@@ -27,8 +27,12 @@ Copied and modified version of Rui's NanomineViz instructions from raymondino/Na
   #NOTE: requires pressing 'Y'
   # Also, the path setup for n is placed into .bashrc
   # Since whyis is not a login user i.e. we sudo su - whyis
-  # the path needs to be set up in .bash_profile
+  # the path needs to be set up in .bash_profile.
+  # NEEDS TO BE FIXED or after logging into whyis next time
+  #   the node build will not work.
   curl -L https://git.io/n-install | bash
+  
+  
   #make sure n is in the path
   source ./.bashrc
   #install/activate latest LTS NodeJS version
