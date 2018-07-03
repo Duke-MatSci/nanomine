@@ -27,11 +27,11 @@ version of Rui's NanomineViz instructions from raymondino/NanomineViz
   #install n - the nodejs version manager and LTS version of node
   
   curl -L https://git.io/n-install | bash -s -- -y lts
-  echo '"export N_PREFIX="$HOME/n"; [[ :$PATH: == *":$N_PREFIX/bin:"* ]] || PATH+=":$N_PREFIX/bin"' >> ~/.bash_profile
+  echo 'export N_PREFIX="$HOME/n"; [[ :$PATH: == *":$N_PREFIX/bin:"* ]] || PATH+=":$N_PREFIX/bin"' >> ~/.bash_profile
   
   
   #make sure n is in the path
-  source ./.bash_profile
+  source ~/.bash_profile
 
   # install the VueJS command line processor
   npm i -g vue-cli@2.9.6  
@@ -56,7 +56,7 @@ version of Rui's NanomineViz instructions from raymondino/NanomineViz
   cd /apps
   touch .netrc
   ```
-#### OK to skip the .netrc edit and load phases at least for now...
+### OK to skip the .netrc edit and load phases at least for now...
 - after you create the .netrc file under /apps, edit the file and add the following.
 
   ```
@@ -73,7 +73,7 @@ version of Rui's NanomineViz instructions from raymondino/NanomineViz
   ```
   - The load process can be monitored with 'sudo tail -f /var/log/celery/w1.log'
   
-#### Use the server...  
+### Use the server...  
 - go to http://localhost/ to login with your credentials during "createuser" command
 - go to http://localhost/nm to access NanoMine
 
