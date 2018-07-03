@@ -1,6 +1,10 @@
 # NanoMine
 NanoMine Nanocomposites Data Resource
 
+```
+Copied and modified version of Rui's NanomineViz instructions from raymondino/NanomineViz
+```
+
 # Installation (REQUIRES ubuntu 16.04 -- 18.04 will not work yet)
 ### Note: if installing on a virtual machine, be sure to allocate at least 8G Memory, 2 CPUs and 50G Disk
 - install [whyis](http://tetherless-world.github.io/whyis/install) using this command (bluedevil-oit version contains proxy work-around)
@@ -12,15 +16,17 @@ NanoMine Nanocomposites Data Resource
   ```
   cd /apps
   sudo git clone https://github.com/duke-matsci/nanomine.git
-  cd /apps/NanomineViz/data
+  cd /apps/nanomine/data
   sudo wget https://raw.githubusercontent.com/duke-matsci/nanomine-ontology/master/xml_ingest.setl.ttl
   sudo wget https://raw.githubusercontent.com/duke-matsci/nanomine-ontology/master/ontology.setl.ttl
   sudo chown -R whyis:whyis /apps/nanomine
   sudo su - whyis
   #install n - the nodejs version manager
-  curl -L https://git.io/n-install | bash
+  echo y | curl -L https://git.io/n-install | bash
   #make sure n is in the path
   source ./.bash_profile
+  #install/activate latest LTS NodeJS version
+  n lts
   npm i -g vue-cli@2.9.6  
   cd /apps/nanomine
   npm install
@@ -66,8 +72,8 @@ sudo su - whyis
 cd /app/whyis
 python manage.py runserver -h 0.0.0.0
 ``` 
-After executing the commands above NanoMine may accessed on "http://localhost:5000/nanomine".
-Then, you only need to refresh your webpage to see your changes immediately after you make changes to the visualization. 
+After executing the commands above NanoMine may accessed on "http://localhost:5000/nm".
+Then, you only need to refresh your webpage to see your changes immediately after you make changes to NanoMine. 
 
 After you finished the visualization changes, you can shutdown the developing mode with CTRL+c.
 Then you have to restart apache2 and celeryd service by
@@ -75,4 +81,4 @@ Then you have to restart apache2 and celeryd service by
 sudo service apache2 restart
 sudo service celeryd restart
 ```
-After this, the updated visualization app will show up at "http://localhost/nm".
+After this, the updated NanoMine app will show up at "http://localhost/nm".
