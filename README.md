@@ -2,7 +2,9 @@
 NanoMine Nanocomposites Data Resource
 
 ```
-Copied and modified version of Rui's NanomineViz instructions from raymondino/NanomineViz
+Since NanoMine's install is similar to the NanomineViz 
+install, the instructions for NanoMine are based on a modified 
+version of Rui's NanomineViz instructions from raymondino/NanomineViz
 ```
 
 # Installation (REQUIRES ubuntu 16.04 -- 18.04 will not work yet)
@@ -22,26 +24,27 @@ Copied and modified version of Rui's NanomineViz instructions from raymondino/Na
   sudo wget https://raw.githubusercontent.com/duke-matsci/nanomine-ontology/master/ontology.setl.ttl
   sudo chown -R whyis:whyis /apps/nanomine
   sudo su - whyis
-  #install n - the nodejs version manager
+  #install n - the nodejs version manager and LTS version of node
   
-  #NOTE: requires pressing 'Y'
-  # Also, the path setup for n is placed into .bashrc
-  # Since whyis is not a login user i.e. we sudo su - whyis
-  # the path needs to be set up in .bash_profile.
-  # NEEDS TO BE FIXED or after logging into whyis next time
-  #   the node build will not work.
-  curl -L https://git.io/n-install | bash
+  curl -L https://git.io/n-install | bash -s -- -y lts
+  echo '"export N_PREFIX="$HOME/n"; [[ :$PATH: == *":$N_PREFIX/bin:"* ]] || PATH+=":$N_PREFIX/bin"' >> ~/.bash_profile
   
   
   #make sure n is in the path
-  source ./.bashrc
-  #install/activate latest LTS NodeJS version
-  n lts
+  source ./.bash_profile
+
+  # install the VueJS command line processor
   npm i -g vue-cli@2.9.6  
+  
   cd /apps/nanomine
+
+  # create node_modules directory and install required components
   npm install
+  
   # build the vue application
   npm run build
+  
+  #install NanoMine python components for Whyis
   pip install -e .
   exit
   sudo service apache2 restart
