@@ -7,8 +7,9 @@ install, the instructions for NanoMine are based on a modified
 version of Rui's NanomineViz instructions from raymondino/NanomineViz
 ```
 
-# Installation (REQUIRES ubuntu 16.04 -- 18.04 will not work yet)
-### Note: if installing on a virtual machine, be sure to allocate at least 8G Memory, 2 CPUs and 50G Disk
+# Installation 
+#### (REQUIRES ubuntu 16.04 -- 18.04 will not work yet)
+### Note: if installing on a virtual machine, be sure to allocate at least 8G Memory, 2 CPUs and 30G Disk
 - install [whyis](http://tetherless-world.github.io/whyis/install) using this command (bluedevil-oit version contains proxy work-around)
   ```
   bash < <(curl -skL https://raw.githubusercontent.com/bluedevil-oit/whyis/release/install.sh)
