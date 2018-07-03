@@ -30,6 +30,8 @@ Copied and modified version of Rui's NanomineViz instructions from raymondino/Na
   npm i -g vue-cli@2.9.6  
   cd /apps/nanomine
   npm install
+  # build the vue application
+  npm run build
   pip install -e .
   exit
   sudo service apache2 restart
