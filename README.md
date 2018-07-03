@@ -78,7 +78,7 @@ version of Rui's NanomineViz instructions from raymondino/NanomineViz
 - go to http://localhost/ to login with your credentials during "createuser" command
 - go to http://localhost/nm to access NanoMine
 
-# Development mode
+# Server Development mode
 Each time a change is made for NanoMine, apache2 and celeryd service have to be restarted manually. 
 It is possible to use Whyis' development mode to bypass the need to restart services.
 
@@ -110,3 +110,16 @@ After this, the updated NanoMine app will show up at "http://localhost/nm".
 - https://github.com/axios/axios Axios Remote Request Library
 - https://www.npmjs.com/package/axios Axios NPM package info
 - https://google.github.io/material-design-icons/ ICONS 
+
+# Development
+Fork the nanomine repository and use the 'dev' branch for 
+development (git checkout dev). Ensure 
+that pull requests are for that branch and not master or QA.
+
+NOTE: The install instructions above clone the repo from the duke-matsci
+using https. Additionally, the files become owned by the 'whyis' user.
+This may make it a bit difficult for on-going development. The best work-around
+for now is probably to fork the repo and use git ssh under your own user.
+However, this will complicate runtime. The readme will be updated with better
+instructions once a good alternative is worked out.
+
