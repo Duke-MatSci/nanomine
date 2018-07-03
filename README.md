@@ -98,3 +98,15 @@ sudo service apache2 restart
 sudo service celeryd restart
 ```
 After this, the updated NanoMine app will show up at "http://localhost/nm".
+
+# Components and Libraries Used
+- https://vuejs.org VueJS Javascript Framework
+- https://vuejs.org/v2/guide/ VueJS Introduction
+- https://router.vuejs.org/. Internal Router
+- https://vue-loader.vuejs.org/. VueJS webpack component loader (Build)
+- https://vuex.vuejs.org/ VueJS global state management
+- https://vuetifyjs.com/en/ Vuetify CSS framework
+- https://vuetifyjs.com/en/getting-started/quick-start Vuetify CSS framework docs
+- https://github.com/axios/axios Axios Remote Request Library
+- https://www.npmjs.com/package/axios Axios NPM package info
+- https://google.github.io/material-design-icons/ ICONS 
