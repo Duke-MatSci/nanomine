@@ -16,15 +16,21 @@ Copied and modified version of Rui's NanomineViz instructions from raymondino/Na
   ```
   cd /apps
   sudo git clone https://github.com/duke-matsci/nanomine.git
+  sudo mkdir -p /apps/nanomine/data 2>/dev/null
   cd /apps/nanomine/data
   sudo wget https://raw.githubusercontent.com/duke-matsci/nanomine-ontology/master/xml_ingest.setl.ttl
   sudo wget https://raw.githubusercontent.com/duke-matsci/nanomine-ontology/master/ontology.setl.ttl
   sudo chown -R whyis:whyis /apps/nanomine
   sudo su - whyis
   #install n - the nodejs version manager
-  echo y | curl -L https://git.io/n-install | bash
+  
+  #NOTE: requires pressing 'Y'
+  # Also, the path setup for n is placed into .bashrc
+  # Since whyis is not a login user i.e. we sudo su - whyis
+  # the path needs to be set up in .bash_profile
+  curl -L https://git.io/n-install | bash
   #make sure n is in the path
-  source ./.bash_profile
+  source ./.bashrc
   #install/activate latest LTS NodeJS version
   n lts
   npm i -g vue-cli@2.9.6  
