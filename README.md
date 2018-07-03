@@ -24,11 +24,10 @@ version of Rui's NanomineViz instructions from raymondino/NanomineViz
   sudo wget https://raw.githubusercontent.com/duke-matsci/nanomine-ontology/master/ontology.setl.ttl
   sudo chown -R whyis:whyis /apps/nanomine
   sudo su - whyis
-  #install n - the nodejs version manager and LTS version of node
   
+  #install n - the nodejs version manager and LTS version of node
   curl -L https://git.io/n-install | bash -s -- -y lts
   echo 'export N_PREFIX="$HOME/n"; [[ :$PATH: == *":$N_PREFIX/bin:"* ]] || PATH+=":$N_PREFIX/bin"' >> ~/.bash_profile
-  
   
   #make sure n is in the path
   source ~/.bash_profile
@@ -42,6 +41,7 @@ version of Rui's NanomineViz instructions from raymondino/NanomineViz
   npm install
   
   # build the vue application
+  #  (do not forget this -- results in 'Server Error' in browser otherwise)
   npm run build
   
   #install NanoMine python components for Whyis
