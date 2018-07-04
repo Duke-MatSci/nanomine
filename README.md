@@ -1,12 +1,6 @@
 # NanoMine
 NanoMine Nanocomposites Data Resource
 
-```
-Since NanoMine's install is similar to the NanomineViz 
-install, the instructions for NanoMine are based on a modified 
-version of Rui's NanomineViz instructions from raymondino/NanomineViz
-```
-
 # Installation 
 #### (REQUIRES ubuntu 16.04 -- 18.04 will not work yet)
 ### Note: if installing on a virtual machine, be sure to allocate at least 8G Memory, 2 CPUs and 30G Disk
@@ -114,7 +108,7 @@ After this, the updated NanoMine app will show up at "http://localhost/nm".
 # Development
 Fork the nanomine repository and use the 'dev' branch for 
 development (git checkout dev). Ensure 
-that pull requests are for that branch and not master or QA.
+that pull requests are for the dev branch and not master and not QA.
 
 NOTE: The install instructions above clone the repo from the duke-matsci
 using https. Additionally, the files become owned by the 'whyis' user.
@@ -123,3 +117,9 @@ for now is probably to fork the repo and use git ssh under your own user.
 However, this will complicate runtime. The readme will be updated with better
 instructions once a good alternative is worked out.
 
+
+```
+Since NanoMine's install is similar to the NanomineViz 
+install, the instructions for NanoMine (above) are based on a modified 
+version of Rui's NanomineViz instructions from raymondino/NanomineViz
+```
