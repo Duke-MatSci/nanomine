@@ -64,7 +64,7 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
   img {
-    width: 36px;
+    width: 50px;
     height: auto;
   }
 h4 {
