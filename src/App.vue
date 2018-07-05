@@ -1,5 +1,5 @@
 <template>
-  <v-app id="app" light>
+  <v-app id="app" app>
     <page-header/>
     <page-subheader/>
     <router-view class="app-router"/>
