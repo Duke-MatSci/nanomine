@@ -24,19 +24,20 @@ h1, h2 {
   font-weight: normal;
 }
 .footer {
-  padding-top:10px;
   bottom:0;
   width:100%;
   height:50px;
   position:fixed;
-  text-align: center;
   justify-content:center;
-  flex:none;
   z-index:1000;
   background-color: #c0c0c0;
 }
 a {
   color: #505050;
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
 }
 
 </style>

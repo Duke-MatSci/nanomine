@@ -11,7 +11,7 @@
         <v-btn flat to="/mtools">Module Tools</v-btn>
         <v-btn flat to="/simtools">Simulation Tools</v-btn>
         <v-btn flat><i class="material-icons nm-search-icon">search</i></v-btn>
-        <v-btn flat to="/loginlogout"><i class="material-icons nm-user-icon">perm_identity</i>Login</v-btn>
+        <v-btn flat href="/login?next=/nm"><i class="material-icons nm-user-icon">perm_identity</i>Login</v-btn>
       </v-toolbar-items>
     </v-toolbar>
   </div>
