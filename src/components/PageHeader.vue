@@ -1,6 +1,6 @@
 <template>
   <div class="header">
-    <v-toolbar dense>
+    <v-toolbar app dense>
       <!--v-toolbar-side-icon></v-toolbar-side-icon-->
       <v-btn flat to="/">
         <v-toolbar-title><i class="material-icons nm-home-icon">home</i>NanoMine</v-toolbar-title>
@@ -11,7 +11,7 @@
         <v-btn flat to="/mtools">Module Tools</v-btn>
         <v-btn flat to="/simtools">Simulation Tools</v-btn>
         <v-btn flat><i class="material-icons nm-search-icon">search</i></v-btn>
-        <v-btn flat to="/loginlogout"><i class="material-icons nm-user-icon">perm_identity</i>Login</v-btn>
+        <v-btn flat href="/login?next=/nm"><i class="material-icons nm-user-icon">perm_identity</i>Login</v-btn>
       </v-toolbar-items>
     </v-toolbar>
   </div>

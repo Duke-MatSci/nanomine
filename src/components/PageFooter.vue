@@ -1,10 +1,10 @@
 <template>
-  <div class="footer">
-    &copy; 2014-2018 NanoMine | <router-link to="/privacy-policy">Privacy Policy</router-link> |
-    <router-link to="/terms-of-use">Terms of Use</router-link>
-    | <router-link to="/help">Help</router-link>
-    | <router-link to="/contact">Contact</router-link>
-  </div>
+  <v-footer app class="footer pa-3">
+    &copy; 2014-{{ new Date().getFullYear() }} NanoMine &nbsp;|&nbsp; <router-link to="/privacy-policy">Privacy Policy</router-link>
+    &nbsp;|&nbsp; <router-link to="/terms-of-use">Terms of Use</router-link>
+    &nbsp;|&nbsp; <router-link to="/help">Help</router-link>
+    &nbsp;|&nbsp; <router-link to="/contact">Contact</router-link>
+  </v-footer>
 </template>
 
 <script>
@@ -24,16 +24,20 @@ h1, h2 {
   font-weight: normal;
 }
 .footer {
-  padding-top:10px;
   bottom:0;
   width:100%;
   height:50px;
   position:fixed;
+  justify-content:center;
   z-index:1000;
   background-color: #c0c0c0;
 }
 a {
   color: #505050;
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
 }
 
 </style>
