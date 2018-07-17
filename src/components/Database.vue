@@ -42,7 +42,7 @@
           </h4>
           <p>Compose your own schema.</p>
         </v-flex>
-      <v-layout>
+      </v-layout>
     </v-container>
   </div>
 </template>
