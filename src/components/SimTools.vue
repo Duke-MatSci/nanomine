@@ -2,69 +2,86 @@
   <div class="simtools">
     <h1>{{ msg }}</h1>
     <v-container>
-      <p>We provide online version of physics-based simulation tools that take advantage of our most recent development
-        in viscoelasticity and dielectric relaxation theories for interphase analysis in nanocomposites, statistical
-        structure-property correlation models, as well as materials optimization methods.
-      </p>
-      <div>
-        <div>
-          <div>
-            <img src="/cdn/img/prop_simu.png"/>
-          </div>
-          <div>
-            <h4>
+      <v-layout row wrap>
+        <v-flex d-flex xs12>
+          <v-card-text>
+            <p class="text-xs-left">
+              We provide online version of physics-based simulation tools that take advantage of our most recent
+              development in viscoelasticity and dielectric relaxation theories for interphase analysis in nanocomposites,
+              statistical structure-property correlation models, as well as materials optimization methods.
+            </p>
+          </v-card-text>
+        </v-flex>
+        <v-flex d-flex xs2>
+        </v-flex>
+        <v-flex d-flex xs3>
+          <img src="/cdn/img/prop_simu.png"/>
+        </v-flex>
+        <v-flex d-flex xs5>
+          <v-card-text>
+            <h4 class="text-xs-left">
               <span>
                 <a href="http://reccr.chem.rpi.edu/polymerizer/index.html" target="_blank">
                   Polymerizer
                 </a>
               </span>
             </h4>
-            <p>
+            <p class="text-xs-left">
               Polymerizer is an online application for prediction of surface energy for nanocomposites featuring
               user-defined polymer structure input and structure-property MQSPR. This web app is in collaboration with
-              and maintained by Rensselaer Polytechnic Institute and supported by Office of Naval Research (ONR).
+              and maintained by Rensselaer Polytechnic Institute.
             </p>
-          </div>
-        </div>
-        <div>
-          <div>
-            <img src="/cdn/img/FEA_dielectrics.png"/>
-          </div>
-          <div>
-            <h4>
+          </v-card-text>
+        </v-flex>
+        <v-flex d-flex xs2>
+        </v-flex>
+        <v-flex d-flex xs2>
+        </v-flex>
+        <v-flex d-flex xs3>
+          <img src="/cdn/img/FEA_dielectrics.png"/>
+        </v-flex>
+        <v-flex d-flex xs5>
+          <v-card-text>
+            <h4 class="text-xs-left">
               <span>
                 <router-link to="/FEA2D">
                   Prediction of Dielectric Constant in Nanodielectrics
                 </router-link>
               </span>
             </h4>
-            <p>
+            <p class="text-xs-left">
               This web app simulates the dielectric spectroscopy in nanocomposites with explicit implementation of
               microstructure dispersion as well as interphase relaxation model. This project is in collaboration with
-              Rensselaer Polytechnic Institute and supported by Office of Naval Research (ONR).
+              Rensselaer Polytechnic Institute.
             </p>
-          </div>
-        </div>
-        <div>
-          <div>
-            <img src="/cdn/img/MCFEA.jpg"/>
-          </div>
-          <div>
-            <h4>
+          </v-card-text>
+        </v-flex>
+        <v-flex d-flex xs2>
+        </v-flex>
+        <v-flex d-flex xs2>
+        </v-flex>
+        <v-flex d-flex xs3>
+          <img src="/cdn/img/MCFEA.jpg"/>
+        </v-flex>
+        <v-flex d-flex xs5>
+          <v-card-text>
+            <h4 class="text-xs-left">
               <span>
                 <router-link to="/MCFEA">
                   Integration of Monte Carlo and Finite Element Analysis in Nanodielectrics
                 </router-link>
               </span>
             </h4>
-            <p>
+            <p class="text-xs-left">
               This web app simulates the charge transport in dielectric polymers and their nanocomposites by compling
               finite element analysis and Monte Carlo. This project is in collaboration with Rensselaer Polytechnic
-              Institute and supported by Office of Naval Research (ONR).
+              Institute.
             </p>
-          </div>
-        </div>
-      </div>
+          </v-card-text>
+        </v-flex>
+        <v-flex d-flex xs2>
+        </v-flex>
+      </v-layout>
     </v-container>
   </div>
 </template>
