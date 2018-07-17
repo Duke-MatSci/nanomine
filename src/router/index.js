@@ -4,6 +4,7 @@ import NanoMine from '@/components/NanoMine'
 import Database from '@/components/Database'
 import ModuleTools from '@/components/ModuleTools'
 import SimTools from '@/components/SimTools'
+import NmEditor from '@/components/Editor'
 Vue.use(Router)
 
 export default new Router({
@@ -27,6 +28,11 @@ export default new Router({
       path: '/mtools',
       name: 'ModuleTools',
       component: ModuleTools
+    },
+    {
+      path: '/editor',
+      name: 'NmEditor',
+      component: NmEditor
     }
   ]
 })
