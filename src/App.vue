@@ -1,5 +1,6 @@
 <template>
   <v-app id="app" app>
+    <LeftMenu/>
     <page-header/>
     <page-subheader/>
     <router-view class="app-router"/>
@@ -8,8 +9,16 @@
 </template>
 
 <script>
+
+import {} from 'vuex'
+
 export default {
-  name: 'App'
+  name: 'App',
+  methods: {
+    showLeftMenu: function () {
+      return this.$store.state.leftMenuActive
+    }
+  }
 }
 </script>
 
