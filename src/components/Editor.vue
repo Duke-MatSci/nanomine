@@ -60,6 +60,7 @@ export default {
     refreshEditor: function () {
       let vm = this
       vm.content.setValue(vm.xml_text)
+      // vm.content.setValue('<xml></xml>')
       vm.content.setSize('100%', '100%')
       setTimeout(function () {
         vm.content.refresh()
