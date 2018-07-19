@@ -15,6 +15,7 @@
   "dependencies": {
     "axios": "^0.18.0",
     "codemirror": "^5.39.0",
+    "d3": "^5.5.0",
     "vue": "^2.5.2",
     "vue-router": "^3.0.1",
     "vuetify": "^1.1.1",
