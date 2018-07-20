@@ -22,7 +22,7 @@
         <v-flex xs4>
           <img src="/cdn/img/edit-big.png" />
           <h4>
-            <router-link to="/curate">Curate online</router-link>
+            <router-link to="/editor">Curate online</router-link>
           </h4>
           <p>
             Select a schema and fill out the corresponding form. Using the Excel template upload is usually simpler.

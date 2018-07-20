@@ -100,10 +100,12 @@ After this, the updated NanoMine app will show up at "http://localhost/nm".
 - https://vue-loader.vuejs.org/. VueJS webpack component loader (Build)
 - https://vuex.vuejs.org/ VueJS global state management
 - https://vuetifyjs.com/en/ Vuetify Material Design CSS framework
+  - NOTE: based on Material Design - https://material.io 
 - https://vuetifyjs.com/en/getting-started/quick-start Vuetify CSS framework docs
 - https://github.com/axios/axios Axios Remote Request Library
 - https://www.npmjs.com/package/axios Axios NPM package info
 - https://google.github.io/material-design-icons/ ICONS 
+
 
 # Development
 Fork the nanomine repository and use the 'dev' branch for 
