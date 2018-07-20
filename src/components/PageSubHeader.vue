@@ -32,7 +32,7 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 .subheader {
-  position: relative;
+  //position: relative;
   top: 0;
   width: 100%;
   justify-content: flex-center;
