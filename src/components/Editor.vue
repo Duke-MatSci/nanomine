@@ -14,9 +14,9 @@ export default {
   name: 'Editor',
   data () {
     return {
-      msg: 'Editor',
+      msg: '<untitled>',
       content: null,
-      xml_text: '<xml></xml>'
+      xml_text: '<PolymerNanocomposite>\n</PolymerNanocomposite>'
     }
   },
   mounted: function () {
@@ -74,10 +74,9 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-  @import 'codemirror/lib/codemirror.css';
-  @import 'codemirror/theme/ttcn.css';
   .nmeditor {
     height: 100%;
+    text-align: left;
   }
   h1 {
     text-transform: uppercase;
