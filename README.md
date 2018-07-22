@@ -37,11 +37,25 @@ NanoMine Nanocomposites Data Resource
   
   # build the vue application
   #  (do not forget this -- results in 'Server Error' in browser otherwise)
+  #    Also, if running the GUI under apache/whyis, the build will need to be re-run
+  #    if gui changes are made.
   npm run build
   
   #install NanoMine python components for Whyis
   pip install -e .
   exit
+  
+  # Add the following 2 entries (without #) to /etc/apache2/sites-enabled/000-default.conf inside the VirtualHost XML-like apache config block  
+  #    ProxyPass /nmr http://localhost:3000/
+  #    ProxyPassReverse /nmr http://localhost:3000/
+  
+  sudo a2enmod proxy.conf  
+  sudo a2enmod proxy_connect.load  
+  sudo a2enmod proxy_html.conf  
+  sudo a2enmod proxy_html.load  
+  sudo a2enmod proxy_http.load  
+  sudo a2enmod proxy.load
+  
   sudo service apache2 restart
   sudo service celeryd restart
   sudo su - whyis

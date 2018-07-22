@@ -2,7 +2,7 @@
   <div class="nmeditor">
     <h1>
       {{msg}}
-    </h1>
+    </h1> <v-btn color="info" v-on:click="refreshButton()" >Refresh</v-btn>
     <div id="editor" ref="editor"></div>
   </div>
 </template>
@@ -10,6 +10,9 @@
 <script>
 import {} from 'vuex'
 import CodeMirror from '@/utils/codemirror'
+import Axios from 'axios'
+import vkbeautify from 'vkbeautify'
+
 export default {
   name: 'Editor',
   data () {
@@ -49,7 +52,8 @@ export default {
         // schemaInfo: vm.state.xmlSchemaList
       },
       foldGutter: true,
-      gutters: ['CodeMirror-linenumbers',
+      gutters: [
+        'CodeMirror-linenumbers',
         'CodeMirror-foldgutter'
       ]
 
@@ -57,6 +61,21 @@ export default {
     this.refreshEditor()
   },
   methods: {
+    refreshButton: function () {
+      let self = this
+      let url = 'http://ubuntu.local/nmr'
+      // let url = 'http://localhost:3000'
+      return Axios.get(url)
+        .then(function (response) {
+          self.xml_text = vkbeautify.xml(response.data.xml, 1)
+          self.refreshEditor()
+        })
+        .catch(function (err) {
+          self.fetchError = err
+          console.log(err)
+          alert(err)
+        })
+    },
     refreshEditor: function () {
       let vm = this
       vm.content.setValue(vm.xml_text)
