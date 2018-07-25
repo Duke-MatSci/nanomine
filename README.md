@@ -6,13 +6,13 @@ NanoMine Nanocomposites Data Resource
 ### Note: if installing on a virtual machine, be sure to allocate at least 8G Memory, 2 CPUs and 30G Disk
 - install [whyis](http://tetherless-world.github.io/whyis/install) using this command (bluedevil-oit version contains proxy work-around)
   ```
-  bash < <(curl -skL https://raw.githubusercontent.com/bluedevil-oit/whyis/master/install.sh)
+  bash < <(curl -skL https://raw.githubusercontent.com/bluedevil-oit/whyis/release/install.sh) # master does not seem to ingest properly
   ```
 - whyis will be installed in /apps/whyis
 - Steps to install NanoMine:
   ```
   cd /apps
-  sudo git clone https://github.com/duke-matsci/nanomine.git
+  sudo git clone https://github.com/YOURFORK/nanomine.git  # to use the original, use FORKNAME of 'duke-matsci'
   sudo mkdir -p /apps/nanomine/data 2>/dev/null
   cd /apps/nanomine/data
   sudo wget https://raw.githubusercontent.com/duke-matsci/nanomine-ontology/master/xml_ingest.setl.ttl
@@ -46,12 +46,12 @@ NanoMine Nanocomposites Data Resource
   exit
   
   # Add the following 2 entries (without #) to /etc/apache2/sites-enabled/000-default.conf inside the VirtualHost XML-like apache config block  
+  #    ProxyPass /nmr/ http://localhost:3000/
+  #    ProxyPassReverse /nmr/ http://localhost:3000/
   #    ProxyPass /nmr http://localhost:3000/
   #    ProxyPassReverse /nmr http://localhost:3000/
   
-  sudo a2enmod proxy.conf  
   sudo a2enmod proxy_connect.load  
-  sudo a2enmod proxy_html.conf  
   sudo a2enmod proxy_html.load  
   sudo a2enmod proxy_http.load  
   sudo a2enmod proxy.load
@@ -59,8 +59,15 @@ NanoMine Nanocomposites Data Resource
   sudo service apache2 restart
   sudo service celeryd restart
   sudo su - whyis
-  cd /apps/whyis
+  cd /apps/whyis 
+   
   python manage.py createuser -e (email) -p (password) -f (frstname) -l (lastname) -u (username) --roles=admin
+  # NOTE: if messages like this are seen: 'numpy.dtype size changed, may indicate binary incompatibility. Expected 96, got 88'
+  #         ref: https://stackoverflow.com/questions/25752444/scipy-error-numpy-dtype-size-changed-may-indicate-binary-incompatibility-and
+  #       then, try these commands:
+  #    pip uninstall -y scipy numpy pandas
+  #    pip install scipy==1.1.0  numpy==1.14.5  pandas==0.23.1
+  
   python manage.py load -i /apps/nanomine/nm.ttl -f turtle
   cd /apps
   touch .netrc

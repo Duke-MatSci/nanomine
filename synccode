@@ -1,5 +1,5 @@
 #!/bin/bash
-rsync -avz --delete -e "ssh " --exclude="static/*" --exclude="dist/*" --exclude=".git/*" --exclude="node_modules/*" . whyis:/apps/nanomine/
+rsync -avz  -e "ssh " --exclude="static/*" --exclude="dist/*" --exclude=".git/*" --exclude="node_modules/*" . whyis:/apps/nanomine/
 ssh whyis "cd nanomine;npm run build"
 ssh whyisroot "service apache2 restart"
 

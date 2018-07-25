@@ -6,10 +6,16 @@ Vue.use(Vuex)
 const store = new Vuex.Store({
   state: {
     leftMenuActive: false,
-    adminAvailable: false
+    adminAvailable: false,
+    isWaiting: false
   },
   mutations: {
-    toggleLeftMenu: function (state) { state.leftMenuActive = !state.leftMenuActive }
+    isLoading: function (state) {
+      state.isWaiting = true
+    },
+    notLoading: function (state) {
+      state.isWaiting = false
+    }
   }
 })
 export default store

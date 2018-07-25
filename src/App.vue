@@ -1,5 +1,6 @@
 <template>
   <v-app id="app" app>
+    <waiting/>
     <LeftMenu/>
     <page-header/>
     <page-subheader/>

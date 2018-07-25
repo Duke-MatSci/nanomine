@@ -2,7 +2,9 @@
   <div class="nmeditor">
     <h1>
       {{msg}}
-    </h1> <v-btn color="info" v-on:click="refreshButton()" >Refresh</v-btn>
+    </h1>
+    <v-btn color="info" v-on:click="refreshButton()" >Refresh</v-btn>
+    <v-btn color="info" v-on:click="testButton()" >Test</v-btn>
     <div id="editor" ref="editor"></div>
   </div>
 </template>
@@ -61,23 +63,47 @@ export default {
     this.refreshEditor()
   },
   methods: {
-    refreshButton: function () {
-      let self = this
-      let url = 'http://ubuntu.local/nmr'
+    testButton: function () {
+      var self = this
+      var url = '/nmr/test1'
       // let url = 'http://localhost:3000'
+      self.$store.commit('isLoading')
       return Axios.get(url)
         .then(function (response) {
-          self.xml_text = vkbeautify.xml(response.data.xml, 1)
+          console.log(response)
+          if (response.data.head !== null) {
+            self.xml_text = JSON.stringify(response.data.results.bindings)
+          }
           self.refreshEditor()
+          self.$store.commit('notLoading')
         })
         .catch(function (err) {
+          self.$store.commit('notLoading')
           self.fetchError = err
           console.log(err)
           alert(err)
         })
     },
+    refreshButton: function () {
+      var self = this
+      var url = '/nmr'
+      // let url = 'http://localhost:3000'
+      self.$store.commit('isLoading')
+      return Axios.get(url)
+        .then(function (response) {
+          self.xml_text = vkbeautify.xml(response.data.xml, 1)
+          self.refreshEditor()
+          self.$store.commit('notLoading')
+        })
+        .catch(function (err) {
+          self.fetchError = err
+          console.log(err)
+          alert(err)
+          self.$store.commit('notLoading')
+        })
+    },
     refreshEditor: function () {
-      let vm = this
+      var vm = this
       vm.content.setValue(vm.xml_text)
       // vm.content.setValue('<xml></xml>')
       vm.content.setSize('100%', '100%')

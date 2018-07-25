@@ -67,11 +67,6 @@ export default {
     },
     showAcctMgt: function () {
       return this.$store.state.adminAvailable
-    },
-    x: function () {
-
-    },
-    xy: function () {
     }
   },
   computed: {},
