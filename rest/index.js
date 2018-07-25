@@ -54,7 +54,7 @@ where {
   }
 }
 `
-  let url = 'http://localhost/sparql'
+  let url = '/sparql'
   let jsonResp = {'error': null, 'data': null}
   let data = qs.stringify({'query': query.trim().replace(/[\n]/g, ' ')})
   return axios({
