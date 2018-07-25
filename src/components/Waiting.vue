@@ -1,14 +1,27 @@
 <template>
   <div class="waiting" v-if="show()">
+    <v-layout align-center justify-center row fill-height>
+      <div></div>
+      <atom-spinner
+        :animation-duration="1000"
+        :size="60"
+        :color="'#ff1d5e'"
+      />
+      <div></div>
+    </v-layout>
   </div>
 </template>
 
 <script>
 
 import {} from 'vuex'
+import {AtomSpinner} from 'epic-spinners'
 
 export default {
   name: 'Waiting',
+  components: {
+    AtomSpinner
+  },
   methods: {
     show: function () {
       return (
@@ -29,7 +42,7 @@ export default {
   .waiting {
     height: 100%;
     width: 100%;
-    z-index: 1000;
+    z-index: 1001;
     top: 0;
     left: 0;
     position: fixed;
