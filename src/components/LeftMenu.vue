@@ -1,11 +1,9 @@
 <template>
   <v-card class="rvwm elevation-12" v-if="show()">
     <v-navigation-drawer floating stateless value="show()">
-      <v-list dense>
-
-        <v-list-group prepend-icon="account_circle" value="true" v-if="showAcctMgt()">
+      <v-list dense v-if="showAcctMgt()">
+        <v-list-group prepend-icon="account_circle" value="true">
           <v-list-tile slot="activator"><v-list-tile-title>Users</v-list-tile-title></v-list-tile>
-
           <v-list-group no-action sub-group value="true">
             <v-list-tile slot="activator"><v-list-tile-title>Admin</v-list-tile-title></v-list-tile>
             <v-list-tile v-for="(admin, i) in admins" :key="i" @click="x">
@@ -15,20 +13,18 @@
               </v-list-tile-action>
             </v-list-tile>
           </v-list-group>
-
           <v-list-group sub-group no-action>
             <v-list-tile slot="activator"><v-list-tile-title>Actions</v-list-tile-title></v-list-tile>
-
             <v-list-tile v-for="(crud, i) in cruds" :key="i" @click="x">
               <v-list-tile-title v-text="crud[0]"></v-list-tile-title>
               <v-list-tile-action><v-icon v-text="crud[1]"></v-icon></v-list-tile-action>
             </v-list-tile>
           </v-list-group>
         </v-list-group>
-
-        <v-list-group prepend-icon="edit" value="true" v-if="showAcctMgt()">
+      </v-list>
+      <v-list dense v-if="showEditorMenu()">
+        <v-list-group prepend-icon="edit" value="true">
           <v-list-tile slot="activator"><v-list-tile-title>File</v-list-tile-title></v-list-tile>
-
           <v-list-group no-action sub-group value="true">
             <v-list-tile slot="activator"><v-list-tile-title>XML</v-list-tile-title></v-list-tile>
             <v-list-tile v-for="(xml, i) in xmls" :key="i" @click="x">
@@ -38,10 +34,8 @@
               </v-list-tile-action>
             </v-list-tile>
           </v-list-group>
-
           <v-list-group sub-group no-action>
             <v-list-tile slot="activator"><v-list-tile-title>Actions</v-list-tile-title></v-list-tile>
-
             <v-list-tile v-for="(fileaction, i) in fileactions" :key="i" @click="x">
               <v-list-tile-title v-text="fileaction[0]"></v-list-tile-title>
               <v-list-tile-action><v-icon v-text="fileaction[1]"></v-icon></v-list-tile-action>
@@ -61,13 +55,15 @@ export default {
   name: 'LeftMenu',
   methods: {
     show: function () {
-      return (
-        this.$store.state.leftMenuActive
-      )
+      return this.$store.getters.isLeftMenuActive
     },
     showAcctMgt: function () {
-      return this.$store.state.adminAvailable
-    }
+      return this.$store.getters.isAdminActive
+    },
+    showEditorMenu: function () {
+      return this.$store.getters.isEditorActive
+    },
+    x: function () {}
   },
   computed: {},
   data () {

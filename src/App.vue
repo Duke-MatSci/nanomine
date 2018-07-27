@@ -35,7 +35,7 @@ export default {
     background-color: white;
   }
   .app-router {
-    margin-bottom: 75px;
+    // margin-bottom: 75px;
     margin-top: -10px;
   }
   h1 {

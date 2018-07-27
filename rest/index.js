@@ -30,6 +30,29 @@ app.get('/', function (req, res) {
   res.json(jsonData)
 })
 
+function postSparql (callerpath, query, req, res) {
+  let url = '/sparql'
+  let jsonResp = {'error': null, 'data': null}
+  let data = qs.stringify({'query': query.trim().replace(/[\n]/g, ' ')})
+  return axios({
+    'method': 'post',
+    'url': url,
+    'data': data
+    // 'headers': {'Content-type': 'application/json'},
+  })
+    .then(function (response) {
+      jsonResp = response.data
+      console.log('' + callerpath + ' data: ' + util.inspect(response, {showHidden: true, depth: 2}))
+      res.json(jsonResp)
+    })
+    .catch(function (err) {
+      console.log('' + callerpath + ' error: ' + util.inspect(err, {showHidden: true, depth: 2}))
+      jsonResp.error = err.message
+      jsonResp.data = err.data
+      res.status(400).json(jsonResp)
+    })
+}
+
 app.get('/test1', function (req, res) { // NOTE: Tg type obtained from material property cache map by name, Mass Fraction from filler property map
   let query = `
 prefix sio:<http://semanticscience.org/resource/>
@@ -54,26 +77,45 @@ where {
   }
 }
 `
-  let url = '/sparql'
+  return postSparql(req.path, query, req, res)
+})
+
+app.get('/samples', function (req, res) {
+  let query = `
+prefix sio:<http://semanticscience.org/resource/>
+prefix ns:<http://nanomine.tw.rpi.edu/ns/>
+prefix np: <http://www.nanopub.org/nschema#>
+prefix dcterms: <http://purl.org/dc/terms/>
+select distinct ?sample
+where {
+  ?nanopub np:hasAssertion ?ag.
+  graph ?ag {
+      ?ac <http://www.w3.org/ns/prov#specializationOf> ?sample.
+  }
+}
+`
+  return postSparql(req.path, query, req, res)
+})
+
+
+app.get('/fullgraph', function (req, res) {
+  // get the working file off disk and just send it back as json
   let jsonResp = {'error': null, 'data': null}
-  let data = qs.stringify({'query': query.trim().replace(/[\n]/g, ' ')})
-  return axios({
-    'method': 'post',
-    'url': url,
-    'data': data
-    // 'headers': {'Content-type': 'application/json'},
-  })
-    .then(function (response) {
-      jsonResp = response.data
-      console.log('/test1 data: ' + util.inspect(response, { showHidden: true, depth: 2 }))
-      res.json(jsonResp)
+  try {
+    require('fs').readFile('outputfile', {encoding: 'utf-8'}, function (err, jsonData) {
+      if (err) {
+        jsonResp.err = err.toString()
+        res.status(500).json(jsonResp)
+      } else {
+        jsonResp.err = null;
+        jsonResp.data = jsonData
+        res.json(jsonResp)
+      }
     })
-    .catch(function (err) {
-      console.log('/test1 error: ' + util.inspect(err, { showHidden: true, depth: 2 }))
-      jsonResp.error = err.message
-      jsonResp.data = err.data
-      res.status(400).json(jsonResp)
-    })
+  } catch (err) {
+    jsonResp.err = err.toString()
+    res.status(500).json(jsonResp)
+  }
 })
 
 app.listen(3000)
@@ -159,7 +201,7 @@ where {
   }
 }
 
--- simplest sparql to get sample id (#1)
+-- simplest sparql to get sample id (#1) -- effectively gets all samples
 prefix sio:<http://semanticscience.org/resource/>
 prefix ns:<http://nanomine.tw.rpi.edu/ns/>
 prefix np: <http://www.nanopub.org/nschema#>

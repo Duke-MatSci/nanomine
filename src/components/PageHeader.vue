@@ -25,10 +25,10 @@ export default {
   name: 'PageHeader',
   methods: {
     toggleLeftMenu: function () {
-      this.$store.state.leftMenuActive = !this.$store.state.leftMenuActive
+      this.$store.commit('toggleLeftMenu')
     },
     toggleAdminAvailable: function () {
-      this.$store.state.adminAvailable = !this.$store.state.adminAvailable
+      this.$store.commit('toggleAdminActive')
     }
   },
   data () {

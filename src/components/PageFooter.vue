@@ -27,9 +27,10 @@ h1, h2 {
   bottom:0;
   width:100%;
   height:50px;
-  position:fixed;
+  //position:fixed;
+  position: relative;
   justify-content:center;
-  z-index:1000;
+  //z-index:1000;
   background-color: #c0c0c0;
 }
 a {
