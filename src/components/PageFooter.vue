@@ -1,5 +1,5 @@
 <template>
-  <v-footer app class="footer">
+  <v-footer app class="footer" v-if="show()">
     <v-flex align-center>
     &copy; 2014-{{ new Date().getFullYear() }} NanoMine &nbsp;|&nbsp; <router-link to="/privacy-policy">Privacy Policy</router-link>
     &nbsp;|&nbsp; <router-link to="/terms-of-use">Terms of Use</router-link>
@@ -10,11 +10,20 @@
 </template>
 
 <script>
+
+import {} from 'vuex'
+
 export default {
   name: 'PageFooter',
   data () {
     return {
       msg: 'PageFooter'
+    }
+  },
+  methods: {
+    show: function () {
+      let vm = this
+      return !vm.$store.getters.isEditorActive
     }
   }
 }

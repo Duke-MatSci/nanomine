@@ -8,10 +8,15 @@ const store = new Vuex.Store({
     leftMenuActive: false,
     adminAvailable: false,
     isWaiting: false,
+    'editor': [
+    ],
     sampleList: [],
     editorActive: false
   },
   mutations: {
+    addSchema: function (state, schemaName, schemaId, schemaXsd) {
+
+    },
     isLoading: function (state) {
       state.isWaiting = true
     },

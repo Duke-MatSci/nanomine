@@ -2,6 +2,12 @@
   <div class="nmeditor">
     <v-toolbar dark color="primary">
       <v-toolbar-title class="white--text">{{msg}}</v-toolbar-title>
+      <v-tooltip bottom>
+        <v-btn icon slot="activator" v-on:click="lockButton()">
+          <v-icon>lock</v-icon>
+        </v-btn>
+        <span>Locked</span>
+      </v-tooltip>
 
       <v-spacer></v-spacer>
 
@@ -28,9 +34,9 @@
 
       <v-tooltip bottom>
       <v-btn icon slot="activator" v-on:click="searchButton()">
-        <v-icon>search</v-icon>
+        <v-icon>find_in_page</v-icon>
       </v-btn>
-        <span>Find</span>
+        <span>Find In Editor</span>
       </v-tooltip>
 
       <!--<v-tooltip bottom>-->
@@ -176,6 +182,9 @@ export default {
     appsButton: function () {
       var vm = this
       console.log(vm.msg + ' apps button')
+    },
+    lockButton: function () {
+      return false
     },
     samplesButton: function () {
       var vm = this
