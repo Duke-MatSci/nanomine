@@ -5,7 +5,7 @@
       <v-list-group prepend-icon="apps" value="true">
         <v-list-tile to="/db">
           <v-list-tile-title>Database</v-list-tile-title>
-            <v-icon>folder_shared</v-icon>
+            <v-icon>collections</v-icon>
         </v-list-tile>
         <v-list-tile to="/mtools">
           <v-list-tile-title>Module Tools</v-list-tile-title>

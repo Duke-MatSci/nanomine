@@ -51,21 +51,21 @@
         <v-btn icon slot="activator" v-on:click="infoButton()">
         <v-icon>info</v-icon>
       </v-btn>
-        <span>Save</span>
+        <span>Info</span>
       </v-tooltip>
 
       <v-tooltip bottom>
         <v-btn icon slot="activator" v-on:click="refreshButton()">
         <v-icon>refresh</v-icon>
         </v-btn>
-        <span>Save</span>
+        <span>Refresh</span>
       </v-tooltip>
 
       <v-tooltip bottom>
         <v-btn icon slot="activator" v-on:click="testButton()">
         <v-icon>more_vert</v-icon>
       </v-btn>
-        <span>Save</span>
+        <span>More</span>
       </v-tooltip>
 
     </v-toolbar>
