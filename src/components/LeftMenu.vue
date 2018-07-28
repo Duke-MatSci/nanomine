@@ -1,6 +1,34 @@
 <template>
   <v-card class="rvwm elevation-12" v-if="show()">
     <v-navigation-drawer floating stateless value="show()">
+      <v-list dense>
+      <v-list-group prepend-icon="apps" value="true">
+        <v-list-tile to="/db">
+          <v-list-tile-title>Database</v-list-tile-title>
+            <v-icon>folder_shared</v-icon>
+        </v-list-tile>
+        <v-list-tile to="/mtools">
+          <v-list-tile-title>Module Tools</v-list-tile-title>
+          <v-icon>insert_chart</v-icon>
+        </v-list-tile>
+        <v-list-tile to="/simtools">
+          <v-list-tile-title>Simulation Tools</v-list-tile-title>
+          <v-icon>waves</v-icon>
+        </v-list-tile>
+        <v-list-tile to="/search">
+          <v-list-tile-title>Search</v-list-tile-title>
+          <v-icon>search</v-icon>
+        </v-list-tile>
+        <v-list-tile href="/login?next=/nm">
+          <v-list-tile-title>Login</v-list-tile-title>
+          <v-icon>perm_identity</v-icon>
+        </v-list-tile>
+        <v-list-tile to="/about">
+          <v-list-tile-title>About</v-list-tile-title>
+          <v-icon>check</v-icon>
+        </v-list-tile>
+      </v-list-group>
+      </v-list>
       <v-list dense v-if="showAcctMgt()">
         <v-list-group prepend-icon="account_circle" value="true">
           <v-list-tile slot="activator"><v-list-tile-title>Users</v-list-tile-title></v-list-tile>

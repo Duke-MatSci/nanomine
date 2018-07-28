@@ -1,19 +1,78 @@
 <template>
   <div class="nmeditor">
-    <h1>
-      {{msg}}
-    </h1>
+    <v-toolbar dark color="primary">
+      <v-toolbar-title class="white--text">{{msg}}</v-toolbar-title>
+
+      <v-spacer></v-spacer>
+
+      <v-tooltip bottom>
+        <v-btn icon slot="activator">
+          <v-icon>save</v-icon>
+        </v-btn>
+        <span>Save</span>
+      </v-tooltip>
+
+      <v-tooltip bottom>
+      <v-btn icon slot="activator">
+        <v-icon>open_in_browser</v-icon>
+      </v-btn>
+        <span>Open</span>
+      </v-tooltip>
+
+      <v-tooltip bottom>
+      <v-btn icon slot="activator">
+        <v-icon>settings</v-icon>
+      </v-btn>
+        <span>Settings</span>
+      </v-tooltip>
+
+      <v-tooltip bottom>
+      <v-btn icon slot="activator" v-on:click="searchButton()">
+        <v-icon>search</v-icon>
+      </v-btn>
+        <span>Find</span>
+      </v-tooltip>
+
+      <!--<v-tooltip bottom>-->
+      <!--<v-btn icon slot="activator" v-on:click="appsButton()">-->
+        <!--<v-icon>apps</v-icon>-->
+      <!--</v-btn>-->
+        <!--<span>Apps</span>-->
+      <!--</v-tooltip>-->
+
+      <v-tooltip bottom>
+      <v-btn icon slot="activator" v-on:click="samplesButton()">
+        <v-icon>list</v-icon>
+      </v-btn>
+        <span>List data and schemas</span>
+      </v-tooltip>
+
+      <v-tooltip bottom>
+        <v-btn icon slot="activator" v-on:click="infoButton()">
+        <v-icon>info</v-icon>
+      </v-btn>
+        <span>Save</span>
+      </v-tooltip>
+
+      <v-tooltip bottom>
+        <v-btn icon slot="activator" v-on:click="refreshButton()">
+        <v-icon>refresh</v-icon>
+        </v-btn>
+        <span>Save</span>
+      </v-tooltip>
+
+      <v-tooltip bottom>
+        <v-btn icon slot="activator" v-on:click="testButton()">
+        <v-icon>more_vert</v-icon>
+      </v-btn>
+        <span>Save</span>
+      </v-tooltip>
+
+    </v-toolbar>
     <v-container fluid justify-start fill-height>
       <v-layout row wrap align-start fill-height>
-        <v-flex fill-height xs10>
+        <v-flex fill-height xs12>
           <div id="editor" ref="editor"></div>
-        </v-flex>
-        <v-flex xs2 fill-height>
-          <v-card align-end fill-height>
-            <v-btn color="info" v-on:click="refreshButton()">Refresh</v-btn>
-            <v-btn color="info" v-on:click="testButton()">Test</v-btn>
-            <v-btn color="info" v-on:click="samplesButton()">List</v-btn>
-          </v-card>
         </v-flex>
       </v-layout>
     </v-container>
@@ -90,31 +149,39 @@ export default {
       this.$store.commit('notLoading')
     },
     testButton: function () {
-      var self = this
+      var vm = this
       var url = '/nmr/test1'
       // let url = 'http://localhost:3000'
-      self.setLoading()
+      vm.setLoading()
       return Axios.get(url)
         .then(function (response) {
           console.log(response)
           if (response.data.head !== null) {
-            self.xml_text = JSON.stringify(response.data.results.bindings)
+            vm.xml_text = JSON.stringify(response.data.results.bindings)
           }
-          self.refreshEditor()
-          self.resetLoading()
+          vm.refreshEditor()
+          vm.resetLoading()
         })
         .catch(function (err) {
-          self.resetLoading()
-          self.fetchError = err
+          vm.resetLoading()
+          vm.fetchError = err
           console.log(err)
           alert(err)
         })
     },
+    infoButton: function () {
+      var vm = this
+      console.log(vm.msg + ' info button')
+    },
+    appsButton: function () {
+      var vm = this
+      console.log(vm.msg + ' apps button')
+    },
     samplesButton: function () {
-      var self = this
+      var vm = this
       var url = '/nmr/samples'
       // let url = 'http://localhost:3000'
-      self.setLoading()
+      vm.setLoading()
       return Axios.get(url)
         .then(function (response) {
           console.log(response.data)
@@ -125,36 +192,39 @@ export default {
             console.log(sampleID + ' ' + v.sample.value)
             sampleList.push({'uri': v.sample.value, 'id': sampleID})
           })
-          self.$store.commit('sampleList')
+          vm.$store.commit('sampleList')
           setTimeout(function () {
-            self.resetLoading()
+            vm.resetLoading()
           }, 1000)
         })
         .catch(function (err) {
-          self.fetchError = err
+          vm.fetchError = err
           console.log(err)
           alert(err)
-          self.resetLoading()
+          vm.resetLoading()
         })
     },
+    searchButton: function () {
+      console.log('Search button.')
+    },
     refreshButton: function () {
-      var self = this
+      var vm = this
       var url = '/nmr'
       // let url = 'http://localhost:3000'
-      self.resetLoading()
+      vm.resetLoading()
       return Axios.get(url)
         .then(function (response) {
-          self.xml_text = vkbeautify.xml(response.data.xml, 1)
-          self.refreshEditor()
+          vm.xml_text = vkbeautify.xml(response.data.xml, 1)
+          vm.refreshEditor()
           setTimeout(function () {
-            self.resetLoading()
+            vm.resetLoading()
           }, 1000)
         })
         .catch(function (err) {
-          self.fetchError = err
+          vm.fetchError = err
           console.log(err)
           alert(err)
-          self.resetLoading()
+          vm.resetLoading()
         })
     },
     refreshEditor: function () {
@@ -178,7 +248,8 @@ export default {
     //height: 100%;
     text-align: left;
   }
-
+  #editor {
+  }
   h1 {
     text-transform: uppercase;
   }

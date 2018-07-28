@@ -14,11 +14,12 @@ export default {
       // Only show the subheader if not on the home page
       if (this.$route.path === '/') {
         console.log('Home - ' + this.$route.path)
-        return false
+        // return false
       } else {
         console.log('Not HOME - ' + this.$route.path)
-        return true
+        // return true
       }
+      return false
     }
   },
   data () {
