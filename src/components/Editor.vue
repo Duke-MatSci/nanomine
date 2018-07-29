@@ -4,9 +4,9 @@
       <v-toolbar-title class="white--text">{{msg}}</v-toolbar-title>
       <v-tooltip bottom>
         <v-btn icon slot="activator" v-on:click="lockButton()">
-          <v-icon>lock</v-icon>
+          <v-icon>lock_open</v-icon>
         </v-btn>
-        <span>Locked</span>
+        <span>Unlocked</span>
       </v-tooltip>
 
       <v-spacer></v-spacer>
