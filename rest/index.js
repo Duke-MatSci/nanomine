@@ -99,23 +99,21 @@ where {
 
 
 app.get('/fullgraph', function (req, res) {
-  // get the working file off disk and just send it back as json
-  let jsonResp = {'error': null, 'data': null}
-  try {
-    require('fs').readFile('outputfile', {encoding: 'utf-8'}, function (err, jsonData) {
-      if (err) {
-        jsonResp.err = err.toString()
-        res.status(500).json(jsonResp)
-      } else {
-        jsonResp.err = null;
-        jsonResp.data = jsonData
-        res.json(jsonResp)
-      }
-    })
-  } catch (err) {
-    jsonResp.err = err.toString()
-    res.status(500).json(jsonResp)
+  // get the nanopub graph
+  let query = `
+prefix sio:<http://semanticscience.org/resource/>
+prefix ns:<http://nanomine.tw.rpi.edu/ns/>
+prefix np: <http://www.nanopub.org/nschema#>
+prefix dcterms: <http://purl.org/dc/terms/>
+select distinct ?nanopub ?ag ?s ?p ?o
+where {
+  ?nanopub np:hasAssertion ?ag.
+  graph ?ag {
+    ?s ?p ?o.
   }
+}  
+`
+  return postSparql(req.path, query, req, res)
 })
 
 app.listen(3000)

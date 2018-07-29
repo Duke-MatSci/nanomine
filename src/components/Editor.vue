@@ -26,7 +26,7 @@
       </v-tooltip>
 
       <v-tooltip bottom>
-      <v-btn icon slot="activator">
+      <v-btn icon slot="activator" v-on:click="test2Button()">
         <v-icon>settings</v-icon>
       </v-btn>
         <span>Settings</span>
@@ -167,6 +167,33 @@ export default {
           }
           vm.refreshEditor()
           vm.resetLoading()
+        })
+        .catch(function (err) {
+          vm.resetLoading()
+          vm.fetchError = err
+          console.log(err)
+          alert(err)
+        })
+    },
+    test2Button: function () {
+      var vm = this
+      var url = '/nmr/fullgraph'
+      // let url = 'http://localhost:3000'
+      vm.setLoading()
+      return Axios.get(url)
+        .then(function (response) {
+          console.log(response.data)
+          console.log(response.data.results.bindings.length)
+          // let sampleList = []
+          // response.data.results.bindings.forEach(function (v) {
+          //   let sampleID = v.sample.value.split('/').pop()
+          //   console.log(sampleID + ' ' + v.sample.value)
+          //   sampleList.push({'uri': v.sample.value, 'id': sampleID})
+          // })
+          // vm.$store.commit('sampleList')
+          setTimeout(function () {
+            vm.resetLoading()
+          }, 1000)
         })
         .catch(function (err) {
           vm.resetLoading()
