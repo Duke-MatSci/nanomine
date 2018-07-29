@@ -255,4 +255,18 @@ where {
 }
 
 
+---- Interesting one that looks for nanopubs and returns the trees (for ~ 320 samples this result is ~ 240,000 triples)
+prefix sio:<http://semanticscience.org/resource/>
+prefix ns:<http://nanomine.tw.rpi.edu/ns/>
+prefix np: <http://www.nanopub.org/nschema#>
+prefix dcterms: <http://purl.org/dc/terms/>
+select distinct ?nanopub ?ag ?s ?p ?o
+where {
+  ?nanopub np:hasAssertion ?ag.
+  graph ?ag {
+    ?s ?p ?o.
+  }
+}
+
+
 */
