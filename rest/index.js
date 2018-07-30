@@ -117,6 +117,7 @@ where {
 })
 
 app.get('/xml/disk', function (req, res) {
+  // this is for testing only
   let jsonResp = {'error': null, 'data': null}
   let fs = require('fs')
   let recs = []
@@ -126,7 +127,7 @@ app.get('/xml/disk', function (req, res) {
   fs.readdir(targetDir, function (err, files) {
     if (err == null) {
       files.forEach(function (v) {
-        mp = new Promise(function(resolve, reject) {
+        let mp = new Promise(function(resolve, reject) {
           fs.readFile(targetDir + '/' + v, {encoding: 'utf-8'}, function (err, data) {
             console.log('data: ' + data)
             if (err == null) {
