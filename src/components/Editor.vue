@@ -184,7 +184,7 @@ export default {
         .then(function (response) {
           console.log(response.data)
           console.log(response.data.results.bindings.length)
-          // let sampleList = []
+          // let x = []
           // response.data.results.bindings.forEach(function (v) {
           //   let sampleID = v.sample.value.split('/').pop()
           //   console.log(sampleID + ' ' + v.sample.value)

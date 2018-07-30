@@ -10,7 +10,8 @@ const store = new Vuex.Store({
     isWaiting: false,
     'editor': [
     ],
-    sampleList: [],
+    sampleList: [], // editor still has dependency -- need to remove when samples get read
+
     editorActive: false
   },
   mutations: {

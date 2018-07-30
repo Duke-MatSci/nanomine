@@ -116,6 +116,50 @@ where {
   return postSparql(req.path, query, req, res)
 })
 
+app.get('/xml/disk', function (req, res) {
+  let jsonResp = {'error': null, 'data': null}
+  let fs = require('fs')
+  let recs = []
+  let schema = '5b1ebeb9e74a1d61fc43654d'
+  let targetDir = '/apps/nanomine/rest/data/' + schema
+  let p = []
+  fs.readdir(targetDir, function (err, files) {
+    if (err == null) {
+      files.forEach(function (v) {
+        mp = new Promise(function(resolve, reject) {
+          fs.readFile(targetDir + '/' + v, {encoding: 'utf-8'}, function (err, data) {
+            console.log('data: ' + data)
+            if (err == null) {
+              recs.push({'title': v, 'schema': schema, '_id': shortUUID.new(), 'content': data})
+              resolve()
+            } else {
+              reject(err)
+            }
+          })
+        })
+        p.push(mp)
+      })
+      Promise.all(p)
+        .then(function () {
+          /* */
+          jsonResp.error = null
+          jsonResp.data = recs
+          res.json(recs)
+        })
+        .catch(function (err) {
+          jsonResp.error = err
+          jsonResp.data = err
+          res.status(400).json(jsonResp)
+        })
+    } else {
+      jsonResp.error = err
+      jsonResp.data = err
+      res.status(400).json(jsonResp)
+    }
+  })
+})
+
+
 app.listen(3000)
 
 /*
@@ -264,6 +308,15 @@ where {
   graph ?ag {
     ?s ?p ?o.
   }
+}
+
+--query to retire nanopubs
+select ?np ?assertion ?provenance ?pubinfo where {
+    hint:Query hint:optimizer "Runtime" .
+    ?np (np:hasAssertion/prov:wasDerivedFrom+/^np:hasAssertion)? ?retiree.
+    ?np np:hasAssertion ?assertion;
+        np:hasPublicationInfo ?pubinfo;
+        np:hasProvenance ?provenance.
 }
 
 

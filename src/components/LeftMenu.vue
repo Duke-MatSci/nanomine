@@ -25,7 +25,7 @@
         </v-list-tile>
         <v-list-tile to="/about">
           <v-list-tile-title>About</v-list-tile-title>
-          <v-icon>check</v-icon>
+          <v-icon>help_outline</v-icon>
         </v-list-tile>
       </v-list-group>
       </v-list>
