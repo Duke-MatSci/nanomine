@@ -13,6 +13,13 @@
 
       <v-tooltip bottom>
         <v-btn icon slot="activator">
+          <v-icon>transform</v-icon>
+        </v-btn>
+        <span>XML/Form view</span>
+      </v-tooltip>
+
+      <v-tooltip bottom>
+        <v-btn icon slot="activator">
           <v-icon>save</v-icon>
         </v-btn>
         <span>Save</span>
@@ -234,9 +241,7 @@ export default {
             sampleList.push({'uri': v, 'id': sampleID})
           })
           vm.$store.commit('sampleList')
-          setTimeout(function () {
-            vm.resetLoading()
-          }, 1000)
+          vm.resetLoading()
         })
         .catch(function (err) {
           vm.fetchError = err
