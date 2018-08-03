@@ -221,12 +221,17 @@ export default {
       return Axios.get(url)
         .then(function (response) {
           console.log(response.data)
-          console.log(response.data.results.bindings.length)
+          console.log(response.data.data.length)
           let sampleList = []
-          response.data.results.bindings.forEach(function (v) {
-            let sampleID = v.sample.value.split('/').pop()
-            console.log(sampleID + ' ' + v.sample.value)
-            sampleList.push({'uri': v.sample.value, 'id': sampleID})
+          // response.data.results.bindings.forEach(function (v) {
+          //   let sampleID = v.sample.value.split('/').pop()
+          //   console.log(sampleID + ' ' + v.sample.value)
+          //   sampleList.push({'uri': v.sample.value, 'id': sampleID})
+          // })
+          response.data.data.forEach(function (v) {
+            let sampleID = v.split('/').pop()
+            console.log(sampleID + ' ' + v)
+            sampleList.push({'uri': v, 'id': sampleID})
           })
           vm.$store.commit('sampleList')
           setTimeout(function () {

@@ -1,4 +1,4 @@
-/* eslint-disable no-multiple-empty-lines */
+/* eslint-disable no-multiple-empty-lines,no-tabs */
 const axios = require('axios')
 const util = require('util')
 const express = require('express')
@@ -52,6 +52,30 @@ function postSparql (callerpath, query, req, res) {
       res.status(400).json(jsonResp)
     })
 }
+function postSparql2 (callerpath, query, req, res, cb) {
+  let url = '/sparql'
+  // let jsonResp = {'error': null, 'data': null}
+  let data = qs.stringify({'query': query.trim().replace(/[\n]/g, ' ')})
+  return axios({
+    'method': 'post',
+    'url': url,
+    'data': data
+    // 'headers': {'Content-type': 'application/json'},
+  })
+    .then(function (response) {
+      // jsonResp = response.data
+      console.log('' + callerpath + ' data: ' + util.inspect(response, {showHidden: true, depth: 2}))
+      // res.json(jsonResp)
+      cb(null, response)
+    })
+    .catch(function (err) {
+      console.log('' + callerpath + ' error: ' + util.inspect(err, {showHidden: true, depth: 2}))
+      // jsonResp.error = err.message
+      // jsonResp.data = err.data
+      // res.status(400).json(jsonResp)
+      cb(err, null)
+    })
+}
 
 app.get('/test1', function (req, res) { // NOTE: Tg type obtained from material property cache map by name, Mass Fraction from filler property map
   let query = `
@@ -81,20 +105,33 @@ where {
 })
 
 app.get('/samples', function (req, res) {
+  let jsonResp = {'error': null, 'data': null}
   let query = `
 prefix sio:<http://semanticscience.org/resource/>
 prefix ns:<http://nanomine.tw.rpi.edu/ns/>
 prefix np: <http://www.nanopub.org/nschema#>
 prefix dcterms: <http://purl.org/dc/terms/>
-select distinct ?sample
+select distinct ?nanopub
 where {
-  ?nanopub np:hasAssertion ?ag.
-  graph ?ag {
-      ?ac <http://www.w3.org/ns/prov#specializationOf> ?sample.
-  }
+  ?nanopub a <http://nanomine.tw.rpi.edu/ns/PolymerNanocomposite>.
 }
 `
-  return postSparql(req.path, query, req, res)
+  postSparql2(req.path, query, req, res, function cb (err, rsp) {
+    if (err != null) {
+      jsonResp.error = err
+      res.status(400).json(jsonResp)
+    } else {
+      let rdata = []
+      rsp.data.results.bindings.forEach(function (v) {
+        let r = v.nanopub.value
+        if (r.match(/['_']/) == null) { // todo xml_ingest bug creates PolymerNanocomposites with appended sub-elements so get rid of them
+          rdata.push(r)
+        }
+      })
+      jsonResp.data = rdata
+      res.json(jsonResp)
+    }
+  })
 })
 
 
@@ -127,7 +164,7 @@ app.get('/xml/disk', function (req, res) {
   fs.readdir(targetDir, function (err, files) {
     if (err == null) {
       files.forEach(function (v) {
-        let mp = new Promise(function(resolve, reject) {
+        let mp = new Promise(function (resolve, reject) {
           fs.readFile(targetDir + '/' + v, {encoding: 'utf-8'}, function (err, data) {
             console.log('data: ' + data)
             if (err == null) {
@@ -320,5 +357,18 @@ select ?np ?assertion ?provenance ?pubinfo where {
         np:hasProvenance ?provenance.
 }
 
+--This returns sample names along with a few other things (the others look like a punt)
+--    ex: correct -
+--       	http://nanomine.tw.rpi.edu/sample/l217-s4-ash-2002
+--    ex: incorrect - not really a PolymerNanocomposite
+--        http://nanomine.tw.rpi.edu/sample/l217-s4-ash-2002_nanomine-tensileloadingprofile_0
+prefix sio:<http://semanticscience.org/resource/>
+prefix ns:<http://nanomine.tw.rpi.edu/ns/>
+prefix np: <http://www.nanopub.org/nschema#>
+prefix dcterms: <http://purl.org/dc/terms/>
+select distinct ?nanopub
+where {
+  ?nanopub a <http://nanomine.tw.rpi.edu/ns/PolymerNanocomposite>.
+}
 
 */
