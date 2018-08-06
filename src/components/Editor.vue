@@ -12,72 +12,67 @@
       <v-spacer></v-spacer>
 
       <v-tooltip bottom>
-        <v-btn icon slot="activator">
+        <v-btn icon slot="activator" v-on:click="transformButton()">
           <v-icon>transform</v-icon>
         </v-btn>
-        <span>XML/Form view</span>
+        <span v-if="view=='xml'">Show Form View</span>
+        <span v-if="view=='form'">Show XML View</span>
       </v-tooltip>
 
-      <v-tooltip bottom>
+      <v-menu :nudge-width="100" >
         <v-btn icon slot="activator">
           <v-icon>save</v-icon>
         </v-btn>
-        <span>Save</span>
-      </v-tooltip>
+        <v-list >
+          <v-list-tile
+            v-for="(item, idx) in fileMenu"
+            :key="item"
+            @click="fileButton(idx, $event)"
+          >
+            <v-list-tile-title v-text="item"></v-list-tile-title>
+          </v-list-tile>
+        </v-list>
+      </v-menu>
 
       <v-tooltip bottom>
-      <v-btn icon slot="activator">
-        <v-icon>open_in_browser</v-icon>
-      </v-btn>
-        <span>Open</span>
-      </v-tooltip>
-
-      <v-tooltip bottom>
-      <v-btn icon slot="activator" v-on:click="test2Button()">
-        <v-icon>settings</v-icon>
-      </v-btn>
+        <v-btn icon slot="activator" v-on:click="test2Button()">
+          <v-icon>settings</v-icon>
+        </v-btn>
         <span>Settings</span>
       </v-tooltip>
 
       <v-tooltip bottom>
-      <v-btn icon slot="activator" v-on:click="searchButton()">
-        <v-icon>find_in_page</v-icon>
-      </v-btn>
+        <v-btn icon slot="activator" v-on:click="searchButton()">
+          <v-icon>find_in_page</v-icon>
+        </v-btn>
         <span>Find In Editor</span>
       </v-tooltip>
 
       <!--<v-tooltip bottom>-->
-      <!--<v-btn icon slot="activator" v-on:click="appsButton()">-->
-        <!--<v-icon>apps</v-icon>-->
-      <!--</v-btn>-->
-        <!--<span>Apps</span>-->
+        <!--<v-btn icon slot="activator" v-on:click="samplesButton()">-->
+          <!--<v-icon>list</v-icon>-->
+        <!--</v-btn>-->
+        <!--<span>List data and schemas</span>-->
       <!--</v-tooltip>-->
 
       <v-tooltip bottom>
-      <v-btn icon slot="activator" v-on:click="samplesButton()">
-        <v-icon>list</v-icon>
-      </v-btn>
-        <span>List data and schemas</span>
-      </v-tooltip>
-
-      <v-tooltip bottom>
         <v-btn icon slot="activator" v-on:click="infoButton()">
-        <v-icon>info</v-icon>
-      </v-btn>
+          <v-icon>info</v-icon>
+        </v-btn>
         <span>Info</span>
       </v-tooltip>
 
       <v-tooltip bottom>
         <v-btn icon slot="activator" v-on:click="refreshButton()">
-        <v-icon>refresh</v-icon>
+          <v-icon>refresh</v-icon>
         </v-btn>
         <span>Refresh</span>
       </v-tooltip>
 
       <v-tooltip bottom>
         <v-btn icon slot="activator" v-on:click="testButton()">
-        <v-icon>more_vert</v-icon>
-      </v-btn>
+          <v-icon>more_vert</v-icon>
+        </v-btn>
         <span>More</span>
       </v-tooltip>
 
@@ -100,11 +95,25 @@ import vkbeautify from 'vkbeautify'
 
 export default {
   name: 'Editor',
-  data () {
+  data: function () {
     return {
       msg: '<untitled>',
       content: null,
-      xml_text: '<PolymerNanocomposite>\n</PolymerNanocomposite>'
+      xml_text: '<PolymerNanocomposite>\n</PolymerNanocomposite>',
+      view: 'xml',
+      loadFile: false,
+      fileMenu: [
+        'Explore',
+        'Publish',
+        'Import',
+        'Export'
+      ],
+      fileMenuOps: [
+        this.fileExplore,
+        this.filePublish,
+        this.fileImport,
+        this.fileExport
+      ]
     }
   },
   beforeDestroy: function () {
@@ -209,21 +218,38 @@ export default {
           alert(err)
         })
     },
+    transformButton: function () {
+      var vm = this
+      if (vm.view === 'xml') {
+        vm.view = 'form'
+      } else {
+        vm.view = 'xml'
+      }
+    },
     infoButton: function () {
       var vm = this
       console.log(vm.msg + ' info button')
     },
-    appsButton: function () {
-      var vm = this
-      console.log(vm.msg + ' apps button')
-    },
     lockButton: function () {
       return false
     },
-    samplesButton: function () {
+    // activateFileMenu: function (ev) {
+    //   let vm = this
+    //   console.log(ev.target.tagName + ' x: ' + ev.screenX + ' y: ' + ev.screenY)
+    //   vm.showFileMenu = true
+    // },
+    fileButton: function (idx, ev) {
+      let vm = this
+      console.log('hi fileButton ' + idx + ' = ' + vm.fileMenu[idx])
+      console.log(ev.target.tagName + ' x: ' + ev.screenX + ' y: ' + ev.screenY)
+      vm.showFileMenu = false
+      vm.fileMenuOps[idx].apply(vm)
+    },
+    fileExplore: function () {
       var vm = this
       var url = '/nmr/samples'
       // let url = 'http://localhost:3000'
+      console.log('fileExplore!')
       vm.setLoading()
       return Axios.get(url)
         .then(function (response) {
@@ -249,6 +275,15 @@ export default {
           alert(err)
           vm.resetLoading()
         })
+    },
+    filePublish: function () {
+      console.log('filePublish!')
+    },
+    fileImport: function () {
+      console.log('fileImport!')
+    },
+    fileExport: function () {
+      console.log('fileExport!')
     },
     searchButton: function () {
       console.log('Search button.')
@@ -291,11 +326,25 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
   .nmeditor {
-    //height: 100%;
-    text-align: left;
+    /* height: 100%; text-align: left; */
+    /* position: relative;  need to ensure that app styles are loaded after codemirror styles -- which is not currently happening */
   }
+
   #editor {
+    text-align: left;
+    position: relative;
+    height: 100%;
+    max-height: 100%;
+    padding-bottom: 32px;
   }
+
+  .editor-save {
+    font-size: 24px;
+    display: inline-flex;
+    vertical-align: bottom;
+    padding-bottom: 2px;
+  }
+
   h1 {
     text-transform: uppercase;
   }
