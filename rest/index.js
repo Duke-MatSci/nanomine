@@ -3,12 +3,18 @@ const axios = require('axios')
 const util = require('util')
 const express = require('express')
 const cookieParser = require('cookie-parser')
+const bodyParser = require('body-parser')
+const FormData = require('form-data')
+
 const qs = require('qs')
 var app = express()
 app.use(cookieParser())
+app.use(bodyParser.json())
 
 let shortUUID = require('short-uuid')() // https://github.com/oculus42/short-uuid (npm i --save short-uuid)
-
+function inspect (theObj) {
+  return util.inspect(theObj, {showHidden: true, depth: 2})
+}
 app.get('/', function (req, res) {
   let ID = 'TestData_' + shortUUID.new()
   let query = 'a query'
@@ -42,11 +48,11 @@ function postSparql (callerpath, query, req, res) {
   })
     .then(function (response) {
       jsonResp = response.data
-      console.log('' + callerpath + ' data: ' + util.inspect(response, {showHidden: true, depth: 2}))
+      console.log('' + callerpath + ' data: ' + inspect(response))
       res.json(jsonResp)
     })
     .catch(function (err) {
-      console.log('' + callerpath + ' error: ' + util.inspect(err, {showHidden: true, depth: 2}))
+      console.log('' + callerpath + ' error: ' + inspect(err))
       jsonResp.error = err.message
       jsonResp.data = err.data
       res.status(400).json(jsonResp)
@@ -64,18 +70,76 @@ function postSparql2 (callerpath, query, req, res, cb) {
   })
     .then(function (response) {
       // jsonResp = response.data
-      console.log('' + callerpath + ' data: ' + util.inspect(response, {showHidden: true, depth: 2}))
+      console.log('' + callerpath + ' data: ' + inspect(response))
       // res.json(jsonResp)
       cb(null, response)
     })
     .catch(function (err) {
-      console.log('' + callerpath + ' error: ' + util.inspect(err, {showHidden: true, depth: 2}))
+      console.log('' + callerpath + ' error: ' + inspect(err))
       // jsonResp.error = err.message
       // jsonResp.data = err.data
       // res.status(400).json(jsonResp)
       cb(err, null)
     })
 }
+app.post('/xml', function (req, res) {
+  let jsonResp = {'error': null, 'data': null}
+  /*
+      expects:
+        {
+          "filetype": "sample", // eventually, more types will be supported. For now, it's just sample
+          "filename": "{sample_file_name}" // like L217_S1_Ash_2002.xml
+          "xml": "XML data as string"
+        }
+  */
+  let url = '/about?view=view&uri=http://localhost/'
+  // let url = '/about?view=view&uri=/'
+  let theType = req.body.filetype
+  let theName = req.body.filename
+
+  let form = new FormData()
+  let buffer = Buffer.from(req.body.xml)
+  form.append('upload_type', 'http://purl.org/net/provenance/ns#File')
+  form.append('file', buffer, {
+    'filename': theName,
+    'contentType': 'text/xml',
+    'knownLength': req.body.xml.length
+  })
+  let contentLen = form.getLengthSync()
+  console.log('session cookie: ' + req.cookies['session'])
+  let cookieHeader = 'session=' + req.cookies['session']
+  let headers = form.getHeaders() // {'Content-Type': form.getHeaders()['content-type']}
+  if (cookieHeader) {
+    headers.Cookie = cookieHeader
+  }
+  headers['Accept'] = 'text/html,application/xhtml+xml,application/xml,application/json, text/plain, */*'
+  headers['Content-Length'] = contentLen
+  url = url + theType + '/' + req.body.filename.replace(/['_']/g, '-').replace(/.xml$/, '').toLowerCase()
+  console.log('request info - outbound post url: ' + url + '  form data: ' + inspect(form))
+  if (theType && typeof theType === 'string' && theName && typeof theName === 'string') {
+    theName = theName.replace(/['_']/g, '-')
+    return axios({
+      'method': 'post',
+      'url': url,
+      'headers': headers,
+      'data': form
+    })
+      .then(function (resp) {
+        console.log('post to url: ' + url + ' did not throw an exception')
+        console.log('resp: ' + inspect(resp))
+        jsonResp.data = {}
+        res.json(jsonResp)
+      })
+      .catch(function (err){
+        console.log('post to url: ' + url + ' DID throw exception -  err: ' + inspect(err))
+        jsonResp.error = err.message
+        res.status(err.response.status).json(jsonResp)
+      })
+  } else {
+    jsonResp.error = 'type and name parameters required. Valid types are: sample. A valid name can be any string'
+    res.status(400).json(jsonResp)
+  }
+})
 
 app.get('/test1', function (req, res) { // NOTE: Tg type obtained from material property cache map by name, Mass Fraction from filler property map
   let query = `
@@ -113,7 +177,9 @@ prefix np: <http://www.nanopub.org/nschema#>
 prefix dcterms: <http://purl.org/dc/terms/>
 select distinct ?nanopub
 where {
-  ?nanopub a <http://nanomine.tw.rpi.edu/ns/PolymerNanocomposite>.
+  ?file a <http://purl.org/net/provenance/ns#File>.
+  ?nanopub a <https://www.iana.org/assignments/media-types/text/xml>
+
 }
 `
   postSparql2(req.path, query, req, res, function cb (err, rsp) {
@@ -369,6 +435,18 @@ prefix dcterms: <http://purl.org/dc/terms/>
 select distinct ?nanopub
 where {
   ?nanopub a <http://nanomine.tw.rpi.edu/ns/PolymerNanocomposite>.
+}
+
+-- Select nanopubs of type #File that are Xmls
+prefix sio:<http://semanticscience.org/resource/>
+prefix ns:<http://nanomine.tw.rpi.edu/ns/>
+prefix np: <http://www.nanopub.org/nschema#>
+prefix dcterms: <http://purl.org/dc/terms/>
+select distinct ?nanopub
+where {
+  ?file a <http://purl.org/net/provenance/ns#File>.
+  ?nanopub a <https://www.iana.org/assignments/media-types/text/xml>
+
 }
 
 */

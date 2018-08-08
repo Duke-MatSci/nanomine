@@ -77,6 +77,30 @@
       </v-tooltip>
 
     </v-toolbar>
+    <v-layout row justify-center>
+      <v-dialog v-model="fileDialog" scrollable max-width="300px">
+        <!--v-btn slot="activator" color="primary" dark>Open Dialog</v-btn-->
+        <v-card>
+          <v-card-title>Select File to Edit</v-card-title>
+          <v-divider></v-divider>
+          <v-card-text style="height: 300px;">
+            <v-radio-group  v-model="fileDialogList" column>
+              <v-radio v-for="(item, idx) in fileDialogList"
+                       :key="idx"
+                       :label="item"
+                       :value="idx"
+              ></v-radio>
+            </v-radio-group>
+          </v-card-text>
+          <v-divider></v-divider>
+          <v-card-actions>
+            <v-btn color="blue darken-1" flat @click="fileDialog = false">Cancel</v-btn>
+            <v-btn color="blue darken-1" flat @click="fileDialog = false">Open</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+    </v-layout>
+
     <v-container fluid justify-start fill-height>
       <v-layout row wrap align-start fill-height>
         <v-flex fill-height xs12>
@@ -101,6 +125,8 @@ export default {
       content: null,
       xml_text: '<PolymerNanocomposite>\n</PolymerNanocomposite>',
       view: 'xml',
+      fileDialog: false,
+      fileDialogList: [],
       loadFile: false,
       fileMenu: [
         'Explore',
@@ -261,11 +287,14 @@ export default {
           //   console.log(sampleID + ' ' + v.sample.value)
           //   sampleList.push({'uri': v.sample.value, 'id': sampleID})
           // })
+          vm.fileDialList = []
           response.data.data.forEach(function (v) {
             let sampleID = v.split('/').pop()
             console.log(sampleID + ' ' + v)
             sampleList.push({'uri': v, 'id': sampleID})
+            vm.fileDialogList.push(sampleID)
           })
+          vm.fileDialog = true
           vm.$store.commit('sampleList')
           vm.resetLoading()
         })
@@ -277,7 +306,23 @@ export default {
         })
     },
     filePublish: function () {
+      let vm = this
       console.log('filePublish!')
+      vm.setLoading()
+      let url = '/nmr/xml'
+      return Axios.post(url, {
+        'filename': 'L217_S1_Ash_2002.xml',
+        'filetype': 'sample',
+        'xml': vm.getEditorContent()
+      })
+        .then(function (resp) {
+          console.log('response: ' + JSON.stringify(resp))
+          vm.resetLoading()
+        })
+        .catch(function (err) {
+          console.log('error: ' + err)
+          vm.resetLoading()
+        })
     },
     fileImport: function () {
       console.log('fileImport!')
@@ -292,7 +337,7 @@ export default {
       var vm = this
       var url = '/nmr'
       // let url = 'http://localhost:3000'
-      vm.resetLoading()
+      vm.setLoading()
       return Axios.get(url)
         .then(function (response) {
           vm.xml_text = vkbeautify.xml(response.data.xml, 1)
@@ -307,6 +352,11 @@ export default {
           alert(err)
           vm.resetLoading()
         })
+    },
+    getEditorContent: function () {
+      // this is really not a good way to do this and is TEMPORARY! TODO
+      let vm = this
+      return vm.content.getValue()
     },
     refreshEditor: function () {
       var vm = this
