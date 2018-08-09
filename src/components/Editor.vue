@@ -84,18 +84,19 @@
           <v-card-title>Select File to Edit</v-card-title>
           <v-divider></v-divider>
           <v-card-text style="height: 300px;">
-            <v-radio-group  v-model="fileDialogList" column>
+            <v-radio-group  v-model="fileDialogItem" column>
               <v-radio v-for="(item, idx) in fileDialogList"
                        :key="idx"
                        :label="item"
                        :value="idx"
+                       v-on:change="fileDialogRadio (idx)"
               ></v-radio>
             </v-radio-group>
           </v-card-text>
           <v-divider></v-divider>
           <v-card-actions>
-            <v-btn color="blue darken-1" flat @click="fileDialog = false">Cancel</v-btn>
-            <v-btn color="blue darken-1" flat @click="fileDialog = false">Open</v-btn>
+            <v-btn color="blue darken-1" flat @click.native="fileDialog = false">Cancel</v-btn>
+            <v-btn color="blue darken-1" flat @click.native="fileDialog = false">Open</v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
@@ -126,7 +127,8 @@ export default {
       xml_text: '<PolymerNanocomposite>\n</PolymerNanocomposite>',
       view: 'xml',
       fileDialog: false,
-      fileDialogList: [],
+      fileDialogItem: -1, // the value of the radio button selected
+      fileDialogList: [], // list to use for radio button item names
       loadFile: false,
       fileMenu: [
         'Explore',
@@ -271,6 +273,9 @@ export default {
       vm.showFileMenu = false
       vm.fileMenuOps[idx].apply(vm)
     },
+    fileDialogRadio: function (idx) {
+      console.log('idx: ' + idx)
+    },
     fileExplore: function () {
       var vm = this
       var url = '/nmr/samples'
@@ -287,13 +292,18 @@ export default {
           //   console.log(sampleID + ' ' + v.sample.value)
           //   sampleList.push({'uri': v.sample.value, 'id': sampleID})
           // })
-          vm.fileDialList = []
+          vm.fileDialogList = []
+          vm.fileDialogItem = -1 // by default set radio selections off
           response.data.data.forEach(function (v) {
             let sampleID = v.split('/').pop()
             console.log(sampleID + ' ' + v)
             sampleList.push({'uri': v, 'id': sampleID})
             vm.fileDialogList.push(sampleID)
           })
+          // let a = ['dummy', 'dummy', 'dummy', 'dummy', 'dummy', 'dummy', 'dummy', 'dummy', 'dummy', 'dummy', 'dummy', 'dummy', 'dummy', 'dummy']
+          // a.forEach(function (v, i) {
+          //   vm.fileDialogList.push(v + i)
+          // })
           vm.fileDialog = true
           vm.$store.commit('sampleList')
           vm.resetLoading()
