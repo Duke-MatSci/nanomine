@@ -100,6 +100,7 @@ app.post('/xml', function (req, res) {
   let form = new FormData()
   let buffer = Buffer.from(req.body.xml)
   form.append('upload_type', 'http://purl.org/net/provenance/ns#File')
+  form.append('contributor', 'erik')
   form.append('file', buffer, {
     'filename': theName,
     'contentType': 'text/xml',
@@ -166,6 +167,31 @@ where {
 }
 `
   return postSparql(req.path, query, req, res)
+})
+app.get('/sample/:id', function (req, res) {
+  let sampleID = req.params.id
+  let url = '/sample/' + sampleID
+  let jsonResp = {'error': null, 'data': null}
+  return axios({
+    'method': 'get',
+    'url': url
+    // 'headers': {'Content-type': 'application/json'},
+  })
+    .then(function (response) {
+      // jsonResp = response.data
+      console.log('' + req.path + ' data: ' + inspect(response))
+      // res.json(jsonResp)
+      jsonResp.data = {'mimeType': 'text/xml', 'xml': response.data}
+      res.json(jsonResp)
+    })
+    .catch(function (err) {
+      console.log('' + res.path + ' error: ' + inspect(err))
+      // jsonResp.error = err.message
+      // jsonResp.data = err.data
+      // res.status(400).json(jsonResp)
+      jsonResp.err = err
+      res.status(400).json(jsonResp)
+    })
 })
 
 app.get('/samples', function (req, res) {
@@ -262,6 +288,27 @@ app.get('/xml/disk', function (req, res) {
     }
   })
 })
+
+/* Job related rest services */
+app.post('/job/create', function (req, res) {
+  let jsonResp = {'error': null, 'data': null}
+  let myjobtype = res.body.jobtype
+  jsonResp.data = {'jobid': shortUUID.new(), 'jobtype': myjobtype}
+  console.log('rest endpoint: ' + req.path + ' jobtype: ' + myjobtype + ' returning jobid: ' + jsonResp.data.jobid)
+  res.json(jsonResp)
+})
+app.post('/job/addinputfile', function (req, res) {
+  let jsonResp = {'error': null, 'data': null}
+  let myjobid = res.body.jobid
+  let myfilenm = res.body.filename
+  let myfilebytes = res.body.filebytes // probably base64 encoded
+  let myfiletype = res.body.filetype // text/xml text/plain image/jpeg image/png
+  jsonResp.data = {'jobid': shortUUID.new(), 'jobtype': myjobtype}
+  console.log('rest endpoint: ' + req.path + ' jobtype: ' + myjobtype + ' returning jobid: ' + jsonResp.data.jobid)
+  res.json(jsonResp)
+})
+
+/* end job related rest services */
 
 
 app.listen(3000)

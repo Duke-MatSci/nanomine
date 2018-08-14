@@ -81,7 +81,7 @@
       <v-dialog v-model="fileDialog" scrollable max-width="300px">
         <!--v-btn slot="activator" color="primary" dark>Open Dialog</v-btn-->
         <v-card>
-          <v-card-title>Select File to Edit</v-card-title>
+          <v-card-title>Select File to Open</v-card-title>
           <v-divider></v-divider>
           <v-card-text style="height: 300px;">
             <v-radio-group  v-model="fileDialogItem" column>
@@ -96,7 +96,7 @@
           <v-divider></v-divider>
           <v-card-actions>
             <v-btn color="blue darken-1" flat @click.native="fileDialog = false">Cancel</v-btn>
-            <v-btn color="blue darken-1" flat @click.native="fileDialog = false">Open</v-btn>
+            <v-btn color="blue darken-1" flat @click.native="fileOpen()">Open</v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
@@ -276,6 +276,36 @@ export default {
     fileDialogRadio: function (idx) {
       console.log('idx: ' + idx)
     },
+    fileOpen: function () {
+      // should probably pass index
+      let vm = this
+      if (vm.fileDialogItem >= 0) {
+        let fileNm = vm.fileDialogList[vm.fileDialogItem]
+        console.log('opening ' + fileNm)
+        vm.fileDialog = false
+        vm.fileLoad(fileNm)
+      } else {
+        console.log('no file selected')
+      }
+    },
+    fileLoad: function (fileNm) {
+      let vm = this
+      let url = '/nmr/sample/' + fileNm
+      // load sample for now. Need more params to denote type
+      console.log('load: ' + fileNm + ' from: ' + url)
+      vm.setLoading()
+      return Axios.get(url)
+        .then(function (response) {
+          vm.xml_text = vkbeautify.xml(response.data.data.xml, 1)
+          vm.refreshEditor()
+        })
+        .catch(function (err) {
+          vm.fetchError = err
+          console.log(err)
+          alert(err)
+          vm.resetLoading()
+        })
+    },
     fileExplore: function () {
       var vm = this
       var url = '/nmr/samples'
@@ -373,7 +403,7 @@ export default {
       vm.content.setValue(vm.xml_text)
       // vm.content.setValue('<xml></xml>')
       vm.content.setSize('100%', '100%')
-      setTimeout(function () {
+      setTimeout(function () { // this timeout is required. Otherwise the editor will not refresh properly.
         vm.content.refresh()
         vm.content.execCommand('goDocStart')
         vm.content.clearHistory()

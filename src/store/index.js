@@ -8,11 +8,13 @@ const store = new Vuex.Store({
     leftMenuActive: false,
     adminAvailable: false,
     isWaiting: false,
-    'editor': [
-    ],
+    'editor': { // editor store should contain all editor state including tabs and data for each tab
+      'tab': [
+      ]
+    },
     sampleList: [], // editor still has dependency -- need to remove when samples get read
 
-    editorActive: false
+    editorActive: false // move to editor object
   },
   mutations: {
     addSchema: function (state, schemaName, schemaId, schemaXsd) {
