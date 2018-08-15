@@ -4,6 +4,7 @@ import NanoMine from '@/components/NanoMine'
 import Database from '@/components/Database'
 import ModuleTools from '@/components/ModuleTools'
 import SimTools from '@/components/SimTools'
+import NmEditor from '@/components/Editor'
 import McrHomepage from '@/components/McrHomepage'
 import BinarizeHomepage from '@/components/BinarizeHomepage'
 import Otsu from '@/components/Otsu'
@@ -30,6 +31,11 @@ export default new Router({
       path: '/mtools',
       name: 'ModuleTools',
       component: ModuleTools
+    },
+    {
+      path: '/editor',
+      name: 'NmEditor',
+      component: NmEditor
     },
     {
       path: '/mcr_homepage',

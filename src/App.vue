@@ -1,5 +1,6 @@
 <template>
   <v-app id="app" app>
+    <waiting/>
     <LeftMenu/>
     <page-header/>
     <page-subheader/>
@@ -31,9 +32,10 @@ export default {
     text-align: center;
     color: #2c3e50;
     margin-top: 48px;
+    background-color: white;
   }
   .app-router {
-    margin-bottom: 75px;
+    // margin-bottom: 75px;
     margin-top: -10px;
   }
   h1 {

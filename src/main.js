@@ -10,6 +10,8 @@ import Header from '@/components/PageHeader'
 import SubHeader from '@/components/PageSubHeader'
 import Footer from '@/components/PageFooter'
 import LeftMenu from '@/components/LeftMenu'
+import Waiting from '@/components/Waiting'
+
 import store from './store'
 
 Vue.config.productionTip = false
@@ -31,6 +33,7 @@ Vue.component('page-header', Header)
 Vue.component('page-subheader', SubHeader)
 Vue.component('page-footer', Footer)
 Vue.component('LeftMenu', LeftMenu)
+Vue.component('waiting', Waiting)
 /* eslint-disable no-new */
 
 new Vue({
