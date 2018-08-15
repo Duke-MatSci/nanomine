@@ -45,23 +45,30 @@ NanoMine Nanocomposites Data Resource
   pip install -e .
   exit
   
-  # Add the following 2 entries (without #) to /etc/apache2/sites-enabled/000-default.conf inside the VirtualHost XML-like apache config block  
-  #    ProxyPass /nmr/ http://localhost:3000/
-  #    ProxyPassReverse /nmr/ http://localhost:3000/
-  #    ProxyPass /nmr http://localhost:3000/
-  #    ProxyPassReverse /nmr http://localhost:3000/
-  
   sudo a2enmod proxy_connect.load  
   sudo a2enmod proxy_html.load  
   sudo a2enmod proxy_http.load  
   sudo a2enmod proxy.load
+
+  sudo cp /apps/nanomine/000-default.conf /etc/apache2/sites-available
+  
   
   sudo service apache2 restart
   sudo service celeryd restart
   sudo su - whyis
+  
+  cd nanomine/rest
+  npm i
+  # the next command will run the rest server in the background
+  #   If you're testing the rest server, it might be a good idea to 
+  #   leave off the ampersand and run 'node index.js'
+  #   in a new console window by itself so that starting/stopping will
+  #   be easier (ctrl+c).  We will make this into a system service soon.
+  node index.js &
+  
   cd /apps/whyis 
    
-  python manage.py createuser -e (email) -p (password) -f (frstname) -l (lastname) -u (username) --roles=admin
+  python manage.py createuser -e (email) -p (password) -f (firstname) -l (lastname) -u (username) --roles=admin
   # NOTE: if messages like this are seen: 'numpy.dtype size changed, may indicate binary incompatibility. Expected 96, got 88'
   #         ref: https://stackoverflow.com/questions/25752444/scipy-error-numpy-dtype-size-changed-may-indicate-binary-incompatibility-and
   #       then, try these commands:
