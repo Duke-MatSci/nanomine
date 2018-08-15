@@ -1,7 +1,7 @@
 <template>
   <div class="nmeditor">
     <v-toolbar dark color="primary">
-      <v-toolbar-title class="white--text">{{msg}}</v-toolbar-title>
+      <v-toolbar-title class="white--text">{{$store.getters.editorFileName}}</v-toolbar-title>
       <v-tooltip bottom>
         <v-btn icon slot="activator" v-on:click="lockButton()">
           <v-icon>lock_open</v-icon>
@@ -297,7 +297,10 @@ export default {
       return Axios.get(url)
         .then(function (response) {
           vm.xml_text = vkbeautify.xml(response.data.data.xml, 1)
+          vm.$store.commit('newEditorTab', {'name': fileNm, 'xmlText': vm.xml_text, 'schemaText': null}) // no schema yet :(
+          // console.log(tabNumber)
           vm.refreshEditor()
+          vm.resetLoading()
         })
         .catch(function (err) {
           vm.fetchError = err
@@ -400,7 +403,10 @@ export default {
     },
     refreshEditor: function () {
       var vm = this
-      vm.content.setValue(vm.xml_text)
+      // let tabNumber = vm.$store.getters.currentEditorTab
+      // if (tabNumber && typeof tabNumber === 'number' && tabNumber >= 0) {
+      vm.content.setValue(vm.$store.getters.editorXmlText)
+      // }
       // vm.content.setValue('<xml></xml>')
       vm.content.setSize('100%', '100%')
       setTimeout(function () { // this timeout is required. Otherwise the editor will not refresh properly.
