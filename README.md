@@ -50,7 +50,7 @@ NanoMine Nanocomposites Data Resource
   sudo a2enmod proxy_http.load  
   sudo a2enmod proxy.load
 
-  sudo cp /apps/nanomine/000-default.conf /etc/apache2/sites-available
+  sudo cp /apps/nanomine/install/000-default.conf /etc/apache2/sites-available
   
   
   sudo service apache2 restart
