@@ -5,6 +5,9 @@ import Database from '@/components/Database'
 import ModuleTools from '@/components/ModuleTools'
 import SimTools from '@/components/SimTools'
 import NmEditor from '@/components/Editor'
+import McrHomepage from '@/components/McrHomepage'
+import BinarizeHomepage from '@/components/BinarizeHomepage'
+import Otsu from '@/components/Otsu'
 Vue.use(Router)
 
 export default new Router({
@@ -33,6 +36,21 @@ export default new Router({
       path: '/editor',
       name: 'NmEditor',
       component: NmEditor
+    },
+    {
+      path: '/mcr_homepage',
+      name: 'McrHomepage',
+      component: McrHomepage
+    },
+    {
+      path: '/binarization_homepage',
+      name: 'BinarizeHomepage',
+      component: BinarizeHomepage
+    },
+    {
+      path: '/Otsu',
+      name: 'Otsu',
+      component: Otsu
     }
   ]
 })
