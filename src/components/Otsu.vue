@@ -25,7 +25,7 @@
                   <p><strong> 3) Multiple images in ZIP File:</strong> Submit a ZIP file containing multiple images (supported formats: .jpg, .tif, .png) of same size (in pixels).
                 DO NOT ZIP the folder containing images; select all images and ZIP them directly.</p>
       </v-flex>
-          <br></br>
+          <br/>
           <h2> Create Agent to accept user uploaded files and process it in MATLAB</h2>
 
     </v-container>
@@ -33,7 +33,7 @@
     <h4>Reference</h4>
     <v-flex xs12>
         <p> N. Otsu, A threshold selection method from gray-level histograms, IEEE transactions on systems, man, and cybernetics, vol. 9, no. 1, pp. 62-66, 1979.</p>
-	  </v-flex>
+    </v-flex>
   </div>
 </template>
 
