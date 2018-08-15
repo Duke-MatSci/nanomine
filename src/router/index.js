@@ -45,6 +45,11 @@ export default new Router({
       path: '/Otsu',
       name: 'Otsu',
       component: Otsu
+    },
+    {
+      path: '/characterization_homepage',
+      name: 'CharacterizeHomepage',
+      component: CharacterizeHomepage
     }
   ]
 })

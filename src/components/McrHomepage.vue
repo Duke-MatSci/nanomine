@@ -41,7 +41,7 @@
                 The functions obtained as a result are useful in developing insights on structure - property relationships and serve as the basis for reconstruction algorithms.
                 Upload a binarized microstructure image / set of images and obtain characterization data of your choice.
             </p>
-            <input type="button" onclick="location.href='http://nanomine.northwestern.edu:8000/MCR_Characterize_Choice';" value="Characterize Image" />
+            <router-link to="/characterization_homepage">Characterize Microstructure</router-link>
           </div>
 
           <!-- Reconstruction -->
