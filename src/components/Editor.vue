@@ -1,5 +1,12 @@
 <template>
   <div class="nmeditor">
+    <v-alert
+      v-model="editorError"
+      type="error"
+      dismissible
+    >
+      {{editorErrorMsg}}
+    </v-alert>
     <v-toolbar dark color="primary">
       <v-toolbar-title class="white--text">{{$store.getters.editorFileName}}</v-toolbar-title>
       <v-tooltip bottom>
@@ -123,6 +130,8 @@ export default {
   data: function () {
     return {
       msg: '<untitled>',
+      editorError: false,
+      editorErrorMsg: '',
       content: null,
       xml_text: '<PolymerNanocomposite>\n</PolymerNanocomposite>',
       view: 'xml',
@@ -216,7 +225,9 @@ export default {
           vm.resetLoading()
           vm.fetchError = err
           console.log(err)
-          alert(err)
+          // alert(err)
+          vm.editorErrorMsg = err
+          vm.editorError = true
         })
     },
     test2Button: function () {
@@ -243,7 +254,8 @@ export default {
           vm.resetLoading()
           vm.fetchError = err
           console.log(err)
-          alert(err)
+          vm.editorErrorMsg = err
+          vm.editorError = true
         })
     },
     transformButton: function () {
@@ -305,7 +317,9 @@ export default {
         .catch(function (err) {
           vm.fetchError = err
           console.log(err)
-          alert(err)
+          // alert(err)
+          vm.editorErrorMsg = err
+          vm.editorError = true
           vm.resetLoading()
         })
     },
@@ -344,7 +358,9 @@ export default {
         .catch(function (err) {
           vm.fetchError = err
           console.log(err)
-          alert(err)
+          // alert(err)
+          vm.editorErrorMsg = err
+          vm.editorError = true
           vm.resetLoading()
         })
     },
@@ -392,7 +408,9 @@ export default {
         .catch(function (err) {
           vm.fetchError = err
           console.log(err)
-          alert(err)
+          // alert(err)
+          vm.editorErrorMsg = err
+          vm.editorError = true
           vm.resetLoading()
         })
     },
