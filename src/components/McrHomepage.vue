@@ -51,7 +51,7 @@
                 reconstruction is cast as an optimization problem; with the goal of matching characteristics of reconstructed image to that of input image.
                 In this section, you can upload a binary microstructure image / set of images and obtain 2D/3D reconstructions using method of your choice.
             </p>
-            <input type="button" onclick="location.href='http://nanomine.northwestern.edu:8000/MCR_Reconstruction_Choice';" value="Reconstruct Image" />
+            <router-link to="/reconstruction_homepage">Reconstruct Microstructure</router-link>
           </div>
       </v-flex>
       </v-layout>

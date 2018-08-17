@@ -8,6 +8,7 @@ import McrHomepage from '@/components/McrHomepage'
 import BinarizeHomepage from '@/components/BinarizeHomepage'
 import Otsu from '@/components/Otsu'
 import CharacterizeHomepage from '@/components/CharacterizeHomepage'
+import ReconstructionHomepage from '@/components/ReconstructionHomepage'
 Vue.use(Router)
 
 export default new Router({
@@ -51,6 +52,11 @@ export default new Router({
       path: '/characterization_homepage',
       name: 'CharacterizeHomepage',
       component: CharacterizeHomepage
+    },
+    {
+      path: '/reconstruction_homepage',
+      name: 'ReconstructionHomepage',
+      component: ReconstructionHomepage
     }
   ]
 })
