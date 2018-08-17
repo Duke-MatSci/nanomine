@@ -7,6 +7,7 @@ import SimTools from '@/components/SimTools'
 import McrHomepage from '@/components/McrHomepage'
 import BinarizeHomepage from '@/components/BinarizeHomepage'
 import Otsu from '@/components/Otsu'
+import CharacterizeHomepage from '@/components/CharacterizeHomepage'
 Vue.use(Router)
 
 export default new Router({
