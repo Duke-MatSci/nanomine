@@ -26,7 +26,7 @@
               <p> They are statistical descriptors that quantitatively connect the macroscopic properties of a heterogeneous image to its complex microstructure.
                   Mathematically, they quantify the conditional probability of finding two randomly chosen points in the same phase (autocorrelation). Currently, our webtool can evaluate four widely used two-point
                   correlation functions - autocorrelation, lineal path, cluster and surface correlation.</p>
-              <router-link to="/Otsu">Use Correlation Function Webtool</router-link>
+              <router-link to="/CorrelationCharacterize">Use Correlation Function Webtool</router-link>
             </div>
             <div>
               <h2> Physical Descriptors </h2>
