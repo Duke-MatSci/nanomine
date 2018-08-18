@@ -5,7 +5,7 @@
 # Application: templates
 # Description:
 #
-# Modified by: Akshay Iyer, July 23, 2018
+# Created by: Akshay Iyer, July 23, 2018
 # Customized for NanoMine
 #
 ################################################################################
