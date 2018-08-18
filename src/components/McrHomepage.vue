@@ -5,7 +5,7 @@
 # Application: templates
 # Description: The landing page for MCR library; categorizes methods and provides description
 #
-# Modified by: Akshay Iyer, July 17, 2018
+# Created by: Akshay Iyer, July 17, 2018
 # Customized for NanoMine
 #
 ################################################################################
