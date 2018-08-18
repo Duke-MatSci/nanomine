@@ -15,6 +15,7 @@ import DescriptorCharacterize from '@/components/DescriptorCharacterize'
 import ReconstructionHomepage from '@/components/ReconstructionHomepage'
 import CorrelationReconstruct from '@/components/CorrelationReconstruct'
 import SDFReconstruct from '@/components/SDFReconstruct'
+import DescriptorReconstruct from '@/components/DescriptorReconstruct'
 Vue.use(Router)
 
 export default new Router({
@@ -93,6 +94,11 @@ export default new Router({
       path: '/SDFReconstruct',
       name: 'SDFReconstruct',
       component: SDFReconstruct
+    },
+    {
+      path: '/DescriptorReconstruct',
+      name: 'DescriptorReconstruct',
+      component: DescriptorReconstruct
     }
   ]
 })

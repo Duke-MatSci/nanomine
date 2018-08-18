@@ -33,7 +33,7 @@
               <p> This webtool creates a 3D reconstruction from the 2D input image. It follows a four step hierarchical reconstruction methodology to match descriptors - Volume fraction, nearest neighbor distance, equivalent radius and aspect ratio
                   of white phase in 3D reconstruction to those in input microstructure. Please refer to articles by Xu et.al. (see references) for more details. This technique is best suited for isotropic microstructures with
                   spherical/ellipsoidal filler aggregates. Time required for reconstruction depends on number of filler aggregates contained in input image.</p>
-              <router-link to="/Niblack_Submit">Use Physical Descriptor Webtool</router-link>
+              <router-link to="/DescriptorReconstruct">Use Physical Descriptor Webtool</router-link>
             </div>
             <div>
               <h2> Spectral Density Function </h2>

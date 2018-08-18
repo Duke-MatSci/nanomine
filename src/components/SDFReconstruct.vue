@@ -30,13 +30,13 @@
                   The reconstructed images will be provided in JPEG format along with a plot comparing their autocorrelation function with the autocorrelation of input image.</p>
                   <p><strong> 2) Single image in .mat format :</strong> The .mat file must contain ONLY ONE variable named "Input" - which contains pixel values(only 0 or 1)
                   (Download <a href='http://129.105.90.149/nm/Two_pt_MCR/Input Samples/Option2.zip'>Sample</a>) The reconstruction results will include the input and reconstructed images
-                   in JPG format, the 2D SDF (data in Input_SDF_2D.csv, plotted in SDF_2D.jpg) and it's radial average (Input_SDF_1D.csv).
-                   The reconstructed images will be provided in JPEG format along with a plot comparing their autocorrelation function with the mean autocorrelation of input images.</p>
-                   <p><strong> 3) Multiple images in ZIP File:</strong> Submit a ZIP file containing multiple images of same size (in pixels).
-                    DO NOT ZIP the folder containing images; select all images and ZIP them directly. (Download <a href='http://129.105.90.149/nm/Two_pt_MCR/Input Samples/Option3.zip'>Sample</a>). The mean SDF (averaged over all input images) will be used for reconstruction.
-                    The results include 2D and 1D SDF for all input		images provided in folders named "Input1", "Input2" etc. (one for each input image).
-                    The mean SDF of input images are provided in CSV files "SDF_1D_mean.csv" and "SDF_2D_mean.csv" and the 2D mean plotted in "SDF_2D.jpg".
-                    The reconstructed images will be provided in JPEG format along with a plot comparing their autocorrelation function with the mean autocorrelation of input images.</p>
+                  in JPG format, the 2D SDF (data in Input_SDF_2D.csv, plotted in SDF_2D.jpg) and it's radial average (Input_SDF_1D.csv).
+                  The reconstructed images will be provided in JPEG format along with a plot comparing their autocorrelation function with the mean autocorrelation of input images.</p>
+                  <p><strong> 3) Multiple images in ZIP File:</strong> Submit a ZIP file containing multiple images of same size (in pixels).
+                  DO NOT ZIP the folder containing images; select all images and ZIP them directly. (Download <a href='http://129.105.90.149/nm/Two_pt_MCR/Input Samples/Option3.zip'>Sample</a>). The mean SDF (averaged over all input images) will be used for reconstruction.
+                  The results include 2D and 1D SDF for all input images provided in folders named "Input1", "Input2" etc.
+                  The mean SDF of input images are provided in CSV files "SDF_1D_mean.csv" and "SDF_2D_mean.csv" and the 2D mean plotted in "SDF_2D.jpg".
+                  The reconstructed images will be provided in JPEG format along with a plot comparing their autocorrelation function with the mean autocorrelation of input images.</p>
       </v-flex>
           <h2> Create Agent to accept user uploaded files and process it in MATLAB</h2>
 
