@@ -1,7 +1,7 @@
 <!--
 ################################################################################
 #
-# File Name: Otsu_Submit.vue
+# File Name: Otsu.vue
 # Application: templates
 # Description:
 #
