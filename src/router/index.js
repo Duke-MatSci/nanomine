@@ -10,6 +10,7 @@ import Otsu from '@/components/Otsu'
 import Niblack from '@/components/Niblack'
 import CharacterizeHomepage from '@/components/CharacterizeHomepage'
 import CorrelationCharacterize from '@/components/CorrelationCharacterize'
+import SDFCharacterize from '@/components/SDFCharacterize'
 import ReconstructionHomepage from '@/components/ReconstructionHomepage'
 Vue.use(Router)
 
@@ -69,6 +70,11 @@ export default new Router({
       path: '/CorrelationCharacterize',
       name: 'CorrelationCharacterize',
       component: CorrelationCharacterize
+    },
+    {
+      path: '/SDFCharacterize',
+      name: 'SDFCharacterize',
+      component: SDFCharacterize
     }
   ]
 })

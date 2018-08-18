@@ -41,7 +41,7 @@
               <p> The Spectral Density Function (SDF) is a frequency domain microstructure representation where different frequencies represent real
               space features at different length scales. SDF provides a low-dimensional microstructure representation for quasi-random materials which have arbitrary filler geometry but its distribution is governed by an
               underlying spatial correlation. The inverse Fourier Transform of SDF is the two-point autocorrelation function.</p>
-              <router-link to="/Niblack_Submit">Use Spectral Density Function Webtool</router-link>
+              <router-link to="/SDFCharacterize">Use Spectral Density Function Webtool</router-link>
             </div>
         </v-flex>
       </v-layout>
