@@ -13,6 +13,7 @@ import CorrelationCharacterize from '@/components/CorrelationCharacterize'
 import SDFCharacterize from '@/components/SDFCharacterize'
 import DescriptorCharacterize from '@/components/DescriptorCharacterize'
 import ReconstructionHomepage from '@/components/ReconstructionHomepage'
+import CorrelationReconstruct from '@/components/CorrelationReconstruct'
 Vue.use(Router)
 
 export default new Router({
@@ -81,6 +82,11 @@ export default new Router({
       path: '/DescriptorCharacterize',
       name: 'DescriptorCharacterize',
       component: DescriptorCharacterize
+    },
+    {
+      path: '/CorrelationReconstruct',
+      name: 'CorrelationReconstruct',
+      component: CorrelationReconstruct
     }
   ]
 })

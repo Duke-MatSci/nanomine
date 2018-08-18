@@ -26,7 +26,7 @@
               <p> Reconstruction using correlation functions employs the Yeong-Torquato method which involves Simulated Annealing based random pixel swapping
                   to match the correlation function of 2D reconstructed image to that of 2D input image. The choice of correlation function to be matched and the number of reconstructed images can be chosen by user.
                   This method is well-suited for porous, isotropic materials. The reconstruction time depends on choice of correlation function chosen and volume (area) fraction of white phase.</p>
-              <router-link to="/Otsu">Use Correlation Function Webtool</router-link>
+              <router-link to="/CorrelationReconstruct">Use Correlation Function Webtool</router-link>
             </div>
             <div>
               <h2> Physical Descriptors </h2>
