@@ -7,6 +7,7 @@ import SimTools from '@/components/SimTools'
 import McrHomepage from '@/components/McrHomepage'
 import BinarizeHomepage from '@/components/BinarizeHomepage'
 import Otsu from '@/components/Otsu'
+import Niblack from '@/components/Niblack'
 import CharacterizeHomepage from '@/components/CharacterizeHomepage'
 import ReconstructionHomepage from '@/components/ReconstructionHomepage'
 Vue.use(Router)
@@ -57,6 +58,11 @@ export default new Router({
       path: '/reconstruction_homepage',
       name: 'ReconstructionHomepage',
       component: ReconstructionHomepage
+    },
+    {
+      path: '/Niblack',
+      name: 'Niblack',
+      component: Niblack
     }
   ]
 })
