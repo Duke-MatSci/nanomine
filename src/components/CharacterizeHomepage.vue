@@ -34,7 +34,7 @@
                   Descriptors are important structural parameters that are highly related to material properties and provide a reduced dimension representation of microstructure. Extracting descriptors from a microstructure
                   image involves application of image segmentation techniques to identify clusters of filler material followed by analysis of individual cluster. Although one can consider several descriptors, our webtool
                   evaluates four descriptors - volume fraction, number of white phase aggregates, aspect ratio and nearest neighbor distance. This method is best suited for materials with particulate filler clusters that are speherical/ellipsoidal in shape.</p>
-              <router-link to="/Niblack_Submit">Use Physical Descriptor Webtool</router-link>
+              <router-link to="/DescriptorCharacterize">Use Physical Descriptor Webtool</router-link>
             </div>
             <div>
               <h2> Spectral Density Function </h2>

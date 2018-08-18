@@ -11,6 +11,7 @@ import Niblack from '@/components/Niblack'
 import CharacterizeHomepage from '@/components/CharacterizeHomepage'
 import CorrelationCharacterize from '@/components/CorrelationCharacterize'
 import SDFCharacterize from '@/components/SDFCharacterize'
+import DescriptorCharacterize from '@/components/DescriptorCharacterize'
 import ReconstructionHomepage from '@/components/ReconstructionHomepage'
 Vue.use(Router)
 
@@ -75,6 +76,11 @@ export default new Router({
       path: '/SDFCharacterize',
       name: 'SDFCharacterize',
       component: SDFCharacterize
+    },
+    {
+      path: '/DescriptorCharacterize',
+      name: 'DescriptorCharacterize',
+      component: DescriptorCharacterize
     }
   ]
 })
