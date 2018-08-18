@@ -39,7 +39,7 @@
               <h2> Spectral Density Function </h2>
               <p> The reconstruction method involves level-cutting a Gaussian Random Field which has the same spectral density function (SDF) as the input image.
               The level-cut parameter is defined by the volume fraction of white phase. Please refer to article by Yu et.al.(see references) for more details. This method is best suited for porous, isotropic, stationary microstructure.</p>
-              <router-link to="/Niblack_Submit">Use Spectral Density Function Webtool</router-link>
+              <router-link to="/SDFReconstruct">Use Spectral Density Function Webtool</router-link>
             </div>
         </v-flex>
       </v-layout>
