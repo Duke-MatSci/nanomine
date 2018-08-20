@@ -4,6 +4,7 @@ import NanoMine from '@/components/NanoMine'
 import Database from '@/components/Database'
 import ModuleTools from '@/components/ModuleTools'
 import SimTools from '@/components/SimTools'
+import XMLCONV from '@/components/XMLCONV'
 Vue.use(Router)
 
 export default new Router({
@@ -27,6 +28,11 @@ export default new Router({
       path: '/mtools',
       name: 'ModuleTools',
       component: ModuleTools
+    },
+    {
+      path: '/XMLCONV',
+      name: 'DataUploader',
+      component: XMLCONV
     }
   ]
 })
