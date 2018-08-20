@@ -1,5 +1,7 @@
 <template>
   <v-app id="app" app>
+    <waiting/>
+    <LeftMenu/>
     <page-header/>
     <page-subheader/>
     <router-view class="app-router"/>
@@ -8,12 +10,21 @@
 </template>
 
 <script>
+
+import {} from 'vuex'
+
 export default {
-  name: 'App'
+  name: 'App',
+  methods: {
+    showLeftMenu: function () {
+      return this.$store.state.leftMenuActive
+    }
+  }
 }
 </script>
 
 <style>
+@import './css/styles.css';
   #app {
     font-family: 'Avenir', Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
@@ -21,9 +32,10 @@ export default {
     text-align: center;
     color: #2c3e50;
     margin-top: 48px;
+    background-color: white;
   }
   .app-router {
-    margin-bottom: 75px;
+    // margin-bottom: 75px;
     margin-top: -10px;
   }
   h1 {
