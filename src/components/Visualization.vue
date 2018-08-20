@@ -1,5 +1,6 @@
 <template>
   <div class="vis" >
+  <div v-if="showMain()">
     <v-layout align-center justify-center row fill-height>
        <div class="navbar navbar-fixed-top">
             <nav class="navbar navbar-inverse">
@@ -10,10 +11,10 @@
                     <!--add option buttons here-->
                     <ul class="nav navbar-nav"></ul>
                     <a href="http://nanomine.org" class="btn navbar-btn btn-info" role="button"><span class = "glyphicon glyphicon-home" title="Nanomine HomePage"></span></a>
-                    <v-btn type="button" class="btn btn-primary navbar-btn" id="fp">Filler Descriptor vs Material Property</v-btn>
-                    <button type="button" class="btn btn-primary navbar-btn" id="mp">Material Property Dashboard</button>
-                    <button type="button" class="btn btn-primary navbar-btn" id="ms">Material Spectrum</button>
-                    <!--button type="button" class="btn btn-primary navbar-btn" id="db">Database Overview (under construction)</button-->
+                    <v-btn type="button" class="btn btn-primary" id="fp" v-on:click="active ='fp'">Filler Descriptor vs Material Property</v-btn>
+                    <v-btn type="button" class="btn btn-primary" id="mp" v-on:click="active ='mp'">Material Property Dashboard</v-btn>
+                    <v-btn type="button" class="btn btn-primary" id="ms" v-on:click="active ='ms'">Material Spectrum</v-btn>
+                    <v-btn type="button" class="btn btn-primary" id="db" v-on:click="active ='db'">Database Overview (under construction)</v-btn>
 
                 </div>
             </nav>
@@ -55,6 +56,34 @@
             </div>
         </div>
       </v-layout>
+	  </div>
+	  <div v-if="showfp()">
+		<h1>Filler Descriptor vs Material Property</h1>
+        <table class="table"><thead><tr><th scope="col" class="text-center">choose one filler property as x axis: </th><th scope="col" class="text-center">choose one material property as y axis:</th></tr></thead><tbody><tr><td><select id="filler-property-select-x" style="width:300px;"><option value="" distabled selected></option></select></td><td><select id="material-property-select-y" style="width:300px;"><option value="" distabled selected></option></select></td><td><button type="button" class="btn btn-primary" id="viz-fp" style="width:300px;">Visualize</button></td></tr></tbody></table>
+        <table class="table"><thead><tr><th class="text-center" id="sampleFilter"></th><th class="text-center" id="matrixFilter"></th><th class="text-center" id="fillerFilter"></th></tr></thead></table>
+        <div id="propertyChart"></div>
+        <br>
+        <div id="propertyTable"></div>
+	  </div> <!-- showfp() -->
+	  <div v-if="showmp()">
+		<h1>Material Property Dashboard</h1>
+        <table class="table"><thead><tr><th scope="col" class="text-center">choose one material property as x axis: </th><th scope="col" class="text-center">choose one material property as y axis:</th></tr></thead><tbody><tr><td><select id="material-property-select-x" style="width:300px;"><option value="" distabled selected></option></select></td><td><select id="material-property-select-y" style="width:300px;"><option value="" distabled selected></option></select></td><td><button type="button" class="btn btn-primary" id="viz-mp" style="width:300px;">Visualize</button></td></tr></tbody></table>
+        <table class="table"><thead><tr><th class="text-center" id="sampleFilter"></th><th class="text-center" id="matrixFilter"></th><th class="text-center" id="fillerFilter"></th><th class="text-center" id="fillerPropertyFilter"></th></tr></thead></table>
+        <div id="propertyChart"></div>
+        <br>
+        <div id="propertyTable"></div>
+	  </div> <!-- showmp() -->
+	  <div v-if="showms()">
+		<h1>Material Spectrum Dashboard</h1>
+		<table class="table"><thead><tr><th scope="col" class="text-center">choose matrix</th><th scope="col" class="text-center">choose filler</th><th scope="col" class="text-center">choose x axis</th><th scope="col" class="text-center">choose y axis</th><th></th></tr></thead><tbody><tr><td><select id="matrix-select" style="width:300px;"><option value="" distabled selected></option></select></td><td><select id="filler-select" style="width:300px;"><option value="" distabled selected></option></select></td><td><select id="specialization-x" style="width:300px;"><option value="" distabled selected></option></select></td><td><select id="specialization-y" style="width:300px;"><option value="" distabled selected></option></select></td><td><button type="button" class="btn btn-primary" id="viz-ms" style="width:300px;">Visualize</button></td></tr></tbody></table>
+		<table class="table"><thead><tr><th class="text-center" id="sampleFilter"></th></tr></thead></table>
+		<div id="propertyChart"></div>
+		<br>
+		<div id="propertyTable"></div>
+	  </div> <!-- showms() -->
+	  <div v-if="showdb()">
+		<h1>Material Spectrum Dashboard (Under Construction)</h1>
+	  </div> <!-- showdb()under construction -->
   </div>
 </template>
 
@@ -65,14 +94,40 @@ import {} from 'vuex'
 export default {
   name: 'Visualization',
   methods: {
-    show: function () {
-      return (
-        true
+    showMain: function () {
+      let vm = this
+	  return (
+        vm.active === "main" 
+      )
+    },
+	showfp: function () {
+      let vm = this
+	  return (
+        vm.active === "fp" 
+      )
+    },
+	showmp: function () {
+      let vm = this
+	  return (
+        vm.active === "mp" 
+      )
+    },
+	showms: function () {
+      let vm = this
+	  return (
+        vm.active === "ms" 
+      )
+    },
+	showdb: function () {
+      let vm = this
+	  return (
+        vm.active === "db" 
       )
     }
   },
   data () {
     return {
+	  active: "main",
       msg: 'Visualization'
     }
   }
