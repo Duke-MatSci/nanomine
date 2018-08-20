@@ -5,7 +5,7 @@
 # Application: templates
 # Description:
 #
-# Modified by: Akshay Iyer, July 23, 2018
+# Created by: Akshay Iyer, July 23, 2018
 # Customized for NanoMine
 #
 ################################################################################
@@ -28,13 +28,12 @@
               </p>
               <router-link to="/Otsu">Use Otsu's Binarization Webtool</router-link>
             </div>
-            <br/>
             <div>
               <h2> Niblack's Method </h2>
               <p> Niblack's method is an adaptive thresholding algorithm which calculates a pixel-wise threshold by sliding a rectangular window over the image.
                   It works well for gray-level images with low contrast between filler and matrix material.
               </p>
-              <router-link to="/Niblack_Submit">Use Niblack Binarization Webtool</router-link>
+              <router-link to="/Niblack">Use Niblack Binarization Webtool</router-link>
             </div>
         </v-flex>
       </v-layout>
