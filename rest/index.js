@@ -245,12 +245,13 @@ where {
   return postSparql(req.path, query, req, res)
 })
 
-app.get('/xml/disk', function (req, res) {
+app.get('/xml/disk/:schema/:xmlfile', function (req, res) {
   // this is for testing only
   let jsonResp = {'error': null, 'data': null}
   let fs = require('fs')
   let recs = []
-  let schema = '5b1ebeb9e74a1d61fc43654d'
+  let schema = req.params.schema // '5b1ebeb9e74a1d61fc43654d'
+  let xmlfile = req.params.xmlfile
   let targetDir = '/apps/nanomine/rest/data/' + schema
   let p = []
   fs.readdir(targetDir, function (err, files) {
@@ -260,7 +261,9 @@ app.get('/xml/disk', function (req, res) {
           fs.readFile(targetDir + '/' + v, {encoding: 'utf-8'}, function (err, data) {
             console.log('data: ' + data)
             if (err == null) {
-              recs.push({'title': v, 'schema': schema, '_id': shortUUID.new(), 'content': data})
+              if (xmlfile && xmlfile === data.title) {
+                recs.push({'title': v, 'schema': schema, '_id': shortUUID.new(), 'content': data}) // NOTE: xml ID not persisted, so it's not really useful
+              }
               resolve()
             } else {
               reject(err)
@@ -302,7 +305,7 @@ app.post('/job/addinputfile', function (req, res) {
   let myjobid = res.body.jobid
   let myfilenm = res.body.filename
   let myfilebytes = res.body.filebytes // probably base64 encoded
-  let myfiletype = res.body.filetype // text/xml text/plain image/jpeg image/png
+  let myfiletype = res.body.filetype // text/xml text/plain image/jpeg image/png application/zip
   jsonResp.data = {'jobid': shortUUID.new(), 'jobtype': myjobtype}
   console.log('rest endpoint: ' + req.path + ' jobtype: ' + myjobtype + ' returning jobid: ' + jsonResp.data.jobid)
   res.json(jsonResp)
