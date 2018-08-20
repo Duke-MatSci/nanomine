@@ -1,8 +1,7 @@
 <template>
   <div class="vis" >
     <v-layout align-center justify-center row fill-height>
-      <div></div>
-      <div class="navbar navbar-fixed-top">
+       <div class="navbar navbar-fixed-top">
             <nav class="navbar navbar-inverse">
                 <div class="container-fluid">
                     <div class="navbar-header">
@@ -11,7 +10,7 @@
                     <!--add option buttons here-->
                     <ul class="nav navbar-nav"></ul>
                     <a href="http://nanomine.org" class="btn navbar-btn btn-info" role="button"><span class = "glyphicon glyphicon-home" title="Nanomine HomePage"></span></a>
-                    <button type="button" class="btn btn-primary navbar-btn" id="fp">Filler Descriptor vs Material Property</button>
+                    <v-btn type="button" class="btn btn-primary navbar-btn" id="fp">Filler Descriptor vs Material Property</v-btn>
                     <button type="button" class="btn btn-primary navbar-btn" id="mp">Material Property Dashboard</button>
                     <button type="button" class="btn btn-primary navbar-btn" id="ms">Material Spectrum</button>
                     <!--button type="button" class="btn btn-primary navbar-btn" id="db">Database Overview (under construction)</button-->
@@ -49,15 +48,13 @@
             <p class="text-left"> •   select “glass transition temperature” as the y-axis </p>
             <p class="text-left"> •   Refinement can be obtained by playing with other features on the page </p>
             <p class="text-left"> •   The table below the graph contains the information of the graph in tabular form.</p>
-		</div>
             <a href="https://imgur.com/woeikox"><img src="https://i.imgur.com/woeikox.png" title="source: imgur.com" /></a>        
               </div>
               <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2"></div>
             </div>
             </div>
         </div>
-      <div></div>
-    </v-layout>
+      </v-layout>
   </div>
 </template>
 
