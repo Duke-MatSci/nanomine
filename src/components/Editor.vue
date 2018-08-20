@@ -8,7 +8,7 @@
       {{editorErrorMsg}}
     </v-alert>
     <v-toolbar dark color="primary">
-      <v-toolbar-title class="white--text">{{$store.getters.editorFileName}}</v-toolbar-title>
+      <v-toolbar-title class="white--text">{{showFileName}}</v-toolbar-title>
       <v-tooltip bottom>
         <v-btn icon slot="activator" v-on:click="lockButton()">
           <v-icon>lock_open</v-icon>
@@ -199,6 +199,16 @@ export default {
 
     })
     vm.refreshEditor()
+  },
+  computed: {
+    showFileName: function () {
+      let vm = this
+      let fn = vm.$store.getters.editorFileName
+      if (fn !== '<untitled>') {
+        fn = fn.toUpperCase()
+      }
+      return (fn)
+    }
   },
   methods: {
     setLoading: function () {
