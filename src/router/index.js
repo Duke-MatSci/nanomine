@@ -8,6 +8,7 @@ import NmEditor from '@/components/Editor'
 import McrHomepage from '@/components/McrHomepage'
 import BinarizeHomepage from '@/components/BinarizeHomepage'
 import Otsu from '@/components/Otsu'
+import Visualization from '@/components/Visualization'
 Vue.use(Router)
 
 export default new Router({
@@ -51,6 +52,11 @@ export default new Router({
       path: '/Otsu',
       name: 'Otsu',
       component: Otsu
+    },
+    {
+      path: '/Visualization',
+      name: 'Visualization',
+      component: Visualization
     }
   ]
 })
