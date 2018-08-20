@@ -144,6 +144,17 @@ Config = dict(
     ],
     inferencers = {
         "SETLr": autonomic.SETLr(),
+#       "EmailNotifier": autonomic.EmailNotifier(
+#             input_type=nanomine.CompletedAnalysis,
+#            subject_template="Your NanoMine analysis is complete",
+#             body_template='''Hello {{user.name}},
+#
+#Your analysis job has completed and the results are available at {{resource.identifier}}.
+#
+#Thanks,
+#The NanoMine Team
+#'''
+#             )
 #        "HTML2Text" : nlp.HTML2Text(),
 #        "EntityExtractor" : nlp.EntityExtractor(),
 #        "EntityResolver" : nlp.EntityResolver(),
