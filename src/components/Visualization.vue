@@ -55,7 +55,6 @@
             </div>
             </div>
         </div>
-      </v-layout>
 	  </div>
 	  <div v-if="showfp()">
 		<h1>Filler Descriptor vs Material Property</h1>
@@ -85,6 +84,7 @@
 		<h1>Material Spectrum Dashboard (Under Construction)</h1>
 	  </div> <!-- showdb()under construction -->
   </div>
+  </v-layout>
 </template>
 
 <script>
