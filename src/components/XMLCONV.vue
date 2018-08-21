@@ -1,6 +1,6 @@
 <template>
   <div class="xmlconv">
-    <h1>{{ msg }}</h1>
+    <h1>Data Uploader</h1>
     <v-container>
       <h3 class="text-xs-left">Description</h3>
       <br>
@@ -20,22 +20,146 @@
       4. Acceptable image file format: JPG, PNG, TIF(F). Indicate the full image file name including the extensions in the corresponding cells in the template Excel file.
       </p>
       <h3 class="text-xs-left">Inputs</h3><br>
+      <v-alert
+        v-model="uploadError"
+        type="error"
+        dismissible
+      >
+        {{uploadErrorMsg}}
+      </v-alert>
+      <v-flex xs12 class="text-xs-center text-sm-center text-md-center text-lg-center">
+        <div><v-text-field label="Select the Excel Template File" @click.stop='pickTemplate' v-model='templateName' prepend-icon='attach_file'></v-text-field>
+        <input
+          type="file"
+          style="display: none"
+          accept=".xlsx, .xls"
+          ref="myTemplate"
+          @change="onTemplatePicked"
+        ></div>
+      </v-flex>
+      <v-flex xs12 class="text-xs-center text-sm-center text-md-center text-lg-center">
+        <div><v-text-field label="Select Other Files (including raw data files and image files)" @click.stop='pickFile' v-model='fileName' prepend-icon='attach_file'></v-text-field>
+        <input
+          type="file"
+          style="display: none"
+          multiple="true"
+          ref="myUpload"
+          @change="onFilePicked"
+        ></div>
+      </v-flex>
+      <v-btn v-on:click="submit()">Submit</v-btn>
     </v-container>
   </div>
 </template>
 
 <script>
+import {} from 'vuex'
+import Axios from 'axios'
+
 export default {
   name: 'XMLCONV',
-  data () {
-    return {
-      msg: 'Data Uploader'
+  data: () => ({
+    title: 'File Upload',
+    dialog: false,
+    templateName: '',
+    templateUrl: '',
+    fileName: '',
+    template: null,
+    files: [],
+    uploadError: false,
+    uploadErrorMsg: ''
+  }),
+  methods: {
+    setLoading: function () {
+      this.$store.commit('isLoading')
+    },
+
+    resetLoading: function () {
+      this.$store.commit('notLoading')
+    },
+
+    pickFile () {
+      this.$refs.myUpload.click()
+    },
+
+    pickTemplate () {
+      this.$refs.myTemplate.click()
+    },
+
+    onTemplatePicked (e) {
+      const files = e.target.files
+      let file = {}
+      let f = files[0]
+      if (f !== undefined) {
+        this.templateName = f.name
+        file.fileName = this.templateName
+        if (this.templateName.lastIndexOf('.') <= 0) {
+          console.log("Error No Extension: " + this.templateName)
+        }
+        const fr = new FileReader()
+        fr.readAsDataURL(f)
+        fr.addEventListener('load', () => {
+          this.templateUrl = fr.result
+          file.fileUrl = this.templateUrl
+          this.template = file
+        })
+      } else {
+        this.templateName = ''
+        this.templateUrl = ''
+      }
+    },
+
+    onFilePicked (e) {
+      const files = e.target.files
+      for (let i = 0; i < files.length; i ++) {
+        let file = {}
+        let f = files[i]
+        if (f !== undefined) {
+          file.fileName = f.name
+          if (file.fileName.lastIndexOf('.') <= 0) {
+            return
+          }
+          const fr = new FileReader()
+          fr.readAsDataURL(f)
+          fr.addEventListener('load', () => {
+            file.fileUrl = fr.result
+            this.files.push(file)
+          })
+        } else {
+          console.log("File Undefined")
+        }
+      }
+    },
+
+    submit () {
+      let vm = this
+      vm.files.forEach(function (v){
+        console.log(JSON.stringify(v))
+      })      
+      if (vm.template != null) {
+        vm.files.unshift(vm.template)
+      } else {
+        vm.uploadError = true
+        vm.uploadErrorMsg = 'Missing Template File'
+        return
+      }
+      console.log('Job Submitted!')
+      vm.setLoading()
+      let url = '/nmr/XMLCONV'
+      return Axios.post(url, vm.files)
+        .then(function (resp) {
+          console.log('response: ' + JSON.stringify(resp))
+          vm.resetLoading()
+        })
+        .catch(function (err) {
+          console.log('error: ' + err)
+          vm.resetLoading()
+        })
     }
   }
 }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
   img {
     width: 240px;
