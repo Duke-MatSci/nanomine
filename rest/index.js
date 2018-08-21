@@ -9,7 +9,8 @@ const FormData = require('form-data')
 const qs = require('qs')
 var app = express()
 app.use(cookieParser())
-app.use(bodyParser.json())
+app.use(bodyParser.raw({'limit': '10mb'}))
+app.use(bodyParser.json({'limit': '10mb'}))
 
 let shortUUID = require('short-uuid')() // https://github.com/oculus42/short-uuid (npm i --save short-uuid)
 function inspect (theObj) {
