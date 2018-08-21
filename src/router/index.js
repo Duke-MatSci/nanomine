@@ -4,6 +4,7 @@ import NanoMine from '@/components/NanoMine'
 import Database from '@/components/Database'
 import ModuleTools from '@/components/ModuleTools'
 import SimTools from '@/components/SimTools'
+import XMLCONV from '@/components/XMLCONV'
 import NmEditor from '@/components/Editor'
 import McrHomepage from '@/components/McrHomepage'
 import BinarizeHomepage from '@/components/BinarizeHomepage'
@@ -40,6 +41,11 @@ export default new Router({
       path: '/mtools',
       name: 'ModuleTools',
       component: ModuleTools
+    },
+    {
+      path: '/XMLCONV',
+      name: 'XMLCONV',
+      component: XMLCONV
     },
     {
       path: '/editor',
