@@ -19,8 +19,8 @@ function inspect (theObj) {
 // Bingyin
 app.post('/XMLCONV', function (req, res) {
   let jsonResp = {'error': null, 'data': null}
-  let files = req.body.files;
-  jsonResp.data = {'jobid': shortUUID.new() }
+  let files = req.body.files
+  jsonResp.data = {'jobid': shortUUID.new()}
   console.log('rest endpoint: ' + req.path + ' returning jobid: ' + jsonResp.data.jobid)
   res.json(jsonResp)
 })// Bingyin end
