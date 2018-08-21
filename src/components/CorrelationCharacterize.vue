@@ -1,24 +1,26 @@
 <!--
 ################################################################################
 #
-# File Name: Otsu.vue
+# File Name: CorrelationCharacterize.vue
 # Application: templates
 # Description:
 #
-# Created by: Akshay Iyer, July 23, 2018
+# Created by: Akshay Iyer, August 18, 2018
 # Customized for NanoMine
 #
 ################################################################################
 -->
 
 <template>
-  <div class="Otsu">
+  <div class="CorrelationCharacterize">
     <h1>{{ msg }}</h1>
     <v-container>
       <v-flex xs12>
           <h3>Description</h3>
           <br>
-            <p>Upload a image / ZIP file containing set of images (Supported file formats: .jpg, .tif, .png) and click "Binarize" to binarize image using Otsu's Mehtod.</p>
+            <p>Upload a binarized image / ZIP file containing set of images (Supported file formats: .jpg, .tif, .png) and click "Characterize".
+            All correlation functions are evaluated for the "white" phase in image.</p>
+            <p><strong> NOTE: Images must be binarized.</strong></p>
             <h4> Input Options:</h4>
                   <p><strong> 1) Single image: </strong>Supported image formats are .jpg, .tif and .png.
                   <p><strong> 2) Single image in .mat format :</strong> The .mat file must contain ONLY ONE variable named "Input" - which contains the image.</p>
@@ -31,17 +33,18 @@
 
     <h4>Reference</h4>
     <v-flex xs12>
-        <p> N. Otsu, A threshold selection method from gray-level histograms, IEEE transactions on systems, man, and cybernetics, vol. 9, no. 1, pp. 62-66, 1979.</p>
+    <p>Rintoul, M.D. and Torquato, S., 1997. Reconstruction of the structure of dispersions. Journal of Colloid and Interface Science, 186(2), pp.467-476.</p>
+    <p>Yeong,C. and Torquato,S., 1998. Reconstructing random media Physical Review E, vol. 57, no. 1, p. 495</p>
     </v-flex>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'Otsu',
+  name: 'CorrelationCharacterize',
   data () {
     return {
-      msg: 'Otsu Image Binarization Method'
+      msg: 'Microstructure Characterization - Correlation Function Approach'
     }
   }
 }

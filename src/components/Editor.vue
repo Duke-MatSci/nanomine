@@ -18,6 +18,10 @@
 
       <v-spacer></v-spacer>
 
+      <v-btn icon @click="dialog = !dialog">
+        <v-icon>link</v-icon>
+      </v-btn>
+
       <v-tooltip bottom>
         <v-btn icon slot="activator" v-on:click="transformButton()">
           <v-icon>transform</v-icon>
@@ -108,14 +112,37 @@
         </v-card>
       </v-dialog>
     </v-layout>
-
+    <!--/><-->
     <v-container fluid justify-start fill-height>
+      <v-flex xs12 class="text-xs-center text-sm-center text-md-center text-lg-center">
+        <img :src="imageUrl" height="150" v-if="imageUrl"/>
+        <v-text-field label="Select Image" @click='pickFile' v-model='imageName' prepend-icon='attach_file'></v-text-field>
+        <input
+          type="file"
+          style="display: none"
+          ref="image"
+          multiple
+          accept=".zip, .xlsx,.xls, image/*"
+          @change="onFilePicked"
+        >
+      </v-flex>
+      <v-dialog v-model="dialog" max-width="290">
+        <v-card>
+          <v-card-title class="headline">Upload</v-card-title>
+          <br>https://stackoverflow.com/questions/44989162/file-upload-in-vuetify
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="green darken-1" flat="flat" @click.native="dialog = false">Close</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
       <v-layout row wrap align-start fill-height>
         <v-flex fill-height xs12>
           <div id="editor" ref="editor"></div>
         </v-flex>
       </v-layout>
     </v-container>
+    <!--/><-->
   </div>
 </template>
 
@@ -150,7 +177,11 @@ export default {
         this.filePublish,
         this.fileImport,
         this.fileExport
-      ]
+      ],
+      dialog: false, // testing file upload
+      imageName: '', // testing
+      imageUrl: '', //  testing
+      imageFile: '' //  testing
     }
   },
   beforeDestroy: function () {
@@ -442,6 +473,34 @@ export default {
         vm.content.execCommand('goDocStart')
         vm.content.clearHistory()
       }, 0)
+    },
+    pickFile () {
+      this.$refs.image.click()
+    },
+
+    onFilePicked (e) {
+      const files = e.target.files
+      if (files[0] !== undefined) {
+        let v = null
+        for (v = 0; v < files.length; ++v) {
+          console.log('file selected: ' + files[v].name)
+        }
+        this.imageName = files[0].name
+        if (this.imageName.lastIndexOf('.') <= 0) {
+          return
+        }
+        const fr = new FileReader()
+        fr.readAsDataURL(files[0])
+        fr.addEventListener('load', () => {
+          this.imageUrl = fr.result
+          console.log(this.imageUrl)
+          this.imageFile = files[0] // this is an image file that can be sent to server...
+        })
+      } else {
+        this.imageName = ''
+        this.imageFile = ''
+        this.imageUrl = ''
+      }
     }
   }
 }

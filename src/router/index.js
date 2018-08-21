@@ -4,14 +4,20 @@ import NanoMine from '@/components/NanoMine'
 import Database from '@/components/Database'
 import ModuleTools from '@/components/ModuleTools'
 import SimTools from '@/components/SimTools'
-<<<<<<< HEAD
 import XMLCONV from '@/components/XMLCONV'
-=======
 import NmEditor from '@/components/Editor'
 import McrHomepage from '@/components/McrHomepage'
 import BinarizeHomepage from '@/components/BinarizeHomepage'
 import Otsu from '@/components/Otsu'
->>>>>>> 5402aa0f22f36658318ea6bc48888215b9f845c8
+import Niblack from '@/components/Niblack'
+import CharacterizeHomepage from '@/components/CharacterizeHomepage'
+import CorrelationCharacterize from '@/components/CorrelationCharacterize'
+import SDFCharacterize from '@/components/SDFCharacterize'
+import DescriptorCharacterize from '@/components/DescriptorCharacterize'
+import ReconstructionHomepage from '@/components/ReconstructionHomepage'
+import CorrelationReconstruct from '@/components/CorrelationReconstruct'
+import SDFReconstruct from '@/components/SDFReconstruct'
+import DescriptorReconstruct from '@/components/DescriptorReconstruct'
 Vue.use(Router)
 
 export default new Router({
@@ -37,11 +43,11 @@ export default new Router({
       component: ModuleTools
     },
     {
-<<<<<<< HEAD
       path: '/XMLCONV',
       name: 'XMLCONV',
       component: XMLCONV
-=======
+    },
+    {
       path: '/editor',
       name: 'NmEditor',
       component: NmEditor
@@ -60,7 +66,51 @@ export default new Router({
       path: '/Otsu',
       name: 'Otsu',
       component: Otsu
->>>>>>> 5402aa0f22f36658318ea6bc48888215b9f845c8
+    },
+    {
+      path: '/characterization_homepage',
+      name: 'CharacterizeHomepage',
+      component: CharacterizeHomepage
+    },
+    {
+      path: '/reconstruction_homepage',
+      name: 'ReconstructionHomepage',
+      component: ReconstructionHomepage
+    },
+    {
+      path: '/Niblack',
+      name: 'Niblack',
+      component: Niblack
+    },
+    {
+      path: '/CorrelationCharacterize',
+      name: 'CorrelationCharacterize',
+      component: CorrelationCharacterize
+    },
+    {
+      path: '/SDFCharacterize',
+      name: 'SDFCharacterize',
+      component: SDFCharacterize
+    },
+    {
+      path: '/DescriptorCharacterize',
+      name: 'DescriptorCharacterize',
+      component: DescriptorCharacterize
+    },
+    {
+      path: '/CorrelationReconstruct',
+      name: 'CorrelationReconstruct',
+      component: CorrelationReconstruct
+    },
+    {
+      path: '/SDFReconstruct',
+      name: 'SDFReconstruct',
+      component: SDFReconstruct
+    },
+    {
+      path: '/DescriptorReconstruct',
+      name: 'DescriptorReconstruct',
+      component: DescriptorReconstruct
     }
   ]
 })
