@@ -23,7 +23,9 @@ app.post('/XMLCONV', function (req, res) {
   jsonResp.data = {'jobid': shortUUID.new()}
   console.log('rest endpoint: ' + req.path + ' returning jobid: ' + jsonResp.data.jobid)
   res.json(jsonResp)
-})// Bingyin end
+})
+
+// Bingyin end
 
 // Erik
 app.get('/', function (req, res) {
