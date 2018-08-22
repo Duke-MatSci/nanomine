@@ -5,7 +5,7 @@
 # Application: templates
 # Description: The landing page for MCR library; categorizes methods and provides description
 #
-# Modified by: Akshay Iyer, July 17, 2018
+# Created by: Akshay Iyer, July 17, 2018
 # Customized for NanoMine
 #
 ################################################################################
@@ -41,7 +41,7 @@
                 The functions obtained as a result are useful in developing insights on structure - property relationships and serve as the basis for reconstruction algorithms.
                 Upload a binarized microstructure image / set of images and obtain characterization data of your choice.
             </p>
-            <input type="button" onclick="location.href='http://nanomine.northwestern.edu:8000/MCR_Characterize_Choice';" value="Characterize Image" />
+            <router-link to="/characterization_homepage">Characterize Microstructure</router-link>
           </div>
 
           <!-- Reconstruction -->
@@ -51,7 +51,7 @@
                 reconstruction is cast as an optimization problem; with the goal of matching characteristics of reconstructed image to that of input image.
                 In this section, you can upload a binary microstructure image / set of images and obtain 2D/3D reconstructions using method of your choice.
             </p>
-            <input type="button" onclick="location.href='http://nanomine.northwestern.edu:8000/MCR_Reconstruction_Choice';" value="Reconstruct Image" />
+            <router-link to="/reconstruction_homepage">Reconstruct Microstructure</router-link>
           </div>
       </v-flex>
       </v-layout>

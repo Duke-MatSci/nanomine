@@ -9,12 +9,26 @@ const FormData = require('form-data')
 const qs = require('qs')
 var app = express()
 app.use(cookieParser())
-app.use(bodyParser.json())
+app.use(bodyParser.raw({'limit': '10mb'}))
+app.use(bodyParser.json({'limit': '10mb'}))
 
 let shortUUID = require('short-uuid')() // https://github.com/oculus42/short-uuid (npm i --save short-uuid)
 function inspect (theObj) {
   return util.inspect(theObj, {showHidden: true, depth: 2})
 }
+
+// Bingyin
+app.post('/XMLCONV', function (req, res) {
+  let jsonResp = {'error': null, 'data': null}
+  let files = req.body.files
+  jsonResp.data = {'jobid': shortUUID.new()}
+  console.log('rest endpoint: ' + req.path + ' returning jobid: ' + jsonResp.data.jobid)
+  res.json(jsonResp)
+})
+
+// Bingyin end
+
+// Erik
 app.get('/', function (req, res) {
   let ID = 'TestData_' + shortUUID.new()
   let query = 'a query'
@@ -291,6 +305,7 @@ app.get('/xml/disk/:schema/:xmlfile', function (req, res) {
     }
   })
 })
+// Erik end
 
 /* Job related rest services */
 app.post('/job/create', function (req, res) {
