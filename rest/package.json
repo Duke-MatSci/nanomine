@@ -11,11 +11,14 @@
   "dependencies": {
     "axios": "^0.18.0",
     "body-parser": "^1.18.3",
+    "config": "^2.0.1",
     "cookie-parser": "^1.4.3",
+    "data-uri-to-buffer": "^2.0.0",
     "express": "^4.16.3",
     "form-data": "^2.3.2",
     "jsonfile": "^4.0.0",
     "qs": "^6.5.2",
-    "short-uuid": "^3.0.0"
+    "short-uuid": "^3.0.0",
+    "winston": "^3.0.0"
   }
 }
