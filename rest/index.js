@@ -29,6 +29,7 @@ app.post('/XMLCONV', function (req, res) {
 // Bingyin end
 
 // Erik
+app.post('/job')
 app.get('/', function (req, res) {
   let ID = 'TestData_' + shortUUID.new()
   let query = 'a query'
