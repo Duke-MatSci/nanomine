@@ -24,9 +24,9 @@ NanoMine Nanocomposites Data Resource
 
   #EDIT the whyis user's ~/.bash_profile to add:
   export NM_MONGO_PORT=27017
-  export NM_MONGO_USER="devadmin" 
+  export NM_MONGO_USER="mongodevadmin" 
   export NM_MONGO_PWD="mydevmongopw" # set this to different password NOW
-  export NM_MONGO_API_USER="mgi"
+  export NM_MONGO_API_USER="mongodevapi"
   export NM_MONGO_API_PWD="mydevmongoapipw" # set this to a diff password NOW
   
   
@@ -71,8 +71,10 @@ NanoMine Nanocomposites Data Resource
   echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/4.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.0.list
   sudo apt-get update
   sudo apt-get install -y mongodb-org
+  sudo cp /apps/nanomine/install/mongoConfig /etc/mongod.conf
   sudo service mongod start
-  
+  sudo /apps/nanomine/install/mongoSetupAdminUser
+  sudo /apps/nanomine/install/mongoSetupApiUser
   
   sudo su - whyis
   
