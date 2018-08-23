@@ -21,12 +21,20 @@ NanoMine Nanocomposites Data Resource
   sudo wget https://raw.githubusercontent.com/duke-matsci/nanomine-ontology/master/ontology.setl.ttl
   sudo chown -R whyis:whyis /apps/nanomine
   sudo su - whyis
+
+  #EDIT the whyis user's ~/.bash_profile to add:
+  export NM_MONGO_PORT=27017
+  export NM_MONGO_USER="mongodevadmin" 
+  export NM_MONGO_PWD="mydevmongopw" # set this to different password NOW
+  export NM_MONGO_API_USER="mongodevapi"
+  export NM_MONGO_API_PWD="mydevmongoapipw" # set this to a diff password NOW
+  
   
   #install n - the nodejs version manager and LTS version of node
   curl -L https://git.io/n-install | bash -s -- -y lts
   echo 'export N_PREFIX="$HOME/n"; [[ :$PATH: == *":$N_PREFIX/bin:"* ]] || PATH+=":$N_PREFIX/bin"' >> ~/.bash_profile
   
-  #make sure n is in the path
+  #make sure n is in the path and new variables are defined
   source ~/.bash_profile
 
   # install the VueJS command line processor
@@ -57,6 +65,17 @@ NanoMine Nanocomposites Data Resource
   
   sudo service apache2 restart
   sudo service celeryd restart
+  
+  #install MongoDB
+  sudo sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 9DA31620334BD75D9DCB49F368818C72E52529D4
+  echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/4.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.0.list
+  sudo apt-get update
+  sudo apt-get install -y mongodb-org
+  sudo cp /apps/nanomine/install/mongoConfig /etc/mongod.conf
+  sudo service mongod start
+  sudo /apps/nanomine/install/mongoSetupAdminUser
+  sudo /apps/nanomine/install/mongoSetupApiUser
+  
   sudo su - whyis
   
   cd nanomine/rest
