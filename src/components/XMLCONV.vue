@@ -94,7 +94,7 @@ export default {
         this.templateName = f.name
         file.fileName = this.templateName
         if (this.templateName.lastIndexOf('.') <= 0) {
-          console.log("Error No Extension: " + this.templateName)
+          console.log('Error No Extension: ' + this.templateName)
         }
         const fr = new FileReader()
         fr.readAsDataURL(f)
@@ -111,7 +111,7 @@ export default {
 
     onFilePicked (e) {
       const files = e.target.files
-      for (let i = 0; i < files.length; i ++) {
+      for (let i = 0; i < files.length; i++) {
         let file = {}
         let f = files[i]
         if (f !== undefined) {
@@ -126,16 +126,16 @@ export default {
             this.files.push(file)
           })
         } else {
-          console.log("File Undefined")
+          console.log('File Undefined')
         }
       }
     },
 
     submit () {
       let vm = this
-      vm.files.forEach(function (v){
+      vm.files.forEach(function (v) {
         console.log(JSON.stringify(v))
-      })      
+      })
       if (vm.template != null) {
         vm.files.unshift(vm.template)
       } else {
