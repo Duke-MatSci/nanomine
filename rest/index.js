@@ -18,14 +18,12 @@ function inspect (theObj) {
 }
 
 /* Job related rest services */
-
-
 app.post('/jobcreate', function (req, res) {
   let jsonResp = {'error': null, 'data': null}
   let jobType = req.body.jobType
   let jobParams = req.body.jobParameters
-  console.log(jobParams)
-  jsonResp.data = {'jobid': jobType + '-' + shortUUID.new()}
+  console.log('job parameters: ' + JSON.stringify(jobParams))
+  jsonResp.data = {'jobId': jobType + '-' + shortUUID.new()}
   res.json(jsonResp)
 })
 
