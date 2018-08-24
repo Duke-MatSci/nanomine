@@ -18,10 +18,6 @@
 
       <v-spacer></v-spacer>
 
-      <v-btn icon @click="dialog = !dialog">
-        <v-icon>link</v-icon>
-      </v-btn>
-
       <v-tooltip bottom>
         <v-btn icon slot="activator" v-on:click="transformButton()">
           <v-icon>transform</v-icon>
@@ -30,11 +26,11 @@
         <span v-if="view=='form'">Show XML View</span>
       </v-tooltip>
 
-      <v-menu :nudge-width="100" >
+      <v-menu :nudge-width="100">
         <v-btn icon slot="activator">
           <v-icon>save</v-icon>
         </v-btn>
-        <v-list >
+        <v-list>
           <v-list-tile
             v-for="(item, idx) in fileMenu"
             :key="item"
@@ -60,10 +56,10 @@
       </v-tooltip>
 
       <!--<v-tooltip bottom>-->
-        <!--<v-btn icon slot="activator" v-on:click="samplesButton()">-->
-          <!--<v-icon>list</v-icon>-->
-        <!--</v-btn>-->
-        <!--<span>List data and schemas</span>-->
+      <!--<v-btn icon slot="activator" v-on:click="samplesButton()">-->
+      <!--<v-icon>list</v-icon>-->
+      <!--</v-btn>-->
+      <!--<span>List data and schemas</span>-->
       <!--</v-tooltip>-->
 
       <v-tooltip bottom>
@@ -95,7 +91,7 @@
           <v-card-title>Select File to Open</v-card-title>
           <v-divider></v-divider>
           <v-card-text style="height: 300px;">
-            <v-radio-group  v-model="fileDialogItem" column>
+            <v-radio-group v-model="fileDialogItem" column>
               <v-radio v-for="(item, idx) in fileDialogList"
                        :key="idx"
                        :label="item"
@@ -114,35 +110,35 @@
     </v-layout>
     <!--/><-->
     <v-container fluid justify-start fill-height>
-      <v-flex xs12 class="text-xs-center text-sm-center text-md-center text-lg-center">
-        <img :src="imageUrl" height="150" v-if="imageUrl"/>
-        <v-text-field label="Select Image" @click='pickFile' v-model='imageName' prepend-icon='attach_file'></v-text-field>
-        <input
-          type="file"
-          style="display: none"
-          ref="image"
-          multiple
-          accept=".zip, .xlsx,.xls, image/*"
-          @change="onFilePicked"
+      <!--img :src="imageUrl" height="150" v-if="imageUrl"/>
+      <v-btn flat icon color="primary" @click.native='pickFile()'>
+        <v-icon>attach_file</v-icon>
+      </v-btn>
+      <input
+        type="file"
+        style="display: none"
+        ref="image"
+        multiple
+        accept=".zip, .xlsx,.xls, image/*"
+        @change="onFilePicked"
+      >
+      <v-list>
+        <v-list-tile
+          v-for="(v, idx) in filesToUpload"
+          :key="idx"
         >
-      </v-flex>
-      <v-dialog v-model="dialog" max-width="290">
-        <v-card>
-          <v-card-title class="headline">Upload</v-card-title>
-          <br>https://stackoverflow.com/questions/44989162/file-upload-in-vuetify
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="green darken-1" flat="flat" @click.native="dialog = false">Close</v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
+          <v-list-tile-content>
+            <v-list-tile-title v-text="v"></v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+      </v-list-->
       <v-layout row wrap align-start fill-height>
         <v-flex fill-height xs12>
           <div id="editor" ref="editor"></div>
         </v-flex>
       </v-layout>
     </v-container>
-    <!--/><-->
+    <!--/>Note: some help on vuetify file uploads: https://stackoverflow.com/questions/44989162/file-upload-in-vuetify<-->
   </div>
 </template>
 
@@ -179,7 +175,7 @@ export default {
         this.fileExport
       ],
       dialog: false, // testing file upload
-      imageName: '', // testing
+      filesToUpload: [], // testing
       imageUrl: '', //  testing
       imageFile: '' //  testing
     }
@@ -207,11 +203,11 @@ export default {
       extraKeys: {
         'Ctrl-J': 'toMatchingTag',
         /* "Cmd-B": vm.beautify,
-        "Ctrl-B": vm.beautify,
-        "Cmd-Z": vm.undo,
-        "Ctrl-Z": vm.undo,
-        "Shift-Cmd-Z": vm.redo,
-        "Shift-Ctrl-Z": vm.redo, */
+          "Ctrl-B": vm.beautify,
+          "Cmd-Z": vm.undo,
+          "Ctrl-Z": vm.undo,
+          "Shift-Cmd-Z": vm.redo,
+          "Shift-Ctrl-Z": vm.redo, */
         "'<'": vm.completeAfter,
         "'/'": vm.completeIfAfterLt,
         "' '": vm.completeIfInTag,
@@ -478,28 +474,24 @@ export default {
       this.$refs.image.click()
     },
 
-    onFilePicked (e) {
+    onFilePicked: function (e) {
+      let vm = this
       const files = e.target.files
-      if (files[0] !== undefined) {
+      if (files !== undefined) {
         let v = null
         for (v = 0; v < files.length; ++v) {
           console.log('file selected: ' + files[v].name)
+          vm.filesToUpload.push(files[v].name)
         }
-        this.imageName = files[0].name
-        if (this.imageName.lastIndexOf('.') <= 0) {
-          return
-        }
+        console.log(vm.filesToUpload)
         const fr = new FileReader()
         fr.readAsDataURL(files[0])
         fr.addEventListener('load', () => {
-          this.imageUrl = fr.result
-          console.log(this.imageUrl)
-          this.imageFile = files[0] // this is an image file that can be sent to server...
+          vm.imageUrl = fr.result
+          console.log(vm.imageUrl)
         })
       } else {
-        this.imageName = ''
-        this.imageFile = ''
-        this.imageUrl = ''
+        vm.filesToUpload = []
       }
     }
   }
