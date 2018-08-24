@@ -5,12 +5,20 @@ const express = require('express')
 const cookieParser = require('cookie-parser')
 const bodyParser = require('body-parser')
 const FormData = require('form-data')
-
+const config = require('config').get('nanomine')
+const winston = require('winston')
+const moment = require('moment')
+const datauri = require('data-uri-to-buffer')
 const qs = require('qs')
-var app = express()
+
+let logger = configureLogger()
+logger.info('NanoMine REST server version ' + config.version + ' starting')
+
+let app = express()
 app.use(cookieParser())
-app.use(bodyParser.raw({'limit': '10mb'}))
-app.use(bodyParser.json({'limit': '10mb'}))
+let dataSizeLimit = '10mb' // probably needs to be at least 50mb
+app.use(bodyParser.raw({'limit': dataSizeLimit}))
+app.use(bodyParser.json({'limit': dataSizeLimit}))
 
 let shortUUID = require('short-uuid')() // https://github.com/oculus42/short-uuid (npm i --save short-uuid)
 function inspect (theObj) {
@@ -22,18 +30,35 @@ app.post('/jobcreate', function (req, res) {
   let jsonResp = {'error': null, 'data': null}
   let jobType = req.body.jobType
   let jobParams = req.body.jobParameters
-  console.log('job parameters: ' + JSON.stringify(jobParams))
+  logger.debug('job parameters: ' + JSON.stringify(jobParams))
+  // TODO create the job directory in the Apache tree
+  // TODO write the job parameters into the directory as 'job_parameters.json'
   jsonResp.data = {'jobId': jobType + '-' + shortUUID.new()}
   res.json(jsonResp)
 })
 
-app.post('jobpostfile', function (req, res) {
+app.post('/jobpostfile', function (req, res) {
   let jsonResp = {'error': null, 'data': null}
-  res.json(jsonResp)
+  let jobId = req.body.jobId
+  let jobType = req.body.jobType
+  let jobFileName = req.body.jobFileInfo.fileName
+  let jobFileUri = req.body.jobFileInfo.dataUri
+  // TODO decode dataurl of file into buffer and write it to the job's directory in the Apache tree
+  //   It would be better to stream the file, but for now, just extract to buffer and write to file
+  // var buffer =
+  logger.debug('writing file to disk: ' + 'yada yada')
+  let rcode = 201
+  // if (Math.floor(Math.random() * 2) === 1) {
+  //   jsonResp.error = 'random error'
+  //   rcode = 400
+  // }
+  res.status(rcode).json(jsonResp)
 })
 
-app.post('jobsubmit', function (req, res) {
+app.post('/jobsubmit', function (req, res) {
   let jsonResp = {'error': null, 'data': null}
+  // execute the configured job in the background
+  //   will do better later. At least client code on each side of the interface won't change
   res.json(jsonResp)
 })
 /* end job related rest services */
@@ -154,7 +179,7 @@ app.post('/xml', function (req, res) {
         jsonResp.data = {}
         res.json(jsonResp)
       })
-      .catch(function (err){
+      .catch(function (err) {
         console.log('post to url: ' + url + ' DID throw exception -  err: ' + inspect(err))
         jsonResp.error = err.message
         res.status(err.response.status).json(jsonResp)
@@ -316,7 +341,27 @@ app.get('/xml/disk/:schema/:xmlfile', function (req, res) {
 })
 
 
-
+function configureLogger () {
+  let logger = winston.createLogger({ // need to adjust to the new 3.x version - https://www.npmjs.com/package/winston#formats
+    transports: [
+      new (winston.transports.File)({
+        levels: { error: 0, warn: 1, info: 2, verbose: 3, debug: 4, trace: 5 },
+        level: config.loglevel,
+        timestamps: true,
+        zippedArchive: true,
+        filename: config.logfilename,
+        maxfiles: config.maxlogfiles,
+        maxsize: config.maxlogfilesize,
+        json: false,
+        formatter: function (data) {
+          let dt = moment().format('YYYYMMDDHHmmss')
+          return (dt + ' ' + data.level + ' ' + data.message)
+        }
+      })
+    ]
+  })
+  return logger
+}
 app.listen(3000)
 
 /*
