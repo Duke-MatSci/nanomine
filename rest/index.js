@@ -17,19 +17,29 @@ function inspect (theObj) {
   return util.inspect(theObj, {showHidden: true, depth: 2})
 }
 
-// Bingyin
-app.post('/XMLCONV', function (req, res) {
+/* Job related rest services */
+
+
+app.post('/jobcreate', function (req, res) {
   let jsonResp = {'error': null, 'data': null}
-  let files = req.body.files
-  jsonResp.data = {'jobid': shortUUID.new()}
-  console.log('rest endpoint: ' + req.path + ' returning jobid: ' + jsonResp.data.jobid)
+  let jobType = req.body.jobType
+  let jobParams = req.body.jobParameters
+  console.log(jobParams)
+  jsonResp.data = {'jobid': jobType + '-' + shortUUID.new()}
   res.json(jsonResp)
 })
 
-// Bingyin end
+app.post('jobpostfile', function (req, res) {
+  let jsonResp = {'error': null, 'data': null}
+  res.json(jsonResp)
+})
 
-// Erik
-app.post('/job')
+app.post('jobsubmit', function (req, res) {
+  let jsonResp = {'error': null, 'data': null}
+  res.json(jsonResp)
+})
+/* end job related rest services */
+
 app.get('/', function (req, res) {
   let ID = 'TestData_' + shortUUID.new()
   let query = 'a query'
@@ -306,28 +316,7 @@ app.get('/xml/disk/:schema/:xmlfile', function (req, res) {
     }
   })
 })
-// Erik end
 
-/* Job related rest services */
-app.post('/job/create', function (req, res) {
-  let jsonResp = {'error': null, 'data': null}
-  let myjobtype = res.body.jobtype
-  jsonResp.data = {'jobid': shortUUID.new(), 'jobtype': myjobtype}
-  console.log('rest endpoint: ' + req.path + ' jobtype: ' + myjobtype + ' returning jobid: ' + jsonResp.data.jobid)
-  res.json(jsonResp)
-})
-app.post('/job/addinputfile', function (req, res) {
-  let jsonResp = {'error': null, 'data': null}
-  let myjobid = res.body.jobid
-  let myfilenm = res.body.filename
-  let myfilebytes = res.body.filebytes // probably base64 encoded
-  let myfiletype = res.body.filetype // text/xml text/plain image/jpeg image/png application/zip
-  jsonResp.data = {'jobid': shortUUID.new(), 'jobtype': myjobtype}
-  console.log('rest endpoint: ' + req.path + ' jobtype: ' + myjobtype + ' returning jobid: ' + jsonResp.data.jobid)
-  res.json(jsonResp)
-})
-
-/* end job related rest services */
 
 
 app.listen(3000)
