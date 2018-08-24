@@ -31,7 +31,10 @@ JobMgr.prototype = {
       setTimeout(failureFunction(400, 'Job type required'), 0) // don't do this on main path -- it's supposed to be async
     } else {
       // create job to get jobId and initialize job directory
-      Axios.post(vm.createJobPath, {'url': vm.createJobPath})
+      Axios.post(vm.createJobPath, {
+        'jobParameters': vm.jobParameters,
+        'jobType': vm.jobType
+      })
         .then(function (res) {
           vm.jobId = res.data.data.jobId
           // still need to send files
