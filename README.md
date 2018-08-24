@@ -75,6 +75,7 @@ NanoMine Nanocomposites Data Resource
   sudo service mongod start
   sudo /apps/nanomine/install/mongoSetupAdminUser
   sudo /apps/nanomine/install/mongoSetupApiUser
+  sudo systemctl enable mongod
   
   sudo su - whyis
   
