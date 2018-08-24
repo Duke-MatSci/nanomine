@@ -154,7 +154,7 @@ After this, the updated NanoMine app will show up at "http://localhost/nm".
 - https://github.com/axios/axios Axios Remote Request Library
 - https://www.npmjs.com/package/axios Axios NPM package info
 - https://google.github.io/material-design-icons/ ICONS 
-- https://expressjs.com ExpressJS 
+- https://expressjs.com ExpressJS Web Application Server Framework
 
 
 # Development
