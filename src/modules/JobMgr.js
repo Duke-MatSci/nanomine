@@ -44,6 +44,11 @@ JobMgr.prototype = {
     } else {
       // create job to get jobId and initialize job directory
       let fileSends = []
+      if (vm.jobParameters) { // TODO : once there is a security layer extract the user and put it here
+        vm.jobParameters.user = 'testuser'
+      } else {
+        vm.jobParameters = {'user': 'testuser'}
+      }
       try {
         Axios.post(vm.createJobPath, {
           'jobParameters': vm.jobParameters,

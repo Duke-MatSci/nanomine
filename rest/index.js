@@ -43,7 +43,7 @@ function inspect (theObj) {
 }
 
 /* Job related rest services */
-function updateJobStatus(statusFilePath, newStatus) {
+function updateJobStatus (statusFilePath, newStatus) {
   let statusFileName = statusFilePath + '/' + 'job_status.json'
   let statusObj = {
     'job_status': newStatus,
@@ -54,7 +54,6 @@ function updateJobStatus(statusFilePath, newStatus) {
       logger.error('error creating job_status file: ' + statusFileName + ' err: ' + err)
     }
   }) // if it fails, it's OK
-
 }
 app.post('/jobcreate', function (req, res, next) {
   let jsonResp = {'error': null, 'data': null}
@@ -112,15 +111,30 @@ app.post('/jobsubmit', function (req, res) {
   let jsonResp = {'error': null, 'data': null}
   let jobId = req.body.jobId
   let jobType = req.body.jobType
-  let jobFileName = req.body.jobFileInfo.fileName
-  let jobFileUri = req.body.jobFileInfo.dataUri
   let jobDir = nmJobDataDir + '/' + jobId
 
   // execute the configured job in the background
   //   will do better later. At least client code on each side of the interface won't change
-
-  updateJobStatus(jobDir, {'status': 'submitted', 'pid': jobPid})
-  res.json(jsonResp)
+  let pgms = config.jobtypes
+  let pgm = null
+  pgms.forEach(function (v) {
+    if (v.jobtype === jobType) {
+      pgm = v.program
+    }
+  })
+  if (pgm != null) {
+    let jobPid = null
+    // TODO track child status and output with events and then update job status, but for now, just kick it off
+    let child = require('child_process').spawn(pgm, [jobId, jobDir])
+    jobPid = child.pid
+    updateJobStatus(jobDir, {'status': 'submitted', 'pid': jobPid})
+    jsonResp.data = {'jobPid': jobPid}
+    res.json(jsonResp)
+  } else {
+    updateJobStatus(jobDir, 'failed-no-pgm-defined')
+    jsonResp.error = 'job type has program not defined'
+    res.status(400).json(jsonResp)
+  }
 })
 /* end job related rest services */
 

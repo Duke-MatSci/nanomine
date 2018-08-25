@@ -8,9 +8,23 @@ import os
 import sys
 import json
 
+import logging # this should be done by a wrapper in the future
+sloglevel=os.environ['NM_LOGLEVEL']
+loglevel = logging.DEBUG
+try:
+  loglevel = getattr(logging, sloglevel.upper())
+except:
+  pass
+
+logging.basicConfig(filename=os.environ['NM_LOGFILE'],level=loglevel)
+
+
+logging.info('nanomine environment keys: ')
 for key in os.environ.keys():
   if key.startswith('NM_'):
-    print key
+    logging.info('  ' + key)
+
+logging.info('--------')
 
 jobBaseDir = os.environ['NM_JOB_DATA']
 jobId = sys.argv[1]
@@ -19,10 +33,9 @@ jobDir = sys.argv[2]
 paramFile = open(jobDir + '/' + 'job_parameters.json','r')
 inputParameters = json.load(paramFile)
 
-print('input parameters: ')
+logging.info(sys.argv[0] + ' input parameters: ')
 for key in inputParameters.keys():
-  print '  ' + key + ' = ' + inputParameters[key]
-
+  logging.info( '  ' + key + ' = ' + inputParameters[key])
 
 myfiles = os.listdir(jobDir)
 
