@@ -28,7 +28,14 @@ NanoMine Nanocomposites Data Resource
   export NM_MONGO_PWD="mydevmongopw" # set this to different password NOW
   export NM_MONGO_API_USER="mongodevapi"
   export NM_MONGO_API_PWD="mydevmongoapipw" # set this to a diff password NOW
+  export NM_WEBFILES_ROOT="/apps/nanomine-webfiles"
+  export NM_JOB_DATA="${NM_WEBFILES_ROOT}/jobdata"
+  export NM_JOB_DATA_URI="/nmf/jobdata"
+  export NM_SMTP_SERVER="myemailserver"
+  export NM_SMTP_PORT="587" # other fields will be needed if not local server, but for now this is adequate
+  export NM_SMTP_TEST="false"  # set this to true and emails will go into the log for testing instead of sending
   
+    
   
   #install n - the nodejs version manager and LTS version of node
   curl -L https://git.io/n-install | bash -s -- -y lts
@@ -61,7 +68,8 @@ NanoMine Nanocomposites Data Resource
   sudo a2enmod proxy.load
 
   sudo cp /apps/nanomine/install/000-default.conf /etc/apache2/sites-available
-  
+  sudo mkdir /apps/nanomine-webfiles
+  sudo chown -R whyis:whyis /apps/nanomine-webfiles
   
   sudo service apache2 restart
   sudo service celeryd restart

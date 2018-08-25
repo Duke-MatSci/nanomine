@@ -54,6 +54,7 @@ JobMgr.prototype = {
             vm.jobInputFiles.forEach(function (v) {
               // send each file in a separate request and wait for all to complete successfully before submitting job
               fileSends.push(Axios.post(vm.postJobFilePath, {
+                'jobId': vm.jobId,
                 'jobType': vm.jobType,
                 'jobFileInfo': v
               }))
