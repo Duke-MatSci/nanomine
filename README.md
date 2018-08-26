@@ -25,7 +25,7 @@ NanoMine Nanocomposites Data Resource
   #EDIT the whyis user's ~/.bash_profile to add:
   export NM_MONGO_PORT=27017
   export NM_MONGO_USER="mongodevadmin" 
-  export NM_MONGO_PWD="mydevmongopw" # SET THIS to different password NOW
+  export NM_MONGO_PWD="mydevmongopw" # SET THIS to a different password NOW
   export NM_MONGO_API_USER="mongodevapi"
   export NM_MONGO_API_PWD="mydevmongoapipw" # SET THIS to a different password NOW
   export NM_WEBFILES_ROOT="/apps/nanomine-webfiles"
