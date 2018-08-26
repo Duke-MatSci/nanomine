@@ -125,7 +125,7 @@ app.post('/jobsubmit', function (req, res) {
   if (pgm != null) {
     let jobPid = null
     // TODO track child status and output with events and then update job status, but for now, just kick it off
-    let child = require('child_process').spawn(pgm, [jobId, jobDir])
+    let child = require('child_process').spawn(pgm, [jobType, jobId, jobDir])
     jobPid = child.pid
     updateJobStatus(jobDir, {'status': 'submitted', 'pid': jobPid})
     jsonResp.data = {'jobPid': jobPid}

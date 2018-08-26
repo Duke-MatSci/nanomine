@@ -27,8 +27,9 @@ for key in os.environ.keys():
 logging.info('--------')
 
 jobBaseDir = os.environ['NM_JOB_DATA']
-jobId = sys.argv[1]
-jobDir = sys.argv[2]
+jobType = sys.argv[1]
+jobId = sys.argv[2]
+jobDir = sys.argv[3]
 
 paramFile = open(jobDir + '/' + 'job_parameters.json','r')
 inputParameters = json.load(paramFile)
