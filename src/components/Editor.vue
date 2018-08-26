@@ -245,8 +245,8 @@ export default {
       this.$store.commit('notLoading')
     },
     testButton: function () {
-      var vm = this
-      var url = '/nmr/test1'
+      let vm = this
+      let url = '/nmr/test1'
       // let url = 'http://localhost:3000'
       vm.setLoading()
       return Axios.get(url)
@@ -268,9 +268,8 @@ export default {
         })
     },
     test2Button: function () {
-      var vm = this
-      var url = '/nmr/fullgraph'
-      // let url = 'http://localhost:3000'
+      let vm = this
+      let url = '/nmr/fullgraph'
       vm.setLoading()
       return Axios.get(url)
         .then(function (response) {

@@ -1,4 +1,6 @@
-// See usage notes below code
+/*
+ See usage notes below code
+*/
 
 import {} from 'vuex'
 import Axios from 'axios'
