@@ -27,17 +27,22 @@ for key in os.environ.keys():
 logging.info('--------')
 
 jobBaseDir = os.environ['NM_JOB_DATA']
-jobId = sys.argv[1]
-jobDir = sys.argv[2]
+pgmName = sys.argv[0]
+jobType = sys.argv[1]
+jobId = sys.argv[2]
+jobDir = sys.argv[3]
 
 paramFile = open(jobDir + '/' + 'job_parameters.json','r')
 inputParameters = json.load(paramFile)
 
-logging.info(sys.argv[0] + ' input parameters: ')
+logging.info(pgmName + ' input parameters: ')
 for key in inputParameters.keys():
   logging.info( '  ' + key + ' = ' + inputParameters[key])
 
+# Do not modify job_status.json -- the server will handle it
+logging.info(pgmName + ' input files: ')
 myfiles = os.listdir(jobDir)
-
+for f in myfiles:
+  print('  ' + f)
 
 
