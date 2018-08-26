@@ -1,4 +1,6 @@
-// See usage notes below code
+/*
+ See usage notes below code
+*/
 
 import {} from 'vuex'
 import Axios from 'axios'
@@ -68,7 +70,7 @@ JobMgr.prototype = {
               .then((p) => {
                 console.log(p)
                 // wait for all files to be sent then submit job
-                p.forEach(function (v, idx) {
+                p.forEach(function (v) {
                   // console.log('logging response info below: ')
                   // console.log(v)
                   // set status and status text vm.jobInputFiles[idx].statusCode=p.

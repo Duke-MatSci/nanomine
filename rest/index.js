@@ -11,6 +11,7 @@ const moment = require('moment')
 const datauri = require('data-uri-to-buffer')
 const qs = require('qs')
 const fs = require('fs')
+const mongoose = require('mongoose')
 
 let logger = configureLogger()
 logger.info('NanoMine REST server version ' + config.version + ' starting')
@@ -42,6 +43,16 @@ function inspect (theObj) {
   return util.inspect(theObj, {showHidden: true, depth: 2})
 }
 
+let db = mongoose.connection
+let dbUri = process.env['NM_MONGO_URI']
+mongoose.connect(dbUri, {keepAlive: true, keepAliveInitialDelay: 300000})
+db.on('error', function (err) {
+  logger.error('db error: ' + err)
+})
+db.once('open', function () {
+  logger.info('database opened successfully.')
+})
+
 /* Job related rest services */
 function updateJobStatus (statusFilePath, newStatus) {
   let statusFileName = statusFilePath + '/' + 'job_status.json'
@@ -62,7 +73,6 @@ app.post('/jobcreate', function (req, res, next) {
   let jobId = jobType + '-' + shortUUID.new()
   let jobDir = nmJobDataDir + '/' + jobId
   let paramFileName = jobDir + '/' + 'job_parameters.json'
-  let statusFileName = jobDir + '/' + 'job_status.json'
   logger.debug('job parameters: ' + JSON.stringify(jobParams))
   fs.mkdir(jobDir, function (err, data) {
     if (err) {

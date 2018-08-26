@@ -24,10 +24,13 @@ NanoMine Nanocomposites Data Resource
 
   #EDIT the whyis user's ~/.bash_profile to add:
   export NM_MONGO_PORT=27017
+  export NM_MONGO_HOST=localhost
+  export NM_MONGO_DB=mgi
   export NM_MONGO_USER="mongodevadmin" 
   export NM_MONGO_PWD="mydevmongopw" # SET THIS to a different password NOW
   export NM_MONGO_API_USER="mongodevapi"
   export NM_MONGO_API_PWD="mydevmongoapipw" # SET THIS to a different password NOW
+  export NM_MONGO_URI="mongodb://${NM_MONGO_API_USER}:${NM_MONGO_API_PWD}@${NM_MONGO_HOST}:${NM_MONGO_PORT}/${NM_MONGO_DB}"
   export NM_WEBFILES_ROOT="/apps/nanomine-webfiles"
   export NM_JOB_DATA="${NM_WEBFILES_ROOT}/jobdata"
   export NM_JOB_DATA_URI="/nmf/jobdata"
@@ -88,7 +91,7 @@ NanoMine Nanocomposites Data Resource
   sudo su - whyis
   
   cd nanomine/rest
-  npm i
+  npm i # install packages needed by rest server
   # the next command will run the rest server in the background
   #   If you're testing the rest server, it might be a good idea to 
   #   leave off the ampersand and run 'node index.js'
