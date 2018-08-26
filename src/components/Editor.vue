@@ -295,7 +295,7 @@ export default {
         })
     },
     transformButton: function () {
-      var vm = this
+      let vm = this
       if (vm.view === 'xml') {
         vm.view = 'form'
       } else {
@@ -303,7 +303,7 @@ export default {
       }
     },
     infoButton: function () {
-      var vm = this
+      let vm = this
       console.log(vm.msg + ' info button')
     },
     lockButton: function () {
@@ -360,8 +360,8 @@ export default {
         })
     },
     fileExplore: function () {
-      var vm = this
-      var url = '/nmr/samples'
+      let vm = this
+      let url = '/nmr/samples'
       // let url = 'http://localhost:3000'
       console.log('fileExplore!')
       vm.setLoading()
@@ -429,8 +429,8 @@ export default {
       console.log('Search button.')
     },
     refreshButton: function () {
-      var vm = this
-      var url = '/nmr'
+      let vm = this
+      let url = '/nmr'
       // let url = 'http://localhost:3000'
       vm.setLoading()
       return Axios.get(url)
@@ -456,7 +456,7 @@ export default {
       return vm.content.getValue()
     },
     refreshEditor: function () {
-      var vm = this
+      let vm = this
       // let tabNumber = vm.$store.getters.currentEditorTab
       // if (tabNumber && typeof tabNumber === 'number' && tabNumber >= 0) {
       vm.content.setValue(vm.$store.getters.editorXmlText)
