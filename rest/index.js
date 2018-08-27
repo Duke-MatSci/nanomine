@@ -1,4 +1,4 @@
-/* eslint-disable no-multiple-empty-lines,no-tabs */
+/* NanoMine REST server */
 const axios = require('axios')
 const util = require('util')
 const express = require('express')
@@ -52,6 +52,17 @@ db.on('error', function (err) {
 db.once('open', function () {
   logger.info('database opened successfully.')
 })
+
+/*
+Mongoose schemas and models -- begin
+  TODO move to separate module
+  Schemas/Models:
+    xmldata
+    template (the xsd)
+    template_version (tracker for template versions and deactivated templates)
+*/
+
+/* Mongoose schemas and models -- end */
 
 /* Job related rest services */
 function updateJobStatus (statusFilePath, newStatus) {
@@ -359,7 +370,6 @@ where {
   })
 })
 
-
 app.get('/fullgraph', function (req, res) {
   // get the nanopub graph
   let query = `
@@ -425,7 +435,6 @@ app.get('/xml/disk/:schema/:xmlfile', function (req, res) {
   })
 })
 
-
 function configureLogger () {
   let logger = winston.createLogger({ // need to adjust to the new 3.x version - https://www.npmjs.com/package/winston#formats
     transports: [
@@ -450,7 +459,6 @@ function configureLogger () {
 app.listen(3000)
 
 /*
-
 prefix dataset: <https://hbgd.tw.rpi.edu/dataset/>
 prefix sio:     <http://semanticscience.org/resource/>
 prefix chear:   <http://hadatac.org/ont/chear#>
@@ -486,14 +494,12 @@ where {
   ?p ?s ?o FILTER ( strstarts(str(?p), "http://nanomine.tw.rpi.edu/unit/") )
 }
 
-
 SELECT * WHERE {
   ?s ?p ?o
   FILTER( regex(str(?p), "^(?http://nanomine.tw.rpi.edu/entry/).+"))
 }
 https://stackoverflow.com/questions/24180387/filtering-based-on-a-uri-in-sparql
 https://stackoverflow.com/questions/19044871/exclude-results-from-dbpedia-sparql-query-based-on-uri-prefix
-
 
 prefix sio: <http://semanticscience.org/resource/>
 prefix ns: <http://nanomine.tw.rpi.edu/ns/>
@@ -583,7 +589,6 @@ where {
   }
 }
 
-
 ---- Interesting one that looks for nanopubs and returns the trees (for ~ 320 samples this result is ~ 240,000 triples)
 prefix sio:<http://semanticscience.org/resource/>
 prefix ns:<http://nanomine.tw.rpi.edu/ns/>
@@ -608,7 +613,7 @@ select ?np ?assertion ?provenance ?pubinfo where {
 
 --This returns sample names along with a few other things (the others look like a punt)
 --    ex: correct -
---       	http://nanomine.tw.rpi.edu/sample/l217-s4-ash-2002
+--       http://nanomine.tw.rpi.edu/sample/l217-s4-ash-2002
 --    ex: incorrect - not really a PolymerNanocomposite
 --        http://nanomine.tw.rpi.edu/sample/l217-s4-ash-2002_nanomine-tensileloadingprofile_0
 prefix sio:<http://semanticscience.org/resource/>
@@ -629,7 +634,6 @@ select distinct ?nanopub
 where {
   ?file a <http://purl.org/net/provenance/ns#File>.
   ?nanopub a <https://www.iana.org/assignments/media-types/text/xml>
-
 }
 
 */
