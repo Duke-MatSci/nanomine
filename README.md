@@ -21,22 +21,40 @@ NanoMine Nanocomposites Data Resource
   sudo wget https://raw.githubusercontent.com/duke-matsci/nanomine-ontology/master/ontology.setl.ttl
   sudo chown -R whyis:whyis /apps/nanomine
   sudo su - whyis
+
+  #EDIT the whyis user's ~/.bash_profile to add:
+  export NM_MONGO_PORT=27017
+  export NM_MONGO_HOST=localhost
+  export NM_MONGO_DB=mgi
+  export NM_MONGO_USER="mongodevadmin" 
+  export NM_MONGO_PWD="mydevmongopw" # SET THIS to a different password NOW
+  export NM_MONGO_API_USER="mongodevapi"
+  export NM_MONGO_API_PWD="mydevmongoapipw" # SET THIS to a different password NOW
+  export NM_MONGO_URI="mongodb://${NM_MONGO_API_USER}:${NM_MONGO_API_PWD}@${NM_MONGO_HOST}:${NM_MONGO_PORT}/${NM_MONGO_DB}"
+  export NM_WEBFILES_ROOT="/apps/nanomine-webfiles"
+  export NM_JOB_DATA="${NM_WEBFILES_ROOT}/jobdata"
+  export NM_JOB_DATA_URI="/nmf/jobdata"
+  export NM_SMTP_SERVER="myemailserver"
+  export NM_SMTP_PORT="587" # other fields will be needed if not local server, but for now this is adequate
+  export NM_SMTP_TEST="true"  # set this to true and emails will go into the log for testing instead of sending
+  export NM_LOGLEVEL="debug"  # use this when creating a logger for javascript or python, then log each message according to severity i.e. logger.info('my info message')
+  export NM_LOGFILE="nanomine.log" # use this log for python logging
   
   #install n - the nodejs version manager and LTS version of node
   curl -L https://git.io/n-install | bash -s -- -y lts
   echo 'export N_PREFIX="$HOME/n"; [[ :$PATH: == *":$N_PREFIX/bin:"* ]] || PATH+=":$N_PREFIX/bin"' >> ~/.bash_profile
   
-  #make sure n is in the path
+  #make sure n is in the path and new variables are defined
   source ~/.bash_profile
 
   # install the VueJS command line processor
   npm i -g vue-cli@2.9.6  
-  
+
   cd /apps/nanomine
 
   # create node_modules directory and install required components
   npm install
-  
+
   # build the vue application
   #  (do not forget this -- results in 'Server Error' in browser otherwise)
   #    Also, if running the GUI under apache/whyis, the build will need to be re-run
@@ -53,14 +71,27 @@ NanoMine Nanocomposites Data Resource
   sudo a2enmod proxy.load
 
   sudo cp /apps/nanomine/install/000-default.conf /etc/apache2/sites-available
-  
+  sudo mkdir /apps/nanomine-webfiles
+  sudo chown -R whyis:whyis /apps/nanomine-webfiles
   
   sudo service apache2 restart
   sudo service celeryd restart
+  
+  #install MongoDB
+  sudo sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 9DA31620334BD75D9DCB49F368818C72E52529D4
+  echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/4.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.0.list
+  sudo apt-get update
+  sudo apt-get install -y mongodb-org
+  sudo cp /apps/nanomine/install/mongoConfig /etc/mongod.conf
+  sudo service mongod start
+  sudo /apps/nanomine/install/mongoSetupAdminUser
+  sudo /apps/nanomine/install/mongoSetupApiUser
+  sudo systemctl enable mongod
+  
   sudo su - whyis
   
   cd nanomine/rest
-  npm i
+  npm i # install packages needed by rest server
   # the next command will run the rest server in the background
   #   If you're testing the rest server, it might be a good idea to 
   #   leave off the ampersand and run 'node index.js'
@@ -135,7 +166,7 @@ After this, the updated NanoMine app will show up at "http://localhost/nm".
 - https://github.com/axios/axios Axios Remote Request Library
 - https://www.npmjs.com/package/axios Axios NPM package info
 - https://google.github.io/material-design-icons/ ICONS 
-- https://expressjs.com ExpressJS 
+- https://expressjs.com ExpressJS Web Application Server Framework
 
 
 # Development

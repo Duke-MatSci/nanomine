@@ -1,0 +1,19 @@
+{
+  "nanomine": {
+    "version": "0.1.0",
+    "loglevel": "debug",
+    "logfilename": "nanomine.log",
+    "maxlogfiles": 10,
+    "maxlogfilesize": 1024000,
+    "testmode" : {
+      "active": false
+    },
+    "jobtypes": [
+      {
+        "jobtype": "xmlconv",
+        "lang": "python",
+        "program": "../src/jobs/XMLCONV/run_xmlconv.py"
+      }
+    ]
+  }
+}

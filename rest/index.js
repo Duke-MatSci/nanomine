@@ -5,29 +5,149 @@ const express = require('express')
 const cookieParser = require('cookie-parser')
 const bodyParser = require('body-parser')
 const FormData = require('form-data')
-
+const config = require('config').get('nanomine')
+const winston = require('winston')
+const moment = require('moment')
+const datauri = require('data-uri-to-buffer')
 const qs = require('qs')
-var app = express()
+const fs = require('fs')
+const mongoose = require('mongoose')
+
+let logger = configureLogger()
+logger.info('NanoMine REST server version ' + config.version + ' starting')
+
+let nmWebFilesRoot = process.env['NM_WEBFILES_ROOT']
+let nmJobDataDir = process.env['NM_JOB_DATA']
+
+try {
+  fs.mkdirSync(nmJobDataDir)
+} catch (err) {
+  logger.error('mkdir nmJobDataDir failed: ' + err)
+}
+
+let app = express()
 app.use(cookieParser())
-app.use(bodyParser.json())
+
+let dataSizeLimit = '10mb' // probably needs to be at least 50mb
+app.use(bodyParser.raw({'limit': dataSizeLimit}))
+app.use(bodyParser.json({'limit': dataSizeLimit}))
+
+app.use('/files', express.static(nmWebFilesRoot, {
+  dotfiles: 'ignore',
+  index: false,
+  redirect: false
+}))
 
 let shortUUID = require('short-uuid')() // https://github.com/oculus42/short-uuid (npm i --save short-uuid)
 function inspect (theObj) {
   return util.inspect(theObj, {showHidden: true, depth: 2})
 }
 
-// Bingyin
-app.post('/XMLCONV', function (req, res) {
-  let jsonResp = {'error': null, 'data': null}
-  let files = req.body.files
-  jsonResp.data = {'jobid': shortUUID.new()}
-  console.log('rest endpoint: ' + req.path + ' returning jobid: ' + jsonResp.data.jobid)
-  res.json(jsonResp)
+let db = mongoose.connection
+let dbUri = process.env['NM_MONGO_URI']
+mongoose.connect(dbUri, {keepAlive: true, keepAliveInitialDelay: 300000})
+db.on('error', function (err) {
+  logger.error('db error: ' + err)
+})
+db.once('open', function () {
+  logger.info('database opened successfully.')
 })
 
-// Bingyin end
+/* Job related rest services */
+function updateJobStatus (statusFilePath, newStatus) {
+  let statusFileName = statusFilePath + '/' + 'job_status.json'
+  let statusObj = {
+    'job_status': newStatus,
+    'update_dttm': Date()
+  }
+  fs.writeFile(statusFileName, JSON.stringify(statusObj), {'encoding': 'utf8'}, function (err, data) {
+    if (err) {
+      logger.error('error creating job_status file: ' + statusFileName + ' err: ' + err)
+    }
+  }) // if it fails, it's OK
+}
+app.post('/jobcreate', function (req, res, next) {
+  let jsonResp = {'error': null, 'data': null}
+  let jobType = req.body.jobType
+  let jobParams = req.body.jobParameters
+  let jobId = jobType + '-' + shortUUID.new()
+  let jobDir = nmJobDataDir + '/' + jobId
+  let paramFileName = jobDir + '/' + 'job_parameters.json'
+  logger.debug('job parameters: ' + JSON.stringify(jobParams))
+  fs.mkdir(jobDir, function (err, data) {
+    if (err) {
+      logger.error('mkdir nmJobDataDir failed: ' + err)
+      next(err)
+    } else {
+      fs.writeFile(paramFileName, JSON.stringify(jobParams), {'encoding': 'utf8'}, function (err, data) {
+        if (err) {
+          updateJobStatus(jobDir, 'preCreateError')
+          next(err)
+        } else {
+          updateJobStatus(jobDir, 'created')
+          jsonResp.data = {'jobId': jobId}
+          res.json(jsonResp)
+        }
+      })
+    }
+  })
+})
 
-// Erik
+app.post('/jobpostfile', function (req, res, next) {
+  let jsonResp = {'error': null, 'data': null}
+  let jobId = req.body.jobId
+  let jobType = req.body.jobType
+  let jobFileName = req.body.jobFileInfo.fileName
+  let jobFileUri = req.body.jobFileInfo.dataUri
+  let jobDir = nmJobDataDir + '/' + jobId
+  let outputName = jobDir + '/' + jobFileName
+  // TODO decode dataurl of file into buffer and write it to the job's directory in the Apache tree
+  //   It would be better to stream the file, but for now, just extract to buffer and write to file
+  var buffer = datauri(jobFileUri)
+  console.log('Job type: ' + jobType + ' file mime type: ' + buffer.fullType)
+  let rcode = 201
+  fs.writeFile(outputName, buffer, {'encoding': 'utf8'}, function (err, data) {
+    if (err) {
+      updateJobStatus(jobDir, 'postFileError' + '-' + outputName)
+      logger.error('/jobpostfile write job file error - file: ' + outputName + ' err: ' + err)
+    } else {
+      updateJobStatus(jobDir, 'filePosted-' + outputName)
+      res.status(rcode).json(jsonResp)
+    }
+  })
+})
+
+app.post('/jobsubmit', function (req, res) {
+  let jsonResp = {'error': null, 'data': null}
+  let jobId = req.body.jobId
+  let jobType = req.body.jobType
+  let jobDir = nmJobDataDir + '/' + jobId
+
+  // execute the configured job in the background
+  //   will do better later. At least client code on each side of the interface won't change
+  let pgms = config.jobtypes
+  let pgm = null
+  pgms.forEach(function (v) {
+    if (v.jobtype === jobType) {
+      pgm = v.program
+    }
+  })
+  if (pgm != null) {
+    let jobPid = null
+    // TODO track child status and output with events and then update job status, but for now, just kick it off
+    let child = require('child_process').spawn(pgm, [jobType, jobId, jobDir])
+    jobPid = child.pid
+    updateJobStatus(jobDir, {'status': 'submitted', 'pid': jobPid})
+    jsonResp.data = {'jobPid': jobPid}
+    res.json(jsonResp)
+  } else {
+    updateJobStatus(jobDir, 'failed-no-pgm-defined')
+    jsonResp.error = 'job type has program not defined'
+    res.status(400).json(jsonResp)
+  }
+})
+/* end job related rest services */
+
 app.get('/', function (req, res) {
   let ID = 'TestData_' + shortUUID.new()
   let query = 'a query'
@@ -144,7 +264,7 @@ app.post('/xml', function (req, res) {
         jsonResp.data = {}
         res.json(jsonResp)
       })
-      .catch(function (err){
+      .catch(function (err) {
         console.log('post to url: ' + url + ' DID throw exception -  err: ' + inspect(err))
         jsonResp.error = err.message
         res.status(err.response.status).json(jsonResp)
@@ -304,30 +424,29 @@ app.get('/xml/disk/:schema/:xmlfile', function (req, res) {
     }
   })
 })
-// Erik end
-
-/* Job related rest services */
-app.post('/job/create', function (req, res) {
-  let jsonResp = {'error': null, 'data': null}
-  let myjobtype = res.body.jobtype
-  jsonResp.data = {'jobid': shortUUID.new(), 'jobtype': myjobtype}
-  console.log('rest endpoint: ' + req.path + ' jobtype: ' + myjobtype + ' returning jobid: ' + jsonResp.data.jobid)
-  res.json(jsonResp)
-})
-app.post('/job/addinputfile', function (req, res) {
-  let jsonResp = {'error': null, 'data': null}
-  let myjobid = res.body.jobid
-  let myfilenm = res.body.filename
-  let myfilebytes = res.body.filebytes // probably base64 encoded
-  let myfiletype = res.body.filetype // text/xml text/plain image/jpeg image/png application/zip
-  jsonResp.data = {'jobid': shortUUID.new(), 'jobtype': myjobtype}
-  console.log('rest endpoint: ' + req.path + ' jobtype: ' + myjobtype + ' returning jobid: ' + jsonResp.data.jobid)
-  res.json(jsonResp)
-})
-
-/* end job related rest services */
 
 
+function configureLogger () {
+  let logger = winston.createLogger({ // need to adjust to the new 3.x version - https://www.npmjs.com/package/winston#formats
+    transports: [
+      new (winston.transports.File)({
+        levels: { error: 0, warn: 1, info: 2, verbose: 3, debug: 4, trace: 5 },
+        level: config.loglevel,
+        timestamps: true,
+        zippedArchive: true,
+        filename: config.logfilename,
+        maxfiles: config.maxlogfiles,
+        maxsize: config.maxlogfilesize,
+        json: false,
+        formatter: function (data) {
+          let dt = moment().format('YYYYMMDDHHmmss')
+          return (dt + ' ' + data.level + ' ' + data.message)
+        }
+      })
+    ]
+  })
+  return logger
+}
 app.listen(3000)
 
 /*
