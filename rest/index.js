@@ -121,6 +121,107 @@ function validQueryParam (p) {
   return rv
 }
 
+app.get('/templates/select/all', function (req, res) { // it's preferable to read only the current non deleted schemas rather than all
+  let jsonResp = {'error': null, 'data': null}
+  XsdSchema.find().exec(function (err, schemas){
+    if (err) {
+      jsonResp.error = err
+      res.status(400).json(jsonResp)
+    } else if (schemas == null || schemas.length <= 0) {
+      jsonResp.error = {'statusCode': 404, 'statusText': 'not found'}
+      res.status(404).json(jsonResp)
+    } else {
+      jsonResp.data = schemas
+      res.json(jsonResp)
+    }
+  })
+})
+
+app.get('/templates/versions/select/all', function (req, res) {
+  let jsonResp = {'error': null, 'data': null}
+  XsdVersionSchema.find().exec(function (err, versions){
+    if (err) {
+      jsonResp.error = err
+      res.status(400).json(jsonResp)
+    } else if (versions == null || versions.length <= 0) {
+      jsonResp.error = {'statusCode': 404, 'statusText': 'not found'}
+      res.status(404).json(jsonResp)
+    } else {
+      jsonResp.data = versions
+      res.json(jsonResp)
+    }
+  })
+})
+
+app.get('/templates/select', function (req, res) {
+  let jsonResp = {'error': null, 'data': null}
+  let id = req.query.id
+  // for all qfields except id - which is a single record query on its own,
+  //   attempt to build the query in a loop
+  let qfields = [{'filename': req.query.filename}, {'content': req.query.content}, {'title': req.query.title},
+    {'version': req.query.version}, {'templateVersion': req.query.templateVersion}, {'hash': req.query.hash}]
+  // not supporting data format at this time -- always returns xml for now
+  let dataformat = req.query.dataformat
+  let query = {}
+  if (validQueryParam(id)) {
+    XsdSchema.findById(id).exec(function (err, xsdRec) {
+      if (err) {
+        jsonResp.error = err
+        res.status(400).json(jsonResp)
+      } else if (xsdRec == null) {
+        jsonResp.error = {'statusCode': 404, 'statusText': 'not found'}
+        res.status(404).json(jsonResp)
+      } else {
+        jsonResp.data = xsdRec
+        console.log(xsdRec._id)
+        res.json(jsonResp)
+      }
+    })
+  } else {
+    let qcomponents = [] // query components
+    qfields.forEach(function (v) { /* Unfortunately, this is a bit hard to read, but it's better than repeating the code 6 times.
+                                    Probably needs factoring though
+                                    */
+      let qfld = Object.keys(v)[0]
+      let qval = v[qfld]
+      if (validQueryParam(qval)) {
+        if (qval.slice(0, 1) === '/' && qval.slice(-1) === '/') {
+          qval = qval.replace(/(^[/]|[/]$)/g, '')
+          let tmp = {}
+          tmp[qfld] = { '$regex': qval }
+          qcomponents.push(tmp)
+        } else {
+          let tmp = {}
+          tmp[qfld] = { '$eq': qval }
+          qcomponents.push(tmp)
+        }
+      }
+    })
+    if (qcomponents.length > 1) {
+      query = {
+        '$and': qcomponents
+      }
+    } else {
+      query = qcomponents[0]
+    }
+    XsdSchema.find(query).exec(function (err, xsdRecs) {
+      if (err) {
+        jsonResp.error = err
+        logger.info('' + req.path + ' query=' + JSON.stringify(query) + ' returned: ' + JSON.stringify(jsonResp))
+        res.status(400).json(jsonResp)
+      } else if (xsdRecs == null || xsdRecs.length < 1) {
+        jsonResp.error = {'statusCode': 404, 'statusText': 'not found'}
+        logger.info('' + req.path + ' query=' + JSON.stringify(query) + ' returned: ' + JSON.stringify(jsonResp))
+        res.status(404).json(jsonResp)
+      } else {
+        jsonResp.data = xsdRecs
+        logger.info('' + req.path + ' query=' + JSON.stringify(query) + ' returned: ' + jsonResp.data.length + ' records.')
+        res.json(jsonResp)
+      }
+    })
+  }
+})
+
 app.get('/explore/select', function (req, res) {
   let jsonResp = {'error': null, 'data': null}
   let id = req.query.id
@@ -186,7 +287,7 @@ app.get('/explore/select', function (req, res) {
         logger.info('/explore/select query=' + JSON.stringify(query) + ' returned: ' + JSON.stringify(jsonResp))
         res.status(404).json(jsonResp)
       } else {
-        jsonResp.data = []
+        jsonResp.data = [] // TODO fix db so the expensive swizzling is not necessary
         xmlRecs.forEach(function (v) { // swizzle the output
           jsonResp.data.push({'_id': v._id, 'schema': v.schemaId, 'title': v.title, 'content': v.xml_str })
         })
