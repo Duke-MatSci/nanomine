@@ -1,4 +1,4 @@
-/* eslint-disable no-multiple-empty-lines,no-tabs */
+/* NanoMine REST server */
 const axios = require('axios')
 const util = require('util')
 const express = require('express')
@@ -12,6 +12,7 @@ const datauri = require('data-uri-to-buffer')
 const qs = require('qs')
 const fs = require('fs')
 const mongoose = require('mongoose')
+const ObjectId = mongoose.Types.ObjectId
 
 let logger = configureLogger()
 logger.info('NanoMine REST server version ' + config.version + ' starting')
@@ -28,7 +29,7 @@ try {
 let app = express()
 app.use(cookieParser())
 
-let dataSizeLimit = '10mb' // probably needs to be at least 50mb
+let dataSizeLimit = config.rest.dataSizeLimit // probably needs to be at least 50mb
 app.use(bodyParser.raw({'limit': dataSizeLimit}))
 app.use(bodyParser.json({'limit': dataSizeLimit}))
 
@@ -52,6 +53,252 @@ db.on('error', function (err) {
 db.once('open', function () {
   logger.info('database opened successfully.')
 })
+
+/*
+Mongoose schemas and models -- begin
+  TODO move to separate module
+  Schemas/Models:
+    xmldata
+    template (the xsd schema) -- we'll call it xsdSchema internally instead of template
+    template_version (tracker for template versions and deactivated templates)
+*/
+let xmlDataSchema = new mongoose.Schema({ // maps the mongo xmldata collection
+  schemaId: String, /* !!! NOTE: had to rename 'schema' field name in restored data from MDCS to schemaId because of mongoose name conflict
+                       To convert the field after restore from MDCS, use mongocli which loads nanomongo.js. At the mongo command line
+                       type 'swizzleForMongoose()' to change all the xmldata document fields named schema to schemaId.
+                    */
+  title: String,
+  content: mongoose.Schema.Types.Mixed, /* !!! NOTE: MDCS stores the XML content as a BSON object parsed into the individual fields.
+                      Moving forward NanoMine will not use this approach, so the data was downloaded as text via the MDCS rest interface
+                      as a string and re-loaded into the xml_str string.  This is another reason why a dump of MDCS mongo will not restore
+                      and run with the new app directly. bluedevil-oit/nanomine-tools project has code to update the field. */
+  xml_str: String,
+  iduser: String, /* numeric reference to user (probably in sqlite) */
+  ispublished: Boolean /* In the current db, these are all false */
+}, {collection: 'xmldata'})
+
+let xsdSchema = new mongoose.Schema({ // maps the mongo template collection
+  title: String, // the name of the schema does not need to be unique
+  filename: String, // not unique and is like 'PNC_schema_112916.xsd'
+  content: String, // definitely a string containing the XSD file
+  templateVersion: String, // string _id of the template version info in template_version (xsdVersionSchema)
+  version: Number, // relative version number for this schema/template within the xsdVersionSchema with templateVersion id
+  hash: String, // MDCS calculates MD5 hash of schema, we'll do something similar. Data restores from MDCS will be OK, but not portable back into MDCS
+  dependencies: [], // Optional and will not be used
+  exporters: [], // optional and will not be used
+  XSLTFiles: [] // optional and will not be used
+}, {collection: 'template'})
+
+let xsdVersionSchema = new mongoose.Schema({ // maps the mongo template_version collection
+  versions: [String], // Array of xsdSchema ids as stings
+  deletedVersions: [String], // deleted versions array of xsdSchema ids
+  nbVersions: Number, // current count of versions
+  isDeleted: Boolean, // this schema is not to be shown/used at all and all xmls based on schema are deprecated
+  current: String // current schema version id
+}, {collection: 'template_version'})
+
+let XmlData = mongoose.model('xmlData', xmlDataSchema)
+let XsdSchema = mongoose.model('xsdData', xsdSchema)
+let XsdVersionSchema = mongoose.model('xsdVersionData', xsdVersionSchema)
+
+// Sniff test for xmlData schema access via model
+// XmlData.findById('58587c6fe74a1d205f4ea5cf').exec(function (err, xmlRec) {
+//   if (err) {
+//     console.log('error looking up known object in database.')
+//   } else {
+//     console.log(xmlRec._id + ' schemaId: ' + xmlRec.schemaId)
+//   }
+// })
+
+/* Mongoose schemas and models -- end */
+/* rest services related to XMLs and Schemas -- begin */
+
+function validQueryParam (p) {
+  let rv = false
+  if (p && p !== null && p.length > 0) {
+    rv = true
+  }
+  return rv
+}
+
+app.get('/templates/select/all', function (req, res) { // it's preferable to read only the current non deleted schemas rather than all
+  let jsonResp = {'error': null, 'data': null}
+  XsdSchema.find().exec(function (err, schemas){
+    if (err) {
+      jsonResp.error = err
+      res.status(400).json(jsonResp)
+    } else if (schemas == null || schemas.length <= 0) {
+      jsonResp.error = {'statusCode': 404, 'statusText': 'not found'}
+      res.status(404).json(jsonResp)
+    } else {
+      jsonResp.data = schemas
+      res.json(jsonResp)
+    }
+  })
+})
+
+app.get('/templates/versions/select/all', function (req, res) {
+  let jsonResp = {'error': null, 'data': null}
+  XsdVersionSchema.find().exec(function (err, versions){
+    if (err) {
+      jsonResp.error = err
+      res.status(400).json(jsonResp)
+    } else if (versions == null || versions.length <= 0) {
+      jsonResp.error = {'statusCode': 404, 'statusText': 'not found'}
+      res.status(404).json(jsonResp)
+    } else {
+      jsonResp.data = versions
+      res.json(jsonResp)
+    }
+  })
+})
+
+app.get('/templates/select', function (req, res) {
+  let jsonResp = {'error': null, 'data': null}
+  let id = req.query.id
+  // for all qfields except id - which is a single record query on its own,
+  //   attempt to build the query in a loop
+  let qfields = [{'filename': req.query.filename}, {'content': req.query.content}, {'title': req.query.title},
+    {'version': req.query.version}, {'templateVersion': req.query.templateVersion}, {'hash': req.query.hash}]
+  // not supporting data format at this time -- always returns xml for now
+  let dataformat = req.query.dataformat
+  let query = {}
+  if (validQueryParam(id)) {
+    XsdSchema.findById(id).exec(function (err, xsdRec) {
+      if (err) {
+        jsonResp.error = err
+        res.status(400).json(jsonResp)
+      } else if (xsdRec == null) {
+        jsonResp.error = {'statusCode': 404, 'statusText': 'not found'}
+        res.status(404).json(jsonResp)
+      } else {
+        jsonResp.data = xsdRec
+        console.log(xsdRec._id)
+        res.json(jsonResp)
+      }
+    })
+  } else {
+    let qcomponents = [] // query components
+    qfields.forEach(function (v) { /* Unfortunately, this is a bit hard to read, but it's better than repeating the code 6 times.
+                                    Probably needs factoring though
+                                    */
+      let qfld = Object.keys(v)[0]
+      let qval = v[qfld]
+      if (validQueryParam(qval)) {
+        if (qval.slice(0, 1) === '/' && qval.slice(-1) === '/') {
+          qval = qval.replace(/(^[/]|[/]$)/g, '')
+          let tmp = {}
+          tmp[qfld] = { '$regex': qval }
+          qcomponents.push(tmp)
+        } else {
+          let tmp = {}
+          tmp[qfld] = { '$eq': qval }
+          qcomponents.push(tmp)
+        }
+      }
+    })
+    if (qcomponents.length > 1) {
+      query = {
+        '$and': qcomponents
+      }
+    } else {
+      query = qcomponents[0]
+    }
+    XsdSchema.find(query).exec(function (err, xsdRecs) {
+      if (err) {
+        jsonResp.error = err
+        logger.info('' + req.path + ' query=' + JSON.stringify(query) + ' returned: ' + JSON.stringify(jsonResp))
+        res.status(400).json(jsonResp)
+      } else if (xsdRecs == null || xsdRecs.length < 1) {
+        jsonResp.error = {'statusCode': 404, 'statusText': 'not found'}
+        logger.info('' + req.path + ' query=' + JSON.stringify(query) + ' returned: ' + JSON.stringify(jsonResp))
+        res.status(404).json(jsonResp)
+      } else {
+        jsonResp.data = xsdRecs
+        logger.info('' + req.path + ' query=' + JSON.stringify(query) + ' returned: ' + jsonResp.data.length + ' records.')
+        res.json(jsonResp)
+      }
+    })
+  }
+})
+
+app.get('/explore/select', function (req, res) {
+  let jsonResp = {'error': null, 'data': null}
+  let id = req.query.id
+  let schema = req.query.schema
+  let title = req.query.title
+  // not supporting data format at this time -- always returns xml for now
+  let dataformat = req.query.dataformat
+  let query = {}
+  if (validQueryParam(id)) {
+    XmlData.findById(id).exec(function (err, xmlRec) {
+      if (err) {
+        jsonResp.error = err
+        res.status(400).json(jsonResp)
+      } else if (xmlRec == null) {
+        jsonResp.error = {'statusCode': 404, 'statusText': 'not found'}
+        res.status(404).json(jsonResp)
+      } else {
+        jsonResp.data = {
+          _id: xmlRec._id,
+          schema: xmlRec.schemaId,
+          content: xmlRec.xml_str,
+          title: xmlRec.title
+        }
+        console.log(xmlRec._id + ' schemaId: ' + xmlRec.schemaId)
+        res.json(jsonResp)
+      }
+    })
+  } else {
+    let titleQuery = null
+    let schemaQuery = null
+    if (validQueryParam(title)) {
+      if (title.slice(0, 1) === '/' && title.slice(-1) === '/') {
+        title = title.replace(/(^[/]|[/]$)/g, '')
+        titleQuery = {'title': { '$regex': title }}
+      } else {
+        titleQuery = {'title': {'$eq': title}}
+      }
+    }
+    if (validQueryParam(schema)) {
+      if (schema.slice(0, 1) === '/' && schema.slice(-1) === '/') {
+        schema = schema.replace(/(^[/]|[/]$)/g, '')
+        schemaQuery = {'schemaId': { '$regex': schema }}
+      } else {
+        schemaQuery = {'schemaId': {'$eq': schema}}
+      }
+    }
+    if (titleQuery && schemaQuery) {
+      query = {
+        '$and': [titleQuery, schemaQuery]
+      }
+    } else if (titleQuery) {
+      query = titleQuery
+    } else {
+      query = schemaQuery
+    }
+    XmlData.find(query, '_id schemaId title xml_str').exec(function (err, xmlRecs) {
+      if (err) {
+        jsonResp.error = err
+        logger.info('/explore/select query=' + JSON.stringify(query) + ' returned: ' + JSON.stringify(jsonResp))
+        res.status(400).json(jsonResp)
+      } else if (xmlRecs == null || xmlRecs.length < 1) {
+        jsonResp.error = {'statusCode': 404, 'statusText': 'not found'}
+        logger.info('/explore/select query=' + JSON.stringify(query) + ' returned: ' + JSON.stringify(jsonResp))
+        res.status(404).json(jsonResp)
+      } else {
+        jsonResp.data = [] // TODO fix db so the expensive swizzling is not necessary
+        xmlRecs.forEach(function (v) { // swizzle the output
+          jsonResp.data.push({'_id': v._id, 'schema': v.schemaId, 'title': v.title, 'content': v.xml_str })
+        })
+        logger.info('/explore/select query=' + JSON.stringify(query) + ' returned: ' + jsonResp.data.length + ' records.')
+        res.json(jsonResp)
+      }
+    })
+  }
+})
+
+/* rest services related to XMLs and Schemas -- end */
 
 /* Job related rest services */
 function updateJobStatus (statusFilePath, newStatus) {
@@ -215,6 +462,7 @@ function postSparql2 (callerpath, query, req, res, cb) {
       cb(err, null)
     })
 }
+
 app.post('/xml', function (req, res) {
   let jsonResp = {'error': null, 'data': null}
   /*
@@ -359,7 +607,6 @@ where {
   })
 })
 
-
 app.get('/fullgraph', function (req, res) {
   // get the nanopub graph
   let query = `
@@ -425,7 +672,6 @@ app.get('/xml/disk/:schema/:xmlfile', function (req, res) {
   })
 })
 
-
 function configureLogger () {
   let logger = winston.createLogger({ // need to adjust to the new 3.x version - https://www.npmjs.com/package/winston#formats
     transports: [
@@ -450,7 +696,6 @@ function configureLogger () {
 app.listen(3000)
 
 /*
-
 prefix dataset: <https://hbgd.tw.rpi.edu/dataset/>
 prefix sio:     <http://semanticscience.org/resource/>
 prefix chear:   <http://hadatac.org/ont/chear#>
@@ -486,14 +731,12 @@ where {
   ?p ?s ?o FILTER ( strstarts(str(?p), "http://nanomine.tw.rpi.edu/unit/") )
 }
 
-
 SELECT * WHERE {
   ?s ?p ?o
   FILTER( regex(str(?p), "^(?http://nanomine.tw.rpi.edu/entry/).+"))
 }
 https://stackoverflow.com/questions/24180387/filtering-based-on-a-uri-in-sparql
 https://stackoverflow.com/questions/19044871/exclude-results-from-dbpedia-sparql-query-based-on-uri-prefix
-
 
 prefix sio: <http://semanticscience.org/resource/>
 prefix ns: <http://nanomine.tw.rpi.edu/ns/>
@@ -583,7 +826,6 @@ where {
   }
 }
 
-
 ---- Interesting one that looks for nanopubs and returns the trees (for ~ 320 samples this result is ~ 240,000 triples)
 prefix sio:<http://semanticscience.org/resource/>
 prefix ns:<http://nanomine.tw.rpi.edu/ns/>
@@ -608,7 +850,7 @@ select ?np ?assertion ?provenance ?pubinfo where {
 
 --This returns sample names along with a few other things (the others look like a punt)
 --    ex: correct -
---       	http://nanomine.tw.rpi.edu/sample/l217-s4-ash-2002
+--       http://nanomine.tw.rpi.edu/sample/l217-s4-ash-2002
 --    ex: incorrect - not really a PolymerNanocomposite
 --        http://nanomine.tw.rpi.edu/sample/l217-s4-ash-2002_nanomine-tensileloadingprofile_0
 prefix sio:<http://semanticscience.org/resource/>
@@ -629,7 +871,6 @@ select distinct ?nanopub
 where {
   ?file a <http://purl.org/net/provenance/ns#File>.
   ?nanopub a <https://www.iana.org/assignments/media-types/text/xml>
-
 }
 
 */
