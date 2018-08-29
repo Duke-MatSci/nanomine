@@ -9,18 +9,25 @@ function listSchemas() {
       print(doc.title+' '+doc._id);
     });
 }
+// Mongoose does not allow a field named 'schema', so swizzle the field named 'schema' to 'schemaId'.
+// Note that there are functions below that still require the 'schema' field name and will be updated and tested with the new name.
+//     So far, the name change was done, but not tested on the other functions below.
+function swizzleForMongoose () {
+  db = db.getSiblingDB('mgi');
+  db.xmldata.updateMany({}, {$rename: { "schema": "schemaId" }})
+}
 
 // listXmlsForSchema(schemaName)
 function listXmlsForSchema(schemaName) {
   db = db.getSiblingDB('mgi');
   var cur = db.template.find({'title':{$eq:schemaName}});
   if(cur.count() > 0) {
-    var schemaId = cur[0]._id.valueOf();
+    var schemaId_ = cur[0]._id.valueOf();
     cur = db.xmldata
-      .find({'schema':{ $eq: schemaId}});
+      .find({'schemaId':{ $eq: schemaId_}});
     if(cur.count() > 0) {
       cur.forEach(function(doc) {
-        print('schema: ' + schemaName + ' (' + doc.schema + ') xml: ' + doc.title + ' (' + doc._id + ')');
+        print('schema: ' + schemaName + ' (' + doc.schemaId + ') xml: ' + doc.title + ' (' + doc._id + ')');
       });
     } else {
       print('schema exists, but there are no curation xmls for schema: ' + schemaName);
@@ -28,6 +35,26 @@ function listXmlsForSchema(schemaName) {
   } else {
     print('schema name not found.');
   }
+}
+function showXmlForSchema(schemaName, xmlName) {
+  db = db.getSiblingDB('mgi')
+  var cur = db.template.find({'title':{$eq: schemaName}});
+  if(cur.count() > 0) {
+    var schemaId_ = cur[0]._id.valueOf();
+    cur = db.xmldata
+      .find({'schemaId':{ $eq: schemaId_}});
+    if(cur.count() > 0) {
+      cur.forEach(function(doc) {
+        print('schema: ' + schemaName + ' (' + doc.schemaId + ') xml: ' + doc.title + ' (' + doc._id + ')');
+        print('     ' + doc.content);
+      });
+    } else {
+      print('schema exists, but there are no curation xmls for schema: ' + schemaName);
+    }
+  } else {
+    print('schema name not found.');
+  }
+
 }
 
 // backupXmlsForSchema(schemaName)
@@ -40,9 +67,9 @@ function backupXmlsForSchema(schemaName, afterFunction) {
   db = db.getSiblingDB('mgi');
   var cur = db.template.find({'title':{$eq:schemaName}});
   if(cur.count() > 0) {
-    var schemaId = cur[0]._id.valueOf();
+    var schemaId_ = cur[0]._id.valueOf();
     cur = db.xmldata
-      .find({'schema':{ $eq: schemaId}});
+      .find({'schemaId':{ $eq: schemaId_}});
     if(cur.count() > 0) {
       var newCollection = 'backupxmldata_'+ts;
       var xmlCt = 0;
@@ -70,9 +97,9 @@ function removeAllXmlsForSchema(schemaName) {
   print('removing records from xmldata for schemaName: ' + schemaName);
   var cur = db.template.find({'title':{$eq:schemaName}});
   if(cur.count() > 0) {
-    var schemaId = cur[0]._id.valueOf();
+    var schemaId_ = cur[0]._id.valueOf();
     var result = db.xmldata.remove(
-      {	'schema': schemaId }
+      {	'schemaId': schemaId_ }
     );
     print('Results: ' + JSON.stringify(result));
   } else {
@@ -89,9 +116,9 @@ function restoreBackupXmls(backupName) {
   if(cur.count() > 0) {
     while(cur.hasNext()) {
       var inrec = cur.next();
-      var schema = inrec.schema;
+      var schema = inrec.schemaId;
       var id = inrec._id.valueOf();
-      var c2 = db.xmldata.find({'schema':schema,_id:ObjectId(id)});
+      var c2 = db.xmldata.find({'schema':schemaId,_id:ObjectId(id)});
       var status = 'skipped...';
       if(c2.count() < 1) {
         db.xmldata.insert(inrec);
