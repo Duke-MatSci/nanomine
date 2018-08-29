@@ -361,8 +361,7 @@ export default {
     },
     fileExplore: function () {
       let vm = this
-      let url = '/nmr/samples'
-      // let url = 'http://localhost:3000'
+      let url = '/nmr/explore/select'
       console.log('fileExplore!')
       vm.setLoading()
       return Axios.get(url)
