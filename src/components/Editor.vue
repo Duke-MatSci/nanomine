@@ -37,6 +37,13 @@
         <span>Next Tab</span>
       </v-tooltip>
 
+      <v-tooltip bottom>
+        <v-btn icon slot="activator">
+          <v-icon>change_history</v-icon>
+        </v-btn>
+        <span >File changed</span>
+      </v-tooltip>
+
       <v-spacer></v-spacer>
 
       <v-tooltip bottom>
@@ -47,20 +54,14 @@
         <span v-if="view=='form'">Show XML View</span>
       </v-tooltip>
 
-      <v-menu :nudge-width="100">
-        <v-btn icon slot="activator">
+
+      <v-tooltip bottom>
+        <v-btn icon slot="activator" v-on:click="saveButton()">
           <v-icon>save</v-icon>
         </v-btn>
-        <v-list>
-          <v-list-tile
-            v-for="(item, idx) in fileMenu"
-            :key="item"
-            @click="fileButton(idx, $event)"
-          >
-            <v-list-tile-title v-text="item"></v-list-tile-title>
-          </v-list-tile>
-        </v-list>
-      </v-menu>
+        <span >Save</span>
+      </v-tooltip>
+
 
       <!--v-tooltip bottom> !!! Disabled settings for now
         <v-btn icon slot="activator" v-on:click="settingsButton()">
@@ -103,8 +104,21 @@
         </v-btn>
         <span>More</span>
       </v-tooltip>
-
     </v-toolbar>
+    <v-layout row justify-center>
+      <v-dialog v-model="saveMenuActive" max-width="150px">
+          <v-list>
+            <v-list-tile
+              v-for="(item, idx) in saveMenu"
+              :key="item"
+              @click="fileButton(idx, $event)"
+            >
+              <v-list-tile-title v-text="item"></v-list-tile-title>
+            </v-list-tile>
+          </v-list>
+      </v-dialog>
+    </v-layout>
+
     <v-layout row justify-center>
       <v-dialog v-model="fileDialog" scrollable max-width="300px">
         <!--v-btn slot="activator" color="primary" dark>Open Dialog</v-btn-->
@@ -198,16 +212,17 @@ export default {
       fileDialogItem: -1, // the value of the radio button selected
       fileDialogList: [], // list to use for radio button item names
       loadFile: false,
-      fileMenu: [
-        'Explore',
+      saveMenuActive: false,
+      saveMenu: [
+        // 'Explore',
         'Publish',
-        'Import',
+        // 'Import',
         'Export'
       ],
-      fileMenuOps: [
-        this.fileExplore,
+      saveMenuOps: [
+        // this.fileExplore,
         this.filePublish,
-        this.fileImport,
+        // this.fileImport,
         this.fileExport
       ],
       dialog: false, // testing file upload
@@ -307,10 +322,6 @@ export default {
         })
         */
     },
-    settingsButton: function () {
-      let vm = this
-      vm.settingsDialog = true
-    },
     test2Button: function () {
       let vm = this
       console.log(vm.msg + ' test2Button() clicked')
@@ -341,6 +352,18 @@ export default {
           vm.editorError = true
         })
         */
+    },
+    showSaveMenu: function () {
+      let vm = this
+      return vm.saveMenuActive
+    },
+    saveButton: function () {
+      let vm = this
+      vm.saveMenuActive = true
+    },
+    settingsButton: function () {
+      let vm = this
+      vm.settingsDialog = true
     },
     transformButton: function () {
       let vm = this
@@ -378,10 +401,10 @@ export default {
     },
     fileButton: function (idx, ev) {
       let vm = this
-      console.log('hi fileButton ' + idx + ' = ' + vm.fileMenu[idx])
+      console.log('hi fileButton ' + idx + ' = ' + vm.saveMenu[idx])
       console.log(ev.target.tagName + ' x: ' + ev.screenX + ' y: ' + ev.screenY)
-      vm.showFileMenu = false
-      vm.fileMenuOps[idx].apply(vm)
+      vm.saveMenuActive = false
+      vm.saveMenuOps[idx].apply(vm)
     },
     fileDialogRadio: function (idx) {
       console.log('idx: ' + idx)
@@ -563,6 +586,9 @@ export default {
       } else {
         vm.filesToUpload = []
       }
+    },
+    tabModified: function () {
+      return true
     },
     hasNextTab: function () {
       let vm = this
