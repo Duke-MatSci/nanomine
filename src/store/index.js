@@ -71,8 +71,11 @@ const store = new Vuex.Store({
       }
       return rv
     },
+    editorTabCount: function (state) {
+      return state.editor.tab.length
+    },
     editorXmlText: function (state) {
-      let rv = '<xml></xml>'
+      let rv = '<?xml version="1.0" encoding="utf-8"?>\n<xml>\n</xml>'
       if (state.editor.currentTab >= 0) {
         rv = state.editor.tab[state.editor.currentTab].xmlText
       }

@@ -111,6 +111,7 @@ let XsdVersionSchema = mongoose.model('xsdVersionData', xsdVersionSchema)
 // })
 
 /* Mongoose schemas and models -- end */
+
 /* rest services related to XMLs and Schemas -- begin */
 
 function validQueryParam (p) {
@@ -298,6 +299,16 @@ app.get('/explore/select', function (req, res) {
   }
 })
 
+app.post('/curate', function (req, res) {
+  let jsonResp = {'error': null, 'data': null}
+  let title = req.body.title
+  let schema = req.body.schema
+  let content = req.body.content
+  let editorStatus = req.body.editorStatus // editedFailedVerify, editedPassedVerify (not trusted), triggers system validation
+  // ensure schema id exists
+  // set validationState to value specified by editor.  Background task will validate and update db status.
+  res.json(jsonResp)
+})
 /* rest services related to XMLs and Schemas -- end */
 
 /* Job related rest services */
@@ -357,6 +368,7 @@ app.post('/jobpostfile', function (req, res, next) {
     if (err) {
       updateJobStatus(jobDir, 'postFileError' + '-' + outputName)
       logger.error('/jobpostfile write job file error - file: ' + outputName + ' err: ' + err)
+      next(err)
     } else {
       updateJobStatus(jobDir, 'filePosted-' + outputName)
       res.status(rcode).json(jsonResp)
@@ -463,7 +475,7 @@ function postSparql2 (callerpath, query, req, res, cb) {
     })
 }
 
-app.post('/xml', function (req, res) {
+app.post('/xml', function (req, res) { // initial testing of post xml file to nanopub -- ISSUE: result redirects to page with no JSON error
   let jsonResp = {'error': null, 'data': null}
   /*
       expects:
@@ -607,7 +619,7 @@ where {
   })
 })
 
-app.get('/fullgraph', function (req, res) {
+app.get('/fullgraph', function (req, res) { // for initial testing and will be removed
   // get the nanopub graph
   let query = `
 prefix sio:<http://semanticscience.org/resource/>
@@ -625,7 +637,7 @@ where {
   return postSparql(req.path, query, req, res)
 })
 
-app.get('/xml/disk/:schema/:xmlfile', function (req, res) {
+app.get('/xml/disk/:schema/:xmlfile', function (req, res) { // this entry point was for some initial testing and will be removed
   // this is for testing only
   let jsonResp = {'error': null, 'data': null}
   let fs = require('fs')
@@ -672,7 +684,7 @@ app.get('/xml/disk/:schema/:xmlfile', function (req, res) {
   })
 })
 
-function configureLogger () {
+function configureLogger () { // logger is not properly configured yet. This config is for an earlier version of Winston
   let logger = winston.createLogger({ // need to adjust to the new 3.x version - https://www.npmjs.com/package/winston#formats
     transports: [
       new (winston.transports.File)({
