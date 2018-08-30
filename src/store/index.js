@@ -75,7 +75,7 @@ const store = new Vuex.Store({
       return state.editor.tab.length
     },
     editorXmlText: function (state) {
-      let rv = '<?xml version="1.0" encoding="utf-8"?>\n<xml>\n</xml>'
+      let rv = '<?xml version="1.0" encoding="utf-8"?>\n<PolymerNanocomposite>\n</PolymerNanocomposite>'
       if (state.editor.currentTab >= 0) {
         rv = state.editor.tab[state.editor.currentTab].xmlText
       }

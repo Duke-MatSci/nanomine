@@ -154,6 +154,22 @@ app.get('/templates/versions/select/all', function (req, res) {
   })
 })
 
+app.get('/templates/versions/select/allactive', function (req, res) {
+  let jsonResp = {'error': null, 'data': null}
+  XsdVersionSchema.find({isDeleted: {$eq: false}}).exec(function (err, versions){
+    if (err) {
+      jsonResp.error = err
+      res.status(400).json(jsonResp)
+    } else if (versions == null || versions.length <= 0) {
+      jsonResp.error = {'statusCode': 404, 'statusText': 'not found'}
+      res.status(404).json(jsonResp)
+    } else {
+      jsonResp.data = versions
+      res.json(jsonResp)
+    }
+  })
+})
+
 app.get('/templates/select', function (req, res) {
   let jsonResp = {'error': null, 'data': null}
   let id = req.query.id

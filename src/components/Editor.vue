@@ -12,7 +12,7 @@
         <v-btn icon slot="activator" v-on:click="addTabButton()">
           <v-icon>add_circle_outline</v-icon>
         </v-btn>
-        <span>Add Tab</span>
+        <span>Open</span>
       </v-tooltip>
 
       <v-toolbar-title class="white--text">{{showFileName}}</v-toolbar-title>
