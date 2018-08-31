@@ -6,14 +6,14 @@
       <br>
       <p class="text-xs-left">The simplest method to curate your sample into the database is by uploading an MS Excel spreadsheet. An online web-form is also available for the advanced user (<router-link to="/curate">click here</router-link>). For each sample, upload a template Excel file using the first uploading box and other supplementary image and raw data files using the second uploading box. The master Excel template contains all possible fields for nanocomposite sample data and therefore many fields will remain blank for your sample. Fill in only the parameters applicable to your sample. Customized templates are available upon request, please contact <a href="mailto:nanominenu@gmail.com">the administrator</a>.</p>
       <br>
-      <h5 class="text-xs-left">Steps</h5>
+      <h3 class="text-xs-left">Steps</h3>
       <p class="text-xs-left">Step 1: Click <a href="{% static 'XMLCONV/master_template.zip' %}" download>here</a> to download the blank MS Excel template (137 kB).
        (Click <a href="{% static 'XMLCONV/example.zip' %}" download>here</a> to see an example, 263 kB)<br>
       Step 2: Fill in the parameters for all applicable cells in the template Excel file. Prepare the supplementary images and raw data files.<br>
       Step 3: Select the template Excel file in the first uploading box.<br>
       Step 4: Select the supplementary images and other raw data files in the second uploading box (press "Ctrl" or "Command" when selecting multiple files), then click Submit to upload your data.<br>
       Step 5: Wait for the feedback message. Please read the message and follow the instructions if an error message is displayed.</p>
-      <h5 class="text-xs-left">Note</h5>
+      <h3 class="text-xs-left">Note</h3>
       <p class="text-xs-left">1. We recommend you to upload your control sample first and remember its sample ID.<br>
       2. Upload one sample data at a time (one template Excel file along with supplementary files).<br>
       3. Rows or sections followed by a "#" sign in the template Excel file can be duplicated. Copy them into additional rows if needed.<br>
@@ -28,33 +28,62 @@
         {{uploadErrorMsg}}
       </v-alert>
       <v-flex xs12 class="text-xs-center text-sm-center text-md-center text-lg-center">
-        <div><v-text-field label="Select the Excel Template File" @click.stop='pickTemplate' v-model='templateName' prepend-icon='attach_file'></v-text-field>
-        <input
-          type="file"
-          style="display: none"
-          accept=".xlsx, .xls"
-          ref="myTemplate"
-          @change="onTemplatePicked"
-        ></div>
+        <p class="text-xs-left">Select the Excel Template File
+          <v-btn class="text-xs-left" small color="primary" @click='pickTemplate'>Browse</v-btn>
+          <input
+            type="file"
+            style="display: none"
+            accept=".xlsx, .xls"
+            ref="myTemplate"
+            @change="onTemplatePicked"
+          >
+        </p>
+        <v-list v-model="templateName" subheader="true" v-if="templateUploaded">
+          <v-list-tile
+            :key="templateName"
+          >
+          <v-list-tile-avatar>
+            <v-icon color="primary">check_circle_outline</v-icon>
+          </v-list-tile-avatar>
+          <v-list-tile-content>
+              <v-list-tile-title v-text="templateName"></v-list-tile-title>
+          </v-list-tile-content>
+          </v-list-tile>
+        </v-list>
       </v-flex>
       <v-flex xs12 class="text-xs-center text-sm-center text-md-center text-lg-center">
-        <div><v-text-field label="Select Other Files (including raw data files and image files)" @click.stop='pickFile' v-model='fileName' prepend-icon='attach_file'></v-text-field>
-        <input
-          type="file"
-          style="display: none"
-          multiple="true"
-          ref="myUpload"
-          @change="onFilePicked"
-        ></div>
+        <p class="text-xs-left">Select Other Files (including raw data files and image files)
+          <v-btn class="text-xs-left" small color="primary" @click='pickFile'>Browse</v-btn>
+          <input
+            type="file"
+            style="display: none"
+            :multiple="true"
+            ref="myUpload"
+            @change="onFilePicked"
+          >
+        </p>
+        <v-list v-model="filesDisplay" subheader="true">
+          <v-list-tile
+            v-for="file in filesDisplay"
+            :key="file.fileName"
+          >
+          <v-list-tile-avatar>
+            <v-icon color="primary">check_circle_outline</v-icon>
+          </v-list-tile-avatar>
+          <v-list-tile-content>
+              <v-list-tile-title v-text="file.fileName"></v-list-tile-title>
+          </v-list-tile-content>
+          </v-list-tile>
+        </v-list>
       </v-flex>
-      <v-btn v-on:click="submit()">Submit</v-btn>
+      <v-btn v-on:click="submit()" color="primary">Submit</v-btn>
     </v-container>
   </div>
 </template>
 
 <script>
 import {} from 'vuex'
-import Axios from 'axios'
+import {JobMgr} from '@/modules/JobMgr.js'
 
 export default {
   name: 'XMLCONV',
@@ -63,11 +92,12 @@ export default {
     dialog: false,
     templateName: '',
     templateUrl: '',
-    fileName: '',
     template: null,
     files: [],
+    filesDisplay: [],
     uploadError: false,
-    uploadErrorMsg: ''
+    uploadErrorMsg: '',
+    templateUploaded: false
   }),
   methods: {
     setLoading: function () {
@@ -86,7 +116,20 @@ export default {
       this.$refs.myTemplate.click()
     },
 
+    resetTemplate: function () {
+      this.templateName = ''
+      this.templateUrl = ''
+      this.template = null
+      this.templateUploaded = false
+    },
+
+    resetFiles: function () {
+      this.files = []
+      this.filesDisplay = []
+    },
+
     onTemplatePicked (e) {
+      this.resetTemplate()
       const files = e.target.files
       let file = {}
       let f = files[0]
@@ -102,14 +145,15 @@ export default {
           this.templateUrl = fr.result
           file.fileUrl = this.templateUrl
           this.template = file
+          this.templateUploaded = true
         })
       } else {
-        this.templateName = ''
-        this.templateUrl = ''
+        this.resetTemplate()
       }
     },
 
     onFilePicked (e) {
+      this.resetFiles()
       const files = e.target.files
       for (let i = 0; i < files.length; i++) {
         let file = {}
@@ -124,6 +168,7 @@ export default {
           fr.addEventListener('load', () => {
             file.fileUrl = fr.result
             this.files.push(file)
+            this.filesDisplay.push(file)
           })
         } else {
           console.log('File Undefined')
@@ -131,7 +176,7 @@ export default {
       }
     },
 
-    submit () {
+    submit: function () {
       let vm = this
       vm.files.forEach(function (v) {
         console.log(JSON.stringify(v))
@@ -145,16 +190,19 @@ export default {
       }
       console.log('Job Submitted!')
       vm.setLoading()
-      let url = '/nmr/XMLCONV'
-      return Axios.post(url, vm.files)
-        .then(function (resp) {
-          console.log('response: ' + JSON.stringify(resp))
-          vm.resetLoading()
-        })
-        .catch(function (err) {
-          console.log('error: ' + err)
-          vm.resetLoading()
-        })
+      let jm = new JobMgr()
+      jm.setJobType('xmlconv')
+      jm.setJobParameters({'templateName': vm.templateName})
+      vm.files.forEach(function (v) {
+        jm.addInputFile(v.fileName, v.fileUrl)
+      })
+      return jm.submitJob(function (jobId) {
+        console.log('Success! JobId is: ' + jobId)
+        vm.resetLoading()
+      }, function (errCode, errMsg) {
+        console.log('error: ' + errCode + ' msg: ' + errMsg)
+        vm.resetLoading()
+      })
     }
   }
 }
