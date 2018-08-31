@@ -10,7 +10,7 @@
             <v-btn class="mx-0" color="primary" to="/Visualization">VISUALIZE
               DATA
             </v-btn>
-            <v-btn class="mx-0" color="secondary" href="#">CURATE DATA</v-btn>
+            <v-btn class="mx-0" color="secondary" to="/XMLCONV">CURATE DATA</v-btn>
           </v-flex>
         </v-layout>
       </v-container>
