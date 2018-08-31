@@ -124,7 +124,7 @@ function validQueryParam (p) {
 
 app.get('/templates/select/all', function (req, res) { // it's preferable to read only the current non deleted schemas rather than all
   let jsonResp = {'error': null, 'data': null}
-  XsdSchema.find().exec(function (err, schemas){
+  XsdSchema.find().exec(function (err, schemas) {
     if (err) {
       jsonResp.error = err
       res.status(400).json(jsonResp)
@@ -140,7 +140,7 @@ app.get('/templates/select/all', function (req, res) { // it's preferable to rea
 
 app.get('/templates/versions/select/all', function (req, res) {
   let jsonResp = {'error': null, 'data': null}
-  XsdVersionSchema.find().exec(function (err, versions){
+  XsdVersionSchema.find().exec(function (err, versions) {
     if (err) {
       jsonResp.error = err
       res.status(400).json(jsonResp)
@@ -156,7 +156,7 @@ app.get('/templates/versions/select/all', function (req, res) {
 
 app.get('/templates/versions/select/allactive', function (req, res) {
   let jsonResp = {'error': null, 'data': null}
-  XsdVersionSchema.find({isDeleted: {$eq: false}}).exec(function (err, versions){
+  XsdVersionSchema.find({isDeleted: {$eq: false}}).exec(function (err, versions) {
     if (err) {
       jsonResp.error = err
       res.status(400).json(jsonResp)
@@ -423,7 +423,7 @@ app.post('/jobsubmit', function (req, res) {
 })
 /* end job related rest services */
 
-/* Visualization related requests - begin*/
+/* Visualization related requests - begin */
 app.get('/visualization/fillerPropertyList', function (req, res) {
   let query = `
 prefix sio:<http://semanticscience.org/resource/>
@@ -438,7 +438,40 @@ where {
   return postSparql(req.path, query, req, res)
 })
 
-/* Visualization related requests - end*/
+app.get('/visualization/materialPropertyList', function (req, res) {
+  let query = `
+prefix sio:<http://semanticscience.org/resource/>
+  prefix ns:<http://nanomine.tw.rpi.edu/ns/>
+  select distinct ?materialProperty
+  where {
+     ?sample sio:hasComponentPart ?filler . 
+     ?sample sio:hasAttribute ?sampleAttribute .
+     ?sampleAttribute a ?materialProperty .
+     ?filler sio:hasRole [a ns:Filler].
+} order by ?materialProperty
+`
+  return postSparql(req.path, query, req, res)
+})
+
+app.get('/visualization/materialPropertiesForFillerProperty', function (req, res) {
+  let fillerPropertyUri = req.query.fillerPropertyUri
+  let query = `
+prefix sio:<http://semanticscience.org/resource/>
+prefix ns:<http://nanomine.tw.rpi.edu/ns/>
+select distinct ?materialProperty (count(?materialProperty) as ?count)
+   where {
+      ?sample sio:hasComponentPart ?filler .
+      ?sample sio:hasAttribute ?sampleAttribute .
+      ?sampleAttribute a ?materialProperty .
+      ?filler sio:hasRole [a ns:Filler].
+      ?filler sio:hasAttribute [a <${fillerPropertyUri}>]. 
+   }
+group by ?materialProperty order by desc(?count)
+`
+  return postSparql(req.path, query, req, res)
+})
+
+/* Visualization related requests - end */
 
 app.get('/', function (req, res) {
   let ID = 'TestData_' + shortUUID.new()
