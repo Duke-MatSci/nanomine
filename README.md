@@ -167,6 +167,7 @@ After this, the updated NanoMine app will show up at "http://localhost/nm".
 - https://www.npmjs.com/package/axios Axios NPM package info
 - https://google.github.io/material-design-icons/ ICONS 
 - https://expressjs.com ExpressJS Web Application Server Framework
+- https://github.com/devstark-com/vue-google-charts Google Charts wrapper for Vue
 
 
 # Development
