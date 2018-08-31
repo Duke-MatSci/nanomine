@@ -8,7 +8,7 @@
       {{editorErrorMsg}}
     </v-alert>
     <v-toolbar dark color="primary">
-      <v-toolbar-title class="white--text">{{$store.getters.editorFileName}}</v-toolbar-title>
+      <v-toolbar-title class="white--text">{{showFileName}}</v-toolbar-title>
       <v-tooltip bottom>
         <v-btn icon slot="activator" v-on:click="lockButton()">
           <v-icon>lock_open</v-icon>
@@ -26,11 +26,11 @@
         <span v-if="view=='form'">Show XML View</span>
       </v-tooltip>
 
-      <v-menu :nudge-width="100" >
+      <v-menu :nudge-width="100">
         <v-btn icon slot="activator">
           <v-icon>save</v-icon>
         </v-btn>
-        <v-list >
+        <v-list>
           <v-list-tile
             v-for="(item, idx) in fileMenu"
             :key="item"
@@ -56,10 +56,10 @@
       </v-tooltip>
 
       <!--<v-tooltip bottom>-->
-        <!--<v-btn icon slot="activator" v-on:click="samplesButton()">-->
-          <!--<v-icon>list</v-icon>-->
-        <!--</v-btn>-->
-        <!--<span>List data and schemas</span>-->
+      <!--<v-btn icon slot="activator" v-on:click="samplesButton()">-->
+      <!--<v-icon>list</v-icon>-->
+      <!--</v-btn>-->
+      <!--<span>List data and schemas</span>-->
       <!--</v-tooltip>-->
 
       <v-tooltip bottom>
@@ -91,7 +91,7 @@
           <v-card-title>Select File to Open</v-card-title>
           <v-divider></v-divider>
           <v-card-text style="height: 300px;">
-            <v-radio-group  v-model="fileDialogItem" column>
+            <v-radio-group v-model="fileDialogItem" column>
               <v-radio v-for="(item, idx) in fileDialogList"
                        :key="idx"
                        :label="item"
@@ -108,14 +108,37 @@
         </v-card>
       </v-dialog>
     </v-layout>
-
+    <!--/><-->
     <v-container fluid justify-start fill-height>
+      <!--img :src="imageUrl" height="150" v-if="imageUrl"/>
+      <v-btn flat icon color="primary" @click.native='pickFile()'>
+        <v-icon>attach_file</v-icon>
+      </v-btn>
+      <input
+        type="file"
+        style="display: none"
+        ref="image"
+        multiple
+        accept=".zip, .xlsx,.xls, image/*"
+        @change="onFilePicked"
+      >
+      <v-list>
+        <v-list-tile
+          v-for="(v, idx) in filesToUpload"
+          :key="idx"
+        >
+          <v-list-tile-content>
+            <v-list-tile-title v-text="v"></v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+      </v-list-->
       <v-layout row wrap align-start fill-height>
         <v-flex fill-height xs12>
           <div id="editor" ref="editor"></div>
         </v-flex>
       </v-layout>
     </v-container>
+    <!--/>Note: some help on vuetify file uploads: https://stackoverflow.com/questions/44989162/file-upload-in-vuetify<-->
   </div>
 </template>
 
@@ -150,7 +173,11 @@ export default {
         this.filePublish,
         this.fileImport,
         this.fileExport
-      ]
+      ],
+      dialog: false, // testing file upload
+      filesToUpload: [], // testing
+      imageUrl: '', //  testing
+      imageFile: '' //  testing
     }
   },
   beforeDestroy: function () {
@@ -176,11 +203,11 @@ export default {
       extraKeys: {
         'Ctrl-J': 'toMatchingTag',
         /* "Cmd-B": vm.beautify,
-        "Ctrl-B": vm.beautify,
-        "Cmd-Z": vm.undo,
-        "Ctrl-Z": vm.undo,
-        "Shift-Cmd-Z": vm.redo,
-        "Shift-Ctrl-Z": vm.redo, */
+          "Ctrl-B": vm.beautify,
+          "Cmd-Z": vm.undo,
+          "Ctrl-Z": vm.undo,
+          "Shift-Cmd-Z": vm.redo,
+          "Shift-Ctrl-Z": vm.redo, */
         "'<'": vm.completeAfter,
         "'/'": vm.completeIfAfterLt,
         "' '": vm.completeIfInTag,
@@ -200,6 +227,16 @@ export default {
     })
     vm.refreshEditor()
   },
+  computed: {
+    showFileName: function () {
+      let vm = this
+      let fn = vm.$store.getters.editorFileName
+      if (fn !== '<untitled>') {
+        fn = fn.toUpperCase()
+      }
+      return (fn)
+    }
+  },
   methods: {
     setLoading: function () {
       this.$store.commit('isLoading')
@@ -208,8 +245,8 @@ export default {
       this.$store.commit('notLoading')
     },
     testButton: function () {
-      var vm = this
-      var url = '/nmr/test1'
+      let vm = this
+      let url = '/nmr/test1'
       // let url = 'http://localhost:3000'
       vm.setLoading()
       return Axios.get(url)
@@ -231,9 +268,8 @@ export default {
         })
     },
     test2Button: function () {
-      var vm = this
-      var url = '/nmr/fullgraph'
-      // let url = 'http://localhost:3000'
+      let vm = this
+      let url = '/nmr/fullgraph'
       vm.setLoading()
       return Axios.get(url)
         .then(function (response) {
@@ -259,7 +295,7 @@ export default {
         })
     },
     transformButton: function () {
-      var vm = this
+      let vm = this
       if (vm.view === 'xml') {
         vm.view = 'form'
       } else {
@@ -267,7 +303,7 @@ export default {
       }
     },
     infoButton: function () {
-      var vm = this
+      let vm = this
       console.log(vm.msg + ' info button')
     },
     lockButton: function () {
@@ -324,9 +360,8 @@ export default {
         })
     },
     fileExplore: function () {
-      var vm = this
-      var url = '/nmr/samples'
-      // let url = 'http://localhost:3000'
+      let vm = this
+      let url = '/nmr/explore/select'
       console.log('fileExplore!')
       vm.setLoading()
       return Axios.get(url)
@@ -393,8 +428,8 @@ export default {
       console.log('Search button.')
     },
     refreshButton: function () {
-      var vm = this
-      var url = '/nmr'
+      let vm = this
+      let url = '/nmr'
       // let url = 'http://localhost:3000'
       vm.setLoading()
       return Axios.get(url)
@@ -420,7 +455,7 @@ export default {
       return vm.content.getValue()
     },
     refreshEditor: function () {
-      var vm = this
+      let vm = this
       // let tabNumber = vm.$store.getters.currentEditorTab
       // if (tabNumber && typeof tabNumber === 'number' && tabNumber >= 0) {
       vm.content.setValue(vm.$store.getters.editorXmlText)
@@ -432,6 +467,30 @@ export default {
         vm.content.execCommand('goDocStart')
         vm.content.clearHistory()
       }, 0)
+    },
+    pickFile () {
+      this.$refs.image.click()
+    },
+
+    onFilePicked: function (e) {
+      let vm = this
+      const files = e.target.files
+      if (files !== undefined) {
+        let v = null
+        for (v = 0; v < files.length; ++v) {
+          console.log('file selected: ' + files[v].name)
+          vm.filesToUpload.push(files[v].name)
+        }
+        console.log(vm.filesToUpload)
+        const fr = new FileReader()
+        fr.readAsDataURL(files[0])
+        fr.addEventListener('load', () => {
+          vm.imageUrl = fr.result
+          console.log(vm.imageUrl)
+        })
+      } else {
+        vm.filesToUpload = []
+      }
     }
   }
 }

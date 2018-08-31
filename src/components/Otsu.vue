@@ -1,11 +1,11 @@
 <!--
 ################################################################################
 #
-# File Name: Otsu_Submit.vue
+# File Name: Otsu.vue
 # Application: templates
 # Description:
 #
-# Modified by: Akshay Iyer, July 23, 2018
+# Created by: Akshay Iyer, July 23, 2018
 # Customized for NanoMine
 #
 ################################################################################
@@ -25,7 +25,6 @@
                   <p><strong> 3) Multiple images in ZIP File:</strong> Submit a ZIP file containing multiple images (supported formats: .jpg, .tif, .png) of same size (in pixels).
                 DO NOT ZIP the folder containing images; select all images and ZIP them directly.</p>
       </v-flex>
-          <br/>
           <h2> Create Agent to accept user uploaded files and process it in MATLAB</h2>
 
     </v-container>

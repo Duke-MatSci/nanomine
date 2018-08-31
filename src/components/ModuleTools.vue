@@ -15,7 +15,7 @@
           <div>
             <h4>
               <span>
-                <router-link to="/Two_pt_MCR">Microstructure Characterization and Reconstruction</router-link>
+                <router-link to="/mcr_homepage">Microstructure Characterization and Reconstruction</router-link>
               </span>
             </h4>
             <p>
