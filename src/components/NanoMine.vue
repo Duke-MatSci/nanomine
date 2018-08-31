@@ -10,7 +10,7 @@
             <v-btn class="mx-0" color="primary" href="https://nanomine.oit.duke.edu:8443/viz" target="_blank">VISUALIZE
               DATA
             </v-btn>
-            <v-btn class="mx-0" color="secondary" href="#">CURATE DATA</v-btn>
+            <v-btn class="mx-0" color="secondary"><router-link to="/curate">CURATE DATA</router-link></v-btn>
           </v-flex>
         </v-layout>
       </v-container>
