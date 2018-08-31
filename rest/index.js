@@ -334,7 +334,7 @@ function updateJobStatus (statusFilePath, newStatus) {
     'job_status': newStatus,
     'update_dttm': Date()
   }
-  fs.writeFile(statusFileName, JSON.stringify(statusObj), {'encoding': 'utf8'}, function (err, data) {
+  fs.writeFile(statusFileName, JSON.stringify(statusObj), {'encoding': 'utf8'}, function (err) {
     if (err) {
       logger.error('error creating job_status file: ' + statusFileName + ' err: ' + err)
     }
@@ -422,6 +422,23 @@ app.post('/jobsubmit', function (req, res) {
   }
 })
 /* end job related rest services */
+
+/* Visualization related requests - begin*/
+app.get('/visualization/fillerPropertyList', function (req, res) {
+  let query = `
+prefix sio:<http://semanticscience.org/resource/>
+prefix ns:<http://nanomine.tw.rpi.edu/ns/>
+select distinct ?fillerProperty
+where {
+    ?filler sio:hasRole [a ns:Filler].
+    ?filler sio:hasAttribute ?fillerAttribute .
+    ?fillerAttribute a ?fillerProperty .
+} order by ?fillerProperty  
+`
+  return postSparql(req.path, query, req, res)
+})
+
+/* Visualization related requests - end*/
 
 app.get('/', function (req, res) {
   let ID = 'TestData_' + shortUUID.new()
