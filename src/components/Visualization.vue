@@ -63,18 +63,7 @@
       <v-layout align-center justify-space-around column fill-height>
         <h1>Filler Descriptor vs Material Property</h1>
       <table class="table"><thead><tr><th scope="col" class="text-center">choose one filler property as x axis: </th><th scope="col" class="text-center">choose one material property as y axis:</th></tr></thead>
-        <tbody><tr><td><select v-model="selected" id="material-property-select-y" style="width:300px;"><option disabled value = "">Please select one</option><div class="text-xs-center"><v-menu offset-y>
-          <v-list>
-            <v-list-tile
-              v-for="(item, index) in items"
-              :key="index"
-              @click="data_drop_fx()"
-            >
-              <v-list-tile-title>{{ item.title }}</v-list-tile-title>
-            </v-list-tile>
-          </v-list>
-        </v-menu>
-    </div></select></td>
+        <tbody><tr><td><select v-model="selected" id="material-property-select-y" style="width:300px;"><option disabled value = "">Please select one</option><option>A</option><option>B</option><option>C</option></select></td>
           <td><select v-model="selected" id="material-property-select-y" style="width:300px;"><option distabled value="">Please select one</option><option>A</option><option>B</option><option>C</option></select>
           </td><td><v-btn type="button" class="btn btn-primary" id="viz-fp" style="width:300px;">Visualize</v-btn></td></tr></tbody></table>
       <table class="table"><thead><tr><th class="text-center" id="sampleFilter"></th><th class="text-center" id="matrixFilter"></th><th class="text-center" id="fillerFilter"></th></tr></thead></table>
