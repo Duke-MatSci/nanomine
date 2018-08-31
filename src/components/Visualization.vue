@@ -97,7 +97,7 @@
                 label="Select Material Property for Y axis"
               ></v-select>
             </v-flex>
-              <v-btn type="button" class="btn btn-primary" id="viz-fp" style="width:300px;">Visualize</v-btn>
+              <v-btn type="button" class="btn btn-primary" id="viz-fp" style="width:300px;" v-on:click="visualizeFp()">Visualize</v-btn>
         <table class="table">
           <thead>
           <tr>
@@ -219,7 +219,7 @@ export default {
       samplePrefix: 'http://nanomine.tw.rpi.edu/sample/',
       compoundPrefix: 'http://nanomine.tw.rpi.edu/compound/',
       sioPrefix: 'http://semanticscience.org/resource/',
-      fillerProeprty: '',
+      fillerProperty: '',
       fillerPropertyList: [],
       fillerPropertyMap: new Map(),
       matrixList: [],
@@ -273,9 +273,9 @@ export default {
       if (vm.fillerPropertyList.length === 0) {
         axios.get('/nmr/visualization/fillerPropertyList')
           .then(rsp => {
-            for (var i = 0; i < rsp.data.results.bindings.length; i++) {
-              var fp = rsp.data.results.bindings[i].fillerProperty.value
-              var key = ''
+            for (let i = 0; i < rsp.data.results.bindings.length; i++) {
+              let fp = rsp.data.results.bindings[i].fillerProperty.value
+              let key = ''
               if (fp.includes(vm.nanoPrefix)) {
                 key = fp.substring(vm.nanoPrefix.length, fp.length).replace(/([A-Z]+)/g, ' $1').replace(/^./, function (str) {
                   return str.toUpperCase()
@@ -318,10 +318,10 @@ export default {
     getMaterialPropertiesForFillerProperty: function () {
       let vm = this
       let fp = vm.fillerProperty
-      let fpuri = vm.fillerPropertyMap.get(fp)
+      let fpUri = vm.fillerPropertyMap.get(fp)
       axios.get('/nmr/visualization/materialPropertiesForFillerProperty', {
         params: {
-          'fillerPropertyUri': fpuri
+          'fillerPropertyUri': fpUri
         }
       })
         .then(function (rsp) {
@@ -335,6 +335,112 @@ export default {
         })
         .catch(function (err) {
           let msg = 'get materialPropertiesForFillerProperty - error: ' + err
+          console.log(msg)
+          vm.visError = true
+          vm.visErrorMsg = msg
+        })
+    },
+    visualizeFp: function () {
+      let vm = this
+      let fpX = vm.fillerProperty
+      let mpY = vm.materialPropertyY
+      let fpUri = vm.fillerPropertyMap.get(fpX)
+      if (mpY.indexOf('(') !== -1) {
+        mpY = mpY.split(' ').slice(0, -1).join(' ')
+      }
+      let mpUri = vm.materialPropertyMap.get(mpY)
+      axios.get('/nmr/visualization/fillerPropertyMaterialPropertyGraphData', {
+        params: {
+          'fillerPropertyUri': fpUri,
+          'materialPropertyUri': mpUri
+        }
+      })
+        .then(function (rsp) {
+          let chartData = [['sample', fpX, mpY, 'control', 'bubble size', fpX, mpY, 'matrix-filler', 'matrix', 'filler', 'paper link', 'paper title']]
+          if (rsp.data.results.bindings.length === 0) {
+            vm.visErrorMsg = 'An axis you have selected includes an array of data and cannot be visualized with this chart. Try using Material Spectrum instead.'
+            vm.visError = true
+          }
+          else {
+            let xUnit = ''
+            let yUnit = ''
+            for (let i = 0; i < rsp.data.results.bindings.length; i++) {
+              let sample = rsp.data.results.bindings[i].sample.value.substring(vm.samplePrefix.length, rsp.data.results.bindings[i].sample.value.length)
+              let x = parseFloat(rsp.data.results.bindings[i].x.value)
+              let y = parseFloat(rsp.data.results.bindings[i].y.value)
+              if (rsp.data.results.bindings[i].hasOwnProperty('xUnit')) {
+                xUnit = rsp.data.results.bindings[i].xUnit.value.substring(vm.unitPrefix.length, rsp.data.results.bindings[i].xUnit.value.length)
+                // temperature unit conversion (all to celsius)
+                if (xUnit === 'kelvin') {
+                  // x = (x - 273.15).toFixed(2);
+                  x = Math.round((x - 273.15) * 1e2) / 1e2
+                  xUnit = 'celsius'
+                }
+                // pressure unit conversion (all to mpa)
+                if (xUnit === 'gpa') {
+                  x = Math.round((x * 1e3) * 1e2) / 1e2
+                  xUnit = 'mpa'
+                }
+                if (xUnit === 'kpa') {
+                  x = Math.round((x / 1e3) * 1e2) / 1e2
+                  xUnit = 'mpa'
+                }
+                // resistivity unit conversion (all to 10^15 ohm-cm)
+                if (xUnit === 'ohm-cm' || xUnit == 'omega-cm') {
+                  x = Math.round((x / 1e15) * 1e4) / 1e4
+                  xUnit = '1E15 ohm-cm'
+                }
+                if (xUnit === 'ohm-meter') {
+                  x = Math.round((x / 1e13) * 1e4) / 1e4
+                  xUnit = '1E15 ohm-cm'
+                }
+              }
+              if (rsp.data.results.bindings[i].hasOwnProperty('yUnit')) {
+                yUnit = rsp.data.results.bindings[i].yUnit.value.substring(vm.unitPrefix.length, rsp.data.results.bindings[i].yUnit.value.length)
+                // temperature unit conversion (all to celsius)
+                if (yUnit === 'kelvin') {
+                  // y = (y - 273.15).toFixed(2);
+                  y = Math.round((y - 273.15) * 1e2) / 1e2
+                  yUnit = 'celsius'
+                }
+                // pressure unit conversion (all to mpa)
+                if (yUnit === 'gpa') {
+                  y = Math.round((y * 1e3) * 1e2) / 1e2
+                  yUnit = 'mpa'
+                }
+                if (yUnit === 'kpa') {
+                  y = Math.round((y / 1e3) * 1e2) / 1e2
+                  yUnit = 'mpa'
+                }
+                // resistivity unit conversion (all to 10^15 ohm-cm)
+                if (yUnit === 'ohm-cm' || yUnit === 'omega-cm') {
+                  y = Math.round((y / 1e15) * 1e4) / 1e4
+                  yUnit = '1E15 ohm-cm'
+                }
+                if (yUnit === 'ohm-meter') {
+                  y = Math.round((y / 1e13) * 1e4) / 1e4
+                  yUnit = '1E15 ohm-cm'
+                }
+              }
+              let matrixPolymer = rsp.data.results.bindings[i].matrixPolymer.value.substring(vm.compoundPrefix.length, rsp.data.results.bindings[i].matrixPolymer.value.length)
+              let fillerPolymer = rsp.data.results.bindings[i].fillerPolymer.value.substring(vm.compoundPrefix.length, rsp.data.results.bindings[i].fillerPolymer.value.length)
+              let doi = rsp.data.results.bindings[i].doi.value
+              let title = rsp.data.results.bindings[i].title.value
+              chartData.push([sample, x, y, 'control-' + x, 1, x + ' ' + xUnit, y + ' ' + yUnit, matrixPolymer + '(matrix)-' + fillerPolymer + '(filler)', matrixPolymer, fillerPolymer, doi, title])
+            }
+            if (xUnit !== '') xUnit = ' (' + xUnit + ')'
+            if (yUnit !== '') yUnit = ' (' + yUnit + ')'
+            // let sampleCategoryFilter = new google.visualization.ControlWrapper({'controlType': 'CategoryFilter', 'containerId': 'sampleFilter', 'options': {'filterColumnIndex': 0, 'ui': {'caption': 'search/choose a sample', 'selectedValuesLayout': 'belowWrapping'}}})
+            // let matrixlCategoryFilter = new google.visualization.ControlWrapper({'controlType': 'CategoryFilter', 'containerId': 'matrixFilter', 'options': {'filterColumnIndex': 8, 'ui': {'caption': 'search/choose a matrix', 'selectedValuesLayout': 'belowWrapping'}}})
+            // let fillerCategoryFilter = new google.visualization.ControlWrapper({'controlType': 'CategoryFilter', 'containerId': 'fillerFilter', 'options': {'filterColumnIndex': 9, 'ui': {'caption': 'search/choose a filler', 'selectedValuesLayout': 'belowWrapping'}}})
+            // let bubbleChart = new google.visualization.ChartWrapper({'chartType': 'BubbleChart', 'containerId': 'propertyChart', 'options': {'title': 'Filler Property Chart (series by martix): ' + fp_x + xUnit + ' vs ' + mp_y + yUnit, 'titlePosition': 'out', 'titleTextStyle': {'color': 'red', 'fontSize': 16, 'bold': true}, 'hAxis': {'title': fp_x + xUnit}, 'vAxis': {'title': mp_y + yUnit}, 'sizeAxis': {'minValue': 0, 'maxSize': 5}, 'height': chartHeight, 'width': chartWidth, 'legend': 'top', 'explorer': {'keepInBounds': true, 'actions': ['dragToZoom', 'rightClickToReset'], 'maxZoomIn': 0.05, 'maxZoomOut': 1}}, 'view': {'columns': [0, 1, 2, 7]}})
+            // let tableChart = new google.visualization.ChartWrapper({'chartType': 'Table', 'containerId': 'propertyTable', 'options': {'height': tableHeight, 'width': tableWidth}, 'view': {'columns': [0, 5, 6, 8, 9, 10, 11]}})
+            // DRAW CHART new google.visualization.Dashboard(dashboard.get(0)).bind([sampleCategoryFilter, matrixlCategoryFilter, fillerCategoryFilter], [bubbleChart, tableChart]).draw(chartData);
+            // if($('#download').length == 0) dashboard.append('<button id="download" class="btn-primary" style="width:300px;" onClick="exportTableToCSV(\'nanomineData.csv\')">Download Data Table as CSV</button>');
+          }
+        })
+        .catch(function (err) {
+          let msg = 'get fillerPropertyMaterialPropertyGraphData - error: ' + err
           console.log(msg)
           vm.visError = true
           vm.visErrorMsg = msg
