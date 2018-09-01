@@ -12,34 +12,22 @@
         <div class="navbar navbar-fixed-top">
           <nav class="navbar navbar-inverse">
             <div class="container-fluid">
-              <div class="jumbotron">
-                <v-layout align-center justify-center column fill-height>
-                  <h1 class="display-3">NanoMine Visualization Dashboard</h1>
-                  <p class="lead">Welcome! Explore a series of visualizations revealing data information by clicking on
-                    the buttons below.</p>
+              <v-jumbotron>
+                <v-layout align-center>
+                  <v-flex>
+                    <h3 class="mainheading">NanoMine Visualization Dashboard</h3>
+                    <span class="subheading">Explore a series of visualizations to reveal Nanocomposites data patterns</span>
+                    <v-divider class="my-3"></v-divider>
+                    <v-btn class="mx-0" color="primary" id="fp" v-on:click="makeFpActive()">Filler Descriptor vs
+                      Material Property
+                    </v-btn>
+                    <v-btn class="mx-0" color="primary" id="mp" v-on:click="active ='mp'">Material Property
+                      Dashboard
+                    </v-btn>
+                    <v-btn class="mx-0" color="primary" id="ms" v-on:click="active ='ms'">Material Spectrum</v-btn>
+                  </v-flex>
                 </v-layout>
-              </div>
-              <!--add option buttons here-->
-              <ul class="nav navbar-nav"></ul>
-              <a href="http://nanomine.org" class="btn navbar-btn btn-info" role="button"><span
-                class="glyphicon glyphicon-home" title="Nanomine HomePage"></span></a>
-              <v-layout justify-center row>
-                <v-btn type="button" class="btn btn-primary" id="fp" v-on:click="makeFpActive()">Filler Descriptor vs
-                  Material Property
-                </v-btn>
-                <v-btn type="button" class="btn btn-primary" id="mp" v-on:click="active ='mp'">Material Property
-                  Dashboard
-                </v-btn>
-                <v-btn type="button" class="btn btn-primary" id="ms" v-on:click="active ='ms'">Material Spectrum</v-btn>
-                <v-btn type="button" class="btn btn-primary" id="db" v-on:click="active ='db'">Database Overview (under
-                  construction)
-                </v-btn>
-              </v-layout>
-              <div class="navbar-header">
-                <v-layout align-center justify-center row fill-height>
-                  <a href="/viz" class="navbar-brand">Go back to NanoMine Main Page</a>
-                </v-layout>
-              </div>
+              </v-jumbotron>
             </div>
           </nav>
         </div>
@@ -60,7 +48,7 @@
                   properties of a specific composite or a certain matrix or filler of interest. </p>
                 <!--p class="text-left"> •   Database Overview (under construction) will offera visual summary of the data in NanoMine. </p-->
               </div>
-              <a href="https://imgur.com/Thtu5w6"><img src="https://i.imgur.com/Thtu5w6.png" title="source: imgur.com"/></a>
+              <img src="/cdn/img/visualization_hero.png"/>
               <br>
               <!--h4 class="text-left">While many of these functions are under construction, an example illustrating the types of visualizations which will be readily available in the next months is below. </h4-->
               <p class="text-left">To re-create the sample visualization shown above: </p>
@@ -71,8 +59,7 @@
                 <p class="text-left"> • Refinement can be obtained by playing with other features on the page </p>
                 <p class="text-left"> • The table below the graph contains the information of the graph in tabular
                   form.</p>
-                <a href="https://imgur.com/woeikox"><img src="https://i.imgur.com/woeikox.png"
-                                                         title="source: imgur.com"/></a>
+                <img src="/cdn/img/visualization_hero2.png"/>
               </div>
               <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2"></div>
             </div>
@@ -108,6 +95,12 @@
           </thead>
         </table>
         <div id="propertyChart"></div>
+        <GChart
+            :settings="{ packages: ['corechart', 'table', 'map'] }"
+            type="Map"
+            :data="chartData"
+            :options="chartOptions"
+        />
         <br>
         <div id="propertyTable"></div>
       </v-layout>
@@ -126,10 +119,10 @@
         <tbody>
         <tr>
           <td><select id="material-property-select-x" style="width:300px;">
-            <option value="" distabled selected></option>
+            <option value="" disabled selected></option>
           </select></td>
           <td><select id="material-property-select-y" style="width:300px;">
-            <option value="" distabled selected></option>
+            <option value="" disabled selected></option>
           </select></td>
           <td>
             <v-btn type="button" class="btn btn-primary" id="viz-mp" style="width:300px;">Visualize</v-btn>
@@ -167,16 +160,16 @@
         <tbody>
         <tr>
           <td><select id="matrix-select" style="width:300px;">
-            <option value="" distabled selected></option>
+            <option value="" disabled selected></option>
           </select></td>
           <td><select id="filler-select" style="width:300px;">
-            <option value="" distabled selected></option>
+            <option value="" disabled selected></option>
           </select></td>
           <td><select id="specialization-x" style="width:300px;">
-            <option value="" distabled selected></option>
+            <option value="" disabled selected></option>
           </select></td>
           <td><select id="specialization-y" style="width:300px;">
-            <option value="" distabled selected></option>
+            <option value="" disabled selected></option>
           </select></td>
           <td>
             <v-btn type="button" class="btn btn-primary" id="viz-ms" style="width:300px;">Visualize</v-btn>
@@ -360,8 +353,7 @@ export default {
           if (rsp.data.results.bindings.length === 0) {
             vm.visErrorMsg = 'An axis you have selected includes an array of data and cannot be visualized with this chart. Try using Material Spectrum instead.'
             vm.visError = true
-          }
-          else {
+          } else {
             let xUnit = ''
             let yUnit = ''
             for (let i = 0; i < rsp.data.results.bindings.length; i++) {
@@ -386,7 +378,7 @@ export default {
                   xUnit = 'mpa'
                 }
                 // resistivity unit conversion (all to 10^15 ohm-cm)
-                if (xUnit === 'ohm-cm' || xUnit == 'omega-cm') {
+                if (xUnit === 'ohm-cm' || xUnit === 'omega-cm') {
                   x = Math.round((x / 1e15) * 1e4) / 1e4
                   xUnit = '1E15 ohm-cm'
                 }
@@ -485,7 +477,25 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
   .viz {
+  }
 
+  .mainheading { /* class of large text in jumbotron*/
+    font-size: 40px;
+    color: white;
+    padding-top: 20px;
+  }
+
+  .subheading {
+    color: white;
+  }
+
+  .v-jumbotron {
+    color: white;
+    padding: 0.5rem 0.5rem;
+    background-color: #000000;
+    border-radius: 0px;
+    margin-top: 0px;
+    max-height: 200px;
   }
 
 </style>

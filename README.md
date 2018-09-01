@@ -168,6 +168,7 @@ After this, the updated NanoMine app will show up at "http://localhost/nm".
 - https://google.github.io/material-design-icons/ ICONS 
 - https://expressjs.com ExpressJS Web Application Server Framework
 - https://github.com/devstark-com/vue-google-charts Google Charts wrapper for Vue
+  - NOTE: Google charts doc: https://developers.google.com/chart/
 
 
 # Development
