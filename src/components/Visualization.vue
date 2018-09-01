@@ -7,30 +7,31 @@
     >
       {{visErrorMsg}}
     </v-alert>
+    <div class="navbar navbar-fixed-top">
+      <nav class="navbar navbar-inverse">
+        <div class="container-fluid">
+          <v-jumbotron>
+            <v-layout align-center>
+              <v-flex>
+                <h3 class="mainheading">NanoMine Visualization Dashboard</h3>
+                <span
+                  class="subheading">Explore a series of visualizations to reveal Nanocomposites data patterns</span>
+                <br/>
+                <v-btn class="mx-0" color="primary" id="fp" v-on:click="makeFpActive()">Filler Descriptor vs
+                  Material Property
+                </v-btn>
+                <v-btn class="mx-0" color="primary" id="mp" v-on:click="active ='mp'">Material Property
+                  Dashboard
+                </v-btn>
+                <v-btn class="mx-0" color="primary" id="ms" v-on:click="active ='ms'">Material Spectrum</v-btn>
+              </v-flex>
+            </v-layout>
+          </v-jumbotron>
+        </div>
+      </nav>
+    </div>
     <div v-if="showMain()">
       <v-layout column fill-height>
-        <div class="navbar navbar-fixed-top">
-          <nav class="navbar navbar-inverse">
-            <div class="container-fluid">
-              <v-jumbotron>
-                <v-layout align-center>
-                  <v-flex>
-                    <h3 class="mainheading">NanoMine Visualization Dashboard</h3>
-                    <span class="subheading">Explore a series of visualizations to reveal Nanocomposites data patterns</span>
-                    <v-divider class="my-3"></v-divider>
-                    <v-btn class="mx-0" color="primary" id="fp" v-on:click="makeFpActive()">Filler Descriptor vs
-                      Material Property
-                    </v-btn>
-                    <v-btn class="mx-0" color="primary" id="mp" v-on:click="active ='mp'">Material Property
-                      Dashboard
-                    </v-btn>
-                    <v-btn class="mx-0" color="primary" id="ms" v-on:click="active ='ms'">Material Spectrum</v-btn>
-                  </v-flex>
-                </v-layout>
-              </v-jumbotron>
-            </div>
-          </nav>
-        </div>
         <!-- visualization dashboard section -->
         <div class="text-center" id="dashboard">
           <div class="row">
@@ -69,42 +70,44 @@
     </div>
     <div v-if="showfp()">
       <v-container fluid grid-list-xl>
-        <v-layout wrap align-center>
-      <!--v-layout align-center justify-space-around column fill-height-->
-        <h1>Filler Descriptor vs Material Property</h1>
-            <v-flex xs12 d-flex>
-              <v-select v-model="fillerProperty" v-on:change="getMaterialPropertiesForFillerProperty()"
-                :items="fillerPropertyList"
-                label="Select Filler Property for X axis"
-              ></v-select>
-            </v-flex>
-            <v-flex xs12 d-flex>
-              <v-select v-model="materialPropertyY"
-                :items="materialPropertiesY"
-                label="Select Material Property for Y axis"
-              ></v-select>
-            </v-flex>
-              <v-btn type="button" class="btn btn-primary" id="viz-fp" style="width:300px;" v-on:click="visualizeFp()">Visualize</v-btn>
-        <table class="table">
-          <thead>
-          <tr>
-            <th class="text-center" id="sampleFilter"></th>
-            <th class="text-center" id="matrixFilter"></th>
-            <th class="text-center" id="fillerFilter"></th>
-          </tr>
-          </thead>
-        </table>
-        <div id="propertyChart"></div>
-        <GChart
-            :settings="{ packages: ['corechart', 'table', 'map'] }"
-            type="Map"
-            :data="chartData"
-            :options="chartOptions"
-        />
-        <br>
-        <div id="propertyTable"></div>
-      </v-layout>
-      <v-btn type="button" class="btn btn-primary" v-on:click="active ='main'">Go Back</v-btn>
+          <!--v-layout align-center justify-space-around column fill-height-->
+          <h1>Filler Descriptor vs Material Property</h1>
+          <v-layout xs-12 align-center>
+            <v-flex xs1 d-flex></v-flex>
+          <v-flex xs5 d-flex>
+            <v-select v-model="fillerProperty" v-on:change="getMaterialPropertiesForFillerProperty()"
+                      :items="fillerPropertyList"
+                      label="Select Filler Property for X axis"
+            ></v-select>
+          </v-flex>
+          <v-flex xs5 d-flex>
+            <v-select v-model="materialPropertyY"
+                      :items="materialPropertiesY"
+                      label="Select Material Property for Y axis"
+            ></v-select>
+            <v-flex xs2 d-flex></v-flex>
+          </v-flex>
+          </v-layout>
+          <v-btn type="button" class="btn btn-primary" id="viz-fp" style="width:300px;" v-on:click="visualizeFp()">
+            Visualize
+          </v-btn>
+          <table class="table">
+            <thead>
+            <tr>
+              <th class="text-center" id="sampleFilter"></th>
+              <th class="text-center" id="matrixFilter"></th>
+              <th class="text-center" id="fillerFilter"></th>
+            </tr>
+            </thead>
+          </table>
+          <GChart v-if="showFdmpChart()"
+            type="BubbleChart"
+            :data="fdmpChartData"
+            :options="fdmpChartOptions"
+          />
+          <br>
+          <div id="propertyTable"></div>
+        <v-btn type="button" class="btn btn-primary" v-on:click="active ='main'">Go Back</v-btn>
       </v-container>
     </div> <!-- showfp() -->
     <div v-if="showmp()">
@@ -199,8 +202,13 @@
 
 import {} from 'vuex'
 import axios from 'axios'
+import {GChart} from 'vue-google-charts'
+
 export default {
   name: 'Visualization',
+  components: {
+    GChart
+  },
   data () {
     return {
       active: 'main',
@@ -224,8 +232,9 @@ export default {
       materialPropertiesY: [],
       materialPropertyList: [],
       materialPropertyMap: new Map(),
-      materialPropertyListY: []
-
+      materialPropertyListY: [],
+      fdmpChartData: [],
+      fdmpChartOptions: null
     }
   },
   methods: {
@@ -240,6 +249,10 @@ export default {
       return (
         vm.active === 'fp'
       )
+    },
+    showFdmpChart: function () {
+      let vm = this
+      return (vm.fdmpChartOptions !== null)
     },
     showmp: function () {
       let vm = this
@@ -295,7 +308,9 @@ export default {
             for (let i = 0; i < rsp.data.results.bindings.length; i++) {
               let mp = rsp.data.results.bindings[i].materialProperty.value
               let key = mp.substring(vm.nanoPrefix.length, mp.length).replace(/([A-Z]+)/g, ' $1').replace(/^./,
-                function (str) { return str.toUpperCase() })
+                function (str) {
+                  return str.toUpperCase()
+                })
               vm.materialPropertyMap.set(key, mp)
               vm.materialPropertyList.push(key)
             }
@@ -322,7 +337,9 @@ export default {
           for (let i = 0; i < rsp.data.results.bindings.length; i++) {
             let mp = rsp.data.results.bindings[i].materialProperty.value
             let count = rsp.data.results.bindings[i].count.value
-            let key = mp.substring(vm.nanoPrefix.length, mp.length).replace(/([A-Z]+)/g, ' $1').replace(/^./, function (str) { return str.toUpperCase() }) + ' (' + count + ')'
+            let key = mp.substring(vm.nanoPrefix.length, mp.length).replace(/([A-Z]+)/g, ' $1').replace(/^./, function (str) {
+              return str.toUpperCase()
+            }) + ' (' + count + ')'
             vm.materialPropertiesY.push(key)
           }
         })
@@ -349,7 +366,7 @@ export default {
         }
       })
         .then(function (rsp) {
-          let chartData = [['sample', fpX, mpY, 'control', 'bubble size', fpX, mpY, 'matrix-filler', 'matrix', 'filler', 'paper link', 'paper title']]
+          vm.fdmpChartData = [['sample', fpX, mpY, 'control', 'bubble size', fpX, mpY, 'matrix-filler', 'matrix', 'filler', 'paper link', 'paper title']]
           if (rsp.data.results.bindings.length === 0) {
             vm.visErrorMsg = 'An axis you have selected includes an array of data and cannot be visualized with this chart. Try using Material Spectrum instead.'
             vm.visError = true
@@ -418,10 +435,29 @@ export default {
               let fillerPolymer = rsp.data.results.bindings[i].fillerPolymer.value.substring(vm.compoundPrefix.length, rsp.data.results.bindings[i].fillerPolymer.value.length)
               let doi = rsp.data.results.bindings[i].doi.value
               let title = rsp.data.results.bindings[i].title.value
-              chartData.push([sample, x, y, 'control-' + x, 1, x + ' ' + xUnit, y + ' ' + yUnit, matrixPolymer + '(matrix)-' + fillerPolymer + '(filler)', matrixPolymer, fillerPolymer, doi, title])
+              vm.fdmpChartData.push([sample, x, y, 'control-' + x, 1, x + ' ' + xUnit, y + ' ' + yUnit, matrixPolymer + '(matrix)-' + fillerPolymer + '(filler)', matrixPolymer, fillerPolymer, doi, title])
             }
             if (xUnit !== '') xUnit = ' (' + xUnit + ')'
             if (yUnit !== '') yUnit = ' (' + yUnit + ')'
+            vm.fdmpChartOptions = {
+              'title': 'Filler Property Chart (series by matrix): ' + fpX + xUnit + ' vs ' + mpY + yUnit,
+              'titlePosition': 'out',
+              'titleTextStyle': {'color': 'red', 'fontSize': 16, 'bold': true},
+              'hAxis': {'title': fpX + xUnit},
+              'vAxis': {'title': mpY + yUnit},
+              'sizeAxis': {'minValue': 0, 'maxSize': 5},
+              // 'height': chartHeight,
+              // 'width': chartWidth,
+              'legend': 'top',
+              'explorer': {
+                'keepInBounds': true,
+                'actions': ['dragToZoom', 'rightClickToReset'],
+                'maxZoomIn': 0.05,
+                'maxZoomOut': 1
+              },
+              'view': {'columns': [0, 1, 2, 7]}
+            }
+
             // let sampleCategoryFilter = new google.visualization.ControlWrapper({'controlType': 'CategoryFilter', 'containerId': 'sampleFilter', 'options': {'filterColumnIndex': 0, 'ui': {'caption': 'search/choose a sample', 'selectedValuesLayout': 'belowWrapping'}}})
             // let matrixlCategoryFilter = new google.visualization.ControlWrapper({'controlType': 'CategoryFilter', 'containerId': 'matrixFilter', 'options': {'filterColumnIndex': 8, 'ui': {'caption': 'search/choose a matrix', 'selectedValuesLayout': 'belowWrapping'}}})
             // let fillerCategoryFilter = new google.visualization.ControlWrapper({'controlType': 'CategoryFilter', 'containerId': 'fillerFilter', 'options': {'filterColumnIndex': 9, 'ui': {'caption': 'search/choose a filler', 'selectedValuesLayout': 'belowWrapping'}}})
@@ -488,10 +524,16 @@ export default {
   .subheading {
     color: white;
   }
-
+  h1 {
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
+  .container {
+    padding-top: 10px;
+  }
   .v-jumbotron {
     color: white;
-    padding: 0.5rem 0.5rem;
+    padding: 0.5rem 0.3rem;
     background-color: #000000;
     border-radius: 0px;
     margin-top: 0px;

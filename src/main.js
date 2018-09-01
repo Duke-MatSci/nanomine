@@ -11,8 +11,11 @@ import SubHeader from '@/components/PageSubHeader'
 import Footer from '@/components/PageFooter'
 import LeftMenu from '@/components/LeftMenu'
 import Waiting from '@/components/Waiting'
-
 import store from './store'
+import VueGoogleCharts from 'vue-google-charts'
+
+Vue.use(VueGoogleCharts)
+
 
 Vue.config.productionTip = false
 
