@@ -70,44 +70,53 @@
     </div>
     <div v-if="showfp()">
       <v-container fluid grid-list-xl>
-          <!--v-layout align-center justify-space-around column fill-height-->
-          <h1>Filler Descriptor vs Material Property</h1>
-          <v-layout xs-12 align-center>
-            <v-flex xs1 d-flex></v-flex>
+        <!--v-layout align-center justify-space-around column fill-height-->
+        <h1>Filler Descriptor vs Material Property</h1>
+        <v-layout xs12 align-center>
+          <v-flex xs1 d-flex></v-flex>
           <v-flex xs5 d-flex>
             <v-select v-model="fillerProperty" v-on:change="getMaterialPropertiesForFillerProperty()"
                       :items="fillerPropertyList"
                       label="Select Filler Property for X axis"
             ></v-select>
           </v-flex>
-          <v-flex xs5 d-flex>
+          <v-flex xs6 d-flex>
             <v-select v-model="materialPropertyY"
                       :items="materialPropertiesY"
                       label="Select Material Property for Y axis"
+                      v-on:change="visualizeFp()"
             ></v-select>
-            <v-flex xs2 d-flex></v-flex>
+            <v-flex xs1 d-flex></v-flex>
           </v-flex>
-          </v-layout>
-          <v-btn type="button" class="btn btn-primary" id="viz-fp" style="width:300px;" v-on:click="visualizeFp()">
-            Visualize
-          </v-btn>
-          <table class="table">
-            <thead>
-            <tr>
-              <th class="text-center" id="sampleFilter"></th>
-              <th class="text-center" id="matrixFilter"></th>
-              <th class="text-center" id="fillerFilter"></th>
-            </tr>
-            </thead>
-          </table>
-          <GChart v-if="showFdmpChart()"
-            type="BubbleChart"
-            :data="fdmpChartData"
-            :options="fdmpChartOptions"
-          />
-          <br>
-          <div id="propertyTable"></div>
-        <v-btn type="button" class="btn btn-primary" v-on:click="active ='main'">Go Back</v-btn>
+        </v-layout>
+        <!--v-btn type="button" class="btn btn-primary" id="viz-fp" style="width:300px;" v-on:click="visualizeFp()">
+          Visualize
+        </v-btn-->
+        <table class="table">
+          <thead>
+          <tr>
+            <th class="text-center" id="sampleFilter"></th>
+            <th class="text-center" id="matrixFilter"></th>
+            <th class="text-center" id="fillerFilter"></th>
+          </tr>
+          </thead>
+        </table>
+        <GChart xs12 v-if="showFdmpChart()"
+                type="BubbleChart"
+                :data="fdmpChartData"
+                :options="fdmpChartOptions"
+        />
+        <v-flex xs12 f-flex v-if="showFdmpChart()">
+          <v-btn xs4 align-center color="secondary">Download Table Data as CSV</v-btn>
+        </v-flex>
+        <GChart xs12 v-if="showFdmpChart()"
+                type="Table"
+                :data="fdmpChartData"
+                :options="fdmpChartOptions"
+        />
+        <br>
+        <!--div id="propertyTable"></div-->
+        <!--v-btn v-on:click="active ='main'">Go Back</v-btn-->
       </v-container>
     </div> <!-- showfp() -->
     <div v-if="showmp()">
@@ -234,7 +243,8 @@ export default {
       materialPropertyMap: new Map(),
       materialPropertyListY: [],
       fdmpChartData: [],
-      fdmpChartOptions: null
+      fdmpChartOptions: null,
+      fdmpTableOptions: null
     }
   },
   methods: {
@@ -457,7 +467,13 @@ export default {
               },
               'view': {'columns': [0, 1, 2, 7]}
             }
-
+            vm.fdmpTableOptions = {
+              'options': {
+                // 'height': tableHeight,
+                // 'width': tableWidth
+              },
+              'view': {'columns': [0, 5, 6, 8, 9, 10, 11]}
+            }
             // let sampleCategoryFilter = new google.visualization.ControlWrapper({'controlType': 'CategoryFilter', 'containerId': 'sampleFilter', 'options': {'filterColumnIndex': 0, 'ui': {'caption': 'search/choose a sample', 'selectedValuesLayout': 'belowWrapping'}}})
             // let matrixlCategoryFilter = new google.visualization.ControlWrapper({'controlType': 'CategoryFilter', 'containerId': 'matrixFilter', 'options': {'filterColumnIndex': 8, 'ui': {'caption': 'search/choose a matrix', 'selectedValuesLayout': 'belowWrapping'}}})
             // let fillerCategoryFilter = new google.visualization.ControlWrapper({'controlType': 'CategoryFilter', 'containerId': 'fillerFilter', 'options': {'filterColumnIndex': 9, 'ui': {'caption': 'search/choose a filler', 'selectedValuesLayout': 'belowWrapping'}}})
@@ -492,21 +508,21 @@ export default {
 
   }
   /* under construction
-    makeDbActive: function () {
-      let vm = this
-      console.log('makeDbActive')
-      vm.active = 'db'
-      if (!vm.matrixList || vm.matrixList.length <= 0) {
-        vm.setLoading()
-        setTimeout(function(){
-          vm.fillerProperties = [{'db': 'a', 'uri': 'a1'}, {'db': 'b', 'uri': 'b1'}, {'db': 'c', 'uri':'c1'}]
-          vm.fillerProperties.forEach(function (v) {
-            vm.matrixList.push(v, db)
-          })
-          vm.resetLoading()
-        }, 0)
-      }
-    }, */
+      makeDbActive: function () {
+        let vm = this
+        console.log('makeDbActive')
+        vm.active = 'db'
+        if (!vm.matrixList || vm.matrixList.length <= 0) {
+          vm.setLoading()
+          setTimeout(function(){
+            vm.fillerProperties = [{'db': 'a', 'uri': 'a1'}, {'db': 'b', 'uri': 'b1'}, {'db': 'c', 'uri':'c1'}]
+            vm.fillerProperties.forEach(function (v) {
+              vm.matrixList.push(v, db)
+            })
+            vm.resetLoading()
+          }, 0)
+        }
+      }, */
 }
 </script>
 
@@ -524,20 +540,23 @@ export default {
   .subheading {
     color: white;
   }
+
   h1 {
-    margin-top: 10px;
+    margin-top: 0px;
     margin-bottom: 10px;
   }
+
   .container {
     padding-top: 10px;
   }
+
   .v-jumbotron {
     color: white;
     padding: 0.5rem 0.3rem;
     background-color: #000000;
     border-radius: 0px;
     margin-top: 0px;
-    max-height: 200px;
+    max-height: 185px;
   }
 
 </style>
