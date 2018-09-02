@@ -101,13 +101,15 @@
           </tr>
           </thead>
         </table>
-        <GChart xs12 v-if="showFdmpChart()"
+        <div class="visChartContainer">
+        <GChart class="visChart" xs12 v-if="showFdmpChart()"
                 type="BubbleChart"
                 :data="fdmpChartData"
                 :options="fdmpChartOptions"
         />
+        </div>
         <v-flex xs12 f-flex v-if="showFdmpChart()">
-          <v-btn xs4 align-center color="secondary">Download Table Data as CSV</v-btn>
+          <v-btn xs4 align-center color="secondary">Download Table as CSV</v-btn>
         </v-flex>
         <GChart xs12 v-if="showFdmpChart()"
                 type="Table"
@@ -262,7 +264,7 @@ export default {
     },
     showFdmpChart: function () {
       let vm = this
-      return (vm.fdmpChartOptions !== null)
+      return (vm.fdmpChartData.length > 0 && vm.fdmpChartOptions !== null)
     },
     showmp: function () {
       let vm = this
@@ -376,10 +378,12 @@ export default {
         }
       })
         .then(function (rsp) {
+          vm.visError = false
           vm.fdmpChartData = [['sample', fpX, mpY, 'control', 'bubble size', fpX, mpY, 'matrix-filler', 'matrix', 'filler', 'paper link', 'paper title']]
           if (rsp.data.results.bindings.length === 0) {
             vm.visErrorMsg = 'An axis you have selected includes an array of data and cannot be visualized with this chart. Try using Material Spectrum instead.'
             vm.visError = true
+            vm.fdmpChartData = []
           } else {
             let xUnit = ''
             let yUnit = ''
@@ -545,11 +549,19 @@ export default {
     margin-top: 0px;
     margin-bottom: 10px;
   }
-
+  .visChartContainer {
+    height: 500px;
+  }
+  .visChart {
+    height: 100%;
+  }
   .container {
     padding-top: 10px;
   }
-
+  .v-alert {
+    margin-top: 10px;
+    margin-bottom: 0px;
+  }
   .v-jumbotron {
     color: white;
     padding: 0.5rem 0.3rem;
