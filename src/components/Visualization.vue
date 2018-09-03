@@ -106,6 +106,18 @@
                     v-on:change="fdmpFilterData"
                     multiple
           >
+            <template
+              slot="selection"
+              slot-scope="{ item, index }"
+            >
+              <v-chip v-if="index === 0">
+                <span>{{ item }}</span>
+              </v-chip>
+              <span
+                v-if="index === 1"
+                class="grey--text caption"
+              >(+{{ fdmpSampleFilterSelected.length - 1 }} others)</span>
+            </template>
             <v-list-tile
               slot="prepend-item"
               ripple
@@ -129,6 +141,18 @@
                     v-on:change="fdmpFilterData"
                     multiple
           >
+            <template
+              slot="selection"
+              slot-scope="{ item, index }"
+            >
+              <v-chip v-if="index === 0">
+                <span>{{ item }}</span>
+              </v-chip>
+              <span
+                v-if="index === 1"
+                class="grey--text caption"
+              >(+{{ fdmpMatrixFilterSelected.length - 1 }} others)</span>
+            </template>
             <v-list-tile
               slot="prepend-item"
               ripple
@@ -152,6 +176,18 @@
                     v-on:change="fdmpFilterData"
                     multiple
           >
+            <template
+              slot="selection"
+              slot-scope="{ item, index }"
+            >
+              <v-chip v-if="index === 0">
+                <span>{{ item }}</span>
+              </v-chip>
+              <span
+                v-if="index === 1"
+                class="grey--text caption"
+              >(+{{ fdmpFillerFilterSelected.length - 1 }} others)</span>
+            </template>
             <v-list-tile
               slot="prepend-item"
               ripple
