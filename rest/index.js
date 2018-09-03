@@ -470,6 +470,42 @@ group by ?materialProperty order by desc(?count)
 `
   return postSparql(req.path, query, req, res)
 })
+app.get('/visualization/fillerPropertyMaterialPropertyGraphData', function (req, res) {
+  let fillerPropertyUri = req.query.fillerPropertyUri
+  let materialPropertyUri = req.query.materialPropertyUri
+  let query = `
+prefix sio:<http://semanticscience.org/resource/>
+prefix ns:<http://nanomine.tw.rpi.edu/ns/> 
+prefix np: <http://www.nanopub.org/nschema#> 
+prefix dcterms: <http://purl.org/dc/terms/> 
+select distinct ?sample ?x ?y ?xUnit ?yUnit ?matrixPolymer ?fillerPolymer ?doi ?title 
+where { 
+  ?nanopub np:hasAssertion ?ag. 
+  graph ?ag { 
+    ?sample sio:hasAttribute ?sampleAttribute .
+    ?sampleAttribute a <${materialPropertyUri}> .
+    ?sampleAttribute sio:hasValue ?y.
+    optional{?sampleAttribute sio:hasUnit ?yUnit.}
+    ?sample sio:hasComponentPart ?matrix .
+    ?sample sio:hasComponentPart ?filler .
+    ?matrix a ?matrixPolymer .
+    ?filler a ?fillerPolymer .
+    ?matrix sio:hasRole [a ns:Matrix].
+    ?filler sio:hasRole [a ns:Filler].
+    ?filler sio:hasAttribute ?fillerAttribute .
+    ?fillerAttribute a <${fillerPropertyUri}> .
+    ?fillerAttribute sio:hasValue ?x .
+    optional{?fillerAttribute sio:hasUnit ?xUnit.}
+  } 
+  ?nanopub np:hasProvenance ?pg. 
+  graph ?pg { 
+    ?doi dcterms:isPartOf ?journal. 
+    ?doi dcterms:title ?title. 
+  } 
+}
+  `
+  return postSparql(req.path, query, req, res)
+})
 
 /* Visualization related requests - end */
 

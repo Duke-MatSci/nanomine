@@ -11,17 +11,19 @@ import SubHeader from '@/components/PageSubHeader'
 import Footer from '@/components/PageFooter'
 import LeftMenu from '@/components/LeftMenu'
 import Waiting from '@/components/Waiting'
-
 import store from './store'
+import VueGoogleCharts from 'vue-google-charts'
+
+Vue.use(VueGoogleCharts)
 
 Vue.config.productionTip = false
 
 Vue.use(Vuex)
 Vue.use(Vuetify, {
   theme: {
-    secondary: '#B3E5FC',
-    primary: '#03A9F4',
-    accent: '#3D5AFE',
+    primary: '#096ff4',
+    secondary: '#03A9F4',
+    accent: '#1519fe',
     error: '#f44336',
     warning: '#ffeb3b',
     info: '#82B1FF',

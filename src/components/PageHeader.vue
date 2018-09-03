@@ -1,7 +1,7 @@
 <template>
   <div class="header">
     <v-toolbar app dense>
-      <v-toolbar-side-icon @click="toggleLeftMenu()"></v-toolbar-side-icon>
+      <!--v-toolbar-side-icon @click="toggleLeftMenu()"></v-toolbar-side-icon-->
       <v-btn flat to="/">
         <v-toolbar-title><i class="material-icons nm-home-icon">home</i>NanoMine</v-toolbar-title>
       </v-btn>

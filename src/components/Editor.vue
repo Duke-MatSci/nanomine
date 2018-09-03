@@ -54,14 +54,12 @@
         <span v-if="view=='form'">Show XML View</span>
       </v-tooltip>
 
-
       <v-tooltip bottom>
         <v-btn icon slot="activator" v-on:click="saveButton()">
           <v-icon>save</v-icon>
         </v-btn>
         <span >Save</span>
       </v-tooltip>
-
 
       <!--v-tooltip bottom> !!! Disabled settings for now
         <v-btn icon slot="activator" v-on:click="settingsButton()">
