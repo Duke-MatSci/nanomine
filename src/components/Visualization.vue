@@ -86,13 +86,10 @@
                       label="Select Material Property for Y axis"
                       v-on:change="visualizeFp()"
             ></v-select>
-            <v-flex xs1 d-flex></v-flex>
+            <v-flex xs2 d-flex></v-flex>
           </v-flex>
         </v-layout>
-        <!--v-btn type="button" class="btn btn-primary" id="viz-fp" style="width:300px;" v-on:click="visualizeFp()">
-          Visualize
-        </v-btn-->
-        <table class="table">
+        <!--table class="table">
           <thead>
           <tr>
             <th class="text-center" id="sampleFilter"></th>
@@ -100,15 +97,88 @@
             <th class="text-center" id="fillerFilter"></th>
           </tr>
           </thead>
-        </table>
+        </table-->
+        <v-layout xs12 d-flex>
+          <v-select xs3
+                    v-model="fdmpSampleFilterSelected"
+                    :items="fdmpSampleFilter"
+                    label="Filter by sample"
+                    v-on:change="fdmpFilterData"
+                    multiple
+          >
+            <v-list-tile
+              slot="prepend-item"
+              ripple
+              @click="fdmpAllSamplesToggle"
+            >
+              <v-list-tile-action>
+                <v-icon :color="fdmpSampleFilterSelected.length > 0 ? 'indigo darken-4' : ''">{{ icon }}</v-icon>
+              </v-list-tile-action>
+              <v-list-tile-title>Select All</v-list-tile-title>
+            </v-list-tile>
+            <v-divider
+              slot="prepend-item"
+              class="mt-2"
+            ></v-divider>
+          </v-select>
+          <v-flex xs1 d-flex></v-flex>
+          <v-select xs3
+                    v-model="fdmpMatrixFilterSelected"
+                    :items="fdmpMatrixFilter"
+                    label="Filter by matrix"
+                    v-on:change="fdmpFilterData"
+                    multiple
+          >
+            <v-list-tile
+              slot="prepend-item"
+              ripple
+              @click="fdmpAllMatrixToggle"
+            >
+              <v-list-tile-action>
+                <v-icon :color="fdmpMatrixFilterSelected.length > 0 ? 'indigo darken-4' : ''">{{ matrixIcon }}</v-icon>
+              </v-list-tile-action>
+              <v-list-tile-title>Select All</v-list-tile-title>
+            </v-list-tile>
+            <v-divider
+              slot="prepend-item"
+              class="mt-2"
+            ></v-divider>
+          </v-select>
+          <v-flex xs1 d-flex></v-flex>
+          <v-select xs3
+                    v-model="fdmpFillerFilterSelected"
+                    :items="fdmpFillerFilter"
+                    label="Filter by filler"
+                    v-on:change="fdmpFilterData"
+                    multiple
+          >
+            <v-list-tile
+              slot="prepend-item"
+              ripple
+              @click="fdmpAllFillerToggle"
+            >
+              <v-list-tile-action>
+                <v-icon :color="fdmpFillerFilterSelected.length > 0 ? 'indigo darken-4' : ''">{{ fillerIcon }}</v-icon>
+              </v-list-tile-action>
+              <v-list-tile-title>Select All</v-list-tile-title>
+            </v-list-tile>
+            <v-divider
+              slot="prepend-item"
+              class="mt-2"
+            ></v-divider>
+          </v-select>
+        </v-layout>
         <div class="visChartContainer">
-        <GChart class="visChart" xs12 v-if="showFdmpChart()"
-                type="BubbleChart"
-                :data="fdmpChartData"
-                :options="fdmpChartOptions"
-        />
+          <GChart class="visChart" xs12 v-if="showFdmpChart()"
+                  type="BubbleChart"
+                  :data="fdmpChartData"
+                  :options="fdmpChartOptions"
+          />
+          <div class="visNoData" v-else>
+            No data for selected criteria
+          </div>
         </div>
-        <v-flex xs12 f-flex v-if="showFdmpChart()">
+        <v-flex xs12 v-flex v-if="showFdmpChart()">
           <v-btn xs4 align-center color="secondary">Download Table as CSV</v-btn>
         </v-flex>
         <GChart xs12 v-if="showFdmpChart()"
@@ -144,7 +214,7 @@
         </tr>
         </tbody>
       </table>
-      <table class="table">
+      <!--table class="table">
         <thead>
         <tr>
           <th class="text-center" id="sampleFilter"></th>
@@ -156,7 +226,7 @@
       </table>
       <div id="propertyChart"></div>
       <br>
-      <div id="propertyTable"></div>
+      <div id="propertyTable"></div-->
       <v-btn type="button" class="btn btn-primary" id="mp" v-on:click="active ='main'">Go Back</v-btn>
     </div> <!-- showmp() -->
     <div v-if="showms()">
@@ -245,11 +315,111 @@ export default {
       materialPropertyMap: new Map(),
       materialPropertyListY: [],
       fdmpChartData: [],
+      fdmpUnfilteredChartData: [],
       fdmpChartOptions: null,
-      fdmpTableOptions: null
+      fdmpTableOptions: null,
+      fdmpSampleFilter: [],
+      fdmpSampleFilterSelected: [],
+      fdmpMatrixFilter: [],
+      fdmpMatrixFilterSelected: [],
+      fdmpFillerFilter: [],
+      fdmpFillerFilterSelected: []
+    }
+  },
+  computed: {
+    fdmpAllSamplesSelected: function () {
+      return this.fdmpSampleFilter.length === this.fdmpSampleFilterSelected.length
+    },
+    fdmpSomeSamplesSelected: function () {
+      return this.fdmpSampleFilterSelected.length > 0 && !this.fdmpAllSamplesSelected
+    },
+    icon: function () {
+      if (this.fdmpAllSamplesSelected) return 'check_box'
+      if (this.fdmpSomeSamplesSelected) return 'indeterminate_check_box'
+      return 'check_box_outline_blank'
+    },
+    fdmpAllMatrixSelected: function () {
+      return this.fdmpMatrixFilter.length === this.fdmpMatrixFilterSelected.length
+    },
+    fdmpSomeMatrixSelected: function () {
+      return this.fdmpMatrixFilterSelected.length > 0 && !this.fdmpAllMatrixSelected
+    },
+    matrixIcon: function () {
+      if (this.fdmpAllMatrixSelected) return 'check_box'
+      if (this.fdmpSomeMatrixSelected) return 'indeterminate_check_box'
+      return 'check_box_outline_blank'
+    },
+    fdmpAllFillerSelected: function () {
+      return this.fdmpFillerFilter.length === this.fdmpFillerFilterSelected.length
+    },
+    fdmpSomeFillerSelected: function () {
+      return this.fdmpFillerFilterSelected.length > 0 && !this.fdmpAllFillerSelected
+    },
+    fillerIcon: function () {
+      if (this.fdmpAllFillerSelected) return 'check_box'
+      if (this.fdmpSomeFillerSelected) return 'indeterminate_check_box'
+      return 'check_box_outline_blank'
     }
   },
   methods: {
+    fdmpFilterData: function () {
+      let sampleIdx = 0
+      let matrixIdx = 8
+      let fillerIdx = 9
+      let vm = this
+      let rv = vm.fdmpUnfilteredChartData.filter((v, idx, a) => {
+        let keep = true
+        if (idx > 0) { // Always keep header record
+          if (vm.fdmpSampleFilterSelected.length > 0 && !vm.fdmpSampleFilterSelected.includes(v[sampleIdx])) {
+            keep = false
+          }
+          if (keep === true && vm.fdmpMatrixFilterSelected.length > 0 && (!vm.fdmpMatrixFilterSelected.includes(v[matrixIdx]) || v[matrixIdx].length <= 0)) {
+            keep = false
+          }
+          if (keep === true && vm.fdmpFillerFilterSelected.length > 0 && (!vm.fdmpFillerFilterSelected.includes(v[fillerIdx]) || v[fillerIdx].length <= 0)) {
+            keep = false
+          }
+        }
+        return keep
+      })
+      if (rv.length === 1) { // if it's just the headers then there is no data, so keep the chart from displaying
+        rv = []
+      }
+      vm.fdmpChartData = rv
+    },
+    fdmpAllSamplesToggle: function () {
+      let vm = this
+      vm.$nextTick(function () {
+        console.log('toggle all samples.')
+        if (vm.fdmpSampleFilterSelected.length === vm.fdmpSampleFilter.length) {
+          vm.fdmpSampleFilterSelected = []
+        } else {
+          vm.fdmpSampleFilterSelected = vm.fdmpSampleFilter.slice()
+        }
+      })
+    },
+    fdmpAllMatrixToggle: function () {
+      let vm = this
+      vm.$nextTick(function () {
+        console.log('toggle all matrix.')
+        if (vm.fdmpMatrixFilterSelected.length === vm.fdmpMatrixFilter.length) {
+          vm.fdmpMatrixFilterSelected = []
+        } else {
+          vm.fdmpMatrixFilterSelected = vm.fdmpMatrixFilter.slice()
+        }
+      })
+    },
+    fdmpAllFillerToggle: function () {
+      let vm = this
+      vm.$nextTick(function () {
+        console.log('toggle all Filler.')
+        if (vm.fdmpFillerFilterSelected.length === vm.fdmpFillerFilter.length) {
+          vm.fdmpFillerFilterSelected = []
+        } else {
+          vm.fdmpFillerFilterSelected = vm.fdmpFillerFilter.slice()
+        }
+      })
+    },
     showMain: function () {
       let vm = this
       return (
@@ -379,11 +549,19 @@ export default {
       })
         .then(function (rsp) {
           vm.visError = false
-          vm.fdmpChartData = [['sample', fpX, mpY, 'control', 'bubble size', fpX, mpY, 'matrix-filler', 'matrix', 'filler', 'paper link', 'paper title']]
+          vm.fdmpSampleFilter = []
+          vm.fdmpSampleFilterSelected = []
+          vm.fdmpMatrixFilter = []
+          vm.fdmpMatrixFilterSelected = []
+          vm.fdmpFillerFilter = []
+          vm.fdmpFillerFilterSelected = []
+          vm.fdmpChartData = []
+          vm.fdmpUnfilteredChartData = [['sample', fpX, mpY, 'control', 'bubble size', fpX, mpY, 'matrix-filler', 'matrix', 'filler', 'paper link', 'paper title']]
           if (rsp.data.results.bindings.length === 0) {
             vm.visErrorMsg = 'An axis you have selected includes an array of data and cannot be visualized with this chart. Try using Material Spectrum instead.'
             vm.visError = true
             vm.fdmpChartData = []
+            vm.fdmpUnfilteredChartData = []
           } else {
             let xUnit = ''
             let yUnit = ''
@@ -449,8 +627,20 @@ export default {
               let fillerPolymer = rsp.data.results.bindings[i].fillerPolymer.value.substring(vm.compoundPrefix.length, rsp.data.results.bindings[i].fillerPolymer.value.length)
               let doi = rsp.data.results.bindings[i].doi.value
               let title = rsp.data.results.bindings[i].title.value
-              vm.fdmpChartData.push([sample, x, y, 'control-' + x, 1, x + ' ' + xUnit, y + ' ' + yUnit, matrixPolymer + '(matrix)-' + fillerPolymer + '(filler)', matrixPolymer, fillerPolymer, doi, title])
+              vm.fdmpUnfilteredChartData.push([sample, x, y, 'control-' + x, 1, x + ' ' + xUnit, y + ' ' + yUnit, matrixPolymer + '(matrix)-' + fillerPolymer + '(filler)', matrixPolymer, fillerPolymer, doi, title])
+              if (sample.trim().length > 0 && !vm.fdmpSampleFilter.includes(sample)) {
+                vm.fdmpSampleFilter.push(sample)
+              }
+              if (matrixPolymer.trim().length > 0 && !vm.fdmpMatrixFilter.includes(matrixPolymer)) {
+                vm.fdmpMatrixFilter.push(matrixPolymer)
+              }
+              if (fillerPolymer.trim().length > 0 && !vm.fdmpFillerFilter.includes(fillerPolymer)) {
+                vm.fdmpFillerFilter.push(fillerPolymer)
+              }
             }
+            vm.fdmpSampleFilter.sort()
+            vm.fdmpMatrixFilter.sort()
+            vm.fdmpFillerFilter.sort()
             if (xUnit !== '') xUnit = ' (' + xUnit + ')'
             if (yUnit !== '') yUnit = ' (' + yUnit + ')'
             vm.fdmpChartOptions = {
@@ -478,6 +668,7 @@ export default {
               },
               'view': {'columns': [0, 5, 6, 8, 9, 10, 11]}
             }
+            vm.fdmpFilterData() // this copies the data to the chart!!!
             // let sampleCategoryFilter = new google.visualization.ControlWrapper({'controlType': 'CategoryFilter', 'containerId': 'sampleFilter', 'options': {'filterColumnIndex': 0, 'ui': {'caption': 'search/choose a sample', 'selectedValuesLayout': 'belowWrapping'}}})
             // let matrixlCategoryFilter = new google.visualization.ControlWrapper({'controlType': 'CategoryFilter', 'containerId': 'matrixFilter', 'options': {'filterColumnIndex': 8, 'ui': {'caption': 'search/choose a matrix', 'selectedValuesLayout': 'belowWrapping'}}})
             // let fillerCategoryFilter = new google.visualization.ControlWrapper({'controlType': 'CategoryFilter', 'containerId': 'fillerFilter', 'options': {'filterColumnIndex': 9, 'ui': {'caption': 'search/choose a filler', 'selectedValuesLayout': 'belowWrapping'}}})
@@ -512,21 +703,21 @@ export default {
 
   }
   /* under construction
-      makeDbActive: function () {
-        let vm = this
-        console.log('makeDbActive')
-        vm.active = 'db'
-        if (!vm.matrixList || vm.matrixList.length <= 0) {
-          vm.setLoading()
-          setTimeout(function(){
-            vm.fillerProperties = [{'db': 'a', 'uri': 'a1'}, {'db': 'b', 'uri': 'b1'}, {'db': 'c', 'uri':'c1'}]
-            vm.fillerProperties.forEach(function (v) {
-              vm.matrixList.push(v, db)
-            })
-            vm.resetLoading()
-          }, 0)
-        }
-      }, */
+          makeDbActive: function () {
+            let vm = this
+            console.log('makeDbActive')
+            vm.active = 'db'
+            if (!vm.matrixList || vm.matrixList.length <= 0) {
+              vm.setLoading()
+              setTimeout(function(){
+                vm.fillerProperties = [{'db': 'a', 'uri': 'a1'}, {'db': 'b', 'uri': 'b1'}, {'db': 'c', 'uri':'c1'}]
+                vm.fillerProperties.forEach(function (v) {
+                  vm.matrixList.push(v, db)
+                })
+                vm.resetLoading()
+              }, 0)
+            }
+          }, */
 }
 </script>
 
@@ -549,19 +740,31 @@ export default {
     margin-top: 0px;
     margin-bottom: 10px;
   }
+
   .visChartContainer {
     height: 500px;
   }
+
   .visChart {
     height: 100%;
+  }
+  .visNoData {
+    margin-top: 30px;
+    font-size: 30px;
+    color: red;
   }
   .container {
     padding-top: 10px;
   }
+  .v-input {
+    margin-top: 0px;
+  }
+
   .v-alert {
     margin-top: 10px;
     margin-bottom: 0px;
   }
+
   .v-jumbotron {
     color: white;
     padding: 0.5rem 0.3rem;

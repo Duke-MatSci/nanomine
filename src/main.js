@@ -16,7 +16,6 @@ import VueGoogleCharts from 'vue-google-charts'
 
 Vue.use(VueGoogleCharts)
 
-
 Vue.config.productionTip = false
 
 Vue.use(Vuex)
