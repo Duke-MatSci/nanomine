@@ -110,13 +110,13 @@
               slot="selection"
               slot-scope="{ item, index }"
             >
-              <v-chip v-if="index === 0">
+              <span v-if="index === 0">
                 <span>{{ item }}</span>
-              </v-chip>
+              </span>
               <span
                 v-if="index === 1"
                 class="grey--text caption"
-              >(+{{ fdmpSampleFilterSelected.length - 1 }} others)</span>
+              >&nbsp;(+{{ fdmpSampleFilterSelected.length - 1 }} more)</span>
             </template>
             <v-list-tile
               slot="prepend-item"
@@ -145,13 +145,13 @@
               slot="selection"
               slot-scope="{ item, index }"
             >
-              <v-chip v-if="index === 0">
+              <span v-if="index === 0">
                 <span>{{ item }}</span>
-              </v-chip>
+              </span>
               <span
                 v-if="index === 1"
                 class="grey--text caption"
-              >(+{{ fdmpMatrixFilterSelected.length - 1 }} others)</span>
+              >&nbsp;(+{{ fdmpMatrixFilterSelected.length - 1 }} more)</span>
             </template>
             <v-list-tile
               slot="prepend-item"
@@ -180,13 +180,13 @@
               slot="selection"
               slot-scope="{ item, index }"
             >
-              <v-chip v-if="index === 0">
+              <span v-if="index === 0">
                 <span>{{ item }}</span>
-              </v-chip>
+              </span>
               <span
                 v-if="index === 1"
                 class="grey--text caption"
-              >(+{{ fdmpFillerFilterSelected.length - 1 }} others)</span>
+              >&nbsp;(+{{ fdmpFillerFilterSelected.length - 1 }} more)</span>
             </template>
             <v-list-tile
               slot="prepend-item"
