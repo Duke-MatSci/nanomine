@@ -6,7 +6,7 @@
         <v-flex xs4>
           <img src="/cdn/img/visualize_data.png"/>
           <h4>
-            <router-link to="/visualize">Visualize</router-link>
+            <router-link to="/Visualization">Visualize</router-link>
           </h4>
           <p>Visualize nanocomposite data.</p>
         </v-flex>
