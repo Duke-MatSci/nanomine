@@ -49,7 +49,7 @@
                   properties of a specific composite or a certain matrix or filler of interest. </p>
                 <!--p class="text-left"> •   Database Overview (under construction) will offera visual summary of the data in NanoMine. </p-->
               </div>
-              <img src="/cdn/img/visualization_hero.png"/>
+              <img style="width:680px;height:auto;" src="/cdn/img/visualization_hero.jpg"/>
               <br>
               <!--h4 class="text-left">While many of these functions are under construction, an example illustrating the types of visualizations which will be readily available in the next months is below. </h4-->
               <p class="text-left">To re-create the sample visualization shown above: </p>
@@ -220,7 +220,7 @@
         <GChart xs12 v-if="showFdmpChart()"
                 type="Table"
                 :data="fdmpChartData"
-                :options="fdmpChartOptions"
+                :options="fdmpTableOptions"
         />
         <br>
         <!--div id="propertyTable"></div-->
@@ -229,7 +229,7 @@
     </div> <!-- showfp() -->
     <div v-if="showmp()">
       <h1>Material Property Dashboard</h1>
-      <table class="table">
+      <!--  COMMENTED FOR NOW table class="table">
         <thead>
         <tr>
           <th scope="col" class="text-center">choose one material property as x axis:</th>
@@ -250,7 +250,7 @@
         </tr>
         </tbody>
       </table>
-      <!--table class="table">
+      <table class="table">
         <thead>
         <tr>
           <th class="text-center" id="sampleFilter"></th>
@@ -262,12 +262,12 @@
       </table>
       <div id="propertyChart"></div>
       <br>
-      <div id="propertyTable"></div-->
-      <v-btn type="button" class="btn btn-primary" id="mp" v-on:click="active ='main'">Go Back</v-btn>
+      <div id="propertyTable"></div>
+      <v-btn type="button" class="btn btn-primary" id="mp" v-on:click="active ='main'">Go Back</v-btn-->
     </div> <!-- showmp() -->
     <div v-if="showms()">
       <h1>Material Spectrum Dashboard</h1>
-      <table class="table">
+      <!-- COMMENTED FOR NOW table class="table">
         <thead>
         <tr>
           <th scope="col" class="text-center">choose matrix</th>
@@ -307,7 +307,7 @@
       <div id="propertyChart"></div>
       <br>
       <div id="propertyTable"></div>
-      <v-btn type="button" class="btn btn-primary" id="ms" v-on:click="active ='main'">Go Back</v-btn>
+      <v-btn type="button" class="btn btn-primary" id="ms" v-on:click="active ='main'">Go Back</v-btn -->
     </div> <!-- showms() -->
     <div v-if="showdb()">
       <h1>Material Spectrum Dashboard (Under Construction)</h1>
@@ -698,11 +698,9 @@ export default {
               'view': {'columns': [0, 1, 2, 7]}
             }
             vm.fdmpTableOptions = {
-              'options': {
-                // 'height': tableHeight,
-                // 'width': tableWidth
-              },
-              'view': {'columns': [0, 5, 6, 8, 9, 10, 11]}
+              table: {
+                'view': {'columns': [0, 5, 6, 8, 9, 10, 11]}
+              }
             }
             vm.fdmpFilterData() // this copies the data to the chart!!!
             // let sampleCategoryFilter = new google.visualization.ControlWrapper({'controlType': 'CategoryFilter', 'containerId': 'sampleFilter', 'options': {'filterColumnIndex': 0, 'ui': {'caption': 'search/choose a sample', 'selectedValuesLayout': 'belowWrapping'}}})
