@@ -229,7 +229,7 @@
     </div> <!-- showfp() -->
     <div v-if="showmp()">
       <h1>Material Property Dashboard</h1>
-      <table class="table">
+      <!--  COMMENTED FOR NOW table class="table">
         <thead>
         <tr>
           <th scope="col" class="text-center">choose one material property as x axis:</th>
@@ -250,7 +250,7 @@
         </tr>
         </tbody>
       </table>
-      <!--table class="table">
+      <table class="table">
         <thead>
         <tr>
           <th class="text-center" id="sampleFilter"></th>
@@ -262,12 +262,12 @@
       </table>
       <div id="propertyChart"></div>
       <br>
-      <div id="propertyTable"></div-->
-      <v-btn type="button" class="btn btn-primary" id="mp" v-on:click="active ='main'">Go Back</v-btn>
+      <div id="propertyTable"></div>
+      <v-btn type="button" class="btn btn-primary" id="mp" v-on:click="active ='main'">Go Back</v-btn-->
     </div> <!-- showmp() -->
     <div v-if="showms()">
       <h1>Material Spectrum Dashboard</h1>
-      <table class="table">
+      <!-- COMMENTED FOR NOW table class="table">
         <thead>
         <tr>
           <th scope="col" class="text-center">choose matrix</th>
@@ -307,7 +307,7 @@
       <div id="propertyChart"></div>
       <br>
       <div id="propertyTable"></div>
-      <v-btn type="button" class="btn btn-primary" id="ms" v-on:click="active ='main'">Go Back</v-btn>
+      <v-btn type="button" class="btn btn-primary" id="ms" v-on:click="active ='main'">Go Back</v-btn -->
     </div> <!-- showms() -->
     <div v-if="showdb()">
       <h1>Material Spectrum Dashboard (Under Construction)</h1>
