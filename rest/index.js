@@ -12,6 +12,10 @@ const datauri = require('data-uri-to-buffer')
 const qs = require('qs')
 const fs = require('fs')
 const mongoose = require('mongoose')
+const templateFiller = require('es6-dynamic-template')
+
+//TODO calling next(err) results in error page rather than error code in json
+
 const ObjectId = mongoose.Types.ObjectId
 
 let logger = configureLogger()
@@ -422,6 +426,29 @@ app.post('/jobsubmit', function (req, res) {
   }
 })
 /* end job related rest services */
+
+/* email related rest services - begin */
+app.post('/jobemail', function (req, res, next) { // bearer auth
+  let jsonResp = {'error':null, 'data': null}
+  let jobtype = req.body.jobtype
+  let jobid = req.body.jobid
+  let emailtemplate = req.body.emailtemplatename
+  let emailvars = req.body.emailvars
+  emailvars.jobtype = jobtype
+  emailvars.jobid = jobid
+  // read the email template, merge with email vars
+
+  fs.readFile('config/emailtemplates/' + jobtype + '/' + emailtemplate + '.etf', function (err, etfText) {
+    if(err) {
+      jsonResp.error = {'statusCode': 400, 'statusText': 'unable to find template file.'}
+      return res.status(400).json(jsonResp)
+    }
+    let filled = templateFiller(etfText, emailvars)
+    logger.info(filled)
+    return res.json(jsonResp)
+  })
+})
+/* email related rest services - end */
 
 /* Visualization related requests - begin */
 app.get('/visualization/fillerPropertyList', function (req, res) {
