@@ -8,12 +8,40 @@
       {{editorErrorMsg}}
     </v-alert>
     <v-toolbar dark color="primary">
+      <v-tooltip bottom v-if="canAddTab()">
+        <v-btn icon slot="activator" v-on:click="addTabButton()">
+          <v-icon>add_circle_outline</v-icon>
+        </v-btn>
+        <span>Open</span>
+      </v-tooltip>
+
       <v-toolbar-title class="white--text">{{showFileName}}</v-toolbar-title>
       <v-tooltip bottom>
         <v-btn icon slot="activator" v-on:click="lockButton()">
           <v-icon>lock_open</v-icon>
         </v-btn>
         <span>Unlocked</span>
+      </v-tooltip>
+
+      <v-tooltip bottom v-if="hasPrevTab()">
+        <v-btn icon slot="activator" v-on:click="prevTabButton()">
+          <v-icon>skip_previous</v-icon>
+        </v-btn>
+        <span>Previous Tab</span>
+      </v-tooltip>
+
+      <v-tooltip bottom v-if="hasNextTab()">
+        <v-btn icon slot="activator" v-on:click="nextTabButton()">
+          <v-icon>skip_next</v-icon>
+        </v-btn>
+        <span>Next Tab</span>
+      </v-tooltip>
+
+      <v-tooltip bottom>
+        <v-btn icon slot="activator">
+          <v-icon>change_history</v-icon>
+        </v-btn>
+        <span >File changed</span>
       </v-tooltip>
 
       <v-spacer></v-spacer>
@@ -26,27 +54,19 @@
         <span v-if="view=='form'">Show XML View</span>
       </v-tooltip>
 
-      <v-menu :nudge-width="100" >
-        <v-btn icon slot="activator">
+      <v-tooltip bottom>
+        <v-btn icon slot="activator" v-on:click="saveButton()">
           <v-icon>save</v-icon>
         </v-btn>
-        <v-list >
-          <v-list-tile
-            v-for="(item, idx) in fileMenu"
-            :key="item"
-            @click="fileButton(idx, $event)"
-          >
-            <v-list-tile-title v-text="item"></v-list-tile-title>
-          </v-list-tile>
-        </v-list>
-      </v-menu>
+        <span >Save</span>
+      </v-tooltip>
 
-      <v-tooltip bottom>
-        <v-btn icon slot="activator" v-on:click="test2Button()">
+      <!--v-tooltip bottom> !!! Disabled settings for now
+        <v-btn icon slot="activator" v-on:click="settingsButton()">
           <v-icon>settings</v-icon>
         </v-btn>
         <span>Settings</span>
-      </v-tooltip>
+      </v-tooltip-->
 
       <v-tooltip bottom>
         <v-btn icon slot="activator" v-on:click="searchButton()">
@@ -56,10 +76,10 @@
       </v-tooltip>
 
       <!--<v-tooltip bottom>-->
-        <!--<v-btn icon slot="activator" v-on:click="samplesButton()">-->
-          <!--<v-icon>list</v-icon>-->
-        <!--</v-btn>-->
-        <!--<span>List data and schemas</span>-->
+      <!--<v-btn icon slot="activator" v-on:click="samplesButton()">-->
+      <!--<v-icon>list</v-icon>-->
+      <!--</v-btn>-->
+      <!--<span>List data and schemas</span>-->
       <!--</v-tooltip>-->
 
       <v-tooltip bottom>
@@ -82,8 +102,21 @@
         </v-btn>
         <span>More</span>
       </v-tooltip>
-
     </v-toolbar>
+    <v-layout row justify-center>
+      <v-dialog v-model="saveMenuActive" max-width="150px">
+          <v-list>
+            <v-list-tile
+              v-for="(item, idx) in saveMenu"
+              :key="item"
+              @click="fileButton(idx, $event)"
+            >
+              <v-list-tile-title v-text="item"></v-list-tile-title>
+            </v-list-tile>
+          </v-list>
+      </v-dialog>
+    </v-layout>
+
     <v-layout row justify-center>
       <v-dialog v-model="fileDialog" scrollable max-width="300px">
         <!--v-btn slot="activator" color="primary" dark>Open Dialog</v-btn-->
@@ -91,7 +124,7 @@
           <v-card-title>Select File to Open</v-card-title>
           <v-divider></v-divider>
           <v-card-text style="height: 300px;">
-            <v-radio-group  v-model="fileDialogItem" column>
+            <v-radio-group v-model="fileDialogItem" column>
               <v-radio v-for="(item, idx) in fileDialogList"
                        :key="idx"
                        :label="item"
@@ -108,14 +141,51 @@
         </v-card>
       </v-dialog>
     </v-layout>
-
+    <v-layout row justify-center>
+      <v-dialog v-model="settingsDialog" persistent max-width="290">
+        <!--v-btn slot="activator" color="primary" dark>Open Dialog</v-btn-->
+        <v-card>
+          <v-card-title class="headline">NanoMine Editor Settings</v-card-title>
+          <v-card-text>Editor settings</v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="green darken-1" flat @click.native="settingsDialog = false">Cancel</v-btn>
+            <v-btn color="green darken-1" flat @click.native="settingsDialog = false">Save</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+    </v-layout>
+    <!--/><-->
     <v-container fluid justify-start fill-height>
+      <!--img :src="imageUrl" height="150" v-if="imageUrl"/>
+      <v-btn flat icon color="primary" @click.native='pickFile()'>
+        <v-icon>attach_file</v-icon>
+      </v-btn>
+      <input
+        type="file"
+        style="display: none"
+        ref="image"
+        multiple
+        accept=".zip, .xlsx,.xls, image/*"
+        @change="onFilePicked"
+      >
+      <v-list>
+        <v-list-tile
+          v-for="(v, idx) in filesToUpload"
+          :key="idx"
+        >
+          <v-list-tile-content>
+            <v-list-tile-title v-text="v"></v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+      </v-list-->
       <v-layout row wrap align-start fill-height>
         <v-flex fill-height xs12>
           <div id="editor" ref="editor"></div>
         </v-flex>
       </v-layout>
     </v-container>
+    <!--/>Note: some help on vuetify file uploads: https://stackoverflow.com/questions/44989162/file-upload-in-vuetify<-->
   </div>
 </template>
 
@@ -130,6 +200,7 @@ export default {
   data: function () {
     return {
       msg: '<untitled>',
+      settingsDialog: false,
       editorError: false,
       editorErrorMsg: '',
       content: null,
@@ -139,18 +210,23 @@ export default {
       fileDialogItem: -1, // the value of the radio button selected
       fileDialogList: [], // list to use for radio button item names
       loadFile: false,
-      fileMenu: [
-        'Explore',
+      saveMenuActive: false,
+      saveMenu: [
+        // 'Explore',
         'Publish',
-        'Import',
+        // 'Import',
         'Export'
       ],
-      fileMenuOps: [
-        this.fileExplore,
+      saveMenuOps: [
+        // this.fileExplore,
         this.filePublish,
-        this.fileImport,
+        // this.fileImport,
         this.fileExport
-      ]
+      ],
+      dialog: false, // testing file upload
+      filesToUpload: [], // testing
+      imageUrl: '', //  testing
+      imageFile: '' //  testing
     }
   },
   beforeDestroy: function () {
@@ -176,11 +252,11 @@ export default {
       extraKeys: {
         'Ctrl-J': 'toMatchingTag',
         /* "Cmd-B": vm.beautify,
-        "Ctrl-B": vm.beautify,
-        "Cmd-Z": vm.undo,
-        "Ctrl-Z": vm.undo,
-        "Shift-Cmd-Z": vm.redo,
-        "Shift-Ctrl-Z": vm.redo, */
+          "Ctrl-B": vm.beautify,
+          "Cmd-Z": vm.undo,
+          "Ctrl-Z": vm.undo,
+          "Shift-Cmd-Z": vm.redo,
+          "Shift-Ctrl-Z": vm.redo, */
         "'<'": vm.completeAfter,
         "'/'": vm.completeIfAfterLt,
         "' '": vm.completeIfInTag,
@@ -218,8 +294,11 @@ export default {
       this.$store.commit('notLoading')
     },
     testButton: function () {
-      var vm = this
-      var url = '/nmr/test1'
+      let vm = this
+      console.log(vm.msg + ' testButton() clicked')
+      /*
+      console.log('testButton() executes one of the sparql queries that is very similar to the one used by the original visualization pgm.')
+      let url = '/nmr/test1'
       // let url = 'http://localhost:3000'
       vm.setLoading()
       return Axios.get(url)
@@ -239,11 +318,14 @@ export default {
           vm.editorErrorMsg = err
           vm.editorError = true
         })
+        */
     },
     test2Button: function () {
-      var vm = this
-      var url = '/nmr/fullgraph'
-      // let url = 'http://localhost:3000'
+      let vm = this
+      console.log(vm.msg + ' test2Button() clicked')
+      /*
+      let url = '/nmr/fullgraph'
+      console.log('this code will load the entire triple store, so it's expensive!')
       vm.setLoading()
       return Axios.get(url)
         .then(function (response) {
@@ -267,9 +349,22 @@ export default {
           vm.editorErrorMsg = err
           vm.editorError = true
         })
+        */
+    },
+    showSaveMenu: function () {
+      let vm = this
+      return vm.saveMenuActive
+    },
+    saveButton: function () {
+      let vm = this
+      vm.saveMenuActive = true
+    },
+    settingsButton: function () {
+      let vm = this
+      vm.settingsDialog = true
     },
     transformButton: function () {
-      var vm = this
+      let vm = this
       if (vm.view === 'xml') {
         vm.view = 'form'
       } else {
@@ -277,7 +372,7 @@ export default {
       }
     },
     infoButton: function () {
-      var vm = this
+      let vm = this
       console.log(vm.msg + ' info button')
     },
     lockButton: function () {
@@ -288,12 +383,26 @@ export default {
     //   console.log(ev.target.tagName + ' x: ' + ev.screenX + ' y: ' + ev.screenY)
     //   vm.showFileMenu = true
     // },
+    canAddTab: function () {
+      let vm = this
+      let rv = false
+      console.log(vm.msg + ' canAddTab()')
+      let tabCount = vm.$store.getters.editorTabCount
+      if (tabCount < 5) {
+        rv = true
+      }
+      return rv
+    },
+
+    addTabButton: function () {
+
+    },
     fileButton: function (idx, ev) {
       let vm = this
-      console.log('hi fileButton ' + idx + ' = ' + vm.fileMenu[idx])
+      console.log('hi fileButton ' + idx + ' = ' + vm.saveMenu[idx])
       console.log(ev.target.tagName + ' x: ' + ev.screenX + ' y: ' + ev.screenY)
-      vm.showFileMenu = false
-      vm.fileMenuOps[idx].apply(vm)
+      vm.saveMenuActive = false
+      vm.saveMenuOps[idx].apply(vm)
     },
     fileDialogRadio: function (idx) {
       console.log('idx: ' + idx)
@@ -333,10 +442,14 @@ export default {
           vm.resetLoading()
         })
     },
+
+    fileSelectSchema: function () { // get the schema versions and select a schema
+    },
     fileExplore: function () {
-      var vm = this
-      var url = '/nmr/samples'
-      // let url = 'http://localhost:3000'
+      let vm = this
+      let tvurl = '/nmr/templates/versions/select/all'
+      let tsurl = '/nmr/templates/select'
+      let url = '/nmr/explore/select'
       console.log('fileExplore!')
       vm.setLoading()
       return Axios.get(url)
@@ -403,9 +516,14 @@ export default {
       console.log('Search button.')
     },
     refreshButton: function () {
-      var vm = this
-      var url = '/nmr'
-      // let url = 'http://localhost:3000'
+      let vm = this
+      vm.setLoading()
+      console.log('refreshButton() pressed')
+      setTimeout(function () {
+        vm.resetLoading()
+      }, 1000)
+      /*
+      let url = '/nmr'
       vm.setLoading()
       return Axios.get(url)
         .then(function (response) {
@@ -423,6 +541,7 @@ export default {
           vm.editorError = true
           vm.resetLoading()
         })
+        */
     },
     getEditorContent: function () {
       // this is really not a good way to do this and is TEMPORARY! TODO
@@ -430,7 +549,7 @@ export default {
       return vm.content.getValue()
     },
     refreshEditor: function () {
-      var vm = this
+      let vm = this
       // let tabNumber = vm.$store.getters.currentEditorTab
       // if (tabNumber && typeof tabNumber === 'number' && tabNumber >= 0) {
       vm.content.setValue(vm.$store.getters.editorXmlText)
@@ -442,6 +561,68 @@ export default {
         vm.content.execCommand('goDocStart')
         vm.content.clearHistory()
       }, 0)
+    },
+    pickFile () {
+      this.$refs.image.click()
+    },
+
+    onFilePicked: function (e) { // credit to stack overflow
+      let vm = this
+      const files = e.target.files
+      if (files !== undefined) {
+        for (let v = 0; v < files.length; ++v) {
+          console.log('file selected: ' + files[v].name)
+          vm.filesToUpload.push(files[v].name)
+        }
+        console.log(vm.filesToUpload)
+        const fr = new FileReader()
+        fr.readAsDataURL(files[0])
+        fr.addEventListener('load', () => {
+          vm.imageUrl = fr.result
+          console.log(vm.imageUrl)
+        })
+      } else {
+        vm.filesToUpload = []
+      }
+    },
+    tabModified: function () {
+      return true
+    },
+    hasNextTab: function () {
+      let vm = this
+      let rv = false
+      console.log(vm.msg + ' hasNextTab()')
+      let tabNumber = vm.$store.getters.currentEditorTab
+      // if (tabNumber && typeof tabNumber === 'number' && tabNumber >= 0) {
+      let tabCount = vm.$store.getters.editorTabCount
+      if (tabNumber !== -1 && tabNumber < (tabCount - 1)) {
+        rv = true
+      }
+      return rv
+    },
+    hasPrevTab: function () {
+      let vm = this
+      let rv = false
+      console.log(vm.msg + ' hasPrevTab()')
+      let tabNumber = vm.$store.getters.currentEditorTab
+      // if (tabNumber && typeof tabNumber === 'number' && tabNumber >= 0) {
+      let tabCount = vm.$store.getters.editorTabCount
+      if (tabNumber !== -1 && tabNumber < tabCount) {
+        rv = true
+      }
+      return rv
+    },
+    nextTabButton: function () {
+      let vm = this
+      console.log(vm.msg + ' nextTabButton()')
+    },
+    prevTabButton: function () {
+      let vm = this
+      console.log(vm.msg + ' prevTabButton()')
+    },
+    newEditorTab: function (isXsd, schemaId, title, filename) {
+      // { schemaId: null, xmlTitle: null, isXsd: false }
+
     }
   }
 }

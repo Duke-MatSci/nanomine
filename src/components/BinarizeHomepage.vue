@@ -41,11 +41,24 @@
 
     <h4>Reference</h4>
     <v-flex xs12>
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> master
       <p> N. Otsu, A threshold selection method from gray-level histograms, IEEE transactions on systems, man, and cybernetics, vol. 9, no. 1, pp. 62-66, 1979.</p>
       <p>W. Niblack, An Introduction to Image Processing. Englewood Cliffs, NJ: Prentice-Hall, 1986, pp. 115-116.</p>
       <p>Khurshid, K.,Siddiqi, I., Faure, C. and Vincent, N., 2009. Comparison of Niblack inspired Binarization methods for ancient document. DRR, 7247, pp.1-10</p>
     </v-flex>
+<<<<<<< HEAD
 
+=======
+=======
+        <p>N. Otsu, A threshold selection method from gray-level histograms, IEEE transactions on systems, man, and cybernetics, vol. 9, no. 1, pp. 62-66, 1979.</p>
+        <p>W. Niblack, An Introduction to Image Processing. Englewood Cliffs, NJ: Prentice-Hall, 1986, pp. 115-116.</p>
+        <p>Khurshid, K.,Siddiqi, I., Faure, C. and Vincent, N., 2009. Comparison of Niblack inspired Binarization methods for ancient document. DRR, 7247, pp.1-10</p>
+     </v-flex>
+>>>>>>> e6a9d3ed4418f78a05757f388c019ddab40c0ab2
+>>>>>>> master
   </div>
 </template>
 
