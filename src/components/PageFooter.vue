@@ -23,8 +23,16 @@ export default {
   methods: {
     show: function () {
       let vm = this
-      return !vm.$store.getters.isEditorActive
+      // return !vm.$store.getters.isEditorActive
+      if (vm.$route.path === '/') {
+        // console.log('Home - ' + vm.$route.path)
+        return true
+      } else {
+        // console.log('Not HOME - ' + vm.$route.path)
+        return false
+      }
     }
+
   }
 }
 </script>

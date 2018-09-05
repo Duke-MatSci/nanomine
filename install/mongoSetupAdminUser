@@ -1,0 +1,13 @@
+#!/bin/bash
+
+mongo  --port=$NM_MONGO_PORT <<EOF
+use admin
+db.createUser(
+{
+  user: "${NM_MONGO_USER}",
+  pwd: "${NM_MONGO_PWD}",
+  roles: [ { role: "userAdminAnyDatabase", db: "admin"},"backup","restore"]
+  }
+)
+EOF
+

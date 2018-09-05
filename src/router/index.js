@@ -4,6 +4,7 @@ import NanoMine from '@/components/NanoMine'
 import Database from '@/components/Database'
 import ModuleTools from '@/components/ModuleTools'
 import SimTools from '@/components/SimTools'
+import XMLCONV from '@/components/XMLCONV'
 import NmEditor from '@/components/Editor'
 import McrHomepage from '@/components/McrHomepage'
 import BinarizeHomepage from '@/components/BinarizeHomepage'
@@ -17,6 +18,7 @@ import ReconstructionHomepage from '@/components/ReconstructionHomepage'
 import CorrelationReconstruct from '@/components/CorrelationReconstruct'
 import SDFReconstruct from '@/components/SDFReconstruct'
 import DescriptorReconstruct from '@/components/DescriptorReconstruct'
+import Visualization from '@/components/Visualization'
 Vue.use(Router)
 
 export default new Router({
@@ -40,6 +42,11 @@ export default new Router({
       path: '/mtools',
       name: 'ModuleTools',
       component: ModuleTools
+    },
+    {
+      path: '/XMLCONV',
+      name: 'XMLCONV',
+      component: XMLCONV
     },
     {
       path: '/editor',
@@ -105,6 +112,11 @@ export default new Router({
       path: '/DescriptorReconstruct',
       name: 'DescriptorReconstruct',
       component: DescriptorReconstruct
+    },
+    {
+      path: '/Visualization',
+      name: 'Visualization',
+      component: Visualization
     }
   ]
 })
