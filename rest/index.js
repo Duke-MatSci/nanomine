@@ -443,7 +443,12 @@ app.post('/jobemail', function (req, res, next) { // bearer auth
       jsonResp.error = {'statusCode': 400, 'statusText': 'unable to find template file.'}
       return res.status(400).json(jsonResp)
     }
-    let filled = templateFiller(etfText, emailvars)
+    let filled = null
+    try {
+      filled = templateFiller(etfText, emailvars)
+    } catch(fillerr) {
+      logger.error('error occurred filling out email template. jobtype: ' + jobtype + ' jobid: ' + jobid + ' template: ' + emailtemplate + ' vars: ' + JSON.stringify(emailvars))
+    }
     logger.info(filled)
     return res.json(jsonResp)
   })
