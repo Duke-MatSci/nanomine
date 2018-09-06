@@ -25,12 +25,7 @@
                   <p><strong> 3) Multiple images in ZIP File:</strong> Submit a ZIP file containing multiple images (supported formats: .jpg, .tif, .png) of same size (in pixels).
                 DO NOT ZIP the folder containing images; select all images and ZIP them directly.</p>
       </v-flex>
-<<<<<<< HEAD
-    <h2> Create Agent to accept user uploaded files and process it in MATLAB</h2>
-=======
       <h2> Create Agent to accept user uploaded files and process it in MATLAB</h2>
->>>>>>> master
-
     </v-container>
 
     <h4>Reference</h4>
