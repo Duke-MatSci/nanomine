@@ -12,6 +12,10 @@ const datauri = require('data-uri-to-buffer')
 const qs = require('qs')
 const fs = require('fs')
 const mongoose = require('mongoose')
+const templateFiller = require('es6-dynamic-template')
+
+//TODO calling next(err) results in error page rather than error code in json
+
 const ObjectId = mongoose.Types.ObjectId
 
 let logger = configureLogger()
@@ -111,6 +115,7 @@ let XsdVersionSchema = mongoose.model('xsdVersionData', xsdVersionSchema)
 // })
 
 /* Mongoose schemas and models -- end */
+
 /* rest services related to XMLs and Schemas -- begin */
 
 function validQueryParam (p) {
@@ -123,7 +128,7 @@ function validQueryParam (p) {
 
 app.get('/templates/select/all', function (req, res) { // it's preferable to read only the current non deleted schemas rather than all
   let jsonResp = {'error': null, 'data': null}
-  XsdSchema.find().exec(function (err, schemas){
+  XsdSchema.find().exec(function (err, schemas) {
     if (err) {
       jsonResp.error = err
       res.status(400).json(jsonResp)
@@ -139,7 +144,23 @@ app.get('/templates/select/all', function (req, res) { // it's preferable to rea
 
 app.get('/templates/versions/select/all', function (req, res) {
   let jsonResp = {'error': null, 'data': null}
-  XsdVersionSchema.find().exec(function (err, versions){
+  XsdVersionSchema.find().exec(function (err, versions) {
+    if (err) {
+      jsonResp.error = err
+      res.status(400).json(jsonResp)
+    } else if (versions == null || versions.length <= 0) {
+      jsonResp.error = {'statusCode': 404, 'statusText': 'not found'}
+      res.status(404).json(jsonResp)
+    } else {
+      jsonResp.data = versions
+      res.json(jsonResp)
+    }
+  })
+})
+
+app.get('/templates/versions/select/allactive', function (req, res) {
+  let jsonResp = {'error': null, 'data': null}
+  XsdVersionSchema.find({isDeleted: {$eq: false}}).exec(function (err, versions) {
     if (err) {
       jsonResp.error = err
       res.status(400).json(jsonResp)
@@ -298,6 +319,16 @@ app.get('/explore/select', function (req, res) {
   }
 })
 
+app.post('/curate', function (req, res) {
+  let jsonResp = {'error': null, 'data': null}
+  let title = req.body.title
+  let schema = req.body.schema
+  let content = req.body.content
+  let editorStatus = req.body.editorStatus // editedFailedVerify, editedPassedVerify (not trusted), triggers system validation
+  // ensure schema id exists
+  // set validationState to value specified by editor.  Background task will validate and update db status.
+  res.json(jsonResp)
+})
 /* rest services related to XMLs and Schemas -- end */
 
 /* Job related rest services */
@@ -307,7 +338,7 @@ function updateJobStatus (statusFilePath, newStatus) {
     'job_status': newStatus,
     'update_dttm': Date()
   }
-  fs.writeFile(statusFileName, JSON.stringify(statusObj), {'encoding': 'utf8'}, function (err, data) {
+  fs.writeFile(statusFileName, JSON.stringify(statusObj), {'encoding': 'utf8'}, function (err) {
     if (err) {
       logger.error('error creating job_status file: ' + statusFileName + ' err: ' + err)
     }
@@ -357,6 +388,7 @@ app.post('/jobpostfile', function (req, res, next) {
     if (err) {
       updateJobStatus(jobDir, 'postFileError' + '-' + outputName)
       logger.error('/jobpostfile write job file error - file: ' + outputName + ' err: ' + err)
+      next(err)
     } else {
       updateJobStatus(jobDir, 'filePosted-' + outputName)
       res.status(rcode).json(jsonResp)
@@ -394,6 +426,120 @@ app.post('/jobsubmit', function (req, res) {
   }
 })
 /* end job related rest services */
+
+/* email related rest services - begin */
+app.post('/jobemail', function (req, res, next) { // bearer auth
+  let jsonResp = {'error':null, 'data': null}
+  let jobtype = req.body.jobtype
+  let jobid = req.body.jobid
+  let emailtemplate = req.body.emailtemplatename
+  let emailvars = req.body.emailvars
+  emailvars.jobtype = jobtype
+  emailvars.jobid = jobid
+  // read the email template, merge with email vars
+
+  fs.readFile('config/emailtemplates/' + jobtype + '/' + emailtemplate + '.etf', function (err, etfText) {
+    if(err) {
+      jsonResp.error = {'statusCode': 400, 'statusText': 'unable to find template file.'}
+      return res.status(400).json(jsonResp)
+    }
+    let filled = null
+    try {
+      filled = templateFiller(etfText, emailvars)
+    } catch(fillerr) {
+      logger.error('error occurred filling out email template. jobtype: ' + jobtype + ' jobid: ' + jobid + ' template: ' + emailtemplate + ' vars: ' + JSON.stringify(emailvars))
+    }
+    logger.info(filled)
+    return res.json(jsonResp)
+  })
+})
+/* email related rest services - end */
+
+/* Visualization related requests - begin */
+app.get('/visualization/fillerPropertyList', function (req, res) {
+  let query = `
+prefix sio:<http://semanticscience.org/resource/>
+prefix ns:<http://nanomine.tw.rpi.edu/ns/>
+select distinct ?fillerProperty
+where {
+    ?filler sio:hasRole [a ns:Filler].
+    ?filler sio:hasAttribute ?fillerAttribute .
+    ?fillerAttribute a ?fillerProperty .
+} order by ?fillerProperty  
+`
+  return postSparql(req.path, query, req, res)
+})
+
+app.get('/visualization/materialPropertyList', function (req, res) {
+  let query = `
+prefix sio:<http://semanticscience.org/resource/>
+  prefix ns:<http://nanomine.tw.rpi.edu/ns/>
+  select distinct ?materialProperty
+  where {
+     ?sample sio:hasComponentPart ?filler . 
+     ?sample sio:hasAttribute ?sampleAttribute .
+     ?sampleAttribute a ?materialProperty .
+     ?filler sio:hasRole [a ns:Filler].
+} order by ?materialProperty
+`
+  return postSparql(req.path, query, req, res)
+})
+
+app.get('/visualization/materialPropertiesForFillerProperty', function (req, res) {
+  let fillerPropertyUri = req.query.fillerPropertyUri
+  let query = `
+prefix sio:<http://semanticscience.org/resource/>
+prefix ns:<http://nanomine.tw.rpi.edu/ns/>
+select distinct ?materialProperty (count(?materialProperty) as ?count)
+   where {
+      ?sample sio:hasComponentPart ?filler .
+      ?sample sio:hasAttribute ?sampleAttribute .
+      ?sampleAttribute a ?materialProperty .
+      ?filler sio:hasRole [a ns:Filler].
+      ?filler sio:hasAttribute [a <${fillerPropertyUri}>]. 
+   }
+group by ?materialProperty order by desc(?count)
+`
+  return postSparql(req.path, query, req, res)
+})
+app.get('/visualization/fillerPropertyMaterialPropertyGraphData', function (req, res) {
+  let fillerPropertyUri = req.query.fillerPropertyUri
+  let materialPropertyUri = req.query.materialPropertyUri
+  let query = `
+prefix sio:<http://semanticscience.org/resource/>
+prefix ns:<http://nanomine.tw.rpi.edu/ns/> 
+prefix np: <http://www.nanopub.org/nschema#> 
+prefix dcterms: <http://purl.org/dc/terms/> 
+select distinct ?sample ?x ?y ?xUnit ?yUnit ?matrixPolymer ?fillerPolymer ?doi ?title 
+where { 
+  ?nanopub np:hasAssertion ?ag. 
+  graph ?ag { 
+    ?sample sio:hasAttribute ?sampleAttribute .
+    ?sampleAttribute a <${materialPropertyUri}> .
+    ?sampleAttribute sio:hasValue ?y.
+    optional{?sampleAttribute sio:hasUnit ?yUnit.}
+    ?sample sio:hasComponentPart ?matrix .
+    ?sample sio:hasComponentPart ?filler .
+    ?matrix a ?matrixPolymer .
+    ?filler a ?fillerPolymer .
+    ?matrix sio:hasRole [a ns:Matrix].
+    ?filler sio:hasRole [a ns:Filler].
+    ?filler sio:hasAttribute ?fillerAttribute .
+    ?fillerAttribute a <${fillerPropertyUri}> .
+    ?fillerAttribute sio:hasValue ?x .
+    optional{?fillerAttribute sio:hasUnit ?xUnit.}
+  } 
+  ?nanopub np:hasProvenance ?pg. 
+  graph ?pg { 
+    ?doi dcterms:isPartOf ?journal. 
+    ?doi dcterms:title ?title. 
+  } 
+}
+  `
+  return postSparql(req.path, query, req, res)
+})
+
+/* Visualization related requests - end */
 
 app.get('/', function (req, res) {
   let ID = 'TestData_' + shortUUID.new()
@@ -463,7 +609,7 @@ function postSparql2 (callerpath, query, req, res, cb) {
     })
 }
 
-app.post('/xml', function (req, res) {
+app.post('/xml', function (req, res) { // initial testing of post xml file to nanopub -- ISSUE: result redirects to page with no JSON error
   let jsonResp = {'error': null, 'data': null}
   /*
       expects:
@@ -607,7 +753,7 @@ where {
   })
 })
 
-app.get('/fullgraph', function (req, res) {
+app.get('/fullgraph', function (req, res) { // for initial testing and will be removed
   // get the nanopub graph
   let query = `
 prefix sio:<http://semanticscience.org/resource/>
@@ -625,7 +771,7 @@ where {
   return postSparql(req.path, query, req, res)
 })
 
-app.get('/xml/disk/:schema/:xmlfile', function (req, res) {
+app.get('/xml/disk/:schema/:xmlfile', function (req, res) { // this entry point was for some initial testing and will be removed
   // this is for testing only
   let jsonResp = {'error': null, 'data': null}
   let fs = require('fs')
@@ -672,7 +818,7 @@ app.get('/xml/disk/:schema/:xmlfile', function (req, res) {
   })
 })
 
-function configureLogger () {
+function configureLogger () { // logger is not properly configured yet. This config is for an earlier version of Winston
   let logger = winston.createLogger({ // need to adjust to the new 3.x version - https://www.npmjs.com/package/winston#formats
     transports: [
       new (winston.transports.File)({

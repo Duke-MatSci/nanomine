@@ -18,6 +18,7 @@ import ReconstructionHomepage from '@/components/ReconstructionHomepage'
 import CorrelationReconstruct from '@/components/CorrelationReconstruct'
 import SDFReconstruct from '@/components/SDFReconstruct'
 import DescriptorReconstruct from '@/components/DescriptorReconstruct'
+import Visualization from '@/components/Visualization'
 Vue.use(Router)
 
 export default new Router({
@@ -111,6 +112,11 @@ export default new Router({
       path: '/DescriptorReconstruct',
       name: 'DescriptorReconstruct',
       component: DescriptorReconstruct
+    },
+    {
+      path: '/Visualization',
+      name: 'Visualization',
+      component: Visualization
     }
   ]
 })
