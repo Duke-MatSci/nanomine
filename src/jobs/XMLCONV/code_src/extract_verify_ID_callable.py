@@ -140,7 +140,7 @@ def localDOI(DOI, myXSDtree, code_srcDir):
         if 'ma-SI' in DOI:
             return alldoiDict[DOI]
         # now fetch the metadata using doi-crawler and save to alldoiDict, doi.pkl
-        crawlerDict = mainDOIsoupFirst(DOI)
+        crawlerDict = mainDOIsoupFirst(DOI, code_srcDir)
         # if doi is not valid, mainDOIsoupFirst() returns {}
         if len(crawlerDict) == 0:
             with open(code_srcDir + '/doi.pkl', 'wb') as f:
