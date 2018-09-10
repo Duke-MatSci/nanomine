@@ -3396,4 +3396,4 @@ def compiler(jobDir, code_srcDir, xsdDir, templateName):
 
     ## Validate the xml file
     logName = runValidation(filename, xsdDir, jobDir)
-
+    return logName
