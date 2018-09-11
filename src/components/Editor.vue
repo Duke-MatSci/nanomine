@@ -447,8 +447,8 @@ export default {
     },
     fileExplore: function () {
       let vm = this
-      let tvurl = '/nmr/templates/versions/select/all'
-      let tsurl = '/nmr/templates/select'
+      // let tvurl = '/nmr/templates/versions/select/all'
+      // let tsurl = '/nmr/templates/select'
       let url = '/nmr/explore/select'
       console.log('fileExplore!')
       vm.setLoading()

@@ -20,3 +20,5 @@ yarn-error.log*
 *.pyc
 package-lock.json
 rest/package-lock.json
+rest/nanomine.log*
+
