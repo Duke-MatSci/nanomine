@@ -728,7 +728,7 @@ export default {
         setTimeout(function () {
           vm.matrixMaterial = [{'ms': 'a', 'uri': 'a1'}, {'ms': 'b', 'uri': 'b1'}, {'ms': 'c', 'uri': 'c1'}]
           vm.matrixMaterial.forEach(function (v) {
-            vm.matrixList.push(v, ms)
+            vm.matrixList.push(v, v.ms)
           })
           vm.resetLoading()
         }, 0)
