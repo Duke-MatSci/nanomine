@@ -432,8 +432,8 @@ app.post('/jobsubmit', function (req, res) {
       pgm = v.pgmdir + '/' + v.pgmname
     }
   })
-  if (pgm != null && pgmdir) {
-    try {
+  try {
+    if (pgm != null && pgmdir) {
       let jobPid = null
       // TODO track child status and output with events and then update job status, but for now, just kick it off
       let child = require('child_process').spawn(pgm, [jobType, jobId, jobDir], {'cwd': pgmdir})
@@ -441,15 +441,13 @@ app.post('/jobsubmit', function (req, res) {
       updateJobStatus(jobDir, {'status': 'submitted', 'pid': jobPid})
       jsonResp.data = {'jobPid': jobPid}
       res.json(jsonResp)
-    }
-  else
-    {
+    } else {
       updateJobStatus(jobDir, 'failed-no-pgm-defined')
       jsonResp.error = 'job type has program not defined'
       res.status(400).json(jsonResp)
     }
-  } catch(err) {
-    updateJobStatus(jobDir,'failed-to-exec-'+err)
+  } catch (err) {
+    updateJobStatus(jobDir, 'failed-to-exec-' + err)
     jsonResp.error = 'job failed to exec: ' + err
     res.status(400).json(jsonResp)
   }
@@ -458,7 +456,7 @@ app.post('/jobsubmit', function (req, res) {
 
 /* email related rest services - begin */
 app.post('/jobemail', function (req, res, next) { // bearer auth
-  let jsonResp = {'error':null, 'data': null}
+  let jsonResp = {'error': null, 'data': null}
   let jobtype = req.body.jobtype
   let jobid = req.body.jobid
   let emailtemplate = req.body.emailtemplatename
@@ -468,14 +466,14 @@ app.post('/jobemail', function (req, res, next) { // bearer auth
   // read the email template, merge with email vars
 
   fs.readFile('config/emailtemplates/' + jobtype + '/' + emailtemplate + '.etf', function (err, etfText) {
-    if(err) {
+    if (err) {
       jsonResp.error = {'statusCode': 400, 'statusText': 'unable to find template file.'}
       return res.status(400).json(jsonResp)
     }
     let filled = null
     try {
       filled = templateFiller(etfText, emailvars)
-    } catch(fillerr) {
+    } catch (fillerr) {
       logger.error('error occurred filling out email template. jobtype: ' + jobtype + ' jobid: ' + jobid + ' template: ' + emailtemplate + ' vars: ' + JSON.stringify(emailvars))
     }
     logger.info(filled)
