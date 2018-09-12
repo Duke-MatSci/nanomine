@@ -428,21 +428,29 @@ app.post('/jobsubmit', function (req, res) {
   let pgmdir = null
   pgms.forEach(function (v) {
     if (v.jobtype === jobType) {
-      pgm = v.pgmname
       pgmdir = v.pgmdir
+      pgm = v.pgmdir + '/' + v.pgmname
     }
   })
   if (pgm != null && pgmdir) {
-    let jobPid = null
-    // TODO track child status and output with events and then update job status, but for now, just kick it off
-    let child = require('child_process').spawn(pgm, [jobType, jobId, jobDir], {'cwd': pgmdir})
-    jobPid = child.pid
-    updateJobStatus(jobDir, {'status': 'submitted', 'pid': jobPid})
-    jsonResp.data = {'jobPid': jobPid}
-    res.json(jsonResp)
-  } else {
-    updateJobStatus(jobDir, 'failed-no-pgm-defined')
-    jsonResp.error = 'job type has program not defined'
+    try {
+      let jobPid = null
+      // TODO track child status and output with events and then update job status, but for now, just kick it off
+      let child = require('child_process').spawn(pgm, [jobType, jobId, jobDir], {'cwd': pgmdir})
+      jobPid = child.pid
+      updateJobStatus(jobDir, {'status': 'submitted', 'pid': jobPid})
+      jsonResp.data = {'jobPid': jobPid}
+      res.json(jsonResp)
+    }
+  else
+    {
+      updateJobStatus(jobDir, 'failed-no-pgm-defined')
+      jsonResp.error = 'job type has program not defined'
+      res.status(400).json(jsonResp)
+    }
+  } catch(err) {
+    updateJobStatus(jobDir,'failed-to-exec-'+err)
+    jsonResp.error = 'job failed to exec: ' + err
     res.status(400).json(jsonResp)
   }
 })
