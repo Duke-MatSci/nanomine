@@ -49,9 +49,11 @@ for f in myfiles:
 ## XMLCONV conversion section
 import glob
 # gather the parameters
-code_srcDir = './code_src'
+code_srcDir = os.getcwd() + '/code_src'
 templateName = inputParameters['templateName']
+logging.info(code_srcDir)
 xsdDir = glob.glob(code_srcDir + '/*.xsd')[0]
+logging.info(xsdDir)
 # add code_src to the sys path
 sys.path.insert(0, code_srcDir)
 # call the conversion code
@@ -64,6 +66,9 @@ except:
   status = 'failure'
   messages = ['[Conversion Error] Oops! The conversion cannot be finished! Please contact the administrator.']
 
+logging.info("CONVERSION RESULT: " + status)
+for message in messages:
+	logging.info("message: " + message)
 # example sending error template (rough cut)
 # for now the email just goes into the rest server log file: nanomine/rest/nanomine.log.gz (log file name will get fixed soon)
 # templates are in rest/config/emailtemplates/JOBTYPE/TEMPLATENAME.etf (etf extension is required, but implied in POST data)
