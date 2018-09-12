@@ -14,7 +14,7 @@ const fs = require('fs')
 const mongoose = require('mongoose')
 const templateFiller = require('es6-dynamic-template')
 
-//TODO calling next(err) results in error page rather than error code in json
+// TODO calling next(err) results in error page rather than error code in json
 
 const ObjectId = mongoose.Types.ObjectId
 
@@ -25,7 +25,7 @@ let nmWebFilesRoot = process.env['NM_WEBFILES_ROOT']
 let nmJobDataDir = process.env['NM_JOB_DATA']
 
 try {
-  fs.mkdirSync(nmJobDataDir)
+  fs.mkdirSync(nmJobDataDir) // Sync used during startup
 } catch (err) {
   logger.error('mkdir nmJobDataDir failed: ' + err)
 }
@@ -62,10 +62,28 @@ db.once('open', function () {
 Mongoose schemas and models -- begin
   TODO move to separate module
   Schemas/Models:
+    version
+    dataset
     xmldata
     template (the xsd schema) -- we'll call it xsdSchema internally instead of template
     template_version (tracker for template versions and deactivated templates)
 */
+
+// let versionSchema = new mongoose.Schema({
+//   major: Number, /* SEMVER versioning for the overall MGI db schema represented by the db. NM base was MDCS 1.3 */
+//   minor: Number, /* http://semver.org */
+//   patch: Number,
+//   label: String /* major.minor.patch-label when formatted */
+// }, {collection: 'version'})
+
+// let datasetSchema = new mongoose.Schema({
+//   seq: Number, /* Unique index constraint, but not forced to monotonic -- required field (set by create) */
+//   title: String, /* Name of study, book, article, paper, etc -- required field */
+//   authors: [String], /* Authors, first is primary */
+//   type: String, /* study, book, article, paper -- fixed set -- required field */
+//   doi: String /* DOI or other unique assigned handle -- can be missing or null */
+// }, {collection: 'dataset'})
+
 let xmlDataSchema = new mongoose.Schema({ // maps the mongo xmldata collection
   schemaId: String, /* !!! NOTE: had to rename 'schema' field name in restored data from MDCS to schemaId because of mongoose name conflict
                        To convert the field after restore from MDCS, use mongocli which loads nanomongo.js. At the mongo command line
@@ -101,6 +119,7 @@ let xsdVersionSchema = new mongoose.Schema({ // maps the mongo template_version 
   current: String // current schema version id
 }, {collection: 'template_version'})
 
+let Dataset = mongoose.model('dataset', datasetSchema)
 let XmlData = mongoose.model('xmlData', xmlDataSchema)
 let XsdSchema = mongoose.model('xsdData', xsdSchema)
 let XsdVersionSchema = mongoose.model('xsdVersionData', xsdVersionSchema)
@@ -406,15 +425,17 @@ app.post('/jobsubmit', function (req, res) {
   //   will do better later. At least client code on each side of the interface won't change
   let pgms = config.jobtypes
   let pgm = null
+  let pgmdir = null
   pgms.forEach(function (v) {
     if (v.jobtype === jobType) {
-      pgm = v.program
+      pgm = v.pgmname
+      pgmdir = v.pgmdir
     }
   })
-  if (pgm != null) {
+  if (pgm != null && pgmdir) {
     let jobPid = null
     // TODO track child status and output with events and then update job status, but for now, just kick it off
-    let child = require('child_process').spawn(pgm, [jobType, jobId, jobDir])
+    let child = require('child_process').spawn(pgm, [jobType, jobId, jobDir], {'cwd': pgmdir})
     jobPid = child.pid
     updateJobStatus(jobDir, {'status': 'submitted', 'pid': jobPid})
     jsonResp.data = {'jobPid': jobPid}
