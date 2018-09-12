@@ -441,7 +441,7 @@ app.post('/jobsubmit', function (req, res) {
       let pgmpath = pathModule.join(cwd, pgmdir)
       pgm = pathModule.join(pgmpath, pgm)
       console.log('executing: ' + pgm + ' in: ' + pgmpath)
-      let child = require('child_process').spawn(pgm, [jobType, jobId, jobDir], {'cwd': pgmpath})
+      let child = require('child_process').spawn(pgm, [jobType, jobId, jobDir], {'cwd': pgmpath, 'env': process.env})
       jobPid = child.pid
       updateJobStatus(jobDir, {'status': 'submitted', 'pid': jobPid})
       jsonResp.data = {'jobPid': jobPid}
