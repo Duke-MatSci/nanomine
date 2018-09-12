@@ -1,6 +1,7 @@
 /* NanoMine REST server */
 const axios = require('axios')
 const util = require('util')
+const pathModule = require('path')
 const express = require('express')
 const cookieParser = require('cookie-parser')
 const bodyParser = require('body-parser')
@@ -429,14 +430,18 @@ app.post('/jobsubmit', function (req, res) {
   pgms.forEach(function (v) {
     if (v.jobtype === jobType) {
       pgmdir = v.pgmdir
-      pgm = v.pgmdir + '/' + v.pgmname
+      pgm = v.pgmname
     }
   })
   try {
     if (pgm != null && pgmdir) {
       let jobPid = null
       // TODO track child status and output with events and then update job status, but for now, just kick it off
-      let child = require('child_process').spawn(pgm, [jobType, jobId, jobDir], {'cwd': pgmdir})
+      let cwd = process.cwd()
+      let pgmpath = pathModule.join(cwd, pgmdir)
+      let pgm = pathModule.join(pgmpath, pgm)
+      console.log('executing: ' + pgm + ' in: ' + pgmpath)
+      let child = require('child_process').spawn(pgm, [jobType, jobId, jobDir], {'cwd': pgmpath})
       jobPid = child.pid
       updateJobStatus(jobDir, {'status': 'submitted', 'pid': jobPid})
       jsonResp.data = {'jobPid': jobPid}
