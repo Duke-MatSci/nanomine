@@ -15,12 +15,14 @@
       {
         "jobtype": "example",
         "lang": "python",
-        "program": "../src/jobs/example/run_example.py"
+        "pgmdir": "../src/jobs/example",
+        "pgmname": "run_example.py"
       },
       {
         "jobtype": "xmlconv",
         "lang": "python",
-        "program": "../src/jobs/XMLCONV/run_xmlconv.py"
+        "pgmdir": "../src/jobs/XMLCONV",
+        "pgmname": "run_xmlconv.py"
       }
     ]
   }
