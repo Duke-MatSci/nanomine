@@ -119,7 +119,7 @@ let xsdVersionSchema = new mongoose.Schema({ // maps the mongo template_version 
   current: String // current schema version id
 }, {collection: 'template_version'})
 
-let Dataset = mongoose.model('dataset', datasetSchema)
+// let Dataset = mongoose.model('dataset', datasetSchema)
 let XmlData = mongoose.model('xmlData', xmlDataSchema)
 let XsdSchema = mongoose.model('xsdData', xsdSchema)
 let XsdVersionSchema = mongoose.model('xsdVersionData', xsdVersionSchema)
