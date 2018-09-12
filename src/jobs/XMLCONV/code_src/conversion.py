@@ -24,6 +24,9 @@ def conversion(jobDir, code_srcDir, xsdDir, templateName):
             return ('failure', messages)
         messages += ['[Conversion Error] Failed to assemble the ID. Please check or contact the administrator!']
         return ('failure', messages)
+    else:
+        with open(jobDir + '/ID.txt', 'r') as f:
+            ID = f.read()
     # kickoff the conversion script
     logName = compiler(jobDir, code_srcDir, xsdDir, templateName)
     # check #3: see if there is an error_message.txt generated during conversion
