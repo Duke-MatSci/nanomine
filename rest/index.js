@@ -439,7 +439,7 @@ app.post('/jobsubmit', function (req, res) {
       // TODO track child status and output with events and then update job status, but for now, just kick it off
       let cwd = process.cwd()
       let pgmpath = pathModule.join(cwd, pgmdir)
-      let pgm = pathModule.join(pgmpath, pgm)
+      pgm = pathModule.join(pgmpath, pgm)
       console.log('executing: ' + pgm + ' in: ' + pgmpath)
       let child = require('child_process').spawn(pgm, [jobType, jobId, jobDir], {'cwd': pgmpath})
       jobPid = child.pid
