@@ -13,16 +13,12 @@ import datetime
 # -------------------------------------------- convert .XLSX to .XML files
 import xlrd
 import dicttoxml
-import uuid
-import codecs
 
 # -------------------------------------------- XML Schemas
-from xml.dom.minidom import parseString   # Python standard library
 import collections                        # Python standard library
 import xml.etree.ElementTree as ET
 
 # -------------------------------------------- DOI information retriever
-from doiretriever import mainDOI          # extract publication info by DOI
 import pickle                             # Python standard library
 
 # -------------------------------------------- XML-XSD validation tool
@@ -3385,15 +3381,11 @@ def compiler(jobDir, code_srcDir, xsdDir, templateName):
             parent.remove(parent.find('Citation')) # remove
         # insert the crawled Citation
         parent.insert(0, citationEle)
-    # 
     # make directory for xml output
     os.mkdir(jobDir + '/xml')
     # write information to ./xml/ID.xml
     filename = jobDir + '/xml/' + str(ID) + '.xml'
     tree.write(filename, encoding="UTF-8", xml_declaration=True)
-    # with codecs.open(filename, 'w', "utf-8") as _f:
-    #     _f.write("%s\n" % (parseString(diffusionDataxml).toprettyxml())[23:])
-
     ## Validate the xml file
     logName = runValidation(filename, xsdDir, jobDir)
     return logName
