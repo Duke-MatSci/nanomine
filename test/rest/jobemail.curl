@@ -1,0 +1,4 @@
+curl --header "Content-Type: application/json" \
+  --request POST \
+  --data '{"jobid":"job21x","jobtype":"example","emailtemplatename":"failure","emailvars":{"jobinfo":{"resultcode":21},"user":"erik"}}' \
+  http://localhost/nmr/jobemail

@@ -14,6 +14,7 @@
     "config": "^2.0.1",
     "cookie-parser": "^1.4.3",
     "data-uri-to-buffer": "^2.0.0",
+    "es6-dynamic-template": "^1.0.5",
     "express": "^4.16.3",
     "form-data": "^2.3.2",
     "jsonfile": "^4.0.0",
