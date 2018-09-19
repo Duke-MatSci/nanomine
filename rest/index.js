@@ -71,10 +71,10 @@ Mongoose schemas and models -- begin
 */
 
 // let versionSchema = new mongoose.Schema({
-//   major: Number, /* SEMVER versioning for the overall MGI db schema represented by the db. NM base was MDCS 1.3 */
-//   minor: Number, /* http://semver.org */
-//   patch: Number,
-//   label: String /* major.minor.patch-label when formatted */
+//   majorVer: Number, /* SEMVER versioning for the overall MGI db schema represented by the db. NM base was MDCS 1.3 */
+//   minorVer: Number, /* http://semver.org */
+//   patchVer: Number,
+//   labelVer: String /* major.minor.patch-label when formatted */
 // }, {collection: 'version'})
 
 // let datasetSchema = new mongoose.Schema({
@@ -202,7 +202,7 @@ app.get('/templates/select', function (req, res) {
   let qfields = [{'filename': req.query.filename}, {'content': req.query.content}, {'title': req.query.title},
     {'version': req.query.version}, {'templateVersion': req.query.templateVersion}, {'hash': req.query.hash}]
   // not supporting data format at this time -- always returns xml for now
-  let dataformat = req.query.dataformat
+  // let dataformat = req.query.dataformat
   let query = {}
   if (validQueryParam(id)) {
     XsdSchema.findById(id).exec(function (err, xsdRec) {
@@ -269,7 +269,7 @@ app.get('/explore/select', function (req, res) {
   let schema = req.query.schema
   let title = req.query.title
   // not supporting data format at this time -- always returns xml for now
-  let dataformat = req.query.dataformat
+  // let dataformat = req.query.dataformat
   let query = {}
   if (validQueryParam(id)) {
     XmlData.findById(id).exec(function (err, xmlRec) {
@@ -330,7 +330,7 @@ app.get('/explore/select', function (req, res) {
       } else {
         jsonResp.data = [] // TODO fix db so the expensive swizzling is not necessary
         xmlRecs.forEach(function (v) { // swizzle the output
-          jsonResp.data.push({'_id': v._id, 'schema': v.schemaId, 'title': v.title, 'content': v.xml_str })
+          jsonResp.data.push({ '_id': v._id, 'schema': v.schemaId, 'title': v.title, 'content': v.xml_str })
         })
         logger.info('/explore/select query=' + JSON.stringify(query) + ' returned: ' + jsonResp.data.length + ' records.')
         res.json(jsonResp)
@@ -341,10 +341,10 @@ app.get('/explore/select', function (req, res) {
 
 app.post('/curate', function (req, res) {
   let jsonResp = {'error': null, 'data': null}
-  let title = req.body.title
-  let schema = req.body.schema
-  let content = req.body.content
-  let editorStatus = req.body.editorStatus // editedFailedVerify, editedPassedVerify (not trusted), triggers system validation
+  // let title = req.body.title
+  // let schema = req.body.schema
+  // let content = req.body.content
+  // let editorStatus = req.body.editorStatus // editedFailedVerify, editedPassedVerify (not trusted), triggers system validation
   // ensure schema id exists
   // set validationState to value specified by editor.  Background task will validate and update db status.
   res.json(jsonResp)
@@ -401,7 +401,7 @@ app.post('/jobpostfile', function (req, res, next) {
   let outputName = jobDir + '/' + jobFileName
   // TODO decode dataurl of file into buffer and write it to the job's directory in the Apache tree
   //   It would be better to stream the file, but for now, just extract to buffer and write to file
-  var buffer = datauri(jobFileUri)
+  let buffer = datauri(jobFileUri)
   console.log('Job type: ' + jobType + ' file mime type: ' + buffer.fullType)
   let rcode = 201
   fs.writeFile(outputName, buffer, {'encoding': 'utf8'}, function (err, data) {
