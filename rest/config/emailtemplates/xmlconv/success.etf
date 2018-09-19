@@ -1,8 +1,8 @@
 
 
-<br/>Hello ${user}
+<br/>Hello ${user},
 
-<br/>Your example job ${jobid} was successful.
+<br/>Your conversion job ${jobid} was successful.
 
 <br/>Please visit <a href="https://nanomine.org/joboutput/${jobid}">your job output</a> for more information
 

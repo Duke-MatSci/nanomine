@@ -46,6 +46,29 @@ myfiles = os.listdir(jobDir)
 for f in myfiles:
   logging.info('  ' + f)
 
+## XMLCONV conversion section
+import glob
+# gather the parameters
+code_srcDir = os.getcwd() + '/code_src'
+templateName = inputParameters['templateName']
+logging.info(code_srcDir)
+xsdDir = glob.glob(code_srcDir + '/*.xsd')[0]
+logging.info(xsdDir)
+# add code_src to the sys path
+sys.path.insert(0, code_srcDir)
+# call the conversion code
+from conversion import conversion
+try:
+  status, messages = conversion(jobDir, code_srcDir, xsdDir, templateName)
+except:
+  logging.info('exception occurred')
+  logging.info('exception: ' + str(sys.exc_info()[0]))
+  status = 'failure'
+  messages = ['[Conversion Error] Oops! The conversion cannot be finished! Please contact the administrator.']
+
+logging.info("CONVERSION RESULT: " + status)
+for message in messages:
+	logging.info("message: " + message)
 # example sending error template (rough cut)
 # for now the email just goes into the rest server log file: nanomine/rest/nanomine.log.gz (log file name will get fixed soon)
 # templates are in rest/config/emailtemplates/JOBTYPE/TEMPLATENAME.etf (etf extension is required, but implied in POST data)
@@ -55,10 +78,11 @@ try:
   emaildata = {
     "jobid": jobId,
     "jobtype": jobType,
-    "emailtemplatename": "failure",
+    "emailtemplatename": status,
     "emailvars": {
       "jobinfo": {
-        "resultcode":21
+        "resultcode":21,
+        "errormsg":'\n'.join(messages)
       },
       "user": str(inputParameters['user'])
     }
@@ -69,7 +93,7 @@ try:
   logging.info('request created using emailurl')
   rq.add_header('Content-Type','application/json')
   r = urllib2.urlopen(rq, json.dumps(emaildata))
-  logging.info('sent failure email: ' + str(r.getcode()))
+  logging.info('sent ' + status + ' email: ' + str(r.getcode()))
 except:
   logging.info('exception occurred')
   logging.info('exception: ' + str(sys.exc_info()[0]))
