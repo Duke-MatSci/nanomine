@@ -126,9 +126,6 @@ export default {
             this.files.push(file)
             this.filesDisplay.push(file)
             this.fileUploaded = true
-            // console.log(file.fileName)
-          // this.file_type = file.fileName.split('.').pop()
-          // console.log(file.fileName.split('.').pop())
           })
         } else {
           console.log('File Undefined')
@@ -141,14 +138,6 @@ export default {
       vm.files.forEach(function (v) {
         console.log(JSON.stringify(v))
       })
-      if (vm.files != null) {
-        vm.files.unshift(vm.files)
-      } else {
-        vm.uploadError = true
-        vm.uploadErrorMsg = 'Missing Input File'
-        return
-      }
-      console.log('Job Submitted!')
 
       vm.setLoading()
       console.log('Loading..')
@@ -156,10 +145,10 @@ export default {
       console.log('Called Job Manager')
       jm.setJobType('otsu')
       jm.setJobParameters({'InputType': vm.fileName}) // Figure out which input type
-      // vm.files.forEach(function (v) {
-      jm.addInputFile(vm.files.fileName, vm.files.fileUrl)
-      console.log('Job Manager added files.')
-      // })
+      vm.files.forEach(function (v) {
+        jm.addInputFile(v.fileName, v.fileUrl)
+        console.log('Job Manager added file: ' + v.fileName)
+      })
       return jm.submitJob(function (jobId) {
         console.log('Success! JobId is: ' + jobId)
         vm.resetLoading()
