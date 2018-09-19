@@ -24,6 +24,7 @@
            four-step hierarchical methodology outlined in articles by Xu et.al. (see references).
            The 3D reconstruction has the same resolution as the input image; i.e. the edge length of a voxel in 3D reconstruction has the same physical size as that of a
            pixel in the 2D input image.</p>
+
           <h4> Input Options:</h4>
           <p><strong> NOTE: Images must be binarized.</strong></p>
                 <p><strong> 1) Single image:</strong> Supported file formats are JPEG, PNG and TIF.(Download <a href='http://129.105.90.149/nm/Two_pt_MCR/Input Samples/Option1.zip'>Sample</a>).</p>
