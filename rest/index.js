@@ -26,6 +26,13 @@ let nmWebFilesRoot = process.env['NM_WEBFILES_ROOT']
 let nmJobDataDir = process.env['NM_JOB_DATA']
 
 try {
+  fs.mkdirSync(nmWebFilesRoot) // Sync used during startup
+} catch (err) {
+  logger.error('mkdir nmWebFilesRoot failed: ' + err)
+}
+
+
+try {
   fs.mkdirSync(nmJobDataDir) // Sync used during startup
 } catch (err) {
   logger.error('mkdir nmJobDataDir failed: ' + err)
