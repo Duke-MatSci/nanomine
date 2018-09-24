@@ -15,23 +15,44 @@
   <div class="Otsu">
     <h1>{{ msg }}</h1>
     <v-container>
-      <v-flex xs12>
+      <v-layout row wrap>
+        <v-flex xs12>
           <h3>Description</h3>
           <br>
-            <p>Upload a image / ZIP file containing set of images (Supported file formats: .jpg, .tif, .png) and click "Binarize" to binarize image using Otsu's Mehtod.</p>
-            <h4> Input Options:</h4>
-                  <p><strong> 1) Single image: </strong>Supported image formats are .jpg, .tif and .png.
-                  <p><strong> 2) Single image in .mat format :</strong> The .mat file must contain ONLY ONE variable named "Input" - which contains the image.</p>
-                  <p><strong> 3) Multiple images in ZIP File:</strong> Submit a ZIP file containing multiple images (supported formats: .jpg, .tif, .png) of same size (in pixels).
-                DO NOT ZIP the folder containing images; select all images and ZIP them directly.</p>
-      </v-flex>
+          <p>Upload an image or ZIP file containing set of images (Supported file formats: .jpg, .tif, .png) and click
+            "Binarize" to binarize image using Otsu's Method.</p>
+        </v-flex>
+        <v-flex xs12 justify-start>
+          <h4> Input Options:</h4>
+          <p class="text-xs-left"><strong> Upload a single image: </strong>Supported image formats are .jpg, .tif and .png.
+          <p class="text-xs-left"><strong> --OR-- Upload a single image in .mat format :</strong> The .mat file must contain ONLY ONE variable named
+            "Input" - which contains the image.</p>
+          <p class="text-xs-left"><strong> --OR-- Upload multiple images in ZIP File:</strong> Submit a ZIP file containing multiple images (supported
+            formats: .jpg, .tif, .png) of same size (in pixels).
+            DO NOT ZIP the folder containing images; select all images and ZIP them directly.</p>
+        </v-flex>
+      </v-layout>
       <v-alert
-        v-model="uploadError"
+        v-model="errorAlert"
         type="error"
         dismissible
       >
-        {{uploadErrorMsg}}
+        {{errorAlertMsg}}
       </v-alert>
+      <v-dialog v-model="successDlg" persistent max-width="500px">
+        <v-card>
+          <v-card-title>
+            <span>Otsu Binarization Job Submitted Successfully</span>
+            <v-spacer></v-spacer>
+          </v-card-title>
+          <v-card-text>
+            Your Otsu job is: {{jobId}} <br/> You should receive an email with a link to the job output.
+          </v-card-text>
+          <v-card-actions>
+            <v-btn color="primary" flat @click="successDlgClicked()">Close</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
       <v-flex xs12 class="text-xs-center text-sm-center text-md-center text-lg-center">
         <p class="text-xs-left">Select File
           <v-btn class="text-xs-left" small color="primary" @click='pickFile'>Browse</v-btn>
@@ -62,7 +83,8 @@
 
     <h4>Reference</h4>
     <v-flex xs12>
-        <p> N. Otsu, A threshold selection method from gray-level histograms, IEEE transactions on systems, man, and cybernetics, vol. 9, no. 1, pp. 62-66, 1979.</p>
+      <p> N. Otsu, A threshold selection method from gray-level histograms, IEEE transactions on systems, man, and
+        cybernetics, vol. 9, no. 1, pp. 62-66, 1979.</p>
 
     </v-flex>
   </div>
@@ -83,9 +105,11 @@ export default {
       // file_type: [],
       files: [],
       filesDisplay: [],
-      uploadError: false,
-      uploadErrorMsg: '',
-      fileUploaded: false
+      errorAlert: false,
+      errorAlertMsg: '',
+      fileUploaded: false,
+      successDlg: false,
+      jobId: ''
     })
   },
   methods: {
@@ -132,7 +156,11 @@ export default {
         }
       }
     },
-
+    successDlgClicked: function () {
+      let vm = this
+      console.log('Success dlg button clicked')
+      vm.$router.go(-1) // go back to previous page
+    },
     submit: function () {
       let vm = this
       vm.files.forEach(function (v) {
@@ -145,17 +173,29 @@ export default {
       console.log('Called Job Manager')
       jm.setJobType('otsu')
       jm.setJobParameters({'InputType': vm.fileName}) // Figure out which input type
-      vm.files.forEach(function (v) {
-        jm.addInputFile(v.fileName, v.fileUrl)
-        console.log('Job Manager added file: ' + v.fileName)
-      })
-      return jm.submitJob(function (jobId) {
-        console.log('Success! JobId is: ' + jobId)
+      if (vm.files && vm.files.length >= 1) {
+        vm.files.forEach(function (v) {
+          jm.addInputFile(v.fileName, v.fileUrl)
+          console.log('Job Manager added file: ' + v.fileName)
+        })
+        return jm.submitJob(function (jobId) {
+          console.log('Success! JobId is: ' + jobId)
+          vm.jobId = jobId
+          vm.resetLoading()
+          vm.successDlg = true
+        }, function (errCode, errMsg) {
+          let msg = 'error: ' + errCode + ' msg: ' + errMsg
+          console.log(msg)
+          vm.errorAlertMsg = msg
+          vm.errorAlert = true
+          vm.resetLoading()
+        })
+      } else {
+        let msg = 'Please select a file to process.'
+        vm.errorAlertMsg = msg
+        vm.errorAlert = true
         vm.resetLoading()
-      }, function (errCode, errMsg) {
-        console.log('error: ' + errCode + ' msg: ' + errMsg)
-        vm.resetLoading()
-      })
+      }
     }
   }
 }
@@ -166,6 +206,7 @@ export default {
   img {
     width: 240px;
   }
+
   h4 {
     text-transform: uppercase;
   }

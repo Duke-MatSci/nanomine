@@ -98,10 +98,12 @@ JobMgr.prototype = {
               })
           })
           .catch(function (err) {
+            console.log('createJob failed - catch' + err)
             vm.handleErr(err, failureFunction)
           })
-      } catch (ex) {
-        vm.handleErr(ex, failureFunction)
+      } catch (err) {
+        console.log('Try failed - catch' + err)
+        vm.handleErr(err, failureFunction)
       }
     }
   },
