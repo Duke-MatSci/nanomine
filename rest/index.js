@@ -365,12 +365,17 @@ function updateJobStatus (statusFilePath, newStatus) {
     'job_status': newStatus,
     'update_dttm': Date()
   }
-  fs.writeFile(statusFileName, JSON.stringify(statusObj), {'encoding': 'utf8'}, function (err) {
-    if (err) {
-      logger.error('error creating job_status file: ' + statusFileName + ' err: ' + err)
-    }
-  }) // if it fails, it's OK
+  try {
+    fs.writeFile(statusFileName, JSON.stringify(statusObj), {'encoding': 'utf8'}, function (err) {
+      if (err) {
+        logger.error('error creating job_status file: ' + statusFileName + ' err: ' + err)
+      }
+    }) // if it fails, it's OK
+  } catch(err) {
+    logger.error('try/catch driven for updating job status: ' + statusFileName + ' err: ' + err)
+  }
 }
+
 app.post('/jobcreate', function (req, res, next) {
   let jsonResp = {'error': null, 'data': null}
   let jobType = req.body.jobType
@@ -381,13 +386,18 @@ app.post('/jobcreate', function (req, res, next) {
   logger.debug('job parameters: ' + JSON.stringify(jobParams))
   fs.mkdir(jobDir, function (err, data) {
     if (err) {
-      logger.error('mkdir nmJobDataDir failed: ' + err)
-      next(err)
+      let msg = 'mkdir nmJobDataDir failed. jobDir: ' + jobDir + ' error: ' + err
+      logger.error(msg)
+      jsonResp.data = null
+      jsonResp.error = msg
+      res.status(400).json(jsonResp)
     } else {
       fs.writeFile(paramFileName, JSON.stringify(jobParams), {'encoding': 'utf8'}, function (err, data) {
         if (err) {
           updateJobStatus(jobDir, 'preCreateError')
-          next(err)
+          jsonResp.data = null
+          jsonResp.error = 'error updating/creating job parameters file: ' + paramFileName
+          res.status(400).json(jsonResp)
         } else {
           updateJobStatus(jobDir, 'created')
           jsonResp.data = {'jobId': jobId}
@@ -406,7 +416,7 @@ app.post('/jobpostfile', function (req, res, next) {
   let jobFileUri = req.body.jobFileInfo.dataUri
   let jobDir = nmJobDataDir + '/' + jobId
   let outputName = jobDir + '/' + jobFileName
-  // TODO decode dataurl of file into buffer and write it to the job's directory in the Apache tree
+  // decode dataurl of file into buffer and write it to the job's directory in the Apache tree
   //   It would be better to stream the file, but for now, just extract to buffer and write to file
   let buffer = datauri(jobFileUri)
   console.log('Job type: ' + jobType + ' file mime type: ' + buffer.fullType)
@@ -414,8 +424,11 @@ app.post('/jobpostfile', function (req, res, next) {
   fs.writeFile(outputName, buffer, {'encoding': 'utf8'}, function (err, data) {
     if (err) {
       updateJobStatus(jobDir, 'postFileError' + '-' + outputName)
-      logger.error('/jobpostfile write job file error - file: ' + outputName + ' err: ' + err)
-      next(err)
+      let msg = '/jobpostfile write job file error - file: ' + outputName + ' err: ' + err
+      logger.error(msg)
+      jsonResp.data = null
+      jsonResp.error = msg
+      res.status(400).json(jsonResp)
     } else {
       updateJobStatus(jobDir, 'filePosted-' + outputName)
       res.status(rcode).json(jsonResp)
