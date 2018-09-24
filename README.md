@@ -133,26 +133,22 @@ NanoMine Nanocomposites Data Resource
 - go to http://localhost/ to login with your credentials during "createuser" command
 - go to http://localhost/nm to access NanoMine
 
-# Server Development mode
-Each time a change is made for NanoMine, apache2 and celeryd service have to be restarted manually. 
-It is possible to use Whyis' development mode to bypass the need to restart services.
-
-Try this:  
+### Code changes
+- If code changes are made to the GUI
 ```
-sudo su - whyis
-cd /app/whyis
-python manage.py runserver -h 0.0.0.0
-``` 
-After executing the commands above NanoMine may accessed on "http://localhost:5000/nm".
-Then, you only need to refresh your webpage to see your changes immediately after you make changes to NanoMine. 
-
-After you finished the visualization changes, you can shutdown the developing mode with CTRL+c.
-Then you have to restart apache2 and celeryd service by
-```
+cd /apps/nanomine
+npm run build
 sudo service apache2 restart
-sudo service celeryd restart
 ```
-After this, the updated NanoMine app will show up at "http://localhost/nm".
+- If code changes are made to the rest server - be sure to stop the rest server and restart
+  - If the rest server is running in a terminal window, just use ^C (ctrl+c) to terminate the rest server and restart
+```
+cd /apps/nanomine/rest
+node index.js
+```
+  - If the rest server is running in the backgroupd you'll need to find the process id and kill it before restarting
+  
+  
 
 # Components and Libraries Used
 - https://vuejs.org VueJS Javascript Framework
