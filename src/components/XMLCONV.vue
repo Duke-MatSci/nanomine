@@ -4,20 +4,34 @@
     <v-container>
       <h3 class="text-xs-left">Description</h3>
       <br>
-      <p class="text-xs-left">The simplest method to curate your sample into the database is by uploading an MS Excel spreadsheet. An online web-form is also available for the advanced user (<router-link to="/curate">click here</router-link>). For each sample, upload a template Excel file using the first uploading box and other supplementary image and raw data files using the second uploading box. The master Excel template contains all possible fields for nanocomposite sample data and therefore many fields will remain blank for your sample. Fill in only the parameters applicable to your sample. Customized templates are available upon request, please contact <a href="mailto:nanominenu@gmail.com">the administrator</a>.</p>
+      <p class="text-xs-left">The simplest method to curate your sample into the database is by uploading an MS Excel
+        spreadsheet. An online web-form is also available for the advanced user (
+        <router-link to="/curate">click here</router-link>
+        ). For each sample, upload a template Excel file using the first uploading box and other supplementary image and
+        raw data files using the second uploading box. The master Excel template contains all possible fields for
+        nanocomposite sample data and therefore many fields will remain blank for your sample. Fill in only the
+        parameters applicable to your sample. Customized templates are available upon request, please contact <a
+          href="mailto:nanomine-help@duke.edu">the administrator</a>.
+      </p>
       <br>
       <h3 class="text-xs-left">Steps</h3>
-      <p class="text-xs-left">Step 1: Click <a href="{% static 'XMLCONV/master_template.zip' %}" download>here</a> to download the blank MS Excel template (137 kB).
-       (Click <a href="{% static 'XMLCONV/example.zip' %}" download>here</a> to see an example, 263 kB)<br>
-      Step 2: Fill in the parameters for all applicable cells in the template Excel file. Prepare the supplementary images and raw data files.<br>
-      Step 3: Select the template Excel file in the first uploading box.<br>
-      Step 4: Select the supplementary images and other raw data files in the second uploading box (press "Ctrl" or "Command" when selecting multiple files), then click Submit to upload your data.<br>
-      Step 5: Wait for the feedback message. Please read the message and follow the instructions if an error message is displayed.</p>
+      <p class="text-xs-left">Step 1: Click <a href="/cdn/xmlconv/master_template.zip" download>here</a> to download the
+        blank MS Excel template (137 kB).
+        (Click <a href="/cdn/xmlconv/example.zip" download>here</a> to see an example, 263 kB)<br>
+        Step 2: Fill in the parameters for all applicable cells in the template Excel file. Prepare the supplementary
+        images and raw data files.<br>
+        Step 3: Select the template Excel file in the first uploading box.<br>
+        Step 4: Select the supplementary images and other raw data files in the second uploading box (press "Ctrl" or
+        "Command" when selecting multiple files), then click Submit to upload your data.<br>
+        Step 5: Wait for the feedback message. Please read the message and follow the instructions if an error message
+        is displayed.</p>
       <h3 class="text-xs-left">Note</h3>
       <p class="text-xs-left">1. We recommend you to upload your control sample first and remember its sample ID.<br>
-      2. Upload one sample data at a time (one template Excel file along with supplementary files).<br>
-      3. Rows or sections followed by a "#" sign in the template Excel file can be duplicated. Copy them into additional rows if needed.<br>
-      4. Acceptable image file format: JPG, PNG, TIF(F). Indicate the full image file name including the extensions in the corresponding cells in the template Excel file.
+        2. Upload one sample data at a time (one template Excel file along with supplementary files).<br>
+        3. Rows or sections followed by a "#" sign in the template Excel file can be duplicated. Copy them into
+        additional rows if needed.<br>
+        4. Acceptable image file format: JPG, PNG, TIF(F). Indicate the full image file name including the extensions in
+        the corresponding cells in the template Excel file.
       </p>
       <h3 class="text-xs-left">Inputs</h3><br>
       <v-alert
@@ -27,6 +41,20 @@
       >
         {{uploadErrorMsg}}
       </v-alert>
+      <v-dialog v-model="successDlg" persistent max-width="500px">
+        <v-card>
+          <v-card-title>
+            <span>Uploader Job Submitted Successfully</span>
+            <v-spacer></v-spacer>
+          </v-card-title>
+          <v-card-text>
+            Your uploader job is: {{jobId}} <br/> You should receive an email with a link to the job output.
+          </v-card-text>
+          <v-card-actions>
+            <v-btn color="primary" flat @click="successDlgClicked()">Close</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
       <v-flex xs12 class="text-xs-center text-sm-center text-md-center text-lg-center">
         <p class="text-xs-left">Select the Excel Template File
           <v-btn class="text-xs-left" small color="primary" @click='pickTemplate'>Browse</v-btn>
@@ -42,12 +70,12 @@
           <v-list-tile
             :key="templateName"
           >
-          <v-list-tile-avatar>
-            <v-icon color="primary">check_circle_outline</v-icon>
-          </v-list-tile-avatar>
-          <v-list-tile-content>
+            <v-list-tile-avatar>
+              <v-icon color="primary">check_circle_outline</v-icon>
+            </v-list-tile-avatar>
+            <v-list-tile-content>
               <v-list-tile-title v-text="templateName"></v-list-tile-title>
-          </v-list-tile-content>
+            </v-list-tile-content>
           </v-list-tile>
         </v-list>
       </v-flex>
@@ -67,12 +95,12 @@
             v-for="file in filesDisplay"
             :key="file.fileName"
           >
-          <v-list-tile-avatar>
-            <v-icon color="primary">check_circle_outline</v-icon>
-          </v-list-tile-avatar>
-          <v-list-tile-content>
+            <v-list-tile-avatar>
+              <v-icon color="primary">check_circle_outline</v-icon>
+            </v-list-tile-avatar>
+            <v-list-tile-content>
               <v-list-tile-title v-text="file.fileName"></v-list-tile-title>
-          </v-list-tile-content>
+            </v-list-tile-content>
           </v-list-tile>
         </v-list>
       </v-flex>
@@ -97,7 +125,9 @@ export default {
     filesDisplay: [],
     uploadError: false,
     uploadErrorMsg: '',
-    templateUploaded: false
+    templateUploaded: false,
+    successDlg: false,
+    jobId: ''
   }),
   methods: {
     setLoading: function () {
@@ -176,6 +206,12 @@ export default {
       }
     },
 
+    successDlgClicked: function () {
+      let vm = this
+      console.log('Success dlg button clicked')
+      vm.$router.go(-1) // go back to previous page
+    },
+
     submit: function () {
       let vm = this
       vm.files.forEach(function (v) {
@@ -198,7 +234,9 @@ export default {
       })
       return jm.submitJob(function (jobId) {
         console.log('Success! JobId is: ' + jobId)
+        vm.jobId = jobId
         vm.resetLoading()
+        vm.successDlg = true
       }, function (errCode, errMsg) {
         console.log('error: ' + errCode + ' msg: ' + errMsg)
         vm.resetLoading()
@@ -212,6 +250,7 @@ export default {
   img {
     width: 240px;
   }
+
   h4 {
     text-transform: uppercase;
   }
