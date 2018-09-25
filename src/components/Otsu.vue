@@ -159,7 +159,7 @@ export default {
     successDlgClicked: function () {
       let vm = this
       console.log('Success dlg button clicked')
-      vm.$router.go(-1) // go back to previous page
+      vm.$router.go(-2) // go back to previous page
     },
     submit: function () {
       let vm = this

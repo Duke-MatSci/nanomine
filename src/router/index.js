@@ -19,6 +19,7 @@ import CorrelationReconstruct from '@/components/CorrelationReconstruct'
 import SDFReconstruct from '@/components/SDFReconstruct'
 import DescriptorReconstruct from '@/components/DescriptorReconstruct'
 import Visualization from '@/components/Visualization'
+import OtsuResult from '@/components/OtsuResult'
 Vue.use(Router)
 
 export default new Router({
@@ -117,6 +118,11 @@ export default new Router({
       path: '/Visualization',
       name: 'Visualization',
       component: Visualization
+    },
+    {
+      path: '/OtsuResult',
+      name: 'OtsuResult',
+      component: OtsuResult
     }
   ]
 })
