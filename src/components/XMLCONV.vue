@@ -239,6 +239,8 @@ export default {
         vm.successDlg = true
       }, function (errCode, errMsg) {
         console.log('error: ' + errCode + ' msg: ' + errMsg)
+        vm.uploadError = true
+        vm.uploadErrorMsg = 'Error submitting files for upload: errCode: ' + errCode + ' msg: ' + errMsg
         vm.resetLoading()
       })
     }
