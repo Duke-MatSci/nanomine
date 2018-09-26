@@ -13,6 +13,12 @@ NanoMine Nanocomposites Data Resource
 - whyis will be installed in /apps/whyis
 - Steps to install NanoMine:
   ```
+  
+  sudo usermod -aG sudo whyis
+  
+  # no need to go back-and-forth to another user. Plus, for development later, just log into whyis directly from login page
+  sudo su - whyis
+  
   cd /apps
   sudo git clone https://github.com/YOURFORK/nanomine.git  # to use the original, use FORKNAME of 'duke-matsci'
   sudo mkdir -p /apps/nanomine/data 2>/dev/null
@@ -20,9 +26,8 @@ NanoMine Nanocomposites Data Resource
   sudo wget https://raw.githubusercontent.com/duke-matsci/nanomine-ontology/master/xml_ingest.setl.ttl
   sudo wget https://raw.githubusercontent.com/duke-matsci/nanomine-ontology/master/ontology.setl.ttl
   sudo chown -R whyis:whyis /apps/nanomine
-  sudo su - whyis
-
-  #EDIT the whyis user's ~/.bash_profile to add:
+  
+  #EDIT the whyis user's ~/.bashrc to add: (append to end of file)
   export NM_MONGO_PORT=27017
   export NM_MONGO_HOST=localhost
   export NM_MONGO_DB=mgi
@@ -44,10 +49,10 @@ NanoMine Nanocomposites Data Resource
   
   #install n - the nodejs version manager and LTS version of node
   curl -L https://git.io/n-install | bash -s -- -y lts
-  echo 'export N_PREFIX="$HOME/n"; [[ :$PATH: == *":$N_PREFIX/bin:"* ]] || PATH+=":$N_PREFIX/bin"' >> ~/.bash_profile
+  echo 'export N_PREFIX="$HOME/n"; [[ :$PATH: == *":$N_PREFIX/bin:"* ]] || PATH+=":$N_PREFIX/bin"' >> ~/.bashrc
   
   #make sure n is in the path and new variables are defined
-  source ~/.bash_profile
+  source ~/.bashrc
 
   # install the VueJS command line processor
   npm i -g vue-cli@2.9.6  
@@ -65,7 +70,6 @@ NanoMine Nanocomposites Data Resource
   
   #install NanoMine python components for Whyis
   pip install -e .
-  exit
   
   sudo a2enmod proxy_connect.load  
   sudo a2enmod proxy_html.load  
@@ -89,9 +93,7 @@ NanoMine Nanocomposites Data Resource
   sudo /apps/nanomine/install/mongoSetupAdminUser
   sudo /apps/nanomine/install/mongoSetupApiUser
   sudo systemctl enable mongod
-  
-  sudo su - whyis
-  
+    
   cd nanomine/rest
   npm i # install packages needed by rest server
   # the next command will run the rest server in the background
