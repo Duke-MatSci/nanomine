@@ -28,6 +28,8 @@ NanoMine Nanocomposites Data Resource
   export NM_MONGO_DB=mgi
   export NM_MONGO_USER="mongodevadmin" 
   export NM_MONGO_PWD="mydevmongopw" # SET THIS to a different password NOW
+  export NM_MONGO_OWNER_USER="mongodevowner"
+  export NM_MONGO_OWNER_PWD="mydevmongoownerpw" # SET THIS to a different password NOW
   export NM_MONGO_API_USER="mongodevapi"
   export NM_MONGO_API_PWD="mydevmongoapipw" # SET THIS to a different password NOW
   export NM_MONGO_URI="mongodb://${NM_MONGO_API_USER}:${NM_MONGO_API_PWD}@${NM_MONGO_HOST}:${NM_MONGO_PORT}/${NM_MONGO_DB}"

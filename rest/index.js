@@ -32,7 +32,6 @@ try {
   logger.error('NOTE: if the error above is EEXISTS, the error can be ignored.')
 }
 
-
 try {
   fs.mkdirSync(nmJobDataDir) // Sync used during startup
 } catch (err) {
@@ -72,27 +71,36 @@ db.once('open', function () {
 Mongoose schemas and models -- begin
   TODO move to separate module
   Schemas/Models:
-    version
-    dataset
+    mgiversion
+    datasets
     xmldata
     template (the xsd schema) -- we'll call it xsdSchema internally instead of template
     template_version (tracker for template versions and deactivated templates)
 */
 
-// let versionSchema = new mongoose.Schema({
-//   majorVer: Number, /* SEMVER versioning for the overall MGI db schema represented by the db. NM base was MDCS 1.3 */
-//   minorVer: Number, /* http://semver.org */
-//   patchVer: Number,
-//   labelVer: String /* major.minor.patch-label when formatted */
-// }, {collection: 'version'})
+let mgiVersionSchema = new mongoose.Schema({
+  majorVer: Number, /* SEMVER versioning for the overall MGI db schema represented by the db. NM base was MDCS 1.3 */
+  minorVer: Number, /* http://semver.org */
+  patchVer: Number,
+  labelVer: String /* major.minor.patch-label when formatted */
+}, {collection: 'mgi_version'}) /* Latest is 1.3.0-nm-sp-dev-1 */
+let MgiVersion = mongoose.model('mgiversion', mgiVersionSchema)
 
-// let datasetSchema = new mongoose.Schema({
-//   seq: Number, /* Unique index constraint, but not forced to monotonic -- required field (set by create) */
-//   title: String, /* Name of study, book, article, paper, etc -- required field */
-//   authors: [String], /* Authors, first is primary */
-//   type: String, /* study, book, article, paper -- fixed set -- required field */
-//   doi: String /* DOI or other unique assigned handle -- can be missing or null */
-// }, {collection: 'dataset'})
+let datasetsSchema = new mongoose.Schema({
+  citationType: String, /* study, book, article, paper -- fixed set -- required field */
+  publication: String, /* Journal name, book name, etc */
+  title: String, /* Name of study, book, article, paper, etc -- required field */
+  author: [String], /* Authors, first is primary */
+  keyword: [String], /* Keywords. NOTE: some are multi-word */
+  publisher: String, /* publisher */
+  publicationYear: Number, /* 2005, etc. */
+  doi: String, /* DOI or other unique assigned handle -- can be missing or null */
+  volume: Number, /* 1-12 for monthly, could be others for weekly, semi-monthly, etc */
+  url: String, /* Best url to access paper, book, etc */
+  language: String, /* English, etc */
+  seq: Number /* Unique index constraint, but not forced to monotonic -- required field (set by create) */
+}, {collection: 'datasets'})
+let Datasets = mongoose.model('datasets', datasetsSchema)
 
 let xmlDataSchema = new mongoose.Schema({ // maps the mongo xmldata collection
   schemaId: String, /* !!! NOTE: had to rename 'schema' field name in restored data from MDCS to schemaId because of mongoose name conflict
@@ -103,11 +111,19 @@ let xmlDataSchema = new mongoose.Schema({ // maps the mongo xmldata collection
   content: mongoose.Schema.Types.Mixed, /* !!! NOTE: MDCS stores the XML content as a BSON object parsed into the individual fields.
                       Moving forward NanoMine will not use this approach, so the data was downloaded as text via the MDCS rest interface
                       as a string and re-loaded into the xml_str string.  This is another reason why a dump of MDCS mongo will not restore
-                      and run with the new app directly. bluedevil-oit/nanomine-tools project has code to update the field. */
+                      and run with the new app directly.
+                      The migration tool will convert the 1.3.0 (no mgi_version collection) content field data and put a copy into xml_str.
+                      The content field is left alone. Note that for really old XMLdata records or ones where the title is not in the
+                      correct format, the conversion will not occur.
+                      bluedevil-oit/nanomine-tools project has (PRELIMINARY) code to update the field. */
   xml_str: String,
   iduser: String, /* numeric reference to user (probably in sqlite) */
-  ispublished: Boolean /* In the current db, these are all false */
+  ispublished: Boolean, /* In the current db, these are all false */
+  curateState: String, /* currently values are Edit, Review, Curated */
+  entityState: String, /* currently values are EditedNotValid, EditedValid, Valid, NotValid, Ingesting, IngestFailed, IngestSuccess */
+  dsSeq: Number /* Sequence number of the associated dataset (datasetSchema) */
 }, {collection: 'xmldata'})
+let XmlData = mongoose.model('xmlData', xmlDataSchema)
 
 let xsdSchema = new mongoose.Schema({ // maps the mongo template collection
   title: String, // the name of the schema does not need to be unique
@@ -120,18 +136,16 @@ let xsdSchema = new mongoose.Schema({ // maps the mongo template collection
   exporters: [], // optional and will not be used
   XSLTFiles: [] // optional and will not be used
 }, {collection: 'template'})
+let XsdSchema = mongoose.model('xsdData', xsdSchema)
 
 let xsdVersionSchema = new mongoose.Schema({ // maps the mongo template_version collection
   versions: [String], // Array of xsdSchema ids as stings
   deletedVersions: [String], // deleted versions array of xsdSchema ids
   nbVersions: Number, // current count of versions
   isDeleted: Boolean, // this schema is not to be shown/used at all and all xmls based on schema are deprecated
-  current: String // current schema version id
+  current: String, // current schema version id
+  currentRef: [{type: mongoose.Schema.Types.ObjectId, ref: 'xsdData'}]
 }, {collection: 'template_version'})
-
-// let Dataset = mongoose.model('dataset', datasetSchema)
-let XmlData = mongoose.model('xmlData', xmlDataSchema)
-let XsdSchema = mongoose.model('xsdData', xsdSchema)
 let XsdVersionSchema = mongoose.model('xsdVersionData', xsdVersionSchema)
 
 // Sniff test for xmlData schema access via model
@@ -187,9 +201,39 @@ app.get('/templates/versions/select/all', function (req, res) {
   })
 })
 
+function sortSchemas (allActive) { // sort by date descending and choose first
+  allActive.sort((a, b) => { // Sort in reverse order
+    let rv = 0
+    let rea = a.currentRef[0].title.match(/(\d{2})(\d{2})(\d{2})/)
+    let reb = b.currentRef[0].title.match(/(\d{2})(\d{2})(\d{2})/)
+    let yra = parseInt(rea[3])
+    let yrb = parseInt(reb[3])
+    let moa = parseInt(rea[1])
+    let mob = parseInt(reb[1])
+    let dya = parseInt(rea[2])
+    let dyb = parseInt(reb[2])
+    if (yrb > yra) {
+      rv = 1 // reverse sort
+    } else if (yrb < yra) {
+      rv = -1
+    }
+    if (rv === 0 && mob > moa) {
+      rv = 1
+    } else if (rv === 0 && moa > mob) {
+      rv = -1
+    }
+    if (rv === 0 && dyb > dya) {
+      rv = 1
+    } else if (rv === 0 && dya > dyb) {
+      rv = -1
+    }
+    return rv
+  })
+}
+
 app.get('/templates/versions/select/allactive', function (req, res) {
   let jsonResp = {'error': null, 'data': null}
-  XsdVersionSchema.find({isDeleted: {$eq: false}}).exec(function (err, versions) {
+  XsdVersionSchema.find({isDeleted: {$eq: false}}).populate('currentRef').exec(function (err, versions) {
     if (err) {
       jsonResp.error = err
       res.status(400).json(jsonResp)
@@ -197,6 +241,13 @@ app.get('/templates/versions/select/allactive', function (req, res) {
       jsonResp.error = {'statusCode': 404, 'statusText': 'not found'}
       res.status(404).json(jsonResp)
     } else {
+      try {
+        sortSchemas(versions) /* In-place sort by title i.e. 081218 will date sort to top relative to 060717 (reverse sort) so that
+                                 client can assume latest schema is first
+                                 */
+      } catch (err) {
+        logger.error('schema sort reverse by date failed :( - error' + err)
+      }
       jsonResp.data = versions
       res.json(jsonResp)
     }
@@ -358,9 +409,9 @@ app.post('/curate', function (req, res) {
   // set validationState to value specified by editor.  Background task will validate and update db status.
   res.json(jsonResp)
 })
-/* rest services related to XMLs and Schemas -- end */
+/* END -- rest services related to XMLs and Schemas  */
 
-/* Job related rest services */
+/* BEGIN -- Job related rest services */
 function updateJobStatus (statusFilePath, newStatus) {
   let statusFileName = statusFilePath + '/' + 'job_status.json'
   let statusObj = {
@@ -373,7 +424,7 @@ function updateJobStatus (statusFilePath, newStatus) {
         logger.error('error creating job_status file: ' + statusFileName + ' err: ' + err)
       }
     }) // if it fails, it's OK
-  } catch(err) {
+  } catch (err) {
     logger.error('try/catch driven for updating job status: ' + statusFileName + ' err: ' + err)
   }
 }

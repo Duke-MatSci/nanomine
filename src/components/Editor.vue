@@ -103,6 +103,55 @@
         <span>More</span>
       </v-tooltip>
     </v-toolbar>
+    <v-dialog v-model="openOrCreateDialog" max-width="500px">
+      <v-tabs
+        v-model="active"
+        color="light-blue"
+        dark
+        slider-color="red"
+      >
+        <v-tab
+          v-for="n in 2"
+          :key="n"
+          ripple
+        >
+          {{ openOrCreateTabs[n-1] }}
+
+        </v-tab>
+        <v-tab-item
+          v-for="n in 2"
+          :key="n"
+        >
+          <v-card flat>
+              <v-layout justify-center v-if="n==1"> <!-- open existing -->
+                <v-flex xs10>
+                  <v-form v-model="valid">
+                    <v-text-field append-icon="search" @click:append="clickedOpenIdSearch()"
+                      v-model="openID"
+                      label="ID"
+                      required
+                    ></v-text-field>
+                    <v-switch
+                      :label="`Latest schema only? ${openLatestSchema?'Yes':'No'}`"
+                      v-model="openLatestSchema"
+                    ></v-switch>
+                  </v-form>
+                </v-flex>
+              </v-layout>
+              <v-layout v-if="n==2"> <!-- create new -->
+                <v-flex>
+                  Layout 2
+                </v-flex>
+              </v-layout>
+          </v-card>
+        </v-tab-item>
+      </v-tabs>
+      <v-card>
+        <v-card-actions>
+          <v-btn color="primary" flat @click="openOrCreateDialog=false">Close</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
     <v-layout row justify-center>
       <v-dialog v-model="saveMenuActive" max-width="150px">
           <v-list>
@@ -200,6 +249,10 @@ export default {
   data: function () {
     return {
       msg: '<untitled>',
+      openOrCreateDialog: false,
+      openOrCreateTabs: ['Open Existing', 'Create New'],
+      openLatestSchema: true,
+      openID: '',
       settingsDialog: false,
       editorError: false,
       editorErrorMsg: '',
@@ -287,6 +340,30 @@ export default {
     }
   },
   methods: {
+    log: function (msg) {
+      window.console.log(msg)
+    },
+    clickedOpenIdSearch: function () {
+      let vm = this
+      vm.log('clicked ID')
+      vm.openOrCreateDialog = false // close dialog box
+      vm.setLoading()
+      let url = '/nmr/templates/versions/select/allactive'
+      setTimeout(function () {
+        Axios.get(url)
+          .then(function (response) {
+            console.log(response)
+            vm.$store.commit('addSchemas', response.data) // could allow this to be cached, but for now just get it done
+            vm.resetLoading()
+            vm.fileDialog = true
+          })
+          .catch(function (err) {
+            vm.resetLoading()
+            vm.editorErrorMsg = err
+            vm.editorError = true
+          })
+      }, 2000)
+    },
     setLoading: function () {
       this.$store.commit('isLoading')
     },
@@ -395,7 +472,7 @@ export default {
     },
 
     addTabButton: function () {
-
+      this.openOrCreateDialog = true
     },
     fileButton: function (idx, ev) {
       let vm = this
@@ -428,7 +505,7 @@ export default {
       return Axios.get(url)
         .then(function (response) {
           vm.xml_text = vkbeautify.xml(response.data.data.xml, 1)
-          vm.$store.commit('newEditorTab', {'name': fileNm, 'xmlText': vm.xml_text, 'schemaText': null}) // no schema yet :(
+          vm.$store.commit('newEditorTab', {'name': fileNm, 'xmlText': vm.xml_text, 'schemaIndex': -1}) // no schema yet :(
           // console.log(tabNumber)
           vm.refreshEditor()
           vm.resetLoading()
