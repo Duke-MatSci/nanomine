@@ -1,4 +1,7 @@
 /*
+
+run with this command "node --harmony-promise-finally migrate.js"
+
 migrate.js - handle migration from app version to app version
   NOTE:
     Originally, the mongodb came from MDCS 1.3 (really old now) and did not have an mgi.version collection
@@ -22,11 +25,23 @@ const ObjectId = require('mongodb').ObjectId
 const _ = require('lodash')
 const validateXml = require('xmllint').validateXML
 
-// const validSchemas = [ // really should come from the database, but no time now TODO
-// //  {name: 'PNC_schema_060718.xsd', id: '5b1ebeb9e74a1d61fc43654d'},
-// //  {name: 'PNC_schema_072618.xsd', id: '5b6da9b0e74a1d213baf41cb'},
-//   {name: 'PNC_schema_081218.xsd', id: '5b71eb00e74a1d7c81bec6c7'}
-// ]
+function logTrace (msg) { // Placeholders logging functions
+  console.log(msg)
+}
+
+function logDebug (msg) {
+  // console.log(msg)
+}
+
+function logInfo (msg) {
+  console.log(msg)
+}
+function logWarn (msg) {
+  console.log(msg)
+}
+function logError (msg) {
+  console.log(msg)
+}
 
 let schemaInfo = [
 ]
@@ -130,7 +145,9 @@ let xmldataColNm = 'xmdata'
 
 // const mongoUri = 'mongodb://mgi:mydevmongoapipw@localhost:27017/mgi'
 const dbName = 'mgi'
-const mongoUrl = 'mongodb://localhost:27017/' + dbName
+// const mongoUrl = 'mongodb://localhost:27017/' + dbName
+const mongoUrl = process.env['NM_MONGO_URI']
+
 let db = null
 let mongoClient = null
 
@@ -150,24 +167,6 @@ function dbClose () {
       })
   })
   return p
-}
-
-function logTrace (msg) { // Placeholders logging functions
-  console.log(msg)
-}
-
-function logDebug (msg) {
-  // console.log(msg)
-}
-
-function logInfo (msg) {
-  console.log(msg)
-}
-function logWarn (msg) {
-  console.log(msg)
-}
-function logError (msg) {
-  console.log(msg)
 }
 
 function mapVersion (versionInfo) { // version info from mgi.version -- may be null from original production version
@@ -275,6 +274,29 @@ function updateXmlDataDocToNmSpDev1 (id, schemaId, dsSeq, xml) {
           }
         })
     }, (Math.floor(Math.random() * 20) + 10) * 1000)
+  })
+  return p
+}
+function updateTemplateVersionCurrentRef () {
+  let func = 'updateTemplateVersionCurrentRef'
+  let p = new Promise(function (resolve, reject) {
+    let templateVersion = db.collection('template_version')
+    templateVersion.find({}).forEach(function (doc) {
+      templateVersion.updateOne({_id: doc._id}, {$set: {'currentRef': ObjectId.createFromHexString(doc.current)}}, {})
+        .then(function (result) {
+          logInfo(func + ' - updateTemplateVersionCurrentRef successful')
+          resolve()
+        })
+        .catch(function (err) {
+          logError(func + ' - updateTemplateVersionCurrentRef failed: ' + err)
+          reject(err)
+        })
+    }, function (err) { // THIS IS NOT A CATCH! It's an iteration ended function and err MAY be null which is OK!
+      if (err) {
+        logError(func + ' - template_version iterator failure. Err: ' + err)
+        reject(err)
+      }
+    })
   })
   return p
 }
@@ -436,10 +458,12 @@ function migrateToNmSpDev1 (fromVer, toVer) {
                   } else if (ds.Keyword && ds.Keyword.length > 0) {
                     datasets[seq].keyword.push(ds.Keyword)
                   }
-                  logDebug('created dataset reference - seq: ' + seq + ' - ' + inspect(datasets[seq]) + '\n\n')
+                  logInfo('created dataset reference - seq: ' + seq + ' - ' + inspect(datasets[seq]) + '\n\n')
                 } else {
                   logInfo('cannot find key path in BSON object to build dataset info: ' + seq + ' for schema: ' + xmldoc.schema + ' title: ' + xmldoc.title)
                 }
+              } else {
+                logInfo('no datasets entry created for: ' + seq + '. Type of datasets[seq]: ' + typeof datasets[seq] + ' isValidSchema: ' + isValidSchema + ' schemaInfo.length: ' + schemaInfo.length + ' checked for schema: ' + xmldoc.schema)
               }
               logDebug(inspect(json))
               xml = xmlHeader // initialize xml
@@ -517,7 +541,7 @@ function getCurrentDbVersion () {
   let msg = ''
   let p = new Promise(function (resolve, reject) {
     // logDebug(inspect(db))
-    db.listCollections({'name': 'version'}).hasNext()
+    db.listCollections({'name': versionColNm}).hasNext()
       .then(function (hasVersionCol) { // boolean value true or false
         dbVer = {}
         if (hasVersionCol === true) {
@@ -664,30 +688,38 @@ function migrate () {
             logDebug(func + ' - getCurrentDbVersion.then idx: ' + idx + ' - fromVer: ' + JSON.stringify(fromVer) + ' toVer: ' + JSON.stringify(toVer))
             migrationTable[idx]['use'].apply(null, [fromVer, toVer])
               .then(function (v) {
-                createDatasetsCollection()
-                  .finally(function () { // node --harmony-promise-finally migrate.js
-                    console.log('createDatasetCollection finally function called')
-                    updateOrAddDatasets() // writePromises already has xmldata updates, be sure to call this before waiting on promises.all
-                    Promise.all(writePromises)
-                      .then(function () {
-                        logInfo(' migration result: ' + v)
-                      })
-                      .catch(function (err) {
-                        logInfo('Failure waiting for all updates. Error: ' + err)
-                      })
-                      .finally(function () {
-                        // set the version into the version collection
-                        createUpdateMgiVersionCollection(toVer)
+                updateTemplateVersionCurrentRef()
+                  .then(function () {
+                    createDatasetsCollection()
+                      .finally(function () { // node --harmony-promise-finally migrate.js
+                        logInfo('createDatasetCollection finally function called')
+                        updateOrAddDatasets() // writePromises already has xmldata updates, be sure to call this before waiting on promises.all
+                        Promise.all(writePromises)
+                          .then(function () {
+                            logInfo(' migration result: ' + v)
+                          })
+                          .catch(function (err) {
+                            logInfo('Failure waiting for all updates. Error: ' + err)
+                          })
                           .finally(function () {
-                            dbClose()
+                            // set the version into the version collection
+                            createUpdateMgiVersionCollection(toVer)
+                              .finally(function () {
+                                dbClose()
+                              })
                           })
                       })
                   })
                   .catch(function (err) {
-                    let msg = func + ' - error returned from migration step:  ' + err
+                    let msg = func + ' - error returned from updateTemplateVersionCurrentRef:  ' + err
                     logError(msg)
                     dbClose()
                   })
+              })
+              .catch(function (err) {
+                let msg = func + ' - error returned from migration step:  ' + err
+                logError(msg)
+                dbClose()
               })
           }
         })
@@ -703,3 +735,23 @@ function migrate () {
 }
 
 migrate()
+/*
+   1.3.0 -> 1.3.0-nm-sp-dev-1
+      add datasets collection that breaks out the citation section of the XMLs into specific records
+        There is a one-many relationship between a datasets document and xmldata records
+        The xmldata document will be updated to contain a reference to the associated dataset doc (dsSeq)
+        The title of each xmldata doc implicitly references the dsSeq as well
+        The reason for adding the datasets collection was to have a way to group xmls together and provide a consistent
+           way to add new groups i.e. new papers, such that it would be possible to (help) generate the correct title for
+           each xml. Note that there is still an issue with the sample component of the title
+      added mgi_version collection to contain a single record with the version information for later migrations
+        Any mgi db without an mgi_version collection is assumed to be v 1.3.0
+      Updated the template_version collection to contain a currentRef ObjectID field (same value as current, but
+        ObjectId intead of string) to allow for a Mongoose reference relationship to the template collection
+        so that obtaining current versions of templates also yields the XSD without having to make another DB call
+      Added xml_str field to most xmldata (non-compliant titles are skipped) docs by parsing content and
+        generating an xml string. The new editor uses the string version of the XML and not the BSON object
+      Added dsSeq field (per above) to xmldata docs
+      added curateState and entityState fields to xmldata docs to help drive curation workflows and xml entity
+        processing (validation, whyis ingest, etc)
+ */
