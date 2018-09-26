@@ -11,15 +11,16 @@ const store = new Vuex.Store({
     'editor': { // editor store should contain all editor state including tabs and data for each tab
       'tab': [
       ],
-      'currentTab': -1
+      'currentTab': -1,
+      'schemas': []
     },
     sampleList: [], // editor still has dependency -- need to remove when samples get read
 
     editorActive: false // move to editor object
   },
   mutations: {
-    addSchema: function (state, schemaName, schemaId, schemaXsd) {
-
+    addSchemas: function (state, toAdd) {
+      state.schemas = toAdd // Overwrite since call is made that returns all data to client at once
     },
     isLoading: function (state) {
       state.isWaiting = true
@@ -28,7 +29,7 @@ const store = new Vuex.Store({
       state.isWaiting = false
     },
     newEditorTab: function (state, toAdd) {
-      // let toAdd = {'name': name, 'xmlText': xmlText, 'schemaText': schemaText}
+      // let toAdd = {'name': name, 'xmlText': xmlText, 'schemaIndex': schemaIndex}
       if (state.editor.tab.length > 0) {
         // for now only 1 tab
         state.editor.tab.pop() // throw away the old tab state for now :(
