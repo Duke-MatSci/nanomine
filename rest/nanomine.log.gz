@@ -1,3 +1,0 @@
-{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
-{"message":"mkdir nmJobDataDir failed: Error: ENOENT: no such file or directory, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
-{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
