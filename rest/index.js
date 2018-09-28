@@ -328,6 +328,7 @@ app.get('/explore/select', function (req, res) {
   let id = req.query.id
   let schema = req.query.schema
   let title = req.query.title
+  let schemas = req.query.schemas // new parameter schema1,schema2,schema3,etc
   // not supporting data format at this time -- always returns xml for now
   // let dataformat = req.query.dataformat
   let query = {}
@@ -353,10 +354,13 @@ app.get('/explore/select', function (req, res) {
   } else {
     let titleQuery = null
     let schemaQuery = null
+    let schemasQuery = null
     if (validQueryParam(title)) {
       if (title.slice(0, 1) === '/' && title.slice(-1) === '/') {
         title = title.replace(/(^[/]|[/]$)/g, '')
-        titleQuery = {'title': { '$regex': title }}
+        let re = new RegExp(title, 'i')
+        titleQuery = {'title': { '$regex': re }}
+        // logger.debug(req.path + ' by title: ' + JSON.stringify(titleQuery))
       } else {
         titleQuery = {'title': {'$eq': title}}
       }
@@ -364,14 +368,30 @@ app.get('/explore/select', function (req, res) {
     if (validQueryParam(schema)) {
       if (schema.slice(0, 1) === '/' && schema.slice(-1) === '/') {
         schema = schema.replace(/(^[/]|[/]$)/g, '')
-        schemaQuery = {'schemaId': { '$regex': schema }}
+        let re = new RegExp(schema, 'i')
+        schemaQuery = {'schemaId': { '$regex': re }}
       } else {
         schemaQuery = {'schemaId': {'$eq': schema}}
       }
     }
+    if (validQueryParam(schemas)) {
+      let schemaList = schemas.split(',')
+      let schemasParams = []
+      if (schemaList.length > 0) {
+        schemaList.forEach(function (v) {
+          schemasParams.push({'schemaId': {'$eq': v}})
+        })
+        schemasQuery = { '$or': schemasParams }
+      }
+      logger.debug(req.path + ' schemasQuery: ' + JSON.stringify(schemasQuery))
+    }
     if (titleQuery && schemaQuery) {
       query = {
         '$and': [titleQuery, schemaQuery]
+      }
+    } else if (titleQuery && schemasQuery) {
+      query = {
+        '$and': [titleQuery, schemasQuery]
       }
     } else if (titleQuery) {
       query = titleQuery
