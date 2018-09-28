@@ -5,7 +5,8 @@ NanoMine Nanocomposites Data Resource
 
 # Installation 
 #### (REQUIRES ubuntu 16.04 -- 18.04 will not work yet)
-### Note: if installing on a virtual machine, be sure to allocate at least 8G Memory, 2 CPUs and 30G Disk
+### Note: if installing on a virtual machine, be sure to allocate at least 8G Memory, 2 CPUs and 40G Disk
+### Also, this is a DEVELOPMENT only install for a personal system (or vm). Don't use these instructions otherwise.
 - install [whyis](http://tetherless-world.github.io/whyis/install) using this command (bluedevil-oit version contains proxy work-around)
   ```
   bash < <(curl -skL https://raw.githubusercontent.com/bluedevil-oit/whyis/release/install.sh) # master does not seem to ingest properly
@@ -14,9 +15,9 @@ NanoMine Nanocomposites Data Resource
 - Steps to install NanoMine:
   ```
   
-  sudo usermod -aG sudo whyis
-  
   # no need to go back-and-forth to another user. Plus, for development later, just log into whyis directly from login page
+  sudo usermod -aG sudo whyis
+  sudo passwd whyis  # enter a password that only YOU know  
   sudo su - whyis
   
   cd /apps
@@ -90,6 +91,7 @@ NanoMine Nanocomposites Data Resource
   sudo apt-get install -y mongodb-org
   sudo cp /apps/nanomine/install/mongoConfig /etc/mongod.conf
   sudo service mongod start
+  sudo /apps/nanomine/install/mongoSetupOwnerUser
   sudo /apps/nanomine/install/mongoSetupAdminUser
   sudo /apps/nanomine/install/mongoSetupApiUser
   sudo systemctl enable mongod

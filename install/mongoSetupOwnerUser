@@ -1,5 +1,4 @@
 #!/bin/bash
-
 mongo  --port=$NM_MONGO_PORT <<EOF
 use admin
 db.createUser(
