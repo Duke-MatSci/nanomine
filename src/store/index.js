@@ -20,6 +20,7 @@ const store = new Vuex.Store({
   },
   mutations: {
     addSchemas: function (state, toAdd) {
+      // console.log('state.addSchemas: ' + JSON.stringify(toAdd))
       state.schemas = toAdd // Overwrite since call is made that returns all data to client at once
     },
     isLoading: function (state) {
@@ -72,15 +73,33 @@ const store = new Vuex.Store({
       }
       return rv
     },
-    editorTabCount: function (state) {
-      return state.editor.tab.length
-    },
     editorXmlText: function (state) {
       let rv = '<?xml version="1.0" encoding="utf-8"?>\n<PolymerNanocomposite>\n</PolymerNanocomposite>'
       if (state.editor.currentTab >= 0) {
+        console.log('editorXmlText: current tab is: ' + state.editor.currentTab)
         rv = state.editor.tab[state.editor.currentTab].xmlText
+      } else {
+        console.log('editorXmlText: could not find current tab.')
       }
       return rv
+    },
+    editorLatestSchemaId: function (state) {
+      let rv = null
+      // console.log(state.editor.schemas)
+      if (state.editor.schemas.length > 0) {
+        rv = state.editor.schemas[0].currentRef[0]._id // TODO NOTE: if sort failed for /nmr/templates/versions/select/allactive this will NOT be the latest schema-- REST needs to indicate this
+      }
+      return rv
+    },
+    editorSchemaIds: function (state) {
+      let rv = []
+      state.editor.schemas.forEach(function (v) {
+        rv.push(v.currentRef[0]._id)
+      })
+      return rv
+    },
+    editorTabCount: function (state) {
+      return state.editor.tab.length
     },
     currentEditorTab: function (state) {
       return state.editor.currentTab
