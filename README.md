@@ -91,6 +91,7 @@ NanoMine Nanocomposites Data Resource
   sudo apt-get install -y mongodb-org
   sudo cp /apps/nanomine/install/mongoConfig /etc/mongod.conf
   sudo service mongod start
+  sudo /apps/nanomine/install/mongoSetupOwnerUser
   sudo /apps/nanomine/install/mongoSetupAdminUser
   sudo /apps/nanomine/install/mongoSetupApiUser
   sudo systemctl enable mongod
