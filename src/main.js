@@ -13,6 +13,9 @@ import LeftMenu from '@/components/LeftMenu'
 import Waiting from '@/components/Waiting'
 import store from './store'
 import VueGoogleCharts from 'vue-google-charts'
+import TreeView from 'vue-json-tree-view'
+
+Vue.use(TreeView)
 
 Vue.use(VueGoogleCharts)
 
