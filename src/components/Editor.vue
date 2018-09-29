@@ -170,35 +170,41 @@
       <v-dialog v-model="fileDialog" scrollable width="500">
         <!--v-layout row>
           <v-flex xs12-->
-          <v-card>
-            <v-card-title class="file-open-header">Open ...</v-card-title>
-            <v-card-title>
-              <v-spacer></v-spacer>
-              <v-text-field
-                v-model="fileDialogSearch"
-                append-icon="search"
-                label="Filter by title or schema"
-                single-line
-                hide-details
-              ></v-text-field>
-            </v-card-title>
-            <v-data-table :headers="fileDialogHeaders" :items="fileDialogList" :search="fileDialogSearch">
+        <v-card>
+          <v-card-title class="file-open-header">Open ...</v-card-title>
+          <v-card-title>
+            <v-spacer></v-spacer>
+            <v-text-field
+              v-model="fileDialogSearch"
+              append-icon="search"
+              label="Filter by title or schema"
+              single-line
+              hide-details
+            ></v-text-field>
+          </v-card-title>
+          <v-data-table :headers="fileDialogHeaders" :items="fileDialogList" :search="fileDialogSearch">
             <v-divider></v-divider>
-              <template slot="items" slot-scope="props" height="300">
-                <td class="text-xs-left" v-on:click="fileDialogClick(props.item.name, props.item.schemaId, props.item.xmlText)">{{props.item.name}}</td>
-                <td class="text-xs-left" v-on:click="fileDialogClick(props.item.name, props.item.schemaId, props.item.xmlText)">{{props.item.schema}}</td>
-              </template>
-              <v-alert slot="no-results" :value="true" color="error" icon="warning">
-                Your search for "{{ fileDialogSearch }}" found no results.
-              </v-alert>
-            </v-data-table>
-            <v-divider></v-divider>
-            <v-card-actions class="file-open-footer">
-              <v-btn color="primary" @click.native="fileDialog = false">Cancel</v-btn>
-            </v-card-actions>
-          </v-card>
-          <!--/v-flex>
-        </v-layout-->
+            <template slot="items" slot-scope="props" height="300">
+              <td class="text-xs-left"
+                  v-on:click="fileDialogClick(props.item.name, props.item.schemaId, props.item.xmlText)">
+                {{props.item.name}}
+              </td>
+              <td class="text-xs-left"
+                  v-on:click="fileDialogClick(props.item.name, props.item.schemaId, props.item.xmlText)">
+                {{props.item.schema}}
+              </td>
+            </template>
+            <v-alert slot="no-results" :value="true" color="error" icon="warning">
+              Your search for "{{ fileDialogSearch }}" found no results.
+            </v-alert>
+          </v-data-table>
+          <v-divider></v-divider>
+          <v-card-actions class="file-open-footer">
+            <v-btn color="primary" @click.native="fileDialog = false">Cancel</v-btn>
+          </v-card-actions>
+        </v-card>
+        <!--/v-flex>
+      </v-layout-->
       </v-dialog>
     </v-layout>
     <v-layout row justify-center>
@@ -216,32 +222,22 @@
       </v-dialog>
     </v-layout>
     <!--/><-->
-    <v-container fluid justify-start fill-height>
-      <!--img :src="imageUrl" height="150" v-if="imageUrl"/>
-      <v-btn flat icon color="primary" @click.native='pickFile()'>
-        <v-icon>attach_file</v-icon>
-      </v-btn>
-      <input
-        type="file"
-        style="display: none"
-        ref="image"
-        multiple
-        accept=".zip, .xlsx,.xls, image/*"
-        @change="onFilePicked"
-      >
-      <v-list>
-        <v-list-tile
-          v-for="(v, idx) in filesToUpload"
-          :key="idx"
-        >
-          <v-list-tile-content>
-            <v-list-tile-title v-text="v"></v-list-tile-title>
-          </v-list-tile-content>
-        </v-list-tile>
-      </v-list-->
+    <v-container v-bind:style="{'display': xmlInView}" fluid justify-start fill-height>
       <v-layout row wrap align-start fill-height>
         <v-flex fill-height xs12>
           <div id="editor" ref="editor"></div>
+        </v-flex>
+      </v-layout>
+    </v-container>
+    <v-container v-bind:style="{'display': formInView}" fluid justify-start fill-height>
+      <v-layout row wrap align-start fill-height>
+        <v-flex fill-height xs12 align-start justify-start>
+          <div id="feditor" ref="feditor">
+            <div>
+              <tree-view style="text-align: left;" :data="jsonSource"
+                         :options="{maxDepth: 99, rootObjectKey: 'PolymerNanocomposite', modifiable: true}"></tree-view>
+            </div>
+          </div>
         </v-flex>
       </v-layout>
     </v-container>
@@ -254,6 +250,7 @@ import {} from 'vuex'
 import CodeMirror from '@/utils/codemirror'
 import Axios from 'axios'
 import vkbeautify from 'vkbeautify'
+import * as jxParser from 'fast-xml-parser'
 
 export default {
   name: 'Editor',
@@ -272,8 +269,8 @@ export default {
       view: 'xml',
       fileDialogSearch: '',
       fileDialogHeaders: [
-        { text: 'Title', align: 'left', value: 'name' },
-        { text: 'Schema', align: 'left', value: 'schema' }
+        {text: 'Title', align: 'left', value: 'name'},
+        {text: 'Schema', align: 'left', value: 'schema'}
       ],
       fileDialog: false,
       fileDialogItem: -1, // the value of the radio button selected
@@ -321,11 +318,11 @@ export default {
       extraKeys: {
         'Ctrl-J': 'toMatchingTag',
         /* "Cmd-B": vm.beautify,
-            "Ctrl-B": vm.beautify,
-            "Cmd-Z": vm.undo,
-            "Ctrl-Z": vm.undo,
-            "Shift-Cmd-Z": vm.redo,
-            "Shift-Ctrl-Z": vm.redo, */
+                "Ctrl-B": vm.beautify,
+                "Cmd-Z": vm.undo,
+                "Ctrl-Z": vm.undo,
+                "Shift-Cmd-Z": vm.redo,
+                "Shift-Ctrl-Z": vm.redo, */
         '\'<\'': vm.completeAfter,
         '\'/\'': vm.completeIfAfterLt,
         '\' \'': vm.completeIfInTag,
@@ -346,6 +343,22 @@ export default {
     vm.refreshEditor()
   },
   computed: {
+    formInView: function () {
+      let vm = this
+      let rv = 'none'
+      if (vm.view === 'form') {
+        rv = 'flex'
+      }
+      return rv
+    },
+    xmlInView: function () {
+      let vm = this
+      let rv = 'none'
+      if (vm.view === 'xml') {
+        rv = 'flex'
+      }
+      return rv
+    },
     showFileName: function () {
       let vm = this
       let fn = vm.$store.getters.editorFileName
@@ -422,7 +435,13 @@ export default {
                       v.schemaId = s.id
                     }
                   })
-                  vm.fileDialogList.push({'value': false, 'name': v.id, 'schema': v.schemaName, 'schemaId': v.schemaId, 'xmlText': v.xmlText})
+                  vm.fileDialogList.push({
+                    'value': false,
+                    'name': v.id,
+                    'schema': v.schemaName,
+                    'schemaId': v.schemaId,
+                    'xmlText': v.xmlText
+                  })
                 })
                 vm.resetLoading()
                 vm.fileDialog = true
@@ -450,59 +469,59 @@ export default {
       let vm = this
       console.log(vm.msg + ' testButton() clicked')
       /*
-        console.log('testButton() executes one of the sparql queries that is very similar to the one used by the original visualization pgm.')
-        let url = '/nmr/test1'
-        // let url = 'http://localhost:3000'
-        vm.setLoading()
-        return Axios.get(url)
-          .then(function (response) {
-            console.log(response)
-            if (response.data.head !== null) {
-              vm.xml_text = JSON.stringify(response.data.results.bindings)
-            }
-            vm.refreshEditor()
-            vm.resetLoading()
-          })
-          .catch(function (err) {
-            vm.resetLoading()
-            vm.fetchError = err
-            console.log(err)
-            // alert(err)
-            vm.editorErrorMsg = err
-            vm.editorError = true
-          })
-          */
+            console.log('testButton() executes one of the sparql queries that is very similar to the one used by the original visualization pgm.')
+            let url = '/nmr/test1'
+            // let url = 'http://localhost:3000'
+            vm.setLoading()
+            return Axios.get(url)
+              .then(function (response) {
+                console.log(response)
+                if (response.data.head !== null) {
+                  vm.xml_text = JSON.stringify(response.data.results.bindings)
+                }
+                vm.refreshEditor()
+                vm.resetLoading()
+              })
+              .catch(function (err) {
+                vm.resetLoading()
+                vm.fetchError = err
+                console.log(err)
+                // alert(err)
+                vm.editorErrorMsg = err
+                vm.editorError = true
+              })
+              */
     },
     test2Button: function () {
       let vm = this
       console.log(vm.msg + ' test2Button() clicked')
       /*
-        let url = '/nmr/fullgraph'
-        console.log('this code will load the entire triple store, so it's expensive!')
-        vm.setLoading()
-        return Axios.get(url)
-          .then(function (response) {
-            console.log(response.data)
-            console.log(response.data.results.bindings.length)
-            // let x = []
-            // response.data.results.bindings.forEach(function (v) {
-            //   let sampleID = v.sample.value.split('/').pop()
-            //   console.log(sampleID + ' ' + v.sample.value)
-            //   sampleList.push({'uri': v.sample.value, 'id': sampleID})
-            // })
-            // vm.$store.commit('sampleList')
-            setTimeout(function () {
-              vm.resetLoading()
-            }, 1000)
-          })
-          .catch(function (err) {
-            vm.resetLoading()
-            vm.fetchError = err
-            console.log(err)
-            vm.editorErrorMsg = err
-            vm.editorError = true
-          })
-          */
+            let url = '/nmr/fullgraph'
+            console.log('this code will load the entire triple store, so it's expensive!')
+            vm.setLoading()
+            return Axios.get(url)
+              .then(function (response) {
+                console.log(response.data)
+                console.log(response.data.results.bindings.length)
+                // let x = []
+                // response.data.results.bindings.forEach(function (v) {
+                //   let sampleID = v.sample.value.split('/').pop()
+                //   console.log(sampleID + ' ' + v.sample.value)
+                //   sampleList.push({'uri': v.sample.value, 'id': sampleID})
+                // })
+                // vm.$store.commit('sampleList')
+                setTimeout(function () {
+                  vm.resetLoading()
+                }, 1000)
+              })
+              .catch(function (err) {
+                vm.resetLoading()
+                vm.fetchError = err
+                console.log(err)
+                vm.editorErrorMsg = err
+                vm.editorError = true
+              })
+              */
     },
     showSaveMenu: function () {
       let vm = this
@@ -519,6 +538,8 @@ export default {
     transformButton: function () {
       let vm = this
       if (vm.view === 'xml') {
+        let ec = vm.getEditorContent()
+        vm.jsonSource = jxParser.parse(ec)
         vm.view = 'form'
       } else {
         vm.view = 'xml'
@@ -676,25 +697,25 @@ export default {
         vm.resetLoading()
       }, 1000)
       /*
-        let url = '/nmr'
-        vm.setLoading()
-        return Axios.get(url)
-          .then(function (response) {
-            vm.xml_text = vkbeautify.xml(response.data.xml, 1)
-            vm.refreshEditor()
-            setTimeout(function () {
-              vm.resetLoading()
-            }, 1000)
-          })
-          .catch(function (err) {
-            vm.fetchError = err
-            console.log(err)
-            // alert(err)
-            vm.editorErrorMsg = err
-            vm.editorError = true
-            vm.resetLoading()
-          })
-          */
+            let url = '/nmr'
+            vm.setLoading()
+            return Axios.get(url)
+              .then(function (response) {
+                vm.xml_text = vkbeautify.xml(response.data.xml, 1)
+                vm.refreshEditor()
+                setTimeout(function () {
+                  vm.resetLoading()
+                }, 1000)
+              })
+              .catch(function (err) {
+                vm.fetchError = err
+                console.log(err)
+                // alert(err)
+                vm.editorErrorMsg = err
+                vm.editorError = true
+                vm.resetLoading()
+              })
+              */
     },
     getEditorContent: function () {
       // this is really not a good way to do this and is TEMPORARY! TODO
@@ -802,12 +823,14 @@ export default {
     vertical-align: bottom;
     padding-bottom: 2px;
   }
+
   .file-open-header {
     background-color: #03A9F4;
     color: #ffffff;
     font-size: 22px;
     font-weight: bold;
   }
+
   .file-open-footer {
     background-color: #03A9F4;
     color: #000000;
