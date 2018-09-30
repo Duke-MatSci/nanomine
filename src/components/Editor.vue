@@ -7,16 +7,23 @@
     >
       {{editorErrorMsg}}
     </v-alert>
-    <v-toolbar dark color="primary">
+    <v-alert
+      v-model="editorValidated"
+      type="success"
+      dismissible
+    >
+      {{editorValidatedMsg}}
+    </v-alert>
+    <v-toolbar dark color="secondary" class="editor-toolbar">
       <v-tooltip bottom v-if="canAddTab()">
-        <v-btn icon slot="activator" v-on:click="addTabButton()">
-          <v-icon>add_circle_outline</v-icon>
+        <v-btn dark color="primary" slot="activator" v-on:click="addTabButton()">Open ...
+          <!--v-icon>add_circle_outline</v-icon-->
         </v-btn>
         <span>Open</span>
       </v-tooltip>
 
-      <v-toolbar-title class="white--text">{{showFileName}}</v-toolbar-title>
-      <v-tooltip bottom>
+      <v-toolbar-title class="white--text">Curating: {{showFileName}} {{editorSchemaName}}</v-toolbar-title>
+      <!--ADD BACK LATER v-tooltip bottom>
         <v-btn icon slot="activator" v-on:click="lockButton()">
           <v-icon>lock_open</v-icon>
         </v-btn>
@@ -42,31 +49,38 @@
           <v-icon>change_history</v-icon>
         </v-btn>
         <span>File changed</span>
-      </v-tooltip>
+      </v-tooltip-->
 
       <v-spacer></v-spacer>
 
       <v-tooltip bottom>
-        <v-btn icon slot="activator" v-on:click="transformButton()">
-          <v-icon>transform</v-icon>
+        <v-btn slot="activator" dark color="primary" v-on:click="transformButton()">
+          <!--v-icon>transform</v-icon-->
+          <span v-if="view=='xml'">Show Form</span>
+          <span v-if="view=='form'">Show XML</span>
         </v-btn>
         <span v-if="view=='xml'">Show Form View</span>
         <span v-if="view=='form'">Show XML View</span>
       </v-tooltip>
+      <!--v-tooltip bottom>
+        <v-btn  slot="activator" dark color="primary" v-on:click="validateButton()">Validate
+        </v-btn>
+        <span>Validate</span>
+      </v-tooltip-->
 
       <v-tooltip bottom>
-        <v-btn icon slot="activator" v-on:click="saveButton()">
-          <v-icon>save</v-icon>
+        <v-btn  slot="activator" dark color="primary" v-on:click="saveButton()">Save ...
+          <!--v-icon>save</v-icon-->
         </v-btn>
         <span>Save</span>
       </v-tooltip>
 
-      <!--v-tooltip bottom> !!! Disabled settings for now
+      <!--v-tooltip bottom> !!! Disabled for now ADD BACK LATER
         <v-btn icon slot="activator" v-on:click="settingsButton()">
           <v-icon>settings</v-icon>
         </v-btn>
         <span>Settings</span>
-      </v-tooltip-->
+      </v-tooltip>
 
       <v-tooltip bottom>
         <v-btn icon slot="activator" v-on:click="searchButton()">
@@ -75,12 +89,12 @@
         <span>Find In Editor</span>
       </v-tooltip>
 
-      <!--<v-tooltip bottom>-->
-      <!--<v-btn icon slot="activator" v-on:click="samplesButton()">-->
-      <!--<v-icon>list</v-icon>-->
-      <!--</v-btn>-->
-      <!--<span>List data and schemas</span>-->
-      <!--</v-tooltip>-->
+      <v-tooltip bottom>
+      <v-btn icon slot="activator" v-on:click="samplesButton()">
+      <v-icon>list</v-icon>
+      </v-btn>
+      <span>List data and schemas</span>
+      </v-tooltip>
 
       <v-tooltip bottom>
         <v-btn icon slot="activator" v-on:click="infoButton()">
@@ -101,7 +115,7 @@
           <v-icon>more_vert</v-icon>
         </v-btn>
         <span>More</span>
-      </v-tooltip>
+      </v-tooltip-->
     </v-toolbar>
     <v-dialog v-model="openOrCreateDialog" max-width="500px">
       <v-tabs
@@ -234,7 +248,7 @@
         <v-flex fill-height xs12 align-start justify-start>
           <div id="feditor" ref="feditor">
             <div>
-              <tree-view style="text-align: left;" :data="jsonSource"
+              <tree-view style="text-align: left;" :data="jsonSource" @change-data="treeViewUpdated"
                          :options="{maxDepth: 99, rootObjectKey: 'PolymerNanocomposite', modifiable: true}"></tree-view>
             </div>
           </div>
@@ -257,6 +271,7 @@ export default {
   data: function () {
     return {
       msg: '<untitled>',
+      jsonSource: {'PolymerNanocomposite': {}},
       openOrCreateDialog: false,
       openOrCreateTabs: ['Open Existing', 'Create New'],
       openLatestSchema: true,
@@ -264,9 +279,11 @@ export default {
       settingsDialog: false,
       editorError: false,
       editorErrorMsg: '',
+      editorValidated: false,
+      editorValidatedMessage: '',
       content: null,
       xml_text: '<PolymerNanocomposite>\n</PolymerNanocomposite>',
-      view: 'xml',
+      view: 'form',
       fileDialogSearch: '',
       fileDialogHeaders: [
         {text: 'Title', align: 'left', value: 'name'},
@@ -341,6 +358,13 @@ export default {
 
     })
     vm.refreshEditor()
+    vm.refreshForm()
+    vm.content.on('changes', function (cm, changes) {
+      vm.xmlEditorOnChanges(cm, changes)
+    })
+    vm.content.on('blur', function (cm, event) {
+      vm.xmlEditorOnBlur(cm, event)
+    })
   },
   computed: {
     formInView: function () {
@@ -365,21 +389,65 @@ export default {
       if (fn !== '<untitled>') {
         fn = fn.toUpperCase()
       }
-      return (fn)
+      return fn
+    },
+    editorSchemaName: function () {
+      let vm = this
+      let rv = ''
+      let schemaName = vm.$store.getters.editorSchemaName
+      if (schemaName && schemaName.length > 0) {
+        rv = ' (schema: ' + schemaName + ')'
+      }
+      return rv
     }
   },
   methods: {
     log: function (msg) {
       window.console.log(msg)
     },
+    xmlEditorOnChanges: function (cm, changes) {
+      // let vm = this
+      // console.log('xmleditor on change: store the editor data into the central storage. WELL, NO. Probably BLUR instead.')
+    },
+    xmlEditorOnBlur: function (cm, event) {
+      let vm = this
+      console.log('xmleditor on blur: store the editor data into the central storage...')
+      console.log(event)
+      let ec = vm.content.getValue()
+      vm.$store.commit('editorUpdateXml', ec)
+      setTimeout(vm.refreshForm(), 0) // let commit finish storing before the refresh tries to obtain data
+    },
     fileDialogClick: function (name, schemaId, xmlText) {
       let vm = this
       console.log('fileDialogClick name: ' + name + ' schemaId: ' + schemaId)
       vm.$store.commit('newEditorTab', {'name': name, 'xmlText': vkbeautify.xml(xmlText, 1), 'schemaId': schemaId}) // no schema yet :(
       // console.log(tabNumber)
-      vm.refreshEditor()
+      // if default is XML vm.refreshEditor()
+      // default is form
+      vm.jsonSource = jxParser.parse(xmlText)
+      setTimeout(function () {
+        let vals = document.getElementsByClassName('tree-view-item-value')
+        // console.log('transform: found ' + vals.length + ' input elements.')
+        for (let i = 0; i < vals.length; ++i) { // can't use forEach on dom nodes
+          vals[i].setAttribute('size', '240')
+        }
+      }, 500) // vm.$nextTick was not sufficient for some reason
+
       vm.fileDialog = false
     },
+    // validateButton: function () {
+    //   let vm = this
+    //   // let xml = vm.$store.getters.editorXmlText
+    //   // let xsd = vm.$store.getters.editorSchemaText
+    //   let errors = null
+    //   if (errors) {
+    //     vm.editorError = true
+    //     vm.editorErrorMsg = JSON.stringify(errors)
+    //   } else {
+    //     vm.editorValidated = true
+    //     vm.editorValidatedMsg = 'Validation Successful'
+    //   }
+    // },
     clickedOpenIdSearch: function () {
       let vm = this
       vm.log('clicked ID')
@@ -457,7 +525,7 @@ export default {
             vm.editorErrorMsg = err
             vm.editorError = true
           })
-      }, 2000)
+      }, 500)
     },
     setLoading: function () {
       this.$store.commit('isLoading')
@@ -535,14 +603,23 @@ export default {
       let vm = this
       vm.settingsDialog = true
     },
+    treeViewUpdated: function (data) {
+      let vm = this
+      let Parser = jxParser.j2xParser
+      let parser = new Parser()
+      let newXml = parser.parse(data)
+      // console.log(newXml)
+      vm.$store.commit('editorUpdateXml', newXml)
+    },
     transformButton: function () {
       let vm = this
       if (vm.view === 'xml') {
-        let ec = vm.getEditorContent()
-        vm.jsonSource = jxParser.parse(ec)
+        // let ec = vm.getEditorContent()
+        vm.refreshForm()
         vm.view = 'form'
       } else {
         vm.view = 'xml'
+        vm.refreshEditor()
       }
     },
     infoButton: function () {
@@ -722,11 +799,25 @@ export default {
       let vm = this
       return vm.content.getValue()
     },
+    refreshForm: function () {
+      let vm = this
+      let xml = vkbeautify.xml(vm.$store.getters.editorXmlText, 1)
+      console.log('refreshForm xml: ' + xml)
+      vm.jsonSource = jxParser.parse(xml) // always returns a valid xml value (default if none opened)
+      setTimeout(function () {
+        let vals = document.getElementsByClassName('tree-view-item-value')
+        // console.log('transform: found ' + vals.length + ' input elements.')
+        for (let i = 0; i < vals.length; ++i) { // can't use forEach on dom nodes
+          vals[i].setAttribute('size', '240')
+        }
+      }, 500) // vm.$nextTick was not sufficient for some reason
+    },
     refreshEditor: function () {
       let vm = this
       // let tabNumber = vm.$store.getters.currentEditorTab
       // if (tabNumber && typeof tabNumber === 'number' && tabNumber >= 0) {
-      vm.content.setValue(vm.$store.getters.editorXmlText)
+      let xmlText = vkbeautify.xml(vm.$store.getters.editorXmlText, 1)
+      vm.content.setValue(xmlText)
       // }
       // vm.content.setValue('<xml></xml>')
       vm.content.setSize('100%', '100%')
@@ -816,7 +907,9 @@ export default {
     max-height: 100%;
     padding-bottom: 32px;
   }
-
+  .editor-toolbar {
+    padding-top: 10px;
+  }
   .editor-save {
     font-size: 24px;
     display: inline-flex;
