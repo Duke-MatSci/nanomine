@@ -7,6 +7,13 @@
     >
       {{editorErrorMsg}}
     </v-alert>
+    <v-alert
+      v-model="editorValidated"
+      type="success"
+      dismissible
+    >
+      {{editorValidatedMsg}}
+    </v-alert>
     <v-toolbar dark color="secondary" class="editor-toolbar">
       <v-tooltip bottom v-if="canAddTab()">
         <v-btn dark color="primary" slot="activator" v-on:click="addTabButton()">Open ...
@@ -55,6 +62,11 @@
         <span v-if="view=='xml'">Show Form View</span>
         <span v-if="view=='form'">Show XML View</span>
       </v-tooltip>
+      <!--v-tooltip bottom>
+        <v-btn  slot="activator" dark color="primary" v-on:click="validateButton()">Validate
+        </v-btn>
+        <span>Validate</span>
+      </v-tooltip-->
 
       <v-tooltip bottom>
         <v-btn  slot="activator" dark color="primary" v-on:click="saveButton()">Save ...
@@ -267,6 +279,8 @@ export default {
       settingsDialog: false,
       editorError: false,
       editorErrorMsg: '',
+      editorValidated: false,
+      editorValidatedMessage: '',
       content: null,
       xml_text: '<PolymerNanocomposite>\n</PolymerNanocomposite>',
       view: 'form',
@@ -421,6 +435,19 @@ export default {
 
       vm.fileDialog = false
     },
+    // validateButton: function () {
+    //   let vm = this
+    //   // let xml = vm.$store.getters.editorXmlText
+    //   // let xsd = vm.$store.getters.editorSchemaText
+    //   let errors = null
+    //   if (errors) {
+    //     vm.editorError = true
+    //     vm.editorErrorMsg = JSON.stringify(errors)
+    //   } else {
+    //     vm.editorValidated = true
+    //     vm.editorValidatedMsg = 'Validation Successful'
+    //   }
+    // },
     clickedOpenIdSearch: function () {
       let vm = this
       vm.log('clicked ID')
