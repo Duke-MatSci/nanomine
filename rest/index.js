@@ -288,8 +288,10 @@ app.get('/templates/select', function (req, res) {
       if (validQueryParam(qval)) {
         if (qval.slice(0, 1) === '/' && qval.slice(-1) === '/') {
           qval = qval.replace(/(^[/]|[/]$)/g, '')
+          let re = new RegExp(qval, 'i')
+
           let tmp = {}
-          tmp[qfld] = { '$regex': qval }
+          tmp[qfld] = { '$regex': re } // TODO test this again with fields mix -- winds up being {'fieldnm': { '$regex': /PATTERN/ }}
           qcomponents.push(tmp)
         } else {
           let tmp = {}

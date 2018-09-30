@@ -21,7 +21,7 @@ const store = new Vuex.Store({
   mutations: {
     addSchemas: function (state, toAdd) {
       // console.log('state.addSchemas: ' + JSON.stringify(toAdd))
-      state.schemas = toAdd // Overwrite since call is made that returns all data to client at once
+      state.editor.schemas = toAdd // Overwrite since call is made that returns all data to client at once
     },
     isLoading: function (state) {
       state.isWaiting = true
@@ -39,6 +39,14 @@ const store = new Vuex.Store({
       // console.log('pushed state: ' + JSON.stringify(toAdd))
       state.editor.currentTab = (state.editor.tab.length - 1)
       console.log('set data for tab: ' + state.editor.currentTab)
+    },
+    editorUpdateXml: function (state, newXml) {
+      if (state.editor.currentTab >= 0) {
+        console.log('editorUpdateXml: current tab is: ' + state.editor.currentTab)
+        state.editor.tab[state.editor.currentTab].xmlText = newXml
+      } else {
+        console.log('editorUpdateXml: could not find current tab.')
+      }
     },
     setSampleList: function (state, sampleList) {
       state.sampleList = sampleList
@@ -73,11 +81,32 @@ const store = new Vuex.Store({
       }
       return rv
     },
+    editorSchemaName: function (state) {
+      let rv = ''
+      if (state.editor.currentTab >= 0) {
+        console.log('editorSchemaName: current tab is: ' + state.editor.currentTab)
+        let schemaId = state.editor.tab[state.editor.currentTab].schemaId
+        state.editor.schemas.forEach(function (v) {
+          if (v.current === schemaId) {
+            rv = v.currentRef[0].title
+            console.log('$store.getters.editorSchemaName - set rv:' + rv)
+          } else {
+            console.log('$store.getters.editorSchemaName - skipped: ' + v.currentRef[0].title)
+          }
+        })
+      } else {
+        console.log('editorSchemaName: could not find current tab.')
+      }
+      return rv
+    },
     editorXmlText: function (state) {
       let rv = '<?xml version="1.0" encoding="utf-8"?>\n<PolymerNanocomposite>\n</PolymerNanocomposite>'
       if (state.editor.currentTab >= 0) {
         console.log('editorXmlText: current tab is: ' + state.editor.currentTab)
-        rv = state.editor.tab[state.editor.currentTab].xmlText
+        let tv = state.editor.tab[state.editor.currentTab].xmlText
+        if (tv) {
+          rv = tv
+        }
       } else {
         console.log('editorXmlText: could not find current tab.')
       }
