@@ -67,7 +67,7 @@ if rc == 0: # send success email
       "jobtype": jobType,
       "emailtemplatename": "success",
       "emailvars": {
-        "resultpage": webBaseUri + '/nm#/db?jobdir='+jobDir,
+        "resultpage": webBaseUri + '/nm#/OtsuResult?refuri='+jobDataUriSuffix+'/'+jobId,
         "jobinfo": {
           "resultcode":rc
         },
