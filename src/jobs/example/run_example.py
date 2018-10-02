@@ -8,17 +8,7 @@ import os
 import sys
 import json
 import urllib2
-
-import logging # this should be done by a wrapper in the future
-sloglevel=os.environ['NM_LOGLEVEL']
-loglevel = logging.DEBUG
-try:
-  loglevel = getattr(logging, sloglevel.upper())
-except:
-  pass
-
-logging.basicConfig(filename=os.environ['NM_LOGFILE'], level=loglevel)
-
+from nm.common import *
 
 logging.info('nanomine environment keys: ')
 for key in os.environ.keys():
