@@ -14,7 +14,8 @@ const qs = require('qs')
 const fs = require('fs')
 const mongoose = require('mongoose')
 const templateFiller = require('es6-dynamic-template')
-
+const _ = require('lodash')
+const nodemailer = require('nodemailer')
 // TODO calling next(err) results in error page rather than error code in json
 
 const ObjectId = mongoose.Types.ObjectId
@@ -22,8 +23,28 @@ const ObjectId = mongoose.Types.ObjectId
 let logger = configureLogger()
 logger.info('NanoMine REST server version ' + config.version + ' starting')
 
+let sendEmails = (process.env['NM_SMTP_TEST'] !== 'true')
+let emailHost = process.env['NM_SMTP_SERVER']
+let emailPort = process.env['NM_SMTP_PORT']
+let emailUser = process.env['NM_SMTP_AUTH_USER']
+let emailPwd = process.env['NM_SMTP_AUTH_PWD']
+let emailTestUser = process.env['NM_SMTP_TEST_ADDR']
 let nmWebFilesRoot = process.env['NM_WEBFILES_ROOT']
 let nmJobDataDir = process.env['NM_JOB_DATA']
+
+let smtpTransport = null
+if (sendEmails) {
+  smtpTransport = nodemailer.createTransport({
+    'port': emailPort,
+    'host': emailHost,
+    'secure': false,
+    'auth': {
+      'user': emailUser,
+      'pass': emailPwd
+    },
+    'opportunisticTLS': true
+  })
+}
 
 try {
   fs.mkdirSync(nmWebFilesRoot) // Sync used during startup
@@ -536,7 +557,9 @@ app.post('/jobsubmit', function (req, res) {
       let pgmpath = pathModule.join(cwd, pgmdir)
       pgm = pathModule.join(pgmpath, pgm)
       console.log('executing: ' + pgm + ' in: ' + pgmpath)
-      let child = require('child_process').spawn(pgm, [jobType, jobId, jobDir], {'cwd': pgmpath, 'env': process.env})
+      let localEnv = {'PYTHONPATH': pathModule.join(cwd, '../src/jobs/lib')}
+      localEnv = _.merge(localEnv, process.env)
+      let child = require('child_process').spawn(pgm, [jobType, jobId, jobDir], {'cwd': pgmpath, 'env': localEnv})
       jobPid = child.pid
       updateJobStatus(jobDir, {'status': 'submitted', 'pid': jobPid})
       jsonResp.data = {'jobPid': jobPid}
@@ -559,6 +582,7 @@ app.post('/jobemail', function (req, res, next) { // bearer auth
   let jsonResp = {'error': null, 'data': null}
   let jobtype = req.body.jobtype
   let jobid = req.body.jobid
+  let userId = req.body.user
   let emailtemplate = req.body.emailtemplatename
   let emailvars = req.body.emailvars
   emailvars.jobtype = jobtype
@@ -575,9 +599,36 @@ app.post('/jobemail', function (req, res, next) { // bearer auth
       filled = templateFiller(etfText, emailvars)
     } catch (fillerr) {
       logger.error('error occurred filling out email template. jobtype: ' + jobtype + ' jobid: ' + jobid + ' template: ' + emailtemplate + ' vars: ' + JSON.stringify(emailvars))
+      jsonResp.error = 'error filling out email template for jobid: ' + jobid
+      return res.status(400).json(jsonResp)
     }
     logger.info(filled)
-    return res.json(jsonResp)
+    if (sendEmails) {
+      // send this email to: emailAddr
+      let userEmailAddr = emailTestUser
+      let message = {
+        subject: 'NanoMine completion notification for job: ' + jobid,
+        text: filled,
+        html: filled,
+        from: 'erik3k@schemacity.org',
+        to: userEmailAddr,
+        envelope: {
+          from: 'noreply <erik3k@schemacity.org>',
+          to: userEmailAddr
+        }
+      }
+      smtpTransport.sendMail(message, function (err, info) {
+        if (err) {
+          jsonResp.error = err
+          logger.error('sendMail error: ' + err)
+          return res.status(400).json(jsonResp)
+        }
+        logger.info('smtp return info: ' + JSON.stringify(info))
+        return res.json(jsonResp) // TODO interpret info object to determine if anything needs to be done
+      })
+    } else {
+      return res.json(jsonResp)
+    }
   })
 })
 /* email related rest services - end */

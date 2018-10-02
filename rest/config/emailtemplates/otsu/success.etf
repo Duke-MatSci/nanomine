@@ -6,7 +6,7 @@
 
 <br/>job ${jobid}
 
-<br/>Please visit <a href="https://nanomine.org/joboutput/${jobid}">your job output</a> for more information
+<br/>Please visit <a href="${resultpage}">this link</a> to view and download your results.
 
 <br/>
 Regards,
