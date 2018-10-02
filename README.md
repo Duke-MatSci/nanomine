@@ -40,13 +40,19 @@ NanoMine Nanocomposites Data Resource
   export NM_MONGO_API_PWD="mydevmongoapipw" # SET THIS to a different password NOW
   export NM_MONGO_URI="mongodb://${NM_MONGO_API_USER}:${NM_MONGO_API_PWD}@${NM_MONGO_HOST}:${NM_MONGO_PORT}/${NM_MONGO_DB}"
   export NM_WEBFILES_ROOT="/apps/nanomine-webfiles"
+  export NM_WEB_BASE_URI="http://ubuntu.local" # external apache uri. May need to tweak this for your local machine/vm depending on external access location -- external uri to apache
   export NM_JOB_DATA="${NM_WEBFILES_ROOT}/jobdata"
   export NM_JOB_DATA_URI="/nmf/jobdata"
   export NM_SMTP_SERVER="myemailserver"
   export NM_SMTP_PORT="587" # other fields will be needed if not local server, but for now this is adequate
   export NM_SMTP_TEST="true"  # set this to true and emails will go into the log for testing instead of sending
+  export NM_SMTP_REST_URL="http://localhost/nmr/jobemail"
+  export NM_SMTP_TEST_ADDR="testuser@example.com"
+  export NM_SMTP_AUTH_USER="mysmtpuser@example.com"
+  export NM_SMTP_AUTH_PWD="mysmtppwd"
   export NM_LOGLEVEL="debug"  # use this when creating a logger for javascript or python, then log each message according to severity i.e. logger.info('my info message')
   export NM_LOGFILE="nanomine.log" # use this log for python logging
+  export NM_MATLAB_AVAILABLE="no" # run TEST_XXXXXX matlab scripts instead of matlab directly
   
   #install n - the nodejs version manager and LTS version of node
   curl -L https://git.io/n-install | bash -s -- -y lts
