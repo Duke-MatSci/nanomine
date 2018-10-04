@@ -3,7 +3,7 @@ import os
 import sys
 
 
-import logging # this should be done by a wrapper in the future
+import logging
 sloglevel=os.environ['NM_LOGLEVEL']
 loglevel = logging.DEBUG
 try:
