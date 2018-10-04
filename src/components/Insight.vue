@@ -19,6 +19,9 @@
             </g>
           </svg>
         </v-flex>
+        <v-flex xs-3>
+          <v-btn v-on:click="handleClick()">Update</v-btn>
+        </v-flex>
       </v-layout>
     </v-container>
   </div>
@@ -40,6 +43,13 @@ export default {
     this.calculatePath() // from example @ https://raw.githubusercontent.com/johnnynotsolucky/samples/master/vuejs-d3/src/components/VueLineChart.vue
   },
   methods: {
+    handleClick: function () {
+      let vm = this
+      vm.lineData.forEach(function (v, idx) {
+        vm.lineData[idx] = Math.floor(Math.random() * 100)
+      })
+      vm.calculatePath()
+    },
     getScales: function () {
       let vm = this
       const x = d3.scaleTime().range([0, 430])
