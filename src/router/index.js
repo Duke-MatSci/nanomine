@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import NanoMine from '@/components/NanoMine'
 import Database from '@/components/Database'
+import Insight from '@/components/Insight'
 import ModuleTools from '@/components/ModuleTools'
 import SimTools from '@/components/SimTools'
 import XMLCONV from '@/components/XMLCONV'
@@ -34,6 +35,11 @@ export default new Router({
       path: '/db',
       name: 'Database',
       component: Database
+    },
+    {
+      path: '/insight',
+      name: 'Insight',
+      component: Insight
     },
     {
       path: '/simtools',

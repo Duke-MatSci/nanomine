@@ -82,7 +82,7 @@ if rc == 0: # send success email
     r = urllib2.urlopen(rq, json.dumps(emaildata))
     logging.info('sent success email: ' + str(r.getcode()))
   except:
-    logging.info('exception occurred')
+    logging.info('exception occurred sending run_otsu success email')
     logging.info('exception: ' + traceback.format_exc())
 else: # send error email
   try:
@@ -106,7 +106,7 @@ else: # send error email
     r = urllib2.urlopen(rq, json.dumps(emaildata))
     logging.info('sent failure email: ' + str(r.getcode()))
   except:
-    logging.info('exception occurred')
+    logging.info('exception occurred sending run_otsu failure email')
     logging.info('exception: ' + traceback.format_exc())
 
 
