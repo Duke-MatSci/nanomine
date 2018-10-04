@@ -334,9 +334,9 @@ export default {
       },
       extraKeys: {
         'Ctrl-J': 'toMatchingTag',
-        /* "Cmd-B": vm.beautify,
-                "Ctrl-B": vm.beautify,
-                "Cmd-Z": vm.undo,
+        'Cmd-B': vm.beautify,
+        'Ctrl-B': vm.beautify,
+        /* "Cmd-Z": vm.undo,
                 "Ctrl-Z": vm.undo,
                 "Shift-Cmd-Z": vm.redo,
                 "Shift-Ctrl-Z": vm.redo, */
@@ -460,6 +460,27 @@ export default {
         Axios.get(xsdUrl)
           .then(function (response) {
             console.log(response)
+            let j2xOptions = {
+              attributeNamePrefix: '@_',
+              attrNodeName: 'attr', // default is 'false'
+              textNodeName: '#text',
+              ignoreAttributes: false,
+              ignoreNameSpace: false,
+              allowBooleanAttributes: false,
+              parseNodeValue: true,
+              parseAttributeValue: true,
+              trimValues: true,
+              cdataTagName: '__cdata', // default is 'false'
+              cdataPositionChar: '\\c',
+              localeRange: '', // To support non english character in tag/attribute values.
+              parseTrueNumberOnly: false
+              // attrValueProcessor: a => he.decode(a, {isAttributeValue: true}),//default is a=>a
+              // tagValueProcessor : a => he.decode(a) //default is a=>a
+            }
+            response.data.data.forEach(function (v, idx) {
+              response.data.data[idx].currentRef[0].contentJson = jxParser.parse(response.data.data[idx].currentRef[0].content, j2xOptions)
+              console.log(JSON.stringify(response.data.data[idx].currentRef[0].contentJson))
+            })
             vm.$store.commit('addSchemas', response.data.data) // could allow this to be cached, but for now just get it done
             // NOTE: state is not updated until next tick, so continue to use request.data.data in this method :(
             let criteria = '/' + vm.openID + '/'
@@ -812,7 +833,7 @@ export default {
         }
       }, 500) // vm.$nextTick was not sufficient for some reason
     },
-    refreshEditor: function () {
+    refreshEditor: function (newCursorPos) {
       let vm = this
       // let tabNumber = vm.$store.getters.currentEditorTab
       // if (tabNumber && typeof tabNumber === 'number' && tabNumber >= 0) {
@@ -825,6 +846,11 @@ export default {
         vm.content.refresh()
         vm.content.execCommand('goDocStart')
         vm.content.clearHistory()
+        if (newCursorPos) {
+          setTimeout(function () {
+            vm.content.setCursor(newCursorPos)
+          }, 0)
+        }
       }, 0)
     },
     pickFile () {
@@ -888,7 +914,48 @@ export default {
     newEditorTab: function (isXsd, schemaId, title, filename) {
       // { schemaId: null, xmlTitle: null, isXsd: false }
 
+    },
+    createXmlModeSchema: function (schema) { // TODO fix schema
+      // The xmlmode schema is required by the xml hint code to allow hinting
+      //   for xml entry.
+      let vm = this
+      let xmlList = {}
+
+      function buildListFromTree (xmlList, srcElem) {
+        xmlList[srcElem.name] = {
+          attrs: null,
+          children: []
+        } // default to leaf
+        srcElem.elements.forEach(function (v) { // if there are elements, then fill in children
+          xmlList[srcElem.name].children.push(v.name)
+          buildListFromTree(xmlList, v)
+        })
+      }
+      // $.when schema loaded
+      if (this === false) {
+        console.log(schema)
+        // only handling tip of tree - no siblings allowed
+        var root = schema.originatingRoot.elements[0]
+        xmlList['!top'] = [root.name]
+        xmlList['!attrs'] = null
+        // load the tree using the names of the elements as keys
+        let srcElem = root
+        buildListFromTree(xmlList, srcElem)
+        vm.state.xmlSchemaList = xmlList
+      }
+    },
+    beautify: function () {
+      let vm = this
+      console.log('Beautify!')
+      // let xmlContent = vm.content.getValue()
+      let savePos = vm.content.getCursor()
+      // let xml = vkbeautify.xml(xmlContent, 1)
+      // vm.$store.commit('editorUpdateXml', xml)
+      // setTimeout(function () {
+      vm.refreshEditor(savePos)
+      // })
     }
+
   }
 }
 </script>

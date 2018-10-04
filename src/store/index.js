@@ -99,6 +99,24 @@ const store = new Vuex.Store({
       }
       return rv
     },
+    editorSchemaJson: function (state) {
+      let rv = ''
+      if (state.editor.currentTab >= 0) {
+        console.log('editorSchemaJson: current tab is: ' + state.editor.currentTab)
+        let schemaId = state.editor.tab[state.editor.currentTab].schemaId
+        state.editor.schemas.forEach(function (v) {
+          if (v.current === schemaId) {
+            rv = v.currentRef[0].contentJson
+            console.log('$store.getters.editorSchemaJson - set rv:' + rv)
+          } else {
+            console.log('$store.getters.editorSchemaJson - skipped: ' + v.currentRef[0].title)
+          }
+        })
+      } else {
+        console.log('editorSchemaJson: could not find current tab.')
+      }
+      return rv
+    },
     editorSchemaText: function (state) {
       let rv = ''
       if (state.editor.currentTab >= 0) {

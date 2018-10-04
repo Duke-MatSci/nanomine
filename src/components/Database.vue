@@ -28,19 +28,26 @@
             Select a schema and fill out the corresponding form. Using the Excel template upload is usually simpler.
           </p>
         </v-flex>
-        <v-flex xs4>
+        <v-flex xs4 v-if="false">
           <img src="/cdn/img/search-big.png" />
           <h4>
             <router-link to="/explore">Explore the repository</router-link>
           </h4>
           <p>Search this nanocomposite data resource using flexible queries.</p>
         </v-flex>
-        <v-flex xs4>
+        <v-flex xs4 v-if="false">
           <img src="/cdn/img/edit-big.png"/>
           <h4>
             <router-link to="/compose">Compose a schema</router-link>
           </h4>
           <p>Compose your own schema.</p>
+        </v-flex>
+        <v-flex xs4>
+          <img src="/cdn/img/visualize_data.png"/>
+          <h4>
+            <router-link to="/Insight">Data Insights</router-link>
+          </h4>
+          <p>Nanocomposite data insights.</p>
         </v-flex>
       </v-layout>
     </v-container>
