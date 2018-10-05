@@ -357,6 +357,16 @@ export default {
       ]
 
     })
+    CodeMirror.autoLoadHelperStylesheet(vm.content, 'fold', 'foldgutter')
+    CodeMirror.autoLoadHelperStylesheet(vm.content, 'hint', 'show-hint')
+    CodeMirror.autoLoadHelper(vm.content, 'fold', 'foldcode')
+    CodeMirror.autoLoadHelper(vm.content, 'fold', 'foldgutter')
+    CodeMirror.autoLoadHelper(vm.content, 'fold', 'xml-fold')
+    CodeMirror.autoLoadHelper(vm.content, 'edit', 'matchtags')
+    CodeMirror.autoLoadHelper(vm.content, 'hint', 'show-hint')
+    CodeMirror.autoLoadHelper(vm.content, 'hint', 'xml-hint')
+    CodeMirror.autoLoadMode(vm.content, 'xml')
+
     vm.refreshEditor()
     vm.refreshForm()
     vm.content.on('changes', function (cm, changes) {
@@ -947,13 +957,12 @@ export default {
     beautify: function () {
       let vm = this
       console.log('Beautify!')
-      // let xmlContent = vm.content.getValue()
+      let xmlContent = vm.content.getValue()
       let savePos = vm.content.getCursor()
-      // let xml = vkbeautify.xml(xmlContent, 1)
-      // vm.$store.commit('editorUpdateXml', xml)
-      // setTimeout(function () {
-      vm.refreshEditor(savePos)
-      // })
+      vm.$store.commit('editorUpdateXml', xmlContent)
+      setTimeout(function () {
+        vm.refreshEditor(savePos)
+      }, 0)
     }
 
   }
