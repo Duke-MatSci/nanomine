@@ -567,60 +567,10 @@ export default {
     testButton: function () {
       let vm = this
       console.log(vm.msg + ' testButton() clicked')
-      /*
-            console.log('testButton() executes one of the sparql queries that is very similar to the one used by the original visualization pgm.')
-            let url = '/nmr/test1'
-            // let url = 'http://localhost:3000'
-            vm.setLoading()
-            return Axios.get(url)
-              .then(function (response) {
-                console.log(response)
-                if (response.data.head !== null) {
-                  vm.xml_text = JSON.stringify(response.data.results.bindings)
-                }
-                vm.refreshEditor()
-                vm.resetLoading()
-              })
-              .catch(function (err) {
-                vm.resetLoading()
-                vm.fetchError = err
-                console.log(err)
-                // alert(err)
-                vm.editorErrorMsg = err
-                vm.editorError = true
-              })
-              */
     },
     test2Button: function () {
       let vm = this
       console.log(vm.msg + ' test2Button() clicked')
-      /*
-            let url = '/nmr/fullgraph'
-            console.log('this code will load the entire triple store, so it's expensive!')
-            vm.setLoading()
-            return Axios.get(url)
-              .then(function (response) {
-                console.log(response.data)
-                console.log(response.data.results.bindings.length)
-                // let x = []
-                // response.data.results.bindings.forEach(function (v) {
-                //   let sampleID = v.sample.value.split('/').pop()
-                //   console.log(sampleID + ' ' + v.sample.value)
-                //   sampleList.push({'uri': v.sample.value, 'id': sampleID})
-                // })
-                // vm.$store.commit('sampleList')
-                setTimeout(function () {
-                  vm.resetLoading()
-                }, 1000)
-              })
-              .catch(function (err) {
-                vm.resetLoading()
-                vm.fetchError = err
-                console.log(err)
-                vm.editorErrorMsg = err
-                vm.editorError = true
-              })
-              */
     },
     showSaveMenu: function () {
       let vm = this
@@ -804,26 +754,6 @@ export default {
       setTimeout(function () {
         vm.resetLoading()
       }, 1000)
-      /*
-            let url = '/nmr'
-            vm.setLoading()
-            return Axios.get(url)
-              .then(function (response) {
-                vm.xml_text = vkbeautify.xml(response.data.xml, 1)
-                vm.refreshEditor()
-                setTimeout(function () {
-                  vm.resetLoading()
-                }, 1000)
-              })
-              .catch(function (err) {
-                vm.fetchError = err
-                console.log(err)
-                // alert(err)
-                vm.editorErrorMsg = err
-                vm.editorError = true
-                vm.resetLoading()
-              })
-              */
     },
     getEditorContent: function () {
       // this is really not a good way to do this and is TEMPORARY! TODO
@@ -833,7 +763,7 @@ export default {
     refreshForm: function () {
       let vm = this
       let xml = vkbeautify.xml(vm.$store.getters.editorXmlText, 1)
-      console.log('refreshForm xml: ' + xml)
+      // console.log('refreshForm xml: ' + xml)
       vm.jsonSource = jxParser.parse(xml) // always returns a valid xml value (default if none opened)
       setTimeout(function () {
         let vals = document.getElementsByClassName('tree-view-item-value')
