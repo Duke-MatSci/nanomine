@@ -47,6 +47,7 @@ NanoMine Nanocomposites Data Resource
   export NM_SMTP_PORT="587" # other fields will be needed if not local server, but for now this is adequate
   export NM_SMTP_TEST="true"  # set this to true and emails will go into the log for testing instead of sending
   export NM_SMTP_REST_URL="http://localhost/nmr/jobemail"
+  export NM_SMTP_ADMIN_ADDR="adminuser@example.com"
   export NM_SMTP_TEST_ADDR="testuser@example.com"
   export NM_SMTP_AUTH_USER="mysmtpuser@example.com"
   export NM_SMTP_AUTH_PWD="mysmtppwd"
