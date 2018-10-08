@@ -28,7 +28,8 @@ let emailHost = process.env['NM_SMTP_SERVER']
 let emailPort = process.env['NM_SMTP_PORT']
 let emailUser = process.env['NM_SMTP_AUTH_USER']
 let emailPwd = process.env['NM_SMTP_AUTH_PWD']
-let emailTestUser = process.env['NM_SMTP_TEST_ADDR']
+let emailTestAddr = process.env['NM_SMTP_TEST_ADDR']
+let emailAdminAddr = process.env['NM_SMTP_ADMIN_ADDR']
 let nmWebFilesRoot = process.env['NM_WEBFILES_ROOT']
 let nmJobDataDir = process.env['NM_JOB_DATA']
 
@@ -605,15 +606,16 @@ app.post('/jobemail', function (req, res, next) { // bearer auth
     logger.info(filled)
     if (sendEmails) {
       // send this email to: emailAddr
-      let userEmailAddr = emailTestUser
+      let userEmailAddr = emailTestAddr
+      let adminEmailAddr = emailAdminAddr
       let message = {
         subject: 'NanoMine completion notification for job: ' + jobid,
         text: filled,
         html: filled,
-        from: 'erik3k@schemacity.org',
+        from: adminEmailAddr,
         to: userEmailAddr,
         envelope: {
-          from: 'noreply <erik3k@schemacity.org>',
+          from: 'noreply <' + adminEmailAddr + '>',
           to: userEmailAddr
         }
       }
