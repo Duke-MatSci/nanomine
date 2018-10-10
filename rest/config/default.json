@@ -19,6 +19,12 @@
         "pgmname": "run_example.py"
       },
       {
+        "jobtype": "otsu",
+        "lang": "python",
+        "pgmdir": "../src/jobs/otsu",
+        "pgmname": "run_otsu.py"
+      },
+      {
         "jobtype": "xmlconv",
         "lang": "python",
         "pgmdir": "../src/jobs/XMLCONV",

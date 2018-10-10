@@ -1,0 +1,12 @@
+#!/bin/bash
+mongo  --port=$NM_MONGO_PORT <<EOF
+use admin
+db.createUser(
+{
+  user: "${NM_MONGO_OWNER_USER}",
+  pwd: "${NM_MONGO_OWNER_PWD}",
+  roles: [ { role: "owner", db: "mgi"} ]
+  }
+)
+EOF
+

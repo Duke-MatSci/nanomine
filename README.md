@@ -5,7 +5,8 @@ NanoMine Nanocomposites Data Resource
 
 # Installation 
 #### (REQUIRES ubuntu 16.04 -- 18.04 will not work yet)
-### Note: if installing on a virtual machine, be sure to allocate at least 8G Memory, 2 CPUs and 30G Disk
+### Note: if installing on a virtual machine, be sure to allocate at least 8G Memory, 2 CPUs and 60G Disk if installing MATLAB otherwise 35GB will probably work.
+### Also, this is a DEVELOPMENT only install for a personal system (or vm). Don't use these instructions for QA or production environments.
 - install [whyis](http://tetherless-world.github.io/whyis/install) using this command (bluedevil-oit version contains proxy work-around)
   ```
   bash < <(curl -skL https://raw.githubusercontent.com/bluedevil-oit/whyis/release/install.sh) # master does not seem to ingest properly
@@ -13,6 +14,12 @@ NanoMine Nanocomposites Data Resource
 - whyis will be installed in /apps/whyis
 - Steps to install NanoMine:
   ```
+  
+  # no need to go back-and-forth to another user. Plus, for development after initial install, just log in as whyis user directly from login page
+  sudo usermod -aG sudo whyis
+  sudo passwd whyis  # enter a password that only YOU know  
+  sudo su - whyis
+  
   cd /apps
   sudo git clone https://github.com/YOURFORK/nanomine.git  # to use the original, use FORKNAME of 'duke-matsci'
   sudo mkdir -p /apps/nanomine/data 2>/dev/null
@@ -20,32 +27,40 @@ NanoMine Nanocomposites Data Resource
   sudo wget https://raw.githubusercontent.com/duke-matsci/nanomine-ontology/master/xml_ingest.setl.ttl
   sudo wget https://raw.githubusercontent.com/duke-matsci/nanomine-ontology/master/ontology.setl.ttl
   sudo chown -R whyis:whyis /apps/nanomine
-  sudo su - whyis
-
-  #EDIT the whyis user's ~/.bash_profile to add:
+  
+  #EDIT the whyis user's ~/.bashrc to add: (append to end of file)
   export NM_MONGO_PORT=27017
   export NM_MONGO_HOST=localhost
   export NM_MONGO_DB=mgi
   export NM_MONGO_USER="mongodevadmin" 
   export NM_MONGO_PWD="mydevmongopw" # SET THIS to a different password NOW
+  export NM_MONGO_OWNER_USER="mongodevowner"
+  export NM_MONGO_OWNER_PWD="mydevmongoownerpw" # SET THIS to a different password NOW
   export NM_MONGO_API_USER="mongodevapi"
   export NM_MONGO_API_PWD="mydevmongoapipw" # SET THIS to a different password NOW
   export NM_MONGO_URI="mongodb://${NM_MONGO_API_USER}:${NM_MONGO_API_PWD}@${NM_MONGO_HOST}:${NM_MONGO_PORT}/${NM_MONGO_DB}"
   export NM_WEBFILES_ROOT="/apps/nanomine-webfiles"
+  export NM_WEB_BASE_URI="http://ubuntu.local" # external apache uri. May need to tweak this for your local machine/vm depending on external access location -- external uri to apache
   export NM_JOB_DATA="${NM_WEBFILES_ROOT}/jobdata"
   export NM_JOB_DATA_URI="/nmf/jobdata"
   export NM_SMTP_SERVER="myemailserver"
   export NM_SMTP_PORT="587" # other fields will be needed if not local server, but for now this is adequate
   export NM_SMTP_TEST="true"  # set this to true and emails will go into the log for testing instead of sending
+  export NM_SMTP_REST_URL="http://localhost/nmr/jobemail"
+  export NM_SMTP_ADMIN_ADDR="adminuser@example.com"
+  export NM_SMTP_TEST_ADDR="testuser@example.com"
+  export NM_SMTP_AUTH_USER="mysmtpuser@example.com"
+  export NM_SMTP_AUTH_PWD="mysmtppwd"
   export NM_LOGLEVEL="debug"  # use this when creating a logger for javascript or python, then log each message according to severity i.e. logger.info('my info message')
   export NM_LOGFILE="nanomine.log" # use this log for python logging
+  export NM_MATLAB_AVAILABLE="no" # run TEST_XXXXXX matlab scripts instead of matlab directly
   
   #install n - the nodejs version manager and LTS version of node
   curl -L https://git.io/n-install | bash -s -- -y lts
-  echo 'export N_PREFIX="$HOME/n"; [[ :$PATH: == *":$N_PREFIX/bin:"* ]] || PATH+=":$N_PREFIX/bin"' >> ~/.bash_profile
+  echo 'export N_PREFIX="$HOME/n"; [[ :$PATH: == *":$N_PREFIX/bin:"* ]] || PATH+=":$N_PREFIX/bin"' >> ~/.bashrc
   
   #make sure n is in the path and new variables are defined
-  source ~/.bash_profile
+  source ~/.bashrc
 
   # install the VueJS command line processor
   npm i -g vue-cli@2.9.6  
@@ -63,7 +78,6 @@ NanoMine Nanocomposites Data Resource
   
   #install NanoMine python components for Whyis
   pip install -e .
-  exit
   
   sudo a2enmod proxy_connect.load  
   sudo a2enmod proxy_html.load  
@@ -84,12 +98,11 @@ NanoMine Nanocomposites Data Resource
   sudo apt-get install -y mongodb-org
   sudo cp /apps/nanomine/install/mongoConfig /etc/mongod.conf
   sudo service mongod start
+  sudo /apps/nanomine/install/mongoSetupOwnerUser
   sudo /apps/nanomine/install/mongoSetupAdminUser
   sudo /apps/nanomine/install/mongoSetupApiUser
   sudo systemctl enable mongod
-  
-  sudo su - whyis
-  
+    
   cd nanomine/rest
   npm i # install packages needed by rest server
   # the next command will run the rest server in the background
@@ -133,26 +146,22 @@ NanoMine Nanocomposites Data Resource
 - go to http://localhost/ to login with your credentials during "createuser" command
 - go to http://localhost/nm to access NanoMine
 
-# Server Development mode
-Each time a change is made for NanoMine, apache2 and celeryd service have to be restarted manually. 
-It is possible to use Whyis' development mode to bypass the need to restart services.
-
-Try this:  
+### Code changes
+- If code changes are made to the GUI
 ```
-sudo su - whyis
-cd /app/whyis
-python manage.py runserver -h 0.0.0.0
-``` 
-After executing the commands above NanoMine may accessed on "http://localhost:5000/nm".
-Then, you only need to refresh your webpage to see your changes immediately after you make changes to NanoMine. 
-
-After you finished the visualization changes, you can shutdown the developing mode with CTRL+c.
-Then you have to restart apache2 and celeryd service by
-```
+cd /apps/nanomine
+npm run build
 sudo service apache2 restart
-sudo service celeryd restart
 ```
-After this, the updated NanoMine app will show up at "http://localhost/nm".
+- If code changes are made to the rest server - be sure to stop the rest server and restart
+  - If the rest server is running in a terminal window, just use ^C (ctrl+c) to terminate the rest server and restart
+```
+cd /apps/nanomine/rest
+node index.js
+```
+  - If the rest server is running in the backgroupd you'll need to find the process id and kill it before restarting
+  
+  
 
 # Components and Libraries Used
 - https://vuejs.org VueJS Javascript Framework

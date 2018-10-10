@@ -122,6 +122,11 @@ const webpackConfig = merge(baseWebpackConfig, {
       {
         from: path.resolve(__dirname, '../node_modules/codemirror/mode/*/*'),
         to: path.join(config.build.assetsSubDirectory, 'js/codemirror/mode/[name]/[name].js')
+      },
+      {
+        from: path.resolve(__dirname, '../node_modules/codemirror/addon/*/*'),
+        to: path.join(config.dev.assetsSubDirectory, 'js/codemirror/addon/[1]/[name].[ext]'),
+        test: /([^/]+)\/([^/]+)$/
       }
     ])
   ]

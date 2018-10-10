@@ -1,0 +1,14 @@
+<br/>Hello ${user},
+
+<br/>Unfortunately, your Otsu's binarize was not successful.
+
+<br/>jobid: ${jobid}
+
+<br/>job result code: ${jobinfo.resultcode}
+
+<br/>Please visit <a href="https://nanomine.org/joboutput/${jobid}">your job output</a> for more information
+
+<br/>
+Regards,
+<br/>The NanoMine team
+<br/>
