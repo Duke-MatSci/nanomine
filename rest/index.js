@@ -442,18 +442,170 @@ app.get('/explore/select', function (req, res) {
     })
   }
 })
-
+function validCuratedDataState (curatedDataState) {
+  let validStates = ['editedNotValid', 'editedValid', 'valid', 'notValid', 'ingest', 'ingestFailed', 'ingestSuccess']
+  return validStates.includes(curatedDataState)
+}
 app.post('/curate', function (req, res) {
   let jsonResp = {'error': null, 'data': null}
-  // let title = req.body.title
-  // let schema = req.body.schema
-  // let content = req.body.content
-  // let editorStatus = req.body.editorStatus // editedFailedVerify, editedPassedVerify (not trusted), triggers system validation
-  // ensure schema id exists
-  // set validationState to value specified by editor.  Background task will validate and update db status.
-  res.json(jsonResp)
+  // TODO need to keep prior versions of XML by using a version number in the record
+  let title = req.body.title
+  let schemaId = req.body.schemaId
+  let content = req.body.content
+  // NOTE: setting curatedDataState to anything past editedPassedVerify requires admin level authority
+  let curatedDataState = req.body.curatedDataState // editedFailedVerify, editedPassedVerify (not trusted), triggers system validation
+  let msg = `/curate - title: ${title} schemaId: ${schemaId} `
+  if (validCuratedDataState(curatedDataState)) {
+    // check schema id
+    XsdSchema.findById(schemaId, function (err, xsdRec) {
+      if (err) {
+        jsonResp.error = err
+        return res.status(400).json(jsonResp)
+      } else if (xsdRec === null) {
+        jsonResp.error = {'statusCode': 404, 'statusText': 'not found'}
+        return res.status(404).json(jsonResp)
+      } else {
+        // ensure that there is an associated dataset record
+        // ensure that the title matches spec
+        let m = title.match(/^[A-Z]([0-9]+)[_][S]([0-9]+)[_][\S]+[_]\d{4}[.][Xx][Mm][Ll]$/) // e.g. L183_S12_Poetschke_2003.xml
+        if (m) {
+          let dsSeq = m[1]
+          // look up the dataset to ensure that it exists
+          let dsQuery = {'seq': dsSeq}
+          Datasets.find(dsQuery, function (err, docs) {
+            if (err || docs.length === 0) {
+              jsonResp.err = 'unable to find associated dataset: ' + dsSeq + ' err: ' + err
+              console.log(msg + ' ' + jsonResp.err)
+              return res.status(400).json(jsonResp)
+            } else {
+              // upsert the data to curate
+              let xmlQuery = {'title': title, 'schemaId': schemaId}
+              let theData = {'title': title, 'schemaId': schemaId, 'entityState': curatedDataState, 'xml_str': content}
+              XmlData.findOneAndUpdate(xmlQuery, theData, {'upsert': true}, function (err, doc) {
+                if (err) {
+                  jsonResp.error = err
+                  return res.status(500).json(jsonResp)
+                }
+                return res.status(201).json(jsonResp)
+              })
+            }
+          })
+        } else {
+          jsonResp.error = 'title does not meet standard: ' + title
+          return res.status(400).json(jsonResp)
+        }
+      }
+    })
+  } else {
+    jsonResp.error = 'error - curatedDataState: ' + curatedDataState + ' is not a valid state.'
+    return res.status(400).json(jsonResp)
+  }
 })
-/* END -- rest services related to XMLs and Schemas  */
+app.get('/dataset', function (req, res) {
+  let jsonResp = {'error': null, 'data': null}
+  let id = req.query.id
+  let seq = req.query.seq
+  let doi = req.query.doi
+  if (validQueryParam(id)) {
+    Datasets.findById(id, function (err, ds) {
+      if (err) {
+        jsonResp.error = err
+        return res.status(500).json(jsonResp)
+      } else {
+        jsonResp.data = ds
+        return res.json(jsonResp)
+      }
+    })
+  } else if (validQueryParam(seq)) {
+    Datasets.find({'seq': {'$eq': seq}}, function (err, doc) {
+      if (err) {
+        jsonResp.error = err
+        return res.status(500).json(jsonResp)
+      } else {
+        jsonResp.data = doc
+        return res.json(jsonResp)
+      }
+    })
+  } else if (validQueryParam(doi)) {
+    Datasets.find({'doi': {'$eq': doi}}, function (err, doc) {
+      if (err) {
+        jsonResp.error = err
+        return res.status(500).json(jsonResp)
+      } else {
+        jsonResp.data = doc
+        return res.json(jsonResp)
+      }
+    })
+  } else {
+    // return all datasets for now
+    Datasets.find({}).sort({'seq': 1}).exec(function (err, docs) {
+      if (err) {
+        jsonResp.error = err
+        return res.status(500).json(jsonResp)
+      } else {
+        jsonResp.data = docs
+        return res.json(jsonResp)
+      }
+    })
+  }
+})
+app.post('/dataset/update', function (req, res) {
+  let jsonResp = {'error': null, 'data': null}
+  let dsUpdate = req.body.dsUpdate
+  let dsSeq = req.body.dsSeq
+  console.log('datataset/update: doing update...' + JSON.stringify(dsUpdate))
+  Datasets.findOneAndUpdate({'seq': dsSeq}, {$set: dsUpdate},{}, function (err, oldDoc) {
+    if (err) {
+      jsonResp.error = err
+      console.log('datataset/update: error - ' + err)
+      return res.status(500).json(jsonResp)
+    } else {
+      jsonResp.data = doc
+      console.log('datataset/update: success - ' + oldDoc)
+      return res.status(200).json(jsonResp)
+    }
+  })
+})
+app.post('/dataset/create', function (req, res) {
+  // TODO dataset needs a unique index on seq to ensure there are no dups
+  let jsonResp = {'error': null, 'data': null}
+  let dsInfo = req.body.dsInfo
+  Datasets.find({}).sort({'seq': 1}).exec(function (err, docs) {
+    if (err) {
+      jsonResp.error = err
+      return res.status(500).json(jsonResp)
+    } else {
+      let last = -1
+      let newSeq = -1
+      let done = false
+      docs.forEach(function (v) {
+        if (!done) {
+          if (v.seq > (last + 1) && last >= 101) {
+            newSeq = last + 1
+            done = true
+          }
+          last = v.seq
+        }
+      })
+      if (!done) {
+        newSeq = last + 1
+      }
+      console.log('newSeq: ' + newSeq)
+      jsonResp.data = {'seq': newSeq}
+      dsInfo.seq = newSeq
+      Datasets.create(dsInfo, function (err, doc) {
+        if (err) {
+          jsonResp.error = err
+          return res.status(500).json(jsonResp)
+        } else {
+          jsonResp.data = doc
+          return res.status(201).json(jsonResp)
+        }
+      })
+    }
+  })
+})
+/* END -- rest services related to XMLs, Schemas and datasets */
 
 /* BEGIN -- Job related rest services */
 function updateJobStatus (statusFilePath, newStatus) {
