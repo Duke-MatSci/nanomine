@@ -15,7 +15,7 @@ processManagement:
   timeZoneInfo: /usr/share/zoneinfo
 
 storage:
-  dbPath: /nanomine/mongodata
+  dbPath: /nanomine-mongodata
 
 security:
    authorization: enabled
