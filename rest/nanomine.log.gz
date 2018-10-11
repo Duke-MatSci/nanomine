@@ -59,3 +59,7 @@
 {"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
 {"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
 {"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"<br/>Hello testuser,\n\n<br/>Unfortunately, your Otsu's binarize was not successful.\n\n<br/>jobid: otsu-bQRCJktaMXieqNASTBr1J1\n\n<br/>job result code: 99\n\n<br/>Please visit <a href=\"https://nanomine.org/joboutput/otsu-bQRCJktaMXieqNASTBr1J1\">your job output</a> for more information\n\n<br/>\nRegards,\n<br/>The NanoMine team\n<br/>\n","level":"info"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"<br/>Hello testuser,\n\n<br/>Unfortunately, your Otsu's binarize was not successful.\n\n<br/>jobid: otsu-41YF2W38Gte6i4idQkeZcp\n\n<br/>job result code: 99\n\n<br/>Please visit <a href=\"https://nanomine.org/joboutput/otsu-41YF2W38Gte6i4idQkeZcp\">your job output</a> for more information\n\n<br/>\nRegards,\n<br/>The NanoMine team\n<br/>\n","level":"info"}
