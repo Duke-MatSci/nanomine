@@ -101,6 +101,7 @@ export default {
 <style scoped>
   img {
     width: 240px;
+    height: 220px;
   }
   h4 {
     text-transform: uppercase;

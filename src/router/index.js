@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import NanoMine from '@/components/NanoMine'
 import Database from '@/components/Database'
+import Insight from '@/components/Insight'
 import ModuleTools from '@/components/ModuleTools'
 import SimTools from '@/components/SimTools'
 import XMLCONV from '@/components/XMLCONV'
@@ -9,6 +10,7 @@ import NmEditor from '@/components/Editor'
 import McrHomepage from '@/components/McrHomepage'
 import BinarizeHomepage from '@/components/BinarizeHomepage'
 import Otsu from '@/components/Otsu'
+import OtsuResult from '@/components/OtsuResult'
 import Niblack from '@/components/Niblack'
 import CharacterizeHomepage from '@/components/CharacterizeHomepage'
 import CorrelationCharacterize from '@/components/CorrelationCharacterize'
@@ -19,7 +21,6 @@ import CorrelationReconstruct from '@/components/CorrelationReconstruct'
 import SDFReconstruct from '@/components/SDFReconstruct'
 import DescriptorReconstruct from '@/components/DescriptorReconstruct'
 import Visualization from '@/components/Visualization'
-import OtsuResult from '@/components/OtsuResult'
 Vue.use(Router)
 
 export default new Router({
@@ -33,6 +34,11 @@ export default new Router({
       path: '/db',
       name: 'Database',
       component: Database
+    },
+    {
+      path: '/insight',
+      name: 'Insight',
+      component: Insight
     },
     {
       path: '/simtools',
@@ -68,6 +74,11 @@ export default new Router({
       path: '/Otsu',
       name: 'Otsu',
       component: Otsu
+    },
+    {
+      path: '/OtsuResult',
+      name: 'OtsuResult',
+      component: OtsuResult
     },
     {
       path: '/characterization_homepage',
