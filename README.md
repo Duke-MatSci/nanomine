@@ -17,43 +17,26 @@ NanoMine Nanocomposites Data Resource
   
   # no need to go back-and-forth to another user. Plus, for development after initial install, just log in as whyis user directly from login page
   sudo usermod -aG sudo whyis
-  sudo passwd whyis  # enter a password that only YOU know  
+  sudo passwd whyis  # enter a password that only YOU know -- and that you'll actually remember 
   sudo su - whyis
   
   cd /apps
-  sudo git clone https://github.com/YOURFORK/nanomine.git  # to use the original, use FORKNAME of 'duke-matsci'
-  sudo mkdir -p /apps/nanomine/data 2>/dev/null
+  git clone https://github.com/YOURFORK/nanomine.git  # to use the original, use FORKNAME of 'duke-matsci'
+  mkdir -p /apps/nanomine/data 2>/dev/null
   cd /apps/nanomine/data
-  sudo wget https://raw.githubusercontent.com/duke-matsci/nanomine-ontology/master/xml_ingest.setl.ttl
-  sudo wget https://raw.githubusercontent.com/duke-matsci/nanomine-ontology/master/ontology.setl.ttl
-  sudo chown -R whyis:whyis /apps/nanomine
+  wget https://raw.githubusercontent.com/duke-matsci/nanomine-ontology/master/xml_ingest.setl.ttl
+  wget https://raw.githubusercontent.com/duke-matsci/nanomine-ontology/master/ontology.setl.ttl
   
-  #EDIT the whyis user's ~/.bashrc to add: (append to end of file)
-  export NM_MONGO_PORT=27017
-  export NM_MONGO_HOST=localhost
-  export NM_MONGO_DB=mgi
-  export NM_MONGO_USER="mongodevadmin" 
-  export NM_MONGO_PWD="mydevmongopw" # SET THIS to a different password NOW
-  export NM_MONGO_OWNER_USER="mongodevowner"
-  export NM_MONGO_OWNER_PWD="mydevmongoownerpw" # SET THIS to a different password NOW
-  export NM_MONGO_API_USER="mongodevapi"
-  export NM_MONGO_API_PWD="mydevmongoapipw" # SET THIS to a different password NOW
-  export NM_MONGO_URI="mongodb://${NM_MONGO_API_USER}:${NM_MONGO_API_PWD}@${NM_MONGO_HOST}:${NM_MONGO_PORT}/${NM_MONGO_DB}"
-  export NM_WEBFILES_ROOT="/apps/nanomine-webfiles"
-  export NM_WEB_BASE_URI="http://ubuntu.local" # external apache uri. May need to tweak this for your local machine/vm depending on external access location -- external uri to apache
-  export NM_JOB_DATA="${NM_WEBFILES_ROOT}/jobdata"
-  export NM_JOB_DATA_URI="/nmf/jobdata"
-  export NM_SMTP_SERVER="myemailserver"
-  export NM_SMTP_PORT="587" # other fields will be needed if not local server, but for now this is adequate
-  export NM_SMTP_TEST="true"  # set this to true and emails will go into the log for testing instead of sending
-  export NM_SMTP_REST_URL="http://localhost/nmr/jobemail"
-  export NM_SMTP_ADMIN_ADDR="adminuser@example.com"
-  export NM_SMTP_TEST_ADDR="testuser@example.com"
-  export NM_SMTP_AUTH_USER="mysmtpuser@example.com"
-  export NM_SMTP_AUTH_PWD="mysmtppwd"
-  export NM_LOGLEVEL="debug"  # use this when creating a logger for javascript or python, then log each message according to severity i.e. logger.info('my info message')
-  export NM_LOGFILE="nanomine.log" # use this log for python logging
-  export NM_MATLAB_AVAILABLE="no" # run TEST_XXXXXX matlab scripts instead of matlab directly
+  cd /apps
+
+  ## WARNING, Execute this only once.  After that diff the prototype with the /apps/nanomine_env and make required
+  ##   updates. Otherwise you risk losing valuable passwords like db passwords that may require a db wipe/reload
+  cp /apps/nanomine/install/nanomine_env.prototype /apps/nanomine_env # Modify the copied version as appropriate to set passwords, etc.
+  
+  chmod og-rw /apps/nanomine_env # only the login user should see the modified settings
+  # add the following line to ~/.bashrc and ~/.bash_profile -- ONLY once
+  source /apps/nanomine_env # add this to both ~/.bashrc and ~/.bash_profile
+  
   
   #install n - the nodejs version manager and LTS version of node
   curl -L https://git.io/n-install | bash -s -- -y lts
@@ -85,8 +68,7 @@ NanoMine Nanocomposites Data Resource
   sudo a2enmod proxy.load
 
   sudo cp /apps/nanomine/install/000-default.conf /etc/apache2/sites-available
-  sudo mkdir /apps/nanomine-webfiles
-  sudo chown -R whyis:whyis /apps/nanomine-webfiles
+  mkdir /apps/nanomine-webfiles
   
   sudo service apache2 restart
   sudo service celeryd restart
@@ -96,21 +78,52 @@ NanoMine Nanocomposites Data Resource
   echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/4.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.0.list
   sudo apt-get update
   sudo apt-get install -y mongodb-org
+  sudo mkdir /nanomine-mongodata
+  sudo chown mongodb:mongodb /nanomine-mongodata
   sudo cp /apps/nanomine/install/mongoConfig /etc/mongod.conf
   sudo service mongod start
-  sudo /apps/nanomine/install/mongoSetupOwnerUser
-  sudo /apps/nanomine/install/mongoSetupAdminUser
-  sudo /apps/nanomine/install/mongoSetupApiUser
   sudo systemctl enable mongod
+  /apps/nanomine/install/mongoSetupAdminUser
+  /apps/nanomine/install/mongoSetupApiUser
+  /apps/nanomine/install/mongoSetupOwnerUser
+  
+  # Restore and migrate mongo dump from production for new version  
+  mkdir /apps/mongodump
+  curl -o /apps/mongodump/mgi.tgz $NM_MONGO_DUMP
+  cd /apps/mongodump
+  tar zxvf mgi.tgz
+  /apps/nanomine/rest/restore_and_migrate.sh  
     
   cd nanomine/rest
   npm i # install packages needed by rest server
-  # the next command will run the rest server in the background
-  #   If you're testing the rest server, it might be a good idea to 
-  #   leave off the ampersand and run 'node index.js'
-  #   in a new console window by itself so that starting/stopping will
-  #   be easier (ctrl+c).  We will make this into a system service soon.
-  node index.js &
+  sudo cp /apps/nanomine/install/nm-rest.service /etc/systemd/system
+  sudo systemctl daemon-reload
+  sudo systemctl start nm-rest  # can also restart or stop as necessary
+  sudo systemctl enable nm-rest # ensure that neo4j runs after reboot
+
+  
+  cd /apps
+  mkdir neo4j
+  cd neo4j 
+  curl -o /tmp/neo4j.tgz $NM_NEO4J_IMAGE
+  tar zxf /tmp/neo4j.tgz
+  
+  #start neo4j with this command
+  /apps/neo4j/bin/neo4j start 
+  # the neo4j browser will be available at http://localhost:7474 -- NOTE: ONLY available to browser running on VM directly
+  ## NOTE: need both /etc/security/limits.conf settings and /etc/systemd/system.conf.d/limits.conf (system.conf.d may be new directory)
+  ## add to /etc/security/limits.conf (sudo vi /etc/security/limits.conf)
+  ##   whyis hard nofile 40000
+  ##   whyis soft nofile 40000
+  ## add to /etc/systemd/system.conf.d/limits.conf (sudo mkdir /etc/systemd/system.conf.d; sudo vi /etc/systemd/system.conf.d/limits.conf) 
+  ##   [Manager]
+  ##   DefaultLimitNOFILE=40000
+  
+  sudo cp /apps/nanomine/install/nm-neo4j.service /etc/systemd/system
+  sudo systemctl daemon-reload
+  sudo systemctl start nm-neo4j  # can also restart or stop as necessary
+  sudo systemctl enable nm-neo4j # ensure that neo4j runs after reboot
+  
   
   cd /apps/whyis 
    
@@ -125,7 +138,6 @@ NanoMine Nanocomposites Data Resource
   cd /apps
   touch .netrc
   ```
-### OK to skip the .netrc edit and load phases at least for now...
 - after you create the .netrc file under /apps, edit the file and add the following.
 
   ```
@@ -143,8 +155,7 @@ NanoMine Nanocomposites Data Resource
   - The load process can be monitored with 'sudo tail -f /var/log/celery/w1.log'
   
 ### Use the server...  
-- go to http://localhost/ to login with your credentials during "createuser" command
-- go to http://localhost/nm to access NanoMine
+- go to http://YOURVMADDRESS/nm to access NanoMine
 
 ### Code changes
 - If code changes are made to the GUI
@@ -159,7 +170,7 @@ sudo service apache2 restart
 cd /apps/nanomine/rest
 node index.js
 ```
-  - If the rest server is running in the backgroupd you'll need to find the process id and kill it before restarting
+  - If the rest server is running in the background you'll need to find the process id and kill it before restarting
   
   
 
