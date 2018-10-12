@@ -2,5 +2,6 @@
 # Run by nm-rest.service unit
 cd /apps/nanomine/rest
 source /apps/nanomine_env
-/apps/n/bin/node index.js $* &
+/apps/n/bin/node index.js $*
+
 
