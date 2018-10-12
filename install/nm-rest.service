@@ -1,0 +1,15 @@
+[Unit]
+Description = NanoMine REST
+After=network.target
+
+[Service]
+Type = simple
+User=whyis
+Group=whyis
+WorkingDirectory=/apps/nanomine/rest
+ExecStart=/apps/nanomine/rest/restServer.sh start
+ExecStop=/apps/nanomine/rest/restServer.sh stop
+ExecReload=/apps/nanomine/rest/restServer.sh restart
+
+[Install]
+WantedBy = multi-user.target
