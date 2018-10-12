@@ -99,7 +99,7 @@ NanoMine Nanocomposites Data Resource
   sudo cp /apps/nanomine/install/nm-rest.service /etc/systemd/system
   sudo systemctl daemon-reload
   sudo systemctl start nm-rest  # can also restart or stop as necessary
-  sudo systemctl enable nm-rest # ensure that neo4j runs after reboot
+  sudo systemctl enable nm-rest # ensure that rest server runs after reboot
 
   
   cd /apps
