@@ -5,7 +5,8 @@ NanoMine Nanocomposites Data Resource
 
 # Installation 
 #### (REQUIRES ubuntu 16.04 -- 18.04 will not work yet)
-### Note: if installing on a virtual machine, be sure to allocate at least 8G Memory, 2 CPUs and 30G Disk
+### Note: if installing on a virtual machine, be sure to allocate at least 8G Memory, 2 CPUs and 60G Disk if installing MATLAB otherwise 35GB will probably work.
+### Also, this is a DEVELOPMENT only install for a personal system (or vm). Don't use these instructions for QA or production environments.
 - install [whyis](http://tetherless-world.github.io/whyis/install) using this command (bluedevil-oit version contains proxy work-around)
   ```
   bash < <(curl -skL https://raw.githubusercontent.com/bluedevil-oit/whyis/release/install.sh) # master does not seem to ingest properly
@@ -13,39 +14,36 @@ NanoMine Nanocomposites Data Resource
 - whyis will be installed in /apps/whyis
 - Steps to install NanoMine:
   ```
-  cd /apps
-  sudo git clone https://github.com/YOURFORK/nanomine.git  # to use the original, use FORKNAME of 'duke-matsci'
-  sudo mkdir -p /apps/nanomine/data 2>/dev/null
-  cd /apps/nanomine/data
-  sudo wget https://raw.githubusercontent.com/duke-matsci/nanomine-ontology/master/xml_ingest.setl.ttl
-  sudo wget https://raw.githubusercontent.com/duke-matsci/nanomine-ontology/master/ontology.setl.ttl
-  sudo chown -R whyis:whyis /apps/nanomine
+  
+  # no need to go back-and-forth to another user. Plus, for development after initial install, just log in as whyis user directly from login page
+  sudo usermod -aG sudo whyis
+  sudo passwd whyis  # enter a password that only YOU know -- and that you'll actually remember 
   sudo su - whyis
+  
+  cd /apps
+  git clone https://github.com/YOURFORK/nanomine.git  # to use the original, use FORKNAME of 'duke-matsci'
+  mkdir -p /apps/nanomine/data 2>/dev/null
+  cd /apps/nanomine/data
+  wget https://raw.githubusercontent.com/duke-matsci/nanomine-ontology/master/xml_ingest.setl.ttl
+  wget https://raw.githubusercontent.com/duke-matsci/nanomine-ontology/master/ontology.setl.ttl
+  
+  cd /apps
 
-  #EDIT the whyis user's ~/.bash_profile to add:
-  export NM_MONGO_PORT=27017
-  export NM_MONGO_HOST=localhost
-  export NM_MONGO_DB=mgi
-  export NM_MONGO_USER="mongodevadmin" 
-  export NM_MONGO_PWD="mydevmongopw" # SET THIS to a different password NOW
-  export NM_MONGO_API_USER="mongodevapi"
-  export NM_MONGO_API_PWD="mydevmongoapipw" # SET THIS to a different password NOW
-  export NM_MONGO_URI="mongodb://${NM_MONGO_API_USER}:${NM_MONGO_API_PWD}@${NM_MONGO_HOST}:${NM_MONGO_PORT}/${NM_MONGO_DB}"
-  export NM_WEBFILES_ROOT="/apps/nanomine-webfiles"
-  export NM_JOB_DATA="${NM_WEBFILES_ROOT}/jobdata"
-  export NM_JOB_DATA_URI="/nmf/jobdata"
-  export NM_SMTP_SERVER="myemailserver"
-  export NM_SMTP_PORT="587" # other fields will be needed if not local server, but for now this is adequate
-  export NM_SMTP_TEST="true"  # set this to true and emails will go into the log for testing instead of sending
-  export NM_LOGLEVEL="debug"  # use this when creating a logger for javascript or python, then log each message according to severity i.e. logger.info('my info message')
-  export NM_LOGFILE="nanomine.log" # use this log for python logging
+  ## WARNING, Execute this only once.  After that diff the prototype with the /apps/nanomine_env and make required
+  ##   updates. Otherwise you risk losing valuable passwords like db passwords that may require a db wipe/reload
+  cp /apps/nanomine/install/nanomine_env.prototype /apps/nanomine_env # Modify the copied version as appropriate to set passwords, etc.
+  
+  chmod og-rw /apps/nanomine_env # only the login user should see the modified settings
+  # add the following line to ~/.bashrc and ~/.bash_profile -- ONLY once
+  source /apps/nanomine_env # add this to both ~/.bashrc and ~/.bash_profile
+  
   
   #install n - the nodejs version manager and LTS version of node
   curl -L https://git.io/n-install | bash -s -- -y lts
-  echo 'export N_PREFIX="$HOME/n"; [[ :$PATH: == *":$N_PREFIX/bin:"* ]] || PATH+=":$N_PREFIX/bin"' >> ~/.bash_profile
+  echo 'export N_PREFIX="$HOME/n"; [[ :$PATH: == *":$N_PREFIX/bin:"* ]] || PATH+=":$N_PREFIX/bin"' >> ~/.bashrc
   
   #make sure n is in the path and new variables are defined
-  source ~/.bash_profile
+  source ~/.bashrc
 
   # install the VueJS command line processor
   npm i -g vue-cli@2.9.6  
@@ -63,7 +61,6 @@ NanoMine Nanocomposites Data Resource
   
   #install NanoMine python components for Whyis
   pip install -e .
-  exit
   
   sudo a2enmod proxy_connect.load  
   sudo a2enmod proxy_html.load  
@@ -71,8 +68,7 @@ NanoMine Nanocomposites Data Resource
   sudo a2enmod proxy.load
 
   sudo cp /apps/nanomine/install/000-default.conf /etc/apache2/sites-available
-  sudo mkdir /apps/nanomine-webfiles
-  sudo chown -R whyis:whyis /apps/nanomine-webfiles
+  mkdir /apps/nanomine-webfiles
   
   sudo service apache2 restart
   sudo service celeryd restart
@@ -82,22 +78,52 @@ NanoMine Nanocomposites Data Resource
   echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/4.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.0.list
   sudo apt-get update
   sudo apt-get install -y mongodb-org
+  sudo mkdir /nanomine-mongodata
+  sudo chown mongodb:mongodb /nanomine-mongodata
   sudo cp /apps/nanomine/install/mongoConfig /etc/mongod.conf
   sudo service mongod start
-  sudo /apps/nanomine/install/mongoSetupAdminUser
-  sudo /apps/nanomine/install/mongoSetupApiUser
   sudo systemctl enable mongod
+  /apps/nanomine/install/mongoSetupAdminUser
+  /apps/nanomine/install/mongoSetupApiUser
+  /apps/nanomine/install/mongoSetupOwnerUser
   
-  sudo su - whyis
-  
+  # Restore and migrate mongo dump from production for new version  
+  mkdir /apps/mongodump
+  curl -o /apps/mongodump/mgi.tgz $NM_MONGO_DUMP
+  cd /apps/mongodump
+  tar zxvf mgi.tgz
+  /apps/nanomine/rest/restore_and_migrate.sh  
+    
   cd nanomine/rest
   npm i # install packages needed by rest server
-  # the next command will run the rest server in the background
-  #   If you're testing the rest server, it might be a good idea to 
-  #   leave off the ampersand and run 'node index.js'
-  #   in a new console window by itself so that starting/stopping will
-  #   be easier (ctrl+c).  We will make this into a system service soon.
-  node index.js &
+  sudo cp /apps/nanomine/install/nm-rest.service /etc/systemd/system
+  sudo systemctl daemon-reload
+  sudo systemctl start nm-rest  # can also restart or stop as necessary
+  sudo systemctl enable nm-rest # ensure that rest server runs after reboot
+
+  
+  cd /apps
+  mkdir neo4j
+  cd neo4j 
+  curl -o /tmp/neo4j.tgz $NM_NEO4J_IMAGE
+  tar zxf /tmp/neo4j.tgz
+  
+  #start neo4j with this command
+  /apps/neo4j/bin/neo4j start 
+  # the neo4j browser will be available at http://localhost:7474 -- NOTE: ONLY available to browser running on VM directly
+  ## NOTE: need both /etc/security/limits.conf settings and /etc/systemd/system.conf.d/limits.conf (system.conf.d may be new directory)
+  ## add to /etc/security/limits.conf (sudo vi /etc/security/limits.conf)
+  ##   whyis hard nofile 40000
+  ##   whyis soft nofile 40000
+  ## add to /etc/systemd/system.conf.d/limits.conf (sudo mkdir /etc/systemd/system.conf.d; sudo vi /etc/systemd/system.conf.d/limits.conf) 
+  ##   [Manager]
+  ##   DefaultLimitNOFILE=40000
+  
+  sudo cp /apps/nanomine/install/nm-neo4j.service /etc/systemd/system
+  sudo systemctl daemon-reload
+  sudo systemctl start nm-neo4j  # can also restart or stop as necessary
+  sudo systemctl enable nm-neo4j # ensure that neo4j runs after reboot
+  
   
   cd /apps/whyis 
    
@@ -112,7 +138,6 @@ NanoMine Nanocomposites Data Resource
   cd /apps
   touch .netrc
   ```
-### OK to skip the .netrc edit and load phases at least for now...
 - after you create the .netrc file under /apps, edit the file and add the following.
 
   ```
@@ -130,29 +155,24 @@ NanoMine Nanocomposites Data Resource
   - The load process can be monitored with 'sudo tail -f /var/log/celery/w1.log'
   
 ### Use the server...  
-- go to http://localhost/ to login with your credentials during "createuser" command
-- go to http://localhost/nm to access NanoMine
+- go to http://YOURVMADDRESS/nm to access NanoMine
 
-# Server Development mode
-Each time a change is made for NanoMine, apache2 and celeryd service have to be restarted manually. 
-It is possible to use Whyis' development mode to bypass the need to restart services.
-
-Try this:  
+### Code changes
+- If code changes are made to the GUI
 ```
-sudo su - whyis
-cd /app/whyis
-python manage.py runserver -h 0.0.0.0
-``` 
-After executing the commands above NanoMine may accessed on "http://localhost:5000/nm".
-Then, you only need to refresh your webpage to see your changes immediately after you make changes to NanoMine. 
-
-After you finished the visualization changes, you can shutdown the developing mode with CTRL+c.
-Then you have to restart apache2 and celeryd service by
-```
+cd /apps/nanomine
+npm run build
 sudo service apache2 restart
-sudo service celeryd restart
 ```
-After this, the updated NanoMine app will show up at "http://localhost/nm".
+- If code changes are made to the rest server - be sure to stop the rest server and restart
+  - If the rest server is running in a terminal window, just use ^C (ctrl+c) to terminate the rest server and restart
+```
+cd /apps/nanomine/rest
+node index.js
+```
+  - If the rest server is running in the background you'll need to find the process id and kill it before restarting
+  
+  
 
 # Components and Libraries Used
 - https://vuejs.org VueJS Javascript Framework
@@ -167,6 +187,8 @@ After this, the updated NanoMine app will show up at "http://localhost/nm".
 - https://www.npmjs.com/package/axios Axios NPM package info
 - https://google.github.io/material-design-icons/ ICONS 
 - https://expressjs.com ExpressJS Web Application Server Framework
+- https://github.com/devstark-com/vue-google-charts Google Charts wrapper for Vue
+  - NOTE: Google charts doc: https://developers.google.com/chart/
 
 
 # Development

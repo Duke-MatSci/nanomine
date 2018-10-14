@@ -1,0 +1,12 @@
+
+
+<br/>Hello ${user},
+
+<br/>Your conversion job ${jobid} was successful.
+
+<br/>Please visit <a href="https://nanomine.org/joboutput/${jobid}">your job output</a> for more information
+
+<br/>
+Regards,
+<br/>The NanoMine team
+<br/>

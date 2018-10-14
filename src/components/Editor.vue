@@ -7,42 +7,76 @@
     >
       {{editorErrorMsg}}
     </v-alert>
-    <v-toolbar dark color="primary">
-      <v-toolbar-title class="white--text">{{showFileName}}</v-toolbar-title>
-      <v-tooltip bottom>
+    <v-alert
+      v-model="editorValidated"
+      type="success"
+      dismissible
+    >
+      {{editorValidatedMsg}}
+    </v-alert>
+    <v-toolbar dark color="secondary" class="editor-toolbar">
+      <v-tooltip bottom v-if="canAddTab()">
+        <v-btn dark color="primary" slot="activator" v-on:click="addTabButton()">Open ...
+          <!--v-icon>add_circle_outline</v-icon-->
+        </v-btn>
+        <span>Open</span>
+      </v-tooltip>
+
+      <v-toolbar-title class="white--text">Curating: {{showFileName}} {{editorSchemaName}}</v-toolbar-title>
+      <!--ADD BACK LATER v-tooltip bottom>
         <v-btn icon slot="activator" v-on:click="lockButton()">
           <v-icon>lock_open</v-icon>
         </v-btn>
         <span>Unlocked</span>
       </v-tooltip>
 
+      <v-tooltip bottom v-if="hasPrevTab()">
+        <v-btn icon slot="activator" v-on:click="prevTabButton()">
+          <v-icon>skip_previous</v-icon>
+        </v-btn>
+        <span>Previous Tab</span>
+      </v-tooltip>
+
+      <v-tooltip bottom v-if="hasNextTab()">
+        <v-btn icon slot="activator" v-on:click="nextTabButton()">
+          <v-icon>skip_next</v-icon>
+        </v-btn>
+        <span>Next Tab</span>
+      </v-tooltip>
+
+      <v-tooltip bottom>
+        <v-btn icon slot="activator">
+          <v-icon>change_history</v-icon>
+        </v-btn>
+        <span>File changed</span>
+      </v-tooltip-->
+
       <v-spacer></v-spacer>
 
       <v-tooltip bottom>
-        <v-btn icon slot="activator" v-on:click="transformButton()">
-          <v-icon>transform</v-icon>
+        <v-btn slot="activator" dark color="primary" v-on:click="transformButton()">
+          <!--v-icon>transform</v-icon-->
+          <span v-if="view=='xml'">Show Form</span>
+          <span v-if="view=='form'">Show XML</span>
         </v-btn>
         <span v-if="view=='xml'">Show Form View</span>
         <span v-if="view=='form'">Show XML View</span>
       </v-tooltip>
-
-      <v-menu :nudge-width="100">
-        <v-btn icon slot="activator">
-          <v-icon>save</v-icon>
+      <!--v-tooltip bottom>
+        <v-btn  slot="activator" dark color="primary" v-on:click="validateButton()">Validate
         </v-btn>
-        <v-list>
-          <v-list-tile
-            v-for="(item, idx) in fileMenu"
-            :key="item"
-            @click="fileButton(idx, $event)"
-          >
-            <v-list-tile-title v-text="item"></v-list-tile-title>
-          </v-list-tile>
-        </v-list>
-      </v-menu>
+        <span>Validate</span>
+      </v-tooltip-->
 
       <v-tooltip bottom>
-        <v-btn icon slot="activator" v-on:click="test2Button()">
+        <v-btn  slot="activator" dark color="primary" v-on:click="saveButton()">Save ...
+          <!--v-icon>save</v-icon-->
+        </v-btn>
+        <span>Save</span>
+      </v-tooltip>
+
+      <!--v-tooltip bottom> !!! Disabled for now ADD BACK LATER
+        <v-btn icon slot="activator" v-on:click="settingsButton()">
           <v-icon>settings</v-icon>
         </v-btn>
         <span>Settings</span>
@@ -55,12 +89,12 @@
         <span>Find In Editor</span>
       </v-tooltip>
 
-      <!--<v-tooltip bottom>-->
-      <!--<v-btn icon slot="activator" v-on:click="samplesButton()">-->
-      <!--<v-icon>list</v-icon>-->
-      <!--</v-btn>-->
-      <!--<span>List data and schemas</span>-->
-      <!--</v-tooltip>-->
+      <v-tooltip bottom>
+      <v-btn icon slot="activator" v-on:click="samplesButton()">
+      <v-icon>list</v-icon>
+      </v-btn>
+      <span>List data and schemas</span>
+      </v-tooltip>
 
       <v-tooltip bottom>
         <v-btn icon slot="activator" v-on:click="infoButton()">
@@ -81,60 +115,143 @@
           <v-icon>more_vert</v-icon>
         </v-btn>
         <span>More</span>
-      </v-tooltip>
-
+      </v-tooltip-->
     </v-toolbar>
+    <v-dialog v-model="openOrCreateDialog" max-width="500px">
+      <v-tabs
+        v-model="active"
+        color="light-blue"
+        dark
+        slider-color="red"
+      >
+        <v-tab
+          v-for="n in 2"
+          :key="n"
+          ripple
+        >
+          {{ openOrCreateTabs[n-1] }}
+
+        </v-tab>
+        <v-tab-item
+          v-for="n in 2"
+          :key="n"
+        >
+          <v-card flat>
+            <v-layout justify-center v-if="n==1"> <!-- open existing -->
+              <v-flex xs10>
+                <v-form v-model="valid">
+                  <v-text-field append-icon="search" @click:append="clickedOpenIdSearch()"
+                                v-model="openID"
+                                label="ID"
+                                required
+                  ></v-text-field>
+                  <v-switch
+                    :label="`Latest schema only? ${openLatestSchema?'Yes':'No'}`"
+                    v-model="openLatestSchema"
+                  ></v-switch>
+                </v-form>
+              </v-flex>
+            </v-layout>
+            <v-layout v-if="n==2"> <!-- create new -->
+              <v-flex>
+                Layout 2
+              </v-flex>
+            </v-layout>
+          </v-card>
+        </v-tab-item>
+      </v-tabs>
+      <v-card>
+        <v-card-actions>
+          <v-btn color="primary" flat @click="openOrCreateDialog=false">Close</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
     <v-layout row justify-center>
-      <v-dialog v-model="fileDialog" scrollable max-width="300px">
+      <v-dialog v-model="saveMenuActive" max-width="150px">
+        <v-list>
+          <v-list-tile
+            v-for="(item, idx) in saveMenu"
+            :key="item"
+            @click="fileButton(idx, $event)"
+          >
+            <v-list-tile-title v-text="item"></v-list-tile-title>
+          </v-list-tile>
+        </v-list>
+      </v-dialog>
+    </v-layout>
+
+    <v-layout row justify-center>
+      <v-dialog v-model="fileDialog" scrollable width="500">
+        <!--v-layout row>
+          <v-flex xs12-->
+        <v-card>
+          <v-card-title class="file-open-header">Open ...</v-card-title>
+          <v-card-title>
+            <v-spacer></v-spacer>
+            <v-text-field
+              v-model="fileDialogSearch"
+              append-icon="search"
+              label="Filter by title or schema"
+              single-line
+              hide-details
+            ></v-text-field>
+          </v-card-title>
+          <v-data-table :headers="fileDialogHeaders" :items="fileDialogList" :search="fileDialogSearch">
+            <v-divider></v-divider>
+            <template slot="items" slot-scope="props" height="300">
+              <td class="text-xs-left"
+                  v-on:click="fileDialogClick(props.item.name, props.item.schemaId, props.item.xmlText)">
+                {{props.item.name}}
+              </td>
+              <td class="text-xs-left"
+                  v-on:click="fileDialogClick(props.item.name, props.item.schemaId, props.item.xmlText)">
+                {{props.item.schema}}
+              </td>
+            </template>
+            <v-alert slot="no-results" :value="true" color="error" icon="warning">
+              Your search for "{{ fileDialogSearch }}" found no results.
+            </v-alert>
+          </v-data-table>
+          <v-divider></v-divider>
+          <v-card-actions class="file-open-footer">
+            <v-btn color="primary" @click.native="fileDialog = false">Cancel</v-btn>
+          </v-card-actions>
+        </v-card>
+        <!--/v-flex>
+      </v-layout-->
+      </v-dialog>
+    </v-layout>
+    <v-layout row justify-center>
+      <v-dialog v-model="settingsDialog" persistent max-width="290">
         <!--v-btn slot="activator" color="primary" dark>Open Dialog</v-btn-->
         <v-card>
-          <v-card-title>Select File to Open</v-card-title>
-          <v-divider></v-divider>
-          <v-card-text style="height: 300px;">
-            <v-radio-group v-model="fileDialogItem" column>
-              <v-radio v-for="(item, idx) in fileDialogList"
-                       :key="idx"
-                       :label="item"
-                       :value="idx"
-                       v-on:change="fileDialogRadio (idx)"
-              ></v-radio>
-            </v-radio-group>
-          </v-card-text>
-          <v-divider></v-divider>
+          <v-card-title class="headline">NanoMine Editor Settings</v-card-title>
+          <v-card-text>Editor settings</v-card-text>
           <v-card-actions>
-            <v-btn color="blue darken-1" flat @click.native="fileDialog = false">Cancel</v-btn>
-            <v-btn color="blue darken-1" flat @click.native="fileOpen()">Open</v-btn>
+            <v-spacer></v-spacer>
+            <v-btn color="green darken-1" flat @click.native="settingsDialog = false">Cancel</v-btn>
+            <v-btn color="green darken-1" flat @click.native="settingsDialog = false">Save</v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
     </v-layout>
     <!--/><-->
-    <v-container fluid justify-start fill-height>
-      <!--img :src="imageUrl" height="150" v-if="imageUrl"/>
-      <v-btn flat icon color="primary" @click.native='pickFile()'>
-        <v-icon>attach_file</v-icon>
-      </v-btn>
-      <input
-        type="file"
-        style="display: none"
-        ref="image"
-        multiple
-        accept=".zip, .xlsx,.xls, image/*"
-        @change="onFilePicked"
-      >
-      <v-list>
-        <v-list-tile
-          v-for="(v, idx) in filesToUpload"
-          :key="idx"
-        >
-          <v-list-tile-content>
-            <v-list-tile-title v-text="v"></v-list-tile-title>
-          </v-list-tile-content>
-        </v-list-tile>
-      </v-list-->
+    <v-container v-bind:style="{'display': xmlInView}" fluid justify-start fill-height>
       <v-layout row wrap align-start fill-height>
         <v-flex fill-height xs12>
           <div id="editor" ref="editor"></div>
+        </v-flex>
+      </v-layout>
+    </v-container>
+    <v-container v-bind:style="{'display': formInView}" fluid justify-start fill-height>
+      <v-layout row wrap align-start fill-height>
+        <v-flex fill-height xs12 align-start justify-start>
+          <div id="feditor" ref="feditor">
+            <div>
+              <tree-view style="text-align: left;" :data="jsonSource" @change-data="treeViewUpdated"
+                         :options="{maxDepth: 99, rootObjectKey: 'PolymerNanocomposite', modifiable: true}"></tree-view>
+            </div>
+          </div>
         </v-flex>
       </v-layout>
     </v-container>
@@ -147,31 +264,46 @@ import {} from 'vuex'
 import CodeMirror from '@/utils/codemirror'
 import Axios from 'axios'
 import vkbeautify from 'vkbeautify'
+import * as jxParser from 'fast-xml-parser'
 
 export default {
   name: 'Editor',
   data: function () {
     return {
       msg: '<untitled>',
+      jsonSource: {'PolymerNanocomposite': {}},
+      openOrCreateDialog: false,
+      openOrCreateTabs: ['Open Existing', 'Create New'],
+      openLatestSchema: true,
+      openID: '',
+      settingsDialog: false,
       editorError: false,
       editorErrorMsg: '',
+      editorValidated: false,
+      editorValidatedMessage: '',
       content: null,
       xml_text: '<PolymerNanocomposite>\n</PolymerNanocomposite>',
-      view: 'xml',
+      view: 'form',
+      fileDialogSearch: '',
+      fileDialogHeaders: [
+        {text: 'Title', align: 'left', value: 'name'},
+        {text: 'Schema', align: 'left', value: 'schema'}
+      ],
       fileDialog: false,
       fileDialogItem: -1, // the value of the radio button selected
-      fileDialogList: [], // list to use for radio button item names
+      fileDialogList: [], // list to use for open item names
       loadFile: false,
-      fileMenu: [
-        'Explore',
+      saveMenuActive: false,
+      saveMenu: [
+        // 'Explore',
         'Publish',
-        'Import',
+        // 'Import',
         'Export'
       ],
-      fileMenuOps: [
-        this.fileExplore,
+      saveMenuOps: [
+        // this.fileExplore,
         this.filePublish,
-        this.fileImport,
+        // this.fileImport,
         this.fileExport
       ],
       dialog: false, // testing file upload
@@ -202,16 +334,16 @@ export default {
       },
       extraKeys: {
         'Ctrl-J': 'toMatchingTag',
-        /* "Cmd-B": vm.beautify,
-          "Ctrl-B": vm.beautify,
-          "Cmd-Z": vm.undo,
-          "Ctrl-Z": vm.undo,
-          "Shift-Cmd-Z": vm.redo,
-          "Shift-Ctrl-Z": vm.redo, */
-        "'<'": vm.completeAfter,
-        "'/'": vm.completeIfAfterLt,
-        "' '": vm.completeIfInTag,
-        "'='": vm.completeIfInTag
+        'Cmd-B': vm.beautify,
+        'Ctrl-B': vm.beautify,
+        /* "Cmd-Z": vm.undo,
+                "Ctrl-Z": vm.undo,
+                "Shift-Cmd-Z": vm.redo,
+                "Shift-Ctrl-Z": vm.redo, */
+        '\'<\'': vm.completeAfter,
+        '\'/\'': vm.completeIfAfterLt,
+        '\' \'': vm.completeIfInTag,
+        '\'=\'': vm.completeIfInTag
         // "Cmd-C": "autocomplete",
         // "Ctrl-C": "autocomplete"
       },
@@ -225,19 +357,207 @@ export default {
       ]
 
     })
+    CodeMirror.autoLoadHelperStylesheet(vm.content, 'fold', 'foldgutter')
+    CodeMirror.autoLoadHelperStylesheet(vm.content, 'hint', 'show-hint')
+    CodeMirror.autoLoadHelper(vm.content, 'fold', 'foldcode')
+    CodeMirror.autoLoadHelper(vm.content, 'fold', 'foldgutter')
+    CodeMirror.autoLoadHelper(vm.content, 'fold', 'xml-fold')
+    CodeMirror.autoLoadHelper(vm.content, 'edit', 'matchtags')
+    CodeMirror.autoLoadHelper(vm.content, 'hint', 'show-hint')
+    CodeMirror.autoLoadHelper(vm.content, 'hint', 'xml-hint')
+    CodeMirror.autoLoadMode(vm.content, 'xml')
+
     vm.refreshEditor()
+    vm.refreshForm()
+    vm.content.on('changes', function (cm, changes) {
+      vm.xmlEditorOnChanges(cm, changes)
+    })
+    vm.content.on('blur', function (cm, event) {
+      vm.xmlEditorOnBlur(cm, event)
+    })
   },
   computed: {
+    formInView: function () {
+      let vm = this
+      let rv = 'none'
+      if (vm.view === 'form') {
+        rv = 'flex'
+      }
+      return rv
+    },
+    xmlInView: function () {
+      let vm = this
+      let rv = 'none'
+      if (vm.view === 'xml') {
+        rv = 'flex'
+      }
+      return rv
+    },
     showFileName: function () {
       let vm = this
       let fn = vm.$store.getters.editorFileName
       if (fn !== '<untitled>') {
         fn = fn.toUpperCase()
       }
-      return (fn)
+      return fn
+    },
+    editorSchemaName: function () {
+      let vm = this
+      let rv = ''
+      let schemaName = vm.$store.getters.editorSchemaName
+      if (schemaName && schemaName.length > 0) {
+        rv = ' (schema: ' + schemaName + ')'
+      }
+      return rv
     }
   },
   methods: {
+    log: function (msg) {
+      window.console.log(msg)
+    },
+    xmlEditorOnChanges: function (cm, changes) {
+      // let vm = this
+      // console.log('xmleditor on change: store the editor data into the central storage. WELL, NO. Probably BLUR instead.')
+    },
+    xmlEditorOnBlur: function (cm, event) {
+      let vm = this
+      console.log('xmleditor on blur: store the editor data into the central storage...')
+      console.log(event)
+      let ec = vm.content.getValue()
+      vm.$store.commit('editorUpdateXml', ec)
+      setTimeout(vm.refreshForm(), 0) // let commit finish storing before the refresh tries to obtain data
+    },
+    fileDialogClick: function (name, schemaId, xmlText) {
+      let vm = this
+      console.log('fileDialogClick name: ' + name + ' schemaId: ' + schemaId)
+      vm.$store.commit('newEditorTab', {'name': name, 'xmlText': vkbeautify.xml(xmlText, 1), 'schemaId': schemaId}) // no schema yet :(
+      // console.log(tabNumber)
+      // if default is XML vm.refreshEditor()
+      // default is form
+      vm.jsonSource = jxParser.parse(xmlText)
+      setTimeout(function () {
+        let vals = document.getElementsByClassName('tree-view-item-value')
+        // console.log('transform: found ' + vals.length + ' input elements.')
+        for (let i = 0; i < vals.length; ++i) { // can't use forEach on dom nodes
+          vals[i].setAttribute('size', '240')
+        }
+      }, 500) // vm.$nextTick was not sufficient for some reason
+
+      vm.fileDialog = false
+    },
+    // validateButton: function () {
+    //   let vm = this
+    //   // let xml = vm.$store.getters.editorXmlText
+    //   // let xsd = vm.$store.getters.editorSchemaText
+    //   let errors = null
+    //   if (errors) {
+    //     vm.editorError = true
+    //     vm.editorErrorMsg = JSON.stringify(errors)
+    //   } else {
+    //     vm.editorValidated = true
+    //     vm.editorValidatedMsg = 'Validation Successful'
+    //   }
+    // },
+    clickedOpenIdSearch: function () {
+      let vm = this
+      vm.log('clicked ID')
+      vm.openOrCreateDialog = false // close dialog box
+      vm.setLoading()
+      let xsdUrl = '/nmr/templates/versions/select/allactive'
+      let xmlUrl = '/nmr/explore/select'
+      vm.fileDialogList = []
+      setTimeout(function () {
+        Axios.get(xsdUrl)
+          .then(function (response) {
+            console.log(response)
+            let j2xOptions = {
+              attributeNamePrefix: '@_',
+              attrNodeName: 'attr', // default is 'false'
+              textNodeName: '#text',
+              ignoreAttributes: false,
+              ignoreNameSpace: false,
+              allowBooleanAttributes: false,
+              parseNodeValue: true,
+              parseAttributeValue: true,
+              trimValues: true,
+              cdataTagName: '__cdata', // default is 'false'
+              cdataPositionChar: '\\c',
+              localeRange: '', // To support non english character in tag/attribute values.
+              parseTrueNumberOnly: false
+              // attrValueProcessor: a => he.decode(a, {isAttributeValue: true}),//default is a=>a
+              // tagValueProcessor : a => he.decode(a) //default is a=>a
+            }
+            response.data.data.forEach(function (v, idx) {
+              response.data.data[idx].currentRef[0].contentJson = jxParser.parse(response.data.data[idx].currentRef[0].content, j2xOptions)
+              console.log(JSON.stringify(response.data.data[idx].currentRef[0].contentJson))
+            })
+            vm.$store.commit('addSchemas', response.data.data) // could allow this to be cached, but for now just get it done
+            // NOTE: state is not updated until next tick, so continue to use request.data.data in this method :(
+            let criteria = '/' + vm.openID + '/'
+            console.log('vm.openID: ' + vm.openID)
+            let schemas = []
+            if (vm.openLatestSchema) { // TODO -- see todo in store/index.js method editorLatestSchemaId
+              // let latestSchemaId = vm.$store.getters.editorLatestSchemaId
+              // if (latestSchemaId) {
+              //   schemas.push(vm.$store.getters.editorLatestSchemaId)
+              // }
+              schemas.push({
+                'id': response.data.data[0].currentRef[0]._id,
+                'title': response.data.data[0].currentRef[0].title
+              })
+            } else {
+              // schemas = vm.$store.getters.editorSchemaIds
+              response.data.data.forEach(function (v) {
+                schemas.push({'id': v.currentRef[0]._id, 'title': v.currentRef[0].title})
+              })
+            }
+            let params = {'params': {'title': criteria}}
+            if (schemas.length > 0) {
+              let s = []
+              schemas.forEach(function (v) {
+                s.push(v.id)
+              })
+              let ss = s.join(',')
+              console.log('schemas: ' + JSON.stringify(ss))
+              params = {'params': {'title': criteria, 'schemas': ss}}
+              console.log('params: ' + JSON.stringify(params))
+            }
+            Axios.get(xmlUrl, params)
+              .then(function (response) {
+                console.log(response)
+                response.data.data.forEach(function (v) {
+                  v.id = v.title.replace('.xml', '')
+                  v.xmlText = v.content
+                  schemas.forEach(function (s) {
+                    if (s.id === v.schema) {
+                      v.schemaName = s.title
+                      v.schemaId = s.id
+                    }
+                  })
+                  vm.fileDialogList.push({
+                    'value': false,
+                    'name': v.id,
+                    'schema': v.schemaName,
+                    'schemaId': v.schemaId,
+                    'xmlText': v.xmlText
+                  })
+                })
+                vm.resetLoading()
+                vm.fileDialog = true
+              })
+              .catch(function (err) {
+                vm.resetLoading()
+                vm.editorErrorMsg = err
+                vm.editorError = true
+              })
+          })
+          .catch(function (err) {
+            vm.resetLoading()
+            vm.editorErrorMsg = err
+            vm.editorError = true
+          })
+      }, 500)
+    },
     setLoading: function () {
       this.$store.commit('isLoading')
     },
@@ -246,60 +566,41 @@ export default {
     },
     testButton: function () {
       let vm = this
-      let url = '/nmr/test1'
-      // let url = 'http://localhost:3000'
-      vm.setLoading()
-      return Axios.get(url)
-        .then(function (response) {
-          console.log(response)
-          if (response.data.head !== null) {
-            vm.xml_text = JSON.stringify(response.data.results.bindings)
-          }
-          vm.refreshEditor()
-          vm.resetLoading()
-        })
-        .catch(function (err) {
-          vm.resetLoading()
-          vm.fetchError = err
-          console.log(err)
-          // alert(err)
-          vm.editorErrorMsg = err
-          vm.editorError = true
-        })
+      console.log(vm.msg + ' testButton() clicked')
     },
     test2Button: function () {
       let vm = this
-      let url = '/nmr/fullgraph'
-      vm.setLoading()
-      return Axios.get(url)
-        .then(function (response) {
-          console.log(response.data)
-          console.log(response.data.results.bindings.length)
-          // let x = []
-          // response.data.results.bindings.forEach(function (v) {
-          //   let sampleID = v.sample.value.split('/').pop()
-          //   console.log(sampleID + ' ' + v.sample.value)
-          //   sampleList.push({'uri': v.sample.value, 'id': sampleID})
-          // })
-          // vm.$store.commit('sampleList')
-          setTimeout(function () {
-            vm.resetLoading()
-          }, 1000)
-        })
-        .catch(function (err) {
-          vm.resetLoading()
-          vm.fetchError = err
-          console.log(err)
-          vm.editorErrorMsg = err
-          vm.editorError = true
-        })
+      console.log(vm.msg + ' test2Button() clicked')
+    },
+    showSaveMenu: function () {
+      let vm = this
+      return vm.saveMenuActive
+    },
+    saveButton: function () {
+      let vm = this
+      vm.saveMenuActive = true
+    },
+    settingsButton: function () {
+      let vm = this
+      vm.settingsDialog = true
+    },
+    treeViewUpdated: function (data) {
+      let vm = this
+      let Parser = jxParser.j2xParser
+      let parser = new Parser()
+      let newXml = parser.parse(data)
+      // console.log(newXml)
+      vm.$store.commit('editorUpdateXml', newXml)
     },
     transformButton: function () {
       let vm = this
       if (vm.view === 'xml') {
+        // let ec = vm.getEditorContent()
+        vm.refreshForm()
         vm.view = 'form'
       } else {
         vm.view = 'xml'
+        vm.refreshEditor()
       }
     },
     infoButton: function () {
@@ -314,17 +615,31 @@ export default {
     //   console.log(ev.target.tagName + ' x: ' + ev.screenX + ' y: ' + ev.screenY)
     //   vm.showFileMenu = true
     // },
+    canAddTab: function () {
+      let vm = this
+      let rv = false
+      console.log(vm.msg + ' canAddTab()')
+      let tabCount = vm.$store.getters.editorTabCount
+      if (tabCount < 5) {
+        rv = true
+      }
+      return rv
+    },
+
+    addTabButton: function () {
+      this.openOrCreateDialog = true
+    },
     fileButton: function (idx, ev) {
       let vm = this
-      console.log('hi fileButton ' + idx + ' = ' + vm.fileMenu[idx])
+      console.log('hi fileButton ' + idx + ' = ' + vm.saveMenu[idx])
       console.log(ev.target.tagName + ' x: ' + ev.screenX + ' y: ' + ev.screenY)
-      vm.showFileMenu = false
-      vm.fileMenuOps[idx].apply(vm)
+      vm.saveMenuActive = false
+      vm.saveMenuOps[idx].apply(vm)
     },
     fileDialogRadio: function (idx) {
       console.log('idx: ' + idx)
     },
-    fileOpen: function () {
+    fileOpen: function () { // TODO this function will not be used -- remove
       // should probably pass index
       let vm = this
       if (vm.fileDialogItem >= 0) {
@@ -336,7 +651,7 @@ export default {
         console.log('no file selected')
       }
     },
-    fileLoad: function (fileNm) {
+    fileLoad: function (fileNm) { // TODO this function will not be used -- remove after extracting some behavior i.e. refactor
       let vm = this
       let url = '/nmr/sample/' + fileNm
       // load sample for now. Need more params to denote type
@@ -345,7 +660,7 @@ export default {
       return Axios.get(url)
         .then(function (response) {
           vm.xml_text = vkbeautify.xml(response.data.data.xml, 1)
-          vm.$store.commit('newEditorTab', {'name': fileNm, 'xmlText': vm.xml_text, 'schemaText': null}) // no schema yet :(
+          vm.$store.commit('newEditorTab', {'name': fileNm, 'xmlText': vm.xml_text, 'schemaIndex': -1}) // no schema yet :(
           // console.log(tabNumber)
           vm.refreshEditor()
           vm.resetLoading()
@@ -359,8 +674,13 @@ export default {
           vm.resetLoading()
         })
     },
+
+    fileSelectSchema: function () { // get the schema versions and select a schema
+    },
     fileExplore: function () {
       let vm = this
+      // let tvurl = '/nmr/templates/versions/select/all'
+      // let tsurl = '/nmr/templates/select'
       let url = '/nmr/explore/select'
       console.log('fileExplore!')
       vm.setLoading()
@@ -429,36 +749,36 @@ export default {
     },
     refreshButton: function () {
       let vm = this
-      let url = '/nmr'
-      // let url = 'http://localhost:3000'
       vm.setLoading()
-      return Axios.get(url)
-        .then(function (response) {
-          vm.xml_text = vkbeautify.xml(response.data.xml, 1)
-          vm.refreshEditor()
-          setTimeout(function () {
-            vm.resetLoading()
-          }, 1000)
-        })
-        .catch(function (err) {
-          vm.fetchError = err
-          console.log(err)
-          // alert(err)
-          vm.editorErrorMsg = err
-          vm.editorError = true
-          vm.resetLoading()
-        })
+      console.log('refreshButton() pressed')
+      setTimeout(function () {
+        vm.resetLoading()
+      }, 1000)
     },
     getEditorContent: function () {
       // this is really not a good way to do this and is TEMPORARY! TODO
       let vm = this
       return vm.content.getValue()
     },
-    refreshEditor: function () {
+    refreshForm: function () {
+      let vm = this
+      let xml = vkbeautify.xml(vm.$store.getters.editorXmlText, 1)
+      // console.log('refreshForm xml: ' + xml)
+      vm.jsonSource = jxParser.parse(xml) // always returns a valid xml value (default if none opened)
+      setTimeout(function () {
+        let vals = document.getElementsByClassName('tree-view-item-value')
+        // console.log('transform: found ' + vals.length + ' input elements.')
+        for (let i = 0; i < vals.length; ++i) { // can't use forEach on dom nodes
+          vals[i].setAttribute('size', '240')
+        }
+      }, 500) // vm.$nextTick was not sufficient for some reason
+    },
+    refreshEditor: function (newCursorPos) {
       let vm = this
       // let tabNumber = vm.$store.getters.currentEditorTab
       // if (tabNumber && typeof tabNumber === 'number' && tabNumber >= 0) {
-      vm.content.setValue(vm.$store.getters.editorXmlText)
+      let xmlText = vkbeautify.xml(vm.$store.getters.editorXmlText, 1)
+      vm.content.setValue(xmlText)
       // }
       // vm.content.setValue('<xml></xml>')
       vm.content.setSize('100%', '100%')
@@ -466,18 +786,22 @@ export default {
         vm.content.refresh()
         vm.content.execCommand('goDocStart')
         vm.content.clearHistory()
+        if (newCursorPos) {
+          setTimeout(function () {
+            vm.content.setCursor(newCursorPos)
+          }, 0)
+        }
       }, 0)
     },
     pickFile () {
       this.$refs.image.click()
     },
 
-    onFilePicked: function (e) {
+    onFilePicked: function (e) { // credit to stack overflow
       let vm = this
       const files = e.target.files
       if (files !== undefined) {
-        let v = null
-        for (v = 0; v < files.length; ++v) {
+        for (let v = 0; v < files.length; ++v) {
           console.log('file selected: ' + files[v].name)
           vm.filesToUpload.push(files[v].name)
         }
@@ -491,7 +815,86 @@ export default {
       } else {
         vm.filesToUpload = []
       }
+    },
+    tabModified: function () {
+      return true
+    },
+    hasNextTab: function () {
+      let vm = this
+      let rv = false
+      console.log(vm.msg + ' hasNextTab()')
+      let tabNumber = vm.$store.getters.currentEditorTab
+      // if (tabNumber && typeof tabNumber === 'number' && tabNumber >= 0) {
+      let tabCount = vm.$store.getters.editorTabCount
+      if (tabNumber !== -1 && tabNumber < (tabCount - 1)) {
+        rv = true
+      }
+      return rv
+    },
+    hasPrevTab: function () {
+      let vm = this
+      let rv = false
+      console.log(vm.msg + ' hasPrevTab()')
+      let tabNumber = vm.$store.getters.currentEditorTab
+      // if (tabNumber && typeof tabNumber === 'number' && tabNumber >= 0) {
+      let tabCount = vm.$store.getters.editorTabCount
+      if (tabNumber !== -1 && tabNumber < tabCount) {
+        rv = true
+      }
+      return rv
+    },
+    nextTabButton: function () {
+      let vm = this
+      console.log(vm.msg + ' nextTabButton()')
+    },
+    prevTabButton: function () {
+      let vm = this
+      console.log(vm.msg + ' prevTabButton()')
+    },
+    newEditorTab: function (isXsd, schemaId, title, filename) {
+      // { schemaId: null, xmlTitle: null, isXsd: false }
+
+    },
+    createXmlModeSchema: function (schema) { // TODO fix schema
+      // The xmlmode schema is required by the xml hint code to allow hinting
+      //   for xml entry.
+      let vm = this
+      let xmlList = {}
+
+      function buildListFromTree (xmlList, srcElem) {
+        xmlList[srcElem.name] = {
+          attrs: null,
+          children: []
+        } // default to leaf
+        srcElem.elements.forEach(function (v) { // if there are elements, then fill in children
+          xmlList[srcElem.name].children.push(v.name)
+          buildListFromTree(xmlList, v)
+        })
+      }
+      // $.when schema loaded
+      if (this === false) {
+        console.log(schema)
+        // only handling tip of tree - no siblings allowed
+        var root = schema.originatingRoot.elements[0]
+        xmlList['!top'] = [root.name]
+        xmlList['!attrs'] = null
+        // load the tree using the names of the elements as keys
+        let srcElem = root
+        buildListFromTree(xmlList, srcElem)
+        vm.state.xmlSchemaList = xmlList
+      }
+    },
+    beautify: function () {
+      let vm = this
+      console.log('Beautify!')
+      let xmlContent = vm.content.getValue()
+      let savePos = vm.content.getCursor()
+      vm.$store.commit('editorUpdateXml', xmlContent)
+      setTimeout(function () {
+        vm.refreshEditor(savePos)
+      }, 0)
     }
+
   }
 }
 </script>
@@ -510,12 +913,28 @@ export default {
     max-height: 100%;
     padding-bottom: 32px;
   }
-
+  .editor-toolbar {
+    padding-top: 10px;
+  }
   .editor-save {
     font-size: 24px;
     display: inline-flex;
     vertical-align: bottom;
     padding-bottom: 2px;
+  }
+
+  .file-open-header {
+    background-color: #03A9F4;
+    color: #ffffff;
+    font-size: 22px;
+    font-weight: bold;
+  }
+
+  .file-open-footer {
+    background-color: #03A9F4;
+    color: #000000;
+    font-size: 22px;
+    font-weight: bold;
   }
 
   h1 {

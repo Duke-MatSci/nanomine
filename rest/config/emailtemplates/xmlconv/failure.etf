@@ -1,0 +1,16 @@
+<br/>Hello ${user},
+
+<br/>Unfortunately, your conversion job ${jobid} was not successful.
+
+<br/>job result code: ${jobinfo.resultcode}
+
+<br/>error messages:
+
+${jobinfo.errormsg}
+
+<br/>Please visit <a href="https://nanomine.org/joboutput/${jobid}">your job output</a> for more information
+
+<br/>
+Regards,
+<br/>The NanoMine team
+<br/>

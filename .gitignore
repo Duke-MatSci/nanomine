@@ -18,5 +18,6 @@ yarn-error.log*
 *.njsproj
 *.sln
 *.pyc
-package-lock.json
-rest/package-lock.json
+**/nanomine.log*
+**/package-lock.json
+

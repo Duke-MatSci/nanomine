@@ -7,17 +7,8 @@
 import os
 import sys
 import json
-
-import logging # this should be done by a wrapper in the future
-sloglevel=os.environ['NM_LOGLEVEL']
-loglevel = logging.DEBUG
-try:
-  loglevel = getattr(logging, sloglevel.upper())
-except:
-  pass
-
-logging.basicConfig(filename=os.environ['NM_LOGFILE'], level=loglevel)
-
+import urllib2
+from nm.common import *
 
 logging.info('nanomine environment keys: ')
 for key in os.environ.keys():
@@ -44,4 +35,34 @@ logging.info(pgmName + ' input files: ')
 myfiles = os.listdir(jobDir)
 for f in myfiles:
   print('  ' + f)
+
+# example sending error template (rough cut)
+# for now the email just goes into the rest server log file: nanomine/rest/nanomine.log.gz (log file name will get fixed soon)
+# templates are in rest/config/emailtemplates/JOBTYPE/TEMPLATENAME.etf (etf extension is required, but implied in POST data)
+try:
+  emailurl = 'http://localhost/nmr/jobemail'
+  logging.info('emailurl: ' + emailurl)
+  emaildata = {
+    "jobid": jobId,
+    "jobtype": jobType,
+    "emailtemplatename": "failure",
+    "emailvars": {
+      "jobinfo": {
+        "resultcode":21
+      },
+      "user": str(inputParameters['user'])
+    }
+  }
+  print('email data: %s' % emaildata)
+  #logging.info('emaildata: ' + json.dumps(emaildata))
+  rq = urllib2.Request(emailurl)
+  logging.info('request created using emailurl')
+  rq.add_header('Content-Type','application/json')
+  r = urllib2.urlopen(rq, json.dumps(emaildata))
+  logging.info('sent failure email: ' + str(r.getcode()))
+except:
+  logging.info('exception occurred')
+  logging.info('exception: ' + str(sys.exc_info()[0]))
+
+
 
