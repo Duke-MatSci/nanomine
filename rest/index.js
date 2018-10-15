@@ -443,7 +443,7 @@ app.get('/explore/select', function (req, res) {
   }
 })
 function validCuratedDataState (curatedDataState) {
-  let validStates = ['editedNotValid', 'editedValid', 'valid', 'notValid', 'ingest', 'ingestFailed', 'ingestSuccess']
+  let validStates = ['EditedNotValid', 'EditedValid', 'Valid', 'NotValid', 'Ingest', 'IngestFailed', 'IngestSuccess']
   return validStates.includes(curatedDataState)
 }
 app.post('/curate', function (req, res) {
@@ -568,6 +568,7 @@ app.post('/dataset/update', function (req, res) {
 })
 app.post('/dataset/create', function (req, res) {
   // TODO dataset needs a unique index on seq to ensure there are no dups
+  // TODO dataset also needs a unique index on DOI to ensure that DOIs are not dup'd
   let jsonResp = {'error': null, 'data': null}
   let dsInfo = req.body.dsInfo
   Datasets.find({}).sort({'seq': 1}).exec(function (err, docs) {
