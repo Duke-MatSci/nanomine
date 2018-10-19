@@ -61,13 +61,13 @@ export default {
       return {x, y}
     },
     updateSvg: function () {
-      let vm = this
+      // let vm = this
+      let parseTime = d3.timeParse('%Y%m%d')
       let svg = d3.select('svg')
       let margin = {top: 20, right: 80, bottom: 30, left: 50}
       let width = svg.attr('width') - margin.left - margin.right
       let height = svg.attr('height') - margin.top - margin.bottom
       let g = svg.append('g').attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
-      // var parseTime = d3.timeParse('%Y%m%d')
 
       let x = d3.scaleTime().range([0, width])
       let y = d3.scaleLinear().range([height, 0])
@@ -79,14 +79,14 @@ export default {
         .y(function (d) { return y(d.temperature) })
 
       try {
-        let typ = vm.getType
-        d3.tsv('/cdn/data.tsv', typ, function (error, data) {
+        d3.tsv('/cdn/data.tsv', function (data) {
           console.log(data)
-          if (error) {
-            console.log('tsv conversion error: ' + JSON.stringify(error))
-            throw error
-          }
-
+          data['date'] = parseTime(data['date'])
+          data['New York'] = +(data['New York'])
+          data['San Francisco'] = +(data['San Francisco'])
+          data['Austin'] = +(data['Austin'])
+          return data
+        }).then(function (data) {
           let cities = data.columns.slice(1).map(function (id) {
             return {
               id: id,
@@ -163,22 +163,6 @@ export default {
       } catch (err) {
         console.log(err)
       }
-    },
-    getType: function (d, /*_,*/ columns) {
-      console.log('getType: ' + d)
-      try {
-        let parseTime = d3.timeParse('%Y%m%d') // parseTime(d.date)
-        d.date = parseTime(d.date)
-        for (let i = 1, n = columns.length, c; i < n; ++i) {
-          console.log(columns[i])
-          d[c = columns[i]] = +d[c]
-        }
-      } catch (err) {
-        console.log('getType throwing ' + err)
-        throw err
-      }
-      console.log('getType returning: ' + JSON.stringify(d))
-      return d
     },
     calculatePath: function () {
       let vm = this
