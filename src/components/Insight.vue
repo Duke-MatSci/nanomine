@@ -14,9 +14,9 @@
       <v-layout>
         <v-flex xs12>
           <svg class="line-graph">
-            <g style="transform: translate(0, 10px)">
+            <!--g style="transform: translate(0, 10px)">
               <path class="line-path" :d="line" />
-            </g>
+            </g-->
           </svg>
         </v-flex>
         <v-flex xs-3>
@@ -60,14 +60,135 @@ export default {
       y.domain([0, d3.max(vm.lineData, d => d)])
       return {x, y}
     },
+    updateSvg: function () {
+      let vm = this
+      let svg = d3.select('svg')
+      let margin = {top: 20, right: 80, bottom: 30, left: 50}
+      let width = svg.attr('width') - margin.left - margin.right
+      let height = svg.attr('height') - margin.top - margin.bottom
+      let g = svg.append('g').attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
+      // var parseTime = d3.timeParse('%Y%m%d')
+
+      let x = d3.scaleTime().range([0, width])
+      let y = d3.scaleLinear().range([height, 0])
+      let z = d3.scaleOrdinal(d3.schemeCategory10)
+
+      let line = d3.line()
+        .curve(d3.curveBasis)
+        .x(function (d) { return x(d.date) })
+        .y(function (d) { return y(d.temperature) })
+
+      try {
+        let typ = vm.getType
+        d3.tsv('/cdn/data.tsv', typ, function (error, data) {
+          console.log(data)
+          if (error) {
+            console.log('tsv conversion error: ' + JSON.stringify(error))
+            throw error
+          }
+
+          let cities = data.columns.slice(1).map(function (id) {
+            return {
+              id: id,
+              values: data.map(function (d) {
+                return {date: d.date, temperature: d[id]}
+              })
+            }
+          })
+
+          x.domain(d3.extent(data, function (d) {
+            return d.date
+          }))
+
+          y.domain([
+            d3.min(cities, function (c) {
+              return d3.min(c.values, function (d) {
+                return d.temperature
+              })
+            }),
+            d3.max(cities, function (c) {
+              return d3.max(c.values, function (d) {
+                return d.temperature
+              })
+            })
+          ])
+
+          z.domain(cities.map(function (c) {
+            return c.id
+          }))
+
+          g.append('g')
+            .attr('class', 'axis axis--x')
+            .attr('transform', 'translate(0,' + height + ')')
+            .call(d3.axisBottom(x))
+
+          g.append('g')
+            .attr('class', 'axis axis--y')
+            .call(d3.axisLeft(y))
+            .append('text')
+            .attr('transform', 'rotate(-90)')
+            .attr('y', 6)
+            .attr('dy', '0.71em')
+            .attr('fill', '#000')
+            .text('Temperature, ºF')
+
+          let city = g.selectAll('.city')
+            .data(cities)
+            .enter().append('g')
+            .attr('class', 'city')
+
+          city.append('path')
+            .attr('class', 'line')
+            .attr('d', function (d) {
+              return line(d.values)
+            })
+            .style('stroke', function (d) {
+              return z(d.id)
+            })
+
+          city.append('text')
+            .datum(function (d) {
+              return {id: d.id, value: d.values[d.values.length - 1]}
+            })
+            .attr('transform', function (d) {
+              return 'translate(' + x(d.value.date) + ',' + y(d.value.temperature) + ')'
+            })
+            .attr('x', 3)
+            .attr('dy', '0.35em')
+            .style('font', '10px sans-serif')
+            .text(function (d) {
+              return d.id
+            })
+        })
+      } catch (err) {
+        console.log(err)
+      }
+    },
+    getType: function (d, /*_,*/ columns) {
+      console.log('getType: ' + d)
+      try {
+        let parseTime = d3.timeParse('%Y%m%d') // parseTime(d.date)
+        d.date = parseTime(d.date)
+        for (let i = 1, n = columns.length, c; i < n; ++i) {
+          console.log(columns[i])
+          d[c = columns[i]] = +d[c]
+        }
+      } catch (err) {
+        console.log('getType throwing ' + err)
+        throw err
+      }
+      console.log('getType returning: ' + JSON.stringify(d))
+      return d
+    },
     calculatePath: function () {
       let vm = this
-      const scale = vm.getScales()
+      vm.updateSvg()
+      /* const scale = vm.getScales()
       const path = d3.line()
         .x((d, i) => scale.x(i))
         .y(d => scale.y(d))
       vm.line = path(vm.lineData)
-      console.log('calculated path.')
+      console.log('calculated path.') */
     }
   }
 }
