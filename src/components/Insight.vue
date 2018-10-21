@@ -81,7 +81,7 @@ export default {
       try {
         d3.tsv('/cdn/data.tsv', function (data) {
           Object.keys(data).forEach(function (v) {
-            if (v==='date') {
+            if (v === 'date') {
               data['date'] = parseTime(data['date'])
             } else {
               data[v] = +(data[v])
