@@ -80,11 +80,14 @@ export default {
 
       try {
         d3.tsv('/cdn/data.tsv', function (data) {
+          Object.keys(data).forEach(function (v) {
+            if (v==='date') {
+              data['date'] = parseTime(data['date'])
+            } else {
+              data[v] = +(data[v])
+            }
+          })
           console.log(data)
-          data['date'] = parseTime(data['date'])
-          data['New York'] = +(data['New York'])
-          data['San Francisco'] = +(data['San Francisco'])
-          data['Austin'] = +(data['Austin'])
           return data
         }).then(function (data) {
           let cities = data.columns.slice(1).map(function (id) {
