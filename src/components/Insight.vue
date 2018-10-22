@@ -13,7 +13,7 @@
     <v-container>
       <v-layout>
         <v-flex xs12>
-          <svg class="line-graph">
+          <svg class="line-graph" ref="svg">
             <!--g style="transform: translate(0, 10px)">
               <path class="line-path" :d="line" />
             </g-->
@@ -61,111 +61,8 @@ export default {
       return {x, y}
     },
     updateSvg: function () {
-      // let vm = this
-      let parseTime = d3.timeParse('%Y%m%d')
-      let svg = d3.select('svg')
-      let margin = {top: 20, right: 80, bottom: 30, left: 50}
-      let width = svg.attr('width') - margin.left - margin.right
-      let height = svg.attr('height') - margin.top - margin.bottom
-      let g = svg.append('g').attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
-
-      let x = d3.scaleTime().range([0, width])
-      let y = d3.scaleLinear().range([height, 0])
-      let z = d3.scaleOrdinal(d3.schemeCategory10)
-
-      let line = d3.line()
-        .curve(d3.curveBasis)
-        .x(function (d) { return x(d.date) })
-        .y(function (d) { return y(d.temperature) })
-
-      try {
-        d3.tsv('/cdn/data.tsv', function (data) {
-          Object.keys(data).forEach(function (v) {
-            if (v === 'date') {
-              data['date'] = parseTime(data['date'])
-            } else {
-              data[v] = +(data[v])
-            }
-          })
-          console.log(data)
-          return data
-        }).then(function (data) {
-          let cities = data.columns.slice(1).map(function (id) {
-            return {
-              id: id,
-              values: data.map(function (d) {
-                return {date: d.date, temperature: d[id]}
-              })
-            }
-          })
-
-          x.domain(d3.extent(data, function (d) {
-            return d.date
-          }))
-
-          y.domain([
-            d3.min(cities, function (c) {
-              return d3.min(c.values, function (d) {
-                return d.temperature
-              })
-            }),
-            d3.max(cities, function (c) {
-              return d3.max(c.values, function (d) {
-                return d.temperature
-              })
-            })
-          ])
-
-          z.domain(cities.map(function (c) {
-            return c.id
-          }))
-
-          g.append('g')
-            .attr('class', 'axis axis--x')
-            .attr('transform', 'translate(0,' + height + ')')
-            .call(d3.axisBottom(x))
-
-          g.append('g')
-            .attr('class', 'axis axis--y')
-            .call(d3.axisLeft(y))
-            .append('text')
-            .attr('transform', 'rotate(-90)')
-            .attr('y', 6)
-            .attr('dy', '0.71em')
-            .attr('fill', '#000')
-            .text('Temperature, ºF')
-
-          let city = g.selectAll('.city')
-            .data(cities)
-            .enter().append('g')
-            .attr('class', 'city')
-
-          city.append('path')
-            .attr('class', 'line')
-            .attr('d', function (d) {
-              return line(d.values)
-            })
-            .style('stroke', function (d) {
-              return z(d.id)
-            })
-
-          city.append('text')
-            .datum(function (d) {
-              return {id: d.id, value: d.values[d.values.length - 1]}
-            })
-            .attr('transform', function (d) {
-              return 'translate(' + x(d.value.date) + ',' + y(d.value.temperature) + ')'
-            })
-            .attr('x', 3)
-            .attr('dy', '0.35em')
-            .style('font', '10px sans-serif')
-            .text(function (d) {
-              return d.id
-            })
-        })
-      } catch (err) {
-        console.log(err)
-      }
+      let vm = this
+      vm.chart(d3, document.body, vm.width, vm.height, vm.xAxis, vm.yAxis, vm.data, vm.line, vm.hover)
     },
     calculatePath: function () {
       let vm = this
@@ -176,6 +73,151 @@ export default {
         .y(d => scale.y(d))
       vm.line = path(vm.lineData)
       console.log('calculated path.') */
+    },
+    chart: function (d3, DOM, width, height, xAxis, yAxis, data, line, hover) {
+      let vm = this
+      // let mydata = d3.data
+      let mySvg = vm.$refs['svg']
+      const svg = d3.select(mySvg)
+      svg.attr('height', height)
+      svg.attr('width', width)
+
+      svg.append('g')
+        .call(xAxis)
+
+      svg.append('g')
+        .call(yAxis)
+
+      let dataObj = vm.svgdata(d3)
+      const path = svg.append('g')
+        .attr('fill', 'none')
+        .attr('stroke', 'steelblue')
+        .attr('stroke-width', 1.5)
+        .attr('stroke-linejoin', 'round')
+        .attr('stroke-linecap', 'round')
+        .selectAll('path')
+        .data(dataObj)
+        .enter().append('path')
+        .style('mix-blend-mode', 'multiply')
+        .attr('d', d => line(d.values))
+
+      svg.call(hover, path)
+
+      return svg.node()
+    },
+
+    hover: function (y, d3, x, data) {
+      return (
+        function hover (svg, path) {
+          svg.style('position', 'relative')
+            .on('mousemove touchmove', moved)
+            .on('mouseenter touchstart', entered)
+            .on('mouseleave touchend', left)
+
+          const dot = svg.append('g')
+            .attr('display', 'none')
+
+          dot.append('circle')
+            .attr('r', 2.5)
+
+          dot.append('text')
+            .style('font', '10px sans-serif')
+            .attr('text-anchor', 'middle')
+            .attr('y', -8)
+
+          function moved () {
+            const ym = y.invert(d3.event.layerY)
+            const xm = x.invert(d3.event.layerX)
+            const i1 = d3.bisectLeft(data.dates, xm, 1)
+            const i0 = i1 - 1
+            const i = xm - data.dates[i0] > data.dates[i1] - xm ? i1 : i0
+            const s = data.series.reduce((a, b) => Math.abs(a.values[i] - ym) < Math.abs(b.values[i] - ym) ? a : b)
+            path.attr('stroke', d => d === s ? null : '#ddd').filter(d => d === s).raise()
+            dot.attr('transform', `translate(${x(data.dates[i])},${y(s.values[i])})`)
+            dot.select('text').text(s.name)
+          }
+
+          function entered () {
+            path.style('mix-blend-mode', null).attr('stroke', '#ddd')
+            dot.attr('display', null)
+          }
+
+          function left () {
+            path.style('mix-blend-mode', 'multiply').attr('stroke', null)
+            dot.attr('display', 'none')
+          }
+        }
+      )
+    },
+    height: function () {
+      return (
+        600
+      )
+    },
+    width: function () {
+      return 800
+    },
+    margin: function () {
+      return (
+        {top: 20, right: 20, bottom: 30, left: 40}
+      )
+    },
+    x: function (d3, data, margin, width) {
+      return (
+        d3.scaleTime()
+          .domain(d3.extent(data.dates))
+          .range([margin.left, width - margin.right])
+      )
+    },
+    y: function (d3, data, height, margin) {
+      return (
+        d3.scaleLinear()
+          .domain([0, d3.max(data.series, d => d3.max(d.values))]).nice()
+          .range([height - margin.bottom, margin.top])
+      )
+    },
+    xAxis: function (height, margin, d3, x, width) {
+      return (
+        g => g
+          .attr('transform', `translate(0,${height - margin.bottom})`)
+          .call(d3.axisBottom(x).ticks(width / 80).tickSizeOuter(0))
+      )
+    },
+    yAxis: function (margin, d3, y, data) {
+      return (
+        g => g
+          .attr('transform', `translate(${margin.left},0)`)
+          .call(d3.axisLeft(y))
+          .call(g => g.select('.domain').remove())
+          .call(g => g.select('.tick:last-of-type text').clone()
+            .attr('x', 3)
+            .attr('text-anchor', 'start')
+            .attr('font-weight', 'bold')
+            .text(data.y))
+      )
+    },
+    line: function (d3, x, data, y) {
+      return (
+        d3.line()
+          .defined(d => !isNaN(d))
+          .x((d, i) => x(data.dates[i]))
+          .y(d => y(d))
+      )
+    },
+    svgdata: async function (d3) {
+      const data = await d3.tsv('https://gist.githubusercontent.com' +
+        '/mbostock/8033015/raw' +
+        '/01e8225d4a65aca6c759fe4b8c77179f446c5815/unemployment.tsv', (d, i, columns) => {
+        return {
+          name: d.name.replace(/, ([\w-]+).*/, ' $1'),
+          values: columns.slice(1).map(k => +d[k])
+        }
+      })
+      return {
+        y: '% Unemployment',
+        series: data,
+        dates: data.columns.slice(1).map(d3.timeParse('%Y-%m'))
+      }
     }
   }
 }
@@ -190,7 +232,6 @@ export default {
   h4 {
     text-transform: uppercase;
   }
-
   .mainheading { /* class of large text in jumbotron*/
     font-size: 40px;
     color: white;
