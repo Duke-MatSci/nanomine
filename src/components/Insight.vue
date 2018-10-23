@@ -136,7 +136,7 @@ export default {
         path.attr('stroke', d => d === s ? null : '#ddd').filter(d => d === s).raise()
         let xVal = vm.x2(vm.dataObj.dates[i]) // x(vm.dataObj.dates[i])
         let yVal = vm.y2(s.values[i]) // y(s.values[i])
-        console.log('xm: ' + xm + ' xVal: ' + xVal(xm) + ' ym: ' + ym + ' yVal: ' + yVal(ym) + ' s.name: ' + s.name)
+        // console.log('xm: ' + xm + ' xVal: ' + xVal(xm) + ' ym: ' + ym + ' yVal: ' + yVal(ym) + ' s.name: ' + s.name)
         dot.attr('transform', `translate(${xVal(xm)},${yVal(ym)})`)
         dot.select('text').text(s.name)
       }
@@ -169,7 +169,7 @@ export default {
         .then(function (dataObj) {
           vm.dataObj = dataObj
           window.dataObj = dataObj
-          console.log(dataObj)
+          // console.log(dataObj)
           let mySvg = vm.$refs['svg']
           const svg = d3.select(mySvg)
           svg.attr('height', height)
