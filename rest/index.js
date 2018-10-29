@@ -1,5 +1,6 @@
 /* NanoMine REST server */
 const axios = require('axios')
+const https = require('https')
 const util = require('util')
 const pathModule = require('path')
 const express = require('express')
@@ -35,12 +36,13 @@ let nmWebFilesRoot = process.env['NM_WEBFILES_ROOT']
 let nmJobDataDir = process.env['NM_JOB_DATA']
 let nmLocalRestBase = process.env['NM_LOCAL_REST_BASE']
 
-let agentOptions = { // allow localhost https without knowledge of CA TODO - install ca cert on node - low priority
+let httpsAgentOptions = { // allow localhost https without knowledge of CA TODO - install ca cert on node - low priority
   host: 'localhost',
   port: '443',
-  path: '/',
+  path: '/sparql',
   rejectUnauthorized: false
 }
+let httpsAgent = new https.Agent(httpsAgentOptions) 
 
 let smtpTransport = null
 if (sendEmails) {
@@ -939,7 +941,7 @@ function postSparql (callerpath, query, req, res) {
     'method': 'post',
     'url': url,
     'data': data,
-    'agent': agentOptions
+    'agent': httpsAgent
     // 'headers': {'Content-type': 'application/json'},
   })
     .then(function (response) {
@@ -962,7 +964,7 @@ function postSparql2 (callerpath, query, req, res, cb) {
     'method': 'post',
     'url': url,
     'data': data,
-    'agent': agentOptions
+    'agent': httpsAgent
     // 'headers': {'Content-type': 'application/json'},
   })
     .then(function (response) {
