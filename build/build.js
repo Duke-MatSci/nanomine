@@ -51,5 +51,13 @@ rm(path.join(config.build.assetsRoot, config.build.assetsSubDirectory), err => {
       .catch(function(error){
         console.error('Directory copy failed (Build is OK, but copy for Whyis failed): ' + error)
       })
+    console.log(chalk.cyan('Copying ./dist/nanomine.html to ./dist/index.html'))
+    cp('./dist/nanomine.html','./dist/index.html', {'overwrite':true} )
+      .then(function(results) {
+        console.info('Copied ' + results.length + ' files')
+      })
+      .catch(function(error){
+        console.error('Copy of ./dist/nanomine.html to ./dist/index.html failed: ' + error)
+      })
   })
 })

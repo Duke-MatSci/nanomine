@@ -73,6 +73,7 @@ app.use('/files', express.static(nmWebFilesRoot, {
   index: false,
   redirect: false
 }))
+app.use('/nm', express.static('../dist'))
 
 let shortUUID = require('short-uuid')() // https://github.com/oculus42/short-uuid (npm i --save short-uuid)
 function inspect (theObj) {
@@ -443,9 +444,14 @@ app.get('/explore/select', function (req, res) {
   }
 })
 function validCuratedDataState (curatedDataState) {
-  let validStates = ['editedNotValid', 'editedValid', 'valid', 'notValid', 'ingest', 'ingestFailed', 'ingestSuccess']
+  let validStates = ['EditedNotValid', 'EditedValid', 'Valid', 'NotValid', 'Ingest', 'IngestFailed', 'IngestSuccess']
   return validStates.includes(curatedDataState)
 }
+function matchValidXmlTitle (title) {
+  let rv = title.match(/^[A-Z]([0-9]+)[_][S]([0-9]+)[_][\S]+[_]\d{4}[.][Xx][Mm][Ll]$/) // e.g. L183_S12_Poetschke_2003.xml
+  return rv
+}
+
 app.post('/curate', function (req, res) {
   let jsonResp = {'error': null, 'data': null}
   // TODO need to keep prior versions of XML by using a version number in the record
@@ -454,53 +460,50 @@ app.post('/curate', function (req, res) {
   let content = req.body.content
   // NOTE: setting curatedDataState to anything past editedPassedVerify requires admin level authority
   let curatedDataState = req.body.curatedDataState // editedFailedVerify, editedPassedVerify (not trusted), triggers system validation
+  let curateState = 'Edit' // Insert/update xml always returns to edit for now - TODO authz may change that
   let msg = `/curate - title: ${title} schemaId: ${schemaId} `
-  if (validCuratedDataState(curatedDataState)) {
+  if (validCuratedDataState(curatedDataState)) { // TODO validCuratedDataState should be authz driven
     // check schema id
-    XsdSchema.findById(schemaId, function (err, xsdRec) {
-      if (err) {
-        jsonResp.error = err
-        return res.status(400).json(jsonResp)
-      } else if (xsdRec === null) {
-        jsonResp.error = {'statusCode': 404, 'statusText': 'not found'}
-        return res.status(404).json(jsonResp)
-      } else {
-        // ensure that there is an associated dataset record
-        // ensure that the title matches spec
-        let m = title.match(/^[A-Z]([0-9]+)[_][S]([0-9]+)[_][\S]+[_]\d{4}[.][Xx][Mm][Ll]$/) // e.g. L183_S12_Poetschke_2003.xml
-        if (m) {
-          let dsSeq = m[1]
-          // look up the dataset to ensure that it exists
-          let dsQuery = {'seq': dsSeq}
-          Datasets.find(dsQuery, function (err, docs) {
-            if (err || docs.length === 0) {
-              jsonResp.err = 'unable to find associated dataset: ' + dsSeq + ' err: ' + err
-              console.log(msg + ' ' + jsonResp.err)
-              return res.status(400).json(jsonResp)
-            } else {
-              // upsert the data to curate
-              let xmlQuery = {'title': title, 'schemaId': schemaId}
-              let theData = {'title': title, 'schemaId': schemaId, 'entityState': curatedDataState, 'xml_str': content}
-              XmlData.findOneAndUpdate(xmlQuery, theData, {'upsert': true}, function (err, doc) {
-                if (err) {
-                  jsonResp.error = err
-                  return res.status(500).json(jsonResp)
-                }
-                return res.status(201).json(jsonResp)
-              })
-            }
-          })
-        } else {
-          jsonResp.error = 'title does not meet standard: ' + title
+    let m = matchValidXmlTitle(title) // e.g. L183_S12_Poetschke_2003.xml
+    if (m) {
+      let dsSeq = m[1]
+      // look up the dataset to ensure that it exists
+      let dsQuery = {'seq': dsSeq}
+      Datasets.find(dsQuery, function (err, docs) {
+        if (err || docs.length === 0) {
+          jsonResp.err = 'unable to find associated dataset: ' + dsSeq + ' err: ' + err
+          console.log(msg + ' ' + jsonResp.err)
           return res.status(400).json(jsonResp)
+        } else {
+          // upsert the data to curate
+          let xmlQuery = {'title': title, 'schemaId': schemaId}
+          let theData = {'title': title,
+            'schemaId': schemaId,
+            'entityState': curatedDataState,
+            'dsSeq': dsSeq,
+            'ispublished': false,
+            'iduser': 2, // TODO fix this in migrate to use userId and when verify user authz
+            'curateState': curateState,
+            'xml_str': content}
+          XmlData.findOneAndUpdate(xmlQuery, theData, {'upsert': true}, function (err, doc) {
+            if (err) {
+              jsonResp.error = err
+              return res.status(500).json(jsonResp)
+            }
+            return res.status(201).json(jsonResp)
+          })
         }
-      }
-    })
+      })
+    } else {
+      jsonResp.error = 'title does not meet standard: ' + title
+      return res.status(400).json(jsonResp)
+    }
   } else {
     jsonResp.error = 'error - curatedDataState: ' + curatedDataState + ' is not a valid state.'
     return res.status(400).json(jsonResp)
   }
 })
+
 app.get('/dataset', function (req, res) {
   let jsonResp = {'error': null, 'data': null}
   let id = req.query.id
@@ -554,7 +557,7 @@ app.post('/dataset/update', function (req, res) {
   let dsUpdate = req.body.dsUpdate
   let dsSeq = req.body.dsSeq
   console.log('datataset/update: doing update...' + JSON.stringify(dsUpdate))
-  Datasets.findOneAndUpdate({'seq': dsSeq}, {$set: dsUpdate},{}, function (err, oldDoc) {
+  Datasets.findOneAndUpdate({'seq': dsSeq}, {$set: dsUpdate}, {}, function (err, oldDoc) {
     if (err) {
       jsonResp.error = err
       console.log('datataset/update: error - ' + err)
@@ -568,6 +571,7 @@ app.post('/dataset/update', function (req, res) {
 })
 app.post('/dataset/create', function (req, res) {
   // TODO dataset needs a unique index on seq to ensure there are no dups
+  // TODO dataset also needs a unique index on DOI to ensure that DOIs are not dup'd
   let jsonResp = {'error': null, 'data': null}
   let dsInfo = req.body.dsInfo
   Datasets.find({}).sort({'seq': 1}).exec(function (err, docs) {
