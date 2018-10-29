@@ -73,6 +73,7 @@ app.use('/files', express.static(nmWebFilesRoot, {
   index: false,
   redirect: false
 }))
+app.use('/nm', express.static('../dist'))
 
 let shortUUID = require('short-uuid')() // https://github.com/oculus42/short-uuid (npm i --save short-uuid)
 function inspect (theObj) {
