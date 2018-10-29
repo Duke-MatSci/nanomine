@@ -73,7 +73,22 @@ app.use('/files', express.static(nmWebFilesRoot, {
   index: false,
   redirect: false
 }))
-app.use('/nm', express.static('../dist'))
+// app.use('/nm', express.static('../dist'))
+app.get('/nm', function (req, res) {
+  let idx = '../dist/index.html'
+  console.log('headers: ' + JSON.stringify(req.headers))
+  try {
+  let html = fs.readFile(idx, 'utf8', function (err, data) {
+    if (err) {
+      res.status(400).send('cannot open index')
+    } else {
+      res.send(data)
+    }
+  })
+  } catch (err) {
+    res.status(404).send(err)
+  } 
+})
 
 let shortUUID = require('short-uuid')() // https://github.com/oculus42/short-uuid (npm i --save short-uuid)
 function inspect (theObj) {
