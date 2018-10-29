@@ -19,7 +19,7 @@ const nodemailer = require('nodemailer')
 
 // TODO calling next(err) results in error page rather than error code in json
 
-const ObjectId = mongoose.Types.ObjectId
+// const ObjectId = mongoose.Types.ObjectId
 
 let logger = configureLogger()
 logger.info('NanoMine REST server version ' + config.version + ' starting')
@@ -34,6 +34,13 @@ let emailAdminAddr = process.env['NM_SMTP_ADMIN_ADDR']
 let nmWebFilesRoot = process.env['NM_WEBFILES_ROOT']
 let nmJobDataDir = process.env['NM_JOB_DATA']
 let nmLocalRestBase = process.env['NM_LOCAL_REST_BASE']
+
+let agentOptions = { // allow localhost https without knowledge of CA TODO - install ca cert on node - low priority
+  host: 'localhost',
+  port: '443',
+  path: '/',
+  rejectUnauthorized: false
+}
 
 let smtpTransport = null
 if (sendEmails) {
@@ -931,7 +938,8 @@ function postSparql (callerpath, query, req, res) {
   return axios({
     'method': 'post',
     'url': url,
-    'data': data
+    'data': data,
+    'agent': agentOptions
     // 'headers': {'Content-type': 'application/json'},
   })
     .then(function (response) {
@@ -953,7 +961,8 @@ function postSparql2 (callerpath, query, req, res, cb) {
   return axios({
     'method': 'post',
     'url': url,
-    'data': data
+    'data': data,
+    'agent': agentOptions
     // 'headers': {'Content-type': 'application/json'},
   })
     .then(function (response) {
