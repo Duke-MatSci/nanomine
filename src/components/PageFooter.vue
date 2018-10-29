@@ -2,7 +2,7 @@
   <v-footer app class="footer" v-if="show()">
     <v-flex align-center>
     &copy; 2014-{{ new Date().getFullYear() }} NanoMine &nbsp;|&nbsp; <router-link to="/privacy-policy">Privacy Policy</router-link>
-    &nbsp;|&nbsp; <a href="https://security.duke.edu/node/82">Terms of Use</a>
+    &nbsp;|&nbsp; <a href="https://security.duke.edu/node/82" target="_blank">Terms of Use</a>
     &nbsp;|&nbsp; <router-link to="/help">Help</router-link>
     &nbsp;|&nbsp; <router-link to="/contact">Contact</router-link>
     </v-flex>

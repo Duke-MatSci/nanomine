@@ -42,7 +42,7 @@ let httpsAgentOptions = { // allow localhost https without knowledge of CA TODO 
   path: '/sparql',
   rejectUnauthorized: false
 }
-let httpsAgent = new https.Agent(httpsAgentOptions) 
+let httpsAgent = new https.Agent(httpsAgentOptions)
 
 let smtpTransport = null
 if (sendEmails) {
@@ -941,7 +941,7 @@ function postSparql (callerpath, query, req, res) {
     'method': 'post',
     'url': url,
     'data': data,
-    'agent': httpsAgent
+    'httpsAgent': httpsAgent
     // 'headers': {'Content-type': 'application/json'},
   })
     .then(function (response) {
@@ -964,7 +964,7 @@ function postSparql2 (callerpath, query, req, res, cb) {
     'method': 'post',
     'url': url,
     'data': data,
-    'agent': httpsAgent
+    'httpsAgent': httpsAgent
     // 'headers': {'Content-type': 'application/json'},
   })
     .then(function (response) {
