@@ -16,6 +16,8 @@ const mongoose = require('mongoose')
 const templateFiller = require('es6-dynamic-template')
 const _ = require('lodash')
 const nodemailer = require('nodemailer')
+const moment = require('moment')
+
 // TODO calling next(err) results in error page rather than error code in json
 
 const ObjectId = mongoose.Types.ObjectId
@@ -32,6 +34,7 @@ let emailTestAddr = process.env['NM_SMTP_TEST_ADDR']
 let emailAdminAddr = process.env['NM_SMTP_ADMIN_ADDR']
 let nmWebFilesRoot = process.env['NM_WEBFILES_ROOT']
 let nmJobDataDir = process.env['NM_JOB_DATA']
+let nmLocalRestBase = process.env['NM_LOCAL_REST_BASE']
 
 let smtpTransport = null
 if (sendEmails) {
@@ -76,18 +79,19 @@ app.use('/files', express.static(nmWebFilesRoot, {
 // app.use('/nm', express.static('../dist'))
 app.get('/nm', function (req, res) {
   let idx = '../dist/index.html'
-  console.log('headers: ' + JSON.stringify(req.headers))
+  // console.log('headers: ' + JSON.stringify(req.headers))
+  // handleLogin(req.headers)
   try {
-  let html = fs.readFile(idx, 'utf8', function (err, data) {
-    if (err) {
-      res.status(400).send('cannot open index')
-    } else {
-      res.send(data)
-    }
-  })
+    fs.readFile(idx, 'utf8', function (err, data) {
+      if (err) {
+        res.status(400).send('cannot open index')
+      } else {
+        res.send(data)
+      }
+    })
   } catch (err) {
     res.status(404).send(err)
-  } 
+  }
 })
 
 let shortUUID = require('short-uuid')() // https://github.com/oculus42/short-uuid (npm i --save short-uuid)
@@ -132,13 +136,21 @@ let datasetsSchema = new mongoose.Schema({
   keyword: [String], /* Keywords. NOTE: some are multi-word */
   publisher: String, /* publisher */
   publicationYear: Number, /* 2005, etc. */
-  doi: String, /* DOI or other unique assigned handle -- can be missing or null */
+  doi: String, /* DOI or other unique assigned handle -- must be unique */
   volume: Number, /* 1-12 for monthly, could be others for weekly, semi-monthly, etc */
   url: String, /* Best url to access paper, book, etc */
   language: String, /* English, etc */
   seq: Number /* Unique index constraint, but not forced to monotonic -- required field (set by create) */
 }, {collection: 'datasets'})
 let Datasets = mongoose.model('datasets', datasetsSchema)
+
+let usersSchema = new mongoose.Schema({
+  alias: String, // random unless overridden by user - not used for attribution, only display
+  user: Number, // user number
+  userId: String,
+  email: String
+}, {collection: 'users'})
+let Users = mongoose.model('users', usersSchema)
 
 let xmlDataSchema = new mongoose.Schema({ // maps the mongo xmldata collection
   schemaId: String, /* !!! NOTE: had to rename 'schema' field name in restored data from MDCS to schemaId because of mongoose name conflict
@@ -914,7 +926,7 @@ app.get('/', function (req, res) {
 })
 
 function postSparql (callerpath, query, req, res) {
-  let url = '/sparql'
+  let url = nmLocalRestBase + '/sparql'
   let jsonResp = {'error': null, 'data': null}
   let data = qs.stringify({'query': query.trim().replace(/[\n]/g, ' ')})
   return axios({
@@ -936,7 +948,7 @@ function postSparql (callerpath, query, req, res) {
     })
 }
 function postSparql2 (callerpath, query, req, res, cb) {
-  let url = '/sparql'
+  let url = nmLocalRestBase + '/sparql'
   // let jsonResp = {'error': null, 'data': null}
   let data = qs.stringify({'query': query.trim().replace(/[\n]/g, ' ')})
   return axios({
