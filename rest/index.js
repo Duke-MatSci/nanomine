@@ -16,7 +16,6 @@ const mongoose = require('mongoose')
 const templateFiller = require('es6-dynamic-template')
 const _ = require('lodash')
 const nodemailer = require('nodemailer')
-const moment = require('moment')
 
 // TODO calling next(err) results in error page rather than error code in json
 
