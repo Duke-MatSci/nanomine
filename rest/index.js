@@ -17,7 +17,7 @@ const mongoose = require('mongoose')
 const templateFiller = require('es6-dynamic-template')
 const _ = require('lodash')
 const nodemailer = require('nodemailer')
-// const jwtBase = require('jsonwebtoken')
+const jwtBase = require('jsonwebtoken')
 const jwt = require('express-jwt')
 const authGate = require('express-jwt-permissions')
 
@@ -103,7 +103,9 @@ app.get('/nm', function (req, res) {
   // NOTE: For now, login is required to get to the site. TODO change login so that it is optional to access protected functions
   let remoteUser = req.headers['remote_user']
   let shibExpiration = +(req.headers['shib-session-expires'])
-  jwt.sign({'sub': remoteUser, 'exp': shibExpiration}, nmAuthSecret)
+  let jwToken = jwtBase.sign({'sub': remoteUser, 'exp': shibExpiration}, nmAuthSecret)
+  res.headers['Authorization'] = 'Bearer ' + jwToken
+  console.log('Bearer token: ' + res.headers['Authorization'])
   try {
     fs.readFile(idx, 'utf8', function (err, data) {
       if (err) {
