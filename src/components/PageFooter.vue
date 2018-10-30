@@ -4,7 +4,6 @@
     &copy; 2014-{{ new Date().getFullYear() }} NanoMine
     &nbsp;|&nbsp; <a href="https://oarc.duke.edu/privacy/duke-university-privacy-statement" target="_blank">Privacy Policy</a>
     &nbsp;|&nbsp; <a href="https://security.duke.edu/node/82" target="_blank">Terms of Use</a>
-    &nbsp;|&nbsp; <router-link to="/help">Help</router-link>
     &nbsp;|&nbsp; <router-link to="/contact">Contact</router-link>
     </v-flex>
   </v-footer>
