@@ -17,7 +17,7 @@ const mongoose = require('mongoose')
 const templateFiller = require('es6-dynamic-template')
 const _ = require('lodash')
 const nodemailer = require('nodemailer')
-const jwtBase = require('jsonwebtoken')
+// const jwtBase = require('jsonwebtoken')
 const jwt = require('express-jwt')
 const authGate = require('express-jwt-permissions')
 
@@ -39,7 +39,7 @@ let nmWebFilesRoot = process.env['NM_WEBFILES_ROOT']
 let nmJobDataDir = process.env['NM_JOB_DATA']
 let nmLocalRestBase = process.env['NM_LOCAL_REST_BASE']
 let nmAuthSecret = process.env['NM_AUTH_SECRET']
-let nmAuthEnabled = process.env['NM_AUTH_ENABLED']
+let nmAuthEnabled = process.env['NM_AUTH_ENABLED'].toLowerCase() === 'yes'
 let nmAuthType = process.env['NM_AUTH_TYPE']
 
 let httpsAgentOptions = { // allow localhost https without knowledge of CA TODO - install ca cert on node - low priority
@@ -100,6 +100,10 @@ app.get('/nm', function (req, res) {
   let idx = '../dist/index.html'
   // console.log('headers: ' + JSON.stringify(req.headers))
   // handleLogin(req.headers)
+  // NOTE: For now, login is required to get to the site. TODO change login so that it is optional to access protected functions
+  let remoteUser = req.headers['remote_user']
+  let shibExpiration = +(req.headers['shib-session-expires'])
+  jwt.sign({'sub': remoteUser, 'exp': shibExpiration}, nmAuthSecret)
   try {
     fs.readFile(idx, 'utf8', function (err, data) {
       if (err) {
@@ -394,7 +398,11 @@ app.get('/templates/select', function (req, res) {
   }
 })
 
-app.get('/explore/select', function (req, res) {
+app.get('/explore/select', jwt({secret: nmAuthSecret}), function (req, res) {
+  console.log(req.path + ' user: ' + JSON.stringify(req.user))
+  // jwt.verify(token, 'shhhhh', function(err, decoded) {
+  //   console.log(decoded.foo) // bar
+  // })
   let jsonResp = {'error': null, 'data': null}
   let id = req.query.id
   let schema = req.query.schema
@@ -1028,7 +1036,7 @@ app.post('/xml', function (req, res) { // initial testing of post xml file to na
   headers['Content-Length'] = contentLen
   url = url + theType + '/' + req.body.filename.replace(/['_']/g, '-').replace(/.xml$/, '').toLowerCase()
   console.log('request info - outbound post url: ' + url + '  form data: ' + inspect(form))
-  if (theType && typeof theType === 'string' && theName && typeof theName === 'string') {
+  if (false && theType && typeof theType === 'string' && theName && typeof theName === 'string') { // DISABLED! TODO remove this service
     theName = theName.replace(/['_']/g, '-')
     return axios({
       'method': 'post',

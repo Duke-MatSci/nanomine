@@ -15,8 +15,8 @@
 #
 # Be sure to CHANGE DEFAULT PASSWORDS AND SECRETS
 #
-export NM_AUTH_ENABLED="no"
-export NM_AUTH_TYPE="local"
+export NM_AUTH_ENABLED="no" # no or yes
+export NM_AUTH_TYPE="local" # local or shib-proxy
 export NM_AUTH_SECRET="SOME_RANDOM_STRING" # CHANGE this for your installation - NOW!
 
 export NM_MONGO_PORT=27017

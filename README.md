@@ -94,6 +94,7 @@ NanoMine Nanocomposites Data Resource
   tar zxvf mgi.tgz
   /apps/nanomine/rest/restore_and_migrate.sh  
     
+  # NOTE: REST server logging now goes into /var/log/syslog  
   cd nanomine/rest
   npm i # install packages needed by rest server
   sudo cp /apps/nanomine/install/nm-rest.service /etc/systemd/system
