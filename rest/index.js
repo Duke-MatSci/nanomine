@@ -400,8 +400,9 @@ app.get('/templates/select', function (req, res) {
   }
 })
 
-app.get('/explore/select', jwt({secret: nmAuthSecret}), function (req, res) {
-  console.log(req.path + ' user: ' + JSON.stringify(req.user))
+app.get('/explore/select', function (req, res) {
+  console.log(req.path + '  user: ' + req.headers['remote_user'])
+  // console.log(req.path + ' user: ' + JSON.stringify(req.user))
   // jwt.verify(token, 'shhhhh', function(err, decoded) {
   //   console.log(decoded.foo) // bar
   // })
@@ -933,26 +934,26 @@ where {
 
 /* Visualization related requests - end */
 
-app.get('/', function (req, res) {
-  let ID = 'TestData_' + shortUUID.new()
-  let query = 'a query'
-  let xml = `
-    <PolymerNanocomposite>
-     <ID>${ID}</ID>
-    </PolymerNanocomposite>
-    `
-  xml = xml.trim()
-
-  let jsonData = {
-    xml: xml,
-    xmlLen: xml.length,
-    query: query,
-    queryLen: query.length
-
-  }
-  console.log('session cookie: ' + req.cookies['session'])
-  res.json(jsonData)
-})
+// app.get('/', function (req, res) {
+//   let ID = 'TestData_' + shortUUID.new()
+//   let query = 'a query'
+//   let xml = `
+//     <PolymerNanocomposite>
+//      <ID>${ID}</ID>
+//     </PolymerNanocomposite>
+//     `
+//   xml = xml.trim()
+//
+//   let jsonData = {
+//     xml: xml,
+//     xmlLen: xml.length,
+//     query: query,
+//     queryLen: query.length
+//
+//   }
+//   console.log('session cookie: ' + req.cookies['session'])
+//   res.json(jsonData)
+// })
 
 function postSparql (callerpath, query, req, res) {
   let url = nmLocalRestBase + '/sparql'
