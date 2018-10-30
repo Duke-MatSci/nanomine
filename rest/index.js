@@ -104,8 +104,8 @@ app.get('/nm', function (req, res) {
   let remoteUser = req.headers['remote_user']
   let shibExpiration = +(req.headers['shib-session-expires'])
   let jwToken = jwtBase.sign({'sub': remoteUser, 'exp': shibExpiration}, nmAuthSecret)
-  res.headers['Authorization'] = 'Bearer ' + jwToken
-  console.log('Bearer token: ' + res.headers['Authorization'])
+  res.set('Authorization', 'Bearer ' + jwToken)
+  console.log('Bearer token: ' + res.get('Authorization'))
   try {
     fs.readFile(idx, 'utf8', function (err, data) {
       if (err) {
