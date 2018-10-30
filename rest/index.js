@@ -17,6 +17,9 @@ const mongoose = require('mongoose')
 const templateFiller = require('es6-dynamic-template')
 const _ = require('lodash')
 const nodemailer = require('nodemailer')
+const jwtBase = require('jsonwebtoken')
+const jwt = require('express-jwt')
+const authGate = require('express-jwt-permissions')
 
 // TODO calling next(err) results in error page rather than error code in json
 
@@ -35,6 +38,9 @@ let emailAdminAddr = process.env['NM_SMTP_ADMIN_ADDR']
 let nmWebFilesRoot = process.env['NM_WEBFILES_ROOT']
 let nmJobDataDir = process.env['NM_JOB_DATA']
 let nmLocalRestBase = process.env['NM_LOCAL_REST_BASE']
+let nmAuthSecret = process.env['NM_AUTH_SECRET']
+let nmAuthEnabled = process.env['NM_AUTH_ENABLED']
+let nmAuthType = process.env['NM_AUTH_TYPE']
 
 let httpsAgentOptions = { // allow localhost https without knowledge of CA TODO - install ca cert on node - low priority
   host: 'localhost',
@@ -84,6 +90,11 @@ app.use('/files', express.static(nmWebFilesRoot, {
   index: false,
   redirect: false
 }))
+app.use(jwt({
+  secret: nmAuthSecret,
+  credentialsRequired: false
+}))
+
 // app.use('/nm', express.static('../dist'))
 app.get('/nm', function (req, res) {
   let idx = '../dist/index.html'

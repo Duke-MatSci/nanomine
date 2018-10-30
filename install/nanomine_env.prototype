@@ -5,17 +5,19 @@
 #    Do this instead: diff /apps/nanomine/install/nanomine_env.prototype /apps/nanomine_env
 #    The above command will show the differences to highlight what has changed since the file was updated
 #    DON'T overwrite the file -- you might lose access to your database and need to re-install/reload -- very inconvenient!
+#    BACKUP /apps/nanomine_env before making changes using a cmd like 'cp /apps/nanomine_env /apps/nanomine_env.bkp'
 # First time only:
 #   copy this file to /apps/nanomine_env
 # On updates -- heed the warning above and only copy new/changed variables as appropriate
 #
 # chmod og-rw /apps/nanomine_env
-#   the above cmd removes read-write access for 'others' and 'group' making the file private
+#   --> the above cmd removes read-write access for 'others' and 'group' making the file private for the user
 #
-# Be sure to CHANGE DEFAULT PASSWORDS
+# Be sure to CHANGE DEFAULT PASSWORDS AND SECRETS
 #
 export NM_AUTH_ENABLED="no"
 export NM_AUTH_TYPE="local"
+export NM_AUTH_SECRET="SOME_RANDOM_STRING" # CHANGE this for your installation - NOW!
 
 export NM_MONGO_PORT=27017
 export NM_MONGO_HOST=localhost
@@ -37,7 +39,7 @@ export NM_LOCAL_REST_BASE="http://localhost"
 
 export NM_SMTP_SERVER="myemailserver"
 export NM_SMTP_PORT="587" # other fields will be needed if not local server, but for now this is adequate
-export NM_SMTP_TEST="true"  # set this to true and emails will go into the log for testing instead of sending
+export NM_SMTP_TEST="true" # set this to true and emails will go into the log for testing instead of sending
 export NM_SMTP_REST_URL="http://localhost/nmr/jobemail"
 export NM_SMTP_ADMIN_ADDR="adminuser@example.com"
 export NM_SMTP_TEST_ADDR="testuser@example.com"
