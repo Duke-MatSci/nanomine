@@ -47,11 +47,21 @@ logging.info(pgmName + ' input files: ')
 myfiles = os.listdir(jobDir)
 for f in myfiles:
   print('  ' + f)
+  #check file type and set appropriate flag for MATLAB
+  if f.endswith(".zip"):
+    input_type = '2'
+    input_name = f
+  elif f.endswith(".mat"):
+    input_type = '3'
+    input_name = f
+  elif f.endswith((".jpg",".png",".tif")):
+    input_type = '1'
+    input_name = f
 
 matlabPgm = 'Otsu' # .m is implied, test mode will use python pgm
 mlab = matlab(logging) # create matlab object
 
-matlabPgmParams = ('param1', 'param2')
+matlabPgmParams = (input_type,input_name)
 
 rc = mlab.run(userId, jobId, jobType, jobSrcDir, jobDir, webBaseUri, jobDataUriSuffix, matlabPgm, matlabPgmParams)
 print('MATLAB return code - rc: ' + str(rc))
@@ -75,7 +85,7 @@ if rc == 0: # send success email
       }
     }
     print('email data: %s' % emaildata)
-    #logging.info('emaildata: ' + json.dumps(emaildata))
+    logging.info('emaildata: ' + json.dumps(emaildata))
     rq = urllib2.Request(emailurl)
     logging.info('request created using emailurl')
     rq.add_header('Content-Type','application/json')
@@ -99,7 +109,7 @@ else: # send error email
       }
     }
     print('email data: %s' % emaildata)
-    #logging.info('emaildata: ' + json.dumps(emaildata))
+    logging.info('emaildata: ' + json.dumps(emaildata))
     rq = urllib2.Request(emailurl)
     logging.info('request created using emailurl')
     rq.add_header('Content-Type','application/json')
