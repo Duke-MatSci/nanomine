@@ -13,7 +13,7 @@ try
     % %% Specify import function according to input option
     switch str2num(input_type)
         case 1
-            %img = imread([path_to_read,file_name]); % read the incming target and store pixel values
+            img = imread([path_to_read,file_name]); % read the incming target and store pixel values
             if size(img) > 1
                 imwrite(img(:,:,1),[path_to_write,'/','Input1.jpg'])
             end
