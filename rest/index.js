@@ -129,6 +129,7 @@ app.get('/nm', function (req, res) {
       if (err) {
         res.status(400).send('cannot open index')
       } else {
+        console.log('result headers: ' + JSON.stringify(res.headers))
         res.send(data)
       }
     })
