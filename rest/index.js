@@ -104,6 +104,8 @@ app.use(jwt({
   secret: nmAuthSecret,
   credentialsRequired: false
 }))
+app.set('x-powered-by', false)
+app.set('trust proxy', true)
 
 // app.use('/nm', express.static('../dist'))
 app.get('/nm', function (req, res) {
@@ -129,7 +131,6 @@ app.get('/nm', function (req, res) {
       if (err) {
         res.status(400).send('cannot open index')
       } else {
-        console.log('result headers: ' + JSON.stringify(res.headers))
         res.send(data)
       }
     })
