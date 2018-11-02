@@ -116,7 +116,7 @@ app.get('/nm', function (req, res) {
   let jwToken = jwtBase.sign({'sub': remoteUser, 'exp': shibExpiration}, nmAuthSecret)
   // res.set('Authorization', 'Bearer ' + jwToken)
   // console.log('Bearer token: ' + res.get('Authorization'))
-  session.set('token', jwtToken)
+  session.set('token', jwToken)
 
   try {
     fs.readFile(idx, 'utf8', function (err, data) {
