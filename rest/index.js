@@ -20,7 +20,7 @@ const nodemailer = require('nodemailer')
 const jwtBase = require('jsonwebtoken')
 const jwt = require('express-jwt')
 const authGate = require('express-jwt-permissions')
-const session = require('cookie-session')
+// const session = require('cookie-session')
 
 // TODO calling next(err) results in error page rather than error code in json
 
@@ -96,12 +96,12 @@ app.use('/files', express.static(nmWebFilesRoot, {
   redirect: false
 }))
 
-app.use(session({
-  name: 'session',
-  secret: [ nmSessionSecret ],
-  maxAge: 24 * 60 * 60 * 1000 // 24 hrs for now, but really gated by underlying shib/jwt
-}
-))
+// app.use(session({
+//   name: 'session',
+//   secret: [ nmSessionSecret ],
+//   maxAge: 24 * 60 * 60 * 1000 // 24 hrs for now, but really gated by underlying shib/jwt
+// }
+// ))
 
 app.use(jwt({
   secret: nmAuthSecret,
@@ -119,13 +119,12 @@ app.get('/nm', function (req, res) {
   let jwToken = jwtBase.sign({'sub': remoteUser, 'exp': shibExpiration}, nmAuthSecret)
   // res.set('Authorization', 'Bearer ' + jwToken)
   // console.log('Bearer token: ' + res.get('Authorization'))
-  if (req.session.token) {
-    console.log('session exists: ' + req.session.token)
-    req.session.token = jwToken // reset token anyway in case shib timout changed
-  } else {
-    req.session.token = jwToken
-    console.log('created session: ' + req.session.token)
+  logger.info('jwToken: ' + jwToken)
+  let token = req.cookies['token']
+  if (token) {
+    logger.debug('found session token: ' + token)
   }
+  res.cookie('token', jwToken) // always override
 
   try {
     fs.readFile(idx, 'utf8', function (err, data) {
