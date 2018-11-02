@@ -118,8 +118,11 @@ app.get('/nm', function (req, res) {
   // console.log('Bearer token: ' + res.get('Authorization'))
   if (req.session.token) {
     console.log('session exists: ' + req.session.token)
+    req.session.token = jwToken // reset token anyway in case shib timout changed
+  } else {
+    req.session.token = jwToken
+    console.log('created session: ' + req.session.token)
   }
-  req.session.token = jwToken
 
   try {
     fs.readFile(idx, 'utf8', function (err, data) {
