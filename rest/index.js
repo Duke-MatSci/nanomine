@@ -81,6 +81,9 @@ try {
 }
 
 let app = express()
+app.set('x-powered-by', false)
+app.set('trust proxy', true)
+
 app.use(cookieParser())
 
 let dataSizeLimit = config.rest.dataSizeLimit // probably needs to be at least 50mb
@@ -104,8 +107,6 @@ app.use(jwt({
   secret: nmAuthSecret,
   credentialsRequired: false
 }))
-app.set('x-powered-by', false)
-app.set('trust proxy', true)
 
 // app.use('/nm', express.static('../dist'))
 app.get('/nm', function (req, res) {
