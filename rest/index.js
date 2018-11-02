@@ -116,6 +116,9 @@ app.get('/nm', function (req, res) {
   let jwToken = jwtBase.sign({'sub': remoteUser, 'exp': shibExpiration}, nmAuthSecret)
   // res.set('Authorization', 'Bearer ' + jwToken)
   // console.log('Bearer token: ' + res.get('Authorization'))
+  if (req.session.token) {
+    console.log('session exists: ' + req.session.token)
+  }
   req.session.token = jwToken
 
   try {
