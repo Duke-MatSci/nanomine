@@ -20,6 +20,7 @@ const nodemailer = require('nodemailer')
 const jwtBase = require('jsonwebtoken')
 const jwt = require('express-jwt')
 const authGate = require('express-jwt-permissions')
+const session = require('cookie-session')
 
 // TODO calling next(err) results in error page rather than error code in json
 
@@ -39,6 +40,7 @@ let nmWebFilesRoot = process.env['NM_WEBFILES_ROOT']
 let nmJobDataDir = process.env['NM_JOB_DATA']
 let nmLocalRestBase = process.env['NM_LOCAL_REST_BASE']
 let nmAuthSecret = process.env['NM_AUTH_SECRET']
+let nmSessionSecret = process.env['NM_SESSION_SECRET']
 let nmAuthEnabled = process.env['NM_AUTH_ENABLED'].toLowerCase() === 'yes'
 let nmAuthType = process.env['NM_AUTH_TYPE']
 
@@ -68,14 +70,14 @@ try {
   fs.mkdirSync(nmWebFilesRoot) // Sync used during startup
 } catch (err) {
   logger.error('mkdir nmWebFilesRoot failed: ' + err)
-  logger.error('NOTE: if the error above is EEXISTS, the error can be ignored.')
+  logger.error('NOTE: if the error above is EXISTS, the error can be ignored.')
 }
 
 try {
   fs.mkdirSync(nmJobDataDir) // Sync used during startup
 } catch (err) {
   logger.error('mkdir nmJobDataDir failed: ' + err)
-  logger.error('NOTE: if the error above is EEXISTS, the error can be ignored.')
+  logger.error('NOTE: if the error above is EXISTS, the error can be ignored.')
 }
 
 let app = express()
@@ -90,6 +92,14 @@ app.use('/files', express.static(nmWebFilesRoot, {
   index: false,
   redirect: false
 }))
+
+app.use(session({
+  name: 'session',
+  secret: [ nmSessionSecret ],
+  maxAge: 24 * 60 * 60 * 1000 // 24 hrs for now, but really gated by underlying shib/jwt
+}
+))
+
 app.use(jwt({
   secret: nmAuthSecret,
   credentialsRequired: false
@@ -104,8 +114,10 @@ app.get('/nm', function (req, res) {
   let remoteUser = req.headers['remote_user']
   let shibExpiration = +(req.headers['shib-session-expires'])
   let jwToken = jwtBase.sign({'sub': remoteUser, 'exp': shibExpiration}, nmAuthSecret)
-  res.set('Authorization', 'Bearer ' + jwToken)
-  console.log('Bearer token: ' + res.get('Authorization'))
+  // res.set('Authorization', 'Bearer ' + jwToken)
+  // console.log('Bearer token: ' + res.get('Authorization'))
+  session.set('token', jwtToken)
+
   try {
     fs.readFile(idx, 'utf8', function (err, data) {
       if (err) {
@@ -178,8 +190,9 @@ let usersSchema = new mongoose.Schema({
 let Users = mongoose.model('users', usersSchema)
 
 let xmlDataSchema = new mongoose.Schema({ // maps the mongo xmldata collection
-  schemaId: String, /* !!! NOTE: had to rename 'schema' field name in restored data from MDCS to schemaId because of mongoose name conflict
-                       To convert the field after restore from MDCS, use mongocli which loads nanomongo.js. At the mongo command line
+  schemaId: String, /* !!! NOTE: had to rename 'schema' field name in restored data from MDCS to schemaId because of mongoose name conflict.
+                       The change is being made in the migration script -- migrate.js.
+                       OLD INFO: To convert the field after restore from MDCS, use mongocli which loads nanomongo.js. At the mongo command line
                        type 'swizzleForMongoose()' to change all the xmldata document fields named schema to schemaId.
                     */
   title: String,
