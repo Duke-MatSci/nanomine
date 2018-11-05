@@ -1,4 +1,4 @@
-function zip_file_processing_Otsu(path_to_write)
+function zip_file_processig_Otsu(path_to_write)
 
     path_to_unzip_files = [path_to_write,'/input'];
 
