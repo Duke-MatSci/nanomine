@@ -18,6 +18,7 @@
     "d3": "^5.5.0",
     "epic-spinners": "^1.0.3",
     "fast-xml-parser": "^3.12.5",
+    "jsonwebtoken": "^8.3.0",
     "lodash": "^4.17.11",
     "vkbeautify": "^0.99.3",
     "vue": "^2.5.2",
