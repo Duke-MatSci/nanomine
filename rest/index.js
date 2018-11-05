@@ -116,7 +116,12 @@ app.get('/nm', function (req, res) {
   // NOTE: For now, login is required to get to the site. TODO change login so that it is optional to access protected functions
   let remoteUser = req.headers['remote_user']
   let shibExpiration = +(req.headers['shib-session-expires'])
-  let jwToken = jwtBase.sign({'sub': remoteUser, 'exp': shibExpiration}, nmAuthSecret)
+  // check admin status by looking up group
+  let isAdmin = false
+  let isUser = true // for now everyone is a user
+  let isAnonymous = false
+
+  let jwToken = jwtBase.sign({'sub': remoteUser, 'exp': shibExpiration, 'isAdmin': isAdmin, 'isUser': isUser, 'isAnonymous': isAnonymous}, nmAuthSecret)
   // res.set('Authorization', 'Bearer ' + jwToken)
   // console.log('Bearer token: ' + res.get('Authorization'))
   logger.info('jwToken: ' + jwToken)
