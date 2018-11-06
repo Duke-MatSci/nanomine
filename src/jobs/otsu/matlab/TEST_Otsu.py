@@ -41,4 +41,9 @@ except:
   logging.error(pgmName + ' error copying test output to ' + outDir)
   rc = 2
 
+file = open(jobDir+"/"+"job_output_parameters.json","w")
+file.write('{\n"inputFileName": "output/Input1.jpg",\n')
+file.write('"binarizedFileName": "output/Binarized_Input1.jpg",\n')
+file.write('"zipFileName": "output/Results.zip"\n}')
+file.close()
 sys.exit(rc)

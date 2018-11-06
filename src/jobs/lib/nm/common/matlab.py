@@ -9,7 +9,7 @@ from subprocess import *
 class matlab:
   def __init__(self, logger):
     self.logger = logger
-    self.matlabAvailable = False
+    self.matlabAvailable = True
     try:
       self.matlabAvailable = (os.environ['NM_MATLAB_AVAILABLE']=='yes')
     except:
@@ -35,11 +35,12 @@ class matlab:
     self.logger.info('               matlabDir: ' + matlabDir)
     self.logger.info('               matlabPgm: ' + matlabPgm)
     self.logger.info('         matlabPgmParams: ' + str(matlabPgmParams))
+    self.logger.info('         matlabInputParams: ' + str(mlparams))
 
     runpgm = ''
     runstr = 'cd ' + matlabDir + '; ' + matlabPgm + '(' + mlparams +'); exit;'
     if(self.matlabAvailable):
-      self.logger.info('NOT ABLE TO RUN MATLAB YET - ' + matlabPgm + '.m')
+      self.logger.info('EXECUTING MATLAB - ' + matlabPgm + '.m')
       runpgm = ["matlab", "-nodesktop", "-nodisplay", "-nosplash", "-r", runstr]
     else :
       self.logger.info('Running TEST_' + matlabPgm)
@@ -50,7 +51,11 @@ class matlab:
     p = Popen(runpgm)
     p.wait()
     rc = p.returncode
-
+    file = open(jobDir+"/"+"job_output_parameters.json","w")
+    file.write('{\n"inputFileName": "output/Input1.jpg",\n')
+    file.write('"binarizedFileName": "output/Binarized_Input1.jpg",\n')
+    file.write('"zipFileName": "output/Results.zip"\n}')
+    file.close()
     return rc
 
 
