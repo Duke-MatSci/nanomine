@@ -71,14 +71,14 @@ def conversion(jobDir, code_srcDir, xsdDir, templateName):
         schemaurl = restbase + '/nmr/templates/select?filename='+xsdFilename
         rq = urllib2.Request(schemaurl)
         j = json.loads(urllib2.urlopen(rq).read())
-        schemaID = j["data"][0]["_id"]
+        schemaId = j["data"][0]["_id"]
         # curate-insert rest call
         with open(jobDir + "/xml/" + ID + ".xml", "r") as f:
             content = f.read()
         curate_insert_url = restbase + '/nmr/curate'
         curate_data = {
             "title": ID + ".xml",
-            "schemaID": schemaID,
+            "schemaId": schemaId,
             "curatedDataState": "EditedNotValid",
             "content": content
         }
