@@ -6,7 +6,7 @@
         <v-flex xs4>
           <img src="/cdn/img/visualize_data.png"/>
           <h4>
-            <router-link to="/Visualization">Visualize</router-link>
+            <a href="https://nanomine.oit.duke.edu:8443/viz" target="_blank">Visualize</a>
           </h4>
           <p>Visualize nanocomposite data.</p>
         </v-flex>
@@ -19,7 +19,7 @@
             Download an Excel template, enter nanocomposite sample or simulation data into the template and upload. This is the simplest way.
           </p>
         </v-flex>
-        <v-flex xs4>
+        <v-flex xs4 v-if="false">
           <img src="/cdn/img/edit-big.png" />
           <h4>
             <router-link to="/editor">Curate online</router-link>
@@ -42,7 +42,7 @@
           </h4>
           <p>Compose your own schema.</p>
         </v-flex>
-        <v-flex xs4>
+        <v-flex xs4 v-if="false">
           <img src="/cdn/img/visualize_data.png"/>
           <h4>
             <router-link to="/Insight">Data Insights</router-link>
