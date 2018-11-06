@@ -44,7 +44,7 @@ def conversion(jobDir, code_srcDir, xsdDir, templateName):
         with open(jobDir + '/ID.txt', 'r') as f:
             ID = f.read()
     # kickoff the conversion script
-    logName = compiler(jobDir, code_srcDir, xsdDir, templateName)
+    logName = compiler(jobDir, code_srcDir, xsdDir, templateName, restbase)
     # check #3: see if there is an error_message.txt generated during conversion
     if os.path.exists(jobDir + '/error_message.txt'):
         with open(jobDir + '/error_message.txt', 'r+') as f:
