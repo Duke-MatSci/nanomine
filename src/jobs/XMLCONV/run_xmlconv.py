@@ -10,6 +10,8 @@ import json
 import urllib2
 
 import logging # this should be done by a wrapper in the future
+restbase = os.environ['NM_LOCAL_REST_BASE']
+webbase = os.environ['NM_WEB_BASE_URI']
 sloglevel=os.environ['NM_LOGLEVEL']
 loglevel = logging.DEBUG
 try:
@@ -57,9 +59,16 @@ logging.info(xsdDir)
 # add code_src to the sys path
 sys.path.insert(0, code_srcDir)
 # call the conversion code
-from conversion import conversion
+import traceback
+try:
+  from conversion import conversion
+except:
+  logging.info(str(traceback.format_exc()))
+
+logging.info("conversion begin")
 try:
   status, messages = conversion(jobDir, code_srcDir, xsdDir, templateName)
+  logging.info("conversion finished")
 except:
   logging.info('exception occurred')
   logging.info('exception: ' + str(sys.exc_info()[0]))
@@ -69,11 +78,12 @@ except:
 logging.info("CONVERSION RESULT: " + status)
 for message in messages:
 	logging.info("message: " + message)
+
 # example sending error template (rough cut)
 # for now the email just goes into the rest server log file: nanomine/rest/nanomine.log.gz (log file name will get fixed soon)
 # templates are in rest/config/emailtemplates/JOBTYPE/TEMPLATENAME.etf (etf extension is required, but implied in POST data)
 try:
-  emailurl = 'http://localhost/nmr/jobemail'
+  emailurl = restbase + '/nmr/jobemail'
   logging.info('emailurl: ' + emailurl)
   emaildata = {
     "jobid": jobId,
@@ -97,5 +107,3 @@ try:
 except:
   logging.info('exception occurred')
   logging.info('exception: ' + str(sys.exc_info()[0]))
-
-
