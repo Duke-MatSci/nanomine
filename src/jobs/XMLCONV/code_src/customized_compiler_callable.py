@@ -24,7 +24,7 @@ from xml_update_validator import runValidation
 # -------------------------------------------- REST service
 import urllib2
 import json
-
+import logging
 
 
 ## Helper Methods
@@ -3420,6 +3420,8 @@ def compiler(jobDir, code_srcDir, xsdDir, templateName, restbase):
     # https://docs.python.org/2/library/collections.html#collections.OrderedDict
     diffusionData = collections.OrderedDict({'item':DATA})
 
+    # change the log level of dicttoxml
+    dicttoxml.LOG.setLevel(logging.ERROR)
     # using dicttoxml library to convert dictionary to xml
     diffusionDataxml = dicttoxml.dicttoxml(diffusionData,custom_root='PolymerNanocomposite',attr_type=False)
     # need to remove all <item> and </item> and <item > in the xml
