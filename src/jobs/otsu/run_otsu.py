@@ -66,6 +66,14 @@ matlabPgmParams = (input_type,input_name)
 rc = mlab.run(userId, jobId, jobType, jobSrcDir, jobDir, webBaseUri, jobDataUriSuffix, matlabPgm, matlabPgmParams)
 print('MATLAB return code - rc: ' + str(rc))
 
+# write job_output_parameters.json
+if rc ==0:
+  file = open(jobDir+"/"+"job_output_parameters.json","w")
+  file.write('{\n"inputFileName": "output/Input1.jpg",\n')
+  file.write('"binarizedFileName": "output/Binarized_Input1.jpg",\n')
+  file.write('"zipFileName": "output/Results.zip"\n}')
+  file.close()
+
 # If the NM_SMTP_TEST environment variable is set to true, then emails are not sent via email and are instead
 #   go into the rest server log file: nanomine/rest/nanomine.log.gz (log file name will get fixed soon)
 # templates are in rest/config/emailtemplates/JOBTYPE/TEMPLATENAME.etf (etf extension is required, but implied in POST data)

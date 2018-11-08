@@ -12,7 +12,7 @@ try
   mkdir(path_to_write);
 
   %% Specify import function according to input option
-  switch input_type
+  switch str2num(input_type)
       case 1
           img = imread([path_to_read,file_name]); % read the incming target and store pixel values
           if length(size(img)) > 3
@@ -28,7 +28,7 @@ try
           imwrite(256*img_original,[path_to_write,'/','Input1.jpg']);
   end
 
-  if input_type ~= 2
+  if str2num(input_type) ~= 2
       %% SDF code - Shuangchen & Yichi
       % img_original - binary original image
 

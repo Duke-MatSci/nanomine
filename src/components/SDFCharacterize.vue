@@ -23,12 +23,14 @@
         </v-flex>
         <v-flex xs12 justify-start>
           <h4> Input Options:</h4>
-          <p class="text-xs-left"><strong> Upload a single image: </strong>Supported image formats are .jpg, .tif and .png.
+          <p class="text-xs-left"><strong> Upload a single image: </strong>Supported image formats are .jpg, .tif and .png.The results will include the 2D SDF and it's radially averaged 1D version in CSV file format.</p>
           <p class="text-xs-left"><strong> --OR-- Upload a single image in .mat format :</strong> The .mat file must contain ONLY ONE variable named
-            "Input" - which contains the image.</p>
+            "Input" - which contains the image.The results will include the 2D SDF and it's radially averaged 1D version in CSV file format.</p>
           <p class="text-xs-left"><strong> --OR-- Upload multiple images in ZIP File:</strong> Submit a ZIP file containing multiple images (supported
-            formats: .jpg, .tif, .png) of same size (in pixels).
-            DO NOT ZIP the folder containing images; select all images and ZIP them directly.</p>
+            formats: .jpg, .tif, .png) of same size (in pixels). DO NOT ZIP the folder containing images; select all images and ZIP them directly.
+            DO NOT ZIP the folder containing images; select all images and ZIP them directly. The results will include a folder "input" which contains all images submitted by user,
+            one folder for each input image that comprises the 2D and 1D SDF (in CSV format) of the respective image.
+            Additionally, the mean 2D and 1D SDF, averaged over all input images is provided in CSV file along with a plot of the mean 2D SDF in "SDF_2D_mean.jpg".</p>
         </v-flex>
       </v-layout>
       <v-alert

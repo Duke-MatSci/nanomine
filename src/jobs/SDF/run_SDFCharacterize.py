@@ -66,6 +66,14 @@ matlabPgmParams = (input_type,input_name)
 rc = mlab.run(userId, jobId, jobType, jobSrcDir, jobDir, webBaseUri, jobDataUriSuffix, matlabPgm, matlabPgmParams)
 print('MATLAB return code - rc: ' + str(rc))
 
+# write job_output_parameters.json
+if rc ==0:
+  file = open(jobDir+"/"+"job_output_parameters.json","w")
+  file.write('{\n"inputFileName": "output/Input1.jpg",\n')
+  file.write('"SDFPlot": "output/SDF_2D.jpg",\n')
+  file.write('"zipFileName": "output/Results.zip"\n}')
+  file.close()
+
 # If the NM_SMTP_TEST environment variable is set to true, then emails are not sent via email and are instead
 #   go into the rest server log file: nanomine/rest/nanomine.log.gz (log file name will get fixed soon)
 # templates are in rest/config/emailtemplates/JOBTYPE/TEMPLATENAME.etf (etf extension is required, but implied in POST data)
@@ -77,7 +85,7 @@ if rc == 0: # send success email
       "jobtype": jobType,
       "emailtemplatename": "success",
       "emailvars": {
-        "resultpage": webBaseUri + '/nm#/OtsuResult?refuri='+jobDataUriSuffix+'/'+jobId,
+        "resultpage": webBaseUri + '/nm#/SDFCharacterizeResults?refuri='+jobDataUriSuffix+'/'+jobId,
         "jobinfo": {
           "resultcode":rc
         },
@@ -92,7 +100,7 @@ if rc == 0: # send success email
     r = urllib2.urlopen(rq, json.dumps(emaildata))
     logging.info('sent success email: ' + str(r.getcode()))
   except:
-    logging.info('exception occurred sending run_otsu success email')
+    logging.info('exception occurred sending run_SDFCharacterize success email')
     logging.info('exception: ' + traceback.format_exc())
 else: # send error email
   try:
@@ -116,7 +124,7 @@ else: # send error email
     r = urllib2.urlopen(rq, json.dumps(emaildata))
     logging.info('sent failure email: ' + str(r.getcode()))
   except:
-    logging.info('exception occurred sending run_otsu failure email')
+    logging.info('exception occurred sending run_SDFCharacterize failure email')
     logging.info('exception: ' + traceback.format_exc())
 
 
