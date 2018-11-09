@@ -745,6 +745,9 @@ def sheetMatType(sheet, DATA, myXSDtree, jobDir):
             if len(vcc) > 0:
                 MatrixComponent.append({'MatrixComponentComposition':vcc})
         # Filler
+            # Description
+        if match(sheet.cell_value(row, 0), 'Filler description'):
+            temp = insert('Description', sheet.cell_value(row, 1), temp)
             # FillerComponent/ChemicalName
         if match(sheet.cell_value(row, 0), 'Filler chemical name/Filler name'):
             FillerComponent = insert('ChemicalName', sheet.cell_value(row, 1), FillerComponent)
