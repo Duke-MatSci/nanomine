@@ -7,7 +7,7 @@
             <h3 class="mainheading">NanoMine</h3>
             <span class="subheading">Material Informatics for Polymer Nanocomposites</span>
             <v-divider class="my-3"></v-divider>
-            <v-btn class="mx-0" color="primary" to="/Visualization">VISUALIZE DATA</v-btn>
+            <v-btn class="mx-0" color="primary" href="https://nanomine.oit.duke.edu:8443/viz" target="_blank">VISUALIZE DATA</v-btn>
             <v-btn class="mx-0" color="secondary" to="/XMLCONV">CURATE DATA</v-btn>
           </v-flex>
         </v-layout>
@@ -46,12 +46,19 @@
 </template>
 
 <script>
+import {Auth} from '@/modules/Auth.js'
+
 export default {
   name: 'NanoMine',
   data () {
     return {
       msg: 'A Nanocomposites Data Resource'
     }
+  },
+  mounted: function () {
+    console.log('cookies: ' + document.cookie)
+    let auth = new Auth()
+    console.log('token: ' + JSON.stringify(auth.tokenValues))
   }
 }
 </script>
