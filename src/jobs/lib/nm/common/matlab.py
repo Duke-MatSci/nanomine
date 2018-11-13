@@ -51,11 +51,6 @@ class matlab:
     p = Popen(runpgm)
     p.wait()
     rc = p.returncode
-    file = open(jobDir+"/"+"job_output_parameters.json","w")
-    file.write('{\n"inputFileName": "output/Input1.jpg",\n')
-    file.write('"binarizedFileName": "output/Binarized_Input1.jpg",\n')
-    file.write('"zipFileName": "output/Results.zip"\n}')
-    file.close()
     return rc
 
 
