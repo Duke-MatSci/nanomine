@@ -21,6 +21,7 @@ import CorrelationReconstruct from '@/components/CorrelationReconstruct'
 import SDFReconstruct from '@/components/SDFReconstruct'
 import DescriptorReconstruct from '@/components/DescriptorReconstruct'
 import Visualization from '@/components/Visualization'
+import SDFCharacterizeResults from '@/components/SDFCharacterizeResults'
 
 Vue.use(Router)
 
@@ -130,6 +131,16 @@ export default new Router({
       path: '/Visualization',
       name: 'Visualization',
       component: Visualization
+    },
+    {
+      path: '/OtsuResult',
+      name: 'OtsuResult',
+      component: OtsuResult
+    },
+    {
+      path: '/SDFCharacterizeResults',
+      name: 'SDFCharacterizeResults',
+      component: SDFCharacterizeResults
     }
   ]
 })

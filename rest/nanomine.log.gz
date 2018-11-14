@@ -1,0 +1,491 @@
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmJobDataDir failed: Error: ENOENT: no such file or directory, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmJobDataDir failed: Error: ENOENT: no such file or directory, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmJobDataDir failed: Error: ENOENT: no such file or directory, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"<br/>Hello testuser,\n\n<br/>Unfortunately, your Otsu's binarize was not successful.\n\n<br/>jobid: otsu-acMCru3NJJbfVnayU3Hu9e\n\n<br/>job result code: 99\n\n<br/>Please visit <a href=\"https://nanomine.org/joboutput/otsu-acMCru3NJJbfVnayU3Hu9e\">your job output</a> for more information\n\n<br/>\nRegards,\n<br/>The NanoMine team\n<br/>\n","level":"info"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"<br/>Hello testuser,\n\n<br/>Unfortunately, your Otsu's binarize was not successful.\n\n<br/>jobid: otsu-bQRCJktaMXieqNASTBr1J1\n\n<br/>job result code: 99\n\n<br/>Please visit <a href=\"https://nanomine.org/joboutput/otsu-bQRCJktaMXieqNASTBr1J1\">your job output</a> for more information\n\n<br/>\nRegards,\n<br/>The NanoMine team\n<br/>\n","level":"info"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"<br/>Hello testuser,\n\n<br/>Unfortunately, your Otsu's binarize was not successful.\n\n<br/>jobid: otsu-41YF2W38Gte6i4idQkeZcp\n\n<br/>job result code: 99\n\n<br/>Please visit <a href=\"https://nanomine.org/joboutput/otsu-41YF2W38Gte6i4idQkeZcp\">your job output</a> for more information\n\n<br/>\nRegards,\n<br/>The NanoMine team\n<br/>\n","level":"info"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"\n\n<br/>Hello testuser,\n\n<br/>Your Otsu binarize  was successful.\n\n<br/>job otsu-xm4KfCFBVBuHGnkbTWTBrp\n\n<br/>Please visit <a href=\"http://localhost/nm#/OtsuResult?refuri=/nmf/jobdata/otsu-xm4KfCFBVBuHGnkbTWTBrp\">this link</a> to view and download your results.\n\n<br/>\nRegards,\n<br/>The NanoMine team\n<br/>\n","level":"info"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"\n\n<br/>Hello testuser,\n\n<br/>Your Otsu binarize  was successful.\n\n<br/>job otsu-5e1oi8oA7dz2RAjYVXi7oz\n\n<br/>Please visit <a href=\"http://localhost/nm#/OtsuResult?refuri=/nmf/jobdata/otsu-5e1oi8oA7dz2RAjYVXi7oz\">this link</a> to view and download your results.\n\n<br/>\nRegards,\n<br/>The NanoMine team\n<br/>\n","level":"info"}
+{"message":"smtp return info: {\"accepted\":[\"back2akshay@gmail.com\"],\"rejected\":[],\"envelopeTime\":203,\"messageTime\":584,\"messageSize\":1258,\"response\":\"250 2.0.0 OK 1539781196 b71-v6sm992251itb.33 - gsmtp\",\"envelope\":{\"from\":\"back2akshay@gmail.com\",\"to\":[\"back2akshay@gmail.com\"]},\"messageId\":\"<0509ba41-f141-a2e7-60c2-0bfe323edbe9@gmail.com>\"}","level":"info"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"\n\n<br/>Hello testuser,\n\n<br/>Your Otsu binarize  was successful.\n\n<br/>job otsu-7ysd9TiLgspPmAhH9fdBcN\n\n<br/>Please visit <a href=\"http://localhost/nm#/OtsuResult?refuri=/nmf/jobdata/otsu-7ysd9TiLgspPmAhH9fdBcN\">this link</a> to view and download your results.\n\n<br/>\nRegards,\n<br/>The NanoMine team\n<br/>\n","level":"info"}
+{"message":"smtp return info: {\"accepted\":[\"back2akshay@gmail.com\"],\"rejected\":[],\"envelopeTime\":242,\"messageTime\":465,\"messageSize\":1258,\"response\":\"250 2.0.0 OK 1540236068 r136-v6sm2619789iod.62 - gsmtp\",\"envelope\":{\"from\":\"back2akshay@gmail.com\",\"to\":[\"back2akshay@gmail.com\"]},\"messageId\":\"<c01eae5d-28c2-f3f8-f691-c88e68a11b6d@gmail.com>\"}","level":"info"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"\n\n<br/>Hello testuser,\n\n<br/>Your Otsu binarize  was successful.\n\n<br/>job otsu-kybwCLbX2CmCvxZ8NR1RLi\n\n<br/>Please visit <a href=\"http://localhost/nm#/OtsuResult?refuri=/nmf/jobdata/otsu-kybwCLbX2CmCvxZ8NR1RLi\">this link</a> to view and download your results.\n\n<br/>\nRegards,\n<br/>The NanoMine team\n<br/>\n","level":"info"}
+{"message":"smtp return info: {\"accepted\":[\"back2akshay@gmail.com\"],\"rejected\":[],\"envelopeTime\":314,\"messageTime\":707,\"messageSize\":1258,\"response\":\"250 2.0.0 OK 1540237684 f64-v6sm1763475ioa.54 - gsmtp\",\"envelope\":{\"from\":\"back2akshay@gmail.com\",\"to\":[\"back2akshay@gmail.com\"]},\"messageId\":\"<6a088342-890b-d9eb-0090-3a8f9cd93073@gmail.com>\"}","level":"info"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"\n\n<br/>Hello testuser,\n\n<br/>Your Otsu binarize  was successful.\n\n<br/>job otsu-hePij8w4aezC5iTDfun8Qz\n\n<br/>Please visit <a href=\"http://localhost/nm#/OtsuResult?refuri=/nmf/jobdata/otsu-hePij8w4aezC5iTDfun8Qz\">this link</a> to view and download your results.\n\n<br/>\nRegards,\n<br/>The NanoMine team\n<br/>\n","level":"info"}
+{"message":"smtp return info: {\"accepted\":[\"back2akshay@gmail.com\"],\"rejected\":[],\"envelopeTime\":115,\"messageTime\":385,\"messageSize\":1258,\"response\":\"250 2.0.0 OK 1540237890 e204-v6sm7923678ite.24 - gsmtp\",\"envelope\":{\"from\":\"back2akshay@gmail.com\",\"to\":[\"back2akshay@gmail.com\"]},\"messageId\":\"<b662dd22-00c2-2251-2d95-fc0790cd3367@gmail.com>\"}","level":"info"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"\n\n<br/>Hello testuser,\n\n<br/>Your Otsu binarize  was successful.\n\n<br/>job otsu-kzeHQUL89HHZ9FC1xxa1v1\n\n<br/>Please visit <a href=\"http://localhost/nm#/OtsuResult?refuri=/nmf/jobdata/otsu-kzeHQUL89HHZ9FC1xxa1v1\">this link</a> to view and download your results.\n\n<br/>\nRegards,\n<br/>The NanoMine team\n<br/>\n","level":"info"}
+{"message":"smtp return info: {\"accepted\":[\"back2akshay@gmail.com\"],\"rejected\":[],\"envelopeTime\":116,\"messageTime\":420,\"messageSize\":1258,\"response\":\"250 2.0.0 OK 1540238734 j75-v6sm7098333itj.33 - gsmtp\",\"envelope\":{\"from\":\"back2akshay@gmail.com\",\"to\":[\"back2akshay@gmail.com\"]},\"messageId\":\"<449d77b2-2dbc-f749-b271-93567fe4a2d3@gmail.com>\"}","level":"info"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"\n\n<br/>Hello testuser,\n\n<br/>Your Otsu binarize  was successful.\n\n<br/>job otsu-wr5oqSEHR1WsVdY8XDwW4c\n\n<br/>Please visit <a href=\"http://localhost/nm#/OtsuResult?refuri=/nmf/jobdata/otsu-wr5oqSEHR1WsVdY8XDwW4c\">this link</a> to view and download your results.\n\n<br/>\nRegards,\n<br/>The NanoMine team\n<br/>\n","level":"info"}
+{"message":"smtp return info: {\"accepted\":[\"back2akshay@gmail.com\"],\"rejected\":[],\"envelopeTime\":102,\"messageTime\":383,\"messageSize\":1258,\"response\":\"250 2.0.0 OK 1540238872 k15-v6sm6299392itk.8 - gsmtp\",\"envelope\":{\"from\":\"back2akshay@gmail.com\",\"to\":[\"back2akshay@gmail.com\"]},\"messageId\":\"<76c8a207-836a-ec98-e265-0faf83d51508@gmail.com>\"}","level":"info"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"\n\n<br/>Hello testuser,\n\n<br/>Your Otsu binarize  was successful.\n\n<br/>job otsu-h3LgJMvvsDCdBigEhVqJ6K\n\n<br/>Please visit <a href=\"http://localhost/nm#/OtsuResult?refuri=/nmf/jobdata/otsu-h3LgJMvvsDCdBigEhVqJ6K\">this link</a> to view and download your results.\n\n<br/>\nRegards,\n<br/>The NanoMine team\n<br/>\n","level":"info"}
+{"message":"smtp return info: {\"accepted\":[\"back2akshay@gmail.com\"],\"rejected\":[],\"envelopeTime\":250,\"messageTime\":659,\"messageSize\":1258,\"response\":\"250 2.0.0 OK 1540240725 w71-v6sm6143874ita.0 - gsmtp\",\"envelope\":{\"from\":\"back2akshay@gmail.com\",\"to\":[\"back2akshay@gmail.com\"]},\"messageId\":\"<d422f64c-e1f3-2288-a4ac-36e82d0c7892@gmail.com>\"}","level":"info"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"\n\n<br/>Hello testuser,\n\n<br/>Your Otsu binarize  was successful.\n\n<br/>job otsu-hWZNedNww9e7f5VxNQ3Li4\n\n<br/>Please visit <a href=\"http://localhost/nm#/OtsuResult?refuri=/nmf/jobdata/otsu-hWZNedNww9e7f5VxNQ3Li4\">this link</a> to view and download your results.\n\n<br/>\nRegards,\n<br/>The NanoMine team\n<br/>\n","level":"info"}
+{"message":"smtp return info: {\"accepted\":[\"back2akshay@gmail.com\"],\"rejected\":[],\"envelopeTime\":212,\"messageTime\":738,\"messageSize\":1258,\"response\":\"250 2.0.0 OK 1540252960 x21-v6sm6441934ita.6 - gsmtp\",\"envelope\":{\"from\":\"back2akshay@gmail.com\",\"to\":[\"back2akshay@gmail.com\"]},\"messageId\":\"<971ac398-7a9e-1ca9-e754-1080d09b2f73@gmail.com>\"}","level":"info"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"\n\n<br/>Hello testuser,\n\n<br/>Your Otsu binarize  was successful.\n\n<br/>job otsu-xyg5bE1PffVHeDeLqmC1V\n\n<br/>Please visit <a href=\"http://localhost/nm#/OtsuResult?refuri=/nmf/jobdata/otsu-xyg5bE1PffVHeDeLqmC1V\">this link</a> to view and download your results.\n\n<br/>\nRegards,\n<br/>The NanoMine team\n<br/>\n","level":"info"}
+{"message":"smtp return info: {\"accepted\":[\"back2akshay@gmail.com\"],\"rejected\":[],\"envelopeTime\":241,\"messageTime\":558,\"messageSize\":1253,\"response\":\"250 2.0.0 OK 1540299690 n2-v6sm399454iog.75 - gsmtp\",\"envelope\":{\"from\":\"back2akshay@gmail.com\",\"to\":[\"back2akshay@gmail.com\"]},\"messageId\":\"<287bb8a1-0d61-d41b-2988-b219c4ecbdb3@gmail.com>\"}","level":"info"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"\n\n<br/>Hello testuser,\n\n<br/>Your Otsu binarize  was successful.\n\n<br/>job otsu-47FpsYR46y7zPz63rVu82\n\n<br/>Please visit <a href=\"http://localhost/nm#/OtsuResult?refuri=/nmf/jobdata/otsu-47FpsYR46y7zPz63rVu82\">this link</a> to view and download your results.\n\n<br/>\nRegards,\n<br/>The NanoMine team\n<br/>\n","level":"info"}
+{"message":"smtp return info: {\"accepted\":[\"back2akshay@gmail.com\"],\"rejected\":[],\"envelopeTime\":107,\"messageTime\":432,\"messageSize\":1253,\"response\":\"250 2.0.0 OK 1540299915 w71-v6sm787277ita.0 - gsmtp\",\"envelope\":{\"from\":\"back2akshay@gmail.com\",\"to\":[\"back2akshay@gmail.com\"]},\"messageId\":\"<e1fe3411-ba8d-d18b-e306-e4bf6cc16aa4@gmail.com>\"}","level":"info"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"\n\n<br/>Hello testuser,\n\n<br/>Your Otsu binarize  was successful.\n\n<br/>job otsu-mgyQymwmpat7Ho51rcEXYq\n\n<br/>Please visit <a href=\"http://localhost/nm#/OtsuResult?refuri=/nmf/jobdata/otsu-mgyQymwmpat7Ho51rcEXYq\">this link</a> to view and download your results.\n\n<br/>\nRegards,\n<br/>The NanoMine team\n<br/>\n","level":"info"}
+{"message":"smtp return info: {\"accepted\":[\"back2akshay@gmail.com\"],\"rejected\":[],\"envelopeTime\":109,\"messageTime\":531,\"messageSize\":1258,\"response\":\"250 2.0.0 OK 1540300234 h24-v6sm429496iog.80 - gsmtp\",\"envelope\":{\"from\":\"back2akshay@gmail.com\",\"to\":[\"back2akshay@gmail.com\"]},\"messageId\":\"<15a086db-b102-b516-a729-24bc2d8fac88@gmail.com>\"}","level":"info"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"\n\n<br/>Hello testuser,\n\n<br/>Your Otsu binarize  was successful.\n\n<br/>job otsu-cunLH7JbPwakpGr9WuFmLF\n\n<br/>Please visit <a href=\"http://localhost/nm#/OtsuResult?refuri=/nmf/jobdata/otsu-cunLH7JbPwakpGr9WuFmLF\">this link</a> to view and download your results.\n\n<br/>\nRegards,\n<br/>The NanoMine team\n<br/>\n","level":"info"}
+{"message":"smtp return info: {\"accepted\":[\"back2akshay@gmail.com\"],\"rejected\":[],\"envelopeTime\":103,\"messageTime\":544,\"messageSize\":1258,\"response\":\"250 2.0.0 OK 1540300320 c26-v6sm773981itd.18 - gsmtp\",\"envelope\":{\"from\":\"back2akshay@gmail.com\",\"to\":[\"back2akshay@gmail.com\"]},\"messageId\":\"<4b48d4a3-ac05-6f09-dba6-ae10300482ff@gmail.com>\"}","level":"info"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"\n\n<br/>Hello testuser,\n\n<br/>Your Otsu binarize  was successful.\n\n<br/>job otsu-ePosbgjAPszBPdMpnLHhq4\n\n<br/>Please visit <a href=\"http://localhost/nm#/OtsuResult?refuri=/nmf/jobdata/otsu-ePosbgjAPszBPdMpnLHhq4\">this link</a> to view and download your results.\n\n<br/>\nRegards,\n<br/>The NanoMine team\n<br/>\n","level":"info"}
+{"message":"smtp return info: {\"accepted\":[\"back2akshay@gmail.com\"],\"rejected\":[],\"envelopeTime\":107,\"messageTime\":434,\"messageSize\":1258,\"response\":\"250 2.0.0 OK 1540300623 y33-v6sm800671ita.15 - gsmtp\",\"envelope\":{\"from\":\"back2akshay@gmail.com\",\"to\":[\"back2akshay@gmail.com\"]},\"messageId\":\"<1398e700-a568-906b-4660-211e17dc2907@gmail.com>\"}","level":"info"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"<br/>Hello testuser,\n\n<br/>Unfortunately, your Otsu's binarize was not successful.\n\n<br/>jobid: otsu-7Q6uBbftutgJ1Tk3EbxqWB\n\n<br/>job result code: -9\n\n<br/>Please visit <a href=\"https://nanomine.org/joboutput/otsu-7Q6uBbftutgJ1Tk3EbxqWB\">your job output</a> for more information\n\n<br/>\nRegards,\n<br/>The NanoMine team\n<br/>\n","level":"info"}
+{"message":"smtp return info: {\"accepted\":[\"back2akshay@gmail.com\"],\"rejected\":[],\"envelopeTime\":225,\"messageTime\":400,\"messageSize\":1296,\"response\":\"250 2.0.0 OK 1540322729 a15-v6sm1179880itc.3 - gsmtp\",\"envelope\":{\"from\":\"back2akshay@gmail.com\",\"to\":[\"back2akshay@gmail.com\"]},\"messageId\":\"<a7f9add1-5870-a6ed-45a3-d20da3393154@gmail.com>\"}","level":"info"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"\n\n<br/>Hello testuser,\n\n<br/>Your Otsu binarize  was successful.\n\n<br/>job otsu-gU3x7G3iYMFcr68zqJWBdW\n\n<br/>Please visit <a href=\"http://localhost/nm#/OtsuResult?refuri=/nmf/jobdata/otsu-gU3x7G3iYMFcr68zqJWBdW\">this link</a> to view and download your results.\n\n<br/>\nRegards,\n<br/>The NanoMine team\n<br/>\n","level":"info"}
+{"message":"smtp return info: {\"accepted\":[\"back2akshay@gmail.com\"],\"rejected\":[],\"envelopeTime\":107,\"messageTime\":704,\"messageSize\":1258,\"response\":\"250 2.0.0 OK 1540322971 z3-v6sm749100iol.3 - gsmtp\",\"envelope\":{\"from\":\"back2akshay@gmail.com\",\"to\":[\"back2akshay@gmail.com\"]},\"messageId\":\"<9f9825bc-fb2f-0cd2-7307-680ceab1e7c1@gmail.com>\"}","level":"info"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"\n\n<br/>Hello testuser,\n\n<br/>Your Otsu binarize  was successful.\n\n<br/>job otsu-4AEqXG9P6Uwv1iLRPCzKBZ\n\n<br/>Please visit <a href=\"http://localhost/nm#/OtsuResult?refuri=/nmf/jobdata/otsu-4AEqXG9P6Uwv1iLRPCzKBZ\">this link</a> to view and download your results.\n\n<br/>\nRegards,\n<br/>The NanoMine team\n<br/>\n","level":"info"}
+{"message":"smtp return info: {\"accepted\":[\"back2akshay@gmail.com\"],\"rejected\":[],\"envelopeTime\":331,\"messageTime\":882,\"messageSize\":1258,\"response\":\"250 2.0.0 OK 1540325158 f10-v6sm538538ioq.59 - gsmtp\",\"envelope\":{\"from\":\"back2akshay@gmail.com\",\"to\":[\"back2akshay@gmail.com\"]},\"messageId\":\"<ade838f8-dced-9ce4-1aea-44fba1579fa2@gmail.com>\"}","level":"info"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"\n\n<br/>Hello testuser,\n\n<br/>Your Otsu binarize  was successful.\n\n<br/>job otsu-8LEmNSdY3qUenwP8igaNVB\n\n<br/>Please visit <a href=\"http://localhost/nm#/OtsuResult?refuri=/nmf/jobdata/otsu-8LEmNSdY3qUenwP8igaNVB\">this link</a> to view and download your results.\n\n<br/>\nRegards,\n<br/>The NanoMine team\n<br/>\n","level":"info"}
+{"message":"smtp return info: {\"accepted\":[\"back2akshay@gmail.com\"],\"rejected\":[],\"envelopeTime\":179,\"messageTime\":648,\"messageSize\":1258,\"response\":\"250 2.0.0 OK 1540333291 f197-v6sm1272898itc.4 - gsmtp\",\"envelope\":{\"from\":\"back2akshay@gmail.com\",\"to\":[\"back2akshay@gmail.com\"]},\"messageId\":\"<8b99bd06-0a04-6a13-3432-b7e7d586d753@gmail.com>\"}","level":"info"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"\n\n<br/>Hello testuser,\n\n<br/>Your Otsu binarize  was successful.\n\n<br/>job otsu-uDK2Ju68Ceea7jPwtZSyJk\n\n<br/>Please visit <a href=\"http://localhost/nm#/OtsuResult?refuri=/nmf/jobdata/otsu-uDK2Ju68Ceea7jPwtZSyJk\">this link</a> to view and download your results.\n\n<br/>\nRegards,\n<br/>The NanoMine team\n<br/>\n","level":"info"}
+{"message":"smtp return info: {\"accepted\":[\"back2akshay@gmail.com\"],\"rejected\":[],\"envelopeTime\":124,\"messageTime\":431,\"messageSize\":1258,\"response\":\"250 2.0.0 OK 1540334248 i5-v6sm823597ioq.5 - gsmtp\",\"envelope\":{\"from\":\"back2akshay@gmail.com\",\"to\":[\"back2akshay@gmail.com\"]},\"messageId\":\"<ea2dde1d-325e-966b-f621-ee30ac29a6c9@gmail.com>\"}","level":"info"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"\n\n<br/>Hello testuser,\n\n<br/>Your Otsu binarize  was successful.\n\n<br/>job otsu-2KDAsyUNz9vdrNd9ahpJN2\n\n<br/>Please visit <a href=\"http://ubuntu.local/nm#/OtsuResult?refuri=/nmf/jobdata/otsu-2KDAsyUNz9vdrNd9ahpJN2\">this link</a> to view and download your results.\n\n<br/>\nRegards,\n<br/>The NanoMine team\n<br/>\n","level":"info"}
+{"message":"smtp return info: {\"accepted\":[\"back2akshay@gmail.com\"],\"rejected\":[],\"envelopeTime\":118,\"messageTime\":530,\"messageSize\":1264,\"response\":\"250 2.0.0 OK 1540411738 129-v6sm4065823itl.43 - gsmtp\",\"envelope\":{\"from\":\"back2akshay@gmail.com\",\"to\":[\"back2akshay@gmail.com\"]},\"messageId\":\"<c859ce18-2421-e74e-bfba-4f81cb40dfc8@gmail.com>\"}","level":"info"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"\n\n<br/>Hello testuser,\n\n<br/>Your Otsu binarize  was successful.\n\n<br/>job otsu-vJws8EZMrKvXnaSapEGeYo\n\n<br/>Please visit <a href=\"http://ubuntu.local/nm#/OtsuResult?refuri=/nmf/jobdata/otsu-vJws8EZMrKvXnaSapEGeYo\">this link</a> to view and download your results.\n\n<br/>\nRegards,\n<br/>The NanoMine team\n<br/>\n","level":"info"}
+{"message":"smtp return info: {\"accepted\":[\"back2akshay@gmail.com\"],\"rejected\":[],\"envelopeTime\":211,\"messageTime\":544,\"messageSize\":1264,\"response\":\"250 2.0.0 OK 1540414197 f18-v6sm388320ioc.69 - gsmtp\",\"envelope\":{\"from\":\"back2akshay@gmail.com\",\"to\":[\"back2akshay@gmail.com\"]},\"messageId\":\"<86877ac5-af49-bbf6-ae8e-7342a3732de2@gmail.com>\"}","level":"info"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"\n\n<br/>Hello testuser,\n\n<br/>Your Otsu binarize  was successful.\n\n<br/>job otsu-v7Xtv314oaitsFg59atHgJ\n\n<br/>Please visit <a href=\"http://ubuntu.local/nm#/OtsuResult?refuri=/nmf/jobdata/otsu-v7Xtv314oaitsFg59atHgJ\">this link</a> to view and download your results.\n\n<br/>\nRegards,\n<br/>The NanoMine team\n<br/>\n","level":"info"}
+{"message":"smtp return info: {\"accepted\":[\"back2akshay@gmail.com\"],\"rejected\":[],\"envelopeTime\":125,\"messageTime\":787,\"messageSize\":1264,\"response\":\"250 2.0.0 OK 1540415342 w124-v6sm456509ita.0 - gsmtp\",\"envelope\":{\"from\":\"back2akshay@gmail.com\",\"to\":[\"back2akshay@gmail.com\"]},\"messageId\":\"<8259e50d-e658-205c-1cd0-7c260af20f2a@gmail.com>\"}","level":"info"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"\n\n<br/>Hello testuser,\n\n<br/>Your Otsu binarize  was successful.\n\n<br/>job otsu-8jk8FqSRYAGwmAb3DMbMtn\n\n<br/>Please visit <a href=\"http://ubuntu.local/nm#/OtsuResult?refuri=/nmf/jobdata/otsu-8jk8FqSRYAGwmAb3DMbMtn\">this link</a> to view and download your results.\n\n<br/>\nRegards,\n<br/>The NanoMine team\n<br/>\n","level":"info"}
+{"message":"smtp return info: {\"accepted\":[\"back2akshay@gmail.com\"],\"rejected\":[],\"envelopeTime\":109,\"messageTime\":526,\"messageSize\":1264,\"response\":\"250 2.0.0 OK 1540415895 4-v6sm2018836ioy.55 - gsmtp\",\"envelope\":{\"from\":\"back2akshay@gmail.com\",\"to\":[\"back2akshay@gmail.com\"]},\"messageId\":\"<21c9d0fb-c792-d05a-0af3-0c7c906174c8@gmail.com>\"}","level":"info"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"\n\n<br/>Hello testuser,\n\n<br/>Your Otsu binarize  was successful.\n\n<br/>job otsu-cJPBV1VeWLd7KJ41Lk69mR\n\n<br/>Please visit <a href=\"http://ubuntu.local/nm#/OtsuResult?refuri=/nmf/jobdata/otsu-cJPBV1VeWLd7KJ41Lk69mR\">this link</a> to view and download your results.\n\n<br/>\nRegards,\n<br/>The NanoMine team\n<br/>\n","level":"info"}
+{"message":"smtp return info: {\"accepted\":[\"back2akshay@gmail.com\"],\"rejected\":[],\"envelopeTime\":304,\"messageTime\":792,\"messageSize\":1264,\"response\":\"250 2.0.0 OK 1540904587 u1-v6sm7945068itu.42 - gsmtp\",\"envelope\":{\"from\":\"back2akshay@gmail.com\",\"to\":[\"back2akshay@gmail.com\"]},\"messageId\":\"<6d6cf284-2f21-c81d-7664-396cac491bcc@gmail.com>\"}","level":"info"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"\n\n<br/>Hello testuser,\n\n<br/>Your Otsu binarize  was successful.\n\n<br/>job otsu-vNJXSg2QnofXPe3Q9pi8Mg\n\n<br/>Please visit <a href=\"http://ubuntu.local/nm#/OtsuResult?refuri=/nmf/jobdata/otsu-vNJXSg2QnofXPe3Q9pi8Mg\">this link</a> to view and download your results.\n\n<br/>\nRegards,\n<br/>The NanoMine team\n<br/>\n","level":"info"}
+{"message":"smtp return info: {\"accepted\":[\"back2akshay@gmail.com\"],\"rejected\":[],\"envelopeTime\":303,\"messageTime\":659,\"messageSize\":1264,\"response\":\"250 2.0.0 OK 1540906184 v24-v6sm7346444iom.85 - gsmtp\",\"envelope\":{\"from\":\"back2akshay@gmail.com\",\"to\":[\"back2akshay@gmail.com\"]},\"messageId\":\"<d1380237-a528-8cb2-83d0-d5557bc9e4ef@gmail.com>\"}","level":"info"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"\n\n<br/>Hello testuser,\n\n<br/>Your Otsu binarize  was successful.\n\n<br/>job otsu-wDn1Y3y4srFCUUL8Jatmo8\n\n<br/>Please visit <a href=\"http://localhost/nm#/OtsuResult?refuri=/nmf/jobdata/otsu-wDn1Y3y4srFCUUL8Jatmo8\">this link</a> to view and download your results.\n\n<br/>\nRegards,\n<br/>The NanoMine team\n<br/>\n","level":"info"}
+{"message":"smtp return info: {\"accepted\":[\"back2akshay@gmail.com\"],\"rejected\":[],\"envelopeTime\":295,\"messageTime\":512,\"messageSize\":1258,\"response\":\"250 2.0.0 OK 1540989390 a17-v6sm5647835ioc.28 - gsmtp\",\"envelope\":{\"from\":\"back2akshay@gmail.com\",\"to\":[\"back2akshay@gmail.com\"]},\"messageId\":\"<b83520fc-cf41-3725-2edc-6a691e35f1a7@gmail.com>\"}","level":"info"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"\n\n<br/>Hello testuser,\n\n<br/>Your Otsu binarize  was successful.\n\n<br/>job otsu-mUeiAybady1G25GizVfb92\n\n<br/>Please visit <a href=\"http://localhost/nm#/OtsuResult?refuri=/nmf/jobdata/otsu-mUeiAybady1G25GizVfb92\">this link</a> to view and download your results.\n\n<br/>\nRegards,\n<br/>The NanoMine team\n<br/>\n","level":"info"}
+{"message":"smtp return info: {\"accepted\":[\"back2akshay@gmail.com\"],\"rejected\":[],\"envelopeTime\":118,\"messageTime\":592,\"messageSize\":1258,\"response\":\"250 2.0.0 OK 1540989710 s15-v6sm6794024ioe.70 - gsmtp\",\"envelope\":{\"from\":\"back2akshay@gmail.com\",\"to\":[\"back2akshay@gmail.com\"]},\"messageId\":\"<474d0245-2438-fa8c-b44b-7446a3940af5@gmail.com>\"}","level":"info"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"<br/>Hello testuser,\n\n<br/>Unfortunately, your Otsu's binarize was not successful.\n\n<br/>jobid: otsu-oBWiJyUotBJtvuAghEzqvj\n\n<br/>job result code: 99\n\n<br/>Please visit <a href=\"https://nanomine.org/joboutput/otsu-oBWiJyUotBJtvuAghEzqvj\">your job output</a> for more information\n\n<br/>\nRegards,\n<br/>The NanoMine team\n<br/>\n","level":"info"}
+{"message":"smtp return info: {\"accepted\":[\"back2akshay@gmail.com\"],\"rejected\":[],\"envelopeTime\":331,\"messageTime\":679,\"messageSize\":1296,\"response\":\"250 2.0.0 OK 1540991109 j11sm1297418itl.24 - gsmtp\",\"envelope\":{\"from\":\"back2akshay@gmail.com\",\"to\":[\"back2akshay@gmail.com\"]},\"messageId\":\"<1772b96c-7b7d-6ce8-2bd1-429208cc1cde@gmail.com>\"}","level":"info"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"\n\n<br/>Hello testuser,\n\n<br/>Your Otsu binarize  was successful.\n\n<br/>job otsu-nWiLKM2yehcaAc6dfDDHBr\n\n<br/>Please visit <a href=\"http://localhost/nm#/OtsuResult?refuri=/nmf/jobdata/otsu-nWiLKM2yehcaAc6dfDDHBr\">this link</a> to view and download your results.\n\n<br/>\nRegards,\n<br/>The NanoMine team\n<br/>\n","level":"info"}
+{"message":"smtp return info: {\"accepted\":[\"back2akshay@gmail.com\"],\"rejected\":[],\"envelopeTime\":410,\"messageTime\":691,\"messageSize\":1258,\"response\":\"250 2.0.0 OK 1541600524 x22-v6sm266181ioh.2 - gsmtp\",\"envelope\":{\"from\":\"back2akshay@gmail.com\",\"to\":[\"back2akshay@gmail.com\"]},\"messageId\":\"<41589d2a-9053-9c48-4d13-284927cea395@gmail.com>\"}","level":"info"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"\n\n<br/>Hello testuser,\n\n<br/>Your Otsu binarize  was successful.\n\n<br/>job otsu-rnmSTg9kUtLvyg9RieKmmA\n\n<br/>Please visit <a href=\"http://localhost/nm#/OtsuResult?refuri=/nmf/jobdata/otsu-rnmSTg9kUtLvyg9RieKmmA\">this link</a> to view and download your results.\n\n<br/>\nRegards,\n<br/>The NanoMine team\n<br/>\n","level":"info"}
+{"message":"smtp return info: {\"accepted\":[\"back2akshay@gmail.com\"],\"rejected\":[],\"envelopeTime\":107,\"messageTime\":379,\"messageSize\":1258,\"response\":\"250 2.0.0 OK 1541600584 u5-v6sm198291iob.83 - gsmtp\",\"envelope\":{\"from\":\"back2akshay@gmail.com\",\"to\":[\"back2akshay@gmail.com\"]},\"messageId\":\"<146466a4-b06a-d2e9-703e-e8d0c91006a1@gmail.com>\"}","level":"info"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"\n\n<br/>Hello testuser,\n\n<br/>Your Otsu binarize  was successful.\n\n<br/>job otsu-seBZQrcQVtzJjkVW2eDKSQ\n\n<br/>Please visit <a href=\"http://localhost/nm#/OtsuResult?refuri=/nmf/jobdata/otsu-seBZQrcQVtzJjkVW2eDKSQ\">this link</a> to view and download your results.\n\n<br/>\nRegards,\n<br/>The NanoMine team\n<br/>\n","level":"info"}
+{"message":"smtp return info: {\"accepted\":[\"back2akshay@gmail.com\"],\"rejected\":[],\"envelopeTime\":227,\"messageTime\":575,\"messageSize\":1258,\"response\":\"250 2.0.0 OK 1541604666 t196-v6sm646111ita.30 - gsmtp\",\"envelope\":{\"from\":\"back2akshay@gmail.com\",\"to\":[\"back2akshay@gmail.com\"]},\"messageId\":\"<c55aa003-38fa-405a-bbcf-fdf6fcac7904@gmail.com>\"}","level":"info"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"<br/>Hello testuser,\n\n<br/>Unfortunately, SDF characterization was not successful.\n\n<br/>jobid: SDFCharacterize-cCzcS3wtF8AYJ4NAEqFzh3\n\n<br/>job result code: 99\n\n<br/>Please visit <a href=\"https://nanomine.org/joboutput/SDFCharacterize-cCzcS3wtF8AYJ4NAEqFzh3\">your job output</a> for more information\n\n<br/>\nRegards,\n<br/>The NanoMine team\n<br/>\n","level":"info"}
+{"message":"smtp return info: {\"accepted\":[\"back2akshay@gmail.com\"],\"rejected\":[],\"envelopeTime\":231,\"messageTime\":506,\"messageSize\":1351,\"response\":\"250 2.0.0 OK 1541685912 b5-v6sm1395112iof.74 - gsmtp\",\"envelope\":{\"from\":\"back2akshay@gmail.com\",\"to\":[\"back2akshay@gmail.com\"]},\"messageId\":\"<ec28293f-e507-22ae-4fc2-5a3bf017043c@gmail.com>\"}","level":"info"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"\n\n<br/>Hello testuser,\n\n<br/>Your SDF Characterization job was successful.\n\n<br/>job SDFCharacterize-sh397AN4auSz4K6szpxCj4\n\n<br/>Please visit <a href=\"http://localhost/nm#/OtsuResult?refuri=/nmf/jobdata/SDFCharacterize-sh397AN4auSz4K6szpxCj4\">this link</a> to view and download your results.\n\n<br/>\nRegards,\n<br/>The NanoMine team\n<br/>\n","level":"info"}
+{"message":"smtp return info: {\"accepted\":[\"back2akshay@gmail.com\"],\"rejected\":[],\"envelopeTime\":272,\"messageTime\":937,\"messageSize\":1333,\"response\":\"250 2.0.0 OK 1541691388 69-v6sm2534242itm.23 - gsmtp\",\"envelope\":{\"from\":\"back2akshay@gmail.com\",\"to\":[\"back2akshay@gmail.com\"]},\"messageId\":\"<75b455ad-aefa-889a-0d1c-26a3fb6bdde7@gmail.com>\"}","level":"info"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"\n\n<br/>Hello testuser,\n\n<br/>Your SDF Characterization job was successful.\n\n<br/>job SDFCharacterize-nyKFybuGwSPQ3ifHhfGyPd\n\n<br/>Please visit <a href=\"http://localhost/nm#/SDFCharacterizeResults?refuri=/nmf/jobdata/SDFCharacterize-nyKFybuGwSPQ3ifHhfGyPd\">this link</a> to view and download your results.\n\n<br/>\nRegards,\n<br/>The NanoMine team\n<br/>\n","level":"info"}
+{"message":"smtp return info: {\"accepted\":[\"back2akshay@gmail.com\"],\"rejected\":[],\"envelopeTime\":118,\"messageTime\":882,\"messageSize\":1363,\"response\":\"250 2.0.0 OK 1541691799 x13-v6sm2127740ita.8 - gsmtp\",\"envelope\":{\"from\":\"back2akshay@gmail.com\",\"to\":[\"back2akshay@gmail.com\"]},\"messageId\":\"<ae1e9745-cceb-bcd1-6bcd-da577a7c6260@gmail.com>\"}","level":"info"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"<br/>Hello testuser,\n\n<br/>Unfortunately, SDF characterization was not successful.\n\n<br/>jobid: SDFCharacterize-9xdhTFLKBiSbf1w3vrDCPu\n\n<br/>job result code: 99\n\n<br/>Please visit <a href=\"https://nanomine.org/joboutput/SDFCharacterize-9xdhTFLKBiSbf1w3vrDCPu\">your job output</a> for more information\n\n<br/>\nRegards,\n<br/>The NanoMine team\n<br/>\n","level":"info"}
+{"message":"smtp return info: {\"accepted\":[\"back2akshay@gmail.com\"],\"rejected\":[],\"envelopeTime\":118,\"messageTime\":443,\"messageSize\":1351,\"response\":\"250 2.0.0 OK 1541692406 c187-v6sm1852374itc.2 - gsmtp\",\"envelope\":{\"from\":\"back2akshay@gmail.com\",\"to\":[\"back2akshay@gmail.com\"]},\"messageId\":\"<c4a54125-f540-cfd3-468c-0fcdb9f76b79@gmail.com>\"}","level":"info"}
+{"message":"job parameters: {\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"\n\n<br/>Hello testuser,\n\n<br/>Your SDF Characterization job was successful.\n\n<br/>job SDFCharacterize-LQyub8Pq3xtr8hhd1qWSq\n\n<br/>Please visit <a href=\"http://localhost/nm#/SDFCharacterizeResults?refuri=/nmf/jobdata/SDFCharacterize-LQyub8Pq3xtr8hhd1qWSq\">this link</a> to view and download your results.\n\n<br/>\nRegards,\n<br/>The NanoMine team\n<br/>\n","level":"info"}
+{"message":"smtp return info: {\"accepted\":[\"back2akshay@gmail.com\"],\"rejected\":[],\"envelopeTime\":105,\"messageTime\":599,\"messageSize\":1358,\"response\":\"250 2.0.0 OK 1541693084 z191-v6sm1886590itb.31 - gsmtp\",\"envelope\":{\"from\":\"back2akshay@gmail.com\",\"to\":[\"back2akshay@gmail.com\"]},\"messageId\":\"<5d154527-ae6e-bf9f-d5ff-73916352b85d@gmail.com>\"}","level":"info"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"NOTE: if the error above is EEXISTS, the error can be ignored.","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}

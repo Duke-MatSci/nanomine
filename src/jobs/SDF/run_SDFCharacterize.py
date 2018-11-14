@@ -58,7 +58,7 @@ for f in myfiles:
     input_type = '1'
     input_name = f
 
-matlabPgm = 'Otsu' # .m is implied, test mode will use python pgm
+matlabPgm = 'SDFCharacterize' # .m is implied, test mode will use python pgm
 mlab = matlab(logging) # create matlab object
 
 matlabPgmParams = (input_type,input_name)
@@ -70,7 +70,7 @@ print('MATLAB return code - rc: ' + str(rc))
 if rc ==0:
   file = open(jobDir+"/"+"job_output_parameters.json","w")
   file.write('{\n"inputFileName": "output/Input1.jpg",\n')
-  file.write('"binarizedFileName": "output/Binarized_Input1.jpg",\n')
+  file.write('"SDFPlot": "output/SDF_2D.jpg",\n')
   file.write('"zipFileName": "output/Results.zip"\n}')
   file.close()
 
@@ -85,7 +85,7 @@ if rc == 0: # send success email
       "jobtype": jobType,
       "emailtemplatename": "success",
       "emailvars": {
-        "resultpage": webBaseUri + '/nm#/OtsuResult?refuri='+jobDataUriSuffix+'/'+jobId,
+        "resultpage": webBaseUri + '/nm#/SDFCharacterizeResults?refuri='+jobDataUriSuffix+'/'+jobId,
         "jobinfo": {
           "resultcode":rc
         },
@@ -100,7 +100,7 @@ if rc == 0: # send success email
     r = urllib2.urlopen(rq, json.dumps(emaildata))
     logging.info('sent success email: ' + str(r.getcode()))
   except:
-    logging.info('exception occurred sending run_otsu success email')
+    logging.info('exception occurred sending run_SDFCharacterize success email')
     logging.info('exception: ' + traceback.format_exc())
 else: # send error email
   try:
@@ -124,7 +124,7 @@ else: # send error email
     r = urllib2.urlopen(rq, json.dumps(emaildata))
     logging.info('sent failure email: ' + str(r.getcode()))
   except:
-    logging.info('exception occurred sending run_otsu failure email')
+    logging.info('exception occurred sending run_SDFCharacterize failure email')
     logging.info('exception: ' + traceback.format_exc())
 
 
