@@ -428,8 +428,19 @@ function migrateToNmSpDev1 (fromVer, toVer) {
               // extract dataset fields and append to datasets array -- if not already there
               seq = match[1]
               let isValidSchema = checkSchema(xmldoc.schema) // TODO bad name. Just checks to see if schema is not deleted and current
-              if (datasets[seq] === undefined && isValidSchema) {
+              if (datasets[seq] === undefined && isValidSchema && (xmldoc.schema === latestSchema().schemaId)) { // try to get latest data
                 let ds = _.get(json, 'PolymerNanocomposite.DATA_SOURCE.Citation.CommonFields', null)
+                let dsExt = _.get(json, 'PolymerNanocomposite.DATA_SOURCE.Citation.CitationType.Journal', null)
+                let issue = null
+                let issn = null
+                if (dsExt) {
+                  issue = dsExt.Issue
+                  issn = dsExt.ISSN
+                  logDebug('issue: ' + issue + ' issn: ' + issn)
+                } else {
+                  // logError('title: ' + xmldoc.title + ' schema: ' + xmldoc.schema + ' - dsExt (journal info) is null or undefined for dataset seq: ' + seq)
+                  logError('dsExt (journal info) is null or undefined for dataset seq: ' + seq)
+                }
                 if (ds !== null) {
                   datasets[seq] = {
                     'citationType': ds.CitationType,
@@ -442,7 +453,11 @@ function migrateToNmSpDev1 (fromVer, toVer) {
                     'doi': ds.DOI,
                     'volume': ds.Volume,
                     'url': ds.URL,
-                    'language': ds.Language
+                    'language': ds.Language,
+                    'dateOfCitation': ds.DateOfCitation,
+                    'location': ds.Location,
+                    'issue': issue,
+                    'issn': issn
                   }
                   if (_.isArray(ds.Author)) {
                     ds.Author.forEach((a) => {
