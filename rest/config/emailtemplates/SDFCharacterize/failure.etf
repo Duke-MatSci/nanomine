@@ -1,0 +1,14 @@
+<br/>Hello ${user},
+
+<br/>Unfortunately, SDF characterization was not successful.
+
+<br/>jobid: ${jobid}
+
+<br/>job result code: ${jobinfo.resultcode}
+
+<br/>Please visit <a href="https://nanomine.org/joboutput/${jobid}">your job output</a> for more information
+
+<br/>
+Regards,
+<br/>The NanoMine team
+<br/>

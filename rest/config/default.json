@@ -29,6 +29,12 @@
         "lang": "python",
         "pgmdir": "../src/jobs/XMLCONV",
         "pgmname": "run_xmlconv.py"
+      },
+      {
+        "jobtype": "SDFCharacterize",
+        "lang": "python",
+        "pgmdir": "../src/jobs/SDF",
+        "pgmname": "run_SDFCharacterize.py"
       }
     ]
   }
