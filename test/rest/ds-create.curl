@@ -2,5 +2,10 @@ curl --header "Content-Type: application/json" \
   --request POST \
   --data '{"dsInfo":{"citationType":"book","publication":"A book of MatSci Samples","title":"A book of MatSci Samples",
   "author":["Taylor, Tim","Clause, Santa"],"keyword":["polymer","nanocomposite"],"publisher":"IHOP","publicationYear":1905,
-    "doi":"abc.def.ghi-21","volume":"1","url":"http://example.com","language":"English","seq":"2140"}}' \
+    "doi":"abc.def.ghi-21","volume":"1","url":"http://example.com","language":"English",
+    "location":"Hollywood",
+    "dateOfCitation":"12/25/1990",
+    "issn":"santa-1",
+    "issue":"br-549",
+    "seq":"2140"}}' \
   http://ubuntu.local/nmr/dataset/create
