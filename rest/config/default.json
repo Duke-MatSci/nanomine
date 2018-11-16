@@ -35,6 +35,12 @@
         "lang": "python",
         "pgmdir": "../src/jobs/SDF",
         "pgmname": "run_SDFCharacterize.py"
+      },
+      {
+        "jobtype": "DescriptorCharacterize",
+        "lang": "python",
+        "pgmdir": "../src/jobs/Descriptor",
+        "pgmname": "run_DescriptorCharacterize.py"
       }
     ]
   }

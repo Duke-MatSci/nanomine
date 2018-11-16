@@ -1,0 +1,14 @@
+
+
+<br/>Hello ${user},
+
+<br/>Your Descriptor Characterization job was successful.
+
+<br/>job ${jobid}
+
+<br/>Please visit <a href="${resultpage}">this link</a> to view and download your results.
+
+<br/>
+Regards,
+<br/>The NanoMine team
+<br/>
