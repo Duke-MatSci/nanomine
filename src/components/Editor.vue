@@ -1,5 +1,5 @@
 <template>
-  <div class="nmeditor">
+  <div class="nmeditor" v-if="showEditor()">
     <v-alert
       v-model="editorError"
       type="error"
@@ -236,6 +236,19 @@
       </v-dialog>
     </v-layout>
     <!--/><-->
+    <v-container fluid class="info-window" v-if="showInfo()">
+      <v-layout row wrap align-start >
+        <v-flex xs12 fill-width>INFO!!!</v-flex>
+      </v-layout>
+    </v-container>
+    <v-container  fluid  class="search-window" v-if="showSearch()">
+      <v-layout row wrap>
+        <v-flex xs12>Search line 1</v-flex>
+        <v-flex xs12>Search line 2</v-flex>
+        <v-flex xs12>Search line 3</v-flex>
+        <v-flex xs12>Search line 4</v-flex>
+      </v-layout>
+    </v-container>
     <v-container v-bind:style="{'display': xmlInView}" fluid justify-start fill-height>
       <v-layout row wrap align-start fill-height>
         <v-flex fill-height xs12>
@@ -265,6 +278,7 @@ import CodeMirror from '@/utils/codemirror'
 import Axios from 'axios'
 import vkbeautify from 'vkbeautify'
 import * as jxParser from 'fast-xml-parser'
+import * as xmljs from 'xml-js'
 
 export default {
   name: 'Editor',
@@ -280,7 +294,7 @@ export default {
       editorError: false,
       editorErrorMsg: '',
       editorValidated: false,
-      editorValidatedMessage: '',
+      editorValidatedMsg: '',
       content: null,
       xml_text: '<PolymerNanocomposite>\n</PolymerNanocomposite>',
       view: 'form',
@@ -412,8 +426,17 @@ export default {
     }
   },
   methods: {
+    showEditor: function () {
+      return false
+    },
     log: function (msg) {
       window.console.log(msg)
+    },
+    showSearch: function () {
+      return false
+    },
+    showInfo: function () {
+      return false
     },
     xmlEditorOnChanges: function (cm, changes) {
       // let vm = this
@@ -434,7 +457,9 @@ export default {
       // console.log(tabNumber)
       // if default is XML vm.refreshEditor()
       // default is form
-      vm.jsonSource = jxParser.parse(xmlText)
+      // vm.jsonSource = jxParser.parse(xmlText)
+      vm.jsonSource = xmljs.xml2js(xmlText)
+      // console.log(vm.jsonSource)
       setTimeout(function () {
         let vals = document.getElementsByClassName('tree-view-item-value')
         // console.log('transform: found ' + vals.length + ' input elements.')
@@ -470,29 +495,30 @@ export default {
         Axios.get(xsdUrl)
           .then(function (response) {
             console.log(response)
-            let j2xOptions = {
-              attributeNamePrefix: '@_',
-              attrNodeName: 'attr', // default is 'false'
-              textNodeName: '#text',
-              ignoreAttributes: false,
-              ignoreNameSpace: false,
-              allowBooleanAttributes: false,
-              parseNodeValue: true,
-              parseAttributeValue: true,
-              trimValues: true,
-              cdataTagName: '__cdata', // default is 'false'
-              cdataPositionChar: '\\c',
-              localeRange: '', // To support non english character in tag/attribute values.
-              parseTrueNumberOnly: false
-              // attrValueProcessor: a => he.decode(a, {isAttributeValue: true}),//default is a=>a
-              // tagValueProcessor : a => he.decode(a) //default is a=>a
-            }
+            // let j2xOptions = {
+            //   attributeNamePrefix: '@_',
+            //   attrNodeName: 'attr', // default is 'false'
+            //   textNodeName: '#text',
+            //   ignoreAttributes: false,
+            //   ignoreNameSpace: false,
+            //   allowBooleanAttributes: false,
+            //   parseNodeValue: true,
+            //   parseAttributeValue: true,
+            //   trimValues: true,
+            //   cdataTagName: '__cdata', // default is 'false'
+            //   cdataPositionChar: '\\c',
+            //   localeRange: '', // To support non english character in tag/attribute values.
+            //   parseTrueNumberOnly: false
+            //   // attrValueProcessor: a => he.decode(a, {isAttributeValue: true}),//default is a=>a
+            //   // tagValueProcessor : a => he.decode(a) //default is a=>a
+            // }
             response.data.data.forEach(function (v, idx) {
-              response.data.data[idx].currentRef[0].contentJson = jxParser.parse(response.data.data[idx].currentRef[0].content, j2xOptions)
+              // response.data.data[idx].currentRef[0].contentJson = jxParser.parse(response.data.data[idx].currentRef[0].content, j2xOptions)
+              response.data.data[idx].currentRef[0].contentJson = xmljs.xml2js(response.data.data[idx].currentRef[0].content, {})
               console.log(JSON.stringify(response.data.data[idx].currentRef[0].contentJson))
             })
             vm.$store.commit('addSchemas', response.data.data) // could allow this to be cached, but for now just get it done
-            // NOTE: state is not updated until next tick, so continue to use request.data.data in this method :(
+            // NOTE: store is not updated until next tick, so continue to use request.data.data in this method :(
             let criteria = '/' + vm.openID + '/'
             console.log('vm.openID: ' + vm.openID)
             let schemas = []
@@ -723,18 +749,31 @@ export default {
       let vm = this
       console.log('filePublish!')
       vm.setLoading()
-      let url = '/nmr/xml'
+      let url = '/nmr/curate'
+      let title = vm.$store.getters.editorFileName // TODO inconsistency in naming. In the xmldata collection it is 'title'
+      title += '.xml' // TODO fix this since title in mongo has .xml, but the code is not saving that internally.
+      let schemaId = vm.$store.getters.editorSchemaId
+      let content = vm.$store.getters.editorXmlText
+      let curatedDataState = 'editedNotValid' // for now, since validation is not done
+      console.log('filePublish - title: ' + title + ' schemaId: ' + schemaId + ' content length: ' + content.length + ' curatedDataState: ' + curatedDataState)
       return Axios.post(url, {
-        'filename': 'L217_S1_Ash_2002.xml',
-        'filetype': 'sample',
-        'xml': vm.getEditorContent()
+        'title': title,
+        'schemaId': schemaId,
+        'content': vkbeautify.xmlmin(content),
+        'curatedDataState': curatedDataState
       })
         .then(function (resp) {
           console.log('response: ' + JSON.stringify(resp))
+          if (resp.error) {
+            vm.editorError = true
+            vm.editorErrorMsg = resp.error
+          }
           vm.resetLoading()
         })
         .catch(function (err) {
           console.log('error: ' + err)
+          vm.editorError = true
+          vm.editorErrorMsg = '' + err
           vm.resetLoading()
         })
     },
@@ -764,7 +803,9 @@ export default {
       let vm = this
       let xml = vkbeautify.xml(vm.$store.getters.editorXmlText, 1)
       // console.log('refreshForm xml: ' + xml)
-      vm.jsonSource = jxParser.parse(xml) // always returns a valid xml value (default if none opened)
+      // vm.jsonSource = jxParser.parse(xml) // always returns a valid xml value (default if none opened)
+      vm.jsonSource = xmljs.xml2js(xml, {'compact': true})
+      console.log(vm.jsonSource)
       setTimeout(function () {
         let vals = document.getElementsByClassName('tree-view-item-value')
         // console.log('transform: found ' + vals.length + ' input elements.')
@@ -922,7 +963,20 @@ export default {
     vertical-align: bottom;
     padding-bottom: 2px;
   }
-
+  .info-window {
+    background-color: #cde0ff;
+    padding-left: 0px;
+    padding-right: 0px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+  }
+  .search-window {
+    background-color: #dffffd;
+    padding-left: 0px;
+    padding-right: 0px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+  }
   .file-open-header {
     background-color: #03A9F4;
     color: #ffffff;

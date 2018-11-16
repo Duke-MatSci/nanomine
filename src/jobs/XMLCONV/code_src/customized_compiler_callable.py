@@ -18,11 +18,13 @@ import dicttoxml
 import collections                        # Python standard library
 import xml.etree.ElementTree as ET
 
-# -------------------------------------------- DOI information retriever
-import pickle                             # Python standard library
-
 # -------------------------------------------- XML-XSD validation tool
 from xml_update_validator import runValidation
+
+# -------------------------------------------- REST service
+import urllib2
+import json
+import logging
 
 
 ## Helper Methods
@@ -439,17 +441,39 @@ def doiAdd(doiKVPair, CommonFields):
 ## Sheet by sheet data extraction
 # Sheet 1. Data Origin (Sample Info)
 # neglecting issue for now
-def sheetSampleInfo(sheet, DATA, myXSDtree, jobDir):
+def sheetSampleInfo(sheet, DATA, myXSDtree, jobDir, restbase):
     CurrentTime = strftime("%Y-%m-%d %H:%M:%S", gmtime())
     CommonFields = []
-    Journal = [] # Thanks Richard!
+    Journal = []
     LabGenerated = []
-    # a flag for DOI
-    DOI = ""
     # ID read from ID.txt, in views.py only ID.txt exists this script will
-    # be called
+    # be called, all ID's will have a sequence
     with open(jobDir + '/ID.txt', 'r+') as fid:
         ID = fid.read()
+    # get the seq
+    seq = ID.split('_')[0][1:] # get the first chunk and delete the first letter
+    # GET dsInfo by seq
+    response = {}
+    try:
+        dsurl = restbase + '/nmr/dataset?seq='+seq
+        rq = urllib2.Request(dsurl)
+        j = json.loads(urllib2.urlopen(rq).read())
+        response = j["data"][0]
+    except:
+        print 'exception occurred during dataset GET by doi'
+        print 'exception: ' + str(sys.exc_info()[0])
+    # special case author and keyword, which are saved as list
+    authorREST = 'author' in response
+    keywordREST = 'keyword' in response
+    if authorREST:
+        for author in response['author']:
+            CommonFields = insert('Author', author, CommonFields)
+    if keywordREST:
+        for keyword in response['keyword']:
+            CommonFields = insert('Keyword', keyword, CommonFields)
+    if 'issn' in response:
+        Journal = insert('ISSN', response['issn'], Journal)
+    # loop through the rows in the excel
     for row in xrange(sheet.nrows):
         # Control_ID
         if match(sheet.row_values(row)[0], 'Control sample ID'):
@@ -466,43 +490,76 @@ def sheetSampleInfo(sheet, DATA, myXSDtree, jobDir):
             UploaderEmail = sheet.row_values(row)[1]
 
         elif match(sheet.row_values(row)[0], 'Publication Type'):
-            CommonFields = insert('CitationType', sheet.row_values(row)[1], CommonFields)
+            value = sheet.row_values(row)[1]
+            if 'citationType' in response:
+                value = response['citationType']
+            CommonFields = insert('CitationType', value, CommonFields)
             
         elif match(sheet.row_values(row)[0], 'Publication'):
-            CommonFields = insert('Publication', sheet.row_values(row)[1], CommonFields)
+            value = sheet.row_values(row)[1]
+            if 'publication' in response:
+                value = response['publication']
+            CommonFields = insert('Publication', value, CommonFields)
             
         elif match(sheet.row_values(row)[0], 'Title'):
-            CommonFields = insert('Title', sheet.row_values(row)[1], CommonFields)
+            value = sheet.row_values(row)[1]
+            if 'title' in response:
+                value = response['title']
+            CommonFields = insert('Title', value, CommonFields)
             
-        elif match(sheet.row_values(row)[0], 'Author'):
+        elif match(sheet.row_values(row)[0], 'Author') and not authorREST:
             CommonFields = insert('Author', sheet.row_values(row)[1], CommonFields)
             
-        elif match(sheet.row_values(row)[0], 'Keyword'):
+        elif match(sheet.row_values(row)[0], 'Keyword') and not keywordREST:
             CommonFields = insert('Keyword', sheet.row_values(row)[1], CommonFields)
             
         elif match(sheet.row_values(row)[0], 'Publication Year'):
-            CommonFields = insert('PublicationYear', sheet.row_values(row)[1], CommonFields)
+            value = sheet.row_values(row)[1]
+            if 'publicationYear' in response:
+                value = response['publicationYear']
+            CommonFields = insert('PublicationYear', value, CommonFields)
         
         elif match(sheet.row_values(row)[0], 'DOI'):
-            if len(DOI) == 0:
-                CommonFields = insert('DOI', sheet.row_values(row)[1], CommonFields)
-                DOI = sheet.row_values(row)[1].strip()
+            value = sheet.row_values(row)[1].strip()
+            if 'doi' in response:
+                value = response['doi']
+            CommonFields = insert('DOI', value, CommonFields)
             
         elif match(sheet.row_values(row)[0], 'Volume'):
-            CommonFields = insert('Volume', (sheet.row_values(row)[1]), CommonFields)
+            value = sheet.row_values(row)[1]
+            if 'volume' in response:
+                value = response['volume']
+            CommonFields = insert('Volume', value, CommonFields)
         
         elif match(sheet.row_values(row)[0], 'URL'):
-            CommonFields = insert('URL', sheet.row_values(row)[1], CommonFields)
+            value = sheet.row_values(row)[1]
+            if 'url' in response:
+                value = response['url']
+            CommonFields = insert('URL', value, CommonFields)
         
         elif match(sheet.row_values(row)[0], 'Language'):
-            CommonFields = insert('Language', sheet.row_values(row)[1], CommonFields)
+            value = sheet.row_values(row)[1]
+            if 'language' in response:
+                value = response['language']
+            CommonFields = insert('Language', value, CommonFields)
             
         elif match(sheet.row_values(row)[0], 'Location'):
-            CommonFields = insert('Location', sheet.row_values(row)[1], CommonFields)
+            value = sheet.row_values(row)[1]
+            if 'location' in response:
+                value = response['location']
+            CommonFields = insert('Location', value, CommonFields)
             
         elif match(sheet.row_values(row)[0], 'DateOfCitation'):
-            CommonFields = insert('DateOfCitation', sheet.row_values(row)[1], CommonFields)
+            value = sheet.row_values(row)[1]
+            if 'dateOfCitation' in response:
+                value = response['dateOfCitation']
+            CommonFields = insert('DateOfCitation', value, CommonFields)
 
+        elif match(sheet.row_values(row)[0], 'Issue'):
+            value = sheet.row_values(row)[1]
+            if 'issue' in response:
+                value = response['issue']
+            Journal = insert('Issue', value, Journal)
         # lab generated 
         elif match(sheet.row_values(row)[0], 'Date of Sample Made'):
             if hasLen(sheet.row_values(row)[1]) and str(sheet.row_values(row)[1]).replace('.','',1).isdigit():
@@ -532,7 +589,7 @@ def sheetSampleInfo(sheet, DATA, myXSDtree, jobDir):
         DATA.append({'DATA_SOURCE': {'Citation': {'CommonFields':CommonFields, 'CitationType': {'Journal':Journal}}}})
     if len(LabGenerated) > 0:
         DATA.append({'DATA_SOURCE': {'LabGenerated': LabGenerated}})
-    return (ID, DATA, DOI)
+    return (ID, DATA)
 
 # Sheet 2. Material Types
 def sheetMatType(sheet, DATA, myXSDtree, jobDir):
@@ -688,6 +745,9 @@ def sheetMatType(sheet, DATA, myXSDtree, jobDir):
             if len(vcc) > 0:
                 MatrixComponent.append({'MatrixComponentComposition':vcc})
         # Filler
+            # Description
+        if match(sheet.cell_value(row, 0), 'Filler description'):
+            temp = insert('Description', sheet.cell_value(row, 1), temp)
             # FillerComponent/ChemicalName
         if match(sheet.cell_value(row, 0), 'Filler chemical name/Filler name'):
             FillerComponent = insert('ChemicalName', sheet.cell_value(row, 1), FillerComponent)
@@ -3311,7 +3371,7 @@ def sheetMicrostructure(sheet, DATA, myXSDtree, jobDir):
     return DATA
 
 ## main
-def compiler(jobDir, code_srcDir, xsdDir, templateName):
+def compiler(jobDir, code_srcDir, xsdDir, templateName, restbase):
     ## Global variable myXSDtree
     # read the xsd tree
     myXSDtree = ET.parse(xsdDir)
@@ -3334,7 +3394,7 @@ def compiler(jobDir, code_srcDir, xsdDir, templateName):
         # check the header of the sheet to determine what it has inside
         if (sheet.row_values(0)[0].strip().lower() == "sample info"):
             # sample info sheet
-            (ID, DATA, DOI) = sheetSampleInfo(sheet, DATA, myXSDtree, jobDir)
+            (ID, DATA) = sheetSampleInfo(sheet, DATA, myXSDtree, jobDir, restbase)
         elif (sheet.row_values(0)[0].strip().lower() == "material types"):
             # material types sheet
             DATA = sheetMatType(sheet, DATA, myXSDtree, jobDir)
@@ -3363,6 +3423,8 @@ def compiler(jobDir, code_srcDir, xsdDir, templateName):
     # https://docs.python.org/2/library/collections.html#collections.OrderedDict
     diffusionData = collections.OrderedDict({'item':DATA})
 
+    # change the log level of dicttoxml
+    dicttoxml.LOG.setLevel(logging.ERROR)
     # using dicttoxml library to convert dictionary to xml
     diffusionDataxml = dicttoxml.dicttoxml(diffusionData,custom_root='PolymerNanocomposite',attr_type=False)
     # need to remove all <item> and </item> and <item > in the xml
@@ -3371,16 +3433,6 @@ def compiler(jobDir, code_srcDir, xsdDir, templateName):
     tree = ET.ElementTree()
     root = ET.fromstring(diffusionDataxml)
     tree._setroot(root)
-    # if DOI exists (excludes special issue madeup DOI), substitute the Citation element
-    if len(DOI) > 0 and 'ma-SI' not in DOI:
-        with open(code_srcDir + '/doi.pkl', 'rb') as f:
-            alldoiDict = pickle.load(f)
-        citationEle = alldoiDict[DOI]['metadata']
-        parent = root.find('.//Citation/..')
-        if parent.find('Citation') is not None:
-            parent.remove(parent.find('Citation')) # remove
-        # insert the crawled Citation
-        parent.insert(0, citationEle)
     # make directory for xml output
     os.mkdir(jobDir + '/xml')
     # write information to ./xml/ID.xml

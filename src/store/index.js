@@ -117,6 +117,16 @@ const store = new Vuex.Store({
       }
       return rv
     },
+    editorSchemaId: function (state) {
+      let rv = null
+      if (state.editor.currentTab >= 0) {
+        console.log('editorSchemaText: current tab is: ' + state.editor.currentTab)
+        rv = state.editor.tab[state.editor.currentTab].schemaId
+      } else {
+        console.log('editorSchemaId: could not find current tab.')
+      }
+      return rv
+    },
     editorSchemaText: function (state) {
       let rv = ''
       if (state.editor.currentTab >= 0) {

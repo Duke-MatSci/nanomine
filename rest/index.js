@@ -1,5 +1,6 @@
 /* NanoMine REST server */
 const axios = require('axios')
+const https = require('https')
 const util = require('util')
 const pathModule = require('path')
 const express = require('express')
@@ -16,9 +17,14 @@ const mongoose = require('mongoose')
 const templateFiller = require('es6-dynamic-template')
 const _ = require('lodash')
 const nodemailer = require('nodemailer')
+const jwtBase = require('jsonwebtoken')
+const jwt = require('express-jwt')
+const authGate = require('express-jwt-permissions')
+// const session = require('cookie-session')
+
 // TODO calling next(err) results in error page rather than error code in json
 
-const ObjectId = mongoose.Types.ObjectId
+// const ObjectId = mongoose.Types.ObjectId
 
 let logger = configureLogger()
 logger.info('NanoMine REST server version ' + config.version + ' starting')
@@ -32,6 +38,19 @@ let emailTestAddr = process.env['NM_SMTP_TEST_ADDR']
 let emailAdminAddr = process.env['NM_SMTP_ADMIN_ADDR']
 let nmWebFilesRoot = process.env['NM_WEBFILES_ROOT']
 let nmJobDataDir = process.env['NM_JOB_DATA']
+let nmLocalRestBase = process.env['NM_LOCAL_REST_BASE']
+let nmAuthSecret = process.env['NM_AUTH_SECRET']
+let nmSessionSecret = process.env['NM_SESSION_SECRET']
+let nmAuthEnabled = process.env['NM_AUTH_ENABLED'].toLowerCase() === 'yes'
+let nmAuthType = process.env['NM_AUTH_TYPE']
+
+let httpsAgentOptions = { // allow localhost https without knowledge of CA TODO - install ca cert on node - low priority
+  host: 'localhost',
+  port: '443',
+  path: '/sparql',
+  rejectUnauthorized: false
+}
+let httpsAgent = new https.Agent(httpsAgentOptions)
 
 let smtpTransport = null
 if (sendEmails) {
@@ -51,17 +70,20 @@ try {
   fs.mkdirSync(nmWebFilesRoot) // Sync used during startup
 } catch (err) {
   logger.error('mkdir nmWebFilesRoot failed: ' + err)
-  logger.error('NOTE: if the error above is EEXISTS, the error can be ignored.')
+  logger.error('NOTE: if the error above is EXISTS, the error can be ignored.')
 }
 
 try {
   fs.mkdirSync(nmJobDataDir) // Sync used during startup
 } catch (err) {
   logger.error('mkdir nmJobDataDir failed: ' + err)
-  logger.error('NOTE: if the error above is EEXISTS, the error can be ignored.')
+  logger.error('NOTE: if the error above is EXISTS, the error can be ignored.')
 }
 
 let app = express()
+app.set('x-powered-by', false)
+app.set('trust proxy', true)
+
 app.use(cookieParser())
 
 let dataSizeLimit = config.rest.dataSizeLimit // probably needs to be at least 50mb
@@ -73,6 +95,54 @@ app.use('/files', express.static(nmWebFilesRoot, {
   index: false,
   redirect: false
 }))
+
+// app.use(session({
+//   name: 'session',
+//   secret: [ nmSessionSecret ],
+//   maxAge: 24 * 60 * 60 * 1000 // 24 hrs for now, but really gated by underlying shib/jwt
+// }
+// ))
+
+app.use(jwt({
+  secret: nmAuthSecret,
+  credentialsRequired: false
+}))
+
+// app.use('/nm', express.static('../dist'))
+app.get('/nm', function (req, res) {
+  let idx = '../dist/index.html'
+  // console.log('headers: ' + JSON.stringify(req.headers))
+  // handleLogin(req.headers)
+  // NOTE: For now, login is required to get to the site. TODO change login so that it is optional to access protected functions
+  let remoteUser = req.headers['remote_user']
+  let shibExpiration = +(req.headers['shib-session-expires'])
+  // check admin status by looking up group
+  let isAdmin = false
+  let isUser = true // for now everyone is a user
+  let isAnonymous = false
+
+  let jwToken = jwtBase.sign({'sub': remoteUser, 'exp': shibExpiration, 'isAdmin': isAdmin, 'isUser': isUser, 'isAnonymous': isAnonymous}, nmAuthSecret)
+  // res.set('Authorization', 'Bearer ' + jwToken)
+  // console.log('Bearer token: ' + res.get('Authorization'))
+  logger.info('jwToken: ' + jwToken)
+  let token = req.cookies['token']
+  if (token) {
+    logger.debug('found session token: ' + token)
+  }
+  res.cookie('token', jwToken) // always override
+
+  try {
+    fs.readFile(idx, 'utf8', function (err, data) {
+      if (err) {
+        res.status(400).send('cannot open index')
+      } else {
+        res.send(data)
+      }
+    })
+  } catch (err) {
+    res.status(404).send(err)
+  }
+})
 
 let shortUUID = require('short-uuid')() // https://github.com/oculus42/short-uuid (npm i --save short-uuid)
 function inspect (theObj) {
@@ -116,7 +186,7 @@ let datasetsSchema = new mongoose.Schema({
   keyword: [String], /* Keywords. NOTE: some are multi-word */
   publisher: String, /* publisher */
   publicationYear: Number, /* 2005, etc. */
-  doi: String, /* DOI or other unique assigned handle -- can be missing or null */
+  doi: String, /* DOI or other unique assigned handle -- must be unique */
   volume: Number, /* 1-12 for monthly, could be others for weekly, semi-monthly, etc */
   url: String, /* Best url to access paper, book, etc */
   language: String, /* English, etc */
@@ -124,9 +194,18 @@ let datasetsSchema = new mongoose.Schema({
 }, {collection: 'datasets'})
 let Datasets = mongoose.model('datasets', datasetsSchema)
 
+let usersSchema = new mongoose.Schema({
+  alias: String, // random unless overridden by user - not used for attribution, only display
+  user: Number, // user number
+  userId: String,
+  email: String
+}, {collection: 'users'})
+let Users = mongoose.model('users', usersSchema)
+
 let xmlDataSchema = new mongoose.Schema({ // maps the mongo xmldata collection
-  schemaId: String, /* !!! NOTE: had to rename 'schema' field name in restored data from MDCS to schemaId because of mongoose name conflict
-                       To convert the field after restore from MDCS, use mongocli which loads nanomongo.js. At the mongo command line
+  schemaId: String, /* !!! NOTE: had to rename 'schema' field name in restored data from MDCS to schemaId because of mongoose name conflict.
+                       The change is being made in the migration script -- migrate.js.
+                       OLD INFO: To convert the field after restore from MDCS, use mongocli which loads nanomongo.js. At the mongo command line
                        type 'swizzleForMongoose()' to change all the xmldata document fields named schema to schemaId.
                     */
   title: String,
@@ -348,6 +427,11 @@ app.get('/templates/select', function (req, res) {
 })
 
 app.get('/explore/select', function (req, res) {
+  console.log(req.path + '  user: ' + req.headers['remote_user'])
+  // console.log(req.path + ' user: ' + JSON.stringify(req.user))
+  // jwt.verify(token, 'shhhhh', function(err, decoded) {
+  //   console.log(decoded.foo) // bar
+  // })
   let jsonResp = {'error': null, 'data': null}
   let id = req.query.id
   let schema = req.query.schema
@@ -443,9 +527,14 @@ app.get('/explore/select', function (req, res) {
   }
 })
 function validCuratedDataState (curatedDataState) {
-  let validStates = ['editedNotValid', 'editedValid', 'valid', 'notValid', 'ingest', 'ingestFailed', 'ingestSuccess']
+  let validStates = ['EditedNotValid', 'EditedValid', 'Valid', 'NotValid', 'Ingest', 'IngestFailed', 'IngestSuccess']
   return validStates.includes(curatedDataState)
 }
+function matchValidXmlTitle (title) {
+  let rv = title.match(/^[A-Z]([0-9]+)[_][S]([0-9]+)[_][\S]+[_]\d{4}[.][Xx][Mm][Ll]$/) // e.g. L183_S12_Poetschke_2003.xml
+  return rv
+}
+
 app.post('/curate', function (req, res) {
   let jsonResp = {'error': null, 'data': null}
   // TODO need to keep prior versions of XML by using a version number in the record
@@ -454,53 +543,50 @@ app.post('/curate', function (req, res) {
   let content = req.body.content
   // NOTE: setting curatedDataState to anything past editedPassedVerify requires admin level authority
   let curatedDataState = req.body.curatedDataState // editedFailedVerify, editedPassedVerify (not trusted), triggers system validation
+  let curateState = 'Edit' // Insert/update xml always returns to edit for now - TODO authz may change that
   let msg = `/curate - title: ${title} schemaId: ${schemaId} `
-  if (validCuratedDataState(curatedDataState)) {
+  if (validCuratedDataState(curatedDataState)) { // TODO validCuratedDataState should be authz driven
     // check schema id
-    XsdSchema.findById(schemaId, function (err, xsdRec) {
-      if (err) {
-        jsonResp.error = err
-        return res.status(400).json(jsonResp)
-      } else if (xsdRec === null) {
-        jsonResp.error = {'statusCode': 404, 'statusText': 'not found'}
-        return res.status(404).json(jsonResp)
-      } else {
-        // ensure that there is an associated dataset record
-        // ensure that the title matches spec
-        let m = title.match(/^[A-Z]([0-9]+)[_][S]([0-9]+)[_][\S]+[_]\d{4}[.][Xx][Mm][Ll]$/) // e.g. L183_S12_Poetschke_2003.xml
-        if (m) {
-          let dsSeq = m[1]
-          // look up the dataset to ensure that it exists
-          let dsQuery = {'seq': dsSeq}
-          Datasets.find(dsQuery, function (err, docs) {
-            if (err || docs.length === 0) {
-              jsonResp.err = 'unable to find associated dataset: ' + dsSeq + ' err: ' + err
-              console.log(msg + ' ' + jsonResp.err)
-              return res.status(400).json(jsonResp)
-            } else {
-              // upsert the data to curate
-              let xmlQuery = {'title': title, 'schemaId': schemaId}
-              let theData = {'title': title, 'schemaId': schemaId, 'entityState': curatedDataState, 'xml_str': content}
-              XmlData.findOneAndUpdate(xmlQuery, theData, {'upsert': true}, function (err, doc) {
-                if (err) {
-                  jsonResp.error = err
-                  return res.status(500).json(jsonResp)
-                }
-                return res.status(201).json(jsonResp)
-              })
-            }
-          })
-        } else {
-          jsonResp.error = 'title does not meet standard: ' + title
+    let m = matchValidXmlTitle(title) // e.g. L183_S12_Poetschke_2003.xml
+    if (m) {
+      let dsSeq = m[1]
+      // look up the dataset to ensure that it exists
+      let dsQuery = {'seq': dsSeq}
+      Datasets.find(dsQuery, function (err, docs) {
+        if (err || docs.length === 0) {
+          jsonResp.err = 'unable to find associated dataset: ' + dsSeq + ' err: ' + err
+          console.log(msg + ' ' + jsonResp.err)
           return res.status(400).json(jsonResp)
+        } else {
+          // upsert the data to curate
+          let xmlQuery = {'title': title, 'schemaId': schemaId}
+          let theData = {'title': title,
+            'schemaId': schemaId,
+            'entityState': curatedDataState,
+            'dsSeq': dsSeq,
+            'ispublished': false,
+            'iduser': 2, // TODO fix this in migrate to use userId and when verify user authz
+            'curateState': curateState,
+            'xml_str': content}
+          XmlData.findOneAndUpdate(xmlQuery, theData, {'upsert': true}, function (err, doc) {
+            if (err) {
+              jsonResp.error = err
+              return res.status(500).json(jsonResp)
+            }
+            return res.status(201).json(jsonResp)
+          })
         }
-      }
-    })
+      })
+    } else {
+      jsonResp.error = 'title does not meet standard: ' + title
+      return res.status(400).json(jsonResp)
+    }
   } else {
     jsonResp.error = 'error - curatedDataState: ' + curatedDataState + ' is not a valid state.'
     return res.status(400).json(jsonResp)
   }
 })
+
 app.get('/dataset', function (req, res) {
   let jsonResp = {'error': null, 'data': null}
   let id = req.query.id
@@ -554,7 +640,7 @@ app.post('/dataset/update', function (req, res) {
   let dsUpdate = req.body.dsUpdate
   let dsSeq = req.body.dsSeq
   console.log('datataset/update: doing update...' + JSON.stringify(dsUpdate))
-  Datasets.findOneAndUpdate({'seq': dsSeq}, {$set: dsUpdate},{}, function (err, oldDoc) {
+  Datasets.findOneAndUpdate({'seq': dsSeq}, {$set: dsUpdate}, {}, function (err, oldDoc) {
     if (err) {
       jsonResp.error = err
       console.log('datataset/update: error - ' + err)
@@ -568,6 +654,7 @@ app.post('/dataset/update', function (req, res) {
 })
 app.post('/dataset/create', function (req, res) {
   // TODO dataset needs a unique index on seq to ensure there are no dups
+  // TODO dataset also needs a unique index on DOI to ensure that DOIs are not dup'd
   let jsonResp = {'error': null, 'data': null}
   let dsInfo = req.body.dsInfo
   Datasets.find({}).sort({'seq': 1}).exec(function (err, docs) {
@@ -873,35 +960,36 @@ where {
 
 /* Visualization related requests - end */
 
-app.get('/', function (req, res) {
-  let ID = 'TestData_' + shortUUID.new()
-  let query = 'a query'
-  let xml = `
-    <PolymerNanocomposite>
-     <ID>${ID}</ID>
-    </PolymerNanocomposite>
-    `
-  xml = xml.trim()
-
-  let jsonData = {
-    xml: xml,
-    xmlLen: xml.length,
-    query: query,
-    queryLen: query.length
-
-  }
-  console.log('session cookie: ' + req.cookies['session'])
-  res.json(jsonData)
-})
+// app.get('/', function (req, res) {
+//   let ID = 'TestData_' + shortUUID.new()
+//   let query = 'a query'
+//   let xml = `
+//     <PolymerNanocomposite>
+//      <ID>${ID}</ID>
+//     </PolymerNanocomposite>
+//     `
+//   xml = xml.trim()
+//
+//   let jsonData = {
+//     xml: xml,
+//     xmlLen: xml.length,
+//     query: query,
+//     queryLen: query.length
+//
+//   }
+//   console.log('session cookie: ' + req.cookies['session'])
+//   res.json(jsonData)
+// })
 
 function postSparql (callerpath, query, req, res) {
-  let url = '/sparql'
+  let url = nmLocalRestBase + '/sparql'
   let jsonResp = {'error': null, 'data': null}
   let data = qs.stringify({'query': query.trim().replace(/[\n]/g, ' ')})
   return axios({
     'method': 'post',
     'url': url,
-    'data': data
+    'data': data,
+    'httpsAgent': httpsAgent
     // 'headers': {'Content-type': 'application/json'},
   })
     .then(function (response) {
@@ -917,13 +1005,14 @@ function postSparql (callerpath, query, req, res) {
     })
 }
 function postSparql2 (callerpath, query, req, res, cb) {
-  let url = '/sparql'
+  let url = nmLocalRestBase + '/sparql'
   // let jsonResp = {'error': null, 'data': null}
   let data = qs.stringify({'query': query.trim().replace(/[\n]/g, ' ')})
   return axios({
     'method': 'post',
     'url': url,
-    'data': data
+    'data': data,
+    'httpsAgent': httpsAgent
     // 'headers': {'Content-type': 'application/json'},
   })
     .then(function (response) {
@@ -976,7 +1065,7 @@ app.post('/xml', function (req, res) { // initial testing of post xml file to na
   headers['Content-Length'] = contentLen
   url = url + theType + '/' + req.body.filename.replace(/['_']/g, '-').replace(/.xml$/, '').toLowerCase()
   console.log('request info - outbound post url: ' + url + '  form data: ' + inspect(form))
-  if (theType && typeof theType === 'string' && theName && typeof theName === 'string') {
+  if (false && theType && typeof theType === 'string' && theName && typeof theName === 'string') { // DISABLED! TODO remove this service
     theName = theName.replace(/['_']/g, '-')
     return axios({
       'method': 'post',
