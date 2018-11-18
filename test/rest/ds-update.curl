@@ -1,6 +1,8 @@
 curl --header "Content-Type: application/json" \
   --request POST \
-  --data '{"dsSeq": "108","dsUpdate":{"citationType":"book","publication":"A book of MatSci Samples","title":"A book of MatSci Samples",
+  --data '{"dsSeq": "103","dsUpdate":{"citationType":"book","publication":"A book of MatSci Samples","title":"A book of MatSci Samples",
   "author":["Taylor, Tim","Clause, Santa"],"keyword":["polymer","nanocomposite"],"publisher":"ZHOP","publicationYear":1909,
-    "doi":"abc.def.ghi-21-DUP","volume":"1","url":"http://example.com","language":"Yiddish"}}' \
+    "doi":"abc.def.ghi-21-DUP","volume":"1","url":"http://example.com","language":"Yiddish",
+    "location":"Bollywood","dateOfCitation":"12/25/2000","issn":"santa-3","issue":"br-549a"
+    }}' \
   http://ubuntu.local/nmr/dataset/update
