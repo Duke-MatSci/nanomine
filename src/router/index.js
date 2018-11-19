@@ -3,7 +3,6 @@ import Router from 'vue-router'
 import NanoMine from '@/components/NanoMine'
 import Database from '@/components/Database'
 import Insight from '@/components/Insight'
-import Insight2 from '@/components/Insight2'
 import ModuleTools from '@/components/ModuleTools'
 import SimTools from '@/components/SimTools'
 import XMLCONV from '@/components/XMLCONV'
@@ -22,6 +21,7 @@ import CorrelationReconstruct from '@/components/CorrelationReconstruct'
 import SDFReconstruct from '@/components/SDFReconstruct'
 import DescriptorReconstruct from '@/components/DescriptorReconstruct'
 import Visualization from '@/components/Visualization'
+import Curation from '@/components/Curation'
 
 Vue.use(Router)
 
@@ -41,11 +41,6 @@ export default new Router({
       path: '/insight',
       name: 'Insight',
       component: Insight
-    },
-    {
-      path: '/insight2',
-      name: 'Insight2',
-      component: Insight2
     },
     {
       path: '/simtools',
@@ -136,6 +131,11 @@ export default new Router({
       path: '/Visualization',
       name: 'Visualization',
       component: Visualization
+    },
+    {
+      path: '/Curation',
+      name: 'Curation',
+      component: Curation
     }
   ]
 })
