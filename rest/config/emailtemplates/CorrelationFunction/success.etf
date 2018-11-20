@@ -4,7 +4,7 @@
 
 <br/> Greetings from Nanomine!
 
-<br/>Your SDF Characterization job was successful. Job ID is ${jobid}
+<br/>Your Correlation Characterization job was successful. Job ID is ${jobid}
 
 <br/>Please visit <a href="${resultpage}">this link</a> to view and download your results.
 

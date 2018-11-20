@@ -2,7 +2,7 @@
 
 <br/> Greetings from Nanomine!
 
-<br/>Unfortunately, SDF characterization was not successful. Job id is ${jobid}
+<br/>Unfortunately, Correlation characterization was not successful. Job id is ${jobid}
 
 <br/>job result code: ${jobinfo.resultcode}
 

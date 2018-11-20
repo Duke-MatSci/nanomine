@@ -41,6 +41,12 @@
         "lang": "python",
         "pgmdir": "../src/jobs/Descriptor",
         "pgmname": "run_DescriptorCharacterize.py"
+      },
+      {
+        "jobtype": "CorrelationCharacterize",
+        "lang": "python",
+        "pgmdir": "../src/jobs/CorrelationFunctions",
+        "pgmname": "run_CorrelationCharacterize.py"
       }
     ]
   }
