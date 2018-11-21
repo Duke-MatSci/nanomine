@@ -22,6 +22,7 @@ import SDFReconstruct from '@/components/SDFReconstruct'
 import DescriptorReconstruct from '@/components/DescriptorReconstruct'
 import Visualization from '@/components/Visualization'
 import SDFCharacterizeResults from '@/components/SDFCharacterizeResults'
+import ViewData from '@/components/ViewData'
 
 Vue.use(Router)
 
@@ -141,6 +142,14 @@ export default new Router({
       path: '/SDFCharacterizeResults',
       name: 'SDFCharacterizeResults',
       component: SDFCharacterizeResults
+    },
+    {
+      path: '/ViewData',
+      name: 'ViewData',
+      component: ViewData,
+      props: (route) => ({
+        title: route.query.title
+      })
     }
   ]
 })
