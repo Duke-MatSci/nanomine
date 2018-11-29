@@ -650,7 +650,7 @@ app.post('/dataset/update', function (req, res) {
       console.log('datataset/update: error - ' + err)
       return res.status(500).json(jsonResp)
     } else {
-      jsonResp.data = doc
+      jsonResp.data = oldDoc
       console.log('datataset/update: success - ' + oldDoc)
       return res.status(200).json(jsonResp)
     }
