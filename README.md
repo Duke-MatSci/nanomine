@@ -62,6 +62,9 @@ NanoMine Nanocomposites Data Resource
   #install NanoMine python components for Whyis
   pip install -e .
   
+  #install XMLCONV components
+  pip install -r /apps/nanomine/install/xmlconv-requirements.txt
+  
   sudo a2enmod proxy_connect.load  
   sudo a2enmod proxy_html.load  
   sudo a2enmod proxy_http.load  

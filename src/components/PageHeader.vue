@@ -11,7 +11,7 @@
         <v-btn flat to="/mtools">Module Tools</v-btn>
         <v-btn flat to="/simtools">Simulation Tools</v-btn>
         <v-btn flat @click="toggleAdminAvailable()"><i class="material-icons nm-search-icon" v-if="searchEnabled()">search</i></v-btn>
-        <!--v-btn flat href="/login?next=/nm"><i class="material-icons nm-user-icon">perm_identity</i>Login</v-btn-->
+        <v-btn v-if="isLoggedIn()" flat v-bind:href="logoutUrl"><i class="material-icons nm-user-icon" v-bind:class="{'nm-admin-icon': isAdmin}">perm_identity</i><span v-if="!isTestUser()">Logout</span> {{userName}}</v-btn>
       </v-toolbar-items>
     </v-toolbar>
   </div>
@@ -20,9 +20,13 @@
 <script>
 
 import {} from 'vuex'
+import {Auth} from '@/modules/Auth.js'
 
 export default {
   name: 'PageHeader',
+  beforeMount: function () {
+    this.auth = new Auth()
+  },
   methods: {
     searchEnabled: function () {
       return false
@@ -32,11 +36,33 @@ export default {
     },
     toggleAdminAvailable: function () {
       this.$store.commit('toggleAdminActive')
+    },
+    isLoggedIn: function () {
+      return this.auth.isLoggedIn()
+    },
+    isTestUser: function () {
+      return this.auth.isTestUser()
+    }
+  },
+  computed: {
+    userId: function () {
+      return this.auth.getUserId()
+    },
+    userName: function () {
+      return this.auth.getGivenName()
+    },
+    logoutUrl: function () {
+      let rv = this.auth.getLogoutUrl()
+      return rv
+    },
+    isAdmin: function () {
+      return this.auth.isAdmin()
     }
   },
   data () {
     return {
-      msg: 'PageHeader'
+      msg: 'PageHeader',
+      auth: null
     }
   }
 }
@@ -63,7 +89,10 @@ export default {
     vertical-align: bottom;
     padding-bottom: 6px;
   }
-
+  .nm-admin-icon {
+    background-color: #00ffff66;
+    color: red;
+  }
   .nm-user-icon {
     font-size: 18px;
     display: inline-flex;

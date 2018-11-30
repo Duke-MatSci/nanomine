@@ -8,8 +8,7 @@
 
 ${jobinfo.errormsg}
 
-<br/>Please visit <a href="https://nanomine.org/joboutput/${jobid}">your job output</a> for more information
-
+<br/>
 <br/>
 Regards,
 <br/>The NanoMine team

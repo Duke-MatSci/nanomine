@@ -4,23 +4,20 @@
 
 # Environment variables will be set, so they're available here.
 
+from nm.common import *
+from nm.common.nm_rest import nm_rest
 import os
 import sys
 import json
 import urllib2
 
-import logging # this should be done by a wrapper in the future
+# import logging # this should be done by a wrapper in the future
 restbase = os.environ['NM_LOCAL_REST_BASE']
 webbase = os.environ['NM_WEB_BASE_URI']
-sloglevel=os.environ['NM_LOGLEVEL']
-loglevel = logging.DEBUG
-try:
-  loglevel = getattr(logging, sloglevel.upper())
-except:
-  pass
 
-logging.basicConfig(filename=os.environ['NM_LOGFILE'],level=loglevel)
-
+sysToken = os.environ['NM_AUTH_SYSTEM_TOKEN']
+emailApiToken = os.environ['NM_AUTH_API_TOKEN_EMAIL']
+emailRefreshToken = os.environ['NM_AUTH_API_REFRESH_EMAIL']
 
 logging.info('nanomine environment keys: ')
 for key in os.environ.keys():
@@ -71,7 +68,7 @@ try:
   logging.info("conversion finished")
 except:
   logging.info('exception occurred')
-  logging.info('exception: ' + str(sys.exc_info()[0]))
+  logging.info('exception: ' + str(str(traceback.format_exc())))
   status = 'failure'
   messages = ['[Conversion Error] Oops! The conversion cannot be finished! Please contact the administrator.']
 
@@ -102,8 +99,10 @@ try:
   rq = urllib2.Request(emailurl)
   logging.info('request created using emailurl')
   rq.add_header('Content-Type','application/json')
-  r = urllib2.urlopen(rq, json.dumps(emaildata))
+  nmEmail = nm_rest(logging, sysToken, emailApiToken, emailRefreshToken, rq)
+  ## r = urllib2.urlopen(rq, json.dumps(emaildata))
+  r = nmEmail.urlopen(json.dumps(emaildata))
   logging.info('sent ' + status + ' email: ' + str(r.getcode()))
 except:
   logging.info('exception occurred')
-  logging.info('exception: ' + str(sys.exc_info()[0]))
+  logging.info('exception: ' + str(traceback.format_exc()))
