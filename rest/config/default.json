@@ -47,6 +47,18 @@
         "lang": "python",
         "pgmdir": "../src/jobs/CorrelationFunctions",
         "pgmname": "run_CorrelationCharacterize.py"
+      },
+      {
+        "jobtype": "SDFReconstruct",
+        "lang": "python",
+        "pgmdir": "../src/jobs/SDF",
+        "pgmname": "run_SDFReconstruct.py"
+      },
+      {
+        "jobtype": "CorrelationReconstruct",
+        "lang": "python",
+        "pgmdir": "../src/jobs/CorrelationFunctions",
+        "pgmname": "run_CorrelationReconstruct.py"
       }
     ]
   }

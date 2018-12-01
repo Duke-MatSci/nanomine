@@ -1,6 +1,6 @@
 %microstructure reconstruction via two-point correlaiton function matching
 %by Xiaolin Li
-%while writing the DeepMCP paper
+%while writing the DeepMCR paper
 % modified by Akshay Iyer for implementation in NANOMINE
 
 function [recon, time_req, iter_req, error] = two_point_recon(target_corrf, L1,L2,correlation_choice)
@@ -52,7 +52,7 @@ xx = 0 : N-1;
 x2 = 0 : length(f_obj) - 1;
 f_obj1 = interp1(x2, f_obj, xx, 'spline');
 
-niter = 1e6;
+niter = 1;
 err = 1e5;
 tol = 1e-5;
 

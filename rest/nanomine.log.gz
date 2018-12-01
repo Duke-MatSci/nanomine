@@ -626,3 +626,109 @@
 {"message":"smtp return info: {\"accepted\":[\"back2akshay@gmail.com\"],\"rejected\":[],\"envelopeTime\":102,\"messageTime\":404,\"messageSize\":1575,\"response\":\"250 2.0.0 OK 1543694784 125sm1489525itk.28 - gsmtp\",\"envelope\":{\"from\":\"back2akshay@gmail.com\",\"to\":[\"back2akshay@gmail.com\"]},\"messageId\":\"<465e2284-b02f-870d-37b1-96dfa4e65221@gmail.com>\"}","level":"info"}
 {"message":"jwToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOm51bGwsImlzQWRtaW4iOmZhbHNlLCJpc1VzZXIiOnRydWUsImlzQW5vbnltb3VzIjpmYWxzZSwiaWF0IjoxNTQzNjk0ODgxfQ.mEzJcDEVJqmuVksp_w3wQ6TidUWCsA0QNnZy3S9-A7k","level":"info"}
 {"message":"found session token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOm51bGwsImlzQWRtaW4iOmZhbHNlLCJpc1VzZXIiOnRydWUsImlzQW5vbnltb3VzIjpmYWxzZSwiaWF0IjoxNTQzNjk0Njc1fQ.4X1Y9Y1DH02mWQKbJR71xdvuME5yL6YKn_s8B1wU6e0","level":"debug"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"NOTE: if the error above is EXISTS, the error can be ignored.","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"NOTE: if the error above is EXISTS, the error can be ignored.","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"jwToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOm51bGwsImlzQWRtaW4iOmZhbHNlLCJpc1VzZXIiOnRydWUsImlzQW5vbnltb3VzIjpmYWxzZSwiaWF0IjoxNTQzNjk3ODQ5fQ.0MtDQky_GjP6wVuwUyla6rcBUslAoxNoPeHZV1mOpy8","level":"info"}
+{"message":"found session token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOm51bGwsImlzQWRtaW4iOmZhbHNlLCJpc1VzZXIiOnRydWUsImlzQW5vbnltb3VzIjpmYWxzZSwiaWF0IjoxNTQzNjk0ODgxfQ.mEzJcDEVJqmuVksp_w3wQ6TidUWCsA0QNnZy3S9-A7k","level":"debug"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"NOTE: if the error above is EXISTS, the error can be ignored.","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"NOTE: if the error above is EXISTS, the error can be ignored.","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"jwToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOm51bGwsImlzQWRtaW4iOmZhbHNlLCJpc1VzZXIiOnRydWUsImlzQW5vbnltb3VzIjpmYWxzZSwiaWF0IjoxNTQzNjk3OTE3fQ.iod9xXuEshz51yhmWDJqobVc3kMUEZUUGtqwLo4kpWg","level":"info"}
+{"message":"found session token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOm51bGwsImlzQWRtaW4iOmZhbHNlLCJpc1VzZXIiOnRydWUsImlzQW5vbnltb3VzIjpmYWxzZSwiaWF0IjoxNTQzNjk3ODQ5fQ.0MtDQky_GjP6wVuwUyla6rcBUslAoxNoPeHZV1mOpy8","level":"debug"}
+{"message":"job parameters: {\"NumOfReconstructs\":\"1\",\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"job parameters: {\"NumOfReconstructs\":\"1\",\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"<br/>Hello testuser,\n\n<br/> Greetings from Nanomine!\n\n<br/>Unfortunately, SDF reconstruction was not successful. Job id is SDFReconstruct-wkAGg9qTgMLCK4tp1nxodf\n\n<br/>job result code: 99\n\n<br/>Please visit <a href=\"https://nanomine.org/joboutput/SDFReconstruct-wkAGg9qTgMLCK4tp1nxodf\">your job output</a> for more information\n\n<br/>\nRegards,\n<br/>The NanoMine team\n<br/> *** DO NOT REPLY TO THIS EMAIL ***\n","level":"info"}
+{"message":"smtp return info: {\"accepted\":[\"back2akshay@gmail.com\"],\"rejected\":[],\"envelopeTime\":430,\"messageTime\":578,\"messageSize\":1464,\"response\":\"250 2.0.0 OK 1543698198 x6-v6sm1409009itg.15 - gsmtp\",\"envelope\":{\"from\":\"back2akshay@gmail.com\",\"to\":[\"back2akshay@gmail.com\"]},\"messageId\":\"<c2855235-3b0c-bc2a-c37f-70c50e80c093@gmail.com>\"}","level":"info"}
+{"message":"job parameters: {\"NumOfReconstructs\":\"1\",\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"<br/>Hello testuser,\n\n<br/> Greetings from Nanomine!\n\n<br/>Unfortunately, SDF reconstruction was not successful. Job id is SDFReconstruct-7nFK7b6aciW6QCb68bhihH\n\n<br/>job result code: 99\n\n<br/>Please visit <a href=\"https://nanomine.org/joboutput/SDFReconstruct-7nFK7b6aciW6QCb68bhihH\">your job output</a> for more information\n\n<br/>\nRegards,\n<br/>The NanoMine team\n<br/> *** DO NOT REPLY TO THIS EMAIL ***\n","level":"info"}
+{"message":"smtp return info: {\"accepted\":[\"back2akshay@gmail.com\"],\"rejected\":[],\"envelopeTime\":100,\"messageTime\":352,\"messageSize\":1464,\"response\":\"250 2.0.0 OK 1543699111 b13sm3206637iot.70 - gsmtp\",\"envelope\":{\"from\":\"back2akshay@gmail.com\",\"to\":[\"back2akshay@gmail.com\"]},\"messageId\":\"<97ff5b26-6147-640e-7abc-c81613e66043@gmail.com>\"}","level":"info"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"NOTE: if the error above is EXISTS, the error can be ignored.","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"NOTE: if the error above is EXISTS, the error can be ignored.","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"jwToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOm51bGwsImlzQWRtaW4iOmZhbHNlLCJpc1VzZXIiOnRydWUsImlzQW5vbnltb3VzIjpmYWxzZSwiaWF0IjoxNTQzNzAwMzE3fQ.IVWm08df6yYPD8zmdXx8mz1d_ago92flxQV9ZDNXPmM","level":"info"}
+{"message":"found session token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOm51bGwsImlzQWRtaW4iOmZhbHNlLCJpc1VzZXIiOnRydWUsImlzQW5vbnltb3VzIjpmYWxzZSwiaWF0IjoxNTQzNjk3OTE3fQ.iod9xXuEshz51yhmWDJqobVc3kMUEZUUGtqwLo4kpWg","level":"debug"}
+{"message":"job parameters: {\"NumOfReconstructs\":\"1\",\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"\n\n<br/>Hello testuser,\n\n<br/> Greetings from Nanomine!\n\n<br/>Your SDF Reconstruction job was successful. Job ID is SDFReconstruct-qCQq3PHWFo5yD51agcmmGp\n\n<br/>Please visit <a href=\"http://localhost/nm#/SDFCharacterizeResults?refuri=/nmf/jobdata/SDFReconstruct-qCQq3PHWFo5yD51agcmmGp\">this link</a> to view and download your results.\n\n<br/>\nRegards,\n<br/>The NanoMine team\n<br/> *** DO NOT REPLY TO THIS EMAIL ***\n","level":"info"}
+{"message":"smtp return info: {\"accepted\":[\"back2akshay@gmail.com\"],\"rejected\":[],\"envelopeTime\":170,\"messageTime\":456,\"messageSize\":1494,\"response\":\"250 2.0.0 OK 1543700376 h64sm1619135itb.14 - gsmtp\",\"envelope\":{\"from\":\"back2akshay@gmail.com\",\"to\":[\"back2akshay@gmail.com\"]},\"messageId\":\"<e223605d-37c2-40e5-869e-e435619dd8d9@gmail.com>\"}","level":"info"}
+{"message":"jwToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOm51bGwsImlzQWRtaW4iOmZhbHNlLCJpc1VzZXIiOnRydWUsImlzQW5vbnltb3VzIjpmYWxzZSwiaWF0IjoxNTQzNzAwNDA5fQ.k0WUv3iGnCz_vvQ7VaZc9e8yuM0pLhJu_gBs9AhqCbY","level":"info"}
+{"message":"found session token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOm51bGwsImlzQWRtaW4iOmZhbHNlLCJpc1VzZXIiOnRydWUsImlzQW5vbnltb3VzIjpmYWxzZSwiaWF0IjoxNTQzNzAwMzE3fQ.IVWm08df6yYPD8zmdXx8mz1d_ago92flxQV9ZDNXPmM","level":"debug"}
+{"message":"job parameters: {\"NumOfReconstructs\":\"1\",\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"\n\n<br/>Hello testuser,\n\n<br/> Greetings from Nanomine!\n\n<br/>Your SDF Reconstruction job was successful. Job ID is SDFReconstruct-fqwRRWqE9bxp9TVEBCbp6s\n\n<br/>Please visit <a href=\"http://localhost/nm#/SDFReconstructResults?refuri=/nmf/jobdata/SDFReconstruct-fqwRRWqE9bxp9TVEBCbp6s\">this link</a> to view and download your results.\n\n<br/>\nRegards,\n<br/>The NanoMine team\n<br/> *** DO NOT REPLY TO THIS EMAIL ***\n","level":"info"}
+{"message":"smtp return info: {\"accepted\":[\"back2akshay@gmail.com\"],\"rejected\":[],\"envelopeTime\":104,\"messageTime\":366,\"messageSize\":1492,\"response\":\"250 2.0.0 OK 1543700602 c102sm1432417itd.38 - gsmtp\",\"envelope\":{\"from\":\"back2akshay@gmail.com\",\"to\":[\"back2akshay@gmail.com\"]},\"messageId\":\"<f74261fb-d6df-0739-b390-9143c9383ee2@gmail.com>\"}","level":"info"}
+{"message":"jwToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOm51bGwsImlzQWRtaW4iOmZhbHNlLCJpc1VzZXIiOnRydWUsImlzQW5vbnltb3VzIjpmYWxzZSwiaWF0IjoxNTQzNzAwNzQwfQ.fn5ARcyaETHcg_a_VB7CnkmcO8LGmdPGNlAUBETUOaY","level":"info"}
+{"message":"found session token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOm51bGwsImlzQWRtaW4iOmZhbHNlLCJpc1VzZXIiOnRydWUsImlzQW5vbnltb3VzIjpmYWxzZSwiaWF0IjoxNTQzNzAwNDA5fQ.k0WUv3iGnCz_vvQ7VaZc9e8yuM0pLhJu_gBs9AhqCbY","level":"debug"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"NOTE: if the error above is EXISTS, the error can be ignored.","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"NOTE: if the error above is EXISTS, the error can be ignored.","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"jwToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOm51bGwsImlzQWRtaW4iOmZhbHNlLCJpc1VzZXIiOnRydWUsImlzQW5vbnltb3VzIjpmYWxzZSwiaWF0IjoxNTQzNzAxODAzfQ.o-oIa3vOGLjID1RnNscSSS4MFjveWGqhdVjjevNQag8","level":"info"}
+{"message":"found session token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOm51bGwsImlzQWRtaW4iOmZhbHNlLCJpc1VzZXIiOnRydWUsImlzQW5vbnltb3VzIjpmYWxzZSwiaWF0IjoxNTQzNzAwNzQwfQ.fn5ARcyaETHcg_a_VB7CnkmcO8LGmdPGNlAUBETUOaY","level":"debug"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"NOTE: if the error above is EXISTS, the error can be ignored.","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"NOTE: if the error above is EXISTS, the error can be ignored.","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"jwToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOm51bGwsImlzQWRtaW4iOmZhbHNlLCJpc1VzZXIiOnRydWUsImlzQW5vbnltb3VzIjpmYWxzZSwiaWF0IjoxNTQzNzAzNTk4fQ.WK1CENiM49v5kfukeQQfWkOzsLIh_gwGqp3DA4x6lEA","level":"info"}
+{"message":"found session token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOm51bGwsImlzQWRtaW4iOmZhbHNlLCJpc1VzZXIiOnRydWUsImlzQW5vbnltb3VzIjpmYWxzZSwiaWF0IjoxNTQzNzAxODAzfQ.o-oIa3vOGLjID1RnNscSSS4MFjveWGqhdVjjevNQag8","level":"debug"}
+{"message":"job parameters: {\"CorrelationType\":\"Autocorrelation\",\"NumOfReconstructs\":\"1\",\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"jwToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOm51bGwsImlzQWRtaW4iOmZhbHNlLCJpc1VzZXIiOnRydWUsImlzQW5vbnltb3VzIjpmYWxzZSwiaWF0IjoxNTQzNzAzOTU4fQ.notMMk9hyssaTx9CstCI3fvfWS9dLBRe-FgtlsJbmCI","level":"info"}
+{"message":"found session token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOm51bGwsImlzQWRtaW4iOmZhbHNlLCJpc1VzZXIiOnRydWUsImlzQW5vbnltb3VzIjpmYWxzZSwiaWF0IjoxNTQzNzAzNTk4fQ.WK1CENiM49v5kfukeQQfWkOzsLIh_gwGqp3DA4x6lEA","level":"debug"}
+{"message":"job parameters: {\"CorrelationType\":\"Autocorrelation\",\"NumOfReconstructs\":\"1\",\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"NOTE: if the error above is EXISTS, the error can be ignored.","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"NOTE: if the error above is EXISTS, the error can be ignored.","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"jwToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOm51bGwsImlzQWRtaW4iOmZhbHNlLCJpc1VzZXIiOnRydWUsImlzQW5vbnltb3VzIjpmYWxzZSwiaWF0IjoxNTQzNzA0MTM3fQ.y52xHw3iLQsiiOp7ebn2lF6qBCetl_jzHnhBfA9KcNk","level":"info"}
+{"message":"found session token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOm51bGwsImlzQWRtaW4iOmZhbHNlLCJpc1VzZXIiOnRydWUsImlzQW5vbnltb3VzIjpmYWxzZSwiaWF0IjoxNTQzNzAzOTU4fQ.notMMk9hyssaTx9CstCI3fvfWS9dLBRe-FgtlsJbmCI","level":"debug"}
+{"message":"job parameters: {\"CorrelationType\":\"Autocorrelation\",\"NumOfReconstructs\":\"1\",\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"<br/>Hello testuser,\n\n<br/> Greetings from Nanomine!\n\n<br/>Unfortunately, Correlation reconstruction was not successful. Job id is CorrelationReconstruct-ceSyJt7W7v1BV7g1C3KuRL\n\n<br/>job result code: 99\n\n<br/>Please visit <a href=\"https://nanomine.org/joboutput/CorrelationReconstruct-ceSyJt7W7v1BV7g1C3KuRL\">your job output</a> for more information\n\n<br/>\nRegards,\n<br/>The NanoMine team\n<br/> *** DO NOT REPLY TO THIS EMAIL ***\n","level":"info"}
+{"message":"smtp return info: {\"accepted\":[\"back2akshay@gmail.com\"],\"rejected\":[],\"envelopeTime\":215,\"messageTime\":414,\"messageSize\":1526,\"response\":\"250 2.0.0 OK 1543704157 g24sm3196553ioc.54 - gsmtp\",\"envelope\":{\"from\":\"back2akshay@gmail.com\",\"to\":[\"back2akshay@gmail.com\"]},\"messageId\":\"<c093106a-af84-d714-2817-04b01bc90bc3@gmail.com>\"}","level":"info"}
+{"message":"job parameters: {\"CorrelationType\":\"Autocorrelation\",\"NumOfReconstructs\":\"1\",\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"\n\n<br/>Hello testuser,\n\n<br/> Greetings from Nanomine!\n\n<br/>Your Correlation reconstruction job was successful. Job ID is CorrelationReconstruct-jX2hdcdFv4d5LKDbemp5UX\n\n<br/>Please visit <a href=\"http://localhost/nm#/CorrelationReconstructResults?refuri=/nmf/jobdata/CorrelationReconstruct-jX2hdcdFv4d5LKDbemp5UX\">this link</a> to view and download your results.\n\n<br/>\nRegards,\n<br/>The NanoMine team\n<br/> *** DO NOT REPLY TO THIS EMAIL ***\n","level":"info"}
+{"message":"smtp return info: {\"accepted\":[\"back2akshay@gmail.com\"],\"rejected\":[],\"envelopeTime\":100,\"messageTime\":433,\"messageSize\":1564,\"response\":\"250 2.0.0 OK 1543704653 v16sm555iom.26 - gsmtp\",\"envelope\":{\"from\":\"back2akshay@gmail.com\",\"to\":[\"back2akshay@gmail.com\"]},\"messageId\":\"<e7ce2080-a356-d44c-d189-b9547b97d475@gmail.com>\"}","level":"info"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"NOTE: if the error above is EXISTS, the error can be ignored.","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"NOTE: if the error above is EXISTS, the error can be ignored.","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"jwToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOm51bGwsImlzQWRtaW4iOmZhbHNlLCJpc1VzZXIiOnRydWUsImlzQW5vbnltb3VzIjpmYWxzZSwiaWF0IjoxNTQzNzA1MTUzfQ.qOwIKGdIVlzxP44ZQz6rXkGObc8Zr3dla3xB6qL1TgM","level":"info"}
+{"message":"found session token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOm51bGwsImlzQWRtaW4iOmZhbHNlLCJpc1VzZXIiOnRydWUsImlzQW5vbnltb3VzIjpmYWxzZSwiaWF0IjoxNTQzNzA0MTM3fQ.y52xHw3iLQsiiOp7ebn2lF6qBCetl_jzHnhBfA9KcNk","level":"debug"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"NOTE: if the error above is EXISTS, the error can be ignored.","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"NOTE: if the error above is EXISTS, the error can be ignored.","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"jwToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOm51bGwsImlzQWRtaW4iOmZhbHNlLCJpc1VzZXIiOnRydWUsImlzQW5vbnltb3VzIjpmYWxzZSwiaWF0IjoxNTQzNzA1NTM4fQ.tLxaceJrm59eIcMDmb4kP7EXDBONX7Op7-yGQyKXRNA","level":"info"}
+{"message":"found session token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOm51bGwsImlzQWRtaW4iOmZhbHNlLCJpc1VzZXIiOnRydWUsImlzQW5vbnltb3VzIjpmYWxzZSwiaWF0IjoxNTQzNzA1MTUzfQ.qOwIKGdIVlzxP44ZQz6rXkGObc8Zr3dla3xB6qL1TgM","level":"debug"}
+{"message":"jwToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOm51bGwsImlzQWRtaW4iOmZhbHNlLCJpc1VzZXIiOnRydWUsImlzQW5vbnltb3VzIjpmYWxzZSwiaWF0IjoxNTQzNzA1NTQ0fQ.FPkcjqf0pkYtHSBJRaVj56TjAC2TbfbL2wempYl9ix8","level":"info"}
+{"message":"found session token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOm51bGwsImlzQWRtaW4iOmZhbHNlLCJpc1VzZXIiOnRydWUsImlzQW5vbnltb3VzIjpmYWxzZSwiaWF0IjoxNTQzNzA1NTM4fQ.tLxaceJrm59eIcMDmb4kP7EXDBONX7Op7-yGQyKXRNA","level":"debug"}
+{"message":"NanoMine REST server version 0.1.0 starting","level":"info"}
+{"message":"mkdir nmWebFilesRoot failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles'","level":"error"}
+{"message":"NOTE: if the error above is EXISTS, the error can be ignored.","level":"error"}
+{"message":"mkdir nmJobDataDir failed: Error: EEXIST: file already exists, mkdir '/apps/nanomine-webfiles/jobdata'","level":"error"}
+{"message":"NOTE: if the error above is EXISTS, the error can be ignored.","level":"error"}
+{"message":"db error: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]","level":"error"}
+{"message":"jwToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOm51bGwsImlzQWRtaW4iOmZhbHNlLCJpc1VzZXIiOnRydWUsImlzQW5vbnltb3VzIjpmYWxzZSwiaWF0IjoxNTQzNzA1NzI5fQ.bQRriD4w71sR79LfPbbRU1NnoUKZaKKdsEMlJkqDST4","level":"info"}
+{"message":"found session token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOm51bGwsImlzQWRtaW4iOmZhbHNlLCJpc1VzZXIiOnRydWUsImlzQW5vbnltb3VzIjpmYWxzZSwiaWF0IjoxNTQzNzA1NTQ0fQ.FPkcjqf0pkYtHSBJRaVj56TjAC2TbfbL2wempYl9ix8","level":"debug"}
+{"message":"job parameters: {\"CorrelationType\":\"Autocorrelation\",\"NumOfReconstructs\":\"1\",\"InputType\":\"\",\"user\":\"testuser\"}","level":"debug"}
+{"message":"\n\n<br/>Hello testuser,\n\n<br/> Greetings from Nanomine!\n\n<br/>Your Correlation reconstruction job was successful. Job ID is CorrelationReconstruct-u7Pfr6LF3Ap2v1biedwZkW\n\n<br/>Please visit <a href=\"http://localhost/nm#/CorrelationReconstructResults?refuri=/nmf/jobdata/CorrelationReconstruct-u7Pfr6LF3Ap2v1biedwZkW\">this link</a> to view and download your results.\n\n<br/>\nRegards,\n<br/>The NanoMine team\n<br/> *** DO NOT REPLY TO THIS EMAIL ***\n","level":"info"}
+{"message":"smtp return info: {\"accepted\":[\"back2akshay@gmail.com\"],\"rejected\":[],\"envelopeTime\":98,\"messageTime\":341,\"messageSize\":1564,\"response\":\"250 2.0.0 OK 1543705750 r15sm3757485ioh.12 - gsmtp\",\"envelope\":{\"from\":\"back2akshay@gmail.com\",\"to\":[\"back2akshay@gmail.com\"]},\"messageId\":\"<700695c2-97ca-2069-c5ba-a5282f4ec9e9@gmail.com>\"}","level":"info"}
+{"message":"jwToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOm51bGwsImlzQWRtaW4iOmZhbHNlLCJpc1VzZXIiOnRydWUsImlzQW5vbnltb3VzIjpmYWxzZSwiaWF0IjoxNTQzNzA1NzY0fQ.yDKMIfeS5MWUDvsYeAzzba8YmJsaf0s46qY9DY34upk","level":"info"}
+{"message":"found session token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOm51bGwsImlzQWRtaW4iOmZhbHNlLCJpc1VzZXIiOnRydWUsImlzQW5vbnltb3VzIjpmYWxzZSwiaWF0IjoxNTQzNzA1NzI5fQ.bQRriD4w71sR79LfPbbRU1NnoUKZaKKdsEMlJkqDST4","level":"debug"}

@@ -53,7 +53,7 @@
           </v-card-actions>
         </v-card>
       </v-dialog>
-      <v-select label="CorrelationName" v-bind:items="options" v-model="corr"></v-select>
+      <v-select label="Correlation Name" v-bind:items="options" v-model="corr"></v-select>
       <v-flex xs12 class="text-xs-center text-sm-center text-md-center text-lg-center">
         <p class="text-xs-left">Select File
           <v-btn class="text-xs-left" small color="primary" @click='pickFile'>Browse</v-btn>
