@@ -21,13 +21,13 @@ try
   %% Specify import function according to input option
   switch str2num(input_type)
       case 1
-          img = imread([path_to_file,file_name]); % read the incming target and store pixel values
+          img = imread([path_to_read,file_name]); % read the incming target and store pixel values
     if max(img(:)) > 1
       img = round(img/256);
     end
     imwrite(256*img,[path_to_write,'/','Input1.jpg']);
       case 2
-          img = unzip([path_to_file,file_name],[path_to_write,'/input']);
+          img = unzip([path_to_read,file_name],[path_to_write,'/input']);
       case 3
           load([path_to_file,file_name]);
           img = Input;
@@ -55,5 +55,8 @@ try
   %% ZIP files %%
   zip([path_to_write,'/Results.zip'],{'*'},path_to_write);
 
-
+catch ex
+  rc = 99;
+  exit(rc);
+end
 end

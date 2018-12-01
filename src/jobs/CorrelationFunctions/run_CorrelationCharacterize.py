@@ -30,6 +30,7 @@ emailurl = os.environ['NM_SMTP_REST_URL']
 paramFile = open(jobDir + '/' + 'job_parameters.json', 'r')
 inputParameters = json.load(paramFile)
 userId = str(inputParameters['user'])
+CorrelationType = str(inputParameters['CorrelationType'])
 
 jobSrcDir = os.getcwd()
 webBaseUri = os.environ['NM_WEB_BASE_URI']
@@ -55,6 +56,15 @@ for f in myfiles:
   elif f.endswith((".jpg",".png",".tif")):
     input_type = '1'
     input_name = f
+
+if CorrelationType == 'Autocorrelation':
+  correlation_type = '1'
+elif CorrelationType == 'Lineal Path Correlation':
+  correlation_type = '2'
+elif CorrelationType == 'Cluster Correlation':
+  correlation_type = '3'
+else:
+  correlation_type = '4'
 
 matlabPgm = 'CorrelationCharacterize' # .m is implied, test mode will use python pgm
 mlab = matlab(logging) # create matlab object

@@ -176,7 +176,7 @@ export default {
       let jm = new JobMgr()
       console.log('Called Job Manager')
       jm.setJobType('CorrelationCharacterize')
-      jm.setJobParameters({'InputType': vm.fileName.split('.').pop()}) // Figure out which input type
+      jm.setJobParameters({'CorrelationType': vm.corr, 'InputType': vm.fileName.split('.').pop()}) // Figure out which input type
       if (vm.files && vm.files.length >= 1) {
         vm.files.forEach(function (v) {
           jm.addInputFile(v.fileName, v.fileUrl)

@@ -23,6 +23,7 @@ import DescriptorReconstruct from '@/components/DescriptorReconstruct'
 import Visualization from '@/components/Visualization'
 import SDFCharacterizeResults from '@/components/SDFCharacterizeResults'
 import DescriptorCharacterizeResults from '@/components/DescriptorCharacterizeResults'
+import CorrelationCharacterizeResults from '@/components/CorrelationCharacterizeResults'
 
 Vue.use(Router)
 
@@ -147,6 +148,11 @@ export default new Router({
       path: '/DescriptorCharacterizeResults',
       name: 'DescriptorCharacterizeResults',
       component: DescriptorCharacterizeResults
+    },
+    {
+      path: '/CorrelationCharacterizeResults',
+      name: 'CorrelationCharacterizeResults',
+      component: CorrelationCharacterizeResults
     }
   ]
 })
