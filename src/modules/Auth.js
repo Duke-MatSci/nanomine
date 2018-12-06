@@ -3,7 +3,7 @@
 */
 
 import {} from 'vuex'
-// import Axios from 'axios'
+import Axios from 'axios'
 import jwt from 'jsonwebtoken'
 export function Auth () {
   this.err = null
@@ -69,15 +69,19 @@ Auth.prototype = {
     return rv
   },
   getLogoutUrl: function () {
-    let vm = this
-    let tv = vm.tokenValues
-    let rv = null
-    if (vm.isTestUser()) {
-      rv = '#'
-    } else if (tv && tv.logoutUrl && tv.logoutUrl.length > 0) {
-      rv = tv.logoutUrl
-    }
-    return rv
+    let p = new Promise(function (resolve, reject) {
+      Axios.get('/nmr/logout')
+        .then(function (response) {
+          console.log('getLogoutUrl response: ')
+          console.log(response)
+          resolve(response.data.data.logoutUrl)
+        })
+        .catch(function (err) {
+          console.log('error logging out: ' + err)
+          reject(err)
+        })
+    })
+    return p
   },
   getGivenName: function () {
     let vm = this
@@ -94,6 +98,15 @@ Auth.prototype = {
     let rv = null
     if (tv && tv.sub && tv.sub.length > 0) {
       rv = tv.sub
+    }
+    return rv
+  },
+  getSurName: function () {
+    let vm = this
+    let tv = vm.tokenValues
+    let rv = null
+    if (tv && tv.sn && tv.sn.length > 0) {
+      rv = tv.sn
     }
     return rv
   },
@@ -128,7 +141,6 @@ Auth.prototype = {
     // Obtains userId, userName and permissions
   },
   logout: function (successFunction, failureFunction) {
-    // Logs out of server, clears userId, userName and permissions
   },
   notAuthorizedHandler: function (successFunction, failureFunction) {
     // call this if the user does something that returns 403, or that user is not permitted to do based on permissions

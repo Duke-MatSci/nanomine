@@ -11,9 +11,40 @@
         <v-btn flat to="/mtools">Module Tools</v-btn>
         <v-btn flat to="/simtools">Simulation Tools</v-btn>
         <v-btn flat @click="toggleAdminAvailable()"><i class="material-icons nm-search-icon" v-if="searchEnabled()">search</i></v-btn>
-        <v-btn v-if="isLoggedIn()" flat v-bind:href="logoutUrl"><i class="material-icons nm-user-icon" v-bind:class="{'nm-admin-icon': isAdmin}">perm_identity</i><span v-if="!isTestUser()">Logout</span> {{userName}}</v-btn>
+        <v-btn v-if="isLoggedIn()" flat v-on:click="logoutDialog = true"><i class="material-icons nm-user-icon" v-bind:class="{'nm-admin-icon': isAdmin}">perm_identity</i><span v-if="!isTestUser()">&nbsp;Logout&nbsp;</span> {{userName}}</v-btn>
       </v-toolbar-items>
     </v-toolbar>
+    <v-dialog
+      v-model="logoutDialog"
+      max-width="290"
+    >
+      <v-card>
+        <v-card-title class="headline blue lighten-2" primary-title>Log out</v-card-title>
+
+        <v-card-text>
+          Log out of NanoMine?
+        </v-card-text>
+        <v-divider></v-divider>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            color="blue darken-1"
+            flat="flat"
+            @click="logoutDialog = false"
+          >
+            No
+          </v-btn>
+
+          <v-btn
+            color="blue darken-1"
+            flat="flat"
+            v-bind:href="logoutUrl"
+          >
+            Yes
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
@@ -25,9 +56,21 @@ import {Auth} from '@/modules/Auth.js'
 export default {
   name: 'PageHeader',
   beforeMount: function () {
-    this.auth = new Auth()
+    let vm = this
+    vm.auth = new Auth()
+    vm.auth.getLogoutUrl()
+      .then(function (logoutUrl) {
+        vm.logoutUrl = logoutUrl
+      })
+      .catch(function (err) {
+        console.log('error getting logout URL: ' + err)
+        vm.logoutUrl = '#'
+      })
   },
   methods: {
+    logout: function () {
+      this.auth.logout()
+    },
     searchEnabled: function () {
       return false
     },
@@ -51,10 +94,6 @@ export default {
     userName: function () {
       return this.auth.getGivenName()
     },
-    logoutUrl: function () {
-      let rv = this.auth.getLogoutUrl()
-      return rv
-    },
     isAdmin: function () {
       return this.auth.isAdmin()
     }
@@ -62,7 +101,9 @@ export default {
   data () {
     return {
       msg: 'PageHeader',
-      auth: null
+      auth: null,
+      logoutDialog: false,
+      logoutUrl: null
     }
   }
 }

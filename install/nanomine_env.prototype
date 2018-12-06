@@ -17,9 +17,11 @@
 #
 export NM_AUTH_ENABLED="no" # no or yes
 export NM_AUTH_TYPE="local" # local or shib-proxy
+export NM_AUTH_EMAIL_HEADER="email"
 export NM_AUTH_USER_HEADER="remote_user"
 export NM_AUTH_GIVEN_NAME_HEADER="givenName"
-export NM_AUTH_EMAIL_HEADER="email"
+export NM_AUTH_SURNAME_HEADER="sn"
+export NM_AUTH_DISPLAYNAME_HEADER="displayName"
 export NM_AUTH_SESSION_EXPIRATION_HEADER="sessionExpiration"
 export NM_AUTH_TEST_USER="testuser"
 export NM_AUTH_LOGOUT_URL="/nmlogout" # logout

@@ -43,6 +43,9 @@ let nmJobDataDir = process.env['NM_JOB_DATA']
 let nmLocalRestBase = process.env['NM_LOCAL_REST_BASE']
 let nmAuthUserHeader = process.env['NM_AUTH_USER_HEADER']
 let nmAuthGivenNameHeader = process.env['NM_AUTH_GIVEN_NAME_HEADER']
+let nmAuthDisplayNameHeader = process.env['NM_AUTH_DISPLAYNAME_HEADER']
+let nmAuthSurNameHeader = process.env['NM_AUTH_SURNAME_HEADER']
+
 let nmAuthEmailHeader = process.env['NM_AUTH_EMAIL_HEADER']
 let nmAuthSessionExpirationHeader = process.env['NM_AUTH_SESSION_EXPIRATION_HEADER']
 let nmAuthSecret = process.env['NM_AUTH_SECRET']
@@ -53,7 +56,7 @@ let nmAuthType = process.env['NM_AUTH_TYPE']
 let nmAuthTestUser = process.env['NM_AUTH_TEST_USER']
 let nmAuthAdminGroupName = process.env['NM_AUTH_ADMIN_GROUP_NAME']
 let nmAuthLogoutUrl = process.env['NM_AUTH_LOGOUT_URL']
-nmAuthLogoutUrl = '/Shibboleth.sso/Logout?return=https://shib.oit.duke.edu/cgi-bin/logout.pl'
+
 let APIACCESS_APITOKEN_PART = 0
 let APIACCESS_REFRESHTOKEN_PART = 1
 let APIACCESS_ACCESSTOKEN_PART = 2
@@ -305,23 +308,31 @@ app.use(authMiddleware(authOptions))
 
 let fourHours = 4 * 60 * 60 * 1000 // TODO test rest API behavior with short LOCAL timeout
 function handleLogin (req, res) {
+  let func = 'handleLogin'
   let remoteUser = null
   let givenName = null
+  let displayName = null
+  let surName = null
   let emailAddr = null
   let sessionExpiration = null
   let userExists = false
   if (nmAuthType === 'local') {
     remoteUser = nmAuthTestUser
     givenName = nmAuthTestUser
+    displayName = nmAuthTestUser
+    surName = nmAuthTestUser
     emailAddr = emailTestAddr
     sessionExpiration = moment().unix() + fourHours
   } else {
     remoteUser = req.headers[nmAuthUserHeader] // OneLink users do not have NetIDs, but all have dudukeids
     givenName = req.headers[nmAuthGivenNameHeader]
+    displayName = req.headers[nmAuthDisplayNameHeader]
+    surName = req.headers[nmAuthSurNameHeader]
     emailAddr = req.headers[nmAuthEmailHeader]
     sessionExpiration = +(req.headers[nmAuthSessionExpirationHeader])
   }
-
+  logger.debug(func + ' - headers: ' + JSON.stringify(req.headers) )
+  logger.debug(`${func} - user info: remoteUser=${remoteUser} givenName=${givenName} displayName=${displayName} surName=${surName} email=${emailAddr} sessionExpiration=${sessionExpiration}`)
   let token = req.cookies['token']
   if (token) {
     logger.debug('found session token: ' + token)
@@ -356,6 +367,8 @@ function handleLogin (req, res) {
               'userid': remoteUser,
               'email': emailAddr,
               'givenName': givenName,
+              'surName': surName,
+              'displayName': displayName,
               'apiAccess': []
             }, function (err, newDoc) {
               if (err) {
@@ -378,15 +391,18 @@ function handleLogin (req, res) {
         .then(function (isMember) {
           let isAdmin = isMember
           let isUser = true // for now everyone is a user
-          let isAnonymous = false
+          let isAnonymous = (givenName === 'Anon' && surName === 'Nanomine')
           // let logoutUrl = nmAuthLogoutUrl
           let jwToken = jwtBase.sign({
             'sub': remoteUser,
             'givenName': givenName,
+            'sn': surName,
+            'displayName': displayName,
             'isTestUser': (nmAuthType === 'local'),
             'exp': sessionExpiration,
             'isAdmin': isAdmin,
             'isUser': isUser,
+            'mail': emailAddr,
             'isAnonymous': isAnonymous,
             // 'logoutUrl': logoutUrl,
             'userExists': userExists
@@ -431,8 +447,8 @@ app.get('/nm', function (req, res) {
       return res.status(500).send('login error occurred: ' + err)
     })
 })
-app.get('/nmr/logout', function (req, res) {
-  res.redirect(nm)
+app.get('/logout', function (req, res) {
+  return res.status(200).json({error:null, data: {logoutUrl: nmAuthLogoutUrl}})
 })
 
 let db = mongoose.connection
@@ -488,6 +504,8 @@ let usersSchema = new mongoose.Schema({
   alias: String, // random unless overridden by user - not used for attribution, only display
   userid: String,
   givenName: String, // first name
+  surName: String, // last name
+  displayName: String, // full name
   email: String,
   apiAccess: [String] // api token | refresh token | accessToken:expiration
 }, {collection: 'users'})
