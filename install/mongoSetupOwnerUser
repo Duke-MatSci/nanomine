@@ -8,5 +8,12 @@ db.createUser(
   roles: [ { role: "dbOwner", db: "mgi"} ]
   }
 )
+use mgi
+db.createUser(
+{
+  "user": "${NM_MONGO_OWNER_USER}",
+  "pwd": "${NM_MONGO_OWNER_PWD}",
+  "roles":["readWrite"]})
+}
 EOF
 
