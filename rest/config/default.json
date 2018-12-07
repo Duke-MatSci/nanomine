@@ -59,6 +59,12 @@
         "lang": "python",
         "pgmdir": "../src/jobs/CorrelationFunctions",
         "pgmname": "run_CorrelationReconstruct.py"
+      },
+      {
+        "jobtype": "DescriptorReconstruct",
+        "lang": "python",
+        "pgmdir": "../src/jobs/Descriptor",
+        "pgmname": "run_DescriptorReconstruct.py"
       }
     ]
   }
