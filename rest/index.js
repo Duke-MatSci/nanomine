@@ -50,8 +50,8 @@ let nmAuthEmailHeader = process.env['NM_AUTH_EMAIL_HEADER']
 let nmAuthSessionExpirationHeader = process.env['NM_AUTH_SESSION_EXPIRATION_HEADER']
 let nmAuthSecret = process.env['NM_AUTH_SECRET']
 let nmAuthSystemToken = process.env['NM_AUTH_SYSTEM_TOKEN']
-let nmSessionSecret = process.env['NM_SESSION_SECRET']
-let nmAuthEnabled = process.env['NM_AUTH_ENABLED'].toLowerCase() === 'yes'
+// let nmSessionSecret = process.env['NM_SESSION_SECRET']
+// let nmAuthEnabled = process.env['NM_AUTH_ENABLED'].toLowerCase() === 'yes'
 let nmAuthType = process.env['NM_AUTH_TYPE']
 let nmAuthTestUser = process.env['NM_AUTH_TEST_USER']
 let nmAuthAdminGroupName = process.env['NM_AUTH_ADMIN_GROUP_NAME']
@@ -195,8 +195,8 @@ function authMiddleware (authOptions) {
     let apiAuth = false
     let apiGroup = null
     let loginUserId = null
-    let runAsUserId = null // Allow admins to set runAsUserId
-    let apiUserId = null
+    // let runAsUserId = null // Allow admins to set runAsUserId
+    // let apiUserId = null
     let jsonResp = {'error': null, 'data': null}
     authOptions.protect.forEach(function (v) {
       if (v.path === req.path) {
@@ -338,10 +338,14 @@ function handleLogin (req, res) {
     logger.debug('found session token: ' + token)
     try {
       let decoded = jwtBase.verify(token, nmAuthSecret)
-      userExists = decoded.userExists
+      if (remoteUser === decoded.sub) { // don't set userExists unless remoteUser and subject of the token are the same
+      //                                   -- Sometimes, on session timeout, the token might not get cleared and login occurs for another user
+        userExists = decoded.userExists
+      }
+      logger.debug(`${func} - current token values: ` + JSON.stringify(decoded))
     } catch (err) {
-      let decoded = jwtBase.decode(token) // not signed version -- possible fake
-      logger.error('unable to verify token. Possible forgery. data: ' + JSON.stringify(decoded))
+      let decoded = jwtBase.decode(token) // timed out or improperly signed version -- possible fake
+      logger.error('unable to verify token. Possible forgery or token timeout. data: ' + JSON.stringify(decoded))
     }
   }
   // TODO enforce forged token check - logout should remove cookie
@@ -387,7 +391,7 @@ function handleLogin (req, res) {
   // check admin status by looking up group
   return new Promise(function (resolve, reject) {
     userFindCreatePromise.then(function () {
-      groupMgr.isGroupMember(nmAuthAdminGroupName, remoteUser)
+      groupMgr.isGroupMember(logger, nmAuthAdminGroupName, remoteUser)
         .then(function (isMember) {
           let isAdmin = isMember
           let isUser = true // for now everyone is a user

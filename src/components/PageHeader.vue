@@ -30,7 +30,7 @@
           <v-btn
             color="blue darken-1"
             flat="flat"
-            @click="logoutDialog = false"
+            @click="cancelLogout()"
           >
             No
           </v-btn>
@@ -38,10 +38,16 @@
           <v-btn
             color="blue darken-1"
             flat="flat"
-            v-bind:href="logoutUrl"
+            v-on:click="logout()"
           >
             Yes
           </v-btn>
+          <a
+            style="display: none"
+            ref="logoutLink"
+            v-bind:href="logoutUrl"
+            v-on:click="log('clicked')"
+          />
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -58,18 +64,50 @@ export default {
   beforeMount: function () {
     let vm = this
     vm.auth = new Auth()
-    vm.auth.getLogoutUrl()
-      .then(function (logoutUrl) {
-        vm.logoutUrl = logoutUrl
-      })
+    vm.ckLogout = new Promise(function (resolve, reject) {
+      vm.auth.getLogoutUrl()
+        .then(function (logoutUrl) {
+          vm.logoutUrl = logoutUrl
+          resolve()
+        })
+        .catch(function (err) {
+          // console.log('error getting logout URL: ' + err)
+          reject(err)
+          vm.logoutUrl = '#'
+        })
+    })
+    vm.ckLogout.then(function () {
+      console.log('query = ' + JSON.stringify(vm.$route.query))
+      let qlogout = vm.$route.query.logout
+      if (qlogout && qlogout.match(/(true).*/)) {
+        setTimeout(function () {
+          vm.logoutRouted = true
+          vm.logoutDialog = true
+          console.log('set logoutDialog to true')
+        }, 50)
+      } else {
+        console.log('logout not requested')
+      }
+    })
       .catch(function (err) {
         console.log('error getting logout URL: ' + err)
-        vm.logoutUrl = '#'
       })
   },
   methods: {
+    log: function (msg) {
+      console.log(msg)
+    },
     logout: function () {
       this.auth.logout()
+      this.$refs.logoutLink.click()
+    },
+    cancelLogout: function () {
+      let vm = this
+      vm.logoutDialog = false
+      if (vm.logoutRouted) {
+        vm.logoutRouted = false
+        vm.$router.push('/')
+      }
     },
     searchEnabled: function () {
       return false
@@ -103,6 +141,7 @@ export default {
       msg: 'PageHeader',
       auth: null,
       logoutDialog: false,
+      logoutRouted: false,
       logoutUrl: null
     }
   }

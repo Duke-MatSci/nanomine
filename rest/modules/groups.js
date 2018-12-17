@@ -1,5 +1,5 @@
 
-function isGroupMember(groupName, remoteUser) {
+function isGroupMember (logger, groupName, remoteUser) {
   let groups = [
     {'admins': ['adminuser']}
   ]
@@ -12,6 +12,9 @@ function isGroupMember(groupName, remoteUser) {
           members.forEach(function (v2) {
             if (remoteUser === v2) {
               rv = true
+              logger.debug('found user: ' + remoteUser + ' in group: ' + groupName)
+            } else {
+              logger.debug('did NOT find user: ' + remoteUser + ' in group: ' + groupName)
             }
           })
         }

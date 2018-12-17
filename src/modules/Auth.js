@@ -83,6 +83,11 @@ Auth.prototype = {
     })
     return p
   },
+  deleteTokenCookie: function () {
+    let cookieDate = new Date()
+    cookieDate.setTime(cookieDate.getTime() - 1)
+    document.cookie = 'token=; expires=' + cookieDate.toGMTString()
+  },
   getGivenName: function () {
     let vm = this
     let tv = vm.tokenValues
@@ -141,6 +146,7 @@ Auth.prototype = {
     // Obtains userId, userName and permissions
   },
   logout: function (successFunction, failureFunction) {
+    this.deleteTokenCookie()
   },
   notAuthorizedHandler: function (successFunction, failureFunction) {
     // call this if the user does something that returns 403, or that user is not permitted to do based on permissions
