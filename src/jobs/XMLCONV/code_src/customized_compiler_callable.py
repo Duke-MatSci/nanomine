@@ -1710,7 +1710,7 @@ def sheetProcType(sheet, DATA, myXSDtree, jobDir):
                 temp_list = sheetProcTypeHelper(sheet, row, temp_list, 'Processing method', myXSDtree, jobDir) # helper
                 if len(temp_list) > 0:
                     # dump the temp_list as a dict into Process_list
-                    Process_list.append(collections.OrderedDict({'OtherProcessing': temp_list}))
+                    Process_list.append(collections.OrderedDict({'Other_Processing': temp_list}))
     # finish up the Experimental Procedure part
     if len(ExpPrc) > 0:
         Process_list.insert(0, collections.OrderedDict({'ExperimentalProcedure': ExpPrc}))
