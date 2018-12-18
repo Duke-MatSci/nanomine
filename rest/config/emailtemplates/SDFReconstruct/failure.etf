@@ -1,0 +1,14 @@
+<br/>Hello ${user},
+
+<br/> Greetings from Nanomine!
+
+<br/>Unfortunately, SDF reconstruction was not successful. Job id is ${jobid}
+
+<br/>job result code: ${jobinfo.resultcode}
+
+<br/>Please visit <a href="https://nanomine.org/joboutput/${jobid}">your job output</a> for more information
+
+<br/>
+Regards,
+<br/>The NanoMine team
+<br/> *** DO NOT REPLY TO THIS EMAIL ***

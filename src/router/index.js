@@ -22,6 +22,11 @@ import SDFReconstruct from '@/components/SDFReconstruct'
 import DescriptorReconstruct from '@/components/DescriptorReconstruct'
 import Visualization from '@/components/Visualization'
 import SDFCharacterizeResults from '@/components/SDFCharacterizeResults'
+import DescriptorCharacterizeResults from '@/components/DescriptorCharacterizeResults'
+import CorrelationCharacterizeResults from '@/components/CorrelationCharacterizeResults'
+import SDFReconstructResults from '@/components/SDFReconstructResults'
+import CorrelationReconstructResults from '@/components/CorrelationReconstructResults'
+import DescriptorReconstructResults from '@/components/DescriptorReconstructResults'
 import ViewData from '@/components/ViewData'
 
 Vue.use(Router)
@@ -144,6 +149,30 @@ export default new Router({
       component: SDFCharacterizeResults
     },
     {
+      path: '/DescriptorCharacterizeResults',
+      name: 'DescriptorCharacterizeResults',
+      component: DescriptorCharacterizeResults
+    },
+    {
+      path: '/CorrelationCharacterizeResults',
+      name: 'CorrelationCharacterizeResults',
+      component: CorrelationCharacterizeResults
+    },
+    {
+      path: '/SDFReconstructResults',
+      name: 'SDFReconstructResults',
+      component: SDFReconstructResults
+    },
+    {
+      path: '/CorrelationReconstructResults',
+      name: 'CorrelationReconstructResults',
+      component: CorrelationReconstructResults
+    },
+    {
+      path: '/DescriptorReconstructResults',
+      name: 'DescriptorReconstructResults',
+      component: DescriptorReconstructResults
+    },
       path: '/ViewData',
       name: 'ViewData',
       component: ViewData,

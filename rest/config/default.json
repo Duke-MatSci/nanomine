@@ -35,6 +35,36 @@
         "lang": "python",
         "pgmdir": "../src/jobs/SDF",
         "pgmname": "run_SDFCharacterize.py"
+      },
+      {
+        "jobtype": "DescriptorCharacterize",
+        "lang": "python",
+        "pgmdir": "../src/jobs/Descriptor",
+        "pgmname": "run_DescriptorCharacterize.py"
+      },
+      {
+        "jobtype": "CorrelationCharacterize",
+        "lang": "python",
+        "pgmdir": "../src/jobs/CorrelationFunctions",
+        "pgmname": "run_CorrelationCharacterize.py"
+      },
+      {
+        "jobtype": "SDFReconstruct",
+        "lang": "python",
+        "pgmdir": "../src/jobs/SDF",
+        "pgmname": "run_SDFReconstruct.py"
+      },
+      {
+        "jobtype": "CorrelationReconstruct",
+        "lang": "python",
+        "pgmdir": "../src/jobs/CorrelationFunctions",
+        "pgmname": "run_CorrelationReconstruct.py"
+      },
+      {
+        "jobtype": "DescriptorReconstruct",
+        "lang": "python",
+        "pgmdir": "../src/jobs/Descriptor",
+        "pgmname": "run_DescriptorReconstruct.py"
       }
     ]
   }

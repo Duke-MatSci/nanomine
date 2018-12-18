@@ -63,7 +63,7 @@ function zip_file_processing_SDFchar(path_to_write)
          1.0, 0.5, 0
          1.0, 1.0, 0
          1.0, 0, 0];
-    imagesc(sdf2d,clims); colormap(map);
+    imagesc(sdf2d_mean,clims); colormap(map);
     xlim([0 size(img_original,1)]); ylim([0 size(img_original,2)]);
     set(gca,'xtick',[]); set(gca,'ytick',[]);
     saveas(gcf,[path_to_write,'/SDF_2D.jpg']);
