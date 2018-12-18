@@ -1,8 +1,8 @@
 <br/>Hello ${user},
 
-<br/>Unfortunately, SDF characterization was not successful.
+<br/> Greetings from Nanomine!
 
-<br/>jobid: ${jobid}
+<br/>Unfortunately, SDF characterization was not successful. Job id is ${jobid}
 
 <br/>job result code: ${jobinfo.resultcode}
 
@@ -11,4 +11,4 @@
 <br/>
 Regards,
 <br/>The NanoMine team
-<br/>
+<br/> *** DO NOT REPLY TO THIS EMAIL ***
