@@ -190,6 +190,10 @@ let datasetsSchema = new mongoose.Schema({
   volume: Number, /* 1-12 for monthly, could be others for weekly, semi-monthly, etc */
   url: String, /* Best url to access paper, book, etc */
   language: String, /* English, etc */
+  location: String, /* Originally: PolymerNanocomposite.DATA_SOURCE.Citation.CommonFields.Location */
+  dateOfCitation: String, /* Originally: PolymerNanocomposite.DATA_SOURCE.Citation.CommonFields.DateOfCitation */
+  issn: String, /* Originally: PolymerNanocomposite.DATA_SOURCE.Citation.CitationType.Journal.ISSN */
+  issue: String, /* Originally: PolymerNanocomposite.DATA_SOURCE.Citation.CitationType.Journal.Issue */
   seq: Number /* Unique index constraint, but not forced to monotonic -- required field (set by create) */
 }, {collection: 'datasets'})
 let Datasets = mongoose.model('datasets', datasetsSchema)
@@ -646,7 +650,7 @@ app.post('/dataset/update', function (req, res) {
       console.log('datataset/update: error - ' + err)
       return res.status(500).json(jsonResp)
     } else {
-      jsonResp.data = doc
+      jsonResp.data = oldDoc
       console.log('datataset/update: success - ' + oldDoc)
       return res.status(200).json(jsonResp)
     }

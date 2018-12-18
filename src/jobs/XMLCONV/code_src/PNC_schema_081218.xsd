@@ -1580,7 +1580,7 @@
             <xsd:element minOccurs="0" name="RheologicalStorageModulus" type="ScalarUncertainty"/>
             <xsd:element minOccurs="0" name="RheologicalLossModulus" type="ScalarUncertainty"/>
             <xsd:element minOccurs="0" name="RheologicalLossTangent" type="ScalarUncertainty"/>
-            <xsd:element minOccurs="0" name="RheologicalMasterCurve" type="Distribution"/>
+            <xsd:element minOccurs="0" maxOccurs="unbounded" name="RheologicalMasterCurve" type="Distribution"/>
         </xsd:sequence>
     </xsd:complexType>
     <xsd:complexType name="ViscosityType">

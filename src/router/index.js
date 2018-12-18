@@ -27,6 +27,7 @@ import CorrelationCharacterizeResults from '@/components/CorrelationCharacterize
 import SDFReconstructResults from '@/components/SDFReconstructResults'
 import CorrelationReconstructResults from '@/components/CorrelationReconstructResults'
 import DescriptorReconstructResults from '@/components/DescriptorReconstructResults'
+import ViewData from '@/components/ViewData'
 
 Vue.use(Router)
 
@@ -171,6 +172,13 @@ export default new Router({
       path: '/DescriptorReconstructResults',
       name: 'DescriptorReconstructResults',
       component: DescriptorReconstructResults
+    },
+      path: '/ViewData',
+      name: 'ViewData',
+      component: ViewData,
+      props: (route) => ({
+        title: route.query.title
+      })
     }
   ]
 })
