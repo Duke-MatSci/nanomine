@@ -11,6 +11,7 @@ const config = require('config').get('nanomine')
 const winston = require('winston')
 const moment = require('moment')
 const datauri = require('data-uri-to-buffer')
+const stream = require('stream')
 const qs = require('qs')
 const fs = require('fs')
 const mongoose = require('mongoose')
@@ -331,7 +332,7 @@ function handleLogin (req, res) {
     emailAddr = req.headers[nmAuthEmailHeader]
     sessionExpiration = +(req.headers[nmAuthSessionExpirationHeader])
   }
-  logger.debug(func + ' - headers: ' + JSON.stringify(req.headers) )
+  logger.debug(func + ' - headers: ' + JSON.stringify(req.headers))
   logger.debug(`${func} - user info: remoteUser=${remoteUser} givenName=${givenName} displayName=${displayName} surName=${surName} email=${emailAddr} sessionExpiration=${sessionExpiration}`)
   let token = req.cookies['token']
   if (token) {
@@ -452,7 +453,7 @@ app.get('/nm', function (req, res) {
     })
 })
 app.get('/logout', function (req, res) {
-  return res.status(200).json({error:null, data: {logoutUrl: nmAuthLogoutUrl}})
+  return res.status(200).json({error: null, data: {logoutUrl: nmAuthLogoutUrl}})
 })
 
 let db = mongoose.connection
@@ -462,7 +463,7 @@ db.on('error', function (err) {
   logger.error('db error: ' + err)
 })
 db.once('open', function () {
-  logger.info('database opened successfully.')
+  logger.info('database opened successfully via mongoose connect.')
 })
 
 /*
@@ -907,6 +908,51 @@ app.post('/curate', function (req, res) {
     jsonResp.error = 'error - curatedDataState: ' + curatedDataState + ' is not a valid state.'
     return res.status(400).json(jsonResp)
   }
+})
+
+app.post('/blob', function (req, res) {
+  // save blob to gridfs
+  let jsonResp = {'error': null, 'data': null}
+  let bucketName = req.body.bucketName
+  let filename = req.body.filename
+  let dataUri = req.body.dataUri
+  if (filename && typeof filename === 'string' && dataUri && typeof dataUri === 'string') {
+    let options = {}
+    if (bucketName && typeof bucketName === 'string') {
+      options.bucketName = bucketName
+    }
+    let buffer = datauri(dataUri)
+    // logger.info('blob dataUri buffer length: ' + buffer.length)
+    const bucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, options)
+    let bufferStream = new stream.PassThrough()
+    // bufferStream.write(buffer)
+    bufferStream.end(buffer)
+    let uploadStream = bucket.openUploadStream(filename)
+    bufferStream
+      .pipe(uploadStream)
+      .on('error', function (err) {
+        jsonResp.error = new Error(err)
+        return res.status(500).json(jsonResp)
+      })
+      .on('finish', function () {
+        logger.info('wrote data to gridFSBucket : ' + (bucketName || 'default') + ' id is: ' + uploadStream.id)
+        jsonResp.data = {'id': uploadStream.id}
+        return res.status(201).json(jsonResp)
+      })
+    bufferStream.resume()
+  } else {
+    let msg = 'Target filename and data to post is required for file upload.'
+    logger.error('post /blob: ' + msg)
+    jsonResp.error = new Error(msg)
+    return res.status(400).json(jsonResp)
+  }
+})
+
+app.get('/blob', function (req, res) { // MDCS only supports get by id (since they save id in XML) and filename is almost superfluous
+  //    for our purposes, get will support filename (expected to be schemaid/xml_title/filename), bucketname (optional) or id
+  //    HOWEVER, existing file names (the ones converted from MDCS), so the id must be extracted from the xml and supplied as parameter
+  //      since MDCS (1.3) filenames are not unique
+  // get blob and send to client
 })
 
 app.get('/dataset', function (req, res) {
