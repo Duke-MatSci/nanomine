@@ -2,13 +2,13 @@
 
 <br/>Hello ${user},
 
-<br/>Your Otsu binarize  was successful.
+<br/> Greetings from Nanomine!
 
-<br/>job ${jobid}
+<br/>Your Otsu binarization submission was successful. Job ID is ${jobid}
 
 <br/>Please visit <a href="${resultpage}">this link</a> to view and download your results.
 
 <br/>
 Regards,
 <br/>The NanoMine team
-<br/>
+<br/> *** DO NOT REPLY TO THIS EMAIL ***

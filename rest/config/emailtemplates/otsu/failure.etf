@@ -1,6 +1,6 @@
 <br/>Hello ${user},
 
-<br/>Unfortunately, your Otsu's binarize was not successful.
+<br/>Unfortunately, your Otsu's binarization submission was not successful.
 
 <br/>jobid: ${jobid}
 
@@ -11,4 +11,4 @@
 <br/>
 Regards,
 <br/>The NanoMine team
-<br/>
+<br/> *** DO NOT REPLY TO THIS EMAIL ***

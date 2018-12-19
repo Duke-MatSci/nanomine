@@ -30,7 +30,7 @@
             formats: .jpg, .tif, .png) of same size (in pixels). DO NOT ZIP the folder containing images; select all images and ZIP them directly.
             DO NOT ZIP the folder containing images; select all images and ZIP them directly. The results will include a folder "input" which contains all images submitted by user,
             one folder for each input image that comprises the 2D and 1D SDF (in CSV format) of the respective image.
-            Additionally, the mean 2D and 1D SDF, averaged over all input images is provided in CSV file along with a plot of the mean 2D SDF in "SDF_2D_mean.jpg".</p>
+            Additionally, the mean 2D and 1D SDF, averaged over all input images is provided in CSV file along with a plot of the mean 2D SDF in "SDF_2D.jpg".</p>
         </v-flex>
       </v-layout>
       <v-alert
