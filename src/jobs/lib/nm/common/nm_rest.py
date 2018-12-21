@@ -22,6 +22,9 @@ class nm_rest:
     if self.sysToken == None or self.apiToken == None or self.refreshToken == None:
       raise ValueError('sysToken, apiToken and accessToken are required parameters and must be valid')
 
+  def getRequest(self):
+    return self.callerReq
+
   def urlopen(self, rqData):
     self.logger.debug('nm_rest urlopen...')
     now = int(time.time())
@@ -47,4 +50,5 @@ class nm_rest:
 
      # now, execute the original request with the correct bearer token
     self.callerReq.add_header('Authentication', 'Bearer ' + self.accessToken)
-    return urllib2.urlopen(self.callerReq, rqData)
+    rv = urllib2.urlopen(self.callerReq, rqData)
+    return rv

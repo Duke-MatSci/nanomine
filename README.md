@@ -67,6 +67,7 @@ NanoMine Nanocomposites Data Resource
   
   #install XMLCONV components
   pip install -r /apps/nanomine/install/xmlconv-requirements.txt
+  pip install python-datauri
   
   sudo a2enmod proxy_connect.load  
   sudo a2enmod proxy_html.load  

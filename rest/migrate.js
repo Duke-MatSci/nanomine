@@ -525,7 +525,7 @@ function migrateToNmSpDev1 (fromVer, toVer) {
               // extract dataset fields and append to datasets array -- if not already there
               seq = match[1]
               let isValidSchema = checkSchema(xmldoc.schema) // TODO bad name. Just checks to see if schema is not deleted and current
-              if (datasets[seq] === undefined && isValidSchema && (xmldoc.schema === latestSchema().schemaId)) { // try to get latest data
+              if (datasets[seq] === undefined ) { //&& isValidSchema && (xmldoc.schema === latestSchema().schemaId)) { // try to get latest data
                 let ds = _.get(json, 'PolymerNanocomposite.DATA_SOURCE.Citation.CommonFields', null)
                 let dsExt = _.get(json, 'PolymerNanocomposite.DATA_SOURCE.Citation.CitationType.Journal', null)
                 let issue = null

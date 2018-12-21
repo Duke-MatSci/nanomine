@@ -173,6 +173,7 @@ export default new Router({
       name: 'DescriptorReconstructResults',
       component: DescriptorReconstructResults
     },
+    {
       path: '/ViewData',
       name: 'ViewData',
       component: ViewData,

@@ -10,6 +10,7 @@ import os
 import sys
 import json
 import urllib2
+import traceback
 
 # import logging # this should be done by a wrapper in the future
 restbase = os.environ['NM_LOCAL_REST_BASE']
@@ -56,7 +57,7 @@ logging.info(xsdDir)
 # add code_src to the sys path
 sys.path.insert(0, code_srcDir)
 # call the conversion code
-import traceback
+
 try:
   from conversion import conversion
 except:
@@ -67,8 +68,8 @@ try:
   status, messages = conversion(jobDir, code_srcDir, xsdDir, templateName)
   logging.info("conversion finished")
 except:
-  logging.info('exception occurred')
-  logging.info('exception: ' + str(str(traceback.format_exc())))
+  logging.error('exception occurred')
+  logging.error('exception: ' + str(str(traceback.format_exc())))
   status = 'failure'
   messages = ['[Conversion Error] Oops! The conversion cannot be finished! Please contact the administrator.']
 
