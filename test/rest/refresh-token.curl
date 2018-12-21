@@ -1,0 +1,10 @@
+#!/bin/bash
+# Gets an access token for the specified api/refresh token
+SYS_TOKEN=${NM_AUTH_SYSTEM_TOKEN}
+API_TOKEN=${1:-${NM_AUTH_API_TOKEN_EMAIL}}
+REFRESH_TOKEN=${2:-${NM_AUTH_API_REFRESH_EMAIL}}
+
+curl --header "Content-Type: application/json" \
+  --request POST \
+  --data '{"systemToken":"'${SYS_TOKEN}'","apiToken":"'${API_TOKEN}'","refreshToken":"'${REFRESH_TOKEN}'"}' \
+  http://localhost/nmr/refreshtoken

@@ -1,22 +1,91 @@
 from extract_verify_ID_callable import runEVI
 from customized_compiler_callable import compiler
+from nm.common import *
+from nm.common.nm_rest import nm_rest
 import os
 import csv
 import urllib2
 import json
-import logging
 import sys
+import re
+import xml.etree.ElementTree as ET
+from datauri import DataURI
+import traceback
+
+
+def uploadFilesAndAdjustXMLImageRefs(jobDir, schemaId, xmlId):
+    imageFiles = [] # track image files uploaded -- which go into default bucket (returned id is substituted back into XML)
+    # all other files go into 'inputfiles' bucket with filename {schemaId}/{xmlId}/filename (returned ID is not stored)
+    # for now let exceptions bubble up to handler in caller
+
+    restbase = os.environ['NM_LOCAL_REST_BASE']
+    webbase = os.environ['NM_WEB_BASE_URI']
+    curateFilesUrl = restbase + '/nmr/blob'
+
+    sysToken = os.environ['NM_AUTH_SYSTEM_TOKEN']
+    curateApiToken = os.environ['NM_AUTH_API_TOKEN_CURATE']
+    curateRefreshToken = os.environ['NM_AUTH_API_REFRESH_CURATE']
+
+    xmlName = jobDir + '/xml/' + xmlId + '.xml'
+    xmlTree = ET.parse(xmlName)
+    updatedXml = False
+    for f in xmlTree.findall('.//MICROSTRUCTURE/ImageFile/File'):
+      fn = f.text.split('/')[-1]
+      imageFiles.append(fn)
+      fullImageFileName = jobDir + '/' + fn
+      logging.debug('uploading: ' + fullImageFileName)
+      dataUri = DataURI.from_file(fullImageFileName)
+      dataUri = dataUri.replace("\n","") # remove line feeds
+      ## logging.debug('dataUri: ' + dataUri)
+      curatefiledata = '{"filename":"'+ fn + '","dataUri":"' + dataUri + '"}'
+      # logging.debug(curatefiledata + ' len is: ' + str(len(curatefiledata)))
+      curatefiledata = json.loads(curatefiledata)
+      rq = urllib2.Request(curateFilesUrl)
+      logging.debug('request created using createFilesUrl')
+      rq.add_header('Content-Type','application/json')
+      nmCurateFiles = nm_rest(logging, sysToken, curateApiToken, curateRefreshToken, rq)
+      r = nmCurateFiles.urlopen(json.dumps(curatefiledata).encode("utf8"))
+      if r.getcode() == 201:
+        uploadId = json.loads(r.read())['data']['id']
+        imageRef = webbase + '/nmr/blob?id=' + uploadId
+        logging.debug('new image value for XML: ' + imageRef)
+        f.text = imageRef # update XML node with new image reference
+        ## testing -- raise ValueError('Upload successful. returned id: ' + uploadId) ## for testing
+        updatedXml = True
+      else:
+        raise ValueError('Unexpected return code from image upload (' + fn + '): ' + str(r.getcode()))
+    if updatedXml == True:
+      # update the XML in the file
+      xmlTree.write(xmlName)
+
+    # get a list of all files in jobDir and upload them
+    dataFiles = os.listdir(jobDir)
+    for f in dataFiles:
+      fn = jobDir + '/' + f
+      if os.path.isfile(fn) and f not in imageFiles: # make sure it's a regular file and wasn't already uploaded as an image
+        dataUri = DataURI.from_file(fn)
+        dataUri = dataUri.replace("\n","") # remove line feeds
+        objFN = schemaId + '/' + xmlId + '/' + f
+        curatefiledata = '{"filename":"'+ objFN + '","bucketName":"curateinput","dataUri":"' + dataUri + '"}'
+        # logging.debug(curatefiledata + ' len is: ' + str(len(curatefiledata)))
+        curatefiledata = json.loads(curatefiledata)
+        rq = urllib2.Request(curateFilesUrl)
+        logging.debug('request created using createFilesUrl')
+        rq.add_header('Content-Type','application/json')
+        nmCurateFiles = nm_rest(logging, sysToken, curateApiToken, curateRefreshToken, rq)
+        r = nmCurateFiles.urlopen(json.dumps(curatefiledata).encode("utf8"))
+        if r.getcode() == 201:
+          uploadId = json.loads(r.read())['data']['id']
+          logging.debug('uploaded file ID: ' + uploadId)
+          ## testing - raise ValueError('Upload of input successful. returned id: ' + uploadId) ## for testing
+        else:
+          raise ValueError('Unexpected return code from file upload (' + objFN + '): ' + str(r.getcode()))
+
+
+
+
 
 def conversion(jobDir, code_srcDir, xsdDir, templateName):
-    # logging config
-    # sloglevel=os.environ['NM_LOGLEVEL']
-    # loglevel = logging.DEBUG
-    # try:
-    #     loglevel = getattr(logging, sloglevel.upper())
-    # except:
-    #     pass
-    # logging.basicConfig(filename=os.environ['NM_LOGFILE'],level=loglevel)
-    # rest setup
     restbase = os.environ['NM_LOCAL_REST_BASE']
     xsdFilename = xsdDir.split("/")[-1]
     # initialize messages
@@ -66,20 +135,23 @@ def conversion(jobDir, code_srcDir, xsdDir, templateName):
     if len(messages) > 0:
         return ('failure', messages)
     # check #5: upload and check if the uploading is successful
-    # rest call for schemaID
     try:
+        # rest call for schemaID
         schemaurl = restbase + '/nmr/templates/select?filename='+xsdFilename
         rq = urllib2.Request(schemaurl)
         j = json.loads(urllib2.urlopen(rq).read())
         schemaId = j["data"][0]["_id"]
+        # upload input files and image files referenced in xml
+        uploadFilesAndAdjustXMLImageRefs(jobDir, schemaId, ID)
         # curate-insert rest call
         with open(jobDir + "/xml/" + ID + ".xml", "r") as f:
             content = f.read()
+
         curate_insert_url = restbase + '/nmr/curate'
         curate_data = {
             "title": ID + ".xml",
             "schemaId": schemaId,
-            "curatedDataState": "EditedNotValid",
+            "curatedDataState": "Valid", # Valid causes ingest to kick of next. Also, it has passed validation.
             "content": content
         }
         rq = urllib2.Request(curate_insert_url)
@@ -89,7 +161,7 @@ def conversion(jobDir, code_srcDir, xsdDir, templateName):
         # logging.info('curate insert request posted: ' + str(r.getcode()))
     except:
         messages.append('exception occurred during curate-insert')
-        messages.append('exception: ' + str(sys.exc_info()[0]))
+        messages.append('exception: '  + str(str(traceback.format_exc())))
     if len(messages) > 0:
         return ('failure', messages)
     # pass all the checks

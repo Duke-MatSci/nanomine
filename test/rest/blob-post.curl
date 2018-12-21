@@ -1,0 +1,4 @@
+curl --header "Authentication: Bearer ${NM_AUTH_API_ACCESS_EMAIL}" --header "Content-Type: application/json" \
+  --request POST \
+  --data '@blobtest1.dataurl' \
+  http://localhost/nmr/blob

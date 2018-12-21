@@ -1,0 +1,11 @@
+#!/bin/bash
+mongo --port $NM_MONGO_PORT -u $NM_MONGO_USER -p $NM_MONGO_PWD --authenticationDatabase admin <<EOF
+use mgi
+db.updateUser(
+  "${NM_MONGO_API_USER}",
+  { 
+  pwd: "${NM_MONGO_API_PWD}",
+  roles: ["readWrite"]
+});
+EOF
+
