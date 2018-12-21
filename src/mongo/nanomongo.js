@@ -1,4 +1,23 @@
 //NanoMine tools script for mongo
+//listUsers()
+function listUsers() {
+  db = db.getSiblingDB('mgi');
+  db.users
+    .find()
+    .forEach(function(doc) {
+      print(JSON.stringify(doc));
+    });
+}
+
+//listApi()
+function listApi() {
+  db = db.getSiblingDB('mgi');
+  db.api
+    .find()
+    .forEach(function(doc) {
+      print(JSON.stringify(doc));
+    });
+}
 
 //listSchemas()
 function listSchemas() {

@@ -11,19 +11,105 @@
         <v-btn flat to="/mtools">Module Tools</v-btn>
         <v-btn flat to="/simtools">Simulation Tools</v-btn>
         <v-btn flat @click="toggleAdminAvailable()"><i class="material-icons nm-search-icon" v-if="searchEnabled()">search</i></v-btn>
-        <!--v-btn flat href="/login?next=/nm"><i class="material-icons nm-user-icon">perm_identity</i>Login</v-btn-->
+        <v-btn v-if="isLoggedIn()" flat v-on:click="logoutDialog = true"><i class="material-icons nm-user-icon" v-bind:class="{'nm-admin-icon': isAdmin}">perm_identity</i><span v-if="!isTestUser()">&nbsp;Logout&nbsp;</span> {{userName}}</v-btn>
       </v-toolbar-items>
     </v-toolbar>
+    <v-dialog
+      v-model="logoutDialog"
+      max-width="290"
+    >
+      <v-card>
+        <v-card-title class="headline blue lighten-2" primary-title>Log out</v-card-title>
+
+        <v-card-text>
+          Log out of NanoMine?
+        </v-card-text>
+        <v-divider></v-divider>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            color="blue darken-1"
+            flat="flat"
+            @click="cancelLogout()"
+          >
+            No
+          </v-btn>
+
+          <v-btn
+            color="blue darken-1"
+            flat="flat"
+            v-on:click="logout()"
+          >
+            Yes
+          </v-btn>
+          <a
+            style="display: none"
+            ref="logoutLink"
+            v-bind:href="logoutUrl"
+            v-on:click="log('clicked')"
+          />
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
 <script>
 
 import {} from 'vuex'
+import {Auth} from '@/modules/Auth.js'
 
 export default {
   name: 'PageHeader',
+  beforeMount: function () {
+    let vm = this
+    vm.auth = new Auth()
+    vm.ckLogout = new Promise(function (resolve, reject) {
+      vm.auth.getLogoutUrl()
+        .then(function (logoutUrl) {
+          vm.logoutUrl = logoutUrl
+          resolve()
+        })
+        .catch(function (err) {
+          // console.log('error getting logout URL: ' + err)
+          reject(err)
+          vm.logoutUrl = '#'
+        })
+    })
+    vm.ckLogout.then(function () {
+      console.log('query = ' + JSON.stringify(vm.$route.query))
+      let qlogout = vm.$route.query.logout
+      if (qlogout && qlogout.match(/(true).*/)) {
+        setTimeout(function () {
+          vm.logoutRouted = true
+          vm.logoutDialog = true
+          console.log('set logoutDialog to true')
+        }, 50)
+      } else {
+        console.log('logout not requested')
+      }
+    })
+      .catch(function (err) {
+        console.log('error getting logout URL: ' + err)
+      })
+  },
   methods: {
+    log: function (msg) {
+      console.log(msg)
+    },
+    logout: function () {
+      this.auth.logout()
+      this.$refs.logoutLink.click()
+      this.logoutDialog = false
+    },
+    cancelLogout: function () {
+      let vm = this
+      vm.logoutDialog = false
+      if (vm.logoutRouted) {
+        vm.logoutRouted = false
+        vm.$router.push('/')
+      }
+    },
     searchEnabled: function () {
       return false
     },
@@ -32,11 +118,32 @@ export default {
     },
     toggleAdminAvailable: function () {
       this.$store.commit('toggleAdminActive')
+    },
+    isLoggedIn: function () {
+      return this.auth.isLoggedIn()
+    },
+    isTestUser: function () {
+      return this.auth.isTestUser()
+    }
+  },
+  computed: {
+    userId: function () {
+      return this.auth.getUserId()
+    },
+    userName: function () {
+      return this.auth.getGivenName()
+    },
+    isAdmin: function () {
+      return this.auth.isAdmin()
     }
   },
   data () {
     return {
-      msg: 'PageHeader'
+      msg: 'PageHeader',
+      auth: null,
+      logoutDialog: false,
+      logoutRouted: false,
+      logoutUrl: null
     }
   }
 }
@@ -63,7 +170,10 @@ export default {
     vertical-align: bottom;
     padding-bottom: 6px;
   }
-
+  .nm-admin-icon {
+    background-color: #00ffff66;
+    color: red;
+  }
   .nm-user-icon {
     font-size: 18px;
     display: inline-flex;

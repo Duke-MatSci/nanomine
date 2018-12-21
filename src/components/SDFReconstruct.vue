@@ -5,7 +5,7 @@
 # Application: templates
 # Description:
 #
-# Created by: Akshay Iyer, August 18, 2018
+# Created by: Akshay Iyer, December 1, 2018
 # Customized for NanoMine
 #
 ################################################################################
@@ -38,8 +38,54 @@
                   The mean SDF of input images are provided in CSV files "SDF_1D_mean.csv" and "SDF_2D_mean.csv" and the 2D mean plotted in "SDF_2D.jpg".
                   The reconstructed images will be provided in JPEG format along with a plot comparing their autocorrelation function with the mean autocorrelation of input images.</p>
       </v-flex>
-          <h2> Create Agent to accept user uploaded files and process it in MATLAB</h2>
-
+      <v-alert
+        v-model="errorAlert"
+        type="error"
+        dismissible
+      >
+        {{errorAlertMsg}}
+      </v-alert>
+      <v-dialog v-model="successDlg" persistent max-width="500px">
+        <v-card>
+          <v-card-title>
+            <span>Characterization Job Submitted Successfully</span>
+            <v-spacer></v-spacer>
+          </v-card-title>
+          <v-card-text>
+            Your characterization job is: {{jobId}} <br/> You should receive an email with a link to the job output.
+          </v-card-text>
+          <v-card-actions>
+            <v-btn color="primary" flat @click="successDlgClicked()">Close</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+      <v-select label="Number Of Reconstructions" v-bind:items="options" v-model="num_recon"></v-select>
+      <v-flex xs12 class="text-xs-center text-sm-center text-md-center text-lg-center">
+        <p class="text-xs-left">Select File
+          <v-btn class="text-xs-left" small color="primary" @click='pickFile'>Browse</v-btn>
+          <input
+            type="file"
+            style="display: none"
+            accept=".jpg, .png, .tif, .mat, .zip"
+            ref="myUpload"
+            @change="onFilePicked"
+          >
+        </p>
+        <v-list v-model="fileName" subheader: true v-if="fileUploaded">
+          <v-list-tile
+            v-for="file in filesDisplay"
+            :key="file.fileName"
+          >
+            <v-list-tile-avatar>
+              <v-icon color="primary">check_circle_outline</v-icon>
+            </v-list-tile-avatar>
+            <v-list-tile-content>
+              <v-list-tile-title v-text="file.fileName"></v-list-tile-title>
+            </v-list-tile-content>
+          </v-list-tile>
+        </v-list>
+      </v-flex>
+      <v-btn v-on:click="submit()" color="primary">Reconstruct</v-btn>
     </v-container>
 
     <h4>Reference</h4>
@@ -52,11 +98,115 @@
 </template>
 
 <script>
+import {} from 'vuex'
+import {JobMgr} from '@/modules/JobMgr.js'
+
 export default {
   name: 'SDFReconstruct',
-  data () {
-    return {
-      msg: 'Microstructure Reconstruction - Spectral Density Function'
+  data: () => {
+    return ({
+      title: 'Input Upload',
+      msg: 'Microstructure Reconstruction - Spectral Density Function',
+      dialog: false,
+      fileName: '',
+      // file_type: [],
+      files: [],
+      filesDisplay: [],
+      errorAlert: false,
+      errorAlertMsg: '',
+      fileUploaded: false,
+      successDlg: false,
+      jobId: '',
+      num_recon: null,
+      options: [
+        '1', '2', '3', '4', '5'
+      ]
+    })
+  },
+  methods: {
+    setLoading: function () {
+      this.$store.commit('isLoading')
+    },
+
+    resetLoading: function () {
+      this.$store.commit('notLoading')
+    },
+
+    pickFile () {
+      this.$refs.myUpload.click()
+    },
+
+    resetFiles: function () {
+      this.files = []
+      this.filesDisplay = []
+      this.fileUploaded = false
+    },
+
+    onFilePicked (e) {
+      this.resetFiles()
+      const files = e.target.files
+      for (let i = 0; i < files.length; i++) {
+        let file = {}
+        let f = files[i]
+        if (f !== undefined) {
+          file.fileName = f.name
+          if (file.fileName.lastIndexOf('.') <= 0) {
+            return
+          }
+          console.log(file.fileName)
+          const fr = new FileReader()
+          fr.readAsDataURL(f)
+          fr.addEventListener('load', () => {
+            file.fileUrl = fr.result
+            this.files.push(file)
+            this.filesDisplay.push(file)
+            this.fileUploaded = true
+          })
+        } else {
+          console.log('File Undefined')
+        }
+      }
+    },
+    successDlgClicked: function () {
+      let vm = this
+      console.log('Success dlg button clicked')
+      vm.$router.go(-2) // go back to mcr homepage page
+    },
+    submit: function () {
+      let vm = this
+      vm.files.forEach(function (v) {
+        console.log(JSON.stringify(v))
+      })
+
+      vm.setLoading()
+      console.log('Loading..')
+      let jm = new JobMgr()
+      console.log('Called Job Manager')
+      jm.setJobType('SDFReconstruct')
+      jm.setJobParameters({'NumOfReconstructs': vm.num_recon, 'InputType': vm.fileName.split('.').pop()}) // Figure out which input type
+      if (vm.files && vm.files.length >= 1) {
+        vm.files.forEach(function (v) {
+          jm.addInputFile(v.fileName, v.fileUrl)
+          console.log('Job Manager added file: ' + v.fileName)
+        })
+        return jm.submitJob(function (jobId) {
+          console.log('Success! JobId is: ' + jobId)
+          vm.jobId = jobId
+          vm.resetLoading()
+          vm.successDlg = true
+        }, function (errCode, errMsg) {
+          let msg = 'error: ' + errCode + ' msg: ' + errMsg
+          console.log(msg)
+          vm.errorAlertMsg = msg
+          vm.errorAlert = true
+          vm.resetLoading()
+        })
+      } else {
+        let msg = 'Please select a file to process.'
+        vm.errorAlertMsg = msg
+        vm.errorAlert = true
+        vm.resetLoading()
+      }
     }
   }
 }
@@ -67,6 +217,7 @@ export default {
   img {
     width: 240px;
   }
+
   h4 {
     text-transform: uppercase;
   }
