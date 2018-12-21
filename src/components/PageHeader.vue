@@ -100,6 +100,7 @@ export default {
     logout: function () {
       this.auth.logout()
       this.$refs.logoutLink.click()
+      this.logoutDialog = false
     },
     cancelLogout: function () {
       let vm = this

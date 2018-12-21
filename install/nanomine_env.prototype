@@ -24,7 +24,7 @@ export NM_AUTH_SURNAME_HEADER="sn"
 export NM_AUTH_DISPLAYNAME_HEADER="displayName"
 export NM_AUTH_SESSION_EXPIRATION_HEADER="sessionExpiration"
 export NM_AUTH_TEST_USER="testuser"
-export NM_AUTH_LOGOUT_URL="/nmlogout" # logout
+export NM_AUTH_LOGOUT_URL="#" # logout
 export NM_AUTH_GROUP_ENABLED="no" # remote groups enable/disable. If not enabled, local groups used instead
 export NM_AUTH_GROUP_STEM="base" # base group name to append
 export NM_AUTH_ADMIN_GROUP_NAME="admins"
@@ -38,7 +38,6 @@ export NM_AUTH_API_TOKEN_JOBS="SOME_RANDOM_STRING7" # use token output from 'nod
 export NM_AUTH_API_REFRESH_JOBS="SOME_RANDOM_STRING8" # use token output 'node /apps/nanomine/rest/generateUserRefreshToken.js generateRefreshToken {USERID} jobs' here
 export NM_AUTH_API_TOKEN_EMAIL="SOME_RANDOM_STRING9" # use token output from 'node /apps/nanomine/rest/updateRestApiToken.js updateToken email' here
 export NM_AUTH_API_REFRESH_EMAIL="SOME_RANDOM_STRING10" # use token output 'node /apps/nanomine/rest/generateUserRefreshToken.js generateRefreshToken {USERID} email' here
-
 
 export NM_MONGO_PORT=27017
 export NM_MONGO_HOST=localhost
