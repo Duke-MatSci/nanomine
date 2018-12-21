@@ -20,6 +20,7 @@
     "fast-xml-parser": "^3.12.5",
     "jsonwebtoken": "^8.3.0",
     "lodash": "^4.17.11",
+    "moment": "^2.22.2",
     "vkbeautify": "^0.99.3",
     "vue": "^2.5.2",
     "vue-google-charts": "^0.3.1",
