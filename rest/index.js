@@ -6,6 +6,7 @@ const pathModule = require('path')
 const express = require('express')
 const cookieParser = require('cookie-parser')
 const bodyParser = require('body-parser')
+const mimetypes = require('mime-types')
 const FormData = require('form-data')
 const config = require('config').get('nanomine')
 const winston = require('winston')
@@ -15,6 +16,7 @@ const stream = require('stream')
 const qs = require('qs')
 const fs = require('fs')
 const mongoose = require('mongoose')
+const ObjectId = require('mongodb').ObjectId
 const templateFiller = require('es6-dynamic-template')
 const _ = require('lodash')
 const nodemailer = require('nodemailer')
@@ -953,6 +955,70 @@ app.get('/blob', function (req, res) { // MDCS only supports get by id (since th
   //    HOWEVER, existing file names (the ones converted from MDCS), so the id must be extracted from the xml and supplied as parameter
   //      since MDCS (1.3) filenames are not unique
   // get blob and send to client
+  let jsonResp = {'error': null, 'data': null}
+  let id = req.query.id // may be empty
+  let bucketName = req.query.bucketname // may be empty
+  let fileName = req.query.filename // may be empty
+  let options = {}
+  if (bucketName && typeof bucketName === 'string') {
+    options.bucketName = bucketName
+  }
+  // At least id or filename is required
+  if ((id && !fileName) || (fileName && !id)) {
+    let dlStream = null
+    const bucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, options)
+    if (id) {
+      try {
+        dlStream = bucket.openDownloadStream(ObjectId.createFromHexString(id), {})
+      } catch (err) {
+        res.status(404).send('NOT FOUND: ' + id)
+      }
+      dlStream.on('file', function (fileRec) {
+        let fn = fileRec.filename
+        let mt = mimetypes.lookup(fn)
+        res.set("Content-Type", mt)
+        let fnc = fn.split('/')
+        res.attachment(fnc.slice(-1)[0])
+      })
+      dlStream.on('error', function (err) {
+        res.status(404).send('NOT FOUND: ' + id)
+      })
+      dlStream.on('data', function (data) {
+        res.write(data)
+      })
+      dlStream.on('end', function () {
+        // stream is done. Send response.
+        res.end()
+      })
+    } else {
+      try {
+        dlStream = bucket.openDownloadStreamByName(fileName, {})
+      } catch (err) {
+        res.status(404).send('NOT FOUND: ' + fileName)
+      }
+      dlStream.on('file', function (fileRec) {
+        let fn = fileRec.filename
+        let mt = mimetypes.lookup(fn)
+        res.set("Content-Type", mt)
+        let fnc = fn.split('/')
+        res.attachment(fnc.slice(-1)[0])
+      })
+      dlStream.on('error', function (err) {
+        res.status(404).send('NOT FOUND: ' + id)
+      })
+      dlStream.on('data', function (data) {
+        res.write(data)
+      })
+      dlStream.on('end', function () {
+        // stream is done. Send response.
+        res.end()
+      })
+    }
+  } else {
+    let err = new Error('get blob requires either id or filename')
+    jsonResp.error = err
+    return res.status(400).json(jsonResp)
+  }
 })
 
 app.get('/dataset', function (req, res) {
