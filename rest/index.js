@@ -976,7 +976,7 @@ app.get('/blob', function (req, res) { // MDCS only supports get by id (since th
       dlStream.on('file', function (fileRec) {
         let fn = fileRec.filename
         let mt = mimetypes.lookup(fn)
-        res.set("Content-Type", mt)
+        res.set('Content-Type', mt)
         let fnc = fn.split('/')
         res.attachment(fnc.slice(-1)[0])
       })
@@ -999,7 +999,7 @@ app.get('/blob', function (req, res) { // MDCS only supports get by id (since th
       dlStream.on('file', function (fileRec) {
         let fn = fileRec.filename
         let mt = mimetypes.lookup(fn)
-        res.set("Content-Type", mt)
+        res.set('Content-Type', mt)
         let fnc = fn.split('/')
         res.attachment(fnc.slice(-1)[0])
       })
@@ -1478,6 +1478,71 @@ app.post('/jobemail', function (req, res, next) { // bearer auth
       return res.json(jsonResp)
     }
   })
+})
+
+app.post('/contact', function (req, res, next) { // bearer auth
+  let func = 'contact'
+  let jsonResp = {'error': null, 'data': null}
+  let userId = ''
+  let contactType = req.body.contactType
+  let contactText = req.body.contactText
+  let userEmailAddr = emailTestAddr
+  let adminEmailAddr = emailAdminAddr
+  let userGivenName = ''
+  let userSurName = ''
+  let userDisplayName = ''
+  let token = req.cookies['token']
+  if (token) {
+    try {
+      let decoded = jwtBase.verify(token, nmAuthSecret)
+      userId = decoded.sub // subject
+      logger.debug(func + ' - user: ' + userId + ' accessing: ' + req.path)
+      userEmailAddr = decoded.mail
+      userGivenName = decoded.givenName
+      userSurName = decoded.sn
+      userDisplayName = decoded.displayName
+    } catch (err) {
+      logger.error(func + ' - check jwt token failed. err: ' + err)
+    }
+  } else {
+    logger.error(func + ' - no jwt token found in cookie.')
+  }
+  let emailText = `
+      \nuser id: ${userId}
+      \nuser email: ${userEmailAddr}
+      \nuser givenName: ${userGivenName}
+      \nuser surName: ${userSurName}
+      \nuser fullName: ${userDisplayName}
+      \ncontact type: ${contactType}
+      \ntext: ${contactText} 
+      `
+  let emailHtml = emailText.replace(/[\n]/g,"<br/>")
+  if (sendEmails) {
+    logger.debug('email text: ' + emailText)
+    let message = {
+      subject: `NanoMine contact request. Type: ${contactType} from: ${userEmailAddr}`,
+      text: emailText,
+      html: emailHtml,
+      from: adminEmailAddr,
+      to: adminEmailAddr,
+      envelope: {
+        from: 'noreply <' + adminEmailAddr + '>',
+        to: adminEmailAddr
+      }
+    }
+    smtpTransport.sendMail(message, function (err, info) {
+      if (err) {
+        jsonResp.error = err
+        logger.error('sendMail error: ' + err)
+        return res.status(400).json(jsonResp)
+      }
+      logger.info('smtp return info: ' + JSON.stringify(info))
+      return res.json(jsonResp) // TODO interpret info object to determine if anything needs to be done
+    })
+  } else {
+    logger.error('Not sending emails. : ' + emailText)
+    return res.json(jsonResp)
+  }
 })
 /* email related rest services - end */
 
