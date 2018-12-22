@@ -28,6 +28,7 @@ import SDFReconstructResults from '@/components/SDFReconstructResults'
 import CorrelationReconstructResults from '@/components/CorrelationReconstructResults'
 import DescriptorReconstructResults from '@/components/DescriptorReconstructResults'
 import ViewData from '@/components/ViewData'
+import Contact from '@/components/Contact'
 
 Vue.use(Router)
 
@@ -42,6 +43,11 @@ export default new Router({
       path: '/db',
       name: 'Database',
       component: Database
+    },
+    {
+      path: '/contact',
+      name: 'Contact',
+      component: Contact
     },
     {
       path: '/insight',
