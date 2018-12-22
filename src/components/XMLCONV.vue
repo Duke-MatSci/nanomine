@@ -5,13 +5,11 @@
       <h3 class="text-xs-left">Description</h3>
       <br>
       <p class="text-xs-left">The simplest method to curate your sample into the database is by uploading an MS Excel
-        spreadsheet. An online web-form is also available for the advanced user (
-        <router-link to="/curate">click here</router-link>
-        ). For each sample, upload a template Excel file using the first uploading box and other supplementary image and
+        spreadsheet. For each sample, upload a template Excel file using the first uploading box and other supplementary image and
         raw data files using the second uploading box. The master Excel template contains all possible fields for
         nanocomposite sample data and therefore many fields will remain blank for your sample. Fill in only the
-        parameters applicable to your sample. Customized templates are available upon request, please contact <a
-          href="mailto:nanomine-help@duke.edu">the administrator</a>.
+        parameters applicable to your sample. Customized templates are available upon request, please contact
+        <router-link to="/contact">the NanoMine team</router-link>.
       </p>
       <br>
       <h3 class="text-xs-left">Steps</h3>
