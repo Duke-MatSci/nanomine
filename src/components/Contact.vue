@@ -165,7 +165,7 @@ export default {
         })
       } else {
         vm.errorState = true
-        vm.errorMsg = 'Please provide the text of your context request.'
+        vm.errorMsg = 'Please provide the text of your request.'
       }
     },
     cancel: function () {
