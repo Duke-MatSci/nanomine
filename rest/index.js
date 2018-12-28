@@ -74,17 +74,22 @@ let httpsAgentOptions = { // allow localhost https without knowledge of CA TODO 
 let httpsAgent = new https.Agent(httpsAgentOptions)
 
 let smtpTransport = null
+let transportParams = {
+  'port': emailPort,
+  'host': emailHost,
+  'secure': false,
+  'auth': {
+    'user': emailUser,
+    'pass': emailPwd
+  },
+  'opportunisticTLS': true
+}
+if (!emailUser || !emailPwd || emailUser.length === 0 || emailPwd.length === 0) {
+  logger.error('WARNING: smtp login is not set. Login to SMTP will fail if user credentials are required.')
+  delete transportParams.auth
+}
 if (sendEmails) {
-  smtpTransport = nodemailer.createTransport({
-    'port': emailPort,
-    'host': emailHost,
-    'secure': false,
-    'auth': {
-      'user': emailUser,
-      'pass': emailPwd
-    },
-    'opportunisticTLS': true
-  })
+  smtpTransport = nodemailer.createTransport(transportParams)
 }
 
 function inspect (theObj) {
