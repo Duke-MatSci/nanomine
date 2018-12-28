@@ -44,16 +44,16 @@
           <v-card-text>
             <h4 class="text-xs-left">
               <span>
-                <router-link to="/FEA2D">
-                  Prediction of Dielectric Constant in Nanodielectrics
-                </router-link>
+                <!--router-link to="/FEA2D"-->
+                <h3>Prediction of Dielectric Constant in Nanodielectrics</h3>
+                <!--/router-link-->
               </span>
             </h4>
             <p class="text-xs-left">
               This web app simulates the dielectric spectroscopy in nanocomposites with explicit implementation of
               microstructure dispersion as well as interphase relaxation model. This project is in collaboration with
               Rensselaer Polytechnic Institute.
-            </p>
+            </p><h3>Under construction. Not currently available.</h3>
           </v-card-text>
         </v-flex>
         <v-flex d-flex xs2>
@@ -67,16 +67,16 @@
           <v-card-text>
             <h4 class="text-xs-left">
               <span>
-                <router-link to="/MCFEA">
-                  Integration of Monte Carlo and Finite Element Analysis in Nanodielectrics
-                </router-link>
+                <!--router-link to="/MCFEA"-->
+                <h3>Integration of Monte Carlo and Finite Element Analysis in Nanodielectrics</h3>
+                <!--/router-link-->
               </span>
             </h4>
             <p class="text-xs-left">
               This web app simulates the charge transport in dielectric polymers and their nanocomposites by compling
               finite element analysis and Monte Carlo. This project is in collaboration with Rensselaer Polytechnic
               Institute.
-            </p>
+            </p><h3>Under construction. Not currently available.</h3>
           </v-card-text>
         </v-flex>
         <v-flex d-flex xs2>
@@ -102,6 +102,9 @@ export default {
   img {
     width: 240px;
     height: 220px;
+  }
+  h3 {
+    color: #096ff4;
   }
   h4 {
     text-transform: uppercase;
