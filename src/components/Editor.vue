@@ -1,3 +1,8 @@
+<!-- NOTE NOTE NOTE - WARNING
+  Work on the editor was halted and the editor(online curation) was removed from the Vue router.
+  The code is in a very inconsistent state and would need quite a bit of work before it would be useful.
+  The code is here in case work ever resumes.
+-->
 <template>
   <div class="nmeditor" v-if="showEditor()">
     <v-alert
