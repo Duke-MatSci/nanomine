@@ -122,7 +122,7 @@ export default {
     dialogClose: function () {
       let vm = this
       vm.confirmationDialog = false
-      vm.$router.push('/')
+      vm.$router.go(-1)
     },
     getHelpText: function () {
       let vm = this
@@ -138,7 +138,7 @@ export default {
         } else if (vm.contactType === 'questions') {
           vm.helpText = 'Enter your questions here...'
         } else {
-          vm.helpText = 'Enter problem description and information to help us re-recreate the problem here...'
+          vm.helpText = 'Enter problem description and information to help us re-create the problem here...'
         }
       })
     },
@@ -169,7 +169,7 @@ export default {
       }
     },
     cancel: function () {
-      this.$router.push('/')
+      this.$router.go(-1)
     }
   }
 }
