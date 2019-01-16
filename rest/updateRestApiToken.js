@@ -36,12 +36,15 @@ let Api = mongoose.model('api', apiSchema)
 cmds.command('updateToken <apiname>')
   .action(function (apiname, cmd) {
     let newToken = shortUUID.new()
-    Api.findOneAndUpdate({'name': {$eq: apiname}}, {$set: {token: newToken}} , function (err, api) {
+    Api.findOneAndUpdate({'name': {$eq: apiname}}, {$set: {token: newToken}}, function (err, api) {
       if (err) {
         console.log('Unexpected error looking up api: ' + apiname + ' err: ' + err)
         db.close()
-      } else {
+      } else if (api) {
         console.log('API ' + apiname + ' updated with new token: ' + newToken)
+        db.close()
+      } else {
+        console.log('API ' + apiname + ' does not exist.')
         db.close()
       }
     })

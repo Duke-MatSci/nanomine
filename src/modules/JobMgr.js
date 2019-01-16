@@ -4,6 +4,7 @@
 
 import {} from 'vuex'
 import Axios from 'axios'
+import Vue from '../main'
 export function JobMgr () {
   this.jobType = null
   this.jobId = null
@@ -46,10 +47,16 @@ JobMgr.prototype = {
     } else {
       // create job to get jobId and initialize job directory
       let fileSends = []
-      if (vm.jobParameters) { // TODO : once there is a security layer extract the user and put it here
-        vm.jobParameters.user = 'testuser'
+      let jobUser = '' // default for now, server will set real value unless runAsUser is set by an admin (checked on server side)
+      let runAs = Vue.$store.getters.runAsUser
+      if (runAs && runAs.length > 0) {
+        jobUser = runAs
+        console.log('Set jobUser to: ' + jobUser)
+      }
+      if (vm.jobParameters) {
+        vm.jobParameters.user = jobUser
       } else {
-        vm.jobParameters = {'user': 'testuser'}
+        vm.jobParameters = {'user': jobUser}
       }
       try {
         Axios.post(vm.createJobPath, {

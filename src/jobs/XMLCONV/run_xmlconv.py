@@ -65,11 +65,11 @@ except:
 
 logging.info("conversion begin")
 try:
-  status, messages = conversion(jobDir, code_srcDir, xsdDir, templateName)
+  status, messages = conversion(jobDir, code_srcDir, xsdDir, templateName, str(inputParameters['user']))
   logging.info("conversion finished")
 except:
   logging.error('exception occurred')
-  logging.error('exception: ' + str(str(traceback.format_exc())))
+  logging.error('exception: ' + str(traceback.format_exc()))
   status = 'failure'
   messages = ['[Conversion Error] Oops! The conversion cannot be finished! Please contact the administrator.']
 
