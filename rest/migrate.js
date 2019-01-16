@@ -26,10 +26,11 @@ const _ = require('lodash')
 const validateXml = require('xmllint').validateXML
 let shortUUID = require('short-uuid')() // https://github.com/oculus42/short-uuid (npm i --save short-uuid)
 
-let nanomineUser = {'userid': '9999999999', 'givenName': 'nanomine', 'email': 'testuser@nodomain.org', 'apiAccess': []}
+let nanomineUser = {'userid': '9999999999', 'givenName': 'nanomine', 'surName': 'test', 'displayName': 'NanoMine Test', 'email': 'testuser@nodomain.org', 'apiAccess': []}
 let curateRestApi = {'name': 'curate', 'desc': 'api for curation', 'token': shortUUID.new()}
 let emailRestApi = {'name': 'email', 'desc': 'api to send email', 'token': shortUUID.new()}
 let jobsRestApi = {'name': 'jobs', 'desc': 'api for job submission/management', 'token': shortUUID.new()}
+let adminRestApi = {'name': 'admin', 'desc': 'api for administration', 'token': shortUUID.new()}
 
 function logTrace (msg) { // Placeholders logging functions
   console.log(msg)
@@ -281,6 +282,8 @@ function updateXmlDataDocToNmSpDev1 (id, schemaId, dsSeq, xml) {
             'dsSeq': parseInt(dsSeq), // Sequence of the associated dataset
             'entityState': 'EditedValid', // initial entity state shows validated by editor,  requiring back-end validation
             'curateState': 'Edit',
+            'isPublic': true, // all of the original data is intended to be public
+            'ispublished': true, // all of the original data came from published papers
             'iduser': nanomineUser.userid
           }
         }, {}, function (err, result) {
@@ -525,7 +528,7 @@ function migrateToNmSpDev1 (fromVer, toVer) {
               // extract dataset fields and append to datasets array -- if not already there
               seq = match[1]
               let isValidSchema = checkSchema(xmldoc.schema) // TODO bad name. Just checks to see if schema is not deleted and current
-              if (datasets[seq] === undefined ) { //&& isValidSchema && (xmldoc.schema === latestSchema().schemaId)) { // try to get latest data
+              if (datasets[seq] === undefined) { // && isValidSchema && (xmldoc.schema === latestSchema().schemaId)) { // try to get latest data
                 let ds = _.get(json, 'PolymerNanocomposite.DATA_SOURCE.Citation.CommonFields', null)
                 let dsExt = _.get(json, 'PolymerNanocomposite.DATA_SOURCE.Citation.CitationType.Journal', null)
                 let issue = null
@@ -554,7 +557,10 @@ function migrateToNmSpDev1 (fromVer, toVer) {
                     'dateOfCitation': ds.DateOfCitation,
                     'location': ds.Location,
                     'issue': issue,
-                    'issn': issn
+                    'issn': issn,
+                    'userid': nanomineUser.userid,
+                    'isPublic': true, // all of the original datasets are public
+                    'ispublished': true // all of the original datasets came from published papers
                   }
                   if (_.isArray(ds.Author)) {
                     ds.Author.forEach((a) => {
@@ -813,6 +819,7 @@ function migrate () {
                                 writePromises.push(createOrUpdateApi(curateRestApi))
                                 writePromises.push(createOrUpdateApi(emailRestApi))
                                 writePromises.push(createOrUpdateApi(jobsRestApi))
+                                writePromises.push(createOrUpdateApi(adminRestApi))
                                 updateOrAddDatasets() // writePromises already has xmldata updates, be sure to call this before waiting on promises.all
                                 Promise.all(writePromises)
                                   .then(function () {
