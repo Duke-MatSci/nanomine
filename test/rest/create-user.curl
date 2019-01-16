@@ -1,0 +1,10 @@
+curl --header "Authentication: Bearer ${NM_AUTH_API_ACCESS_ADMIN}" --header "Content-Type: application/json" \
+  --request POST \
+  --data '{
+    "userid":"999999999A",
+    "email":"testuser2@example.com",
+    "givenName":"Test",
+    "surName":"User",
+    "displayName":"Test User"
+    }' \
+  http://localhost/nmr/user

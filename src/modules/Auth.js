@@ -5,6 +5,7 @@
 import {} from 'vuex'
 import Axios from 'axios'
 import jwt from 'jsonwebtoken'
+import Vue from '../main'
 export function Auth () {
   this.err = null
   this.getAuthPath = '/nmr/auth'
@@ -27,6 +28,21 @@ Auth.prototype = {
           }
         })
       }
+    }
+    return rv
+  },
+  setRunAsUser: function (userid) {
+    Vue.$store.commit('setRunAsUser', userid)
+  },
+  resetRunAsUser: function () {
+    Vue.$store.commit('resetRunAsUser')
+  },
+  getRunAsUser: function () {
+    let rv = null
+    try {
+      rv = Vue.$store.getters.runAsUser
+    } catch (err) {
+      console.log('error getting runAsUser')
     }
     return rv
   },
