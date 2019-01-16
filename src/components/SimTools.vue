@@ -109,4 +109,9 @@ export default {
   h4 {
     text-transform: uppercase;
   }
+  h1 {
+    margin-top: 10px;
+    background-color: black;
+    color: white;
+  }
 </style>

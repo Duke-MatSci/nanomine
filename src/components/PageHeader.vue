@@ -10,8 +10,23 @@
         <v-btn flat to="/db">Database</v-btn>
         <v-btn flat to="/mtools">Module Tools</v-btn>
         <v-btn flat to="/simtools">Simulation Tools</v-btn>
-        <v-btn flat @click="toggleAdminAvailable()"><i class="material-icons nm-search-icon" v-if="searchEnabled()">search</i></v-btn>
-        <v-btn v-if="isLoggedIn()" flat v-on:click="logoutDialog = true"><i class="material-icons nm-user-icon" v-bind:class="{'nm-admin-icon': isAdmin}">perm_identity</i><span v-if="!isTestUser()">&nbsp;Logout&nbsp;</span> {{userName}}</v-btn>
+        <v-btn flat @click="toggleAdminAvailable()"><i class="material-icons nm-search-icon" v-if="searchEnabled()">search</i>
+        </v-btn>
+        <v-btn v-if="isLoggedIn()" flat to="/mypage">My Page</v-btn>
+        <v-btn v-if="isLoggedIn()" flat v-on:click="logoutDialog = true">
+          <i class="material-icons nm-user-icon" v-bind:class="{'nm-admin-icon': (isAdmin && !isRunAs), 'nm-runas-icon': isRunAs}">
+            perm_identity
+          </i>
+          <span v-if="!isTestUser()">
+            &nbsp;Logout&nbsp;
+          </span>
+          <span v-if="!isRunAs">
+            &nbsp;&nbsp;{{userName}}
+          </span>
+          <span v-else>
+            &nbsp;&nbsp;{{auth.getRunAsUser()}}
+          </span>
+        </v-btn>
       </v-toolbar-items>
     </v-toolbar>
     <v-dialog
@@ -20,7 +35,6 @@
     >
       <v-card>
         <v-card-title class="headline blue lighten-2" primary-title>Log out</v-card-title>
-
         <v-card-text>
           Log out of NanoMine?
         </v-card-text>
@@ -135,6 +149,9 @@ export default {
     },
     isAdmin: function () {
       return this.auth.isAdmin()
+    },
+    isRunAs: function () {
+      return this.$store.getters.runAsUser != null
     }
   },
   data () {
@@ -160,6 +177,7 @@ export default {
     opacity: 1.0;
     background-color: #8CB2CA;
   }
+
   .header .v-toolbar {
     background-color: #8CB2CA;
   }
@@ -170,10 +188,16 @@ export default {
     vertical-align: bottom;
     padding-bottom: 6px;
   }
+
   .nm-admin-icon {
     background-color: #00ffff66;
+    color: yellow;
+  }
+  .nm-runas-icon {
+    background-color: #ffffff;
     color: red;
   }
+
   .nm-user-icon {
     font-size: 18px;
     display: inline-flex;
@@ -182,10 +206,10 @@ export default {
   }
 
   /*.nm-search-icon {*/
-    /*font-size: 18px;*/
-    /*display: inline-flex;*/
-    /*vertical-align: bottom;*/
-    /*padding-bottom: 2px;*/
+  /*font-size: 18px;*/
+  /*display: inline-flex;*/
+  /*vertical-align: bottom;*/
+  /*padding-bottom: 2px;*/
   /*}*/
 
   .bg-nm-info {

@@ -10,6 +10,7 @@ import traceback
 
 from nm.common import *
 from nm.common.matlab import matlab
+from nm.common.nm_rest import nm_rest
 
 logging.info('PYTHONPATH: ' + os.environ['PYTHONPATH'])
 
@@ -27,6 +28,10 @@ jobId = sys.argv[2]
 jobDir = sys.argv[3]
 emailurl = os.environ['NM_SMTP_REST_URL']
 
+sysToken = os.environ['NM_AUTH_SYSTEM_TOKEN']
+emailApiToken = os.environ['NM_AUTH_API_TOKEN_EMAIL']
+emailRefreshToken = os.environ['NM_AUTH_API_REFRESH_EMAIL']
+
 paramFile = open(jobDir + '/' + 'job_parameters.json', 'r')
 inputParameters = json.load(paramFile)
 userId = str(inputParameters['user'])
@@ -39,7 +44,7 @@ jobDataUriSuffix = os.environ['NM_JOB_DATA_URI']
 
 logging.info(pgmName + ' input parameters: ')
 for key in inputParameters.keys():
-  logging.info( '  ' + key + ' = ' + inputParameters[key])
+  logging.info( '  ' + key + ' = ' + str(inputParameters[key]))
 
 # Do not modify job_status.json -- the server will handle it
 logging.info(pgmName + ' input files: ')
@@ -101,12 +106,17 @@ if rc == 0: # send success email
       }
     }
     print('email data: %s' % emaildata)
+
     logging.info('emaildata: ' + json.dumps(emaildata))
+
     rq = urllib2.Request(emailurl)
     logging.info('request created using emailurl')
     rq.add_header('Content-Type','application/json')
-    r = urllib2.urlopen(rq, json.dumps(emaildata))
+    nmEmail = nm_rest(logging, sysToken, emailApiToken, emailRefreshToken, rq)
+    #r = urllib2.urlopen(rq, json.dumps(emaildata))
+    r = nmEmail.urlopen(json.dumps(emaildata))
     logging.info('sent success email: ' + str(r.getcode()))
+
   except:
     logging.info('exception occurred sending run_CorrelationCharacterize success email')
     logging.info('exception: ' + traceback.format_exc())
@@ -129,7 +139,9 @@ else: # send error email
     rq = urllib2.Request(emailurl)
     logging.info('request created using emailurl')
     rq.add_header('Content-Type','application/json')
-    r = urllib2.urlopen(rq, json.dumps(emaildata))
+    nmEmail = nm_rest(logging, sysToken, emailApiToken, emailRefreshToken, rq)
+    #r = urllib2.urlopen(rq, json.dumps(emaildata))
+    r = nmEmail.urlopen(json.dumps(emaildata))
     logging.info('sent failure email: ' + str(r.getcode()))
   except:
     logging.info('exception occurred sending run_CorrelationCharacterize failure email')

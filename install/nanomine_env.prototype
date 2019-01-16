@@ -38,6 +38,8 @@ export NM_AUTH_API_TOKEN_JOBS="SOME_RANDOM_STRING7" # use token output from 'nod
 export NM_AUTH_API_REFRESH_JOBS="SOME_RANDOM_STRING8" # use token output 'node /apps/nanomine/rest/generateUserRefreshToken.js generateRefreshToken {USERID} jobs' here
 export NM_AUTH_API_TOKEN_EMAIL="SOME_RANDOM_STRING9" # use token output from 'node /apps/nanomine/rest/updateRestApiToken.js updateToken email' here
 export NM_AUTH_API_REFRESH_EMAIL="SOME_RANDOM_STRING10" # use token output 'node /apps/nanomine/rest/generateUserRefreshToken.js generateRefreshToken {USERID} email' here
+export NM_AUTH_API_TOKEN_ADMIN="SOME_RANDOM_STRING11" # use token output from 'node /apps/nanomine/rest/updateRestApiToken.js updateToken admin' here
+export NM_AUTH_API_REFRESH_ADMIN="SOME_RANDOM_STRING12" # use token output 'node /apps/nanomine/rest/generateUserRefreshToken.js generateRefreshToken {USERID} admin' here
 
 export NM_MONGO_PORT=27017
 export NM_MONGO_HOST=localhost
