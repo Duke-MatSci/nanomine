@@ -24,6 +24,7 @@ export NM_AUTH_SURNAME_HEADER="sn"
 export NM_AUTH_DISPLAYNAME_HEADER="displayName"
 export NM_AUTH_SESSION_EXPIRATION_HEADER="sessionExpiration"
 export NM_AUTH_TEST_USER="testuser"
+export NM_AUTH_ANON_USER_ID="testuser"
 export NM_AUTH_LOGOUT_URL="#" # logout
 export NM_AUTH_GROUP_ENABLED="no" # remote groups enable/disable. If not enabled, local groups used instead
 export NM_AUTH_GROUP_STEM="base" # base group name to append
