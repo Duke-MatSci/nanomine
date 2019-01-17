@@ -803,7 +803,6 @@ function datasetXmlFileList (xmlTitle) { // returns promise that when fulfilled 
   let func = 'datasetXmlFileList'
   let bucketName = datasetBucketName
   let validTitle = matchValidXmlTitle(xmlTitle)
-  let dsId = validTitle[1]
   let options = {
     'bucketName': bucketName
   }
@@ -923,6 +922,14 @@ function publishFiles (userid, xmlTitle, cb) { // xmlText, schemaName, filesInfo
     let dsSeq = match[1]
     let xmlId = xmlTitle.replace(/\.xml$/, '')
     let whyisId = shortUUID.new()
+    // Overall steps:
+    //   get latest schema to get name of schema and its ID
+    //   Query to get the xml text using the xmlTitle and schema Id
+    //   Convert the xml to b64 to prepare it for its part of the JsonLD
+    //   Get the list of associated files for the xml (input XLS, associated XLSs, images and processing related files)
+    //   Ensure that the job_parameters.json is read to get the input XLS name since it's ref'd specifically in the JsonLD
+    //   Encode each associated file as B64, obtain its MimeType and encode them into the appropriate section of the JsonLD
+    //   Add each file's name to the section in the JsonLD that lists the file as related to the dataset (fileListLD)
 
     // get latest schema/schemaId
     getLatestSchemas()
@@ -934,7 +941,7 @@ function publishFiles (userid, xmlTitle, cb) { // xmlText, schemaName, filesInfo
           let schemaName = latestSchema.title
 
           // read xmldata for latest schema
-          let query = {'$and': [{'$eq': {'title': xmlTitle}}, {'$eq': {'schemaId': schemaId}}]}
+          let query = {'$and': [{'title': {'$eq': xmlTitle}}, {'schemaId': {'$eq': schemaId}}]}
           XmlData.find(query).exec(function (err, xmlRecs) {
             if (err) {
               cb(err, null)
@@ -943,121 +950,148 @@ function publishFiles (userid, xmlTitle, cb) { // xmlText, schemaName, filesInfo
             } else {
               // XML found
               let xmlRec = xmlRecs[0]
-              let b64XmlData = str2b64(xmlRec.xmlStr)
+              let b64XmlData = str2b64(xmlRec.xml_str)
               // logger.error('xml-b64: ' + b64XmlData)
 
-              // get list of files (with basename) for
+              let filePromises = []
+              // get list of files (with basename)
               datasetXmlFileList(xmlTitle)
                 .then(function (filesInfo) {
                   let filesDataLD = ''
-                  let foundParameters = false
-                  filesInfo.forEach(function (fInfo) {
-                    let contentType = mimetypes.lookup(fInfo.basename)
-                    getDatasetXmlFileData()
-                    if (fInfo.basename === 'job_parameters.json') {
-                      foundParameters = true
-                    }
-
-                    let b64Data = '' // get the file data and b64 encode it
-                    filesDataLD += `,
-                      {
-                      "@id" : "dataset/${dsSeq}/${xmlId}/${fInfo.basename}",
-                      "@type": [ "schema:DataDownload", "mt:${contentType}"],
-                      "whyis:hasContent" : "data:${contentType};charset=UTF-8;base64,${b64Data}"
-                      }
-                    `
-                  })
-
+                  let xlsInputFile = 'NOT_VALID'
                   let fileListLD = ''
-                  filesInfo.forEach(function (fInfo) {
+                  filesInfo.forEach(function (fInfo) { // go ahead and fill out the related files section
                     fileListLD += `,
                       {"@id" : "dataset/${dsSeq}/${xmlId}/${fInfo.basename}"}
                     `
                   })
-                  // NOTE NOTE NOTE
-                  //   FYI - Part of the JsonLD below is built above and added below dynamically
-                  let data = `
-                    {
-                      "@context": {
-                        "@base" : "${nmWebBaseUri}",
-                        "schema": "http://schema.org/",
-                        "xsd": "http://www.w3.org/2001/XMLSchema#",
-                        "whyis": "http://vocab.rpi.edu/whyis/",
-                        "np": "http://www.nanopub.org/nschema#",
-                        "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
-                        "sio": "http://semanticscience.org/resource/",
-                        "dc": "http://purl.org/dc/terms/",
-                        "prov": "http://www.w3.org/ns/prov#",
-                        "mt" : "https://www.iana.org/assignments/media-types/"
-                      },
-                      "@id": "urn:${whyisId}",
-                      "@graph": {
-                        "@id": "urn:${whyisId}",
-                        "@type": "np:Nanopublication",
-                        "np:hasAssertion": {
-                          "@id": "urn:${whyisId}_assertion",
-                          "@type": "np:Assertion",
-                          "@graph": [
-                            {
-                              "@id" : "nmr/xml/${xmlId}",
-                              "@type": [ "schema:DataDownload", "mt:text/xml", ,"http://nanomine.org/ns/NanomineXMLFile"],
-                              "whyis:hasContent" : "data:text/xml;charset=UTF-8;base64,${b64XmlData}",
-                              "prov:wasDerivedFrom" : [{"@id" : "dataset/${dsSeq}/${xmlId}/${xlsInputFile}"}],
-                              "dc:conformsTo" : {"@id" : "nmr/schema/${schemaName}"}
-                            }
-                            ${filesDataLD}
-                            ,{
-                              "@id" : "nmr/dataset/{{dataset_id}}",
-                              "@type" : "schema:Dataset",
-                              "schema:distribution" : [
-                                {"@id" : "nmr/xml/${xmlId}"},
-                                {"@id" : "dataset/${dsSeq}/${xmlId}/${xlsInputFile}"}
-                                ${fileListLD}
-                              ]
-                            }
-                          ]
-                        }
-                      }
-                    }`
-                  getUserInfo(userid)
-                    .then(function (userinfo) {
-                      let httpsAgentOptions = { // allow localhost https without knowledge of CA TODO - install ca cert on node - low priority
-                        host: 'localhost',
-                        port: '443',
-                        method: 'POST',
-                        path: '/wi/pub',
-                        // path: '/sparql',
-                        rejectUnauthorized: false
-                      }
-                      let httpsAgent = new https.Agent(httpsAgentOptions)
-                      let cookieValue = createOutboundJwt(userinfo)
-                      logger.error(func + ' cookie to send: ' + cookieValue + ' request data: ' + data)
-                      return axios({
-                        'method': 'post',
-                        'url': url,
-                        'data': data,
-                        'httpsAgent': httpsAgent,
-                        'headers': {'Content-Type': 'application/ld+json', 'Cookie': cookieValue}
-                      })
-                        .then(function (response) {
-                          logger.error(func + ' data: ' + inspect(response))
-                          cb(null, response)
+                  filesInfo.forEach(function (fInfo) { // now fill out the data for each file and when all are complete, continue with submit
+                    filePromises.push(new Promise(function (resolve, reject) {
+                      getMongoFileData('curateinput', null, fInfo.filename)
+                        .then(function (buffer) {
+                          let msg = 'getMongoFileData("curateinput", ' + fInfo.filename + ') Got data length: ' + buffer.length
+                          logger.debug(msg)
+                          if (fInfo.basename === 'job_parameters.json') {
+                            let params = JSON.parse(buffer.toString('utf8'))
+                            xlsInputFile = params.templateName
+                          }
+                          resolve({'filename': fInfo.filename, 'basename': fInfo.basename, 'buffer': buffer})
                         })
                         .catch(function (err) {
-                          logger.error(func + ' error: ' + inspect(err))
+                          let msg = 'error getting data (getMongoFileData) for: ' + fInfo.filename + ' error: ' + err
+                          logger.error(msg)
+                          console.log(msg)
+                          reject(msg)
+                        })
+                    }))
+                  })
+                  Promise.all(filePromises)
+                    .then(function (valuesArray) {
+                      // carry on...
+                      valuesArray.forEach(function (v) {
+                        let contentType = mimetypes.lookup(v.basename)
+                        // convert the file to base64
+                        let b64Data = v.buffer.toString('base64') // get the file data and b64 encode it
+                        filesDataLD += `,
+                            {
+                            "@id" : "dataset/${dsSeq}/${xmlId}/${v.basename}",
+                            "@type": [ "schema:DataDownload", "mt:${contentType}"],
+                            "whyis:hasContent" : "data:${contentType};charset=UTF-8;base64,${b64Data}"
+                            }
+                        `
+                      })
+                      // NOTE NOTE NOTE
+                      //   FYI - Part of the JsonLD below is built above and added below dynamically
+                      let data = `
+                        {
+                          "@context": {
+                            "@base" : "${nmWebBaseUri}",
+                            "schema": "http://schema.org/",
+                            "xsd": "http://www.w3.org/2001/XMLSchema#",
+                            "whyis": "http://vocab.rpi.edu/whyis/",
+                            "np": "http://www.nanopub.org/nschema#",
+                            "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+                            "sio": "http://semanticscience.org/resource/",
+                            "dc": "http://purl.org/dc/terms/",
+                            "prov": "http://www.w3.org/ns/prov#",
+                            "mt" : "https://www.iana.org/assignments/media-types/"
+                          },
+                          "@id": "urn:${whyisId}",
+                          "@graph": {
+                            "@id": "urn:${whyisId}",
+                            "@type": "np:Nanopublication",
+                            "np:hasAssertion": {
+                              "@id": "urn:${whyisId}_assertion",
+                              "@type": "np:Assertion",
+                              "@graph": [
+                                {
+                                  "@id" : "nmr/xml/${xmlId}",
+                                  "@type": [ "schema:DataDownload", "mt:text/xml", ,"http://nanomine.org/ns/NanomineXMLFile"],
+                                  "whyis:hasContent" : "data:text/xml;charset=UTF-8;base64,${b64XmlData}",
+                                  "prov:wasDerivedFrom" : [{"@id" : "dataset/${dsSeq}/${xmlId}/${xlsInputFile}"}],
+                                  "dc:conformsTo" : {"@id" : "nmr/schema/${schemaName}"}
+                                }
+                                ${filesDataLD}
+                                ,{
+                                  "@id" : "nmr/dataset/{{dataset_id}}",
+                                  "@type" : "schema:Dataset",
+                                  "schema:distribution" : [
+                                    {"@id" : "nmr/xml/${xmlId}"},
+                                    {"@id" : "dataset/${dsSeq}/${xmlId}/${xlsInputFile}"}
+                                    ${fileListLD}
+                                  ]
+                                }
+                              ]
+                            }
+                          }
+                        }`
+                      getUserInfo(userid)
+                        .then(function (userinfo) {
+                          let httpsAgentOptions = { // allow localhost https without knowledge of CA TODO - install ca cert on node - low priority
+                            host: 'localhost',
+                            port: '443',
+                            method: 'POST',
+                            path: '/wi/pub',
+                            // path: '/sparql',
+                            rejectUnauthorized: false
+                          }
+                          let httpsAgent = new https.Agent(httpsAgentOptions)
+                          let cookieValue = createOutboundJwt(userinfo)
+                          logger.error(func + ' cookie to send: ' + cookieValue + ' request data: ' + data)
+                          return axios({
+                            'method': 'post',
+                            'url': url,
+                            'data': data,
+                            'httpsAgent': httpsAgent,
+                            'headers': {'Content-Type': 'application/ld+json', 'Cookie': cookieValue}
+                          })
+                            .then(function (response) {
+                              logger.error(func + ' data: ' + inspect(response))
+                              cb(null, response)
+                            })
+                            .catch(function (err) {
+                              logger.error(func + ' error: ' + inspect(err))
+                              cb(err, null)
+                            })
+                        })
+                        .catch(function (err) {
+                          logger.error(func + ' error getting user info for userid: ' + userid)
                           cb(err, null)
                         })
                     })
                     .catch(function (err) {
-                      logger.error(func + ' error getting user info for userid: ' + userid)
+                      let msg = func + ' - error occurred obtaining file data from mongo: ' + err
+                      logger.error(msg)
                       cb(err, null)
                     })
                 })
-                .catch(function (err) { // datasetXmlFileList
-                  logger.error(func + ' -  error getting file list associated with xml. Error: ' + err)
+                .catch(function (err) {
+                  let msg = func + ' -  error getting file list associated with xml. Error: ' + err
+                  logger.error(msg)
                   cb(err, null)
                 })
-            }
+              // No call to callback needed -- everything handled by promise thens/catches
+            } // else leg OK handler after error check no additional else or catch needed
           })
         } else {
           let msg = func + ' - error obtaining latest schemas'
@@ -1246,6 +1280,25 @@ function publishLatestSchema (userid, cb) {
       cb(err, null)
     })
 }
+// Test publishFiles (xml, and datafiles pushed to rdf
+app.get('/testpubfiles', function (req, res) {
+  let xmlTitle = req.query.xmltitle
+  if (xmlTitle && matchValidXmlTitle(xmlTitle) ) {
+    setTimeout(function () {
+      publishFiles(nmAuthAnonUserId, xmlTitle, function cb(err, response) { // user is Anon Nanomine
+        if (err) {
+          logger.error('publishFiles test failed: ' + err)
+        } else {
+          logger.error('publishFiles success!!!')
+        }
+      })
+    }, 100)
+    res.send('invoked files publish for: ' + xmlTitle + '. Check log to see what happened.')
+  } else {
+    res.status(400).send('invalid xml title')
+  }
+})
+
 // Test publishLatestSchema
 app.get('/testpubschema', function (req, res) {
   setTimeout(function () {
