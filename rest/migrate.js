@@ -24,6 +24,7 @@ const MongoClient = require('mongodb').MongoClient
 const ObjectId = require('mongodb').ObjectId
 const _ = require('lodash')
 const validateXml = require('xmllint').validateXML
+const nmWebBaseUri = process.env['NM_WEB_BASE_URI']
 let shortUUID = require('short-uuid')() // https://github.com/oculus42/short-uuid (npm i --save short-uuid)
 
 let nanomineUser = {'userid': '9999999999', 'givenName': 'nanomine', 'surName': 'test', 'displayName': 'NanoMine Test', 'email': 'testuser@nodomain.org', 'apiAccess': []}
@@ -585,6 +586,44 @@ function migrateToNmSpDev1 (fromVer, toVer) {
               }
               logDebug(inspect(json))
               xml = xmlHeader // initialize xml
+              // Update any image references in the xml so that they're valid
+              //  .//MICROSTRUCTURE/ImageFile/File
+              let newImageFileValue = function (fileElem) {
+                let rv = null
+                let blobIdRegex = /blob\?id=([A-Fa-f0-9]*)/
+                logInfo('found imageFile = ' + fileElem)
+                let match = fileElem.match(blobIdRegex)
+                if (match) {
+                  let blobId = match[1]
+                  rv = nmWebBaseUri + '/nmr/blob?id=' + blobId
+                  logInfo('  imageFile mached. New value: ' + rv)
+                }
+                return rv
+              }
+              let imageFiles = _.get(json, 'PolymerNanocomposite.MICROSTRUCTURE.ImageFile', null)
+              if (imageFiles) { // just use above to verify path exists
+                if (!Array.isArray(imageFiles)) {
+                  let ov = json.PolymerNanocomposite.MICROSTRUCTURE.ImageFile.File
+                  let nv = newImageFileValue(ov)
+                  if (nv) {
+                    json.PolymerNanocomposite.MICROSTRUCTURE.ImageFile.File = nv
+                    logInfo('Replaced single imageFile value old: ' + ov + ' new: ' + nv)
+                  } else {
+                    logError('ERROR: Found single MICROSTRUCTURE image file, but was unable to update reference: ' + ov)
+                  }
+                } else {
+                  imageFiles.forEach(function (imageFile, idx) {
+                    let ov = imageFile.File
+                    let nv = newImageFileValue(imageFile.File)
+                    if (nv) {
+                      logInfo('Replaced #' + idx + ' imageFile value old: ' + ov + ' new: ' + nv)
+                      json.PolymerNanocomposite.MICROSTRUCTURE.ImageFile[idx].File = nv
+                    } else {
+                      logError('Unable to replace #' + idx + ' imageFile value. Old value:: ' + ov)
+                    }
+                  })
+                }
+              }
               logDebug(j2x(json, null, indent))
               let xsd = getSchemaInfo(xmldoc.schema)
               /* Cannot verify all xmls without process running out of memory. Need another way to verify.
