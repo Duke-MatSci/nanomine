@@ -23,12 +23,12 @@
           <p></p>
         </v-flex>
       </v-layout>
-      <v-layout>
+      <!--v-layout>
         <v-flex xs12>
           <h4>Download Results</h4>
           <a :href="getZipFile()">{{zipFileName}}</a>
         </v-flex>
-      </v-layout>
+      </v-layout-->
     </v-container>
     <h4>Reference</h4>
     <v-flex xs12>
