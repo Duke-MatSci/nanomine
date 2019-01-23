@@ -1,6 +1,7 @@
 import os
 import sys
 import urllib2
+import ssl
 import time
 import json
 import traceback
@@ -38,7 +39,7 @@ class nm_rest:
       atReq = urllib2.Request(self.baseUrl + self.refreshUrl)
       atReq.add_header('Content-Type','application/json')
       try:
-        r = urllib2.urlopen(atReq, json.dumps(refreshData))
+        r = urllib2.urlopen(atReq, json.dumps(refreshData), context=ssl._create_unverified_context())
         sdata = r.read()
         self.logger.debug('access token: ' + sdata)
         data = json.loads(sdata)['data']
@@ -50,5 +51,5 @@ class nm_rest:
 
      # now, execute the original request with the correct bearer token
     self.callerReq.add_header('Authentication', 'Bearer ' + self.accessToken)
-    rv = urllib2.urlopen(self.callerReq, rqData)
+    rv = urllib2.urlopen(self.callerReq, rqData, context=ssl._create_unverified_context())
     return rv
