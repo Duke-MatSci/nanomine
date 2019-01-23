@@ -2418,79 +2418,127 @@ app.post('/jobsubmit', function (req, res) {
 })
 /* end job related rest services */
 
+function fillOutJobEmailTemplate(jobtype, templateName, emailvars) {
+  // resolves with filled out template
+  // rejects with new Error('error text')
+  let func = 'fillOutJobEmailTemplate'
+  let emailtemplate = templateName
+  return new Promise(function (resolve, reject) {
+    // read the email template, merge with email vars
+    fs.readFile('config/emailtemplates/' + jobtype + '/' + emailtemplate + '.etf', function (err, etfText) {
+      if (err) {
+        // jsonResp.error = {'statusCode': 400, 'statusText': 'unable to find template file.'}
+        // return res.status(400).json(jsonResp)
+        let msg = func + ' - unable to find template file: ' + emailtemplate
+        logger.error(msg)
+        reject(new Error(msg))
+      } else {
+        let filled = null
+        try {
+          filled = templateFiller(etfText, emailvars)
+          logger.debug(func + ' - filled out email template: ' + filled)
+          resolve(filled)
+        } catch (fillerr) {
+          let msg = func + ' - error occurred filling out email template. jobtype: ' + jobtype + ' jobid: ' + jobid + ' template: ' + emailtemplate + ' vars: ' + JSON.stringify(emailvars)
+          logger.error(msg)
+          reject(new Error(msg))
+          // jsonResp.error = 'error filling out email template for jobid: ' + jobid
+          // return res.status(400).json(jsonResp)
+        }
+      }
+    })
+  })
+}
+
 /* email related rest services - begin */
 app.post('/jobemail', function (req, res, next) { // bearer auth
+  let func = '/jobemail handler'
   let jsonResp = {'error': null, 'data': null}
   let jobtype = req.body.jobtype
   let jobid = req.body.jobid
-  let userId = req.body.user
+  // let userId = req.body.user
   let emailtemplate = req.body.emailtemplatename
   let emailvars = req.body.emailvars
+  let userId = emailvars.user
   emailvars.jobtype = jobtype
   emailvars.jobid = jobid
-  // read the email template, merge with email vars
 
-  fs.readFile('config/emailtemplates/' + jobtype + '/' + emailtemplate + '.etf', function (err, etfText) {
-    if (err) {
-      jsonResp.error = {'statusCode': 400, 'statusText': 'unable to find template file.'}
-      return res.status(400).json(jsonResp)
-    }
-    let filled = null
-    try {
-      filled = templateFiller(etfText, emailvars)
-    } catch (fillerr) {
-      logger.error('error occurred filling out email template. jobtype: ' + jobtype + ' jobid: ' + jobid + ' template: ' + emailtemplate + ' vars: ' + JSON.stringify(emailvars))
-      jsonResp.error = 'error filling out email template for jobid: ' + jobid
-      return res.status(400).json(jsonResp)
-    }
-    logger.debug('filled out email template: ' + filled)
-    if (sendEmails) {
-      let userEmailAddr = emailTestAddr
-      let adminEmailAddr = emailAdminAddr
-      let userPromise = new Promise(function (resolve, reject) {
-        if (nmAuthType !== 'local') {
-          // get user's email address from database
-          Users.findOne({userid: {'$eq': userId}}, function (err, userDoc) {
-            if (err) {
-              reject(err)
-            } else {
-              userEmailAddr = userDoc.email
-              resolve()
-            }
-          })
-        } else {
-          resolve()
-        }
-      })
-      userPromise.then(function () {
-        let message = {
-          subject: 'NanoMine completion notification for job: ' + jobid,
-          text: filled,
-          html: filled,
-          from: adminEmailAddr,
-          to: userEmailAddr,
-          envelope: {
-            from: 'noreply <' + adminEmailAddr + '>',
-            to: userEmailAddr
-          }
-        }
-        smtpTransport.sendMail(message, function (err, info) {
+  if (sendEmails) {
+    let userEmailAddr = emailTestAddr
+    let adminEmailAddr = emailAdminAddr
+    let givenName = 'NanoMine user'
+    let userPromise = new Promise(function (resolve, reject) {
+      if (nmAuthType !== 'local') {
+        // get user's email address from database
+        Users.findOne({userid: {'$eq': userId}}, function (err, userDoc) {
           if (err) {
-            jsonResp.error = err
-            logger.error('sendMail error: ' + err)
-            return res.status(400).json(jsonResp)
+            reject(err)
+          } else {
+            if (userDoc) {
+              userEmailAddr = userDoc.email
+              givenName = userDoc.givenName
+              resolve()
+            } else {
+              let err = new Error(func + ' - cannot find userId: ' + userId)
+              logger.error(err)
+              reject(err)
+            }
           }
-          logger.info('smtp return info: ' + JSON.stringify(info))
-          return res.json(jsonResp) // TODO interpret info object to determine if anything needs to be done
         })
-      })
+      } else {
+        resolve()
+      }
+    })
+    userPromise.then(function () {
+      emailvars.user = givenName
+      fillOutJobEmailTemplate(jobtype, emailtemplate, emailvars)
+        .then(function (filled) {
+          let message = {
+            subject: 'NanoMine completion notification for job: ' + jobid,
+            text: filled,
+            html: filled,
+            from: adminEmailAddr,
+            to: userEmailAddr,
+            envelope: {
+              from: 'noreply <' + adminEmailAddr + '>',
+              to: userEmailAddr
+            }
+          }
+          smtpTransport.sendMail(message, function (err, info) {
+            if (err) {
+              jsonResp.error = err
+              logger.error('sendMail error: ' + err)
+              return res.status(400).json(jsonResp)
+            }
+            logger.info('smtp return info: ' + JSON.stringify(info))
+            return res.json(jsonResp) // TODO interpret info object to determine if anything needs to be done
+          })
+        })
         .catch(function (err) {
-          return res.status(400).send(err)
+          jsonResp.error = err
+          jsonResp.data = null
+          return res.status(500).json(jsonResp)
         })
-    } else {
-      return res.json(jsonResp)
-    }
-  })
+    })
+      .catch(function (err) {
+        logger.error(func + ' - error setting up for email send: ' + err)
+        return res.status(400).send(err)
+      })
+  } else {
+    fillOutJobEmailTemplate(jobtype, emailtemplate, emailvars)
+      .then(function (filled) {
+        logger.error(filled)
+        jsonResp.data = null
+        jsonResp.error = null
+        return res.json(jsonResp)
+      })
+      .catch(function (err) {
+        logger.error(err)
+        jsonResp.data = null
+        jsonResp.error = err
+        return res.status(500).json(jsonResp)
+      })
+  }
 })
 
 app.post('/contact', function (req, res, next) { // bearer auth
