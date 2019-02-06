@@ -29,7 +29,7 @@
         <li><span>Improve the ability to design nanocomposites through simulation and design tools.</span></li>
       </ul>
       <p style="padding-left:15%;padding-right:15%;text-align:left"><span>NanoMine is built on both a <a
-        href="https://github.com/Duke-MatSci/nanomine-schema/tree/master/xml" target="_blank">schema</a> and an ontology to provide a robustness to the FAIR principles.Nanomine also allows for the registration of materials resources, bridging the gap between existing resources and the end users and making those existing resources available for research to material community.</span>
+        href="https://github.com/Duke-MatSci/nanomine-schema/tree/master/xml" target="_blank">schema</a> and an ontology to provide a robustness to the FAIR principles. NanoMine also allows for the registration of materials resources, bridging the gap between existing resources and the end users and making those existing resources available for research to material community.</span>
       </p>
 
       <p style="text-align:center;"><img src="/cdn/img/sponsors3.png"></p>
