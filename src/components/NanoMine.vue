@@ -7,7 +7,7 @@
             <h3 class="mainheading">NanoMine</h3>
             <span class="subheading">Material Informatics for Polymer Nanocomposites</span>
             <v-divider class="my-3"></v-divider>
-            <v-btn class="mx-0" color="primary" href="https://nanomine.oit.duke.edu:8443/viz" target="_blank">VISUALIZE DATA</v-btn>
+            <!--v-btn class="mx-0" color="primary" href="https://nanomine.oit.duke.edu:8443/viz" target="_blank">VISUALIZE DATA</v-btn-->
             <v-btn class="mx-0" color="secondary" to="/XMLCONV">CURATE DATA</v-btn>
           </v-flex>
         </v-layout>
@@ -29,7 +29,7 @@
         <li><span>Improve the ability to design nanocomposites through simulation and design tools.</span></li>
       </ul>
       <p style="padding-left:15%;padding-right:15%;text-align:left"><span>NanoMine is built on both a <a
-        href="https://github.com/Duke-MatSci/nanomine-schema/tree/master/xml" target="_blank">schema</a> and an ontology to provide a robustness to the FAIR principles.Nanomine also allows for the registration of materials resources, bridging the gap between existing resources and the end users and making those existing resources available for research to material community.</span>
+        href="https://github.com/Duke-MatSci/nanomine-schema/tree/master/xml" target="_blank">schema</a> and an ontology to provide a robustness to the FAIR principles. NanoMine also allows for the registration of materials resources, bridging the gap between existing resources and the end users and making those existing resources available for research to material community.</span>
       </p>
 
       <p style="text-align:center;"><img src="/cdn/img/sponsors3.png"></p>

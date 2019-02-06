@@ -9,6 +9,32 @@ function listUsers() {
     });
 }
 
+// resetIngesting
+function resetIngesting() {
+  db = db.getSiblingDB('mgi')
+  print(JSON.stringify(db.xmldata.updateMany({'entityState': {'$eq': 'Ingesting'}}, { '$set': {'entityState': 'EditedValid'}})))
+}
+function resetIngestSuccess() {
+  db = db.getSiblingDB('mgi')
+  print(JSON.stringify(db.xmldata.updateMany({'entityState': {'$eq': 'IngestSuccess'}}, { '$set': {'entityState': 'EditedValid'}})))
+}
+function resetIngestFailed() {
+  db = db.getSiblingDB('mgi')
+  print(JSON.stringify(db.xmldata.updateMany({'entityState': {'$eq': 'IngestFailed'}}, { '$set': {'entityState': 'EditedValid'}})))
+}
+
+function countIngesting() {
+  db = db.getSiblingDB('mgi')
+  print(JSON.stringify(db.xmldata.count({'entityState':{'$eq':'Ingesting'}})))
+}
+function countIngestSuccess() {
+  db = db.getSiblingDB('mgi')
+  print(JSON.stringify(db.xmldata.count({'entityState':{'$eq':'IngestSuccess'}})))
+}
+function countIngestFailed() {
+  db = db.getSiblingDB('mgi')
+  print(JSON.stringify(db.xmldata.count({'entityState':{'$eq':'IngestFailed'}})))
+}
 //listApi()
 function listApi() {
   db = db.getSiblingDB('mgi');

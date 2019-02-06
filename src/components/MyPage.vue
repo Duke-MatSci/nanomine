@@ -520,6 +520,7 @@ export default {
       vm.setLoading()
       Axios.get('/nmr/xml?dataset=' + entry.seq)
         .then(function (data) {
+          // console.log(data.data.data)
           vm.sampleList = data.data.data // Just had to...
           vm.resetLoading()
         })

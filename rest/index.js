@@ -2,6 +2,10 @@
 // NOTE the following is ONLY for testing and reject unauthorized should not be disabled in general.
 // process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0'
 
+/*
+ NOTE: there are posts and gets to localhost:/${XXXX} intended for RDF that will need to change to localhost:/wi/${XXXX} at some point
+ */
+
 const axios = require('axios')
 const https = require('https')
 const util = require('util')
@@ -10,7 +14,7 @@ const express = require('express')
 const cookieParser = require('cookie-parser')
 const bodyParser = require('body-parser')
 const mimetypes = require('mime-types')
-const FormData = require('form-data')
+// was used for posting to rdf - const FormData = require('form-data')
 const config = require('config').get('nanomine')
 const winston = require('winston')
 const moment = require('moment')
@@ -25,10 +29,16 @@ const _ = require('lodash')
 const nodemailer = require('nodemailer')
 const jwtBase = require('jsonwebtoken')
 const jwt = require('express-jwt')
-const authGate = require('express-jwt-permissions')
+// not currently used - const authGate = require('express-jwt-permissions')
 const shortUUID = require('short-uuid')() // https://github.com/oculus42/short-uuid (npm i --save short-uuid)
 const groupMgr = require('./modules/groupMgr').groupmgr
 const s2a = require('stream-to-array')
+
+const nanomineUtils = require('./modules/utils')
+let matchValidXmlTitle = nanomineUtils.matchValidXmlTitle
+let env = nanomineUtils.getEnv()
+const getDatasetXmlFileList = nanomineUtils.getDatasetXmlFileList
+
 // const session = require('cookie-session')
 
 // TODO calling next(err) results in error page rather than error code in json
@@ -48,35 +58,37 @@ const s2a = require('stream-to-array')
 let logger = configureLogger()
 logger.info('NanoMine REST server version ' + config.version + ' starting')
 
-let datasetBucketName = 'curateinput'
+let datasetBucketName = nanomineUtils.datasetBucketName
 
-let sendEmails = (process.env['NM_SMTP_TEST'] !== 'true')
-let emailHost = process.env['NM_SMTP_SERVER']
-let emailPort = process.env['NM_SMTP_PORT']
-let emailUser = process.env['NM_SMTP_AUTH_USER']
-let emailPwd = process.env['NM_SMTP_AUTH_PWD']
-let emailTestAddr = process.env['NM_SMTP_TEST_ADDR']
-let emailAdminAddr = process.env['NM_SMTP_ADMIN_ADDR']
-let nmWebFilesRoot = process.env['NM_WEBFILES_ROOT']
-let nmWebBaseUri = process.env['NM_WEB_BASE_URI']
-let nmJobDataDir = process.env['NM_JOB_DATA']
-let nmLocalRestBase = process.env['NM_LOCAL_REST_BASE']
-let nmAuthUserHeader = process.env['NM_AUTH_USER_HEADER']
-let nmAuthGivenNameHeader = process.env['NM_AUTH_GIVEN_NAME_HEADER']
-let nmAuthDisplayNameHeader = process.env['NM_AUTH_DISPLAYNAME_HEADER']
-let nmAuthSurNameHeader = process.env['NM_AUTH_SURNAME_HEADER']
-let nmAuthAnonUserId = process.env['NM_AUTH_ANON_USER_ID']
+let sendEmails = env.sendEmails
+let emailHost = env.emailHost
+let emailPort = env.emailPort
+let emailUser = env.emailUser
+let emailPwd = env.emailPwd
+let emailTestAddr = env.emailTestAddr
+let emailAdminAddr = env.emailAdminAddr
+let nmWebFilesRoot = env.nmWebFilesRoot
+let nmWebBaseUri = env.nmWebBaseUri
+let nmJobDataDir = env.nmJobDataDir
+let nmLocalRestBase = env.nmLocalRestBase
+let nmAutostartCurator = env.nmAutostartCurator
+let nmAuthUserHeader = env.nmAuthUserHeader
+let nmAuthGivenNameHeader = env.nmAuthGivenNameHeader
+let nmAuthDisplayNameHeader = env.nmAuthDisplayNameHeader
+let nmAuthSurNameHeader = env.nmAuthSurNameHeader
+let nmAuthAnonUserId = env.nmAuthAnonUserId
+let nmAuthSystemUserId = env.nmAuthSystemUserId
 
-let nmAuthEmailHeader = process.env['NM_AUTH_EMAIL_HEADER']
-let nmAuthSessionExpirationHeader = process.env['NM_AUTH_SESSION_EXPIRATION_HEADER']
-let nmAuthSecret = process.env['NM_AUTH_SECRET']
-let nmAuthSystemToken = process.env['NM_AUTH_SYSTEM_TOKEN']
+let nmAuthEmailHeader = env.nmAuthEmailHeader
+let nmAuthSessionExpirationHeader = env.nmAuthSessionExpirationHeader
+let nmAuthSecret = env.nmAuthSecret
+let nmAuthSystemToken = env.nmAuthSystemToken
 // let nmSessionSecret = process.env['NM_SESSION_SECRET']
 // let nmAuthEnabled = process.env['NM_AUTH_ENABLED'].toLowerCase() === 'yes'
-let nmAuthType = process.env['NM_AUTH_TYPE']
-let nmAuthTestUser = process.env['NM_AUTH_TEST_USER']
-let nmAuthAdminGroupName = process.env['NM_AUTH_ADMIN_GROUP_NAME']
-let nmAuthLogoutUrl = process.env['NM_AUTH_LOGOUT_URL']
+let nmAuthType = env.nmAuthType
+let nmAuthTestUser = env.nmAuthTestUser
+let nmAuthAdminGroupName = env.nmAuthAdminGroupName
+let nmAuthLogoutUrl = env.nmAuthLogoutUrl
 
 let APIACCESS_APITOKEN_PART = 0
 let APIACCESS_REFRESHTOKEN_PART = 1
@@ -114,6 +126,44 @@ if (sendEmails) {
 function inspect (theObj) {
   return util.inspect(theObj, {showHidden: true, depth: 5})
 }
+
+/* Mongoose schemas re-factored start */
+let db = mongoose.connection
+let dbUri = process.env['NM_MONGO_URI']
+let dbPromise = new Promise(function (resolve, reject) {
+  db.on('error', function (err) {
+    logger.error('db error: ' + err)
+    reject(err)
+  })
+  db.once('open', function () {
+    logger.info('database opened successfully via mongoose connect.')
+    resolve()
+  })
+})
+mongoose.connect(dbUri, {keepAlive: true, keepAliveInitialDelay: 300000})
+
+// let mgiVersionSchema = require('./modules/mongo/schema/mgiVersion')(mongoose)
+// let MgiVersion = mongoose.model('mgiversion', mgiVersionSchema)
+
+let datasetsSchema = require('./modules/mongo/schema/datasets')(mongoose)
+let Datasets = mongoose.model('datasets', datasetsSchema)
+
+let usersSchema = require('./modules/mongo/schema/users')(mongoose)
+let Users = mongoose.model('users', usersSchema)
+
+let apiSchema = require('./modules/mongo/schema/api')(mongoose)
+let Api = mongoose.model('api', apiSchema)
+
+let xmlDataSchema = require('./modules/mongo/schema/xmldata')(mongoose)
+let XmlData = mongoose.model('xmlData', xmlDataSchema)
+
+let xsdSchema = require('./modules/mongo/schema/xsd')(mongoose)
+let XsdSchema = mongoose.model('xsdData', xsdSchema)
+
+let xsdVersionSchema = require('./modules/mongo/schema/xsdVersion')(mongoose)
+let XsdVersionSchema = mongoose.model('xsdVersionData', xsdVersionSchema)
+
+/* Mongoose schemas re-factored end */
 
 try {
   fs.mkdirSync(nmWebFilesRoot) // Sync used during startup
@@ -165,11 +215,15 @@ let authOptions = {
     //   loginAuth also forces group membership check if membership is set - empty membership === any or no group OK
     // not yet    { path: '/curate', loginAuth: false, membership: [], apiAuth: true, apiGroup: 'curate' },
     // not yet    { path: '/dataset/create', loginAuth: false, membership: [], apiAuth: true, apiGroup: 'curate' },
-    { path: '/datasets', loginAuth: true, membership: [], apiAuth: true, apiGroup: 'curate' },
-    { path: '/jobemail', loginAuth: false, membership: [], apiAuth: true, apiGroup: 'email' },
-    { path: '/jobsubmit', loginAuth: true, membership: [], apiAuth: true, apiGroup: 'jobs' },
-    { path: '/users', loginAuth: true, membership: ['admin'], apiAuth: true, apiGroup: 'admin' },
-    { path: '/user', loginAuth: false, membership: ['admin'], apiAuth: true, apiGroup: 'admin' }
+    {path: '/datasets', loginAuth: true, membership: [], apiAuth: true, apiGroup: 'curate'},
+    {path: '/jobemail', loginAuth: false, membership: [], apiAuth: true, apiGroup: 'email'},
+    {path: '/jobsubmit', loginAuth: true, membership: [], apiAuth: true, apiGroup: 'jobs'},
+    {path: '/testpubfiles2rdf', loginAuth: true, membership: ['admin'], apiAuth: true, apiGroup: 'curate'},
+    {path: '/testpubschema2rdf', loginAuth: true, membership: ['admin'], apiAuth: true, apiGroup: 'curate'},
+    {path: '/testpubxml2rdf', loginAuth: true, membership: ['admin'], apiAuth: true, apiGroup: 'curate'},
+    // {path: '/pubfiles2rdf', loginAuth: false, membership: [], apiAuth: true, apiGroup: 'curate'},
+    {path: '/users', loginAuth: true, membership: ['admin'], apiAuth: true, apiGroup: 'admin'},
+    {path: '/user', loginAuth: false, membership: ['admin'], apiAuth: true, apiGroup: 'admin'}
   ]
 }
 
@@ -243,7 +297,7 @@ function authMiddleware (authOptions) {
     let loginAuth = false
     let loginMembership = []
     let apiAuth = false
-    let apiGroup = null
+    // let apiGroup = null
     let loginUserId = null
     let isAdmin = false
     // let runAsUserId = null // Allow admins to set runAsUserId
@@ -255,7 +309,7 @@ function authMiddleware (authOptions) {
         loginAuth = v.loginAuth
         loginMembership = v.membership
         apiAuth = v.apiAuth
-        apiGroup = v.apiGroup
+        // apiGroup = v.apiGroup
       }
     })
     let token = req.cookies['token']
@@ -366,6 +420,7 @@ function authMiddleware (authOptions) {
     }
   }
 }
+
 app.use(authMiddleware(authOptions))
 /* END Api Authorization */
 
@@ -402,7 +457,7 @@ function handleLogin (req, res) {
     try {
       let decoded = jwtBase.verify(token, nmAuthSecret)
       if (remoteUser === decoded.sub) { // don't set userExists unless remoteUser and subject of the token are the same
-      //                                   -- Sometimes, on session timeout, the token might not get cleared and login occurs for another user
+        //                                   -- Sometimes, on session timeout, the token might not get cleared and login occurs for another user
         userExists = decoded.userExists
       }
       logger.debug(`${func} - current token values: ` + JSON.stringify(decoded))
@@ -414,10 +469,46 @@ function handleLogin (req, res) {
   // TODO enforce forged token check - logout should remove cookie
   // find the user
   let userFindCreatePromise = new Promise(function (resolve, reject) {
+    let func = 'userFindCreatePromise'
     if (userExists) {
       logger.debug('User exists flag set in cookie, so will not look up user info.')
       resolve()
     } else {
+      getUserAndAdminInfo(remoteUser)
+        .then(function (userAndAdminInfo) {
+          if (userAndAdminInfo.userInfo) {
+            let userDoc = userAndAdminInfo.userInfo
+            // let isAdmin = userAndAdminInfo.isAdmin
+            if (userDoc.email !== emailAddr || userDoc.givenName !== givenName) {
+              // TODO - Users.findOneAndUpdate({'userid': remoteUser},{'upsert': true}, function (err, )
+              logger.error('WARNING: user email address or given name has changed!')
+            }
+            userExists = true
+            resolve()
+          } else {
+            Users.create({
+              'userid': remoteUser,
+              'email': emailAddr,
+              'givenName': givenName,
+              'surName': surName,
+              'displayName': displayName,
+              'apiAccess': []
+            }, function (err, newDoc) {
+              if (err) {
+                reject(err)
+              } else {
+                ensureRdfUser(newDoc, userAndAdminInfo.isAdmin)
+                userExists = true
+                resolve()
+              }
+            })
+          }
+        })
+        .catch(function (err) {
+          let msg = func + ' - getUserAndAdminInfo failed. Error: ' + err
+          logger.error(msg)
+          reject(err)
+        })
       Users.findOne({'userid': remoteUser}, function (err, userDoc) {
         if (err) {
           reject(err)
@@ -441,6 +532,7 @@ function handleLogin (req, res) {
               if (err) {
                 reject(err)
               } else {
+                ensureRdfUser(newDoc)
                 userExists = true
                 resolve()
               }
@@ -480,14 +572,17 @@ function handleLogin (req, res) {
           resolve(res)
         })
         .catch(function (err) {
+          logger.error(func + ' - groupMgr.isGroupMember rejected with error: ' + err)
           reject(err)
         })
     })
       .catch(function (err) {
+        logger.error(func + ' - userFindCreatePromise rejected with error: ' + err)
         reject(err)
       })
   })
 }
+
 // app.use('/nm', express.static('../dist'))
 app.get('/nm', function (req, res) {
   let idx = '../dist/index.html'
@@ -518,148 +613,53 @@ app.get('/logout', function (req, res) {
   return res.status(200).json({error: null, data: {logoutUrl: nmAuthLogoutUrl}})
 })
 
-let db = mongoose.connection
-let dbUri = process.env['NM_MONGO_URI']
-mongoose.connect(dbUri, {keepAlive: true, keepAliveInitialDelay: 300000})
-db.on('error', function (err) {
-  logger.error('db error: ' + err)
-})
-db.once('open', function () {
-  logger.info('database opened successfully via mongoose connect.')
-})
-
-/*
-Mongoose schemas and models -- begin
-  TODO move to separate module
-  Schemas/Models:
-    mgiversion
-    datasets
-    xmldata
-    template (the xsd schema) -- we'll call it xsdSchema internally instead of template
-    template_version (tracker for template versions and deactivated templates)
-*/
-
-let mgiVersionSchema = new mongoose.Schema({
-  majorVer: Number, /* SEMVER versioning for the overall MGI db schema represented by the db. NM base was MDCS 1.3 */
-  minorVer: Number, /* http://semver.org */
-  patchVer: Number,
-  labelVer: String /* major.minor.patch-label when formatted */
-}, {collection: 'mgi_version'}) /* Latest is 1.3.0-nm-sp-dev-1 */
-let MgiVersion = mongoose.model('mgiversion', mgiVersionSchema)
-
-let datasetsSchema = new mongoose.Schema({
-  citationType: String, /* study, book, article, paper -- fixed set -- required field */
-  publication: String, /* Journal name, book name, etc */
-  title: String, /* Name of study, book, article, paper, etc -- required field */
-  author: [String], /* Authors, first is primary */
-  keyword: [String], /* Keywords. NOTE: some are multi-word */
-  publisher: String, /* publisher */
-  publicationYear: Number, /* 2005, etc. */
-  doi: String, /* DOI or other unique assigned handle -- must be unique */
-  volume: Number, /* 1-12 for monthly, could be others for weekly, semi-monthly, etc */
-  url: String, /* Best url to access paper, book, etc */
-  language: String, /* English, etc */
-  location: String, /* Originally: PolymerNanocomposite.DATA_SOURCE.Citation.CommonFields.Location */
-  dateOfCitation: String, /* Originally: PolymerNanocomposite.DATA_SOURCE.Citation.CommonFields.DateOfCitation */
-  issn: String, /* Originally: PolymerNanocomposite.DATA_SOURCE.Citation.CitationType.Journal.ISSN */
-  issue: String, /* Originally: PolymerNanocomposite.DATA_SOURCE.Citation.CitationType.Journal.Issue */
-  seq: Number, /* Unique index constraint, but not forced to monotonic -- required field (set by create) */
-  ispublished: Boolean, /* could use this to flag actually published */
-  isPublic: Boolean, /* available to everyone */
-  latestSchema: Boolean, /* Has associated xml_data recs for latest schema. If not, then lookups of xmls for latest schema using this dsSeq will fail */
-  userid: String /* creator's user id */
-}, {collection: 'datasets'})
-let Datasets = mongoose.model('datasets', datasetsSchema)
-
-let usersSchema = new mongoose.Schema({
-  alias: String, // random unless overridden by user - not used for attribution, only display
-  userid: String,
-  givenName: String, // first name
-  surName: String, // last name
-  displayName: String, // full name
-  email: String,
-  apiAccess: [String] // api token | refresh token | accessToken:expiration
-}, {collection: 'users'})
-let Users = mongoose.model('users', usersSchema)
-
-let apiSchema = new mongoose.Schema({
-  name: String, // Name of the API
-  desc: String, // Description of the API
-  token: String // random token representing api that can be changed if necessary
-}, {collection: 'api'})
-let Api = mongoose.model('api', apiSchema)
-
-let xmlDataSchema = new mongoose.Schema({ // maps the mongo xmldata collection
-  schemaId: String, /* !!! NOTE: had to rename 'schema' field name in restored data from MDCS to schemaId because of mongoose name conflict.
-                       The change is being made in the migration script -- migrate.js.
-                       OLD INFO: To convert the field after restore from MDCS, use mongocli which loads nanomongo.js. At the mongo command line
-                       type 'swizzleForMongoose()' to change all the xmldata document fields named schema to schemaId.
-                    */
-  title: String,
-  content: mongoose.Schema.Types.Mixed, /* !!! NOTE: MDCS stores the XML content as a BSON object parsed into the individual fields.
-                      Moving forward NanoMine will not use this approach, so the data was downloaded as text via the MDCS rest interface
-                      as a string and re-loaded into the xml_str string.  This is another reason why a dump of MDCS mongo will not restore
-                      and run with the new app directly.
-                      The migration tool will convert the 1.3.0 (no mgi_version collection) content field data and put a copy into xml_str.
-                      The content field is left alone. Note that for really old XMLdata records or ones where the title is not in the
-                      correct format, the conversion will not occur.
-                      bluedevil-oit/nanomine-tools project has (PRELIMINARY) code to update the field. */
-  xml_str: String,
-  iduser: String, /* numeric reference to user (probably in sqlite) - Original MDCS name for userid */
-  ispublished: Boolean, /* In the current db, these are all false */
-  isPublic: Boolean, /* Set this to true to make available to everyone */
-  curateState: String, /* currently values are Edit, Review, Curated */
-  entityState: String, /* currently values are EditedNotValid, EditedValid, Valid, NotValid, Ingesting, IngestFailed, IngestSuccess */
-  dsSeq: Number /* Sequence number of the associated dataset (datasetSchema) */
-}, {collection: 'xmldata'})
-let XmlData = mongoose.model('xmlData', xmlDataSchema)
-
-let xsdSchema = new mongoose.Schema({ // maps the mongo template collection
-  title: String, // the name of the schema does not need to be unique
-  filename: String, // not unique and is like 'PNC_schema_112916.xsd'
-  content: String, // definitely a string containing the XSD file
-  templateVersion: String, // string _id of the template version info in template_version (xsdVersionSchema)
-  version: Number, // relative version number for this schema/template within the xsdVersionSchema with templateVersion id
-  hash: String, // MDCS calculates MD5 hash of schema, we'll do something similar. Data restores from MDCS will be OK, but not portable back into MDCS
-  dependencies: [], // Optional and will not be used
-  exporters: [], // optional and will not be used
-  XSLTFiles: [] // optional and will not be used
-}, {collection: 'template'})
-let XsdSchema = mongoose.model('xsdData', xsdSchema)
-
-let xsdVersionSchema = new mongoose.Schema({ // maps the mongo template_version collection
-  versions: [String], // Array of xsdSchema ids as stings
-  deletedVersions: [String], // deleted versions array of xsdSchema ids
-  nbVersions: Number, // current count of versions
-  isDeleted: Boolean, // this schema is not to be shown/used at all and all xmls based on schema are deprecated
-  current: String, // current schema version id
-  currentRef: [{type: mongoose.Schema.Types.ObjectId, ref: 'xsdData'}]
-}, {collection: 'template_version'})
-let XsdVersionSchema = mongoose.model('xsdVersionData', xsdVersionSchema)
-
-// Sniff test for xmlData schema access via model
-// XmlData.findById('58587c6fe74a1d205f4ea5cf').exec(function (err, xmlRec) {
-//   if (err) {
-//     console.log('error looking up known object in database.')
-//   } else {
-//     console.log(xmlRec._id + ' schemaId: ' + xmlRec.schemaId)
-//   }
-// })
-
-/* Mongoose schemas and models -- end */
-
 /* BEGIN general utility functions */
+
+function ensureRdfUser (userInfo, isAdmin) {
+  let func = 'ensureRdfUser'
+  return new Promise(function (resolve, reject) {
+    // let httpsAgent = new https.Agent(httpsAgentOptions)
+    let cookieValue = createOutboundJwt({'userInfo': userInfo, 'isAdmin': isAdmin})
+    logger.error(func + ' cookie to send: ' + cookieValue)
+    let httpsAgent = {
+      host: 'localhost',
+      port: '443',
+      // path: '/',
+      path: '/ensure',
+      rejectUnauthorized: false
+    }
+    return axios({
+      'method': 'get',
+      'url': nmLocalRestBase + '/ensure',
+      // 'params': {ID: 12345},
+      'httpsAgent': httpsAgent,
+      'headers': {'Content-Type': 'text/html', 'Cookie': cookieValue}
+    })
+      .then(function (response) {
+        logger.debug(func + ' created rdf user successfully. data: ' + inspect(response))
+        resolve(response)
+      })
+      .catch(function (err) {
+        logger.error(func + ' error creating rdf user: ' + inspect(err))
+        reject(err)
+      })
+  })
+}
 
 function setDatasetLatestSchemaFlag (dsSeq, bv) {
   let func = 'setDatasetLatestSchemaFlag'
   // Datasets.updateOne({'seq': +(dsSeq)}, {'$set': {'latestSchema': bv}}, {'upsert': true}).cursor()
-  Datasets.findOneAndUpdate({'seq': +(dsSeq)}, {$set: {'latestSchema': true}}).exec()
-    .then(function (doc) {
-      logger.debug(func + ' - updated dataset: ' + dsSeq + ' latestSchema:' + bv + ' doc: ' + doc.latestSchema)
-    })
-    .catch(function (err) {
+  Datasets.updateOne({'seq': {'$eq': +(dsSeq)}}, {$set: {'latestSchema': bv}}, function (err, raw) {
+    if (err) {
       logger.debug(func + ' - updated datasets: done. Error: ' + err)
-    })
+    } else {
+      if (raw) {
+        logger.debug(func + ' - updated dataset: ' + dsSeq + ' latestSchema:' + bv + ' raw: ' + JSON.stringify(raw))
+      } else {
+        logger.debug(func + ' - updated dataset: ' + dsSeq + ' latestSchema:' + bv + ' NO RESPONSE FROM MONGO via MONGOOSE?')
+      }
+    }
+  })
 }
 
 function updateDatasetLatestSchema () { // Mark datasets denoting whether each has associated xml_data records for the latest schema
@@ -674,17 +674,36 @@ function updateDatasetLatestSchema () { // Mark datasets denoting whether each h
       let schemaId = versions[0].currentRef[0]._id
       // logger.debug(func + ' -- ' + JSON.stringify(versions[0]))
       // logger.debug(func + ' - latest schemaId is: ' + schemaId)
-      XmlData.find({'schemaId': {'$eq': schemaId}}, null, {'sort': {'dsSeq': 1}}).cursor()
-        .on('data', function (data) {
-          // logger.debug(func + ' - dataset: ' + data.dsSeq + ' latestSchema hash updated to true for data: ' + data.title + ' ' + data.schemaId)
-          validDatasets[data.dsSeq] = true // they'll all wind up as true, but it prevents searching (let js do it)
-        })
-        .on('end', function () {
-          // logger.debug(func + ' - on end called for XmlData.find')
-          Datasets.updateMany({}, {'latestSchema': false}).exec()
-            .then(function (data) {
-              // logger.debug(func + ' - dataset updateMany initial update all to false for: ' + data.seq)
-              // logger.debug(func + ' - dataset updateMany: success. Continuing to update latestSchema flag.')
+      new Promise(function (resolve, reject) {
+        XmlData.find({'schemaId': {'$eq': schemaId}}, null, {'sort': {'dsSeq': 1}}).cursor()
+          .on('data', function (data) {
+            // logger.debug(func + ' - dataset: ' + data.dsSeq + ' latestSchema hash updated to true for data: ' + data.title + ' ' + data.schemaId)
+            validDatasets[data.dsSeq] = true // they'll all wind up as true, but it prevents searching (let js do it)
+          })
+          .on('end', function () {
+            // logger.debug(func + ' - on end called for XmlData.find')
+            let len = Object.keys(validDatasets).length
+            if (len > 0) {
+              logger.debug(func + ' - valid dataset count: ' + len)
+              resolve(validDatasets)
+            } else {
+              reject(new Error('no valid datasets'))
+            }
+          })
+      })
+        .then(function (validDatasets) {
+          new Promise(function (resolve, reject) {
+            Datasets.update({}, {'$set': {'latestSchema': false}}, {'multi': true}, function (err, raw) {
+              if (err) {
+                logger.error(func + ' - update (multi) failed. Error: ' + err)
+                reject(err)
+              } else {
+                resolve(validDatasets)
+                logger.debug(func + ' - dataset update (multi) done:  ' + JSON.stringify(raw))
+              }
+            })
+          })
+            .then(function (validDatasets) {
               let keys = Object.keys(validDatasets)
               keys.forEach(function (v) {
                 // logger.debug(func + ' - will update dataset key ' + v + ' latestSchema to true.')
@@ -692,21 +711,23 @@ function updateDatasetLatestSchema () { // Mark datasets denoting whether each h
               })
             })
             .catch(function (err) {
-              logger.error(func + ' - dataset updateMany failed: ' + err)
+              logger.error(func + ' - XmlData.find error: ' + err)
             })
         })
-        // .catch(function (err) {
-        //   logger.error(func + ' - XmlData find error: ' + err)
-        // })
+        .catch(function (err) {
+          logger.error(func + ' - XmlData.find error: ' + err)
+        })
     })
     .catch(function (err) {
       logger.error(func + ' - getCurrentSchemas: ' + err)
     })
 }
+
 // ... and run at startup
-setTimeout(function () {
+dbPromise.then(function () {
+  console.log('db opened successfully. Updating datasets.')
   updateDatasetLatestSchema()
-}, 15000)
+})
 
 function getUserInfo (userid) {
   let func = 'getUserInfo'
@@ -725,6 +746,53 @@ function getUserInfo (userid) {
           reject(new Error(msg))
         }
       })
+  })
+}
+
+function getUserAndAdminInfo (userid) { // convenience version that sets isAdmin flag
+  let func = 'getUserAndAdminInfo'
+  return new Promise(function (resolve, reject) {
+    // NOTE: a user can be an admin, but not in the user database yet since our db is not directly coupled to IDM or group mgr
+    groupMgr.isGroupMember(logger, nmAuthAdminGroupName, userid)
+      .then(function (isAdmin) {
+        getUserInfo(userid)
+          .then(function (userDoc) {
+            if (userDoc) {
+              resolve({userInfo: userDoc, 'isAdmin': isAdmin})
+            } else { // for Clarity since userDoc may be null
+              logger.error(func + ' - WARNING: DB userinfo was null for ' + userid + ' - ensure this was the user create scenario.')
+              resolve({userInfo: null, 'isAdmin': isAdmin})
+            }
+          })
+          .catch(function (err) {
+            logger.error(func + ' - getUserInfo threw error: ' + err)
+            reject(err)
+          })
+      })
+      .catch(function (err) {
+        let msg = func + ' - getUserAndAdminInfo failed. Error: ' + err
+        logger.error(msg)
+        reject(err)
+      })
+    // getUserInfo(userid)
+    //   .then(function (userDoc) {
+    //     if (userDoc) {
+    //       groupMgr.isGroupMember(logger, nmAuthAdminGroupName, userid)
+    //         .then(function (isAdmin){
+    //           resolve({userInfo: userDoc, 'isAdmin': isAdmin})
+    //         })
+    //         .catch(function (err) {
+    //           let msg = func + ' - getUserAndAdminInfo failed. Error: ' + err
+    //           logger.error(msg) // ERROR
+    //         })
+    //     } else {
+    //       resolve(null)
+    //     }
+    //   })
+    //   .catch(function (err) {
+    //     logger.error(func + ' - getUserInfo threw error: ' + err)
+    //     reject(err)
+    //   })
   })
 }
 
@@ -779,7 +847,9 @@ function str2b64 (string) {
   return b64
 }
 
-function createOutboundJwt (userInfo) {
+function createOutboundJwt (userAndAdminInfo) {
+  let userInfo = userAndAdminInfo.userInfo
+  let isAdmin = userAndAdminInfo.isAdmin
   let jwToken = jwtBase.sign({
     'sub': userInfo.userid,
     'givenName': userInfo.givenName,
@@ -787,7 +857,7 @@ function createOutboundJwt (userInfo) {
     'displayName': userInfo.displayName,
     'isTestUser': (nmAuthType === 'local'),
     'exp': Date.now() / 1000 + 3600,
-    'isAdmin': true,
+    'isAdmin': typeof isAdmin === 'boolean' ? isAdmin : false,
     'isUser': true,
     'mail': userInfo.email,
     'isAnonymous': false,
@@ -800,44 +870,9 @@ function createOutboundJwt (userInfo) {
 }
 
 function datasetXmlFileList (xmlTitle) { // returns promise that when fulfilled contains list of file info objects related to XML
-  let func = 'datasetXmlFileList'
-  let bucketName = datasetBucketName
-  let validTitle = matchValidXmlTitle(xmlTitle)
-  let options = {
-    'bucketName': bucketName
-  }
-  return new Promise(function (resolve, reject) {
-    const bucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, options)
-    let files = []
-    if (validTitle) {
-      let dsId = validTitle[1]
-      let findParam = {filename: {$regex: dsId + '[/]' + xmlTitle.replace(/\.xml$/, '') + '[/].*'}}
-      logger.debug(func + ' looking for files like: ' + JSON.stringify(findParam))
-      bucket.find(findParam).sort({uploadDate: -1, filename: 1})
-        .on('data', (data) => {
-          data.basename = data.filename.split('/').pop()
-          let found = false
-          files.forEach(function (v) {
-            if (found === false) {
-              found = (v.filename === data.filename)
-            }
-          })
-          if (found === false) {
-            files.push(data)
-          }
-        })
-        .on('end', (err) => {
-          if (err) {
-            reject(err)
-          } else {
-            resolve(files)
-          }
-        })
-    } else {
-      reject(new Error('invalid xmlTitle format'))
-    }
-  })
+  return getDatasetXmlFileList(mongoose, logger, xmlTitle) // post refactor, but client not changed
 }
+
 function getMongoFileData (bucketName, id, fileName) {
   let func = 'getMongoFileData'
   // let fileName = null // only supporting id for this right now
@@ -958,7 +993,7 @@ function publishFiles (userid, xmlTitle, cb) { // xmlText, schemaName, filesInfo
               datasetXmlFileList(xmlTitle)
                 .then(function (filesInfo) {
                   let filesDataLD = ''
-                  let xlsInputFile = 'NOT_VALID'
+                  let xlsInputFile = 'NOT-KNOWN-DIRECT-XML'
                   let fileListLD = ''
                   filesInfo.forEach(function (fInfo) { // go ahead and fill out the related files section
                     fileListLD += `,
@@ -1025,19 +1060,19 @@ function publishFiles (userid, xmlTitle, cb) { // xmlText, schemaName, filesInfo
                               "@type": "np:Assertion",
                               "@graph": [
                                 {
-                                  "@id" : "nmr/xml/${xmlId}",
+                                  "@id" : "/nmr/xml/${xmlId}",
                                   "@type": [ "schema:DataDownload", "mt:text/xml", ,"http://nanomine.org/ns/NanomineXMLFile"],
                                   "whyis:hasContent" : "data:text/xml;charset=UTF-8;base64,${b64XmlData}",
-                                  "prov:wasDerivedFrom" : [{"@id" : "dataset/${dsSeq}/${xmlId}/${xlsInputFile}"}],
-                                  "dc:conformsTo" : {"@id" : "nmr/schema/${schemaName}"}
+                                  "prov:wasDerivedFrom" : [{"@id" : "/nmr/dataset/${dsSeq}/${xmlId}/${xlsInputFile}"}],
+                                  "dc:conformsTo" : {"@id" : "/nmr/schema/${schemaName}"}
                                 }
                                 ${filesDataLD}
                                 ,{
-                                  "@id" : "nmr/dataset/{{dataset_id}}",
+                                  "@id" : "nmr/dataset/${dsSeq}",
                                   "@type" : "schema:Dataset",
                                   "schema:distribution" : [
-                                    {"@id" : "nmr/xml/${xmlId}"},
-                                    {"@id" : "dataset/${dsSeq}/${xmlId}/${xlsInputFile}"}
+                                    {"@id" : "/nmr/xml/${xmlId}"},
+                                    {"@id" : "/nmr/dataset/${dsSeq}/${xmlId}/${xlsInputFile}"}
                                     ${fileListLD}
                                   ]
                                 }
@@ -1045,28 +1080,31 @@ function publishFiles (userid, xmlTitle, cb) { // xmlText, schemaName, filesInfo
                             }
                           }
                         }`
-                      getUserInfo(userid)
-                        .then(function (userinfo) {
+                      getUserAndAdminInfo(userid)
+                        .then(function (userAndAdminInfo) {
+                          // let userinfo = userAndAdminInfo.userInfo
+                          // let isAdmin = userAndAdminInfo.isAdmin
                           let httpsAgentOptions = { // allow localhost https without knowledge of CA TODO - install ca cert on node - low priority
                             host: 'localhost',
                             port: '443',
                             method: 'POST',
                             path: '/wi/pub',
-                            // path: '/sparql',
                             rejectUnauthorized: false
                           }
                           let httpsAgent = new https.Agent(httpsAgentOptions)
-                          let cookieValue = createOutboundJwt(userinfo)
+                          let cookieValue = createOutboundJwt(userAndAdminInfo)
                           logger.error(func + ' cookie to send: ' + cookieValue + ' request data: ' + data)
                           return axios({
                             'method': 'post',
                             'url': url,
                             'data': data,
+                            'maxRedirects': 0,
+                            'validateStatus': null,
                             'httpsAgent': httpsAgent,
                             'headers': {'Content-Type': 'application/ld+json', 'Cookie': cookieValue}
                           })
                             .then(function (response) {
-                              logger.error(func + ' data: ' + inspect(response))
+                              logger.error(func + ' data: ' + inspect(response) + ' response url was: ' + response.request.res.responseUrl)
                               cb(null, response)
                             })
                             .catch(function (err) {
@@ -1155,8 +1193,10 @@ function publishXml (userid, xmlTitle, xmlText, schemaName, cb) {
         }
       }
     }`
-  getUserInfo(userid)
-    .then(function (userinfo) {
+  getUserAndAdminInfo(userid)
+    .then(function (userAndAdminInfo) {
+      // let userinfo = userAndAdminInfo.userInfo
+      // let isAdmin = userAndAdminInfo.isAdmin
       let httpsAgentOptions = { // allow localhost https without knowledge of CA TODO - install ca cert on node - low priority
         host: 'localhost',
         port: '443',
@@ -1166,17 +1206,19 @@ function publishXml (userid, xmlTitle, xmlText, schemaName, cb) {
         rejectUnauthorized: false
       }
       let httpsAgent = new https.Agent(httpsAgentOptions)
-      let cookieValue = createOutboundJwt(userinfo)
+      let cookieValue = createOutboundJwt(userAndAdminInfo)
       logger.error(func + ' cookie to send: ' + cookieValue + ' request data: ' + data)
       return axios({
         'method': 'post',
         'url': url,
         'data': data,
+        'maxRedirects': 0,
+        'validateStatus': null,
         'httpsAgent': httpsAgent,
         'headers': {'Content-Type': 'application/ld+json', 'Cookie': cookieValue}
       })
         .then(function (response) {
-          logger.error(func + ' data: ' + inspect(response))
+          logger.error(func + ' data: ' + inspect(response) + ' response url was: ' + response.request.res.responseUrl)
           cb(null, response)
         })
         .catch(function (err) {
@@ -1236,8 +1278,10 @@ function publishLatestSchema (userid, cb) {
               }
             }
           }`
-        getUserInfo(userid)
-          .then(function (userinfo) {
+        getUserAndAdminInfo(userid)
+          .then(function (userAndAdminInfo) {
+            // let userinfo = userAndAdminInfo.userInfo
+            // let isAdmin = userAndAdminInfo.isAdmin
             let httpsAgentOptions = { // allow localhost https without knowledge of CA TODO - install ca cert on node - low priority
               host: 'localhost',
               port: '443',
@@ -1247,17 +1291,19 @@ function publishLatestSchema (userid, cb) {
               rejectUnauthorized: false
             }
             let httpsAgent = new https.Agent(httpsAgentOptions)
-            let cookieValue = createOutboundJwt(userinfo)
+            let cookieValue = createOutboundJwt(userAndAdminInfo)
             logger.error(func + ' cookie to send: ' + cookieValue + ' request data: ' + data)
             return axios({
               'method': 'post',
               'url': url,
               'data': data,
+              maxRedirects: 0,
+              validateStatus: null,
               'httpsAgent': httpsAgent,
               'headers': {'Content-Type': 'application/ld+json', 'Cookie': cookieValue}
             })
               .then(function (response) {
-                logger.error(func + ' data: ' + inspect(response))
+                logger.error(func + ' data: ' + inspect(response) + ' response url was: ' + response.request.res.responseUrl) // detect redirect
                 cb(null, response)
               })
               .catch(function (err) {
@@ -1280,12 +1326,61 @@ function publishLatestSchema (userid, cb) {
       cb(err, null)
     })
 }
+app.post('/publishfiles2rdf', function (req, res) {
+  let func = 'publishfiles2rdf'
+  let xmlTitle = req.body.xmltitle // {title: title, userid: userid}
+  let targetUserid = req.body.userid
+  let jsonResp = {error: null, data: null}
+  if (xmlTitle && matchValidXmlTitle(xmlTitle)) {
+    publishFiles(targetUserid, xmlTitle, function cb (err, response) {
+      if (err) {
+        let msg = func + ' failed: ' + err
+        logger.error(msg)
+        jsonResp.error = msg
+        res.status(500).json(jsonResp)
+      } else {
+        let msg = func + ' success!!!'
+        logger.info(msg)
+        res.status(201).json(jsonResp) // TODO rdf is funky. errors can occur that cause a redirect, so need to handle that error condition by parsing response
+      }
+    })
+  } else {
+    jsonResp.error = 'invalid xml title'
+    res.status(400).json(jsonResp)
+  }
+})
+app.post('/publishxml2rdf', function (req, res) {
+  let func = 'publishxml2rdf'
+  let xmlTitle = req.body.xmltitle // {title: title, userid: userid}
+  let xmlText = req.body.xmltext
+  let schemaName = req.body.schemaname
+  let targetUserid = req.body.userid
+  let jsonResp = {error: null, data: null}
+  if (xmlTitle && matchValidXmlTitle(xmlTitle)) {
+    publishXml(targetUserid, xmlTitle, xmlText, schemaName, function cb (err, response) {
+      if (err) {
+        let msg = func + ' failed: ' + err
+        logger.error(msg)
+        jsonResp.error = msg
+        res.status(500).json(jsonResp)
+      } else {
+        let msg = func + ' success!!!'
+        logger.info(msg)
+        res.status(201).json(jsonResp) // TODO rdf is funky. errors can occur that cause a redirect, so need to handle that error condition by parsing response
+      }
+    })
+  } else {
+    jsonResp.error = 'invalid xml title: ' + xmlTitle
+    res.status(400).json(jsonResp)
+  }
+})
+
 // Test publishFiles (xml, and datafiles pushed to rdf
-app.get('/testpubfiles', function (req, res) {
+app.get('/testpubfiles2rdf', function (req, res) {
   let xmlTitle = req.query.xmltitle
-  if (xmlTitle && matchValidXmlTitle(xmlTitle) ) {
+  if (xmlTitle && matchValidXmlTitle(xmlTitle)) {
     setTimeout(function () {
-      publishFiles(nmAuthAnonUserId, xmlTitle, function cb(err, response) { // user is Anon Nanomine
+      publishFiles(nmAuthAnonUserId, xmlTitle, function cb (err, response) { // user is Anon Nanomine
         if (err) {
           logger.error('publishFiles test failed: ' + err)
         } else {
@@ -1300,7 +1395,7 @@ app.get('/testpubfiles', function (req, res) {
 })
 
 // Test publishLatestSchema
-app.get('/testpubschema', function (req, res) {
+app.get('/testpubschema2rdf', function (req, res) {
   setTimeout(function () {
     publishLatestSchema(nmAuthAnonUserId, function cb (err, response) { // user is Anon Nanomine
       if (err) {
@@ -1314,7 +1409,7 @@ app.get('/testpubschema', function (req, res) {
 })
 // End Test publishLatestSchema
 // Begin test publishXml
-app.get('/testpubxml', function (req, res) { // L183_S12_Poetschke_2003.xml
+app.get('/testpubxml2rdf', function (req, res) { // L183_S12_Poetschke_2003.xml
   setTimeout(function () {
     let xmlText = '<xml><test>' + Date.now() + '</test></xml>'
     let schemaName = 'PNC_schema_0812118'
@@ -1429,7 +1524,7 @@ function getLatestSchemas () { // duplicate of getCurrentSchemas!! TODO
 app.get('/templates/versions/select/allactive', function (req, res) {
   let jsonResp = {'error': null, 'data': null}
   getLatestSchemas()
-    .then(function (schemas) {
+    .then(function (schemas) { // schemas[0].currentRef[0] is latest schema
       if (schemas && schemas.length > 0) {
         jsonResp.data = schemas
         res.json(jsonResp)
@@ -1481,11 +1576,11 @@ app.get('/templates/select', function (req, res) {
           let re = new RegExp(qval, 'i')
 
           let tmp = {}
-          tmp[qfld] = { '$regex': re } // TODO test this again with fields mix -- winds up being {'fieldnm': { '$regex': /PATTERN/ }}
+          tmp[qfld] = {'$regex': re} // TODO test this again with fields mix -- winds up being {'fieldnm': { '$regex': /PATTERN/ }}
           qcomponents.push(tmp)
         } else {
           let tmp = {}
-          tmp[qfld] = { '$eq': qval }
+          tmp[qfld] = {'$eq': qval}
           qcomponents.push(tmp)
         }
       }
@@ -1647,7 +1742,7 @@ app.get('/explore/select', function (req, res) {
       if (title.slice(0, 1) === '/' && title.slice(-1) === '/') {
         title = title.replace(/(^[/]|[/]$)/g, '')
         let re = new RegExp(title, 'i')
-        titleQuery = {'title': { '$regex': re }}
+        titleQuery = {'title': {'$regex': re}}
         // logger.debug(req.path + ' by title: ' + JSON.stringify(titleQuery))
       } else {
         titleQuery = {'title': {'$eq': title}}
@@ -1657,7 +1752,7 @@ app.get('/explore/select', function (req, res) {
       if (schema.slice(0, 1) === '/' && schema.slice(-1) === '/') {
         schema = schema.replace(/(^[/]|[/]$)/g, '')
         let re = new RegExp(schema, 'i')
-        schemaQuery = {'schemaId': { '$regex': re }}
+        schemaQuery = {'schemaId': {'$regex': re}}
       } else {
         schemaQuery = {'schemaId': {'$eq': schema}}
       }
@@ -1669,7 +1764,7 @@ app.get('/explore/select', function (req, res) {
         schemaList.forEach(function (v) {
           schemasParams.push({'schemaId': {'$eq': v}})
         })
-        schemasQuery = { '$or': schemasParams }
+        schemasQuery = {'$or': schemasParams}
       }
       logger.debug(req.path + ' schemasQuery: ' + JSON.stringify(schemasQuery))
     }
@@ -1698,7 +1793,7 @@ app.get('/explore/select', function (req, res) {
       } else {
         jsonResp.data = [] // TODO fix db so the expensive swizzling is not necessary
         xmlRecs.forEach(function (v) { // swizzle the output
-          jsonResp.data.push({ '_id': v._id, 'schema': v.schemaId, 'title': v.title, 'content': v.xml_str })
+          jsonResp.data.push({'_id': v._id, 'schema': v.schemaId, 'title': v.title, 'content': v.xml_str})
         })
         logger.info('/explore/select query=' + JSON.stringify(query) + ' returned: ' + jsonResp.data.length + ' records.')
         res.json(jsonResp)
@@ -1712,10 +1807,7 @@ function validCuratedDataState (curatedDataState) {
   return validStates.includes(curatedDataState)
 }
 
-function matchValidXmlTitle (title) {
-  let rv = title.match(/^[A-Z]([0-9]+)[_][S]([0-9]+)[_][\S]+[_]\d{4}([.][Xx][Mm][Ll])?$/) // e.g. L183_S12_Poetschke_2003.xml
-  return rv
-}
+
 
 app.post('/curate', function (req, res) {
   let func = 'curate'
@@ -1841,16 +1933,16 @@ app.get('/dataset/filenames/:xmlId', function (req, res) {
     return res.status(400).json(jsonResp)
   }
 })
-app.get('/dataset/file/:dsSeq/:xmlId/:filename', function (req, res) {
-  let dsSeq = req.params.dsSeq
-  let xmlId = req.params.xmlId
-  let filename = req.params.filename
-  let bucketName = datasetBucketName
-  // Probably needs to look into default bucketname as well -- or ...
-  //  1 - put all data into default bucket
-  //  2 - put images into the default bucket as well as the curateinput bucket (might work best)
-  // TODO ...
-})
+// app.get('/dataset/file/:dsSeq/:xmlId/:filename', function (req, res) {
+//   let dsSeq = req.params.dsSeq
+//   let xmlId = req.params.xmlId
+//   let filename = req.params.filename
+//   let bucketName = datasetBucketName
+//   // Probably needs to look into default bucketname as well -- or ...
+//   //  1 - put all data into default bucket
+//   //  2 - put images into the default bucket as well as the curateinput bucket (might work best)
+//   // TODO ...
+// })
 
 app.get('/blob', function (req, res) { // MDCS only supports get by id (since they save id in XML) and filename is almost superfluous
   //    for our purposes, get will support filename (expected to be schemaid/xml_title/filename), bucketname (optional) or id
@@ -1883,7 +1975,7 @@ app.get('/blob', function (req, res) { // MDCS only supports get by id (since th
         res.attachment(fnc.slice(-1)[0])
       })
       dlStream.on('error', function (err) {
-        res.status(404).send('NOT FOUND: ' + id)
+        res.status(404).send('NOT FOUND: ' + id + ' err:' + err)
       })
       dlStream.on('data', function (data) {
         res.write(data)
@@ -2099,6 +2191,7 @@ function newAccessTokenAndExpiration () {
   let hr4 = 4 * 60 * 60 * 1000 // 4 hrs in seconds
   return {'accessToken': shortUUID.new(), 'expiration': (moment().unix() + hr4)}
 }
+
 function updateUserAccessToken (userid, apiToken, refreshToken, accessToken, expiration) {
   let func = 'updateUserAccessToken'
   logger.debug(func + ' - userid: ' + userid + ' apiToken: ' + apiToken + ' refreshToken: ' + refreshToken)
@@ -2132,6 +2225,7 @@ function updateUserAccessToken (userid, apiToken, refreshToken, accessToken, exp
   })
   return p
 }
+
 app.post('/refreshtoken', function (req, res) {
   let func = 'refreshtoken'
   let jsonResp = {'error': null, 'data': null}
@@ -2268,36 +2362,81 @@ function updateJobStatus (statusFilePath, newStatus) {
   }
 }
 
+function jobCreate (jobType, jobParams) {
+  return new Promise(function (resolve, reject) {
+    let jobId = jobType + '-' + shortUUID.new()
+    let jobDir = nmJobDataDir + '/' + jobId
+    let paramFileName = jobDir + '/' + 'job_parameters.json'
+    logger.debug('job parameters: ' + JSON.stringify(jobParams))
+    fs.mkdir(jobDir, function (err, data) {
+      if (err) {
+        let msg = 'mkdir nmJobDataDir failed. jobDir: ' + jobDir + ' error: ' + err
+        logger.error(msg)
+        // jsonResp.data = null
+        // jsonResp.error = msg
+        // res.status(400).json(jsonResp)
+        reject(new Error(msg))
+      } else {
+        fs.writeFile(paramFileName, JSON.stringify(jobParams), {'encoding': 'utf8'}, function (err, data) {
+          if (err) {
+            updateJobStatus(jobDir, 'preCreateError')
+            let msg = 'error updating/creating job parameters file: ' + paramFileName
+            logger.error(msg)
+            // jsonResp.data = null
+            // jsonResp.error = 'error updating/creating job parameters file: ' + paramFileName
+            // res.status(400).json(jsonResp)
+            reject(new Error(msg))
+          } else {
+            updateJobStatus(jobDir, 'created')
+            // jsonResp.data = {'jobId': jobId}
+            // res.json(jsonResp)
+            resolve({'jobId': jobId})
+          }
+        })
+      }
+    })
+  })
+}
+
 app.post('/jobcreate', function (req, res, next) {
   let jsonResp = {'error': null, 'data': null}
   let jobType = req.body.jobType
   let jobParams = req.body.jobParameters
-  let jobId = jobType + '-' + shortUUID.new()
-  let jobDir = nmJobDataDir + '/' + jobId
-  let paramFileName = jobDir + '/' + 'job_parameters.json'
-  logger.debug('job parameters: ' + JSON.stringify(jobParams))
-  fs.mkdir(jobDir, function (err, data) {
-    if (err) {
-      let msg = 'mkdir nmJobDataDir failed. jobDir: ' + jobDir + ' error: ' + err
-      logger.error(msg)
-      jsonResp.data = null
-      jsonResp.error = msg
+  jobCreate(jobType, jobParams)
+    .then(function (jobInfo) {
+      jsonResp.data = jobInfo
+      res.json(jsonResp)
+    })
+    .catch(function (err) {
+      jsonResp.error = err
       res.status(400).json(jsonResp)
-    } else {
-      fs.writeFile(paramFileName, JSON.stringify(jobParams), {'encoding': 'utf8'}, function (err, data) {
-        if (err) {
-          updateJobStatus(jobDir, 'preCreateError')
-          jsonResp.data = null
-          jsonResp.error = 'error updating/creating job parameters file: ' + paramFileName
-          res.status(400).json(jsonResp)
-        } else {
-          updateJobStatus(jobDir, 'created')
-          jsonResp.data = {'jobId': jobId}
-          res.json(jsonResp)
-        }
-      })
-    }
-  })
+    })
+  // let jobId = jobType + '-' + shortUUID.new()
+  // let jobDir = nmJobDataDir + '/' + jobId
+  // let paramFileName = jobDir + '/' + 'job_parameters.json'
+  // logger.debug('job parameters: ' + JSON.stringify(jobParams))
+  // fs.mkdir(jobDir, function (err, data) {
+  //   if (err) {
+  //     let msg = 'mkdir nmJobDataDir failed. jobDir: ' + jobDir + ' error: ' + err
+  //     logger.error(msg)
+  //     jsonResp.data = null
+  //     jsonResp.error = msg
+  //     res.status(400).json(jsonResp)
+  //   } else {
+  //     fs.writeFile(paramFileName, JSON.stringify(jobParams), {'encoding': 'utf8'}, function (err, data) {
+  //       if (err) {
+  //         updateJobStatus(jobDir, 'preCreateError')
+  //         jsonResp.data = null
+  //         jsonResp.error = 'error updating/creating job parameters file: ' + paramFileName
+  //         res.status(400).json(jsonResp)
+  //       } else {
+  //         updateJobStatus(jobDir, 'created')
+  //         jsonResp.data = {'jobId': jobId}
+  //         res.json(jsonResp)
+  //       }
+  //     })
+  //   }
+  // })
 })
 
 app.post('/jobpostfile', function (req, res, next) {
@@ -2328,97 +2467,286 @@ app.post('/jobpostfile', function (req, res, next) {
   })
 })
 
+function submitCurator (userid) {
+  let func = 'submitCurator'
+  let jobParams = {'user': userid}
+  return new Promise(function (resolve, reject) {
+    jobCreate('curator', jobParams)
+      .then(function (jobInfo) {
+        getUserAndAdminInfo(userid)
+          .then(function (userAndAdminInfo) {
+            // NOTE: overridding isAdmin for now since nanomine system user may not officially be admin in groups
+            //  ALSO: ensure that the nanomine nmAuthSystemUserId exists in the nm DB before calling!
+            if (userAndAdminInfo.userInfo) {
+              if (userAndAdminInfo.isAdmin !== true) {
+                let msg = func + ' - WARNING - overriding isAdmin to true for user: ' + userid + ' to submit curator.'
+                logger.error(msg)
+                userAndAdminInfo.isAdmin = true
+              }
+              let userToken = createOutboundJwt(userAndAdminInfo)
+              jobSubmit(jobInfo.jobId, 'curator', userToken)
+                .then(function (jobInfo) {
+                  logger.info('successfully submitted curator job. Pid: ' + jobInfo.jobPid)
+                  resolve()
+                })
+                .catch(function (err) {
+                  logger.error('error submitting curator job. Error: ' + err)
+                  reject(err)
+                })
+            } else {
+              // user Not defined!
+              let msg = func + ' - cannot submit curator job for non-existent user: ' + userid
+              logger.error(msg)
+              reject(new Error(msg))
+            }
+          })
+          .catch(function (err) {
+            let msg = func + ' - getUserAndAdminInfo for userid: ' + userid + '. Unable to submit job. Error: ' + err
+            logger.error(msg)
+            reject(err)
+          })
+      })
+      .catch(function (err) {
+        logger.error('error creating curator job. Error: ' + err)
+      })
+  })
+}
+dbPromise.then(function () {
+  if (!nmAutostartCurator) {
+    console.log('NOT SUBMITTING CURATOR AT THIS TIME. DISABLED.')
+    return
+  }
+  console.log('db opened successfully. Submitting curator.')
+  submitCurator(nmAuthSystemUserId) // run the curator job (long running job) TODO: monitor curator
+    .then(function () {
+      let msg = 'successfully submitted curator job.'
+      logger.info(msg)
+      console.log(msg) // for convenience
+    })
+    .catch(function (err) {
+      let msg = 'submission of curator job failed. Error: ' + err
+      logger.error(msg)
+      console.log(msg)
+    })
+})
+dbPromise.catch(function (err) {
+  console.log('dbPromise.catch - db open failed: ' + err)
+})
+function jobSubmit (jobId, jobType, userToken) {
+  let func = 'jobSubmit'
+  return new Promise(function (resolve, reject) {
+    let jobDir = nmJobDataDir + '/' + jobId
+    let paramFileName = jobDir + '/' + 'job_parameters.json'
+
+    // execute the configured job in the background
+    //   will do better later. At least client code on each side of the interface won't change
+    let pgms = config.jobtypes
+    let pgm = null
+    let pgmdir = null
+    pgms.forEach(function (v) {
+      if (v.jobtype === jobType) {
+        pgmdir = v.pgmdir
+        pgm = v.pgmname
+      }
+    })
+    try {
+      let jobParams = null
+      fs.readFile(paramFileName, {encoding: 'utf8'}, function (err, jobParamsStr) {
+        if (err) {
+          updateJobStatus(jobDir, 'readParametersOnSubmitError' + '-' + paramFileName)
+          let msg = '/jobsubmit write job file error - file: ' + paramFileName + ' err: ' + err
+          logger.error(msg)
+          // jsonResp.data = null
+          // jsonResp.error = msg
+          // return res.status(500).json(jsonResp)
+          reject(new Error(msg))
+        } else {
+          jobParams = JSON.parse(jobParamsStr)
+          let token = userToken
+          if (token) { // always update user in parameters to either current user or if current=admin same user spec'd in parms
+            let userid = token.sub
+            let newUser = null
+            let oldUser = jobParams.user
+            if (token.isAdmin && oldUser && oldUser.length > 0 && userid !== oldUser) { // allow admin to override runAs user
+              newUser = oldUser
+            } else {
+              newUser = userid // set to user running job if not admin or override not requested
+            }
+            jobParams.user = newUser
+            jobParams.submittingUser = userid
+            jobParams.originalUser = oldUser
+            fs.writeFile(paramFileName, JSON.stringify(jobParams), {'encoding': 'utf8'}, function (err, data) {
+              if (err) {
+                updateJobStatus(jobDir, 'updateUserOnSubmitError' + '-' + paramFileName)
+                let msg = '/jobsubmit write job parameter file error - file: ' + paramFileName + ' err: ' + err
+                logger.error(msg)
+                // jsonResp.data = null
+                // jsonResp.error = msg
+                // return res.status(500).json(jsonResp)
+                reject(new Error(msg))
+              } else {
+                updateJobStatus(jobDir, 'userUpdatedOnSubmit-Old(' + oldUser + ')--New(' + newUser + ')')
+                if (pgm != null && pgmdir) {
+                  let jobPid = null
+                  // TODO track child status and output with events and then update job status, but for now, just kick it off
+                  let cwd = process.cwd()
+                  let pgmpath = pathModule.join(cwd, pgmdir)
+                  pgm = pathModule.join(pgmpath, pgm)
+                  logger.info('executing: ' + pgm + ' in: ' + pgmpath)
+                  let localEnv = {'PYTHONPATH': pathModule.join(cwd, '../src/jobs/lib')}
+                  localEnv = _.merge(localEnv, process.env)
+                  logger.debug(func + ' - running job ' + jobId + ' with env path = ' + localEnv['PATH'])
+                  let child = require('child_process').spawn(pgm, [jobType, jobId, jobDir], {
+                    'cwd': pgmpath,
+                    'env': localEnv
+                  })
+                  jobPid = child.pid
+                  updateJobStatus(jobDir, {'status': 'submitted', 'pid': jobPid})
+                  child.stdout.on('data', (data) => {
+                    logger.info('job ' + jobId + ' o: ' + data)
+                  })
+                  child.stderr.on('data', (data) => {
+                    logger.error('job ' + jobId + ' e: ' + data)
+                  })
+                  child.on('close', (data) => {
+                    logger.info('job ' + jobId + ' exited with code: ' + data)
+                  })
+                  resolve({'jobPid': jobPid})
+                } else {
+                  updateJobStatus(jobDir, 'failed-no-pgm-defined')
+                  let msg = 'job type has no program defined'
+                  // jsonResp.error = 'job type has program not defined'
+                  // return res.status(400).json(jsonResp)
+                  logger.error(msg)
+                  reject(new Error(msg))
+                }
+              }
+            })
+          } else {
+            let msg = 'Did not run job because proper userid was not set in JWT token. This should not happen since auth required to get here!'
+            logger.error(msg + ' token: ' + JSON.stringify(token))
+            // jsonResp.error = msg
+            // return res.status(500).json(jsonResp)
+            reject(new Error(msg))
+          }
+        }
+      })
+    } catch (err) {
+      updateJobStatus(jobDir, 'failed-to-exec-' + err)
+      let msg = func + ' - job failed to exec: ' + err
+      logger.error(msg)
+      // jsonResp.error = 'job failed to exec: ' + err
+      // res.status(400).json(jsonResp)
+      reject(new Error(msg))
+    }
+  })
+}
+
 app.post('/jobsubmit', function (req, res) {
   let jsonResp = {'error': null, 'data': null}
   let jobId = req.body.jobId
   let jobType = req.body.jobType
-  let jobDir = nmJobDataDir + '/' + jobId
-  let paramFileName = jobDir + '/' + 'job_parameters.json'
+  let userToken = getTokenDataFromReq(req)
+  // let jobDir = nmJobDataDir + '/' + jobId
+  // let paramFileName = jobDir + '/' + 'job_parameters.json'
 
+  jobSubmit(jobId, jobType, userToken)
+    .then(function (data) {
+      jsonResp.data = data
+      return res.json(jsonResp)
+    })
+    .catch(function (err) {
+      jsonResp.error = err
+      return res.status(500).json(jsonResp)
+    })
   // execute the configured job in the background
   //   will do better later. At least client code on each side of the interface won't change
-  let pgms = config.jobtypes
-  let pgm = null
-  let pgmdir = null
-  pgms.forEach(function (v) {
-    if (v.jobtype === jobType) {
-      pgmdir = v.pgmdir
-      pgm = v.pgmname
-    }
-  })
-  try {
-    let jobParams = null
-    fs.readFile(paramFileName, {encoding: 'utf8'}, function (err, jobParamsStr) {
-      if (err) {
-        updateJobStatus(jobDir, 'readParametersOnSubmitError' + '-' + paramFileName)
-        let msg = '/jobsubmit write job file error - file: ' + paramFileName + ' err: ' + err
-        logger.error(msg)
-        jsonResp.data = null
-        jsonResp.error = msg
-        return res.status(500).json(jsonResp)
-      } else {
-        jobParams = JSON.parse(jobParamsStr)
-        let token = getTokenDataFromReq(req)
-        if (token) { // always update user in parameters to either current user or if current=admin same user spec'd in parms
-          let userid = token.sub
-          let newUser = null
-          let oldUser = jobParams.user
-          if (token.isAdmin && oldUser && oldUser.length > 0 && userid !== oldUser) { // allow admin to override runAs user
-            newUser = oldUser
-          } else {
-            newUser = userid // set to user running job if not admin or override not requested
-          }
-          jobParams.user = newUser
-          jobParams.submittingUser = userid
-          jobParams.originalUser = oldUser
-          fs.writeFile(paramFileName, JSON.stringify(jobParams), {'encoding': 'utf8'}, function (err, data) {
-            if (err) {
-              updateJobStatus(jobDir, 'updateUserOnSubmitError' + '-' + paramFileName)
-              let msg = '/jobsubmit write job parameter file error - file: ' + paramFileName + ' err: ' + err
-              logger.error(msg)
-              jsonResp.data = null
-              jsonResp.error = msg
-              return res.status(500).json(jsonResp)
-            } else {
-              updateJobStatus(jobDir, 'userUpdatedOnSubmit-Old(' + oldUser + ')--New(' + newUser + ')')
-              if (pgm != null && pgmdir) {
-                let jobPid = null
-                // TODO track child status and output with events and then update job status, but for now, just kick it off
-                let cwd = process.cwd()
-                let pgmpath = pathModule.join(cwd, pgmdir)
-                pgm = pathModule.join(pgmpath, pgm)
-                logger.info('executing: ' + pgm + ' in: ' + pgmpath)
-                let localEnv = {'PYTHONPATH': pathModule.join(cwd, '../src/jobs/lib')}
-                localEnv = _.merge(localEnv, process.env)
-                let child = require('child_process').spawn(pgm, [jobType, jobId, jobDir], {'cwd': pgmpath, 'env': localEnv})
-                jobPid = child.pid
-                updateJobStatus(jobDir, {'status': 'submitted', 'pid': jobPid})
-                jsonResp.data = {'jobPid': jobPid}
-                return res.json(jsonResp)
-              } else {
-                updateJobStatus(jobDir, 'failed-no-pgm-defined')
-                jsonResp.error = 'job type has program not defined'
-                return res.status(400).json(jsonResp)
-              }
-            }
-          })
-        } else {
-          let msg = 'Did not run job because proper userid was not set in JWT token. This should not happen since auth required to get here!'
-          logger.error(msg + ' token: ' + JSON.stringify(token))
-          jsonResp.error = msg
-          return res.status(500).json(jsonResp)
-        }
-      }
-    })
-  } catch (err) {
-    updateJobStatus(jobDir, 'failed-to-exec-' + err)
-    jsonResp.error = 'job failed to exec: ' + err
-    res.status(400).json(jsonResp)
-  }
+  // let pgms = config.jobtypes
+  // let pgm = null
+  // let pgmdir = null
+  // pgms.forEach(function (v) {
+  //   if (v.jobtype === jobType) {
+  //     pgmdir = v.pgmdir
+  //     pgm = v.pgmname
+  //   }
+  // })
+  // try {
+  //   let jobParams = null
+  //   fs.readFile(paramFileName, {encoding: 'utf8'}, function (err, jobParamsStr) {
+  //     if (err) {
+  //       updateJobStatus(jobDir, 'readParametersOnSubmitError' + '-' + paramFileName)
+  //       let msg = '/jobsubmit write job file error - file: ' + paramFileName + ' err: ' + err
+  //       logger.error(msg)
+  //       jsonResp.data = null
+  //       jsonResp.error = msg
+  //       return res.status(500).json(jsonResp)
+  //     } else {
+  //       jobParams = JSON.parse(jobParamsStr)
+  //       let token = getTokenDataFromReq(req)
+  //       if (token) { // always update user in parameters to either current user or if current=admin same user spec'd in parms
+  //         let userid = token.sub
+  //         let newUser = null
+  //         let oldUser = jobParams.user
+  //         if (token.isAdmin && oldUser && oldUser.length > 0 && userid !== oldUser) { // allow admin to override runAs user
+  //           newUser = oldUser
+  //         } else {
+  //           newUser = userid // set to user running job if not admin or override not requested
+  //         }
+  //         jobParams.user = newUser
+  //         jobParams.submittingUser = userid
+  //         jobParams.originalUser = oldUser
+  //         fs.writeFile(paramFileName, JSON.stringify(jobParams), {'encoding': 'utf8'}, function (err, data) {
+  //           if (err) {
+  //             updateJobStatus(jobDir, 'updateUserOnSubmitError' + '-' + paramFileName)
+  //             let msg = '/jobsubmit write job parameter file error - file: ' + paramFileName + ' err: ' + err
+  //             logger.error(msg)
+  //             jsonResp.data = null
+  //             jsonResp.error = msg
+  //             return res.status(500).json(jsonResp)
+  //           } else {
+  //             updateJobStatus(jobDir, 'userUpdatedOnSubmit-Old(' + oldUser + ')--New(' + newUser + ')')
+  //             if (pgm != null && pgmdir) {
+  //               let jobPid = null
+  //               // TODO track child status and output with events and then update job status, but for now, just kick it off
+  //               let cwd = process.cwd()
+  //               let pgmpath = pathModule.join(cwd, pgmdir)
+  //               pgm = pathModule.join(pgmpath, pgm)
+  //               logger.info('executing: ' + pgm + ' in: ' + pgmpath)
+  //               let localEnv = {'PYTHONPATH': pathModule.join(cwd, '../src/jobs/lib')}
+  //               localEnv = _.merge(localEnv, process.env)
+  //               let child = require('child_process').spawn(pgm, [jobType, jobId, jobDir], {
+  //                 'cwd': pgmpath,
+  //                 'env': localEnv
+  //               })
+  //               jobPid = child.pid
+  //               updateJobStatus(jobDir, {'status': 'submitted', 'pid': jobPid})
+  //               jsonResp.data = {'jobPid': jobPid}
+  //               return res.json(jsonResp)
+  //             } else {
+  //               updateJobStatus(jobDir, 'failed-no-pgm-defined')
+  //               jsonResp.error = 'job type has program not defined'
+  //               return res.status(400).json(jsonResp)
+  //             }
+  //           }
+  //         })
+  //       } else {
+  //         let msg = 'Did not run job because proper userid was not set in JWT token. This should not happen since auth required to get here!'
+  //         logger.error(msg + ' token: ' + JSON.stringify(token))
+  //         jsonResp.error = msg
+  //         return res.status(500).json(jsonResp)
+  //       }
+  //     }
+  //   })
+  // } catch (err) {
+  //   updateJobStatus(jobDir, 'failed-to-exec-' + err)
+  //   jsonResp.error = 'job failed to exec: ' + err
+  //   res.status(400).json(jsonResp)
+  // }
 })
+
 /* end job related rest services */
 
-function fillOutJobEmailTemplate(jobtype, templateName, emailvars) {
+function fillOutJobEmailTemplate (jobtype, templateName, emailvars) {
   // resolves with filled out template
   // rejects with new Error('error text')
   let func = 'fillOutJobEmailTemplate'
@@ -2978,7 +3306,7 @@ function configureLogger () { // logger is not properly configured yet. This con
   let logger = winston.createLogger({ // need to adjust to the new 3.x version - https://www.npmjs.com/package/winston#formats
     transports: [
       new (winston.transports.File)({
-        levels: { error: 0, warn: 1, info: 2, verbose: 3, debug: 4, trace: 5 },
+        levels: {error: 0, warn: 1, info: 2, verbose: 3, debug: 4, trace: 5},
         level: config.loglevel,
         timestamps: true,
         zippedArchive: true,
@@ -2995,6 +3323,7 @@ function configureLogger () { // logger is not properly configured yet. This con
   })
   return logger
 }
+
 app.listen(3000)
 
 /*
