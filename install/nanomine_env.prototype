@@ -24,6 +24,7 @@ export NM_AUTH_SURNAME_HEADER="sn"
 export NM_AUTH_DISPLAYNAME_HEADER="displayName"
 export NM_AUTH_SESSION_EXPIRATION_HEADER="sessionExpiration"
 export NM_AUTH_TEST_USER="testuser"
+export NM_AUTH_SYSTEM_USER_ID="nanomine"
 export NM_AUTH_ANON_USER_ID="testuser"
 export NM_AUTH_LOGOUT_URL="#" # logout
 export NM_AUTH_GROUP_ENABLED="no" # remote groups enable/disable. If not enabled, local groups used instead
@@ -59,6 +60,7 @@ export NM_WEB_BASE_URI="http://ubuntu.local" # external apache uri. May need to 
 export NM_JOB_DATA="${NM_WEBFILES_ROOT}/jobdata"
 export NM_JOB_DATA_URI="/nmf/jobdata"
 export NM_LOCAL_REST_BASE="http://localhost"
+export NM_AUTOSTART_CURATOR="yes"
 
 export NM_SMTP_SERVER="myemailserver"
 export NM_SMTP_PORT="587" # other fields will be needed if not local server, but for now this is adequate
