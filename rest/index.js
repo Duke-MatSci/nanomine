@@ -16,7 +16,14 @@ const bodyParser = require('body-parser')
 const mimetypes = require('mime-types')
 // was used for posting to rdf - const FormData = require('form-data')
 const config = require('config').get('nanomine')
-const winston = require('winston')
+// const winston = require('winston')
+const {createLogger, format, transports} = require('winston')
+const { combine, label, printf, prettyPrint } = format
+const curateFormat = printf(({ level, message, label}) => {
+  let now = moment().format('YYYYMMDDHHmmssSSS')
+  return `${now} [${label}] ${level}: ${message}`
+})
+
 const moment = require('moment')
 const datauri = require('data-uri-to-buffer')
 const stream = require('stream')
@@ -1218,7 +1225,7 @@ function publishXml (userid, xmlTitle, xmlText, schemaName, cb) {
         'headers': {'Content-Type': 'application/ld+json', 'Cookie': cookieValue}
       })
         .then(function (response) {
-          logger.error(func + ' data: ' + inspect(response) + ' response url was: ' + response.request.res.responseUrl)
+          logger.trace(func + ' data: ' + inspect(response) + ' response url was: ' + response.request.res.responseUrl)
           cb(null, response)
         })
         .catch(function (err) {
@@ -3302,27 +3309,48 @@ function postSparql2 (callerpath, query, req, res, cb) {
 //   })
 // })
 
+// function configureLogger () { // logger is not properly configured yet. This config is for an earlier version of Winston
+//   let logger = winston.createLogger({ // need to adjust to the new 3.x version - https://www.npmjs.com/package/winston#formats
+//     transports: [
+//       new (winston.transports.File)({
+//         levels: {error: 0, warn: 1, info: 2, verbose: 3, debug: 4, trace: 5},
+//         level: config.loglevel,
+//         timestamps: true,
+//         // zippedArchive: true,
+//         filename: config.logfilename,
+//         maxfiles: config.maxlogfiles,
+//         maxsize: config.maxlogfilesize,
+//         json: false,
+//         formatter: function (data) {
+//           let dt = moment().format('YYYYMMDDHHmmss')
+//           return (dt + ' ' + data.level + ' ' + data.message)
+//         }
+//       })
+//     ]
+//   })
+//   return logger
+// }
 function configureLogger () { // logger is not properly configured yet. This config is for an earlier version of Winston
-  let logger = winston.createLogger({ // need to adjust to the new 3.x version - https://www.npmjs.com/package/winston#formats
+  let logger = createLogger({ // need to adjust to the new 3.x version - https://www.npmjs.com/package/winston#formats
+    levels: {error: 0, warn: 1, info: 2, verbose: 3, debug: 4, trace: 5},
+    format: combine(
+      label({label: 'curate'}),
+      // moment().format('YYYYMMDDHHmmss'),
+      prettyPrint(),
+      curateFormat
+    ),
     transports: [
-      new (winston.transports.File)({
-        levels: {error: 0, warn: 1, info: 2, verbose: 3, debug: 4, trace: 5},
+      new (transports.File)({
         level: config.loglevel,
-        timestamps: true,
-        zippedArchive: true,
         filename: config.logfilename,
         maxfiles: config.maxlogfiles,
-        maxsize: config.maxlogfilesize,
-        json: false,
-        formatter: function (data) {
-          let dt = moment().format('YYYYMMDDHHmmss')
-          return (dt + ' ' + data.level + ' ' + data.message)
-        }
+        maxsize: config.maxlogfilesize
       })
     ]
   })
   return logger
 }
+
 
 app.listen(3000)
 

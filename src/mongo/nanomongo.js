@@ -9,14 +9,21 @@ function listUsers() {
     });
 }
 
-// resetIngesting
 function resetIngesting() {
   db = db.getSiblingDB('mgi')
   print(JSON.stringify(db.xmldata.updateMany({'entityState': {'$eq': 'Ingesting'}}, { '$set': {'entityState': 'EditedValid'}})))
 }
+function resetOneIngesting() {
+  db = db.getSiblingDB('mgi')
+  print(JSON.stringify(db.xmldata.updateOne({'entityState': {'$eq': 'Ingesting'}}, { '$set': {'entityState': 'EditedValid'}})))
+}
 function resetIngestSuccess() {
   db = db.getSiblingDB('mgi')
   print(JSON.stringify(db.xmldata.updateMany({'entityState': {'$eq': 'IngestSuccess'}}, { '$set': {'entityState': 'EditedValid'}})))
+}
+function resetOneIngestSuccess() { // for testing, use Valid instead of EditedValid for this since none of the original XMLs use that state
+  db = db.getSiblingDB('mgi')
+  print(JSON.stringify(db.xmldata.updateOne({'entityState': {'$eq': 'IngestSuccess'}}, { '$set': {'entityState': 'Valid'}})))
 }
 function resetIngestFailed() {
   db = db.getSiblingDB('mgi')
