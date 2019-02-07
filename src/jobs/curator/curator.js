@@ -30,6 +30,7 @@ let logger = configureLogger()
 
 function configureLogger () { // logger is not properly configured yet. This config is for an earlier version of Winston
   let logger = createLogger({ // need to adjust to the new 3.x version - https://www.npmjs.com/package/winston#formats
+    levels: {error: 0, warn: 1, info: 2, verbose: 3, debug: 4, trace: 5},
     format: combine(
       label({label: 'curate'}),
       // moment().format('YYYYMMDDHHmmss'),
@@ -38,7 +39,6 @@ function configureLogger () { // logger is not properly configured yet. This con
     ),
     transports: [
       new (transports.File)({
-        levels: {error: 0, warn: 1, info: 2, verbose: 3, debug: 4, trace: 5},
         level: config.loglevel,
         filename: config.logfilename,
         maxfiles: config.maxlogfiles,
@@ -210,91 +210,101 @@ function curator () {
         // 1. find all xmldata records with entity states of Valid or EditedValid since there's no editor
         getNextXmlDataRecordWithEntityStates(schemaRec._id, [entityStates[valid], entityStates[editedValid]])
           .then(function (xmlData) {
-            logger.info(func + ' - processsing schema id: ' + xmlData.schemaId + ' title: ' + xmlData.title + ' entityState: ' + xmlData.entityState)
-            // 2. Update state to ingesting
-            updateXmlDataRecordEntityState(xmlData, entityStates[ingesting])
-              .then(function () {
-                // 3. upload associated data to rdf using USERID of user from xmldata record via nanomine rest service
-                let httpsAgentOptions = { // allow localhost https without knowledge of CA TODO - install ca cert on node - low priority
-                  host: 'localhost',
-                  port: '443',
-                  path: '/',
-                  rejectUnauthorized: false
-                }
-                let httpsAgent = new https.Agent(httpsAgentOptions)
-                // if xmldata has associated curated files (older xmls do not currently since their files are not in curateinput bucket
-                getDatasetXmlFileList(mongoose, logger, xmlData.title)
-                  .then(function (files) {
-                    let url = null
-                    let data = null
-                    let trimmedTitle = xmlData.title.replace(/\.xml$/,'')
-                    if (files && files.length > 0) { // has curated files
-                      url = env.nmLocalRestBase + '/nmr/publishfiles2rdf'
-                      data = {'xmltitle': trimmedTitle, 'userid': xmlData.iduser} // yes, in xmldata, it's iduser
-                    } else { // does not have curated files, so just publish xml
-                      url = env.nmLocalRestBase + '/nmr/publishxml2rdf'
-                      data = {'xmltitle': trimmedTitle, 'xmltext': xmlData.xml_str, 'schemaname': schemaRec.title, 'userid': xmlData.iduser} // yes, in xmldata, it's iduser
-                    }
-                    axios({
-                      'method': 'post',
-                      'url': url,
-                      'data': data,
-                      'httpsAgent': httpsAgent,
-                      'headers': {'Content-Type': 'application/json'}
-                    })
-                      .then(function (data) {
-                        // 4. change state to IngestSuccess or IngestFailed
-                        // logger.debug(func + ' - response data: ' + inspect(data))
-                        if (data.status === 201) {
-                          updateXmlDataRecordEntityState(xmlData, entityStates[ingestSuccess])
-                            .then(function () {
-                              handleCuratorRunComplete(false) // yay no error
-                            })
-                            .catch(function (err){
-                              let msg = func + ' - publish was successful, but entityState update for: ' + xmlData.schemaId + '/' + xmlData.title + ' failed with error: ' + err
-                              logger.error(msg)
-                              handleCuratorRunComplete(true) // report error for failure to update state even though record was published
-                            })
-                        } else {
+            if (xmlData) {
+              logger.info(func + ' - processsing schema id: ' + xmlData.schemaId + ' title: ' + xmlData.title + ' entityState: ' + xmlData.entityState)
+              // 2. Update state to ingesting
+              updateXmlDataRecordEntityState(xmlData, entityStates[ingesting])
+                .then(function () {
+                  // 3. upload associated data to rdf using USERID of user from xmldata record via nanomine rest service
+                  let httpsAgentOptions = { // allow localhost https without knowledge of CA TODO - install ca cert on node - low priority
+                    host: 'localhost',
+                    port: '443',
+                    path: '/',
+                    rejectUnauthorized: false
+                  }
+                  let httpsAgent = new https.Agent(httpsAgentOptions)
+                  // if xmldata has associated curated files (older xmls do not currently since their files are not in curateinput bucket
+                  getDatasetXmlFileList(mongoose, logger, xmlData.title)
+                    .then(function (files) {
+                      let url = null
+                      let data = null
+                      let trimmedTitle = xmlData.title.replace(/\.xml$/, '')
+                      if (files && files.length > 0) { // has curated files
+                        url = env.nmLocalRestBase + '/nmr/publishfiles2rdf'
+                        data = {'xmltitle': trimmedTitle, 'userid': xmlData.iduser} // yes, in xmldata, it's iduser
+                      } else { // does not have curated files, so just publish xml
+                        url = env.nmLocalRestBase + '/nmr/publishxml2rdf'
+                        data = {
+                          'xmltitle': trimmedTitle,
+                          'xmltext': xmlData.xml_str,
+                          'schemaname': schemaRec.title,
+                          'userid': xmlData.iduser
+                        } // yes, in xmldata, it's iduser
+                      }
+                      axios({
+                        'method': 'post',
+                        'url': url,
+                        'data': data,
+                        'httpsAgent': httpsAgent,
+                        'headers': {'Content-Type': 'application/json'}
+                      })
+                        .then(function (data) {
+                          // 4. change state to IngestSuccess or IngestFailed
+                          // logger.debug(func + ' - response data: ' + inspect(data))
+                          if (data.status === 201) {
+                            updateXmlDataRecordEntityState(xmlData, entityStates[ingestSuccess])
+                              .then(function () {
+                                handleCuratorRunComplete(false) // yay no error
+                              })
+                              .catch(function (err) {
+                                let msg = func + ' - publish was successful, but entityState update for: ' + xmlData.schemaId + '/' + xmlData.title + ' failed with error: ' + err
+                                logger.error(msg)
+                                handleCuratorRunComplete(true) // report error for failure to update state even though record was published
+                              })
+                          } else {
+                            // 4b. change xml entity state to IngestFailed
+                            let msg = func + ' - unexpected response posting data to rdf. status(200 is not OK-should be 201): ' + data.status
+                            logger.error(msg)
+                            updateXmlDataRecordEntityState(xmlData, entityStates[ingestFailed])
+                              .then(function () {
+                                handleCuratorRunComplete(true)
+                              })
+                              .catch(function (err) {
+                                let msg = func + ' - publish failed and entityState update for: ' + xmlData.schemaId + '/' + xmlData.title + ' failed with error: ' + err
+                                logger.error(msg)
+                                handleCuratorRunComplete(true) // report error for failure to update state even though record was published
+                              })
+                          }
+                        })
+                        .catch(function (err) {
                           // 4b. change xml entity state to IngestFailed
-                          let msg = func + ' - unexpected response posting data to rdf. status(200 is not OK-should be 201): ' + data.status
+                          let msg = func + ' - error posting data to rdf. error: ' + err
                           logger.error(msg)
                           updateXmlDataRecordEntityState(xmlData, entityStates[ingestFailed])
                             .then(function () {
                               handleCuratorRunComplete(true)
                             })
-                            .catch(function (err){
+                            .catch(function (err) {
                               let msg = func + ' - publish failed and entityState update for: ' + xmlData.schemaId + '/' + xmlData.title + ' failed with error: ' + err
                               logger.error(msg)
                               handleCuratorRunComplete(true) // report error for failure to update state even though record was published
                             })
-                        }
-                      })
-                      .catch(function (err) {
-                        // 4b. change xml entity state to IngestFailed
-                        let msg = func + ' - error posting data to rdf. error: ' + err
-                        logger.error(msg)
-                        updateXmlDataRecordEntityState(xmlData, entityStates[ingestFailed])
-                          .then(function () {
-                            handleCuratorRunComplete(true)
-                          })
-                          .catch(function (err){
-                            let msg = func + ' - publish failed and entityState update for: ' + xmlData.schemaId + '/' + xmlData.title + ' failed with error: ' + err
-                            logger.error(msg)
-                            handleCuratorRunComplete(true) // report error for failure to update state even though record was published
-                          })
-                      })
-                  })
-                  .catch(function (err) {
-                    let msg = func + ' - error determining if xmlTitle: ' + xmlData.title + ' has associated curated files. Error: ' + err
-                    logger.error(msg)
-                    handleCuratorRunComplete(true)
-                  })
-              })
-              .catch(function (err) {
-                logger.error(func + ' - error updating state of xmldata to ingesting: ' + xmlData.schemaId + '/' + xmlData.title + ' error: ' + err)
-                handleCuratorRunComplete(true)
-              })
+                        })
+                    })
+                    .catch(function (err) {
+                      let msg = func + ' - error determining if xmlTitle: ' + xmlData.title + ' has associated curated files. Error: ' + err
+                      logger.error(msg)
+                      handleCuratorRunComplete(true)
+                    })
+                })
+                .catch(function (err) {
+                  logger.error(func + ' - error updating state of xmldata to ingesting: ' + xmlData.schemaId + '/' + xmlData.title + ' error: ' + err)
+                  handleCuratorRunComplete(true)
+                })
+            } else {
+              logger.debug(func + ' - nothing to do. No records are in a state requiring processing.')
+              handleCuratorRunComplete(false)
+            }
           })
           .catch(function (err) {
             logger.error(func + ' - failure getting xml data record. Error: ' + err)
