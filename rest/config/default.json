@@ -4,7 +4,7 @@
     "loglevel": "debug",
     "logfilename": "nanomine.log",
     "maxlogfiles": 10,
-    "maxlogfilesize": 1024000,
+    "maxlogfilesize": 52428800,
     "testmode": {
       "active": false
     },
