@@ -16,10 +16,12 @@ const bodyParser = require('body-parser')
 const mimetypes = require('mime-types')
 // was used for posting to rdf - const FormData = require('form-data')
 const config = require('config').get('nanomine')
+
+
 // const winston = require('winston')
 const {createLogger, format, transports} = require('winston')
 const { combine, label, printf, prettyPrint } = format
-const curateFormat = printf(({ level, message, label}) => {
+const logFormat = printf(({level, message, label}) => {
   let now = moment().format('YYYYMMDDHHmmssSSS')
   return `${now} [${label}] ${level}: ${message}`
 })
@@ -75,7 +77,8 @@ let emailPwd = env.emailPwd
 let emailTestAddr = env.emailTestAddr
 let emailAdminAddr = env.emailAdminAddr
 let nmWebFilesRoot = env.nmWebFilesRoot
-let nmWebBaseUri = env.nmWebBaseUri
+// let nmWebBaseUri = env.nmWebBaseUri
+let nmRdfLodPrefix = env.nmRdfLodPrefix
 let nmJobDataDir = env.nmJobDataDir
 let nmLocalRestBase = env.nmLocalRestBase
 let nmAutostartCurator = env.nmAutostartCurator
@@ -1047,7 +1050,7 @@ function publishFiles (userid, xmlTitle, cb) { // xmlText, schemaName, filesInfo
                       let data = `
                         {
                           "@context": {
-                            "@base" : "${nmWebBaseUri}",
+                            "@base" : "${nmRdfLodPrefix}",
                             "schema": "http://schema.org/",
                             "xsd": "http://www.w3.org/2001/XMLSchema#",
                             "whyis": "http://vocab.rpi.edu/whyis/",
@@ -1166,7 +1169,7 @@ function publishXml (userid, xmlTitle, xmlText, schemaName, cb) {
   let data = `
     {
       "@context": {
-        "@base" : "${nmWebBaseUri}",
+        "@base" : "${nmRdfLodPrefix}",
         "schema": "http://schema.org/",
         "xsd": "http://www.w3.org/2001/XMLSchema#",
         "whyis": "http://vocab.rpi.edu/whyis/",
@@ -1186,15 +1189,15 @@ function publishXml (userid, xmlTitle, xmlText, schemaName, cb) {
           "@type": "np:Assertion",
           "@graph": [
             {
-              "@id" : "${nmWebBaseUri}/nmr/xml/${xmlTitle}",
-              "@type": [ "mt:text/xml", "http://www.w3.org/2001/XMLSchema" ],
+              "@id" : "${nmRdfLodPrefix}/nmr/xml/${xmlTitle}",
+              "@type": [ "schema:DataDownload", "mt:text/xml", "http://nanomine.org/ns/NanomineXMLFile"],
               "whyis:hasContent" : "data:text/xml;charset=UTF-8;base64,${b64XmlData}",
-              "dc:conformsTo" : {"@id" : "${nmWebBaseUri}/nmr/schema/${schemaName}"}
+              "dc:conformsTo" : {"@id" : "${nmRdfLodPrefix}/nmr/schema/${schemaName}"}
             },
             {
-              "@id" : "${nmWebBaseUri}/nmr/dataset/${dsSeq}",
+              "@id" : "${nmRdfLodPrefix}/nmr/dataset/${dsSeq}",
               "@type" : "schema:Dataset",
-              "schema:distribution" : [ {"@id" : "${nmWebBaseUri}/nmr/xml/${xmlTitle}"} ]
+              "schema:distribution" : [ {"@id" : "${nmRdfLodPrefix}/nmr/xml/${xmlTitle}"} ]
             }            
           ]
         }
@@ -1214,13 +1217,13 @@ function publishXml (userid, xmlTitle, xmlText, schemaName, cb) {
       }
       let httpsAgent = new https.Agent(httpsAgentOptions)
       let cookieValue = createOutboundJwt(userAndAdminInfo)
-      logger.error(func + ' cookie to send: ' + cookieValue + ' request data: ' + data)
+      logger.trace(func + ' cookie to send: ' + cookieValue + ' request data: ' + data)
       return axios({
         'method': 'post',
         'url': url,
         'data': data,
         'maxRedirects': 0,
-        'validateStatus': null,
+        // 'validateStatus': null,
         'httpsAgent': httpsAgent,
         'headers': {'Content-Type': 'application/ld+json', 'Cookie': cookieValue}
       })
@@ -1257,7 +1260,7 @@ function publishLatestSchema (userid, cb) {
         let data = `
           {
             "@context": {
-              "@base" : "${nmWebBaseUri}",
+              "@base" : "${nmRdfLodPrefix}",
               "schema": "http://schema.org/",
               "xsd": "http://www.w3.org/2001/XMLSchema#",
               "whyis": "http://vocab.rpi.edu/whyis/",
@@ -1277,7 +1280,7 @@ function publishLatestSchema (userid, cb) {
                 "@type": "np:Assertion",
                 "@graph": [
                   {
-                    "@id" : "${nmWebBaseUri}/nmr/schema/${schemaName}",
+                    "@id" : "${nmRdfLodPrefix}/nmr/schema/${schemaName}",
                     "@type": [ "mt:text/xml", "http://www.w3.org/2001/XMLSchema" ],
                     "whyis:hasContent" : "data:text/xml;charset=UTF-8;base64,${b64SchemaData}"
                   }
@@ -3334,10 +3337,9 @@ function configureLogger () { // logger is not properly configured yet. This con
   let logger = createLogger({ // need to adjust to the new 3.x version - https://www.npmjs.com/package/winston#formats
     levels: {error: 0, warn: 1, info: 2, verbose: 3, debug: 4, trace: 5},
     format: combine(
-      label({label: 'curate'}),
-      // moment().format('YYYYMMDDHHmmss'),
+      label({label: 'nm-rest'}),
       prettyPrint(),
-      curateFormat
+      logFormat
     ),
     transports: [
       new (transports.File)({
