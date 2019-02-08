@@ -74,6 +74,12 @@ NanoMine Nanocomposites Data Resource
   sudo a2enmod proxy_http.load  
   sudo a2enmod proxy.load
 
+  #add this line to /etc/apache2/envvars
+  . /apps/nanomine_env
+  
+  #add this line near the top of /etc/init.d/celeryd
+  . /apps/nanomine_env
+  
   sudo cp /apps/nanomine/install/000-default.conf /etc/apache2/sites-available
   mkdir /apps/nanomine-webfiles
   

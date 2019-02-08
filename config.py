@@ -13,14 +13,18 @@ import rdflib
 from datetime import datetime
 
 # Set to be custom for your project
-LOD_PREFIX = 'http://localhost'
+LOD_PREFIX = os.environ['NM_RDF_LOD_PREFIX']
 #os.getenv('lod_prefix') if os.getenv('lod_prefix') else 'http://hbgd.tw.rpi.edu'
 
 skos = rdflib.Namespace("http://www.w3.org/2004/02/skos/core#")
 
 from nanomine.agent import *
+from authenticator import JWTAuthenticator
 
 # base config class; extend it to your needs.
+authenticatorSecret = os.environ['NM_AUTH_SECRET']
+# print 'LOD_PREFIX: ' + LOD_PREFIX + ' auth secret: ' + authenticatorSecret
+
 Config = dict(
     # use DEBUG mode?
     DEBUG = False,
@@ -103,7 +107,9 @@ Config = dict(
 
     knowledge_queryEndpoint = 'http://localhost:8080/blazegraph/namespace/knowledge/sparql',
     knowledge_updateEndpoint = 'http://localhost:8080/blazegraph/namespace/knowledge/sparql',
-
+    authenticators = [
+      JWTAuthenticator(key=authenticatorSecret)
+    ],
     LOGIN_USER_TEMPLATE = "auth/login.html",
     CELERY_BROKER_URL = 'redis://localhost:6379/0',
     CELERY_RESULT_BACKEND = 'redis://localhost:6379/0',
@@ -144,6 +150,7 @@ Config = dict(
     ],
     inferencers = {
         "SETLr": autonomic.SETLr(),
+        "SETLMaker": autonomic.SETLMaker(),
 #       "EmailNotifier": autonomic.EmailNotifier(
 #             input_type=nanomine.CompletedAnalysis,
 #            subject_template="Your NanoMine analysis is complete",
