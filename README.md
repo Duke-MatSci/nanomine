@@ -9,41 +9,40 @@ NanoMine Nanocomposites Data Resource
 ### Also, this is a DEVELOPMENT only install for a personal system (or vm). Don't use these instructions for QA or production environments.
 
   sudo apt-get install curl
+  sudo pip install --upgrade pip # just in case pip is outdated
 
-- install [whyis](http://tetherless-world.github.io/whyis/install) using this command (bluedevil-oit version contains proxy work-around)
+- install [whyis](http://tetherless-world.github.io/whyis/install) using this command (bluedevil-oit version contains needed updates)
   ```
-  bash < <(curl -skL https://raw.githubusercontent.com/bluedevil-oit/whyis/release/install.sh) # master does not seem to ingest properly
+  bash < <(curl -skL https://raw.githubusercontent.com/bluedevil-oit/whyis/master/install.sh)
   ```
+  #### NOTE: if 'pip' error occurs, copy down the pip command and parameters and run it in /apps/whyis manually
 - whyis will be installed in /apps/whyis
 - Steps to install NanoMine:
   ```
   
-  # no need to go back-and-forth to another user. Plus, for development after initial install, just log in as whyis user directly from login page
+  # NOTE: no need to go back-and-forth to another user. Plus, for development after initial install, just log in as whyis user directly from login page
   sudo usermod -aG sudo whyis
   sudo passwd whyis  # enter a password that only YOU know -- and that you'll actually remember 
   sudo su - whyis
   
   cd /apps
   git clone https://github.com/YOURFORK/nanomine.git  # to use the original, use FORKNAME of 'duke-matsci'
-  mkdir -p /apps/nanomine/data 2>/dev/null
-  cd /apps/nanomine/data
-  wget https://raw.githubusercontent.com/duke-matsci/nanomine-ontology/master/xml_ingest.setl.ttl
-  wget https://raw.githubusercontent.com/duke-matsci/nanomine-ontology/master/ontology.setl.ttl
-  
-  cd /apps
+    
 
-  ## WARNING, Execute this only once.  After that diff the prototype with the /apps/nanomine_env and make required
-  ##   updates. Otherwise you risk losing valuable passwords like db passwords that may require a db wipe/reload
+  ## WARNING: Execute this only once.  Thereafter, diff the prototype with the /apps/nanomine_env and make required
+  ##   updates. Otherwise you will risk losing valuable passwords like db passwords that may require a db wipe/reload
   cp /apps/nanomine/install/nanomine_env.prototype /apps/nanomine_env # Modify the copied version as appropriate to set passwords, etc.
   
   chmod og-rw /apps/nanomine_env # only the login user should see the modified settings
+
   # add the following line to ~/.bashrc and ~/.bash_profile -- ONLY once
   source /apps/nanomine_env # add this to both ~/.bashrc and ~/.bash_profile
-  
-  
+    
   #install n - the nodejs version manager and LTS version of node
   curl -L https://git.io/n-install | bash -s -- -y lts
-  echo 'export N_PREFIX="$HOME/n"; [[ :$PATH: == *":$N_PREFIX/bin:"* ]] || PATH+=":$N_PREFIX/bin"' >> ~/.bashrc
+
+  # append this line to ~/.bash_profile if it's not already there (it was alreaded added to .bashrc automatically)
+  export N_PREFIX="$HOME/n"; [[ :$PATH: == *":$N_PREFIX/bin:"* ]] || PATH+=":$N_PREFIX/bin"  # Added by n-install (see http://git.io/n-install-repo).
   
   #make sure n is in the path and new variables are defined
   source ~/.bashrc
@@ -94,79 +93,44 @@ NanoMine Nanocomposites Data Resource
   sudo mkdir /nanomine-mongodata
   sudo chown mongodb:mongodb /nanomine-mongodata
   sudo cp /apps/nanomine/install/mongoConfig /etc/mongod.conf
-  sudo service mongod start
+  sudo systemctl start mongod
   sudo systemctl enable mongod
   /apps/nanomine/install/mongoSetupAdminUser
   /apps/nanomine/install/mongoSetupApiUser
   /apps/nanomine/install/mongoSetupOwnerUser
-  
+ 
+  cd /apps/nanomine/rest
+  npm i # install packages needed by rest server
+     
   # Restore and migrate mongo dump from production for new version  
   mkdir /apps/mongodump
   curl -o /apps/mongodump/mgi.tgz $NM_MONGO_DUMP
   cd /apps/mongodump
   tar zxvf mgi.tgz
+  # now do the migration -- this will take a few minutes to run
+  #  NOTE: need to edit the "if [ 1 -ne 1 ]; then" line to change -ne to -eq ; this is a safety check to ensure that the db is not overwritten accidentally
   /apps/nanomine/rest/restore_and_migrate.sh  
     
-  # NOTE: REST server logging now goes into /var/log/syslog  
-  cd nanomine/rest
-  npm i # install packages needed by rest server
+  # NOTE: REST server logging now goes into /var/log/syslog (well, some does. Most still goes into /apps/nanomine/rest/nanomine.log)
+  #   Also, note that when running jobs, job output currently goes into the source directory of the job that ran.
+  #   For instance, the job log outut for src/jobs/XMLCONV for uploads of data goes into that src/jobs/XMLCONV directory.
+  #    The instructions above may change.
   sudo cp /apps/nanomine/install/nm-rest.service /etc/systemd/system
   sudo systemctl daemon-reload
   sudo systemctl start nm-rest  # NOTE: can also 'restart' or 'stop' as necessary
   sudo systemctl enable nm-rest # ensure that rest server runs after reboot
 
   
-  cd /apps
-  mkdir neo4j
-  cd neo4j 
-  curl -o /tmp/neo4j.tgz $NM_NEO4J_IMAGE
-  tar zxf /tmp/neo4j.tgz
-  
-  #start neo4j with this command
-  /apps/neo4j/bin/neo4j start 
-  # the neo4j browser will be available at http://localhost:7474 -- NOTE: ONLY available to browser running on VM directly
-  ## NOTE: need both /etc/security/limits.conf settings and /etc/systemd/system.conf.d/limits.conf (system.conf.d may be new directory)
-  ## add to /etc/security/limits.conf (sudo vi /etc/security/limits.conf)
-  ##   whyis hard nofile 40000
-  ##   whyis soft nofile 40000
-  ## add to /etc/systemd/system.conf.d/limits.conf (sudo mkdir /etc/systemd/system.conf.d; sudo vi /etc/systemd/system.conf.d/limits.conf) 
-  ##   [Manager]
-  ##   DefaultLimitNOFILE=40000
-  
-  sudo cp /apps/nanomine/install/nm-neo4j.service /etc/systemd/system
-  sudo systemctl daemon-reload
-  sudo systemctl start nm-neo4j  # can also restart or stop as necessary
-  sudo systemctl enable nm-neo4j # ensure that neo4j runs after reboot
-  
-  
   cd /apps/whyis 
    
-  python manage.py createuser -e (email) -p (password) -f (firstname) -l (lastname) -u (username) --roles=admin
-  # NOTE: if messages like this are seen: 'numpy.dtype size changed, may indicate binary incompatibility. Expected 96, got 88'
-  #         ref: https://stackoverflow.com/questions/25752444/scipy-error-numpy-dtype-size-changed-may-indicate-binary-incompatibility-and
-  #       then, try these commands:
-  #    pip uninstall -y scipy numpy pandas
-  #    pip install scipy==1.1.0  numpy==1.14.5  pandas==0.23.1
+  python manage.py createuser -e nouser@nodomain.edu -p none -f nanomine -l test -u 9999999999 --roles=admin
   
   python manage.py load -i /apps/nanomine/nm.ttl -f turtle
-  cd /apps
-  touch .netrc
+  python manage.py load -i /apps/nanomine/setl/ontology.setl.ttl -f turtle
+  python manage.py load -i /apps/nanomine/setl/xml_ingest.setl.ttl -f turtle
   ```
-- after you create the .netrc file under /apps, edit the file and add the following.
 
-  ```
-  machine some_url (like 000.000.000.000) NO PORT -- this is the address of the nanomine MDCS server
-  login some_username (like testuser1)
-  password some_password (like testpwd1)
-  ```
-- after you edit the .netrc file, in your terminal type:
-  - the xml_ingest.setl.ttl file references the nanomine server protocol, address and port and may need to  be edited
-  ```
-  cd /apps/whyis
-  python manage.py load -i /apps/nanomine/data/ontology.setl.ttl -f turtle
-  python manage.py load -i /apps/nanomine/data/xml_ingest.setl.ttl -f turtle
-  ```
-  - The load process can be monitored with 'sudo tail -f /var/log/celery/w1.log'
+  - The load process can be monitored with 'sudo tail -f /var/log/celery/w1.log', but note that loading will not occur until upload via XMLCONV GUI
   
 ### Use the server...  
 - go to http://YOURVMADDRESS/nm to access NanoMine
@@ -176,16 +140,37 @@ NanoMine Nanocomposites Data Resource
 ```
 cd /apps/nanomine
 npm run build
-sudo service apache2 restart
+sudo service apache2 restart  # may be optional depending on what was changed. For nanomine javascript and job changes, it's not currently necessary.
 ```
 - If code changes are made to the rest server - be sure to stop the rest server and restart
-  - If the rest server is running in a terminal window, just use ^C (ctrl+c) to terminate the rest server and restart
 ```
-cd /apps/nanomine/rest
-node index.js
+  sudo systemctl restart nm-rest
 ```
-  - If the rest server is running in the background you'll need to find the process id and kill it before restarting
   
+  ## NOTE OPTIONAL!
+  ###  Neo4j is optional -- most devs should probably not install
+  cd /apps
+  mkdir neo4j
+  cd neo4j 
+  curl -o /tmp/neo4j.tgz $NM_NEO4J_IMAGE
+  tar zxf /tmp/neo4j.tgz
+  
+  ### start neo4j with this command
+  /apps/neo4j/bin/neo4j start 
+  - the neo4j browser will be available at http://localhost:7474 -- NOTE: ONLY available to browser running on VM directly
+  - NOTE: need both /etc/security/limits.conf settings and /etc/systemd/system.conf.d/limits.conf (system.conf.d may be new directory)
+  - add to /etc/security/limits.conf (sudo vi /etc/security/limits.conf)
+  -   whyis hard nofile 40000
+  -   whyis soft nofile 40000
+  - add to /etc/systemd/system.conf.d/limits.conf (sudo mkdir /etc/systemd/system.conf.d; sudo vi /etc/systemd/system.conf.d/limits.conf) 
+  -   [Manager]
+  -   DefaultLimitNOFILE=40000
+  
+  sudo cp /apps/nanomine/install/nm-neo4j.service /etc/systemd/system
+  sudo systemctl daemon-reload
+  sudo systemctl start nm-neo4j  # can also restart or stop as necessary
+  sudo systemctl enable nm-neo4j # ensure that neo4j runs after reboot
+  ## NOTE -- END of Neo4j install
   
 
 # Components and Libraries Used
