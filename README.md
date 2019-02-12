@@ -31,6 +31,9 @@ NanoMine Nanocomposites Data Resource
 
   ## WARNING: Execute this only once.  Thereafter, diff the prototype with the /apps/nanomine_env and make required
   ##   updates. Otherwise you will risk losing valuable passwords like db passwords that may require a db wipe/reload
+  ##   BIG NOTE: Some values need to be set before mongo can be configured and started.  Some can't be updated until after
+  ##     the rest server is started.  Try to update as much as possible, but the values related to tokens that
+  ##     require running a command to generate a token cannot be run until the rest server is running.
   cp /apps/nanomine/install/nanomine_env.prototype /apps/nanomine_env # Modify the copied version as appropriate to set passwords, etc.
   
   chmod og-rw /apps/nanomine_env # only the login user should see the modified settings
