@@ -16,7 +16,7 @@ import traceback
 
 def uploadFilesAndAdjustXMLImageRefs(jobDir, schemaId, xmlId):
     imageFiles = [] # track image files uploaded -- which go into default bucket (returned id is substituted back into XML)
-    # all other files go into 'inputfiles' bucket with filename {schemaId}/{xmlId}/filename (returned ID is not stored)
+    # all other files go into 'curateinput' bucket with filename {schemaId}/{xmlId}/filename (returned ID is not stored)
     # for now let exceptions bubble up to handler in caller
 
     restbase = os.environ['NM_LOCAL_REST_BASE']
