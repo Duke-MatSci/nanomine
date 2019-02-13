@@ -65,10 +65,10 @@ NanoMine Nanocomposites Data Resource
   #    if gui changes are made.
   npm run build
   
-  #install NanoMine python components for Whyis
+  # install NanoMine python components for Whyis
   pip install -e .
   
-  #install XMLCONV components
+  # install XMLCONV components
   pip install -r /apps/nanomine/install/xmlconv-requirements.txt
   pip install python-datauri
   
@@ -77,10 +77,10 @@ NanoMine Nanocomposites Data Resource
   sudo a2enmod proxy_http.load  
   sudo a2enmod proxy.load
 
-  #add this line to /etc/apache2/envvars
+  # add this line to the end /etc/apache2/envvars (use sudo vi /etc/apache2/envvars or sudo nano /etc/apache2/envvars)
   . /apps/nanomine_env
   
-  #add this line near the top of /etc/init.d/celeryd
+  # add this line near the top of /etc/init.d/celeryd after the first set of comments (use sudo vi /etc/init.d/celeryd or sudo nano /etc/init.d/celeryd)
   . /apps/nanomine_env
   
   sudo cp /apps/nanomine/install/000-default.conf /etc/apache2/sites-available
@@ -134,7 +134,7 @@ NanoMine Nanocomposites Data Resource
   python manage.py load -i /apps/nanomine/setl/xml_ingest.setl.ttl -f turtle
   ```
 
-  - The load process can be monitored with 'sudo tail -f /var/log/celery/w1.log', but note that loading will not occur until upload via XMLCONV GUI
+  - The load process can be monitored with 'sudo tail -f /var/log/celery/w1.log', but note that loading will usually not occur until upload via XMLCONV GUI
   
 ### Use the server...  
 - go to http://YOURVMADDRESS/nm to access NanoMine
