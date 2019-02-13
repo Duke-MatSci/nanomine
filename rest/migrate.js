@@ -24,12 +24,14 @@ const MongoClient = require('mongodb').MongoClient
 const ObjectId = require('mongodb').ObjectId
 const _ = require('lodash')
 const validateXml = require('xmllint').validateXML
+const nmWebBaseUri = process.env['NM_WEB_BASE_URI']
 let shortUUID = require('short-uuid')() // https://github.com/oculus42/short-uuid (npm i --save short-uuid)
 
-let nanomineUser = {'userid': '9999999999', 'givenName': 'nanomine', 'email': 'testuser@nodomain.org', 'apiAccess': []}
+let nanomineUser = {'userid': '9999999999', 'givenName': 'nanomine', 'surName': 'test', 'displayName': 'NanoMine Test', 'email': 'testuser@nodomain.org', 'apiAccess': []}
 let curateRestApi = {'name': 'curate', 'desc': 'api for curation', 'token': shortUUID.new()}
 let emailRestApi = {'name': 'email', 'desc': 'api to send email', 'token': shortUUID.new()}
 let jobsRestApi = {'name': 'jobs', 'desc': 'api for job submission/management', 'token': shortUUID.new()}
+let adminRestApi = {'name': 'admin', 'desc': 'api for administration', 'token': shortUUID.new()}
 
 function logTrace (msg) { // Placeholders logging functions
   console.log(msg)
@@ -281,6 +283,8 @@ function updateXmlDataDocToNmSpDev1 (id, schemaId, dsSeq, xml) {
             'dsSeq': parseInt(dsSeq), // Sequence of the associated dataset
             'entityState': 'EditedValid', // initial entity state shows validated by editor,  requiring back-end validation
             'curateState': 'Edit',
+            'isPublic': true, // all of the original data is intended to be public
+            'ispublished': true, // all of the original data came from published papers
             'iduser': nanomineUser.userid
           }
         }, {}, function (err, result) {
@@ -525,7 +529,7 @@ function migrateToNmSpDev1 (fromVer, toVer) {
               // extract dataset fields and append to datasets array -- if not already there
               seq = match[1]
               let isValidSchema = checkSchema(xmldoc.schema) // TODO bad name. Just checks to see if schema is not deleted and current
-              if (datasets[seq] === undefined ) { //&& isValidSchema && (xmldoc.schema === latestSchema().schemaId)) { // try to get latest data
+              if (datasets[seq] === undefined) { // && isValidSchema && (xmldoc.schema === latestSchema().schemaId)) { // try to get latest data
                 let ds = _.get(json, 'PolymerNanocomposite.DATA_SOURCE.Citation.CommonFields', null)
                 let dsExt = _.get(json, 'PolymerNanocomposite.DATA_SOURCE.Citation.CitationType.Journal', null)
                 let issue = null
@@ -554,7 +558,10 @@ function migrateToNmSpDev1 (fromVer, toVer) {
                     'dateOfCitation': ds.DateOfCitation,
                     'location': ds.Location,
                     'issue': issue,
-                    'issn': issn
+                    'issn': issn,
+                    'userid': nanomineUser.userid,
+                    'isPublic': true, // all of the original datasets are public
+                    'ispublished': true // all of the original datasets came from published papers
                   }
                   if (_.isArray(ds.Author)) {
                     ds.Author.forEach((a) => {
@@ -579,6 +586,44 @@ function migrateToNmSpDev1 (fromVer, toVer) {
               }
               logDebug(inspect(json))
               xml = xmlHeader // initialize xml
+              // Update any image references in the xml so that they're valid
+              //  .//MICROSTRUCTURE/ImageFile/File
+              let newImageFileValue = function (fileElem) {
+                let rv = null
+                let blobIdRegex = /blob\?id=([A-Fa-f0-9]*)/
+                logInfo('found imageFile = ' + fileElem)
+                let match = fileElem.match(blobIdRegex)
+                if (match) {
+                  let blobId = match[1]
+                  rv = nmWebBaseUri + '/nmr/blob?id=' + blobId
+                  logInfo('  imageFile mached. New value: ' + rv)
+                }
+                return rv
+              }
+              let imageFiles = _.get(json, 'PolymerNanocomposite.MICROSTRUCTURE.ImageFile', null)
+              if (imageFiles) { // just use above to verify path exists
+                if (!Array.isArray(imageFiles)) {
+                  let ov = json.PolymerNanocomposite.MICROSTRUCTURE.ImageFile.File
+                  let nv = newImageFileValue(ov)
+                  if (nv) {
+                    json.PolymerNanocomposite.MICROSTRUCTURE.ImageFile.File = nv
+                    logInfo('Replaced single imageFile value old: ' + ov + ' new: ' + nv)
+                  } else {
+                    logError('ERROR: Found single MICROSTRUCTURE image file, but was unable to update reference: ' + ov)
+                  }
+                } else {
+                  imageFiles.forEach(function (imageFile, idx) {
+                    let ov = imageFile.File
+                    let nv = newImageFileValue(imageFile.File)
+                    if (nv) {
+                      logInfo('Replaced #' + idx + ' imageFile value old: ' + ov + ' new: ' + nv)
+                      json.PolymerNanocomposite.MICROSTRUCTURE.ImageFile[idx].File = nv
+                    } else {
+                      logError('Unable to replace #' + idx + ' imageFile value. Old value:: ' + ov)
+                    }
+                  })
+                }
+              }
               logDebug(j2x(json, null, indent))
               let xsd = getSchemaInfo(xmldoc.schema)
               /* Cannot verify all xmls without process running out of memory. Need another way to verify.
@@ -813,6 +858,7 @@ function migrate () {
                                 writePromises.push(createOrUpdateApi(curateRestApi))
                                 writePromises.push(createOrUpdateApi(emailRestApi))
                                 writePromises.push(createOrUpdateApi(jobsRestApi))
+                                writePromises.push(createOrUpdateApi(adminRestApi))
                                 updateOrAddDatasets() // writePromises already has xmldata updates, be sure to call this before waiting on promises.all
                                 Promise.all(writePromises)
                                   .then(function () {

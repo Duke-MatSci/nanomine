@@ -3,20 +3,20 @@
     <h1>{{ msg }}</h1>
     <v-container grid-list-xl>
       <v-layout row wrap>
-        <v-flex xs4>
+        <!--v-flex xs4>
           <img src="/cdn/img/visualize_data.png"/>
           <h4>
             <a href="https://nanomine.oit.duke.edu:8443/viz" target="_blank">Visualize</a>
           </h4>
           <p>Visualize nanocomposite data.</p>
-        </v-flex>
+        </v-flex-->
         <v-flex xs4>
           <img src="/cdn/img/excel.png" />
           <h4>
             <router-link to="/XMLCONV">Curate Using Uploader</router-link>
           </h4>
           <p>
-            Download an Excel template, enter nanocomposite sample or simulation data into the template and upload. This is the simplest way.
+            Download an Excel template, enter nanocomposite sample or simulation data into the template and upload.
           </p>
         </v-flex>
         <v-flex xs4 v-if="false">
@@ -71,7 +71,13 @@ export default {
     width: 50px;
     height: auto;
   }
-h4 {
-  text-transform: uppercase;
-}
+  h4 {
+    text-transform: uppercase;
+  }
+  h1 {
+    margin-top: 10px;
+    background-color: black;
+    color: white;
+  }
+
 </style>

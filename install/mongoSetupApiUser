@@ -5,6 +5,6 @@ db.createUser({
   user: "${NM_MONGO_API_USER}",
   pwd: "${NM_MONGO_API_PWD}",
   roles: ["readWrite"]
-});
+})
 EOF
 

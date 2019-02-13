@@ -8,6 +8,7 @@ const store = new Vuex.Store({
     leftMenuActive: false,
     adminAvailable: false,
     isWaiting: false,
+    runAsUser: null,
     'editor': { // editor store should contain all editor state including tabs and data for each tab
       'tab': [
       ],
@@ -28,6 +29,12 @@ const store = new Vuex.Store({
     },
     notLoading: function (state) {
       state.isWaiting = false
+    },
+    setRunAsUser: function (state, userId) {
+      state.runAsUser = userId // runAsUser will be checked on server side, so override non-admin will not work
+    },
+    resetRunAsUser: function (state) {
+      state.runAsUser = null
     },
     newEditorTab: function (state, toAdd) {
       // let toAdd = {'name': name, 'xmlText': xmlText, 'schemaIndex': schemaIndex}
@@ -67,6 +74,9 @@ const store = new Vuex.Store({
   getters: {
     isLoading: function (state) {
       return state.isWaiting
+    },
+    runAsUser: function (state) {
+      return state.runAsUser
     },
     isLeftMenuActive: function (state) {
       return state.leftMenuActive

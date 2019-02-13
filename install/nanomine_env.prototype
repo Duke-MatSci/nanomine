@@ -24,6 +24,8 @@ export NM_AUTH_SURNAME_HEADER="sn"
 export NM_AUTH_DISPLAYNAME_HEADER="displayName"
 export NM_AUTH_SESSION_EXPIRATION_HEADER="sessionExpiration"
 export NM_AUTH_TEST_USER="testuser"
+export NM_AUTH_SYSTEM_USER_ID="nanomine"
+export NM_AUTH_ANON_USER_ID="testuser"
 export NM_AUTH_LOGOUT_URL="#" # logout
 export NM_AUTH_GROUP_ENABLED="no" # remote groups enable/disable. If not enabled, local groups used instead
 export NM_AUTH_GROUP_STEM="base" # base group name to append
@@ -38,6 +40,8 @@ export NM_AUTH_API_TOKEN_JOBS="SOME_RANDOM_STRING7" # use token output from 'nod
 export NM_AUTH_API_REFRESH_JOBS="SOME_RANDOM_STRING8" # use token output 'node /apps/nanomine/rest/generateUserRefreshToken.js generateRefreshToken {USERID} jobs' here
 export NM_AUTH_API_TOKEN_EMAIL="SOME_RANDOM_STRING9" # use token output from 'node /apps/nanomine/rest/updateRestApiToken.js updateToken email' here
 export NM_AUTH_API_REFRESH_EMAIL="SOME_RANDOM_STRING10" # use token output 'node /apps/nanomine/rest/generateUserRefreshToken.js generateRefreshToken {USERID} email' here
+export NM_AUTH_API_TOKEN_ADMIN="SOME_RANDOM_STRING11" # use token output from 'node /apps/nanomine/rest/updateRestApiToken.js updateToken admin' here
+export NM_AUTH_API_REFRESH_ADMIN="SOME_RANDOM_STRING12" # use token output 'node /apps/nanomine/rest/generateUserRefreshToken.js generateRefreshToken {USERID} admin' here
 
 export NM_MONGO_PORT=27017
 export NM_MONGO_HOST=localhost
@@ -53,9 +57,11 @@ export NM_MONGO_DUMP="http://path.to.mongo.dump.tgz" # Before using, obtain the 
 
 export NM_WEBFILES_ROOT="/apps/nanomine-webfiles"
 export NM_WEB_BASE_URI="http://ubuntu.local" # external apache uri. May need to tweak this for your local machine/vm depending on external access location -- external uri to apache
+export NM_RDF_LOD_PREFIX="http://localhost"
 export NM_JOB_DATA="${NM_WEBFILES_ROOT}/jobdata"
 export NM_JOB_DATA_URI="/nmf/jobdata"
 export NM_LOCAL_REST_BASE="http://localhost"
+export NM_AUTOSTART_CURATOR="yes"
 
 export NM_SMTP_SERVER="myemailserver"
 export NM_SMTP_PORT="587" # other fields will be needed if not local server, but for now this is adequate

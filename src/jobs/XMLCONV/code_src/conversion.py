@@ -1,3 +1,4 @@
+
 from extract_verify_ID_callable import runEVI
 from customized_compiler_callable import compiler
 from nm.common import *
@@ -15,7 +16,7 @@ import traceback
 
 def uploadFilesAndAdjustXMLImageRefs(jobDir, schemaId, xmlId):
     imageFiles = [] # track image files uploaded -- which go into default bucket (returned id is substituted back into XML)
-    # all other files go into 'inputfiles' bucket with filename {schemaId}/{xmlId}/filename (returned ID is not stored)
+    # all other files go into 'curateinput' bucket with filename {schemaId}/{xmlId}/filename (returned ID is not stored)
     # for now let exceptions bubble up to handler in caller
 
     restbase = os.environ['NM_LOCAL_REST_BASE']
@@ -25,7 +26,12 @@ def uploadFilesAndAdjustXMLImageRefs(jobDir, schemaId, xmlId):
     sysToken = os.environ['NM_AUTH_SYSTEM_TOKEN']
     curateApiToken = os.environ['NM_AUTH_API_TOKEN_CURATE']
     curateRefreshToken = os.environ['NM_AUTH_API_REFRESH_CURATE']
+    xmlTitleRe = re.compile('^[A-Z]([0-9]+)[_][S]([0-9]+)[_][\S]+[_]\d{4}([.][Xx][Mm][Ll])?$')
+    reMatch = xmlTitleRe.match(xmlId) ## TODO handle invalid title i.e. reMatch == None
+    if reMatch == None:
+      logging.error('xmlId (title) does not match expected format: ' + xmlId + ' (match was None)')
 
+    datasetId = reMatch.group(1)
     xmlName = jobDir + '/xml/' + xmlId + '.xml'
     xmlTree = ET.parse(xmlName)
     updatedXml = False
@@ -62,10 +68,12 @@ def uploadFilesAndAdjustXMLImageRefs(jobDir, schemaId, xmlId):
     dataFiles = os.listdir(jobDir)
     for f in dataFiles:
       fn = jobDir + '/' + f
-      if os.path.isfile(fn) and f not in imageFiles: # make sure it's a regular file and wasn't already uploaded as an image
+      # changed following check to save imageFiles into curateinput bucket as well since not doing so causes downstream issue
+      if os.path.isfile(fn): ## and f not in imageFiles: # make sure it's a regular file and wasn't already uploaded as an image
         dataUri = DataURI.from_file(fn)
         dataUri = dataUri.replace("\n","") # remove line feeds
-        objFN = schemaId + '/' + xmlId + '/' + f
+        ## objFN = schemaId + '/' + xmlId + '/' + f # change to datasetid/xmlid/filename
+        objFN = datasetId + '/' + xmlId + '/' + f
         curatefiledata = '{"filename":"'+ objFN + '","bucketName":"curateinput","dataUri":"' + dataUri + '"}'
         # logging.debug(curatefiledata + ' len is: ' + str(len(curatefiledata)))
         curatefiledata = json.loads(curatefiledata)
@@ -85,7 +93,7 @@ def uploadFilesAndAdjustXMLImageRefs(jobDir, schemaId, xmlId):
 
 
 
-def conversion(jobDir, code_srcDir, xsdDir, templateName):
+def conversion(jobDir, code_srcDir, xsdDir, templateName, user):
     restbase = os.environ['NM_LOCAL_REST_BASE']
     xsdFilename = xsdDir.split("/")[-1]
     # initialize messages
@@ -95,7 +103,7 @@ def conversion(jobDir, code_srcDir, xsdDir, templateName):
         messages = ['[Upload Error] The Excel template file should have extensions like ".xlsx" or ".xls".']
         return ('failure', messages)
     # get the ID
-    runEVI(jobDir, code_srcDir, templateName, restbase)
+    runEVI(jobDir, code_srcDir, templateName, restbase, user)
     # check #2: see if ID conversion is successful
     if not os.path.exists(jobDir + '/ID.txt'):
         if os.path.exists(jobDir + '/error_message.txt'):
@@ -149,9 +157,12 @@ def conversion(jobDir, code_srcDir, xsdDir, templateName):
 
         curate_insert_url = restbase + '/nmr/curate'
         curate_data = {
+            "userid": user,
             "title": ID + ".xml",
             "schemaId": schemaId,
             "curatedDataState": "Valid", # Valid causes ingest to kick of next. Also, it has passed validation.
+            "ispublished": "false",
+            "isPublic": "false",
             "content": content
         }
         rq = urllib2.Request(curate_insert_url)
@@ -161,7 +172,7 @@ def conversion(jobDir, code_srcDir, xsdDir, templateName):
         # logging.info('curate insert request posted: ' + str(r.getcode()))
     except:
         messages.append('exception occurred during curate-insert')
-        messages.append('exception: '  + str(str(traceback.format_exc())))
+        messages.append('exception: '  + str(traceback.format_exc()))
     if len(messages) > 0:
         return ('failure', messages)
     # pass all the checks
