@@ -20,14 +20,15 @@ NanoMine Nanocomposites Data Resource
 - Steps to install NanoMine:
   ```
   
-  # NOTE: no need to go back-and-forth to another user. Plus, for development after initial install, just log in as whyis user directly from login page
+  # NOTE: no need to go back-and-forth to another user. Plus, for development after initial install, just log in as whyis user directly from Ubuntu login page
   sudo usermod -aG sudo whyis
   sudo passwd whyis  # enter a password that only YOU know -- and that you'll actually remember 
   sudo su - whyis
   
   cd /apps
   git clone https://github.com/YOURFORK/nanomine.git  # to use the original, use FORKNAME of 'duke-matsci'
-    
+  cd nanomine
+  git checkout dev # be sure to use the dev branch     
 
   ## WARNING: Execute this only once.  Thereafter, diff the prototype with the /apps/nanomine_env and make required
   ##   updates. Otherwise you will risk losing valuable passwords like db passwords that may require a db wipe/reload
