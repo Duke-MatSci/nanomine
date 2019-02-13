@@ -20,17 +20,21 @@ NanoMine Nanocomposites Data Resource
 - Steps to install NanoMine:
   ```
   
-  # NOTE: no need to go back-and-forth to another user. Plus, for development after initial install, just log in as whyis user directly from login page
+  # NOTE: no need to go back-and-forth to another user. Plus, for development after initial install, just log in as whyis user directly from Ubuntu login page
   sudo usermod -aG sudo whyis
   sudo passwd whyis  # enter a password that only YOU know -- and that you'll actually remember 
   sudo su - whyis
   
   cd /apps
   git clone https://github.com/YOURFORK/nanomine.git  # to use the original, use FORKNAME of 'duke-matsci'
-    
+  cd nanomine
+  git checkout dev # be sure to use the dev branch     
 
   ## WARNING: Execute this only once.  Thereafter, diff the prototype with the /apps/nanomine_env and make required
   ##   updates. Otherwise you will risk losing valuable passwords like db passwords that may require a db wipe/reload
+  ##   BIG NOTE: Some values need to be set before mongo can be configured and started.  Some can't be updated until after
+  ##     the rest server is started.  Try to update as much as possible, but the values related to tokens that
+  ##     require running a command to generate a token cannot be run until the rest server is running.
   cp /apps/nanomine/install/nanomine_env.prototype /apps/nanomine_env # Modify the copied version as appropriate to set passwords, etc.
   
   chmod og-rw /apps/nanomine_env # only the login user should see the modified settings
@@ -61,10 +65,10 @@ NanoMine Nanocomposites Data Resource
   #    if gui changes are made.
   npm run build
   
-  #install NanoMine python components for Whyis
+  # install NanoMine python components for Whyis
   pip install -e .
   
-  #install XMLCONV components
+  # install XMLCONV components
   pip install -r /apps/nanomine/install/xmlconv-requirements.txt
   pip install python-datauri
   
@@ -73,10 +77,10 @@ NanoMine Nanocomposites Data Resource
   sudo a2enmod proxy_http.load  
   sudo a2enmod proxy.load
 
-  #add this line to /etc/apache2/envvars
+  # add this line to the end /etc/apache2/envvars (use sudo vi /etc/apache2/envvars or sudo nano /etc/apache2/envvars)
   . /apps/nanomine_env
   
-  #add this line near the top of /etc/init.d/celeryd
+  # add this line near the top of /etc/init.d/celeryd after the first set of comments (use sudo vi /etc/init.d/celeryd or sudo nano /etc/init.d/celeryd)
   . /apps/nanomine_env
   
   sudo cp /apps/nanomine/install/000-default.conf /etc/apache2/sites-available
@@ -130,7 +134,7 @@ NanoMine Nanocomposites Data Resource
   python manage.py load -i /apps/nanomine/setl/xml_ingest.setl.ttl -f turtle
   ```
 
-  - The load process can be monitored with 'sudo tail -f /var/log/celery/w1.log', but note that loading will not occur until upload via XMLCONV GUI
+  - The load process can be monitored with 'sudo tail -f /var/log/celery/w1.log', but note that loading will usually not occur until upload via XMLCONV GUI
   
 ### Use the server...  
 - go to http://YOURVMADDRESS/nm to access NanoMine
