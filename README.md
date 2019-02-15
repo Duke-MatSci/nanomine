@@ -114,7 +114,7 @@ NanoMine Nanocomposites Data Resource
   # now do the migration -- this will take a few minutes to run
   #  NOTE: need to edit the "if [ 1 -ne 1 ]; then" line to change -ne to -eq ; this is a safety check to ensure that the db is not overwritten accidentally
   /apps/nanomine/rest/restore_and_migrate.sh  
-    
+        
   # NOTE: REST server logging now goes into /var/log/syslog (well, some does. Most still goes into /apps/nanomine/rest/nanomine.log)
   #   Also, note that when running jobs, job output currently goes into the source directory of the job that ran.
   #   For instance, the job log outut for src/jobs/XMLCONV for uploads of data goes into that src/jobs/XMLCONV directory.
@@ -151,7 +151,7 @@ sudo service apache2 restart  # may be optional depending on what was changed. F
   sudo systemctl restart nm-rest
 ```
   
-  ## NOTE OPTIONAL!
+  ### NOTE OPTIONAL!
   ###  Neo4j is optional -- most devs should probably not install
   cd /apps
   mkdir neo4j
