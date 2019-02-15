@@ -12,6 +12,7 @@ import re
 import xml.etree.ElementTree as ET
 from datauri import DataURI
 import traceback
+import ssl
 
 
 def uploadFilesAndAdjustXMLImageRefs(jobDir, schemaId, xmlId):
@@ -147,7 +148,7 @@ def conversion(jobDir, code_srcDir, xsdDir, templateName, user):
         # rest call for schemaID
         schemaurl = restbase + '/nmr/templates/select?filename='+xsdFilename
         rq = urllib2.Request(schemaurl)
-        j = json.loads(urllib2.urlopen(rq).read())
+        j = json.loads(urllib2.urlopen(rq, context=ssl._create_unverified_context()).read())
         schemaId = j["data"][0]["_id"]
         # upload input files and image files referenced in xml
         uploadFilesAndAdjustXMLImageRefs(jobDir, schemaId, ID)
@@ -168,7 +169,7 @@ def conversion(jobDir, code_srcDir, xsdDir, templateName, user):
         rq = urllib2.Request(curate_insert_url)
         # logging.info('request created using curate_insert_url')
         rq.add_header('Content-Type','application/json')
-        r = urllib2.urlopen(rq, json.dumps(curate_data))
+        r = urllib2.urlopen(rq, json.dumps(curate_data), context=ssl._create_unverified_context())
         # logging.info('curate insert request posted: ' + str(r.getcode()))
     except:
         messages.append('exception occurred during curate-insert')

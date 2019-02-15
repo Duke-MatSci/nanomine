@@ -13,7 +13,7 @@
 # chmod og-rw /apps/nanomine_env
 #   --> the above cmd removes read-write access for 'others' and 'group' making the file private for the user
 #
-# Be sure to CHANGE DEFAULT PASSWORDS AND SECRETS
+# Be sure to CHANGE DEFAULT PASSWORDS AND SECRETS (use nanomine/install/random.js to generate random passwords)
 #
 export NM_AUTH_ENABLED="no" # no or yes
 export NM_AUTH_TYPE="local" # local or shib-proxy

@@ -17,7 +17,6 @@ const mimetypes = require('mime-types')
 // was used for posting to rdf - const FormData = require('form-data')
 const config = require('config').get('nanomine')
 
-
 // const winston = require('winston')
 const {createLogger, format, transports} = require('winston')
 const { combine, label, printf, prettyPrint } = format
@@ -294,7 +293,7 @@ function getTokenDataFromReq (req) {
       logger.error(func + ' - check jwt token failed. err: ' + err)
     }
   } else {
-    logger.error(func + ' - no jwt token found in cookie.')
+    logger.trace(func + ' - no jwt token found in cookie.')
   }
   return decoded
 }
@@ -334,7 +333,7 @@ function authMiddleware (authOptions) {
         logger.error(func + ' - check jwt token failed. err: ' + err)
       }
     } else {
-      logger.error(func + ' - no jwt token found in cookie.')
+      logger.trace(func + ' - no jwt token found in cookie.')
     }
 
     if (pathProtected) {
@@ -425,7 +424,7 @@ function authMiddleware (authOptions) {
           })
       }
     } else {
-      logger.error('non-protected path: ' + req.path)
+      logger.trace('non-protected path: ' + req.path)
       next()
     }
   }
@@ -984,14 +983,18 @@ function publishFiles (userid, xmlTitle, cb) { // xmlText, schemaName, filesInfo
           let latestSchema = schemas[0].currentRef[0] // getLatestSchemas
           let schemaId = latestSchema._id
           let schemaName = latestSchema.title
-
+          logger.debug(func + ' - latest schemaId: ' + schemaId + ' name: ' + schemaName)
           // read xmldata for latest schema
+          if (xmlTitle.match(/.*\.xml$/) === null) {
+            xmlTitle += '.xml' // actual title field of xml data record has .xml appended. Lookup will fail if it's not there.
+          }
           let query = {'$and': [{'title': {'$eq': xmlTitle}}, {'schemaId': {'$eq': schemaId}}]}
           XmlData.find(query).exec(function (err, xmlRecs) {
             if (err) {
               cb(err, null)
             } else if (xmlRecs == null || xmlRecs.length < 1) {
-              cb(new Error('Not found'), null)
+              logger.error(func + ' - no xmlRecs found for query: ' + JSON.stringify(query))
+              cb(new Error('Not found'), null) // << source of error? Why is xmlrecs null or less than 1?
             } else {
               // XML found
               let xmlRec = xmlRecs[0]
@@ -1071,7 +1074,7 @@ function publishFiles (userid, xmlTitle, cb) { // xmlText, schemaName, filesInfo
                               "@graph": [
                                 {
                                   "@id" : "/nmr/xml/${xmlId}",
-                                  "@type": [ "schema:DataDownload", "mt:text/xml", ,"http://nanomine.org/ns/NanomineXMLFile"],
+                                  "@type": [ "schema:DataDownload", "mt:text/xml", "http://nanomine.org/ns/NanomineXMLFile"],
                                   "whyis:hasContent" : "data:text/xml;charset=UTF-8;base64,${b64XmlData}",
                                   "prov:wasDerivedFrom" : [{"@id" : "/nmr/dataset/${dsSeq}/${xmlId}/${xlsInputFile}"}],
                                   "dc:conformsTo" : {"@id" : "/nmr/schema/${schemaName}"}
@@ -1090,6 +1093,14 @@ function publishFiles (userid, xmlTitle, cb) { // xmlText, schemaName, filesInfo
                             }
                           }
                         }`
+                      try {
+                        let testObject = JSON.parse(data)
+                        if (testObject) {
+                          logger.debug(func + ' - test object created from generated JSON parsed fine. data context: ' + JSON.stringify(testObject['@context']))
+                        }
+                      } catch (err) {
+                        logger.error(func + ' - unable to parse generated JSON object. Error: ' + err)
+                      }
                       getUserAndAdminInfo(userid)
                         .then(function (userAndAdminInfo) {
                           // let userinfo = userAndAdminInfo.userInfo
@@ -1103,18 +1114,20 @@ function publishFiles (userid, xmlTitle, cb) { // xmlText, schemaName, filesInfo
                           }
                           let httpsAgent = new https.Agent(httpsAgentOptions)
                           let cookieValue = createOutboundJwt(userAndAdminInfo)
-                          logger.error(func + ' cookie to send: ' + cookieValue + ' request data: ' + data)
+                          logger.debug(func + ' cookie to send: ' + cookieValue)
+                          logger.trace(func + ' request data: ' + data)
                           return axios({
                             'method': 'post',
                             'url': url,
                             'data': data,
                             'maxRedirects': 0,
-                            'validateStatus': null,
+                            // 'validateStatus': null,
                             'httpsAgent': httpsAgent,
                             'headers': {'Content-Type': 'application/ld+json', 'Cookie': cookieValue}
                           })
                             .then(function (response) {
-                              logger.error(func + ' data: ' + inspect(response) + ' response url was: ' + response.request.res.responseUrl)
+                              logger.trace(func + ' response url was: ' + response.request.res.responseUrl + ' data: ' + inspect(response))
+                              logger.debug(func + ' response status: ' + response.status)
                               cb(null, response)
                             })
                             .catch(function (err) {
@@ -1232,7 +1245,7 @@ function publishXml (userid, xmlTitle, xmlText, schemaName, cb) {
           cb(null, response)
         })
         .catch(function (err) {
-          logger.error(func + ' error: ' + inspect(err))
+          logger.error(func + ' error: ' + err)
           cb(err, null)
         })
     })
@@ -1308,12 +1321,13 @@ function publishLatestSchema (userid, cb) {
               'url': url,
               'data': data,
               maxRedirects: 0,
-              validateStatus: null,
+              // validateStatus: null,
               'httpsAgent': httpsAgent,
               'headers': {'Content-Type': 'application/ld+json', 'Cookie': cookieValue}
             })
               .then(function (response) {
-                logger.error(func + ' data: ' + inspect(response) + ' response url was: ' + response.request.res.responseUrl) // detect redirect
+                logger.trace(func + ' data: ' + inspect(response) + ' response url was: ' + response.request.res.responseUrl) // detect redirect
+                logger.debug(func + ' - response: ' + response.status)
                 cb(null, response)
               })
               .catch(function (err) {
@@ -1351,7 +1365,7 @@ app.post('/publishfiles2rdf', function (req, res) {
       } else {
         let msg = func + ' success!!!'
         logger.info(msg)
-        res.status(201).json(jsonResp) // TODO rdf is funky. errors can occur that cause a redirect, so need to handle that error condition by parsing response
+        res.status(201).json(jsonResp)
       }
     })
   } else {
@@ -1816,8 +1830,6 @@ function validCuratedDataState (curatedDataState) {
   let validStates = ['EditedNotValid', 'EditedValid', 'Valid', 'NotValid', 'Ingest', 'IngestFailed', 'IngestSuccess']
   return validStates.includes(curatedDataState)
 }
-
-
 
 app.post('/curate', function (req, res) {
   let func = 'curate'
@@ -3352,7 +3364,6 @@ function configureLogger () { // logger is not properly configured yet. This con
   })
   return logger
 }
-
 
 app.listen(3000)
 

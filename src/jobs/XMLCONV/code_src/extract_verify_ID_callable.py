@@ -7,6 +7,8 @@ from doiretriever import mainDOIsoupFirst
 import datetime
 import json
 import urllib2
+import ssl
+import traceback
 
 # a helper method to find a blurry match regardless of # signs between two
 # strings, testant is the standard expression
@@ -127,13 +129,15 @@ def restDOI(DOI, code_srcDir, restbase, sheet_sample, user):
     try:
         dsurl = restbase + '/nmr/dataset?doi='+DOI
         rq = urllib2.Request(dsurl)
-        j = json.loads(urllib2.urlopen(rq).read())
+        j = json.loads(urllib2.urlopen(rq, context=ssl._create_unverified_context()).read())
         if len(j["data"]) > 0:
             exist = True
             response = j["data"][0]
     except:
         message += 'exception occurred during dataset GET by doi\n'
-        message += 'exception: ' + str(sys.exc_info()[0]) + '\n'
+        message += 'exception: ' + str(traceback.format_exc()) + '\n'
+        ## print('exception: '  + str(traceback.format_exc()))
+
     if message != '':
         return (None, message)
     # if doi doesn't exist, ds-create
@@ -165,12 +169,12 @@ def restDOI(DOI, code_srcDir, restbase, sheet_sample, user):
             dsInfo['userid'] = user
             # NOTE END
 
-            r = urllib2.urlopen(rq, json.dumps(ds_data))
+            r = urllib2.urlopen(rq, json.dumps(ds_data), context=ssl._create_unverified_context())
             # logging.info('dataset create request posted: ' + str(r.getcode()))
             response = json.loads(r.read())['data']
         except:
             message += 'exception occurred during dataset-create\n'
-            message += 'exception: ' + str(sys.exc_info()[0]) + '\n'
+            message += 'exception: ' + str(traceback.format_exc()) + '\n'
         # assemble the PID
         if response is None:
             message += 'exception occurred during getting the response of dataset-create\n'

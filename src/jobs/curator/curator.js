@@ -186,10 +186,12 @@ function handleCuratorRunComplete (failed) {
   } else {
     consecutiveFailureCount = 0
   }
-  logger.info('Curator run completed ' + (failed ? 'unsuccessfully.' : 'successfully.'))
+  if (failed) {
+    logger.info('Curator run completed ' + (failed ? 'unsuccessfully.' : 'successfully.'))
+  }
   nextInterval = 5000
   if (consecutiveFailureCount < 5) {
-    logger.info(func + ' - rescheduling curator. Failure count is below threshold. FailureCount: ' + consecutiveFailureCount)
+    logger.trace(func + ' - rescheduling curator. Failure count is below threshold. FailureCount: ' + consecutiveFailureCount)
     curator() // re-schedule self after run
   } else {
     logger.error(func + ' - not rescheduling curator since failure count is: ' + consecutiveFailureCount + '. Alerting administrator.')
@@ -203,7 +205,7 @@ let editedValid = 1, editedNotValid = 2, valid = 3, notValid = 4, ingesting = 5,
 function curator () {
   let func = 'curator'
   setTimeout(function () {
-    logger.info('Curator run starting...')
+    logger.trace('Curator run starting...')
     // 0. Get the latest schema id
     getLatestSchema()
       .then(function (schemaRec) {
@@ -302,7 +304,7 @@ function curator () {
                   handleCuratorRunComplete(true)
                 })
             } else {
-              logger.debug(func + ' - nothing to do. No records are in a state requiring processing.')
+              logger.trace(func + ' - nothing to do. No records are in a state requiring processing.')
               handleCuratorRunComplete(false)
             }
           })
