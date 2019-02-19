@@ -61,7 +61,7 @@ export NM_RDF_LOD_PREFIX="http://localhost"
 export NM_JOB_DATA="${NM_WEBFILES_ROOT}/jobdata"
 export NM_JOB_DATA_URI="/nmf/jobdata"
 export NM_LOCAL_REST_BASE="http://localhost"
-export NM_AUTOSTART_CURATOR="yes"
+export NM_AUTOSTART_CURATOR="no"
 
 export NM_SMTP_SERVER="myemailserver"
 export NM_SMTP_PORT="587" # other fields will be needed if not local server, but for now this is adequate
