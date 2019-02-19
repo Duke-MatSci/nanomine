@@ -31,14 +31,14 @@ echo installing whyis ...
 bash < <(curl -skL https://raw.githubusercontent.com/bluedevil-oit/whyis/master/install.sh)
 
 (su whyis -c "mkdir /apps/install")
-(su whyis -c "curl -skL https://raw.githubusercontent.com/bluedevil-oit/nanomine/install/install_rest.sh > /apps/install/install_rest.sh")
-(su whyis -c "curl -skL https://raw.githubusercontent.com/bluedevil-oit/nanomine/install/setup_mongo.sh > /apps/install/setup_mongo.sh")
-(su whyis -c "curl -skL https://raw.githubusercontent.com/bluedevil-oit/nanomine/install/setup_nanomine.sh > /apps/install/setup_nanomine.sh")
+(su whyis -c "curl -skL https://raw.githubusercontent.com/bluedevil-oit/nanomine/install/install_rest.sh > /apps/install/install_rest.sh; chmod a+x /apps/install/install_rest.sh")
+(su whyis -c "curl -skL https://raw.githubusercontent.com/bluedevil-oit/nanomine/install/setup_mongo.sh > /apps/install/setup_mongo.sh; chmod a+x /apps/install/setup_mongo.sh")
+(su whyis -c "curl -skL https://raw.githubusercontent.com/bluedevil-oit/nanomine/install/setup_nanomine.sh > /apps/install/setup_nanomine.sh; chmod a+x /apps/install/setup_nanomine.sh")
 
-echo executing commands as whyis...
+echo executing rest server install as whyis...
 (su - whyis -c "/apps/install/install_rest.sh")
 
-
+echo installing mongo
 apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 9DA31620334BD75D9DCB49F368818C72E52529D4
 echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/4.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.0.list
 apt-get update
@@ -49,6 +49,7 @@ cp /apps/nanomine/install/mongoConfig /etc/mongod.conf
 systemctl start mongod
 systemctl enable mongod
 
+echo setting up mongo
 (su - whyis -c "/apps/install/setup_mongo.sh")
 
 echo install apache modules
