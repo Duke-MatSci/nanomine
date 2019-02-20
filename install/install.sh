@@ -48,7 +48,8 @@ apt-get install -y mongodb-org
 mkdir /nanomine-mongodata
 chown mongodb:mongodb /nanomine-mongodata
 cp /apps/nanomine/install/mongoConfig /etc/mongod.conf
-systemctl start mongod
+echo starting mongo
+systemctl restart mongod
 systemctl enable mongod
 
 echo setting up mongo
