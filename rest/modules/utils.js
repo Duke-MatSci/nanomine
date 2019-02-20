@@ -1,14 +1,13 @@
 
 const {createLogger, format, transports} = require('winston')
 
-const config = require('config').get('nanomine')
 const { combine, label, printf, prettyPrint } = format
 
 const logFormat = printf(({ level, message, label}) => {
   let now = moment().format('YYYYMMDDHHmmssSSS')
   return `${now} [${label}] ${level}: ${message}`
 })
-let configureLogger = function (logLabel) {
+let configureLogger = function (config, logLabel) {
   let loggerLabel = logLabel
   if (!loggerLabel) {
     loggerLabel = 'default'

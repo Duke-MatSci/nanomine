@@ -75,8 +75,10 @@ export dttm=$(date +%Y%m%d%H%M%S)
 grep nanomine_env /etc/init.d/celeryd 2>/dev/null
 if [[ $? -gt 0 ]] ; then
   cp /etc/init.d/celeryd /etc/init.d/celeryd.backup-${dttm}
-  export newfile=$(sed -e 's/\. \/lib\/lsb\/init-functions/\. \/apps\/nanomine_env\n\. \/lib\/lsb\/init-functions/' /etc/init.d/celeryd)
-  echo ${newfile} > /etc/init.d/celeryd
+  export tmpFile = $(mktemp)
+  $(sed -e 's/\. \/lib\/lsb\/init-functions/\. \/apps\/nanomine_env\n\. \/lib\/lsb\/init-functions/' /etc/init.d/celeryd > ${tmpFile})
+  cp ${tmpFile} /etc/init.d/celeryd
+  // rm ${tmpFile}
 fi
 systemctl daemon-reload
 systemctl restart apache2

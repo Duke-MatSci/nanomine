@@ -3,13 +3,14 @@ const mongoose = require('mongoose')
 const cmds = require('commander')
 const shortUUID = require('short-uuid')()
 const nmutils = require('./modules/utils')
+const config = require('config').get('nanomine')
 
 // let nmAuthSysToken = process.env['NM_AUTH_SYS_TOKEN']
 
 let db = mongoose.connection
 let dbUri = process.env['NM_MONGO_URI']
 
-let logger = nmutils.configureLogger('generateRefreshToken')
+let logger = nmutils.configureLogger(config, 'generateRefreshToken')
 
 mongoose.connect(dbUri, {keepAlive: true, keepAliveInitialDelay: 300000})
 db.on('error', function (err) {
