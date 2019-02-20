@@ -30,6 +30,10 @@ else
   echo 'export N_PREFIX="$HOME/n"; [[ :$PATH: == *":$N_PREFIX/bin:"* ]] || PATH+=":$N_PREFIX/bin"' > ~/.bash_profile
   echo '. /apps/nanomine_env' >> ~/.bash_profile
 fi
+grep nanomine_env ~/.bashrc
+if [[ $? -ne 0 ]]; then
+  echo '. /apps/nanomine_env' >> ~/.bashrc
+fi
 . ~/.bashrc
 
 # install the VueJS command line processor
