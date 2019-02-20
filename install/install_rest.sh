@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-export myFork = 'bluedevil-oit'
+export myFork='bluedevil-oit'
 cd /apps
 echo cloning fork ${myFork}
 git clone https://github.com/"${myFork}"/nanomine.git # to use the original, use FORKNAME of 'duke-matsci'
