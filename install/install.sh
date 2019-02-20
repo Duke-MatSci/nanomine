@@ -31,9 +31,9 @@ echo installing whyis ...
 bash < <(curl -skL https://raw.githubusercontent.com/bluedevil-oit/whyis/master/install.sh)
 
 (su whyis -c "mkdir /apps/install")
-(su whyis -c "curl -skL https://raw.githubusercontent.com/bluedevil-oit/nanomine/install/install_rest.sh > /apps/install/install_rest.sh; chmod a+x /apps/install/install_rest.sh")
-(su whyis -c "curl -skL https://raw.githubusercontent.com/bluedevil-oit/nanomine/install/setup_mongo.sh > /apps/install/setup_mongo.sh; chmod a+x /apps/install/setup_mongo.sh")
-(su whyis -c "curl -skL https://raw.githubusercontent.com/bluedevil-oit/nanomine/install/setup_nanomine.sh > /apps/install/setup_nanomine.sh; chmod a+x /apps/install/setup_nanomine.sh")
+(su whyis -c "curl -skL https://raw.githubusercontent.com/bluedevil-oit/nanomine/install/install/install_rest.sh > /apps/install/install_rest.sh; chmod a+x /apps/install/install_rest.sh")
+(su whyis -c "curl -skL https://raw.githubusercontent.com/bluedevil-oit/nanomine/install/install/setup_mongo.sh > /apps/install/setup_mongo.sh; chmod a+x /apps/install/setup_mongo.sh")
+(su whyis -c "curl -skL https://raw.githubusercontent.com/bluedevil-oit/nanomine/install/install/setup_nanomine.sh > /apps/install/setup_nanomine.sh; chmod a+x /apps/install/setup_nanomine.sh")
 
 echo executing rest server install as whyis...
 (su - whyis -c "/apps/install/install_rest.sh")
@@ -64,6 +64,7 @@ cp /apps/nanomine/install/000-default.conf /etc/apache2/sites-available # update
 # add this line to the end /etc/apache2/envvars (use sudo vi /etc/apache2/envvars or sudo nano /etc/apache2/envvars)
 grep nanomine_env /etc/apache2/envvars 2>/dev/null
 if [[ $? -gt 0 ]] ; then
+  echo ' ' >> /etc/apache2/envvars
   echo '. /apps/nanomine_env' >> /etc/apache2/envvars
 fi
 
@@ -72,10 +73,10 @@ export dttm=$(date +%Y%m%d%H%M%S)
 grep nanomine_env /etc/init.d/celeryd 2>/dev/null
 if [[ $? -gt 0 ]] ; then
   cp /etc/init.d/celeryd /etc/init.d/celeryd.backup-${dttm}
-  newfile = $(sed -e 's/\. \/lib\/lsb\/init-functions/\. \/apps\/nanomine_env\n\. \/lib\/lsb\/init-functions/' /etc/init.d/celeryd)
+  export newfile=$(sed -e 's/\. \/lib\/lsb\/init-functions/\. \/apps\/nanomine_env\n\. \/lib\/lsb\/init-functions/' /etc/init.d/celeryd)
   echo ${newfile} > /etc/init.d/celeryd
 fi
-
+systemctl daemon-reload
 systemctl restart apache2
 systemctl restart celeryd
 
