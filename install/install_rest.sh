@@ -78,12 +78,12 @@ echo 'export NM_AUTH_ADMIN_GROUP_NAME="admins"' >> nanomine_env
 echo 'export NM_AUTH_SECRET="'$(./nanomine/install/random.js)'"' >> nanomine_env # CHANGE this for your installation - NOW!
 echo 'export NM_SESSION_SECRET="'$(./nanomine/install/random.js)'"' >> nanomine_env # CHANGE this for your installation - NOW!
 
-echo '"export NM_MONGO_PORT=27017"' >> nanomine_env
-echo '"export NM_MONGO_HOST=localhost"' >> nanomine_env
-echo '"export NM_MONGO_DB=mgi"' >> nanomine_env
-echo '"export NM_MONGO_USER=mongodevadmin"' >> nanomine_env
-echo '"export NM_MONGO_OWNER_USER=mongodevowner"' >> nanomine_env
-echo '"export NM_MONGO_API_USER=mongodevapiuser"' >> nanomine_env
+echo 'export NM_MONGO_PORT=27017' >> nanomine_env
+echo 'export NM_MONGO_HOST=localhost' >> nanomine_env
+echo 'export NM_MONGO_DB=mgi' >> nanomine_env
+echo 'export NM_MONGO_USER=mongodevadmin' >> nanomine_env
+echo 'export NM_MONGO_OWNER_USER=mongodevowner' >> nanomine_env
+echo 'export NM_MONGO_API_USER=mongodevapiuser' >> nanomine_env
 
 echo 'export NM_MONGO_PWD="'$(${BASE_DIR}/nanomine/install/random.js)'"'  >> nanomine_env # set
 echo 'export NM_MONGO_OWNER_PWD="'$(${BASE_DIR}/nanomine/install/random.js)'"'  >> nanomine_env # SET THIS to a different password NOW
