@@ -27,7 +27,7 @@ echo add user whyis
 adduser --home /apps --shell /bin/bash --ingroup sudo whyis
 # echo whyis:${whyispw} | sudo chpasswd # system owner can add whyis password manually if desired
 if [[ ! -d /apps ]]; then
-  (su root -c 'mkdir /apps; touch /apps/nanomine_env; chown whyis:whyis /apps/nanomine_env; ls -las /apps/nanomine_env')
+  (su root -c 'mkdir /apps; touch /apps/nanomine_env; chown -R whyis:whyis /apps; ls -lasR /apps')
 fi
 echo installing whyis ...
 bash < <(curl -skL https://raw.githubusercontent.com/bluedevil-oit/whyis/master/install.sh)
