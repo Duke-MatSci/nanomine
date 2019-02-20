@@ -49,11 +49,12 @@ mkdir /nanomine-mongodata
 chown mongodb:mongodb /nanomine-mongodata
 cp /apps/nanomine/install/mongoConfig /etc/mongod.conf
 echo starting mongo
-systemctl restart mongod
-systemctl enable mongod
 
 echo setting up mongo
 (su - whyis -c "/apps/install/setup_mongo.sh")
+
+systemctl restart mongod
+systemctl enable mongod
 
 echo install apache modules
 a2enmod proxy_connect.load
