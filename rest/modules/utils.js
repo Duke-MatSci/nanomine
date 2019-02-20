@@ -1,4 +1,40 @@
 
+const {createLogger, format, transports} = require('winston')
+
+const config = require('config').get('nanomine')
+const { combine, label, printf, prettyPrint } = format
+
+const logFormat = printf(({ level, message, label}) => {
+  let now = moment().format('YYYYMMDDHHmmssSSS')
+  return `${now} [${label}] ${level}: ${message}`
+})
+let configureLogger = function (logLabel) {
+  let loggerLabel = logLabel
+  if (!loggerLabel) {
+    loggerLabel = 'default'
+  }
+  let logger = createLogger({
+    levels: {error: 0, warn: 1, info: 2, verbose: 3, debug: 4, trace: 5},
+    format: combine(
+      label({label: loggerLabel}),
+      // moment().format('YYYYMMDDHHmmss'),
+      prettyPrint(),
+      logFormat
+    ),
+    transports: [
+      new (transports.File)({
+        level: config.loglevel,
+        filename: config.logfilename,
+        maxfiles: config.maxlogfiles,
+        maxsize: config.maxlogfilesize
+      })
+    ]
+  })
+  return logger
+}
+
+
+
 let getEnv = function () {
   return {
     sendEmails: process.env['NM_SMTP_TEST'] !== 'true',
@@ -81,6 +117,7 @@ function getDatasetXmlFileList (mongoose, logger, xmlTitle) {
 }
 
 module.exports = {
+  'configureLogger': configureLogger,
   'matchValidXmlTitle': matchValidXmlTitle,
   'getEnv': getEnv,
   'datasetBucketName': datasetBucketName,

@@ -2,18 +2,21 @@ const mongoose = require('mongoose')
 // const chalk = require('chalk')
 const cmds = require('commander')
 const shortUUID = require('short-uuid')()
+const nmutils = require('./modules/utils')
 
-let nmAuthSysToken = process.env['NM_AUTH_SYS_TOKEN']
+// let nmAuthSysToken = process.env['NM_AUTH_SYS_TOKEN']
 
 let db = mongoose.connection
 let dbUri = process.env['NM_MONGO_URI']
 
+let logger = nmutils.configureLogger('generateRefreshToken')
+
 mongoose.connect(dbUri, {keepAlive: true, keepAliveInitialDelay: 300000})
 db.on('error', function (err) {
-  console.log('db error: ' + err)
+  logger.error('db error: ' + err)
 })
 db.once('open', function () {
-  console.log('database opened successfully.')
+  logger.info('database opened successfully.')
 })
 
 let usersSchema = new mongoose.Schema({
@@ -40,7 +43,7 @@ cmds.command('generateRefreshToken <userid> <apiname>')
     //    (re)add apitoken entry with new refresh token as well as accesstoken/expiration (will need to be refreshed via refresh api)
     Api.findOne({'name': {$eq: apiname}}, function (err, api) {
       if (err) {
-        console.log('Unexpected error looking up api: ' + apiname + ' err: ' + err)
+        console.log('Unexpected error looking up api: ' + apiname + ' err: ' + err) // console.log used on purpose!!
         db.close()
       } else {
         let newRefreshToken = shortUUID.new()
@@ -48,7 +51,7 @@ cmds.command('generateRefreshToken <userid> <apiname>')
         let expiration = 99 // dummy expired expiration
         Users.findOne({'userid': {$eq: userid}}, function (err, user) {
           if (err) {
-            console.log('error looking up userid: ' + userid)
+            console.log('error looking up userid: ' + userid) // console.log used on purpose!!!
             db.close()
           } else {
             let newApiAccessList = []
@@ -69,10 +72,11 @@ cmds.command('generateRefreshToken <userid> <apiname>')
             }
             Users.findOneAndUpdate({'userid': {$eq: userid}}, {$set: {apiAccess: newApiAccessList}}, function (err, oldDoc) {
               if (err) {
-                console.log('error updating api access for userid: ' + err)
+                console.log('error updating api access for userid: ' + err) // console.log used on purpose!!!
                 db.close()
               } else {
-                console.log('Successfully updated refresh token for userid: ' + userid + ' api: ' + apiname + ' new refresh token: ' + newRefreshToken)
+                logger.info('Successfully updated refresh token for userid: ' + userid + ' api: ' + apiname + ' new refresh token: ' + newRefreshToken)
+                console.log(newRefreshToken) // console.log used on purpose!!!
                 db.close()
               }
             })
