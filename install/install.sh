@@ -47,12 +47,13 @@ apt-get update
 apt-get install -y mongodb-org
 mkdir /nanomine-mongodata
 chown mongodb:mongodb /nanomine-mongodata
-cp /apps/nanomine/install/mongoConfig /etc/mongod.conf
-echo starting mongo
 
 echo setting up mongo
 (su - whyis -c "/apps/install/setup_mongo.sh")
 
+cp /apps/nanomine/install/mongoConfig /etc/mongod.conf
+echo restarting mongo with authorization active
+#NOTE cannot restart mongo until users are added since new conf enables security : chicken-n-egg
 systemctl restart mongod
 systemctl enable mongod
 
