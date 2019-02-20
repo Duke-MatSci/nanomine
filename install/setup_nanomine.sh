@@ -18,8 +18,7 @@ curl -o /apps/mongodump/mgi.tgz $NM_MONGO_DUMP
 cd /apps/mongodump
 tar zxvf mgi.tgz
 # now do the migration -- this will take a few minutes to run
-#  NOTE: need to edit the "if [ 1 -ne 1 ]; then" line to change -ne to -eq ; this is a safety check to ensure that the db is not overwritten accidentally
-/apps/nanomine/rest/restore_and_migrate.sh
+/apps/nanomine/rest/restore_and_migrate.sh FORCE ## force overrides protection that prevents dropping database!! use wisely!
 
 
 

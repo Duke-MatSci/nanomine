@@ -4,10 +4,17 @@ cd /apps
 echo cloning fork ${myFork}
 git clone https://github.com/"${myFork}"/nanomine.git # to use the original, use FORKNAME of 'duke-matsci'
 cd nanomine
-git checkout dev
+git checkout install ## TODO WARNING!! change this to dev!!
 
 echo installing nodejs
 curl -L https://git.io/n-install | bash -s -- -y lts
+
+if [[ -z $1 ]] ; then
+  echo "MONGO Dump location required. Pass value for MONGO_DUMP_DOWNLOAD_LOCATION as first parameter to this script ($0)"
+  exit 1
+else
+  MONGO_DUMP_DOWNLOAD_LOCATION=$1
+fi
 
 ## export N_PREFIX="$HOME/n"; [[ :$PATH: == *":$N_PREFIX/bin:"* ]] || PATH+=":$N_PREFIX/bin"
 if [[ -f ~/.bash_profile ]] ; then
@@ -92,3 +99,4 @@ echo 'export NM_MONGO_API_PWD="'$(${BASE_DIR}/nanomine/install/random.js)'"'  >>
 echo 'export NM_MONGO_URI="mongodb://${NM_MONGO_API_USER}:${NM_MONGO_API_PWD}@${NM_MONGO_HOST}:${NM_MONGO_PORT}/${NM_MONGO_DB}"'  >> nanomine_env
 echo 'export NM_MONGO_DUMP="${MONGO_DUMP_DOWNLOAD_LOCATION}"'  >> nanomine_env # Before using, obtain the actual location for this reference
 
+echo 'export NM_RDF_LOD_PREFIX="http://localhost"' >> nanomine_env

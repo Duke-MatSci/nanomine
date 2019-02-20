@@ -38,7 +38,7 @@ bash < <(curl -skL https://raw.githubusercontent.com/bluedevil-oit/whyis/master/
 (su whyis -c "curl -skL https://raw.githubusercontent.com/bluedevil-oit/nanomine/install/install/setup_nanomine.sh > /apps/install/setup_nanomine.sh; chmod a+x /apps/install/setup_nanomine.sh")
 
 echo executing rest server install as whyis...
-(su - whyis -c "/apps/install/install_rest.sh")
+(su - whyis -c "/apps/install/install_rest.sh ${MONGO_DUMP_DOWNLOAD_LOCATION}")
 
 echo installing mongo
 apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 9DA31620334BD75D9DCB49F368818C72E52529D4
