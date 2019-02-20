@@ -58,7 +58,6 @@ pip install python-datauri
 echo create directory for dynamically generated web files
 mkdir /apps/nanomine-webfiles 2>/dev/null
 
-
 cd /apps
 export dttm=$(date +%Y%m%d%H%M%S)
 

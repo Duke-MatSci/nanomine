@@ -3,6 +3,7 @@ const mongoose = require('mongoose')
 const cmds = require('commander')
 const shortUUID = require('short-uuid')()
 const nmutils = require('./modules/utils')
+process.env['NODE_CONFIG_DIR'] = '/apps/nanomine/rest/config' // unfortunately not relative directory ... yet
 const config = require('config').get('nanomine')
 
 // let nmAuthSysToken = process.env['NM_AUTH_SYS_TOKEN']
