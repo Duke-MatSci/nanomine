@@ -5,7 +5,7 @@ export REST_DIR="/apps/nanomine/rest"
 
 # Restore and migrate mongo dump from production for new version
 mkdir /apps/mongodump
-curl -o /apps/mongodump/mgi.tgz $NM_MONGO_DUMP
+curl -k -o /apps/mongodump/mgi.tgz $NM_MONGO_DUMP
 cd /apps/mongodump
 tar zxvf mgi.tgz
 # now do the migration -- this will take a few minutes to run
