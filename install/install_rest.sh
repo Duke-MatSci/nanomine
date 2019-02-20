@@ -96,6 +96,7 @@ echo 'export NM_MONGO_OWNER_PWD="'$(/apps/nanomine/install/random.js)'"'  >> nan
 echo 'export NM_MONGO_API_PWD="'$(/apps/nanomine/install/random.js)'"'  >> nanomine_env # SET THIS to a different password NOW
 
 echo 'export NM_MONGO_URI="mongodb://${NM_MONGO_API_USER}:${NM_MONGO_API_PWD}@${NM_MONGO_HOST}:${NM_MONGO_PORT}/${NM_MONGO_DB}"'  >> nanomine_env
-echo 'export NM_MONGO_DUMP="${MONGO_DUMP_DOWNLOAD_LOCATION}"'  >> nanomine_env # Before using, obtain the actual location for this reference
+# the MONGO_DUMP_DOWNLOAD_LOCATION needs to be resolved here and written as a value not a variable
+echo 'export NM_MONGO_DUMP="'${MONGO_DUMP_DOWNLOAD_LOCATION}'"'  >> nanomine_env # Before using, obtain the actual location for this reference
 
 echo 'export NM_RDF_LOD_PREFIX="http://localhost"' >> nanomine_env

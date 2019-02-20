@@ -78,7 +78,7 @@ if [[ $? -gt 0 ]] ; then
   export tmpFile=$(mktemp)
   $(sed -e 's/\. \/lib\/lsb\/init-functions/\. \/apps\/nanomine_env\n\. \/lib\/lsb\/init-functions/' /etc/init.d/celeryd > ${tmpFile})
   cp ${tmpFile} /etc/init.d/celeryd
-  // rm ${tmpFile}
+  ## rm ${tmpFile}
 fi
 systemctl daemon-reload
 systemctl restart apache2
