@@ -52,6 +52,12 @@ cp /apps/nanomine/install/mongoConfig /etc/mongod.conf
 systemctl start mongod
 systemctl enable mongod
 
+echo 'hi' | nc localhost 27017
+while [[ $? -ne 0 ]]; do
+  echo waiting for mongod listener to wake up
+  echo 'hi' | nc localhost 27017
+done
+
 echo configuring mongo
 (su - whyis -c "/apps/install/setup_mongo.sh")
 
