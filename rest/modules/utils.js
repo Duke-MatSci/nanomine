@@ -1,4 +1,4 @@
-
+const moment = require('moment')
 const {createLogger, format, transports} = require('winston')
 
 const { combine, label, printf, prettyPrint } = format
