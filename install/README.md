@@ -11,13 +11,14 @@ NanoMine Nanocomposites Data Resource
 - whyis will be installed in /apps/whyis
 
 - Run these commands after adjusting the mongo dump location in a terminal window on your Ubuntu VM or native Ubuntu install:
-
+```
 export MONGO_DUMP_DOWNLOAD_LOCATION=http://somewhere.edu/mgi.tgz  # adjust this to the real download location
 sudo apt-get install -y curl
 sudo apt-get install -y vim 
 curl -skL https://raw.githubusercontent.com/bluedevil-oit/nanomine/install/install/install.sh > ./nminstall.sh
 chmod a+x ./nminstall.sh
 sudo -E ./nminstall.sh 2>&1 | tee nminstall.log # Take a break. It will take a while.
+```
 
 - When loading data into whyis, 
   - The load process can be monitored with 'sudo tail -f /var/log/celery/w1.log', but note that loading will usually not occur until upload via XMLCONV GUI
