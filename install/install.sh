@@ -19,12 +19,11 @@ else
   (su root -c 'pip install --upgrade pip')
 fi
 
-echo installing curl and git
-apt-get install -y curl
+echo installing git
 apt-get install -y git
 
 echo add user whyis
-adduser --home /apps --shell /bin/bash --ingroup sudo whyis
+useradd --home-dir /apps --shell /bin/bash -G sudo -M -U whyis
 # echo whyis:${whyispw} | sudo chpasswd # system owner can add whyis password manually if desired
 if [[ ! -d /apps ]]; then
   (su root -c 'mkdir /apps; touch /apps/nanomine_env; chown -R whyis:whyis /apps; ls -lasR /apps')
@@ -55,6 +54,7 @@ systemctl enable mongod
 echo 'hi' | nc localhost 27017
 while [[ $? -ne 0 ]]; do
   echo waiting for mongod listener to wake up
+  sleep 2
   echo 'hi' | nc localhost 27017
 done
 

@@ -34,7 +34,7 @@ grep nanomine_env ~/.bashrc
 if [[ $? -ne 0 ]]; then
   echo '. /apps/nanomine_env' >> ~/.bashrc
 fi
-. ~/.bashrc
+. /apps/.bashrc
 
 # install the VueJS command line processor
 npm i -g vue-cli@2.9.6
