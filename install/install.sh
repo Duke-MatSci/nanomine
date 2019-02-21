@@ -41,9 +41,9 @@ echo executing rest server install as whyis...
 (su - whyis -c "/apps/install/install_rest.sh ${MONGO_DUMP_DOWNLOAD_LOCATION}")
 
 # Note: mongo is installed with defaults for localhost/27017
-echo installing mongo
-apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 9DA31620334BD75D9DCB49F368818C72E52529D4
-echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/4.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.0.list
+echo installing mongo (NOTE: installing 3.6 since 4.x does not work well)
+sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 2930ADAE8CAF5059EE73BB4B58712A2291FA4AD5
+echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.6 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.6.list
 apt-get update
 apt-get install -y mongodb-org
 mkdir /nanomine-mongodata
