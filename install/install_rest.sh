@@ -103,4 +103,3 @@ echo 'export NM_MONGO_URI="mongodb://${NM_MONGO_API_USER}:${NM_MONGO_API_PWD}@${
 # the MONGO_DUMP_DOWNLOAD_LOCATION needs to be resolved here and written as a value not a variable
 echo 'export NM_MONGO_DUMP="'${MONGO_DUMP_DOWNLOAD_LOCATION}'"'  >> nanomine_env # Before using, obtain the actual location for this reference
 
-echo 'export NM_RDF_LOD_PREFIX="http://localhost"' >> nanomine_env
