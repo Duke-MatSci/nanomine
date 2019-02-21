@@ -37,8 +37,10 @@ bash < <(curl -skL https://raw.githubusercontent.com/bluedevil-oit/whyis/master/
 (su whyis -c "curl -skL https://raw.githubusercontent.com/bluedevil-oit/nanomine/install/install/setup_mongo.sh > /apps/install/setup_mongo.sh; chmod a+x /apps/install/setup_mongo.sh")
 (su whyis -c "curl -skL https://raw.githubusercontent.com/bluedevil-oit/nanomine/install/install/setup_nanomine.sh > /apps/install/setup_nanomine.sh; chmod a+x /apps/install/setup_nanomine.sh")
 
+echo executing rest server install as whyis...
+(su - whyis -c "/apps/install/install_rest.sh ${MONGO_DUMP_DOWNLOAD_LOCATION}")
+
 # Note: mongo is installed with defaults for localhost/27017
-# install mongo before running the rest server install to give mongo time to come up before attempting to configure (systemctl start mongo does not wait until fully up)
 echo installing mongo
 apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 9DA31620334BD75D9DCB49F368818C72E52529D4
 echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/4.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.0.list
@@ -46,18 +48,14 @@ apt-get update
 apt-get install -y mongodb-org
 mkdir /nanomine-mongodata
 chown mongodb:mongodb /nanomine-mongodata
+cp /apps/nanomine/install/mongoConfig /etc/mongod.conf
 systemctl start mongod
 systemctl enable mongod
-
-echo executing rest server install as whyis...
-(su - whyis -c "/apps/install/install_rest.sh ${MONGO_DUMP_DOWNLOAD_LOCATION}")
 
 echo configuring mongo
 (su - whyis -c "/apps/install/setup_mongo.sh")
 
-cp /apps/nanomine/install/mongoConfig /etc/mongod.conf
 echo restarting mongo with authorization active
-#NOTE cannot restart mongo until users are added since new conf enables security : chicken-n-egg
 systemctl restart mongod
 
 echo install apache modules
