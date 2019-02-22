@@ -56,12 +56,12 @@ export NM_MONGO_URI="mongodb://${NM_MONGO_API_USER}:${NM_MONGO_API_PWD}@${NM_MON
 export NM_MONGO_DUMP="http://path.to.mongo.dump.tgz" # Before using, obtain the actual location for this reference
 
 export NM_WEBFILES_ROOT="/apps/nanomine-webfiles"
-export NM_WEB_BASE_URI="http://ubuntu.local" # external apache uri. May need to tweak this for your local machine/vm depending on external access location -- external uri to apache
+export NM_WEB_BASE_URI="http://localhost" # external apache uri. May need to tweak this for your local machine/vm depending on external access location -- external uri to apache
 export NM_RDF_LOD_PREFIX="http://localhost"
 export NM_JOB_DATA="${NM_WEBFILES_ROOT}/jobdata"
 export NM_JOB_DATA_URI="/nmf/jobdata"
 export NM_LOCAL_REST_BASE="http://localhost"
-export NM_AUTOSTART_CURATOR="yes"
+export NM_AUTOSTART_CURATOR="no"
 
 export NM_SMTP_SERVER="myemailserver"
 export NM_SMTP_PORT="587" # other fields will be needed if not local server, but for now this is adequate
