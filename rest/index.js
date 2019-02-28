@@ -442,6 +442,7 @@ function handleLogin (req, res) {
   let surName = null
   let emailAddr = null
   let sessionExpiration = null
+  let isAnonymous = false
   let userExists = false
   if (nmAuthType === 'local') {
     remoteUser = nmAuthTestUser
@@ -457,9 +458,18 @@ function handleLogin (req, res) {
     surName = req.headers[nmAuthSurNameHeader]
     emailAddr = req.headers[nmAuthEmailHeader]
     sessionExpiration = +(req.headers[nmAuthSessionExpirationHeader])
+    if (remoteUser === undefined) {
+      isAnonymous = true
+      remoteUser = 'anonymous'
+      givenName = 'anonymous'
+      displayName = 'anonymous user'
+      surName = 'anonymous'
+      emailAddr = 'anonymous@nodomain.edu'
+      sessionExpiration = Math.floor(Date.now() / 1000) + (20 * 60)
+    }
   }
   logger.debug(func + ' - headers: ' + JSON.stringify(req.headers))
-  logger.debug(`${func} - user info: remoteUser=${remoteUser} givenName=${givenName} displayName=${displayName} surName=${surName} email=${emailAddr} sessionExpiration=${sessionExpiration}`)
+  logger.debug(`${func} - user info: isAnonymous=${isAnonymous} remoteUser=${remoteUser} givenName=${givenName} displayName=${displayName} surName=${surName} email=${emailAddr} sessionExpiration=${sessionExpiration}`)
   let token = req.cookies['token']
   if (token) {
     logger.debug('found session token: ' + token)
@@ -559,7 +569,7 @@ function handleLogin (req, res) {
         .then(function (isMember) {
           let isAdmin = isMember
           let isUser = true // for now everyone is a user
-          let isAnonymous = (givenName === 'Anon' && surName === 'Nanomine')
+          // let isAnonymous = (givenName === 'Anon' && surName === 'Nanomine')
           // let logoutUrl = nmAuthLogoutUrl
           let jwToken = jwtBase.sign({
             'sub': remoteUser,
@@ -591,7 +601,31 @@ function handleLogin (req, res) {
       })
   })
 }
-
+// app.post('/XAML2/XOST', function (req, res) {
+//   let idx = '../dist/index.html'
+//   // console.log('headers: ' + JSON.stringify(req.headers))
+//   // handleLogin(req.headers)
+//   // NOTE: For now, login is required to get to the site. TODO change login so that it is optional to access protected functions
+//   // let remoteUser = req.headers['remote_user'] // this only works with NetIDs and will not work with OneLink
+//   handleLogin(req, res)
+//     .then(function (res) {
+//       try {
+//         fs.readFile(idx, 'utf8', function (err, data) { // TODO Cache this
+//           if (err) {
+//             return res.status(400).send('cannot open index')
+//           } else {
+//             return res.send(data)
+//           }
+//         })
+//       } catch (err) {
+//         return res.status(404).send(err)
+//       }
+//     })
+//     .catch(function (err) {
+//       logger.error('login error caught from handleLogin: ' + err)
+//       return res.status(500).send('login error occurred: ' + err)
+//     })
+// })
 // app.use('/nm', express.static('../dist'))
 app.get('/nm', function (req, res) {
   let idx = '../dist/index.html'
