@@ -1,0 +1,91 @@
+@prefix rdf:           <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:          <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:           <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl:           <http://www.w3.org/2002/07/owl#> .
+@prefix skos:          <http://www.w3.org/2004/02/skos/core#> .
+@prefix prov:          <http://www.w3.org/ns/prov#> .
+@prefix sio:           <http://semanticscience.org/resource/> .
+@prefix dcat:          <http://www.w3.org/ns/dcat#> .
+@prefix dcterms:       <http://purl.org/dc/terms/> .
+@prefix void:          <http://rdfs.org/ns/void#> .
+@prefix foaf:          <http://xmlns.com/foaf/0.1/> .
+@prefix ov:            <http://open.vocab.org/terms/> .
+@prefix setl:          <http://purl.org/twc/vocab/setl/> .
+@prefix csvw:          <http://www.w3.org/ns/csvw#> .
+@prefix pv:            <http://purl.org/net/provenance/ns#>.
+@prefix sp:            <http://spinrdf.org/sp#>.
+@prefix api_vocab: <http://purl.org/linked-data/api/vocab#>.
+
+@prefix :              <http://nanomine.org/setl/xml/> .
+
+@prefix nanopub: <http://www.nanopub.org/nschema#> .
+
+:nanomine_json a setl:JSON;
+  api_vocab:selector "item";
+  prov:wasGeneratedBy [
+     a setl:Extract;
+     prov:used <http://129.105.90.149:8000/rest/explore/select?schema=5abe807ce74a1d06fd9943a0&dataformat=xml>
+#     prov:used <http://129.105.90.149:8000/rest/explore/select?title=L193_S1_Palmeri_2010.xml&dataformat=xml>
+#     prov:used <http://129.105.90.149:8000/rest/explore/select/all?dataformat=xml>;
+  ].
+
+:b64encode a owl:Class, prov:SoftwareAgent, setl:PythonScript;
+  rdfs:subClassOf prov:Activity;
+  prov:value '''
+from base64 import b64encode as result
+'''.
+
+
+:mdcs_files_import a setl:SemanticETLScript;
+  rdfs:label "Nanomine MDCS Import SETL Script".
+
+:nanopubs a void:Dataset, dcat:Dataset, setl:Persisted;
+  prov:wasGeneratedBy :mdcs_files_import, [
+    a setl:Transform, setl:JSLDT;
+    prov:used :nanomine_json;
+    prov:qualifiedUsage [ a prov:Usage; prov:entity :b64encode; prov:hadRole [ dcterms:identifier "b64encode"]];
+    setl:hasContext '''{
+    "@base" : "http://nanomine.org/",
+    "schema": "http://schema.org/",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "whyis": "http://vocab.rpi.edu/whyis/",
+    "np": "http://www.nanopub.org/nschema#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "sio": "http://semanticscience.org/resource/",
+    "dc": "http://purl.org/dc/terms/",
+    "prov": "http://www.w3.org/ns/prov#",
+    "mt" : "https://www.iana.org/assignments/media-types/"
+}''';
+    prov:value """[{
+    "@if" : "row['schema'] == '5abe807ce74a1d06fd9943a0' and ' ' not in row['title']",
+    "@id": "nanopublication/{{row['_id']}}",
+    "@graph": {
+      "@id": "nanopublication/{{row['_id']}}",
+      "@type": "np:Nanopublication",
+      "np:hasAssertion": {
+        "@id": "nanopublication/{{row['_id']}}_assertion",
+        "@type": "np:Assertion",
+        "@graph": [
+          {
+            "@id" : "http://nanomine.org/nmr/xml/{{row['title']}}",
+            "@type": [ "schema:DataDownload", "mt:text/xml", "http://nanomine.org/ns/NanomineXMLFile"],
+            "whyis:hasContent" : "data:text/xml;charset=UTF-8;base64,{{b64encode(row['content'].encode('utf-8'))}}",
+            "dc:conformsTo" : {"@id" : "http://nanomine.org/nmr/schema/{{row['schema']}}"}
+          },
+          { 
+            "@id" : "http://nanomine.org/nmr/dataset/{{'_'.join(row['title'].split('_')[:1]+row['title'].replace('.xml','').split('_')[2:])}}",
+            "@type" : "schema:Dataset",
+            "schema:distribution" : [ {"@id" : "http://nanomine.org/nmr/xml/{{row['title']}}"} ]
+          }
+        ]
+      }
+    }
+}]"""
+  ].
+
+<nanopubs.trig> a pv:File;
+    dcterms:format "application/trig";
+    prov:wasGeneratedBy [
+      a setl:Load;
+      prov:used :nanopubs ;
+    ].
