@@ -1,4 +1,7 @@
 #!/bin/bash
+# export MONGO_DUMP_DOWNLOAD_LOCATION=""
+# export NM_INSTALL_FORK=""
+# export NM_INSTALL_BRANCH=""
 
 if [[ -z ${MONGO_DUMP_DOWNLOAD_LOCATION} ]] ; then
   echo 'Export MONGO_DUMP_DOWNLOAD_LOCATION before running installer'
@@ -102,8 +105,6 @@ if [[ $? -gt 0 ]] ; then
   ## rm ${tmpFile}
 fi
 systemctl daemon-reload
-systemctl restart apache2
-systemctl restart celeryd
 
 cp /apps/nanomine/install/nm-rest.service /etc/systemd/system
 systemctl daemon-reload
@@ -112,6 +113,8 @@ systemctl enable nm-rest # ensure that rest server runs after reboot
 
 (su - whyis -c "/apps/install/setup_nanomine.sh")
 systemctl restart nm-rest # since the db was re-created by setup_nanomine.sh
+systemctl restart apache2
+systemctl restart celeryd
 
 echo if you would like to login as whyis from the ubuntu login, execute 'sudo passwd whyis' and set a password to use from the login page
 
