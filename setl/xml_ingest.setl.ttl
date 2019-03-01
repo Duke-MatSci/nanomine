@@ -92,7 +92,7 @@
             "@graph" : [
               {
                 "@if" : "row.findtext('Control_ID') is not None",
-                "@id" : "sample:{{slugify(row.findtext('Control_ID').replace(' ',''))}}",
+                "@id" : "sample:{{slugify(row.findtext('Control_ID').replace(' ',''))}}", 
                 "sio:hasRole": {
                   "@type" : "sio:ControlRole",
                   "@id" : "sample:{{slugify(row.findtext('Control_ID').replace(' ',''))}}_control_role",
@@ -116,12 +116,12 @@
                           "@id" : "pubchem:{{particle.find('PubChemRef').text.replace(' ','')}}",
                           "@type" : "owl:Class",
                           "rdfs:label" : [
-                              {
-                                  "@value" : "{{particle.find('ChemicalName').text}}",
+                              { 
+                                  "@value" : "{{particle.find('ChemicalName').text}}", 
                                   "@if" : "particle.find('ChemicalName').text is not None"
                               },
-                              {
-                                  "@value" : "{{particle.find('Abbreviation').text}}",
+                              { 
+                                  "@value" : "{{particle.find('Abbreviation').text}}", 
                                   "@if" : "particle.find('ChemicalName').text is None and particle.find('Abbreviation').text is not None"
                               }
                           ]
@@ -292,12 +292,12 @@
                           "@id" : "pubchem:{{surface.find('PubChemRef').text.replace(' ','')}}",
                           "@type" : "owl:Class",
                           "rdfs:label" : [
-                              {
-                                  "@value" : "{{surface.find('ChemicalName').text}}",
+                              { 
+                                  "@value" : "{{surface.find('ChemicalName').text}}", 
                                   "@if" : "surface.find('ChemicalName').text is not None"
                               },
-                              {
-                                  "@value" : "{{surface.find('Abbreviation').text}}",
+                              { 
+                                  "@value" : "{{surface.find('Abbreviation').text}}", 
                                   "@if" : "surface.find('ChemicalName').text is None and surface.find('Abbreviation').text is not None"
                               }
                           ]
@@ -333,12 +333,12 @@
                           "@id" : "pubchem:{{polymer.find('PubChemRef').text.replace(' ','')}}",
                           "@type" : "owl:Class",
                           "rdfs:label" : [
-                              {
-                                  "@value" : "{{polymer.find('ChemicalName').text}}",
+                              { 
+                                  "@value" : "{{polymer.find('ChemicalName').text}}", 
                                   "@if" : "polymer.find('ChemicalName').text is not None"
                               },
-                              {
-                                  "@value" : "{{polymer.find('Abbreviation').text}}",
+                              { 
+                                  "@value" : "{{polymer.find('Abbreviation').text}}", 
                                   "@if" : "polymer.find('ChemicalName').text is None and polymer.find('Abbreviation').text is not None"
                               }
                           ]
@@ -376,9 +376,6 @@
                                {
                                  "@if" : "row.findall('column')[1].text is not None and row.findall('column')[0].text is not None",
                                  "@id" : "sample:{{slugify(id.text.replace(' ',''))}}_{{slugify(property.uri)}}_{{row.attrib['id']}}",
-                                 "@type" : [
-                                   "nanomine:PolymerNanocomposite"
-                                 ],
                                  "sio:hasAttribute" : [
                                    {
                                      "@type" : "{{property.uri}}",
@@ -497,7 +494,7 @@
                                    {
                                      "@for" : "i, method_attr in methods.iterrows()",
                                      "@do" : {
-                                       "@if" : "not isempty('.'+method_attr.xpath) and value.findall('.'+method_attr.xpath)",
+                                       "@if" : "not isempty('.'+method_attr.xpath) and value.findall('.'+method_attr.xpath)",       
                                        "@type" : "method_attr.uri",
                                        "sio:hasValue" : {
                                          "@value" : "{{value.findall('.'+method_attr.xpath)[0].find('value').text}}",
@@ -573,11 +570,14 @@
                         "dcterms:creator" : [
                           {
                             "@for" : "author in citation.findall('CommonFields/Author')",
-                            "@do" :
+                            "@do" : 
                               {
                                 "@id" : "author:{{slugify(author.text)}}",
                                 "@type" : "prov:Agent",
-                                "foaf:name" : "{{author.text}}"
+                                "foaf:name" : "{{author.text}}",
+                                "@reverse": {
+                                  "prov:wasAttributedTo" : { "@id" : "sample:{{slugify(id.text.replace(' ',''))}}"}
+                                }
                               }
                           }
                         ],
