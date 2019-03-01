@@ -38,7 +38,9 @@ apt-get install -y git
 
 echo add user whyis
 useradd --home-dir /apps --shell /bin/bash -G sudo -M -U whyis
-# echo whyis:${whyispw} | sudo chpasswd # system owner can add whyis password manually if desired
+if [[ ! -z ${whyispw} ]]; then
+  echo whyis:${whyispw} | sudo chpasswd # system owner can add whyis password manually if desired
+fi
 if [[ ! -d /apps ]]; then
   (su root -c 'mkdir /apps; touch /apps/nanomine_env; chown -R whyis:whyis /apps; ls -lasR /apps')
 fi
