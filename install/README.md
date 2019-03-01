@@ -13,9 +13,11 @@ NanoMine Nanocomposites Data Resource
 - Run these commands after adjusting the mongo dump location in a terminal window on your Ubuntu VM or native Ubuntu install:
 ```
 export MONGO_DUMP_DOWNLOAD_LOCATION=http://somewhere.edu/mgi.tgz  # adjust this to the real download location
+export NM_INSTALL_FORK='duke-matsci' # this should probably be YOUR github userid if you intend to push changes
+export NM_INSTALL_BRANCH='dev' # usually, this should be 'dev' if you intend to push changes
 sudo apt-get install -y curl
 sudo apt-get install -y vim 
-curl -skL https://raw.githubusercontent.com/bluedevil-oit/nanomine/install/install/install.sh > ./nminstall.sh
+curl -skL https://raw.githubusercontent.com/${NM_INSTALL_FORK}/nanomine/${NM_INSTALL_BRANCH}/install/install.sh > ./nminstall.sh
 chmod a+x ./nminstall.sh
 sudo -E ./nminstall.sh 2>&1 | tee nminstall.log # Take a break. It will take a while.
 ```

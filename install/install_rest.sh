@@ -1,20 +1,38 @@
 #!/usr/bin/env bash
 export myFork='bluedevil-oit'
-cd /apps
-echo cloning fork ${myFork}
-git clone https://github.com/"${myFork}"/nanomine.git # to use the original, use FORKNAME of 'duke-matsci'
-cd nanomine
-git checkout install ## TODO WARNING!! change this to dev!!
-
-echo installing nodejs
-curl -L https://git.io/n-install | bash -s -- -y lts
-
+export myBranch='install'
 if [[ -z $1 ]] ; then
   echo "MONGO Dump location required. Pass value for MONGO_DUMP_DOWNLOAD_LOCATION as first parameter to this script ($0)"
   exit 1
 else
   MONGO_DUMP_DOWNLOAD_LOCATION=$1
 fi
+
+if [[ -z $2 ]] ; then
+  echo "Fork of duke-matsci required for install. Pass value for NM_INSTALL_FORK as second parameter to this script ($0)"
+  exit 1
+else
+  myFork=$2
+fi
+
+if [[ -z $3 ]] ; then
+  echo "Branch to install required. Pass value for NM_INSTALL_BRANCH as third parameter to this script ($0)"
+  exit 1
+else
+  myBranch=$3
+fi
+
+
+cd /apps
+echo cloning fork ${myFork}
+git clone https://github.com/"${myFork}"/nanomine.git # to use the original, use FORKNAME of 'duke-matsci'
+cd nanomine
+echo checking out ${myBranch}
+git checkout ${myBranch}
+
+echo installing nodejs
+curl -L https://git.io/n-install | bash -s -- -y lts
+
 
 ## export N_PREFIX="$HOME/n"; [[ :$PATH: == *":$N_PREFIX/bin:"* ]] || PATH+=":$N_PREFIX/bin"
 if [[ -f ~/.bash_profile ]] ; then
@@ -34,7 +52,7 @@ grep nanomine_env ~/.bashrc
 if [[ $? -ne 0 ]]; then
   echo '. /apps/nanomine_env' >> ~/.bashrc
 fi
-. /apps/.bashrc
+source /apps/.bashrc
 
 # install the VueJS command line processor
 npm i -g vue-cli@2.9.6
