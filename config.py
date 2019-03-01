@@ -29,11 +29,11 @@ Config = dict(
     # use DEBUG mode?
     DEBUG = False,
 
-    site_name = "nanomine",
+    site_name = "Nanomine",
 
     site_header_image = '/static/images/random_network.png',
 
-    site_description = '',
+    site_description = 'Materials Informatics for Polymer Nanocomposites',
 
     root_path = '/apps/whyis',
 
