@@ -13,6 +13,7 @@
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix flaskld: <http://vocab.rpi.edu/flaskld/> .
+@base <http://vocab.rpi.edu/whyis/> .
 @prefix whyis: <http://vocab.rpi.edu/whyis/> .
 @prefix bibo: <http://purl.org/ontology/bibo/> .
 
@@ -92,7 +93,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
 ###  http://vocab.rpi.edu/flaskld/hasOwner
 
 flaskld:hasOwner rdf:type owl:ObjectProperty ;
-
+                 
                  rdfs:range prov:Agent .
 
 
@@ -100,13 +101,13 @@ flaskld:hasOwner rdf:type owl:ObjectProperty ;
 ###  http://vocab.tw.rpi.edu/auth/hasRole
 
 auth:hasRole rdf:type owl:ObjectProperty ;
-
+             
              rdfs:label "roles" ;
-
+             
              flaskld:fieldName "roles" ;
-
+             
              rdfs:subPropertyOf owl:topObjectProperty ;
-
+             
              rdfs:range prov:Role .
 
 
@@ -115,9 +116,9 @@ auth:hasRole rdf:type owl:ObjectProperty ;
 
 np:hasAssertion rdf:type owl:FunctionalProperty ,
                          owl:ObjectProperty ;
-
+                
                 rdfs:range np:Assertion ;
-
+                
                 rdfs:domain np:Nanopublication .
 
 
@@ -126,9 +127,9 @@ np:hasAssertion rdf:type owl:FunctionalProperty ,
 
 np:hasProvenance rdf:type owl:FunctionalProperty ,
                           owl:ObjectProperty ;
-
+                 
                  rdfs:domain np:Nanopublication ;
-
+                 
                  rdfs:range np:Provenance .
 
 
@@ -137,9 +138,9 @@ np:hasProvenance rdf:type owl:FunctionalProperty ,
 
 np:hasPublicationInfo rdf:type owl:FunctionalProperty ,
                                owl:ObjectProperty ;
-
+                      
                       rdfs:domain np:Nanopublication ;
-
+                      
                       rdfs:range np:PublicationInfo .
 
 
@@ -147,7 +148,7 @@ np:hasPublicationInfo rdf:type owl:FunctionalProperty ,
 ###  http://www.w3.org/2000/01/rdf-schema#seeAlso
 
 rdfs:seeAlso rdf:type owl:ObjectProperty ;
-
+             
              rdfs:subPropertyOf owl:topObjectProperty .
 
 
@@ -172,7 +173,7 @@ dc:description rdf:type owl:DatatypeProperty ,
 
 dc:identifier rdf:type owl:DatatypeProperty ,
                        owl:FunctionalProperty ;
-
+              
               flaskld:fieldName "identifier" .
 
 
@@ -181,11 +182,11 @@ dc:identifier rdf:type owl:DatatypeProperty ,
 
 auth:active rdf:type owl:DatatypeProperty ,
                      owl:FunctionalProperty ;
-
+            
             rdfs:label "active" ;
-
+            
             flaskld:fieldName "active" ;
-
+            
             rdfs:range xsd:boolean .
 
 
@@ -194,11 +195,11 @@ auth:active rdf:type owl:DatatypeProperty ,
 
 auth:confirmed rdf:type owl:DatatypeProperty ,
                         owl:FunctionalProperty ;
-
+               
                rdfs:label "confirmed" ;
-
+               
                flaskld:fieldName "confirmed_at" ;
-
+               
                rdfs:range xsd:dateTime .
 
 
@@ -207,9 +208,9 @@ auth:confirmed rdf:type owl:DatatypeProperty ,
 
 auth:email rdf:type owl:DatatypeProperty ,
                     owl:FunctionalProperty ;
-
+           
            rdfs:label "email address" ;
-
+           
            flaskld:fieldName "email" .
 
 
@@ -218,11 +219,11 @@ auth:email rdf:type owl:DatatypeProperty ,
 
 auth:hadCurrentLogin rdf:type owl:DatatypeProperty ,
                               owl:FunctionalProperty ;
-
+                     
                      rdfs:label "current login at" ;
-
+                     
                      flaskld:fieldName "current_login_at" ;
-
+                     
                      rdfs:range xsd:dateTime .
 
 
@@ -231,9 +232,9 @@ auth:hadCurrentLogin rdf:type owl:DatatypeProperty ,
 
 auth:hadCurrentLoginIP rdf:type owl:DatatypeProperty ,
                                 owl:FunctionalProperty ;
-
+                       
                        rdfs:label "current login IP" ;
-
+                       
                        flaskld:fieldName "current_login_ip" .
 
 
@@ -242,11 +243,11 @@ auth:hadCurrentLoginIP rdf:type owl:DatatypeProperty ,
 
 auth:hadLastLogin rdf:type owl:DatatypeProperty ,
                            owl:FunctionalProperty ;
-
+                  
                   rdfs:label "last login" ;
-
+                  
                   flaskld:fieldName "last_login_at" ;
-
+                  
                   rdfs:range xsd:dateTime .
 
 
@@ -255,9 +256,9 @@ auth:hadLastLogin rdf:type owl:DatatypeProperty ,
 
 auth:hadLastLoginIP rdf:type owl:DatatypeProperty ,
                              owl:FunctionalProperty ;
-
+                    
                     rdfs:label "last login IP" ;
-
+                    
                     flaskld:fieldName "last_login_ip" .
 
 
@@ -266,11 +267,11 @@ auth:hadLastLoginIP rdf:type owl:DatatypeProperty ,
 
 auth:hadLoginCount rdf:type owl:DatatypeProperty ,
                             owl:FunctionalProperty ;
-
+                   
                    rdfs:label "login count" ;
-
+                   
                    flaskld:fieldName "login_count" ;
-
+                   
                    rdfs:range xsd:integer .
 
 
@@ -279,9 +280,9 @@ auth:hadLoginCount rdf:type owl:DatatypeProperty ,
 
 auth:passwd rdf:type owl:DatatypeProperty ,
                      owl:FunctionalProperty ;
-
+            
             rdfs:label "password" ;
-
+            
             flaskld:fieldName "password" .
 
 
@@ -297,9 +298,9 @@ rdfs:label rdf:type owl:DatatypeProperty ,
 
 foaf:familyName rdf:type owl:DatatypeProperty ,
                          owl:FunctionalProperty ;
-
+                
                 rdfs:label "last name" ;
-
+                
                 flaskld:fieldName "familyName" .
 
 
@@ -308,9 +309,9 @@ foaf:familyName rdf:type owl:DatatypeProperty ,
 
 foaf:givenName rdf:type owl:DatatypeProperty ,
                         owl:FunctionalProperty ;
-
+               
                rdfs:label "first name" ;
-
+               
                flaskld:fieldName "givenName" .
 
 
@@ -334,13 +335,13 @@ foaf:mbox rdf:type owl:DatatypeProperty ,
 ###  http://vocab.rpi.edu/whyis/Graph
 
 :Graph rdf:type owl:Class ;
-
+       
        flaskld:prefix "role" ;
-
+       
        flaskld:hasField dc:description ;
-
+       
        flaskld:key rdfs:label ;
-
+       
        flaskld:hasField rdfs:label .
 
 
@@ -348,7 +349,7 @@ foaf:mbox rdf:type owl:DatatypeProperty ,
 ###  http://www.nanopub.org/nschema#Assertion
 
 np:Assertion rdf:type owl:Class ;
-
+             
              rdfs:subClassOf rdfg:Graph .
 
 
@@ -363,7 +364,7 @@ np:Nanopublication rdf:type owl:Class ;
 ###  http://www.nanopub.org/nschema#Provenance
 
 np:Provenance rdf:type owl:Class ;
-
+              
               rdfs:subClassOf rdfg:Graph .
 
 
@@ -371,7 +372,7 @@ np:Provenance rdf:type owl:Class ;
 ###  http://www.nanopub.org/nschema#PublicationInfo
 
 np:PublicationInfo rdf:type owl:Class ;
-
+                   
                    rdfs:subClassOf rdfg:Graph .
 
 
@@ -379,7 +380,7 @@ np:PublicationInfo rdf:type owl:Class ;
 ###  http://www.w3.org/2002/07/owl#Ontology
 
 owl:Ontology rdf:type owl:Class ;
-
+             
              rdfs:subClassOf :Graph .
 
 
@@ -393,15 +394,15 @@ rdfg:Graph rdf:type owl:Class .
 ###  http://www.w3.org/ns/prov#Agent
 
 prov:Agent rdf:type owl:Class ;
-
+           
            rdfs:label "User" ;
-
+           
            flaskld:prefix "user" ;
-
+           
            flaskld:hasField dc:identifier ;
-
+           
            flaskld:key dc:identifier ;
-
+           
            flaskld:hasField auth:active ,
                             auth:confirmed ,
                             auth:email ,
@@ -412,9 +413,9 @@ prov:Agent rdf:type owl:Class ;
                             auth:hadLoginCount ,
                             auth:hasRole ,
                             auth:passwd ;
-
+           
            flaskld:hideField auth:passwd ;
-
+           
            flaskld:hasField foaf:familyName ,
                             foaf:givenName .
 
@@ -423,11 +424,11 @@ prov:Agent rdf:type owl:Class ;
 ###  http://www.w3.org/ns/prov#Role
 
 prov:Role rdf:type owl:Class ;
-
+          
           flaskld:prefix "role" ;
-
+          
           flaskld:key rdfs:label ;
-
+          
           flaskld:hasField rdfs:label .
 
 whyis:hasView dc:identifier "view".
@@ -473,7 +474,17 @@ rdfs:label flaskld:fieldName "name" .
 
 ###  Generated by the OWL API (version 3.5.1) http://owlapi.sourceforge.net
 
-<http://nanomine.tw.rpi.edu/ns/nanomine> a owl:Class;
-whyis:hasView "nanomine.html".
+<http://nanomine.tw.rpi.edu/ns/Visualization> a owl:Class;
+whyis:hasView "visualization.html".
 
+<http://nanomine.org/ns/PolymerNanocomposite> a <http://nanomine.org/ns/PNCClass>.
 
+<http://nanomine.org/ns/PNCClass> rdfs:subClassOf owl:Class.
+
+<http://nanomine.org/ns/PNCClass> a owl:Class;
+  whyis:hasConstraints "class_constraints.json";
+  whyis:hasOutgoing "outgoing_class.json";
+  whyis:hasIncoming "incoming_class.json";
+  whyis:newInstanceView "new_instance_view.html";
+  whyis:hasView "class_view.html";
+  whyis:hasFacets "pnc_facets.json".

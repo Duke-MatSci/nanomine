@@ -1,9 +1,11 @@
 import Vue from 'vue'
 import Router from 'vue-router'
+import Admin from '@/components/Admin'
 import NanoMine from '@/components/NanoMine'
 import Database from '@/components/Database'
 import Insight from '@/components/Insight'
 import ModuleTools from '@/components/ModuleTools'
+import MyPage from '@/components/MyPage'
 import SimTools from '@/components/SimTools'
 import XMLCONV from '@/components/XMLCONV'
 import NmEditor from '@/components/Editor'
@@ -28,10 +30,14 @@ import SDFReconstructResults from '@/components/SDFReconstructResults'
 import CorrelationReconstructResults from '@/components/CorrelationReconstructResults'
 import DescriptorReconstructResults from '@/components/DescriptorReconstructResults'
 import ViewData from '@/components/ViewData'
+import Contact from '@/components/Contact'
 
 Vue.use(Router)
 
 export default new Router({
+  scrollBehavior () {
+    return { x: 0, y: 0 }
+  },
   routes: [
     {
       path: '/',
@@ -39,9 +45,19 @@ export default new Router({
       component: NanoMine
     },
     {
+      path: '/admin',
+      name: 'Admin',
+      component: Admin
+    },
+    {
       path: '/db',
       name: 'Database',
       component: Database
+    },
+    {
+      path: '/contact',
+      name: 'Contact',
+      component: Contact
     },
     {
       path: '/insight',
@@ -52,6 +68,11 @@ export default new Router({
       path: '/simtools',
       name: 'SimTools',
       component: SimTools
+    },
+    {
+      path: '/mypage',
+      name: 'MyPage',
+      component: MyPage
     },
     {
       path: '/mtools',
@@ -173,6 +194,7 @@ export default new Router({
       name: 'DescriptorReconstructResults',
       component: DescriptorReconstructResults
     },
+    {
       path: '/ViewData',
       name: 'ViewData',
       component: ViewData,
