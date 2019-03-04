@@ -2,6 +2,7 @@
 # export MONGO_DUMP_DOWNLOAD_LOCATION=""
 # export NM_INSTALL_FORK=""
 # export NM_INSTALL_BRANCH=""
+# export whyispw=""
 
 if [[ -z ${MONGO_DUMP_DOWNLOAD_LOCATION} ]] ; then
   echo 'Export MONGO_DUMP_DOWNLOAD_LOCATION before running installer'
