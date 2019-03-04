@@ -46,6 +46,7 @@ let getEnv = function () {
     nmWebFilesRoot: process.env['NM_WEBFILES_ROOT'],
     nmWebBaseUri: process.env['NM_WEB_BASE_URI'],
     nmRdfLodPrefix: process.env['NM_RDF_LOD_PREFIX'],
+    nmRdfUriBase: process.env['NM_RDF_URI_BASE'],
     nmJobDataDir: process.env['NM_JOB_DATA'],
     nmLocalRestBase: process.env['NM_LOCAL_REST_BASE'],
     nmAuthUserHeader: process.env['NM_AUTH_USER_HEADER'],

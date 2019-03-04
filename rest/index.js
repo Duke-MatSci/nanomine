@@ -78,6 +78,7 @@ let emailAdminAddr = env.emailAdminAddr
 let nmWebFilesRoot = env.nmWebFilesRoot
 // let nmWebBaseUri = env.nmWebBaseUri
 let nmRdfLodPrefix = env.nmRdfLodPrefix
+let nmRdfUriBase = env.nmRdfUriBase
 let nmJobDataDir = env.nmJobDataDir
 let nmLocalRestBase = env.nmLocalRestBase
 let nmAutostartCurator = env.nmAutostartCurator
@@ -960,7 +961,7 @@ function getMongoFileData (bucketName, id, fileName) {
 /* BEGIN Outbound requests to whyis */
 function publishFiles (userid, xmlTitle, cb) { // xmlText, schemaName, filesInfo, cb) {
   let func = 'publishFiles'
-  let url = nmLocalRestBase + '/wi/pub'
+  let url = nmLocalRestBase + nmRdfUriBase + '/pub'
   let match = matchValidXmlTitle(xmlTitle)
   if (match) {
     let dsSeq = match[1]
@@ -1109,7 +1110,7 @@ function publishFiles (userid, xmlTitle, cb) { // xmlText, schemaName, filesInfo
                             host: 'localhost',
                             port: '443',
                             method: 'POST',
-                            path: '/wi/pub',
+                            path: nmRdfUriBase + '/pub',
                             rejectUnauthorized: false
                           }
                           let httpsAgent = new https.Agent(httpsAgentOptions)
@@ -1173,7 +1174,7 @@ function publishFiles (userid, xmlTitle, cb) { // xmlText, schemaName, filesInfo
 
 function publishXml (userid, xmlTitle, xmlText, schemaName, cb) {
   let func = 'publishXml'
-  let url = nmLocalRestBase + '/wi/pub'
+  let url = nmLocalRestBase + nmRdfUriBase + '/pub'
   let whyisId = shortUUID.new()
   let dsSeq = matchValidXmlTitle(xmlTitle)[1]
   // logger.error('xmlText: ' + xmlText)
@@ -1224,7 +1225,7 @@ function publishXml (userid, xmlTitle, xmlText, schemaName, cb) {
         host: 'localhost',
         port: '443',
         method: 'POST',
-        path: '/wi/pub',
+        path: nmRdfUriBase + '/pub',
         // path: '/sparql',
         rejectUnauthorized: false
       }
@@ -1245,6 +1246,7 @@ function publishXml (userid, xmlTitle, xmlText, schemaName, cb) {
           cb(null, response)
         })
         .catch(function (err) {
+          logger.trace(func + ' data: ' + inspect(err.response) + ' response url was: ' + err.response.request.res.responseUrl)
           logger.error(func + ' error: ' + err)
           cb(err, null)
         })
@@ -1258,7 +1260,7 @@ function publishXml (userid, xmlTitle, xmlText, schemaName, cb) {
 function publishLatestSchema (userid, cb) {
   // TODO: there will be a target user (jwt in token cookie for whyis)
   let func = 'publishLatestSchema'
-  let url = nmLocalRestBase + '/wi/pub'
+  let url = nmLocalRestBase + nmRdfUriBase + '/pub'
   // let jsonResp = {'error': null, 'data': null}
   getCurrentSchemas()
     .then(function (schemasArray) {
@@ -1309,7 +1311,7 @@ function publishLatestSchema (userid, cb) {
               host: 'localhost',
               port: '443',
               method: 'POST',
-              path: '/wi/pub',
+              path: nmRdfUriBase + '/pub',
               // path: '/sparql',
               rejectUnauthorized: false
             }
