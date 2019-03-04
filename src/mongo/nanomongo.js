@@ -29,6 +29,10 @@ function resetIngestFailed() {
   db = db.getSiblingDB('mgi')
   print(JSON.stringify(db.xmldata.updateMany({'entityState': {'$eq': 'IngestFailed'}}, { '$set': {'entityState': 'EditedValid'}})))
 }
+function resetOneIngestFailed() {
+  db = db.getSiblingDB('mgi')
+  print(JSON.stringify(db.xmldata.updateOne({'entityState': {'$eq': 'IngestFailed'}}, { '$set': {'entityState': 'Valid'}})))
+}
 
 function countIngesting() {
   db = db.getSiblingDB('mgi')
