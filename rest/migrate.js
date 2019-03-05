@@ -23,7 +23,8 @@ const util = require('util')
 const MongoClient = require('mongodb').MongoClient
 const ObjectId = require('mongodb').ObjectId
 const _ = require('lodash')
-const validateXml = require('xmllint').validateXML
+const he = require('he')
+// const validateXml = require('xmllint').validateXML
 const nmWebBaseUri = process.env['NM_WEB_BASE_URI']
 let shortUUID = require('short-uuid')() // https://github.com/oculus42/short-uuid (npm i --save short-uuid)
 
@@ -259,7 +260,13 @@ function j2x (o, parent, indent) {
       }
     })
   } else {
-    xml += (' '.repeat(indent) + o) // Element text
+    let heo = o
+    if (typeof o === 'string') {
+      heo = he.encode(o, {
+        'useNamedReferences': false
+      })
+    }
+    xml += (' '.repeat(indent) + heo) // Element text
   }
   return xml
 }

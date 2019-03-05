@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-export myFork='bluedevil-oit'
-export myBranch='install'
+export myFork='duke-matsci'
+export myBranch='dev'
 if [[ -z $1 ]] ; then
   echo "MONGO Dump location required. Pass value for MONGO_DUMP_DOWNLOAD_LOCATION as first parameter to this script ($0)"
   exit 1
