@@ -8,6 +8,7 @@ if [[ -z $force || $force != "FORCE" ]] ; then
   echo "This script no longer executes by default."
   echo "IT IS DANGEROUS. If you really need drop the database, restore and migrate then use the FORCE option."
   echo "Be aware that the default operations are to DELETE THE DATA before restoring the DB and doing a migration"
+  echo "If the database is re-created, then the system user needs to be re-configured for API services by updating keys (see install/setup_nanomine.sh)."
   echo "use $0 FORCE to force dropping the db, and migrating the data from the dump file"
   echo "Aborting."
   exit
