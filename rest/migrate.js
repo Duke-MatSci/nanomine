@@ -149,6 +149,14 @@ const versionSpDev1 = { // NanoMine SP rewrite dev version 1
   patchVer: 0,
   labelVer: 'nm-sp-dev-1'
 }
+
+const versionSpDev2 = { // NanoMine SP rewrite dev version 1
+  majorVer: 1,
+  minorVer: 3,
+  patchVer: 0,
+  labelVer: 'nm-sp-dev-2'
+}
+
 let dbVer = versionOriginal
 let versionColNm = 'mgi_version'
 let datasetColNm = 'dataset'
@@ -419,7 +427,7 @@ function createUpdateMgiVersionCollection (versionInfo) {
           logError(func + ' - error updating mgi_version collection. Error: ' + err)
           reject(err)
         } else {
-          logError(func + ' - Successfully updated mgi_version collection. Result: ' + result)
+          logError(func + ' - Successfully updated mgi_version collection. Result: ' + JSON.stringify(result))
           resolve(result)
         }
       })
@@ -496,6 +504,140 @@ function updateOrAddDatasets () {
     datasets[k].seq = key
     writePromises.push(updateOrAddDatasetForNmSpDev1(datasets[k]))
   })
+}
+
+function updateXmlDataDocToNmSpDev2 (id, xml) {
+  // write xml to xmlddoc.xml_str
+  // create schemaId field and save schema field there (Mongoose issue)
+  // create and update entityState=EditedNotValid and curateState=Edit fields
+  let p = new Promise(function (resolve, reject) {
+    // this timeout is not a work-around, it's simply to allow other parts of the migration to occur inter-spersed
+    setTimeout(function () {
+      let msg = ' id: ' + id + ' using xml of length: ' + xml.length
+      let xmldata = db.collection('xmldata')
+      logInfo('Updating: xmldata record: ' + id)
+      xmldata.findOneAndUpdate({'_id': {$eq: id}},
+        {
+          $set: {
+            'xml_str': xml // write xml
+          }
+        }, {}, function (err, result) {
+          if (err) {
+            logInfo('Update failed: ' + msg + ' error: ' + err)
+            reject(err)
+          } else {
+            logInfo('Update successful: ' + msg)
+            resolve()
+          }
+        })
+    }, (Math.floor(Math.random() * 20) + 10) * 1000)
+  })
+  return p
+}
+
+function newImageFileValue (fileElem) {
+  let rv = null
+  let blobIdRegex = /blob\?id=([A-Fa-f0-9]*)/
+  logInfo('found imageFile = ' + fileElem)
+  let match = fileElem.match(blobIdRegex)
+  if (match) {
+    let blobId = match[1]
+    rv = nmWebBaseUri + '/nmr/blob?id=' + blobId
+    logInfo('  imageFile mached. New value: ' + rv)
+  }
+  return rv
+}
+
+function adjustImageBlob (json) {
+  let imageFiles = _.get(json, 'PolymerNanocomposite.MICROSTRUCTURE.ImageFile', null)
+  if (imageFiles) { // just use above to verify path exists
+    if (!Array.isArray(imageFiles)) {
+      let ov = json.PolymerNanocomposite.MICROSTRUCTURE.ImageFile.File
+      let nv = newImageFileValue(ov)
+      if (nv) {
+        json.PolymerNanocomposite.MICROSTRUCTURE.ImageFile.File = nv
+        logInfo('Replaced single imageFile value old: ' + ov + ' new: ' + nv)
+      } else {
+        logError('ERROR: Found single MICROSTRUCTURE image file, but was unable to update reference: ' + ov)
+      }
+    } else {
+      imageFiles.forEach(function (imageFile, idx) {
+        let ov = imageFile.File
+        let nv = newImageFileValue(imageFile.File)
+        if (nv) {
+          logInfo('Replaced #' + idx + ' imageFile value old: ' + ov + ' new: ' + nv)
+          json.PolymerNanocomposite.MICROSTRUCTURE.ImageFile[idx].File = nv
+        } else {
+          logError('Unable to replace #' + idx + ' imageFile value. Old value:: ' + ov)
+        }
+      })
+    }
+  }
+  return json
+}
+function migrateToNmSpDev2 (fromVer, toVer) {
+  let func = 'migrateToNmSpDev2'
+  let p = new Promise(function (resolve, reject) {
+    let msg = func + ' - Migrating from: ' + JSON.stringify(fromVer) + ' to: ' + JSON.stringify(toVer)
+    logInfo(msg)
+    let xmldata = db.collection('xmldata')
+    if (xmldata && xmldata !== null) {
+      logDebug('xmldata: ' + inspect(xmldata))
+      let xmlcur = xmldata.find({}) // .sort([['title', 1]])
+      let xmlrecs = 0
+      // let skipped = []
+      xmlcur.count()
+        .then(function (xmlcount) {
+          logDebug('count: ' + xmlcount)
+          xmlcur.rewind()
+          xmlcur.forEach((xmldoc) => {
+            msg = func + ' - idx: ' + xmlrecs + ' title: ' + xmldoc.title + ' schema: ' + xmldoc.schema
+            let match = xmldoc.title.match(/^[a-zA-Z](\d{3,})[_].*/)
+            if (match) {
+              logDebug('processing: ' + msg)
+              // !!! xmldoc.schemaId = xmldoc.schema // fix schema id name
+              let bson = xmldoc.content
+              if (bson != null) {
+                logInfo(func + ' - processing record')
+                bson = adjustImageBlob(bson)
+                logDebug(func + ' - translating bson to xml for: ' + xmldoc.title + ' ' + xmldoc.schema)
+                xml = xmlHeader
+                j2x(bson, null, indent) // appends global xml (crappy design that already wasted some time) TODO fix global xml
+                logDebug(func + ' - done translating bson')
+                writePromises.push(updateXmlDataDocToNmSpDev2(xmldoc._id, xml))
+              } else {
+                logInfo(msg + ' - skipping since there is no original content field in the xmldata rec.')
+              }
+            } else {
+              logInfo(msg + ' - skipping since title field in the xmldata rec is poorly formed.')
+            }
+          }, (err) => { // err is null most of the time unless there was an iteration error
+            if (err) {
+              let msg = func + ' - error processing xmldata collection. error: ' + err
+              reject(msg)
+            } else {
+              let msg = func + ' - done processing xmldata collection. Still waiting on updates to complete.'
+              logInfo(msg)
+              Promise.all(writePromises)
+                .then(function () {
+                  logInfo(' migration successful.')
+                  resolve()
+                })
+                .catch(function (err) {
+                  let msg = 'Failure waiting for all updates. Error: ' + err
+                  reject(msg)
+                })
+            }
+          })
+        })
+        .catch(function (err) {
+          let msg = func + ' - error getting xml count. Error: ' + err
+          logError(msg)
+          reject(msg)
+        })
+    }
+  })
+  return p
 }
 
 function migrateToNmSpDev1 (fromVer, toVer) {
@@ -595,42 +737,7 @@ function migrateToNmSpDev1 (fromVer, toVer) {
               xml = xmlHeader // initialize xml
               // Update any image references in the xml so that they're valid
               //  .//MICROSTRUCTURE/ImageFile/File
-              let newImageFileValue = function (fileElem) {
-                let rv = null
-                let blobIdRegex = /blob\?id=([A-Fa-f0-9]*)/
-                logInfo('found imageFile = ' + fileElem)
-                let match = fileElem.match(blobIdRegex)
-                if (match) {
-                  let blobId = match[1]
-                  rv = nmWebBaseUri + '/nmr/blob?id=' + blobId
-                  logInfo('  imageFile mached. New value: ' + rv)
-                }
-                return rv
-              }
-              let imageFiles = _.get(json, 'PolymerNanocomposite.MICROSTRUCTURE.ImageFile', null)
-              if (imageFiles) { // just use above to verify path exists
-                if (!Array.isArray(imageFiles)) {
-                  let ov = json.PolymerNanocomposite.MICROSTRUCTURE.ImageFile.File
-                  let nv = newImageFileValue(ov)
-                  if (nv) {
-                    json.PolymerNanocomposite.MICROSTRUCTURE.ImageFile.File = nv
-                    logInfo('Replaced single imageFile value old: ' + ov + ' new: ' + nv)
-                  } else {
-                    logError('ERROR: Found single MICROSTRUCTURE image file, but was unable to update reference: ' + ov)
-                  }
-                } else {
-                  imageFiles.forEach(function (imageFile, idx) {
-                    let ov = imageFile.File
-                    let nv = newImageFileValue(imageFile.File)
-                    if (nv) {
-                      logInfo('Replaced #' + idx + ' imageFile value old: ' + ov + ' new: ' + nv)
-                      json.PolymerNanocomposite.MICROSTRUCTURE.ImageFile[idx].File = nv
-                    } else {
-                      logError('Unable to replace #' + idx + ' imageFile value. Old value:: ' + ov)
-                    }
-                  })
-                }
-              }
+              adjustImageBlob(json)
               logDebug(j2x(json, null, indent))
               let xsd = getSchemaInfo(xmldoc.schema)
               /* Cannot verify all xmls without process running out of memory. Need another way to verify.
@@ -658,7 +765,53 @@ function migrateToNmSpDev1 (fromVer, toVer) {
               skipped.forEach(function (v) {
                 logError(v)
               })
-              resolve(msg)
+              // resolve(msg)
+              updateTemplateVersionCurrentRef()
+                .then(function () {
+                  createCollection('api')
+                    .then(function () {
+                      createUsersCollection()
+                        .then(function () {
+                          createDatasetsCollection()
+                            .finally(function () { // node --harmony-promise-finally migrate.js
+                              logInfo('createDatasetCollection finally function called')
+                              createOrUpdateUser(nanomineUser) // adds self to writePromises list to process
+                              writePromises.push(createOrUpdateApi(curateRestApi))
+                              writePromises.push(createOrUpdateApi(emailRestApi))
+                              writePromises.push(createOrUpdateApi(jobsRestApi))
+                              writePromises.push(createOrUpdateApi(adminRestApi))
+                              updateOrAddDatasets() // writePromises already has xmldata updates, be sure to call this before waiting on promises.all
+                              Promise.all(writePromises)
+                                .then(function () {
+                                  logInfo(' migration successful')
+                                  // set the version into the version collection
+                                  resolve('updates complete')
+                                })
+                                .catch(function (err) {
+                                  let msg = func + ' - failure waiting for all updates. Error: ' + err
+                                  logInfo(msg)
+                                  reject(msg)
+                                })
+                            })
+                        })
+                        .catch(function (err) {
+                          let msg = func + ' - error returned from createUsersCollection:  ' + err
+                          logError(msg)
+                          reject(msg)
+                        })
+                    })
+                    .catch(function (err) {
+                      let msg = func + ' - error returned from createCollection(api):  ' + err
+                      logError(msg)
+                      reject(msg)
+                    })
+                })
+
+                .catch(function (err) {
+                  let msg = func + ' - error returned from updateTemplateVersionCurrentRef:  ' + err
+                  logError(msg)
+                  reject(msg)
+                })
             })
             .catch(function (err) {
               let msg = func + ' attempt to iterate xm records caught error: ' + err
@@ -675,7 +828,8 @@ function migrateToNmSpDev1 (fromVer, toVer) {
 }
 
 const migrationTable = [ // Array of version to version conversion function mappings
-  {'from': versionOriginal, 'to': versionSpDev1, 'use': migrateToNmSpDev1}
+  { 'from': versionOriginal, 'to': versionSpDev1, 'use': migrateToNmSpDev1 },
+  { 'from': versionSpDev1, 'to': versionSpDev2, 'use': migrateToNmSpDev2 }
 ]
 
 function dbConnectAndOpen () {
@@ -709,51 +863,34 @@ function getCurrentDbVersion () {
       .then(function (hasVersionCol) { // boolean value true or false
         dbVer = {}
         if (hasVersionCol === true) {
-          logError(func + ' cannot handle reading version collection yet.') // TODO handle reading version colection
-          reject(false)
+          //          logError(func + ' cannot handle reading version collection yet.') // TODO handle reading version colection
+          //          reject(false)
+          msg = func + ' - looking up current mgi version'
+          logDebug(msg)
+          dbVer = {}
+          // console.log(db[versionColNm])
+          let ver = db.collection(versionColNm)
+          ver.findOne({}, function (err, r) {
+            if (err) {
+              msg = func + ' - no version info exists in db.  Error: ' + err
+              dbVer = versionOriginal
+              logError(msg)
+              reject(msg)
+            } else {
+              dbVer.majorVer = r.majorVer
+              dbVer.minorVer = r.minorVer
+              dbVer.patchVer = r.patchVer
+              dbVer.labelVer = r.labelVer
+              msg = func + ' - found version info in db. Setting version to: ' + JSON.stringify(dbVer)
+              logDebug(msg)
+              resolve(dbVer)
+            }
+          })
         } else {
           dbVer = versionOriginal
+          logInfo('Version collection: ' + versionColNm + ' not found. Returning original default for MDCS data: ' + JSON.stringify(dbVer))
           resolve(dbVer)
         }
-        // msg = func + ' - db.collections.then handler'
-        // logDebug(msg)
-        // dbCollections.forEach(function (v) {
-        //   // logDebug(inspect(v))
-        //   try {
-        //     if (v.s.name === 'version') {
-        //       dbVer = {}
-        //       // msg = func + ' - calling findOne()'
-        //       // logDebug(msg)
-        //       v.findOne({})
-        //         .then(function (r) {
-        //           dbVer.majorVer = r.majorVer
-        //           dbVer.minorVer = r.minorVer
-        //           dbVer.patchVer = r.patchVer
-        //           dbVer.labelVer = r.labelVer
-        //           msg = func + ' - found version info in db. Setting version to: ' + JSON.stringify(dbVer)
-        //           logDebug(msg)
-        //           // no resolve here. let the end of loop check handle it
-        //         })
-        //         .catch(function (err) {
-        //           msg = func + ' - unable to no version info exists in db. Setting default version.'
-        //           dbVer = versionOriginal
-        //           logDebug(msg)
-        //           // no resolve/reject here. let the end of loop check handle it
-        //         })
-        //       // } else {
-        //       //   logDebug(v.s.name + ' collection name is not version')
-        //     }
-        //   } catch (err) {
-        //     msg = func + ' - error checking collection names. err: ' + err
-        //     logError(msg)
-        //     dbVer = null
-        //     reject(msg)
-        //   }
-        // })
-        // if (dbVer !== null) {
-        //   logInfo('dbVer is: ' + JSON.stringify(dbVer))
-        //   resolve(dbVer)
-        // }
       })
       .catch(function (err) {
         msg = func + ' - unable to get list of collections: ' + err
@@ -846,59 +983,17 @@ function migrate () {
           let labelVer = versionInfo['labelVer']
           if (idx === -1) {
             logInfo(func + ` - No conversion for version - major: ${majorVer} minor: ${minorVer} patch: ${patchVer} label: ${labelVer} found. Is it current?`)
+            dbClose()
           } else {
             let fromVer = migrationTable[idx]['from']
             let toVer = migrationTable[idx]['to']
             logDebug(func + ' - getCurrentDbVersion.then idx: ' + idx + ' - fromVer: ' + JSON.stringify(fromVer) + ' toVer: ' + JSON.stringify(toVer))
             migrationTable[idx]['use'].apply(null, [fromVer, toVer])
-              .then(function (v) {
-                updateTemplateVersionCurrentRef()
-                  .then(function () {
-                    createCollection('api')
-                      .then(function () {
-                        createUsersCollection()
-                          .then(function () {
-                            createDatasetsCollection()
-                              .finally(function () { // node --harmony-promise-finally migrate.js
-                                logInfo('createDatasetCollection finally function called')
-                                createOrUpdateUser(nanomineUser) // adds self to writePromises list to process
-                                writePromises.push(createOrUpdateApi(curateRestApi))
-                                writePromises.push(createOrUpdateApi(emailRestApi))
-                                writePromises.push(createOrUpdateApi(jobsRestApi))
-                                writePromises.push(createOrUpdateApi(adminRestApi))
-                                updateOrAddDatasets() // writePromises already has xmldata updates, be sure to call this before waiting on promises.all
-                                Promise.all(writePromises)
-                                  .then(function () {
-                                    logInfo(' migration result: ' + v)
-                                  })
-                                  .catch(function (err) {
-                                    logInfo('Failure waiting for all updates. Error: ' + err)
-                                  })
-                                  .finally(function () {
-                                    // set the version into the version collection
-                                    createUpdateMgiVersionCollection(toVer)
-                                      .finally(function () {
-                                        dbClose()
-                                      })
-                                  })
-                              })
-                          })
-                          .catch(function (err) {
-                            let msg = func + ' - error returned from createUsersCollection:  ' + err
-                            logError(msg)
-                            dbClose()
-                          })
-                      })
-                      .catch(function (err) {
-                        let msg = func + ' - error returned from createCollection(api):  ' + err
-                        logError(msg)
-                        dbClose()
-                      })
-                  })
-
-                  .catch(function (err) {
-                    let msg = func + ' - error returned from updateTemplateVersionCurrentRef:  ' + err
-                    logError(msg)
+              .then(function () {
+                let msg = func + ' - migration from ' + JSON.stringify(fromVer) + ' to ' + JSON.stringify(toVer) + ' complete.'
+                logInfo(msg)
+                createUpdateMgiVersionCollection(toVer)
+                  .finally(function () {
                     dbClose()
                   })
               })
@@ -940,4 +1035,6 @@ migrate()
       Added dsSeq field (per above) to xmldata docs
       added curateState and entityState fields to xmldata docs to help drive curation workflows and xml entity
         processing (validation, whyis ingest, etc)
+  1.3.0-mn-sp-dev-1 -> 1.3.0-nm-sp-dev-2
+     update xmls so that entity values do not contain invalid characters like & without encoding
  */
