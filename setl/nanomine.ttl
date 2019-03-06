@@ -14,7 +14,7 @@
 @prefix xml: <http://www.w3.org/XML/1998/namespace> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-<file:///apps/nanomine-graph/setl/nan> a owl:Class ;
+<file:///apps/nanomine/setl/nan> a owl:Class ;
     rdfs:label "nan" .
 
 :ns a owl:Ontology ;
