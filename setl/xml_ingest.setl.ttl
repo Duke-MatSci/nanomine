@@ -47,7 +47,7 @@
     owl:someValuesFrom <http://nanomine.org/ns/NanomineXMLFile>
   ].
 
-:nanopubs a void:Dataset, dcat:Dataset, setl:Persisted;
+:nanopubs a void:Dataset, dcat:Dataset;
   prov:wasGeneratedBy [a :NanomineXMLImport], [
     a setl:Transform, setl:JSLDT;
     prov:used :xml;
@@ -146,25 +146,16 @@
                       "sio:hasAttribute" : [
                         {
                           "@for" : ["fraction in [ x for x in [",
-                                    "particle.find('FillerComponentComposition/fraction'),",
-                                    "row.find('MATERIALS/Filler/FillerComposition/fraction'),",
+                                    "particle.find('FillerComponentComposition/*'),",
+                                    "row.find('MATERIALS/Filler/FillerComposition/Fraction/*'),",
                                     "] if x is not None][:1]"
                                    ],
                           "@do" : {
                               "@id" : "sample:{{slugify(id.text.replace(' ',''))}}_filler_{{fc}}_{{fraction.tag}}_fraction",
-                              "rdfs:label" : "{{fraction.text}}",
-                              "sio:hasValue" : [
-                                  {
-                                      "@if" : "'%' not in fraction.text",
-                                      "@value" : "{{fraction.text.split(' ')[0]}}",
-                                      "@type": "xsd:double"
-                                  },
-                                  {
-                                      "@if" : "'%' in fraction.text",
-                                      "@value" : "{{float(fraction.text.replace('%','').split(' ')[0].split('-')[0])/100.0}}",
-                                      "@type": "xsd:double"
-                                  }
-                              ],
+                              "sio:hasValue" : {
+                                  "@value" : "{{fraction.text}}",
+                                  "@type": "xsd:double"
+                              },
                               "@type" : "nanomine:{{fraction.tag.title()}}Fraction"
                             }
                         },
@@ -548,6 +539,7 @@
                         { "@id" : "{{ {'research article':'nanomine:ResearchArticle','conference proceeding':'nanomine:ProceedingsArticle','communication':'nanomine:Communication','review':'nanomine:ReviewArticle','letter':'bibo:Letter','technical comment':'nanomine:TechnicalComment'}[citation.find('CommonFields/CitationType').text] }}"}
                       ],
                         "dcterms:title" : "{{citation.find('CommonFields/Title').text}}",
+                        "rdfs:label" : "{{citation.find('CommonFields/Title').text}}",
                         "rdfs:seeAlso" : {
                           "@if" : "citation.find('CommonFields/URL').text",
                           "@id" : "{{citation.find('CommonFields/URL').text.replace('<','%3C').replace('>','%3E')}}"
@@ -575,6 +567,7 @@
                                 "@id" : "author:{{slugify(author.text)}}",
                                 "@type" : "prov:Agent",
                                 "foaf:name" : "{{author.text}}",
+                                "rdfs:label" : "{{author.text}}",
                                 "@reverse": {
                                   "prov:wasAttributedTo" : { "@id" : "sample:{{slugify(id.text.replace(' ',''))}}"}
                                 }
@@ -597,6 +590,7 @@
                             }
                           }
                         },
+                        "sio:hasPart" : { "@id" : "sample:{{slugify(id.text.replace(' ',''))}}"},
                         "dcat:keyword" : [
                           {
                             "@for" : "keyword in citation.findall('CommonFields/Keyword')",
