@@ -10,7 +10,7 @@
         <v-btn flat to="/db">Database</v-btn>
         <v-btn flat to="/mtools">Module Tools</v-btn>
         <v-btn flat to="/simtools">Simulation Tools</v-btn>
-        <v-btn flat @click="toggleAdminAvailable()"><i class="material-icons nm-search-icon" v-if="searchEnabled()">search</i>
+        <v-btn flat href="/home"><i class="material-icons nm-search-icon" v-if="searchEnabled()">search</i>
         </v-btn>
         <v-btn v-if="isLoggedIn()" flat to="/mypage">My Page</v-btn>
         <v-btn v-if="isLoggedIn()" flat v-on:click="logoutDialog = true">
@@ -125,7 +125,7 @@ export default {
       }
     },
     searchEnabled: function () {
-      return false
+      return true
     },
     toggleLeftMenu: function () {
       this.$store.commit('toggleLeftMenu')

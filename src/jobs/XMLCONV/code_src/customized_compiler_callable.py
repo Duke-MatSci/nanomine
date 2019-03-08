@@ -9,6 +9,8 @@ import sys                                # Python standard library
 import copy                               # Python standard library
 from time import gmtime, strftime         # Python standard library
 import datetime
+import ssl
+import traceback
 
 # -------------------------------------------- convert .XLSX to .XML files
 import xlrd
@@ -457,12 +459,14 @@ def sheetSampleInfo(sheet, DATA, myXSDtree, jobDir, restbase):
     try:
         dsurl = restbase + '/nmr/dataset?seq='+seq
         rq = urllib2.Request(dsurl)
-        j = json.loads(urllib2.urlopen(rq).read())
+        j = json.loads(urllib2.urlopen(rq, context=ssl._create_unverified_context()).read())
         response = j["data"][0]
     except:
         print 'exception occurred during dataset GET by doi'
-        print 'exception: ' + str(sys.exc_info()[0])
-    # special case author and keyword, which are saved as list
+        #print 'exception: ' + str(sys.exc_info()[0])
+        print('exception: '  + str(traceback.format_exc()))
+
+# special case author and keyword, which are saved as list
     authorREST = 'author' in response
     keywordREST = 'keyword' in response
     if authorREST:

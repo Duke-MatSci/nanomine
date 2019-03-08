@@ -13,7 +13,7 @@
 # chmod og-rw /apps/nanomine_env
 #   --> the above cmd removes read-write access for 'others' and 'group' making the file private for the user
 #
-# Be sure to CHANGE DEFAULT PASSWORDS AND SECRETS
+# Be sure to CHANGE DEFAULT PASSWORDS AND SECRETS (use nanomine/install/random.js to generate random passwords)
 #
 export NM_AUTH_ENABLED="no" # no or yes
 export NM_AUTH_TYPE="local" # local or shib-proxy
@@ -33,16 +33,6 @@ export NM_AUTH_ADMIN_GROUP_NAME="admins"
 export NM_AUTH_SECRET="SOME_RANDOM_STRING" # CHANGE this for your installation - NOW!
 export NM_SESSION_SECRET="SOME_RANDOM_STRING2" # CHANGE this for your installation - NOW!
 
-export NM_AUTH_SYSTEM_TOKEN="SOME_RANDOM_STRING4" # CHANGE this for your installation - NOW!
-export NM_AUTH_API_TOKEN_CURATE="SOME_RANDOM_STRING5" # use token output from 'node /apps/nanomine/rest/updateRestApiToken.js updateToken curate' here
-export NM_AUTH_API_REFRESH_CURATE="SOME_RANDOM_STRING6" # use token output 'node /apps/nanomine/rest/generateUserRefreshToken.js generateRefreshToken {USERID} curate' here
-export NM_AUTH_API_TOKEN_JOBS="SOME_RANDOM_STRING7" # use token output from 'node /apps/nanomine/rest/updateRestApiToken.js updateToken jobs' here
-export NM_AUTH_API_REFRESH_JOBS="SOME_RANDOM_STRING8" # use token output 'node /apps/nanomine/rest/generateUserRefreshToken.js generateRefreshToken {USERID} jobs' here
-export NM_AUTH_API_TOKEN_EMAIL="SOME_RANDOM_STRING9" # use token output from 'node /apps/nanomine/rest/updateRestApiToken.js updateToken email' here
-export NM_AUTH_API_REFRESH_EMAIL="SOME_RANDOM_STRING10" # use token output 'node /apps/nanomine/rest/generateUserRefreshToken.js generateRefreshToken {USERID} email' here
-export NM_AUTH_API_TOKEN_ADMIN="SOME_RANDOM_STRING11" # use token output from 'node /apps/nanomine/rest/updateRestApiToken.js updateToken admin' here
-export NM_AUTH_API_REFRESH_ADMIN="SOME_RANDOM_STRING12" # use token output 'node /apps/nanomine/rest/generateUserRefreshToken.js generateRefreshToken {USERID} admin' here
-
 export NM_MONGO_PORT=27017
 export NM_MONGO_HOST=localhost
 export NM_MONGO_DB=mgi
@@ -56,12 +46,13 @@ export NM_MONGO_URI="mongodb://${NM_MONGO_API_USER}:${NM_MONGO_API_PWD}@${NM_MON
 export NM_MONGO_DUMP="http://path.to.mongo.dump.tgz" # Before using, obtain the actual location for this reference
 
 export NM_WEBFILES_ROOT="/apps/nanomine-webfiles"
-export NM_WEB_BASE_URI="http://ubuntu.local" # external apache uri. May need to tweak this for your local machine/vm depending on external access location -- external uri to apache
+export NM_WEB_BASE_URI="http://localhost" # external apache uri. May need to tweak this for your local machine/vm depending on external access location -- external uri to apache
 export NM_RDF_LOD_PREFIX="http://localhost"
+export NM_RDF_URI_BASE="" # high level uri component of path to RDF
 export NM_JOB_DATA="${NM_WEBFILES_ROOT}/jobdata"
 export NM_JOB_DATA_URI="/nmf/jobdata"
 export NM_LOCAL_REST_BASE="http://localhost"
-export NM_AUTOSTART_CURATOR="yes"
+export NM_AUTOSTART_CURATOR="no"
 
 export NM_SMTP_SERVER="myemailserver"
 export NM_SMTP_PORT="587" # other fields will be needed if not local server, but for now this is adequate
@@ -78,3 +69,13 @@ export NM_LOGFILE="nanomine.log" # use this log for python logging
 export NM_MATLAB_AVAILABLE="no" # run TEST_XXXXXX matlab scripts instead of matlab directly
 
 export NM_NEO4J_IMAGE="http://path.to.neo4j.tgz"  # Before using, obtain the actual location for this reference
+
+export NM_AUTH_SYSTEM_TOKEN="SOME_RANDOM_STRING4" # CHANGE this for your installation - NOW!
+export NM_AUTH_API_TOKEN_CURATE="SOME_RANDOM_STRING5" # use token output from 'node /apps/nanomine/rest/updateRestApiToken.js updateToken curate' here
+export NM_AUTH_API_REFRESH_CURATE="SOME_RANDOM_STRING6" # use token output 'node /apps/nanomine/rest/generateUserRefreshToken.js generateRefreshToken {USERID} curate' here
+export NM_AUTH_API_TOKEN_JOBS="SOME_RANDOM_STRING7" # use token output from 'node /apps/nanomine/rest/updateRestApiToken.js updateToken jobs' here
+export NM_AUTH_API_REFRESH_JOBS="SOME_RANDOM_STRING8" # use token output 'node /apps/nanomine/rest/generateUserRefreshToken.js generateRefreshToken {USERID} jobs' here
+export NM_AUTH_API_TOKEN_EMAIL="SOME_RANDOM_STRING9" # use token output from 'node /apps/nanomine/rest/updateRestApiToken.js updateToken email' here
+export NM_AUTH_API_REFRESH_EMAIL="SOME_RANDOM_STRING10" # use token output 'node /apps/nanomine/rest/generateUserRefreshToken.js generateRefreshToken {USERID} email' here
+export NM_AUTH_API_TOKEN_ADMIN="SOME_RANDOM_STRING11" # use token output from 'node /apps/nanomine/rest/updateRestApiToken.js updateToken admin' here
+export NM_AUTH_API_REFRESH_ADMIN="SOME_RANDOM_STRING12" # use token output 'node /apps/nanomine/rest/generateUserRefreshToken.js generateRefreshToken {USERID} admin' here

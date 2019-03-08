@@ -59,7 +59,7 @@
   rdfs:label "Nanomine Ontology SETL Script".
 
 
-<http://nanomine.org/ns> a void:Dataset;
+:nanomine_ontology a void:Dataset;
   prov:wasGeneratedBy :ontology, [
     a setl:Transform, setl:JSLDT;
     prov:used :imports_table;
@@ -278,9 +278,9 @@
 #      prov:used <http://nanomine.org/ns> ;
 #    ].
 
-#<nanomine.ttl> a pv:File;
-#    dcterms:format "text/turtle";
-#    prov:wasGeneratedBy [
-#      a setl:Load;
-#      prov:used <http://nanomine.org/ns> ;
-#    ].
+<nanomine.ttl> a pv:File;
+    dcterms:format "text/turtle";
+    prov:wasGeneratedBy [
+      a setl:Load;
+      prov:used :nanomine_ontology ;
+    ].

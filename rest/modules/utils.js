@@ -1,3 +1,38 @@
+const moment = require('moment')
+const {createLogger, format, transports} = require('winston')
+
+const { combine, label, printf, prettyPrint } = format
+
+const logFormat = printf(({ level, message, label}) => {
+  let now = moment().format('YYYYMMDDHHmmssSSS')
+  return `${now} [${label}] ${level}: ${message}`
+})
+let configureLogger = function (config, logLabel) {
+  let loggerLabel = logLabel
+  if (!loggerLabel) {
+    loggerLabel = 'default'
+  }
+  let logger = createLogger({
+    levels: {error: 0, warn: 1, info: 2, verbose: 3, debug: 4, trace: 5},
+    format: combine(
+      label({label: loggerLabel}),
+      // moment().format('YYYYMMDDHHmmss'),
+      prettyPrint(),
+      logFormat
+    ),
+    transports: [
+      new (transports.File)({
+        level: config.loglevel,
+        filename: config.logfilename,
+        maxfiles: config.maxlogfiles,
+        maxsize: config.maxlogfilesize
+      })
+    ]
+  })
+  return logger
+}
+
+
 
 let getEnv = function () {
   return {
@@ -11,6 +46,7 @@ let getEnv = function () {
     nmWebFilesRoot: process.env['NM_WEBFILES_ROOT'],
     nmWebBaseUri: process.env['NM_WEB_BASE_URI'],
     nmRdfLodPrefix: process.env['NM_RDF_LOD_PREFIX'],
+    nmRdfUriBase: process.env['NM_RDF_URI_BASE'],
     nmJobDataDir: process.env['NM_JOB_DATA'],
     nmLocalRestBase: process.env['NM_LOCAL_REST_BASE'],
     nmAuthUserHeader: process.env['NM_AUTH_USER_HEADER'],
@@ -81,6 +117,7 @@ function getDatasetXmlFileList (mongoose, logger, xmlTitle) {
 }
 
 module.exports = {
+  'configureLogger': configureLogger,
   'matchValidXmlTitle': matchValidXmlTitle,
   'getEnv': getEnv,
   'datasetBucketName': datasetBucketName,
