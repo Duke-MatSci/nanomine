@@ -1,6 +1,32 @@
 [
     {
         "class": "http://nanomine.org/ns/PolymerNanocomposite",
+        "label": "Author",
+        "multiType": "union",
+        "facetId" : "Author",
+        "predicate": "<http://www.w3.org/ns/prov#wasAttributedTo>",
+        "typeProperty" : "",
+        "propertyType": "http://www.w3.org/2002/07/owl#ObjectProperty"
+    },
+    {
+        "class": "http://nanomine.org/ns/PolymerNanocomposite",
+        "label": "Article",
+        "multiType": "union",
+        "facetId" : "Article",
+        "predicate": "^<http://semanticscience.org/resource/hasPart>",
+        "typeProperty" : "",
+        "propertyType": "http://www.w3.org/2002/07/owl#ObjectProperty"
+    },
+    {
+        "class": "http://nanomine.org/ns/PolymerNanocomposite",
+        "label": "Keyword",
+        "multiType": "union",
+        "facetId" : "Keyword",
+        "predicate": "^<http://semanticscience.org/resource/hasPart>/<http://www.w3.org/ns/dcat#keyword>",
+        "propertyType": "http://www.w3.org/2002/07/owl#DataProperty"
+    },
+    {
+        "class": "http://nanomine.org/ns/PolymerNanocomposite",
         "inverse": "http://semanticscience.org/resource/isComponentPartOf",
         "label": "Filler",
         "multiType": "union",
