@@ -137,7 +137,7 @@ function checkSchema (schema) {
   return rv
 }
 
-const versionOriginal = { // NanoMine Django RC1 or thereabouts i.e. the data currently in production as of 2018/09/10
+const versionOriginal = { // NanoMine Django RC1 or thereabouts i.e. the data was in production as of 2018/09/10 (until mid Feb 2019 shutdown)
   majorVer: 1,
   minorVer: 3,
   patchVer: 0,
@@ -150,7 +150,7 @@ const versionSpDev1 = { // NanoMine SP rewrite dev version 1
   labelVer: 'nm-sp-dev-1'
 }
 
-const versionSpDev2 = { // NanoMine SP rewrite dev version 1
+const versionSpDev2 = { // NanoMine SP rewrite dev version 2
   majorVer: 1,
   minorVer: 3,
   patchVer: 0,
@@ -271,7 +271,8 @@ function j2x (o, parent, indent) {
     let heo = o
     if (typeof o === 'string') {
       heo = he.encode(o, {
-        'useNamedReferences': false
+        'useNamedReferences': false,
+        'decimal': true
       })
     }
     xml += (' '.repeat(indent) + heo) // Element text
