@@ -77,6 +77,9 @@ echo install XMLCONV components
 pip install -r /apps/nanomine/install/xmlconv-requirements.txt
 pip install python-datauri
 
+echo install Dynamfit components
+pip install -r /apps/nanomine/install/dynamfit-requirements.txt
+
 echo create directory for dynamically generated web files
 mkdir /apps/nanomine-webfiles 2>/dev/null
 
