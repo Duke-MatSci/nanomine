@@ -17,7 +17,7 @@
 
       <p class="text-xs-left"><b>1. Upload #.X_T file containing three values per line (Frequency X' X''):</b></p>
       <v-flex xs12 class="text-xs-center text-sm-center text-md-center text-lg-center">
-        <p class="text-xs-left">Upload "EXAMPLE.X_T" here:
+        <p class="text-xs-left">Upload #.X_T file here:
           <v-btn class="text-xs-left" small color="primary" @click='pickTemplate'>Browse</v-btn>
           <input
             type="file"
