@@ -55,20 +55,27 @@ for f in myfiles:
 ## dynamfit conversion section
 messages = []
 # gather the parameters
-code_srcDir = os.getcwd() + '/code_src'
 # templateName
 templateName = inputParameters['templateName']
 # remove .X_T from templateName
 if templateName.endswith(".X_T"):
   templateName = templateName[:-4]
+else:
+  messages.append("[Extension Error] Your upload does not seem to have a .X_T file.")
 # weight
 weight = str(inputParameters['weight'])
+if not weight.isdigit():
+  messages.append("[Input Error] Weight factor should be a number. Please read instructions on the Dynamfit page carefully.")
+if float(weight) < 0.0 or float(weight) > 2.0:
+  messages.append("[Input Error] Weight factor should between 0.0 and 2.0. Please read instructions on the Dynamfit page carefully.")
 # nEle
+if int(inputParameters['nEle']) != float(int(inputParameters['nEle'])):
+  messages.append("[Input Error] Please use integer for the number of element.")
 nEle = int(inputParameters['nEle']) # integer number of element
 if nEle > 2 and nEle <= 104:
   nEle = str(nEle)
 else:
-  print("XXXXXXXXXXXXXXXXXXXXXXXXXX Error")
+  messages.append("[Input Error] We suggest to use 2 to 104 elements in Dynamfit.")
 # stddev
 stddev = inputParameters['stddev']
 if stddev in {"std1", "std2"}:
@@ -77,7 +84,7 @@ if stddev in {"std1", "std2"}:
   elif stddev == "std2":
     std = '2'
 else:
-  print("XXXXXXXXXXXXXXXXXXXXXXXXXX Error")
+  messages.append("[Input Error] Please reselect the standard deviation.")
 
 # dt
 dtype = inputParameters['dt']
@@ -87,10 +94,10 @@ if dtype in {"dt1", "dt2"}:
   elif dtype == "dt2":
     dt = '2'
 else:
-  print("XXXXXXXXXXXXXXXXXXXXXXXXXX Error")  
+  messages.append("[Input Error] Please reselect the data type.")
 
-logging.info(code_srcDir)
 # add code_src to the sys path
+code_srcDir = os.getcwd() + '/code_src'
 sys.path.insert(0, code_srcDir)
 # call the calculation code
 import traceback
@@ -101,18 +108,19 @@ except:
 
 status = 'failure'
 logging.info("calculation begin")
-try:
-  logging.info("before a.out")
-  os.system("cd %s; ./a.out %s %s %s %s %s" %(jobDir, templateName, weight, std, nEle, dt))
-  logging.info("after a.out")
-  plotEandEE(jobDir, templateName+'.X_T', templateName+'.XPR', int(nEle))
-  status = 'success'
-  logging.info("calculation finished")
-except:
-  logging.info('exception occurred')
-  logging.info('exception: ' + str(sys.exc_info()[0]))
-  status = 'failure'
-  messages = ['[Calculation Error] Oops! The calculation cannot be finished! Please contact the administrator.']
+if len(messages) == 0:
+  try:
+    logging.info("before a.out")
+    os.system("cd %s; ./a.out %s %s %s %s %s" %(jobDir, templateName, weight, std, nEle, dt))
+    logging.info("after a.out")
+    plotEandEE(jobDir, templateName+'.X_T', templateName+'.XPR', int(nEle))
+    status = 'success'
+    logging.info("calculation finished")
+  except:
+    logging.info('exception occurred')
+    logging.info('exception: ' + str(sys.exc_info()[0]))
+    status = 'failure'
+    messages.append("[Calculation Error] Oops! The calculation cannot be finished! Please contact the administrator.")
 
 logging.info("DYNAMFIT RESULT: " + status)
 for message in messages:
