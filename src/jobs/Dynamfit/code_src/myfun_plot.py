@@ -80,7 +80,7 @@ def plotEandEE(jobDir, experimental_file, data_file, eleNum):
 	plt.figure()
 	plt.plot(logfreq, np.log10(epp), label = "Fitted Debye series")
 	plt.plot(ExptFreq, np.log10(ExptEpp), marker=(8,2,0), linestyle='', label = "Experiment", color = 'r')
-	plt.xlabel('log(Frequency [Hz]')
+	plt.xlabel('log(Frequency [Hz])')
 	plt.xlim(ExptFreq[0]+0.5, ExptFreq[-1]-0.5)
 	plt.ylabel(r"$\epsilon''$")
 	plt.legend()
