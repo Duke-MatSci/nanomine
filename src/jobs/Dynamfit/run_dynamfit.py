@@ -63,15 +63,15 @@ if templateName.endswith(".X_T"):
 else:
   messages.append("[Extension Error] Your upload does not seem to have a .X_T file.")
 # weight
-weight = str(inputParameters['weight'])
-if not weight.isdigit():
-  messages.append("[Input Error] Weight factor should be a number. Please read instructions on the Dynamfit page carefully.")
+weight = unicode(inputParameters['weight'])
+if not weight.replace('.','',1).isdigit():
+  messages.append("[Input Error] Weight factor should be a non-negative number. Please read instructions on the Dynamfit page carefully.")
 else:
   if float(weight) < 0.0 or float(weight) > 2.0:
     messages.append("[Input Error] Weight factor should between 0.0 and 2.0. Please read instructions on the Dynamfit page carefully.")
 # nEle
-if not inputParameters['nEle'].isdigit():
-  messages.append("[Input Error] The number of element should be a number. Please read instructions on the Dynamfit page carefully.")
+if not unicode(inputParameters['nEle']).replace('.','',1).isdigit():
+  messages.append("[Input Error] The number of element should be a positive number. Please read instructions on the Dynamfit page carefully.")
 else:
   if int(inputParameters['nEle']) != float(int(inputParameters['nEle'])):
     messages.append("[Input Error] Please use integer for the number of element.")
