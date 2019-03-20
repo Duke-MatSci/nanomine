@@ -66,16 +66,20 @@ else:
 weight = str(inputParameters['weight'])
 if not weight.isdigit():
   messages.append("[Input Error] Weight factor should be a number. Please read instructions on the Dynamfit page carefully.")
-if float(weight) < 0.0 or float(weight) > 2.0:
-  messages.append("[Input Error] Weight factor should between 0.0 and 2.0. Please read instructions on the Dynamfit page carefully.")
-# nEle
-if int(inputParameters['nEle']) != float(int(inputParameters['nEle'])):
-  messages.append("[Input Error] Please use integer for the number of element.")
-nEle = int(inputParameters['nEle']) # integer number of element
-if nEle > 2 and nEle <= 104:
-  nEle = str(nEle)
 else:
-  messages.append("[Input Error] We suggest to use 2 to 104 elements in Dynamfit.")
+  if float(weight) < 0.0 or float(weight) > 2.0:
+    messages.append("[Input Error] Weight factor should between 0.0 and 2.0. Please read instructions on the Dynamfit page carefully.")
+# nEle
+if not inputParameters['nEle'].isdigit():
+  messages.append("[Input Error] The number of element should be a number. Please read instructions on the Dynamfit page carefully.")
+else:
+  if int(inputParameters['nEle']) != float(int(inputParameters['nEle'])):
+    messages.append("[Input Error] Please use integer for the number of element.")
+  nEle = int(inputParameters['nEle']) # integer number of element
+  if nEle > 2 and nEle <= 104:
+    nEle = str(nEle)
+  else:
+    messages.append("[Input Error] We suggest to use 2 to 104 elements in Dynamfit.")
 # stddev
 stddev = inputParameters['stddev']
 if stddev in {"std1", "std2"}:
