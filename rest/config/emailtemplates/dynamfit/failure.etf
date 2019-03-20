@@ -1,0 +1,15 @@
+<br/>Hello ${user},
+
+<br/>Unfortunately, your dynamfit job ${jobid} was not successful.
+
+<br/>job result code: ${jobinfo.resultcode}
+
+<br/>error messages:
+
+${jobinfo.errormsg}
+
+<br/>
+<br/>
+Regards,
+<br/>The NanoMine team
+<br/>
