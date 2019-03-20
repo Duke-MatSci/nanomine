@@ -7,6 +7,8 @@ from doiretriever import mainDOIsoupFirst
 import datetime
 import json
 import urllib2
+import ssl
+import traceback
 
 # a helper method to find a blurry match regardless of # signs between two
 # strings, testant is the standard expression
@@ -39,7 +41,7 @@ def verifyID(ID_raw):
 
 
 # the method to extract ID
-def extractID(xlsxName, jobDir, code_srcDir, restbase):
+def extractID(xlsxName, jobDir, code_srcDir, restbase, user):
     # open xlsx
     # xlrd is the library used to read xlsx file
     # https://secure.simplistix.co.uk/svn/xlrd/trunk/xlrd/doc/xlrd.html?p=4966
@@ -96,7 +98,7 @@ def extractID(xlsxName, jobDir, code_srcDir, restbase):
     # if no error detected
     if message == '':
         # call restDOI here
-        response, message = restDOI(DOI, code_srcDir, restbase, sheet_sample)
+        response, message = restDOI(DOI, code_srcDir, restbase, sheet_sample, user)
         # if doi is not valid
         if response is None:
             with open(jobDir + '/error_message.txt', 'a') as fid:
@@ -119,7 +121,7 @@ def extractID(xlsxName, jobDir, code_srcDir, restbase):
 
 
 # make rest call for doi info
-def restDOI(DOI, code_srcDir, restbase, sheet_sample):
+def restDOI(DOI, code_srcDir, restbase, sheet_sample, user):
     message = ''
     exist = False
     response = None
@@ -127,13 +129,15 @@ def restDOI(DOI, code_srcDir, restbase, sheet_sample):
     try:
         dsurl = restbase + '/nmr/dataset?doi='+DOI
         rq = urllib2.Request(dsurl)
-        j = json.loads(urllib2.urlopen(rq).read())
+        j = json.loads(urllib2.urlopen(rq, context=ssl._create_unverified_context()).read())
         if len(j["data"]) > 0:
             exist = True
             response = j["data"][0]
     except:
         message += 'exception occurred during dataset GET by doi\n'
-        message += 'exception: ' + str(sys.exc_info()[0]) + '\n'
+        message += 'exception: ' + str(traceback.format_exc()) + '\n'
+        ## print('exception: '  + str(traceback.format_exc()))
+
     if message != '':
         return (None, message)
     # if doi doesn't exist, ds-create
@@ -157,12 +161,20 @@ def restDOI(DOI, code_srcDir, restbase, sheet_sample):
             rq = urllib2.Request(ds_create_url)
             # logging.info('request created using ds_create_url')
             rq.add_header('Content-Type','application/json')
-            r = urllib2.urlopen(rq, json.dumps(ds_data))
+
+            # NOTE: TODO this may not be the best place for this but, default for create is false and need to set userid ...
+            dsInfo = ds_data['dsInfo']
+            dsInfo['isPublic'] = 'false'
+            dsInfo['ispublished'] = 'false' # no camel case on this one
+            dsInfo['userid'] = user
+            # NOTE END
+
+            r = urllib2.urlopen(rq, json.dumps(ds_data), context=ssl._create_unverified_context())
             # logging.info('dataset create request posted: ' + str(r.getcode()))
             response = json.loads(r.read())['data']
         except:
             message += 'exception occurred during dataset-create\n'
-            message += 'exception: ' + str(sys.exc_info()[0]) + '\n'
+            message += 'exception: ' + str(traceback.format_exc()) + '\n'
         # assemble the PID
         if response is None:
             message += 'exception occurred during getting the response of dataset-create\n'
@@ -315,6 +327,6 @@ def specialIssueRest(sheet, DOI):
     restDict = {'dsInfo': restDict}
     return restDict
 
-def runEVI(jobDir, code_srcDir, templateName, restbase):
+def runEVI(jobDir, code_srcDir, templateName, restbase, user):
     xlsxName = jobDir + '/' + templateName
-    extractID(xlsxName, jobDir, code_srcDir, restbase)
+    extractID(xlsxName, jobDir, code_srcDir, restbase, user)

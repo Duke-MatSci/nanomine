@@ -33,16 +33,16 @@
           <div>
             <h4>
               <span>
-                <router-link to="/dynamfit">
-                  Dynamfit
-                </router-link>
+                <!--router-link to="/dynamfit"-->
+                <h3>Dynamfit</h3>
+                <!--/router-link-->
               </span>
             </h4>
             <p>
               Dynamfit is a sign control algorithm for Prony Series fitting. This program fits a viscoelastic
               mastercurve from DMA experiments with a Prony Series. The Prony Series coefficients can be used as
               baseline properties for the matrix in a FEA simulation of nanocomposites.
-            </p>
+            </p><h3>Under construction. Not currently available.</h3>
           </div>
         </div>
         <div>
@@ -52,7 +52,9 @@
           <div>
             <h4>
               <span>
-                <router-link to="/AUTOFIT">Automatic Fitting of Interphase Relaxation Model in Nanocomposites</router-link>
+                <!--router-link to="/AUTOFIT"-->
+                <h3>Automatic Fitting of Interphase Relaxation Model in Nanocomposites</h3>
+                <!--/router-link-->
               </span>
             </h4>
             <p>
@@ -60,7 +62,7 @@
               starts from composite properties and microstructure. It integrates finite element analysis and
               metamodeling optimization that predicts the interphase properties that results in minimal error between
               simulated properties from FEA and experimental composite properties.
-            </p>
+            </p><h3>Under construction. Not currently available.</h3>
           </div>
         </div>
       </div>
@@ -84,7 +86,15 @@ export default {
   img {
     width: 240px;
   }
+  h3 {
+    color: #096ff4;
+  }
   h4 {
     text-transform: uppercase;
+  }
+  h1 {
+    margin-top: 10px;
+    background-color: black;
+    color: white;
   }
 </style>

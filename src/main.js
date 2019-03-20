@@ -41,7 +41,7 @@ Vue.component('LeftMenu', LeftMenu)
 Vue.component('waiting', Waiting)
 /* eslint-disable no-new */
 
-new Vue({
+export default new Vue({
   el: '#app',
   store,
   router,
