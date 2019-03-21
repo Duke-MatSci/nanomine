@@ -31,6 +31,10 @@ import CorrelationReconstructResults from '@/components/CorrelationReconstructRe
 import DescriptorReconstructResults from '@/components/DescriptorReconstructResults'
 import ViewData from '@/components/ViewData'
 import Contact from '@/components/Contact'
+import Dynamfit from '@/components/Dynamfit'
+import DynamfitExample from '@/components/DynamfitExample'
+import DynamfitExampleInput from '@/components/DynamfitExampleInput'
+import DynamfitResult from '@/components/DynamfitResult'
 
 Vue.use(Router)
 
@@ -201,6 +205,26 @@ export default new Router({
       props: (route) => ({
         title: route.query.title
       })
+    },
+    {
+      path: '/Dynamfit',
+      name: 'Dynamfit',
+      component: Dynamfit
+    },
+    {
+      path: '/DynamfitExample',
+      name: 'DynamfitExample',
+      component: DynamfitExample
+    },
+    {
+      path: '/DynamfitExampleInput',
+      name: 'DynamfitExampleInput',
+      component: DynamfitExampleInput
+    },
+    {
+      path: '/DynamfitResult',
+      name: 'DynamfitResult',
+      component: DynamfitResult
     }
   ]
 })

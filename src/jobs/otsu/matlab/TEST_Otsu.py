@@ -31,7 +31,7 @@ except:
   pass
 
 srcDir = jobSrcDir + '/matlab/test_outputs/'
-outFiles = [ srcDir + 'Binarized_Input1.jpg', srcDir + 'Input1.jpg', srcDir + 'Results.zip']
+outFiles = [ srcDir + 'Binarized_Input1.jpg', srcDir + 'Input1.jpg', srcDir + 'Results.zip', srcDir + 'errors.txt']
 
 try:
   for f in outFiles:
@@ -44,6 +44,7 @@ except:
 file = open(jobDir+"/"+"job_output_parameters.json","w")
 file.write('{\n"inputFileName": "output/Input1.jpg",\n')
 file.write('"binarizedFileName": "output/Binarized_Input1.jpg",\n')
-file.write('"zipFileName": "output/Results.zip"\n}')
+file.write('"zipFileName": "output/Results.zip"\n')
+file.write('\n}')
 file.close()
 sys.exit(rc)
