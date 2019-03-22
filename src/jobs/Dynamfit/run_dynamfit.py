@@ -9,6 +9,7 @@ import sys
 import json
 import urllib2
 from nm.common import *
+from nm.common.nm_rest import nm_rest
 
 restbase = os.environ['NM_LOCAL_REST_BASE']
 webbase = os.environ['NM_WEB_BASE_URI']
@@ -22,6 +23,9 @@ except:
 
 logging.basicConfig(filename=os.environ['NM_LOGFILE'],level=loglevel)
 
+sysToken = os.environ['NM_AUTH_SYSTEM_TOKEN']
+emailApiToken = os.environ['NM_AUTH_API_TOKEN_EMAIL']
+emailRefreshToken = os.environ['NM_AUTH_API_REFRESH_EMAIL']
 
 logging.info('nanomine environment keys: ')
 for key in os.environ.keys():
@@ -163,7 +167,9 @@ try:
   rq = urllib2.Request(emailurl)
   logging.info('request created using emailurl')
   rq.add_header('Content-Type','application/json')
-  r = urllib2.urlopen(rq, json.dumps(emaildata))
+  nmEmail = nm_rest(logging, sysToken, emailApiToken, emailRefreshToken, rq)
+  ## r = urllib2.urlopen(rq, json.dumps(emaildata))
+  r = nmEmail.urlopen(json.dumps(emaildata))
   logging.info('sent ' + status + ' email: ' + str(r.getcode()))
 except:
   logging.info('exception occurred')
