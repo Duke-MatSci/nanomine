@@ -1,6 +1,6 @@
 <template>
   <div class="main">
-    <v-jumbotron>
+    <v-jumbotron src="/cdn/img/random_network.png">
       <v-container fill-height>
         <v-layout align-center>
           <v-flex>
