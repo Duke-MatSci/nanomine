@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-export myFork='bluedevil-oit'
-export myBranch='install'
+export myFork='duke-matsci'
+export myBranch='dev'
 if [[ -z $1 ]] ; then
   echo "MONGO Dump location required. Pass value for MONGO_DUMP_DOWNLOAD_LOCATION as first parameter to this script ($0)"
   exit 1
@@ -22,7 +22,6 @@ else
   myBranch=$3
 fi
 
-
 cd /apps
 echo cloning fork ${myFork}
 git clone https://github.com/"${myFork}"/nanomine.git # to use the original, use FORKNAME of 'duke-matsci'
@@ -32,7 +31,6 @@ git checkout ${myBranch}
 
 echo installing nodejs
 curl -L https://git.io/n-install | bash -s -- -y lts
-
 
 ## export N_PREFIX="$HOME/n"; [[ :$PATH: == *":$N_PREFIX/bin:"* ]] || PATH+=":$N_PREFIX/bin"
 if [[ -f ~/.bash_profile ]] ; then
@@ -48,6 +46,11 @@ else
   echo 'export N_PREFIX="$HOME/n"; [[ :$PATH: == *":$N_PREFIX/bin:"* ]] || PATH+=":$N_PREFIX/bin"' > ~/.bash_profile
   echo '. /apps/nanomine_env' >> ~/.bash_profile
 fi
+grep activate ~/.bashrc
+if [[ $? -ne 0 ]]; then
+  echo 'source /apps/whyis/venv/bin/activate' >> ~/.bashrc
+fi
+
 grep nanomine_env ~/.bashrc
 if [[ $? -ne 0 ]]; then
   echo '. /apps/nanomine_env' >> ~/.bashrc
