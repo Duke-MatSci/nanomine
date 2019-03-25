@@ -218,3 +218,12 @@ export default {
   }
 }
 </script>
+<style scoped>
+
+  h1 {
+    margin-top: 10px;
+    background-color: black;
+    color: white;
+  }
+
+</style>
