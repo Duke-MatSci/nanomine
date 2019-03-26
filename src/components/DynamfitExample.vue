@@ -41,13 +41,13 @@
         <v-flex xs5>
           <v-layout column>
             <div class="subheading">Epsilon Prime</div>
-            <v-img src="cdn/img/dynamfit_example_E.jpg" contain></v-img>
+            <v-img src="cdn/img/dynamfit_example_E.png" contain></v-img>
           </v-layout>
         </v-flex>
         <v-flex xs5>
           <v-layout column>
             <div class="subheading">Epsilon Double Prime</div>
-            <v-img src="cdn/img/dynamfit_example_EE.jpg" contain></v-img>
+            <v-img src="cdn/img/dynamfit_example_EE.png" contain></v-img>
           </v-layout>
         </v-flex>
       </v-layout>
