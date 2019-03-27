@@ -1,0 +1,13 @@
+
+
+<br/>Hello ${user},
+
+<br/>Your dynamfit job ${jobid} was successful.
+
+<br/>You can see the result at ${resultpage}.
+
+
+<br/>
+Regards,
+<br/>The NanoMine team
+<br/>

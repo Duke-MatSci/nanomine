@@ -1,20 +1,36 @@
 #!/usr/bin/env bash
-export myFork='bluedevil-oit'
-cd /apps
-echo cloning fork ${myFork}
-git clone https://github.com/"${myFork}"/nanomine.git # to use the original, use FORKNAME of 'duke-matsci'
-cd nanomine
-git checkout install ## TODO WARNING!! change this to dev!!
-
-echo installing nodejs
-curl -L https://git.io/n-install | bash -s -- -y lts
-
+export myFork='duke-matsci'
+export myBranch='dev'
 if [[ -z $1 ]] ; then
   echo "MONGO Dump location required. Pass value for MONGO_DUMP_DOWNLOAD_LOCATION as first parameter to this script ($0)"
   exit 1
 else
   MONGO_DUMP_DOWNLOAD_LOCATION=$1
 fi
+
+if [[ -z $2 ]] ; then
+  echo "Fork of duke-matsci required for install. Pass value for NM_INSTALL_FORK as second parameter to this script ($0)"
+  exit 1
+else
+  myFork=$2
+fi
+
+if [[ -z $3 ]] ; then
+  echo "Branch to install required. Pass value for NM_INSTALL_BRANCH as third parameter to this script ($0)"
+  exit 1
+else
+  myBranch=$3
+fi
+
+cd /apps
+echo cloning fork ${myFork}
+git clone https://github.com/"${myFork}"/nanomine.git # to use the original, use FORKNAME of 'duke-matsci'
+cd nanomine
+echo checking out ${myBranch}
+git checkout ${myBranch}
+
+echo installing nodejs
+curl -L https://git.io/n-install | bash -s -- -y lts
 
 ## export N_PREFIX="$HOME/n"; [[ :$PATH: == *":$N_PREFIX/bin:"* ]] || PATH+=":$N_PREFIX/bin"
 if [[ -f ~/.bash_profile ]] ; then
@@ -30,11 +46,16 @@ else
   echo 'export N_PREFIX="$HOME/n"; [[ :$PATH: == *":$N_PREFIX/bin:"* ]] || PATH+=":$N_PREFIX/bin"' > ~/.bash_profile
   echo '. /apps/nanomine_env' >> ~/.bash_profile
 fi
+grep activate ~/.bashrc
+if [[ $? -ne 0 ]]; then
+  echo 'source /apps/whyis/venv/bin/activate' >> ~/.bashrc
+fi
+
 grep nanomine_env ~/.bashrc
 if [[ $? -ne 0 ]]; then
   echo '. /apps/nanomine_env' >> ~/.bashrc
 fi
-. /apps/.bashrc
+source /apps/.bashrc
 
 # install the VueJS command line processor
 npm i -g vue-cli@2.9.6
@@ -58,6 +79,9 @@ pip install -e .
 echo install XMLCONV components
 pip install -r /apps/nanomine/install/xmlconv-requirements.txt
 pip install python-datauri
+
+echo install Dynamfit components
+pip install -r /apps/nanomine/install/dynamfit-requirements.txt
 
 echo create directory for dynamically generated web files
 mkdir /apps/nanomine-webfiles 2>/dev/null
