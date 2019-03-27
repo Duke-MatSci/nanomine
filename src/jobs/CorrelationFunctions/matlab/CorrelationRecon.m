@@ -12,10 +12,15 @@ function CorrelationRecon(userId, jobId, jobType, jobSrcDir, jobDir, webBaseUri,
 % 4 : Two point Surface-Surface Correlation
 %%%
 
+%%% Umar edits
+% 1: Fix the reconstruction size to 200 by 200 for images with greater sizes
+%%%
+writeError([path_to_write, '/errors.txt'], ''); % ensure that errors.txt exists
 rc=0;
 try
   path_to_read = [jobSrcDir,'/'];
   path_to_write = [jobSrcDir,'/output'];
+  
   mkdir(path_to_write);
   num_recon = str2num(NumOfRecon);
   correlation_choice = str2num(correlation_choice);
@@ -23,9 +28,15 @@ try
   switch str2num(input_type)
       case 1
           img = imread([path_to_read,file_name]); % read the incming target and store pixel values
-          if max(img(:)) > 1
-              img = round(img/256);
-          end
+          %% Umar added to check and binarize the image using Otsu 02/27/2019
+if max(img(:))>1
+    Target = double(img);
+    Target = Target/256; %
+    level = graythresh(Target);
+    img = im2bw(Target,level);
+    
+end
+%%
           imwrite(256*img,[path_to_write,'/','Input1.jpg']);
           legendInfo{1} = 'Target Image'; % Create legend for plots and variable names to save in .csv
           legendInfo_table{1} = 'Target_Image'; % Create variable names to save in .csv
@@ -35,8 +46,19 @@ try
           legendInfo{1} = 'Mean Of Inputs'; % Create legend for plots and variable names to save in .csv
           legendInfo_table{1} = 'Mean_Of_Inputs'; % Create variable names to save in .csv
       case 3
-          load([path_to_read,file_name]);
-          img = Input;
+path=[path_to_read,file_name];
+k=load(path);
+[no_need,f_name,ext]=fileparts(file_name);
+try
+img = getfield(k,f_name);
+catch ex
+rc = 98;
+msg = getReport(ex);
+writeError([path_to_write, '/errors.txt'], 'The variable name inside the material file shold be the same as the name of the file. Technical details below:');
+writeError([path_to_write, '/errors.txt'], msg);
+writeError([path_to_write, '/errors.txt'], sprintf('\n'));
+exit(rc);
+end
           img_viewable = 256 * img;
           imwrite(img_viewable,[path_to_write,'/','Input1.jpg']);
           legendInfo{1} = 'Target Image'; % Create legend for plots and variable names to save in .csv
@@ -44,21 +66,48 @@ try
   end
   switch (correlation_choice)
       case 1
+          try
           calc_Corr = @evaluate;
           Y_label = 'Two Point Autocorrelation';
           Correlation_name = 'Two_Point_Autocorrelation';
+          catch
+              writeError([path_to_write, '/errors.txt'], ['Failed to perform Two Point Autocorrelation ']);
+        rc = 99;
+        exit(rc);
+          end
+          
       case 2
+          try
           calc_Corr = @L_2D;
           Y_label = 'Two Point Lineal Path Correlation';
           Correlation_name = 'Lineal_Path_Correlation';
+          catch
+              writeError([path_to_write, '/errors.txt'], ['Failed to perform Two Point Lineal Path Correlation ']);
+        rc = 99;
+        exit(rc);
+          end
+          
       case 3
+          try
           calc_Corr = @C2;
           Y_label = 'Two Point Cluster Correlation';
           Correlation_name = 'Cluster_Correlation';
+          catch
+              writeError([path_to_write, '/errors.txt'], ['Failed to perform Cluster Correlation']);
+        rc = 99;
+        exit(rc);
+          end
+          
       case 4
+          try
           calc_Corr = @Ss_2D;
           Y_label = 'Two Point Surface-Surface Correlation';
           Correlation_name = 'Surface_Correlation';
+          catch
+              writeError([path_to_write, '/errors.txt'], ['Failed to perform Two Point Suraface-Surface Correlation ']);
+        rc = 99;
+        exit(rc);
+          end
   end
 
   
@@ -99,8 +148,16 @@ try
               Y_label = 'Two Point Surface-Surface Correlation';
               Correlation_name = 'Surface_Correlation';
       end
-      L1 = size(Target_img,1); L2 = size(Target_img,2); % get dimensions of image to be reconstructed
-      %     S2_target = evaluate(Target_img); % calculate S2 of target
+L1 = size(Target_img,1); L2 = size(Target_img,2); % get dimensions of image to be reconstructed
+     if L1>200
+         L1=200; %Fix the reconstruction size for sizes above 200
+     end
+     if L2>200
+         L2=200; %Fix the reconstruction size for sizes above 200
+     end
+ 
+     
+%     S2_target = evaluate(Target_img); % calculate S2 of target
       %     L2_target = L_2D(Target_img);
       %     Surf2_target = Ss_2D(Target_img);
       %     C2_target = C2(Target_img);
@@ -131,7 +188,7 @@ try
             imwrite(256*Recon_img,[path_to_write,'/Reconstruct',num2str(i),'.jpg']);
             %save([path_to_write,'/Reconstruct',num2str(i),'.mat'],'Recon_img');
         end
-
+try
         %%Plotting%%
         figure('color',[1,1,1])
         hold on;
@@ -148,7 +205,11 @@ try
         legend(legendInfo);
         saveas(gcf,[path_to_write,'/Correlation Comparison.jpg']);
         hold off;
-
+catch
+    writeError([path_to_write, '/errors.txt'], 'Could not plot the results');
+    rc=99;
+    exit(rc)
+end
         % figure('color',[1,1,1])
         % hold on;
         % plot( 0:1:length(L2_target)-1, L2_target , 'LineWidth',2.5);
@@ -221,5 +282,10 @@ catch ex
   rc = 99;
   exit(rc);
 end
+    function writeError(file, msg)
+    f = fopen(file,'a+');
+    fprintf(f, '%s\n', msg);
+    fclose(f);
+    end
 
 end
