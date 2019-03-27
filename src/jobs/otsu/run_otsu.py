@@ -89,7 +89,7 @@ try:
     errmsgs = f.read()
   errmsgs = str.replace(errmsgs, '\n','<br/>\n')
 except:
-  logging.info('exception resading otsu matlab job error messages')
+  logging.info('exception reading otsu matlab job error messages')
   logging.info('exception: ' + traceback.format_exc())
   errmsgs = ''
 
