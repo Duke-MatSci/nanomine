@@ -119,7 +119,8 @@ else: # send error email
       "emailtemplatename": "failure",
       "emailvars": {
         "jobinfo": {
-          "resultcode":rc
+          "resultcode":rc,
+          "errors": errmsgs
         },
         "user": userId
       }
