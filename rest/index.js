@@ -602,59 +602,54 @@ function handleLogin (req, res) {
       })
   })
 }
-// app.post('/XAML2/XOST', function (req, res) {
-//   let idx = '../dist/index.html'
-//   // console.log('headers: ' + JSON.stringify(req.headers))
-//   // handleLogin(req.headers)
-//   // NOTE: For now, login is required to get to the site. TODO change login so that it is optional to access protected functions
-//   // let remoteUser = req.headers['remote_user'] // this only works with NetIDs and will not work with OneLink
-//   handleLogin(req, res)
-//     .then(function (res) {
-//       try {
-//         fs.readFile(idx, 'utf8', function (err, data) { // TODO Cache this
-//           if (err) {
-//             return res.status(400).send('cannot open index')
-//           } else {
-//             return res.send(data)
-//           }
-//         })
-//       } catch (err) {
-//         return res.status(404).send(err)
-//       }
-//     })
-//     .catch(function (err) {
-//       logger.error('login error caught from handleLogin: ' + err)
-//       return res.status(500).send('login error occurred: ' + err)
-//     })
-// })
-// app.use('/nm', express.static('../dist'))
-app.get('/nm', function (req, res) {
-  let idx = '../dist/index.html'
-  // console.log('headers: ' + JSON.stringify(req.headers))
-  // handleLogin(req.headers)
-  // NOTE: For now, login is required to get to the site. TODO change login so that it is optional to access protected functions
-  // let remoteUser = req.headers['remote_user'] // this only works with NetIDs and will not work with OneLink
+
+app.get('/secure', function (req, res, next) {
+  logger.debug('headers: ' + inspect(req.headers))
   handleLogin(req, res)
     .then(function (res) {
-      try {
-        fs.readFile(idx, 'utf8', function (err, data) { // TODO Cache this
-          if (err) {
-            return res.status(400).send('cannot open index')
-          } else {
-            return res.send(data)
-          }
-        })
-      } catch (err) {
-        return res.status(404).send(err)
-      }
+      res.redirect('/nm')
     })
     .catch(function (err) {
       logger.error('login error caught from handleLogin: ' + err)
       return res.status(500).send('login error occurred: ' + err)
     })
 })
+
+// app.use('/nm', express.static('../dist'))
+app.get('/nm', function (req, res) {
+  let idx = '../dist/index.html'
+  // logger.debug('headers: ' + JSON.stringify(req.headers))
+  // handleLogin(req.headers)
+  // NOTE: For now, login is required to get to the site.
+  // let remoteUser = req.headers['remote_user'] // this only works with NetIDs and will not work with OneLink
+  //  handleLogin(req, res)
+  //    .then(function (res) {
+  logger.debug('cookies: ' + inspect(req.cookies))
+  try {
+    fs.readFile(idx, 'utf8', function (err, data) { // TODO Cache this
+      if (err) {
+        return res.status(400).send('cannot open index')
+      } else {
+        return res.send(data)
+      }
+    })
+  } catch (err) {
+    return res.status(404).send(err)
+  }
+  // })
+  // .catch(function (err) {
+  //   logger.error('login error caught from handleLogin: ' + err)
+  //   return res.status(500).send('login error occurred: ' + err)
+  // })
+})
 app.get('/logout', function (req, res) {
   return res.status(200).json({error: null, data: {logoutUrl: nmAuthLogoutUrl}})
+})
+
+app.get('/doLogout', function (req, res) {
+  res.clearCookie('session', {'httpOnly': true, 'path': '/'})
+  res.clearCookie('token', {})
+  res.redirect(nmAuthLogoutUrl)
 })
 
 /* BEGIN general utility functions */

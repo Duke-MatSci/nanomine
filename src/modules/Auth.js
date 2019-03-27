@@ -3,9 +3,10 @@
 */
 
 import {} from 'vuex'
-import Axios from 'axios'
+// import Axios from 'axios'
 import jwt from 'jsonwebtoken'
 import Vue from '../main'
+
 export function Auth () {
   this.err = null
   this.getAuthPath = '/nmr/auth'
@@ -84,25 +85,15 @@ Auth.prototype = {
     }
     return rv
   },
-  getLogoutUrl: function () {
-    let p = new Promise(function (resolve, reject) {
-      Axios.get('/nmr/logout')
-        .then(function (response) {
-          console.log('getLogoutUrl response: ')
-          console.log(response)
-          resolve(response.data.data.logoutUrl)
-        })
-        .catch(function (err) {
-          console.log('error logging out: ' + err)
-          reject(err)
-        })
-    })
-    return p
-  },
   deleteTokenCookie: function () {
     let cookieDate = new Date()
     cookieDate.setTime(cookieDate.getTime() - 1)
     document.cookie = 'token=; expires=' + cookieDate.toGMTString()
+  },
+  deleteSessionCookie: function () {
+    let cookieDate = new Date()
+    cookieDate.setTime(cookieDate.getTime() - 1)
+    document.cookie = 'session=; expires=' + cookieDate.toGMTString()
   },
   getGivenName: function () {
     let vm = this
@@ -163,6 +154,7 @@ Auth.prototype = {
   },
   logout: function (successFunction, failureFunction) {
     this.deleteTokenCookie()
+    this.deleteSessionCookie()
   },
   notAuthorizedHandler: function (successFunction, failureFunction) {
     // call this if the user does something that returns 403, or that user is not permitted to do based on permissions
