@@ -227,6 +227,8 @@ let authOptions = {
     // not yet    { path: '/dataset/create', loginAuth: false, membership: [], apiAuth: true, apiGroup: 'curate' },
     {path: '/datasets', loginAuth: true, membership: [], apiAuth: true, apiGroup: 'curate'},
     {path: '/jobemail', loginAuth: false, membership: [], apiAuth: true, apiGroup: 'email'},
+    {path: '/jobcreate', loginAuth: true, membership: [], apiAuth: true, apiGroup: 'jobs'},
+    {path: '/jobpostfile', loginAuth: true, membership: [], apiAuth: true, apiGroup: 'jobs'},
     {path: '/jobsubmit', loginAuth: true, membership: [], apiAuth: true, apiGroup: 'jobs'},
     {path: '/testpubfiles2rdf', loginAuth: true, membership: ['admin'], apiAuth: true, apiGroup: 'curate'},
     {path: '/testpubschema2rdf', loginAuth: true, membership: ['admin'], apiAuth: true, apiGroup: 'curate'},
