@@ -436,7 +436,8 @@ function authMiddleware (authOptions) {
 app.use(authMiddleware(authOptions))
 /* END Api Authorization */
 
-let fourHours = 4 * 60 * 60 * 1000 // TODO test rest API behavior with short LOCAL timeout
+let oneHour = 60 * 60 // in seconds. TODO test rest API behavior with short LOCAL timeout
+let tokenTTL = 4 * oneHour
 function handleLogin (req, res) {
   let func = 'handleLogin'
   let remoteUser = null
@@ -453,7 +454,7 @@ function handleLogin (req, res) {
     displayName = nmAuthTestUser
     surName = nmAuthTestUser
     emailAddr = emailTestAddr
-    sessionExpiration = moment().unix() + fourHours
+    sessionExpiration = moment().unix() + tokenTTL
   } else {
     remoteUser = req.headers[nmAuthUserHeader] // OneLink users do not have NetIDs, but all have dudukeids
     givenName = req.headers[nmAuthGivenNameHeader]
@@ -2714,89 +2715,6 @@ app.post('/jobsubmit', function (req, res) {
       jsonResp.error = err
       return res.status(500).json(jsonResp)
     })
-  // execute the configured job in the background
-  //   will do better later. At least client code on each side of the interface won't change
-  // let pgms = config.jobtypes
-  // let pgm = null
-  // let pgmdir = null
-  // pgms.forEach(function (v) {
-  //   if (v.jobtype === jobType) {
-  //     pgmdir = v.pgmdir
-  //     pgm = v.pgmname
-  //   }
-  // })
-  // try {
-  //   let jobParams = null
-  //   fs.readFile(paramFileName, {encoding: 'utf8'}, function (err, jobParamsStr) {
-  //     if (err) {
-  //       updateJobStatus(jobDir, 'readParametersOnSubmitError' + '-' + paramFileName)
-  //       let msg = '/jobsubmit write job file error - file: ' + paramFileName + ' err: ' + err
-  //       logger.error(msg)
-  //       jsonResp.data = null
-  //       jsonResp.error = msg
-  //       return res.status(500).json(jsonResp)
-  //     } else {
-  //       jobParams = JSON.parse(jobParamsStr)
-  //       let token = getTokenDataFromReq(req)
-  //       if (token) { // always update user in parameters to either current user or if current=admin same user spec'd in parms
-  //         let userid = token.sub
-  //         let newUser = null
-  //         let oldUser = jobParams.user
-  //         if (token.isAdmin && oldUser && oldUser.length > 0 && userid !== oldUser) { // allow admin to override runAs user
-  //           newUser = oldUser
-  //         } else {
-  //           newUser = userid // set to user running job if not admin or override not requested
-  //         }
-  //         jobParams.user = newUser
-  //         jobParams.submittingUser = userid
-  //         jobParams.originalUser = oldUser
-  //         fs.writeFile(paramFileName, JSON.stringify(jobParams), {'encoding': 'utf8'}, function (err, data) {
-  //           if (err) {
-  //             updateJobStatus(jobDir, 'updateUserOnSubmitError' + '-' + paramFileName)
-  //             let msg = '/jobsubmit write job parameter file error - file: ' + paramFileName + ' err: ' + err
-  //             logger.error(msg)
-  //             jsonResp.data = null
-  //             jsonResp.error = msg
-  //             return res.status(500).json(jsonResp)
-  //           } else {
-  //             updateJobStatus(jobDir, 'userUpdatedOnSubmit-Old(' + oldUser + ')--New(' + newUser + ')')
-  //             if (pgm != null && pgmdir) {
-  //               let jobPid = null
-  //               // TODO track child status and output with events and then update job status, but for now, just kick it off
-  //               let cwd = process.cwd()
-  //               let pgmpath = pathModule.join(cwd, pgmdir)
-  //               pgm = pathModule.join(pgmpath, pgm)
-  //               logger.info('executing: ' + pgm + ' in: ' + pgmpath)
-  //               let localEnv = {'PYTHONPATH': pathModule.join(cwd, '../src/jobs/lib')}
-  //               localEnv = _.merge(localEnv, process.env)
-  //               let child = require('child_process').spawn(pgm, [jobType, jobId, jobDir], {
-  //                 'cwd': pgmpath,
-  //                 'env': localEnv
-  //               })
-  //               jobPid = child.pid
-  //               updateJobStatus(jobDir, {'status': 'submitted', 'pid': jobPid})
-  //               jsonResp.data = {'jobPid': jobPid}
-  //               return res.json(jsonResp)
-  //             } else {
-  //               updateJobStatus(jobDir, 'failed-no-pgm-defined')
-  //               jsonResp.error = 'job type has program not defined'
-  //               return res.status(400).json(jsonResp)
-  //             }
-  //           }
-  //         })
-  //       } else {
-  //         let msg = 'Did not run job because proper userid was not set in JWT token. This should not happen since auth required to get here!'
-  //         logger.error(msg + ' token: ' + JSON.stringify(token))
-  //         jsonResp.error = msg
-  //         return res.status(500).json(jsonResp)
-  //       }
-  //     }
-  //   })
-  // } catch (err) {
-  //   updateJobStatus(jobDir, 'failed-to-exec-' + err)
-  //   jsonResp.error = 'job failed to exec: ' + err
-  //   res.status(400).json(jsonResp)
-  // }
 })
 
 /* end job related rest services */
@@ -2991,88 +2909,88 @@ app.post('/contact', function (req, res, next) { // bearer auth
 /* email related rest services - end */
 
 /* Visualization related requests - begin */
-app.get('/visualization/fillerPropertyList', function (req, res) {
-  let query = `
-prefix sio:<http://semanticscience.org/resource/>
-prefix ns:<http://nanomine.tw.rpi.edu/ns/>
-select distinct ?fillerProperty
-where {
-    ?filler sio:hasRole [a ns:Filler].
-    ?filler sio:hasAttribute ?fillerAttribute .
-    ?fillerAttribute a ?fillerProperty .
-} order by ?fillerProperty  
-`
-  return postSparql(req.path, query, req, res)
-})
-
-app.get('/visualization/materialPropertyList', function (req, res) {
-  let query = `
-prefix sio:<http://semanticscience.org/resource/>
-  prefix ns:<http://nanomine.tw.rpi.edu/ns/>
-  select distinct ?materialProperty
-  where {
-     ?sample sio:hasComponentPart ?filler . 
-     ?sample sio:hasAttribute ?sampleAttribute .
-     ?sampleAttribute a ?materialProperty .
-     ?filler sio:hasRole [a ns:Filler].
-} order by ?materialProperty
-`
-  return postSparql(req.path, query, req, res)
-})
-
-app.get('/visualization/materialPropertiesForFillerProperty', function (req, res) {
-  let fillerPropertyUri = req.query.fillerPropertyUri
-  let query = `
-prefix sio:<http://semanticscience.org/resource/>
-prefix ns:<http://nanomine.tw.rpi.edu/ns/>
-select distinct ?materialProperty (count(?materialProperty) as ?count)
-   where {
-      ?sample sio:hasComponentPart ?filler .
-      ?sample sio:hasAttribute ?sampleAttribute .
-      ?sampleAttribute a ?materialProperty .
-      ?filler sio:hasRole [a ns:Filler].
-      ?filler sio:hasAttribute [a <${fillerPropertyUri}>]. 
-   }
-group by ?materialProperty order by desc(?count)
-`
-  return postSparql(req.path, query, req, res)
-})
-app.get('/visualization/fillerPropertyMaterialPropertyGraphData', function (req, res) {
-  let fillerPropertyUri = req.query.fillerPropertyUri
-  let materialPropertyUri = req.query.materialPropertyUri
-  let query = `
-prefix sio:<http://semanticscience.org/resource/>
-prefix ns:<http://nanomine.tw.rpi.edu/ns/> 
-prefix np: <http://www.nanopub.org/nschema#> 
-prefix dcterms: <http://purl.org/dc/terms/> 
-select distinct ?sample ?x ?y ?xUnit ?yUnit ?matrixPolymer ?fillerPolymer ?doi ?title 
-where { 
-  ?nanopub np:hasAssertion ?ag. 
-  graph ?ag { 
-    ?sample sio:hasAttribute ?sampleAttribute .
-    ?sampleAttribute a <${materialPropertyUri}> .
-    ?sampleAttribute sio:hasValue ?y.
-    optional{?sampleAttribute sio:hasUnit ?yUnit.}
-    ?sample sio:hasComponentPart ?matrix .
-    ?sample sio:hasComponentPart ?filler .
-    ?matrix a ?matrixPolymer .
-    ?filler a ?fillerPolymer .
-    ?matrix sio:hasRole [a ns:Matrix].
-    ?filler sio:hasRole [a ns:Filler].
-    ?filler sio:hasAttribute ?fillerAttribute .
-    ?fillerAttribute a <${fillerPropertyUri}> .
-    ?fillerAttribute sio:hasValue ?x .
-    optional{?fillerAttribute sio:hasUnit ?xUnit.}
-  } 
-  ?nanopub np:hasProvenance ?pg. 
-  graph ?pg { 
-    ?doi dcterms:isPartOf ?journal. 
-    ?doi dcterms:title ?title. 
-  } 
-}
-  `
-  return postSparql(req.path, query, req, res)
-})
+// app.get('/visualization/fillerPropertyList', function (req, res) {
+//   let query = `
+// prefix sio:<http://semanticscience.org/resource/>
+// prefix ns:<http://nanomine.tw.rpi.edu/ns/>
+// select distinct ?fillerProperty
+// where {
+//     ?filler sio:hasRole [a ns:Filler].
+//     ?filler sio:hasAttribute ?fillerAttribute .
+//     ?fillerAttribute a ?fillerProperty .
+// } order by ?fillerProperty
+// `
+//   return postSparql(req.path, query, req, res)
+// })
+//
+// app.get('/visualization/materialPropertyList', function (req, res) {
+//   let query = `
+// prefix sio:<http://semanticscience.org/resource/>
+//   prefix ns:<http://nanomine.tw.rpi.edu/ns/>
+//   select distinct ?materialProperty
+//   where {
+//      ?sample sio:hasComponentPart ?filler .
+//      ?sample sio:hasAttribute ?sampleAttribute .
+//      ?sampleAttribute a ?materialProperty .
+//      ?filler sio:hasRole [a ns:Filler].
+// } order by ?materialProperty
+// `
+//   return postSparql(req.path, query, req, res)
+// })
+//
+// app.get('/visualization/materialPropertiesForFillerProperty', function (req, res) {
+//   let fillerPropertyUri = req.query.fillerPropertyUri
+//   let query = `
+// prefix sio:<http://semanticscience.org/resource/>
+// prefix ns:<http://nanomine.tw.rpi.edu/ns/>
+// select distinct ?materialProperty (count(?materialProperty) as ?count)
+//    where {
+//       ?sample sio:hasComponentPart ?filler .
+//       ?sample sio:hasAttribute ?sampleAttribute .
+//       ?sampleAttribute a ?materialProperty .
+//       ?filler sio:hasRole [a ns:Filler].
+//       ?filler sio:hasAttribute [a <${fillerPropertyUri}>].
+//    }
+// group by ?materialProperty order by desc(?count)
+// `
+//   return postSparql(req.path, query, req, res)
+// })
+// app.get('/visualization/fillerPropertyMaterialPropertyGraphData', function (req, res) {
+//   let fillerPropertyUri = req.query.fillerPropertyUri
+//   let materialPropertyUri = req.query.materialPropertyUri
+//   let query = `
+// prefix sio:<http://semanticscience.org/resource/>
+// prefix ns:<http://nanomine.tw.rpi.edu/ns/>
+// prefix np: <http://www.nanopub.org/nschema#>
+// prefix dcterms: <http://purl.org/dc/terms/>
+// select distinct ?sample ?x ?y ?xUnit ?yUnit ?matrixPolymer ?fillerPolymer ?doi ?title
+// where {
+//   ?nanopub np:hasAssertion ?ag.
+//   graph ?ag {
+//     ?sample sio:hasAttribute ?sampleAttribute .
+//     ?sampleAttribute a <${materialPropertyUri}> .
+//     ?sampleAttribute sio:hasValue ?y.
+//     optional{?sampleAttribute sio:hasUnit ?yUnit.}
+//     ?sample sio:hasComponentPart ?matrix .
+//     ?sample sio:hasComponentPart ?filler .
+//     ?matrix a ?matrixPolymer .
+//     ?filler a ?fillerPolymer .
+//     ?matrix sio:hasRole [a ns:Matrix].
+//     ?filler sio:hasRole [a ns:Filler].
+//     ?filler sio:hasAttribute ?fillerAttribute .
+//     ?fillerAttribute a <${fillerPropertyUri}> .
+//     ?fillerAttribute sio:hasValue ?x .
+//     optional{?fillerAttribute sio:hasUnit ?xUnit.}
+//   }
+//   ?nanopub np:hasProvenance ?pg.
+//   graph ?pg {
+//     ?doi dcterms:isPartOf ?journal.
+//     ?doi dcterms:title ?title.
+//   }
+// }
+//   `
+//   return postSparql(req.path, query, req, res)
+// })
 
 /* Visualization related requests - end */
 

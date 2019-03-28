@@ -13,6 +13,7 @@
         <v-btn flat href="/home"><i class="material-icons nm-search-icon" v-if="searchEnabled()">search</i>
         </v-btn>
         <v-btn v-if="isLoggedIn()" flat to="/mypage">My Page</v-btn>
+        <v-btn v-else flat to="/mypage">My Page</v-btn>
         <v-btn v-if="isLoggedIn()" flat v-on:click="logoutDialog = true">
           <i class="material-icons nm-user-icon" v-bind:class="{'nm-admin-icon': (isAdmin && !isRunAs), 'nm-runas-icon': isRunAs}">
             perm_identity
