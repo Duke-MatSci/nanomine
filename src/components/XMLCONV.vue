@@ -33,6 +33,13 @@
       </p>
       <h3 class="text-xs-left">Inputs</h3><br>
       <v-alert
+        v-model="loginRequired"
+        type="error"
+        outline
+      >
+        {{loginRequiredMsg}}
+      </v-alert>
+      <v-alert
         v-model="uploadError"
         type="error"
         dismissible
@@ -110,6 +117,7 @@
 <script>
 import {} from 'vuex'
 import {JobMgr} from '@/modules/JobMgr.js'
+import {Auth} from '@/modules/Auth.js'
 
 export default {
   name: 'XMLCONV',
@@ -123,10 +131,20 @@ export default {
     filesDisplay: [],
     uploadError: false,
     uploadErrorMsg: '',
+    loginRequired: false,
+    loginRequiredMsg: '',
     templateUploaded: false,
     successDlg: false,
     jobId: ''
   }),
+  beforeMount: function () {
+    let vm = this
+    vm.auth = new Auth()
+    if (!vm.auth.isLoggedIn()) {
+      vm.loginRequired = true
+      vm.loginRequiredMsg = 'Login is required before uploading files.'
+    }
+  },
   methods: {
     setLoading: function () {
       this.$store.commit('isLoading')
@@ -203,7 +221,6 @@ export default {
         }
       }
     },
-
     successDlgClicked: function () {
       let vm = this
       console.log('Success dlg button clicked')

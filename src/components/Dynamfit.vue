@@ -2,6 +2,13 @@
   <div class="dynamfit">
     <h1>Dynamfit - Prony Series coefficient fitting</h1>
     <v-container>
+      <v-alert
+        v-model="loginRequired"
+        type="error"
+        outline
+      >
+        {{loginRequiredMsg}}
+      </v-alert>
       <h3 class="text-xs-left">Description</h3>
       <br>
       <p class="text-xs-left">This program fits a viscoelastic mastercurve from DMA experiments with a Prony Series. The Prony Series coefficients can be used as baseline properties for the matrix in a FEA simulation of nanocomposites.
@@ -99,6 +106,7 @@
 <script>
 import {} from 'vuex'
 import {JobMgr} from '@/modules/JobMgr.js'
+import {Auth} from '@/modules/Auth.js'
 
 export default {
   name: 'Dynamfit',
@@ -116,8 +124,18 @@ export default {
       dtRadios: '',
       uploadError: false,
       uploadErrorMsg: '',
+      loginRequired: false,
+      loginRequiredMsg: '',
       successDlg: false,
       jobId: ''
+    }
+  },
+  beforeMount: function () {
+    let vm = this
+    vm.auth = new Auth()
+    if (!vm.auth.isLoggedIn()) {
+      vm.loginRequired = true
+      vm.loginRequiredMsg = 'Login is required.'
     }
   },
   methods: {
