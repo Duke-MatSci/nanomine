@@ -89,7 +89,7 @@ if rc ==0:
   file.write('{\n"inputFileName": "output/Input1.jpg",\n')
   file.write('"ReconstructedFileName": "output/Reconstruct1.jpg",\n')
   file.write('"CorrelationComparison": "output/Correlation Comparison.jpg",\n')
-  file.write('"zipFileName": "output/Results.zip"\n}')
+  file.write('"zipFileName": "output/Results.zip",\n')
   file.write('"errors": "output/errors.txt"\n}')
   file.close()
 else:

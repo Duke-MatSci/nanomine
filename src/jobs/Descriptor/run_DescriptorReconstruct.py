@@ -77,7 +77,7 @@ if rc ==0:
   file.write('{\n"inputFileName": "output/Input.jpg",\n')
   file.write('"CorrelationComparison": "output/Autocorrelation_comparison.jpg",\n')
   file.write('"ReconstructedFileName": "output/Slice.jpg",\n')
-  file.write('"zipFileName": "output/Results.zip"\n}')
+  file.write('"zipFileName": "output/Results.zip",\n')
   file.write('"errors": "output/errors.txt"\n}')
   file.close()
 else:
