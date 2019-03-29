@@ -46,6 +46,8 @@ const nanomineUtils = require('./modules/utils')
 let matchValidXmlTitle = nanomineUtils.matchValidXmlTitle
 let env = nanomineUtils.getEnv()
 const getDatasetXmlFileList = nanomineUtils.getDatasetXmlFileList
+const getLatestSchemas = nanomineUtils.getLatestSchemas
+const sortSchemas = nanomineUtils.sortSchemas
 
 // const session = require('cookie-session')
 
@@ -66,7 +68,7 @@ const getDatasetXmlFileList = nanomineUtils.getDatasetXmlFileList
 let logger = configureLogger()
 logger.info('NanoMine REST server version ' + config.version + ' starting')
 
-let datasetBucketName = nanomineUtils.datasetBucketName
+// let datasetBucketName = nanomineUtils.datasetBucketName
 
 let sendEmails = env.sendEmails
 let emailHost = env.emailHost
@@ -223,17 +225,18 @@ let authOptions = {
   protect: [
     // path is req.path, loginAuth is whether logged in users(jwtToken via cookie) have access and apiAuth allows access using api tokens
     //   loginAuth also forces group membership check if membership is set - empty membership === any or no group OK
-    // not yet    { path: '/curate', loginAuth: false, membership: [], apiAuth: true, apiGroup: 'curate' },
     // not yet    { path: '/dataset/create', loginAuth: false, membership: [], apiAuth: true, apiGroup: 'curate' },
+    {path: '/curate', loginAuth: false, membership: [], apiAuth: true, apiGroup: 'curate'},
     {path: '/datasets', loginAuth: true, membership: [], apiAuth: true, apiGroup: 'curate'},
     {path: '/jobemail', loginAuth: false, membership: [], apiAuth: true, apiGroup: 'email'},
     {path: '/jobcreate', loginAuth: true, membership: [], apiAuth: true, apiGroup: 'jobs'},
     {path: '/jobpostfile', loginAuth: true, membership: [], apiAuth: true, apiGroup: 'jobs'},
     {path: '/jobsubmit', loginAuth: true, membership: [], apiAuth: true, apiGroup: 'jobs'},
+    {path: '/publishfiles2rdf', loginAuth: false, membership: ['admin'], apiAuth: true, apiGroup: 'curate'},
+    {path: '/publishxml2rdf', loginAuth: false, membership: ['admin'], apiAuth: true, apiGroup: 'curate'},
     {path: '/testpubfiles2rdf', loginAuth: true, membership: ['admin'], apiAuth: true, apiGroup: 'curate'},
     {path: '/testpubschema2rdf', loginAuth: true, membership: ['admin'], apiAuth: true, apiGroup: 'curate'},
     {path: '/testpubxml2rdf', loginAuth: true, membership: ['admin'], apiAuth: true, apiGroup: 'curate'},
-    // {path: '/pubfiles2rdf', loginAuth: false, membership: [], apiAuth: true, apiGroup: 'curate'},
     {path: '/users', loginAuth: true, membership: ['admin'], apiAuth: true, apiGroup: 'admin'},
     {path: '/user', loginAuth: false, membership: ['admin'], apiAuth: true, apiGroup: 'admin'}
   ]
@@ -305,130 +308,143 @@ function authMiddleware (authOptions) {
   // TODO review this code
   return function (req, res, next) {
     let func = 'authMiddleWare(' + req.path + ')'
-    let pathProtected = false
-    let loginAuth = false
-    let loginMembership = []
-    let apiAuth = false
-    // let apiGroup = null
-    let loginUserId = null
-    let isAdmin = false
-    // let runAsUserId = null // Allow admins to set runAsUserId
-    // let apiUserId = null
     let jsonResp = {'error': null, 'data': null}
-    authOptions.protect.forEach(function (v) {
-      if (v.path === req.path) {
-        pathProtected = true
-        loginAuth = v.loginAuth
-        loginMembership = v.membership
-        apiAuth = v.apiAuth
-        // apiGroup = v.apiGroup
-      }
-    })
-    let token = req.cookies['token']
-    if (token) {
-      try {
-        let decoded = jwtBase.verify(token, nmAuthSecret)
-        loginUserId = decoded.sub // subject
-        isAdmin = decoded.isAdmin
-        logger.debug(func + ' - user: ' + loginUserId + ' accessing: ' + req.path)
-        req.headers['nmLoginUserId'] = decoded.sub
-      } catch (err) {
-        logger.error(func + ' - check jwt token failed. err: ' + err)
-      }
-    } else {
-      logger.trace(func + ' - no jwt token found in cookie.')
-    }
-
-    if (pathProtected) {
-      logger.error('protected path: ' + req.path)
-      let authFailed = true
-      let groupCheckFailed = false // TODO recheck this logic related to loginUserId
-      if (loginAuth) {
-        loginMembership.forEach(function (v) { // TODO update for memberships other than admin i.e. make dynamic
-          if (v === 'admin') {
-            if (!isAdmin) {
-              groupCheckFailed = true
-            }
-          }
-        })
-        if (loginUserId !== null && groupCheckFailed === false) {
-          authFailed = false
+    try {
+      logger.debug(func + ' - function entry')
+      let pathProtected = false
+      let loginAuth = false
+      let loginMembership = []
+      let apiAuth = false
+      // let apiGroup = null
+      let loginUserId = null
+      let isAdmin = false
+      // let runAsUserId = null // Allow admins to set runAsUserId
+      // let apiUserId = null
+      authOptions.protect.forEach(function (v) {
+        if (v.path === req.path) {
+          pathProtected = true
+          loginAuth = v.loginAuth
+          loginMembership = v.membership
+          apiAuth = v.apiAuth
+          // apiGroup = v.apiGroup
         }
-      }
-      let apiAuthPromise = null
-      if (apiAuth && authFailed) {
-        let authHeader = req.get('Authentication')
-        let bearerToken = null
-        if (authHeader) {
-          let btParts = authHeader.split(' ')
-          if (btParts[0] === 'Bearer' && btParts[1] && btParts[1].length > 0) {
-            bearerToken = btParts[1]
-          }
-          if (bearerToken) {
-            // Look up bearer token in users
-            apiAuthPromise = new Promise(function (resolve, reject) {
-              getBearerTokenInfo(bearerToken)
-                .then(function (tokenInfo) {
-                  if (tokenInfo !== null) {
-                    // may be expired
-                    let now = moment().unix()
-                    let expired = (+(tokenInfo.expiration) < now)
-                    if (!expired) {
-                      logger.debug(func + ' - bearer: ' + bearerToken + ' success. Token info: ' + JSON.stringify(tokenInfo) + ' accessing: ' + req.path)
-                      resolve(tokenInfo)
-                    } else {
-                      logger.debug(func + ' - bearer: ' + bearerToken + ' access token expired: ' + JSON.stringify(tokenInfo) + ' accessing: ' + req.path)
-                      resolve(null)
-                    }
-                  } else {
-                    logger.debug(func + ' - bearer: ' + bearerToken + ' FAILED. Token info not found accessing: ' + req.path)
-                    resolve(null)
-                  }
-                })
-                .catch(function (err) {
-                  logger.error(func + ' - could not obtain info for bearer token: ' + bearerToken + ' err: ' + err)
-                  reject(err)
-                })
-            })
-          } else {
-            logger.error(func + ' - No bearer token specified')
-          }
-          // if found, the record will hold the associated api token
-          // get the api definition from the target api
-          // set nmApiUserId into header
-        } else {
-          logger.error(func + ' - api authentication failed for bearer token: ' + bearerToken)
-        }
-      } else if (loginAuth && authFailed) {
-        logger.error(func + ' - login auth failed for userid: ' + loginUserId)
-      }
-
-      if (!apiAuthPromise) { // TODO evaluate whether these return values should differ depending on protocol (get vs post)
-        if (!authFailed) {
-          next()
-        } else {
-          jsonResp.error = 'not authorized'
-          return res.status(403).json(jsonResp)
+      })
+      let token = req.cookies['token']
+      if (token) {
+        try {
+          let decoded = jwtBase.verify(token, nmAuthSecret)
+          loginUserId = decoded.sub // subject
+          isAdmin = decoded.isAdmin
+          logger.debug(func + ' - user: ' + loginUserId + ' accessing: ' + req.path)
+          req.headers['nmLoginUserId'] = decoded.sub
+        } catch (err) {
+          logger.error(func + ' - check jwt token failed. err: ' + err)
         }
       } else {
-        apiAuthPromise
-          .then(function (tokenInfo) {
-            if (tokenInfo) {
-              req.headers['nmLoginUserId'] = tokenInfo.userId
-              next()
-            } else {
-              jsonResp.error = 'invalid token'
-              return res.status(403).json(jsonResp)
+        logger.trace(func + ' - no jwt token found in cookie.')
+      }
+
+      if (pathProtected) {
+        logger.error('protected path: ' + req.path)
+        let authFailed = true
+        let groupCheckFailed = false // TODO recheck this logic related to loginUserId
+        if (loginAuth) {
+          loginMembership.forEach(function (v) { // TODO update for memberships other than admin i.e. make dynamic
+            if (v === 'admin') {
+              if (!isAdmin) {
+                groupCheckFailed = true
+              }
             }
           })
-          .catch(function (err) {
-            jsonResp.error = err
+          if (loginUserId !== null && groupCheckFailed === false) {
+            authFailed = false
+          }
+        }
+        let apiAuthPromise = null
+        if (apiAuth && authFailed) {
+          let authHeader = req.get('Authentication')
+          if (!authHeader) {
+            authHeader = req.get('Authorization') // Authorization is the correct header, BTW
+          }
+          logger.debug(func + ' - authHeader is: ' + authHeader)
+          let bearerToken = null
+          if (authHeader) {
+            let btParts = authHeader.split(' ')
+            if (btParts[0] === 'Bearer' && btParts[1] && btParts[1].length > 0) {
+              bearerToken = btParts[1]
+            }
+            if (bearerToken) {
+              logger.debug(func + ' - found bearer token')
+              // Look up bearer token in users
+              apiAuthPromise = new Promise(function (resolve, reject) {
+                getBearerTokenInfo(bearerToken)
+                  .then(function (tokenInfo) {
+                    if (tokenInfo !== null) {
+                      // may be expired
+                      let now = moment().unix()
+                      let expired = (+(tokenInfo.expiration) < now)
+                      if (!expired) {
+                        logger.debug(func + ' - bearer: ' + bearerToken + ' success. Token info: ' + JSON.stringify(tokenInfo) + ' accessing: ' + req.path)
+                        resolve(tokenInfo)
+                      } else {
+                        logger.debug(func + ' - bearer: ' + bearerToken + ' access token expired: ' + JSON.stringify(tokenInfo) + ' accessing: ' + req.path)
+                        resolve(null)
+                      }
+                    } else {
+                      logger.debug(func + ' - bearer: ' + bearerToken + ' FAILED. Token info not found accessing: ' + req.path)
+                      resolve(null)
+                    }
+                  })
+                  .catch(function (err) {
+                    logger.error(func + ' - could not obtain info for bearer token: ' + bearerToken + ' err: ' + err)
+                    reject(err)
+                  })
+              })
+            } else {
+              logger.error(func + ' - No bearer token specified')
+            }
+            // if found, the record will hold the associated api token
+            // get the api definition from the target api
+            // set nmApiUserId into header
+          } else {
+            logger.error(func + ' - api authentication failed for bearer token: ' + bearerToken)
+          }
+        } else if (loginAuth && authFailed) {
+          logger.error(func + ' - login auth failed for userid: ' + loginUserId)
+        }
+
+        if (!apiAuthPromise) { // TODO evaluate whether these return values should differ depending on protocol (get vs post)
+          if (!authFailed) {
+            next()
+          } else {
+            jsonResp.error = 'not authorized'
             return res.status(403).json(jsonResp)
-          })
+          }
+        } else {
+          apiAuthPromise
+            .then(function (tokenInfo) {
+              if (tokenInfo) {
+                req.headers['nmLoginUserId'] = tokenInfo.userId
+                next()
+              } else {
+                jsonResp.error = 'invalid token'
+                return res.status(403).json(jsonResp)
+              }
+            })
+            .catch(function (err) {
+              jsonResp.error = err
+              return res.status(403).json(jsonResp)
+            })
+        }
+      } else {
+        logger.trace('non-protected path: ' + req.path)
+        next()
       }
-    } else {
-      logger.trace('non-protected path: ' + req.path)
-      next()
+    } catch (err) {
+      let msg = func + ' - exception in authMiddleware. Error: ' + err
+      logger.error(msg)
+      jsonResp.error = err
+      return res.status(401).json(jsonResp)
     }
   }
 }
@@ -858,7 +874,7 @@ function createUser (userid, emailAddr, givenName, surName, displayName) {
   })
 }
 
-function getCurrentSchemas () { // returns promise resolved with sorted list of current schemas -- latest is first
+function getCurrentSchemas () { // returns promise resolved with sorted list of current schemas -- latest is first TODO dup of utils.getLatestSchemas
   return new Promise(function (resolve, reject) {
     XsdVersionSchema.find({isDeleted: {$eq: false}}).populate('currentRef').exec(function (err, versions) {
       if (err) {
@@ -1009,7 +1025,7 @@ function publishFiles (userid, xmlTitle, cb) { // xmlText, schemaName, filesInfo
     //   Add each file's name to the section in the JsonLD that lists the file as related to the dataset (fileListLD)
 
     // get latest schema/schemaId
-    getLatestSchemas()
+    getLatestSchemas(XsdVersionSchema, logger)
       .then(function (schemas) {
         if (schemas && schemas.length > 0) {
           // logger.error('xmlText: ' + xmlText)
@@ -1386,6 +1402,7 @@ function publishLatestSchema (userid, cb) {
 }
 app.post('/publishfiles2rdf', function (req, res) {
   let func = 'publishfiles2rdf'
+  logger.debug(func + ' - function entry')
   let xmlTitle = req.body.xmltitle // {title: title, userid: userid}
   let targetUserid = req.body.userid
   let jsonResp = {error: null, data: null}
@@ -1409,6 +1426,7 @@ app.post('/publishfiles2rdf', function (req, res) {
 })
 app.post('/publishxml2rdf', function (req, res) {
   let func = 'publishxml2rdf'
+  logger.debug(func + ' - function entry')
   let xmlTitle = req.body.xmltitle // {title: title, userid: userid}
   let xmlText = req.body.xmltext
   let schemaName = req.body.schemaname
@@ -1527,61 +1545,9 @@ app.get('/templates/versions/select/all', function (req, res) {
   })
 })
 
-function sortSchemas (allActive) { // sort by date descending and choose first
-  allActive.sort((a, b) => { // Sort in reverse order
-    let rv = 0
-    let rea = a.currentRef[0].title.match(/(\d{2})(\d{2})(\d{2})/)
-    let reb = b.currentRef[0].title.match(/(\d{2})(\d{2})(\d{2})/)
-    let yra = parseInt(rea[3])
-    let yrb = parseInt(reb[3])
-    let moa = parseInt(rea[1])
-    let mob = parseInt(reb[1])
-    let dya = parseInt(rea[2])
-    let dyb = parseInt(reb[2])
-    if (yrb > yra) {
-      rv = 1 // reverse sort
-    } else if (yrb < yra) {
-      rv = -1
-    }
-    if (rv === 0 && mob > moa) {
-      rv = 1
-    } else if (rv === 0 && moa > mob) {
-      rv = -1
-    }
-    if (rv === 0 && dyb > dya) {
-      rv = 1
-    } else if (rv === 0 && dya > dyb) {
-      rv = -1
-    }
-    return rv
-  })
-}
-
-function getLatestSchemas () { // duplicate of getCurrentSchemas!! TODO
-  return new Promise(function (resolve, reject) {
-    XsdVersionSchema.find({isDeleted: {$eq: false}}).populate('currentRef').exec(function (err, versions) {
-      if (err) {
-        reject(err)
-      } else if (versions == null || versions.length <= 0) {
-        resolve(null) // not found
-      } else {
-        try {
-          sortSchemas(versions) /* In-place sort by title i.e. 081218 will date sort to top relative to 060717 (reverse sort) so that
-                                 client can assume latest schema is first
-                                 */
-          resolve(versions)
-        } catch (err) {
-          logger.error('schema sort reverse by date failed :( - error' + err)
-          reject(err)
-        }
-      }
-    })
-  })
-}
-
 app.get('/templates/versions/select/allactive', function (req, res) {
   let jsonResp = {'error': null, 'data': null}
-  getLatestSchemas()
+  getLatestSchemas(XsdVersionSchema, logger)
     .then(function (schemas) { // schemas[0].currentRef[0] is latest schema
       if (schemas && schemas.length > 0) {
         jsonResp.data = schemas
@@ -2244,7 +2210,7 @@ app.get('/users', function (req, res) {
 
 /* BEGIN -- refresh token service */
 function newAccessTokenAndExpiration () {
-  let hr4 = 4 * 60 * 60 * 1000 // 4 hrs in seconds
+  let hr4 = 4 * 60 * 60 // 4 hrs in seconds
   return {'accessToken': shortUUID.new(), 'expiration': (moment().unix() + hr4)}
 }
 
@@ -2314,7 +2280,7 @@ app.post('/refreshtoken', function (req, res) {
                     if (parts[APIACCESS_ACCESSTOKEN_PART]) { // existing access token
                       if (parts[APIACCESS_EXPIRATION_PART] && !isNaN(+(parts[APIACCESS_EXPIRATION_PART]))) { // has it expired?
                         let exp = +(parts[APIACCESS_EXPIRATION_PART])
-                        let hr = 60 * 60 * 1000 // seconds
+                        let hr = 60 * 60 // seconds
                         let now = moment().unix() // unix timestamp
                         logger.debug(func + ' now: ' + now + ' 1 hr: ' + hr + ' exp: ' + exp + ' exp - hr: ' + (exp - hr) + ' (exp-hr)>now ' + ((exp - hr) > now))
                         if ((exp - hr) > now) { // expires in more than 1 hr, return current token
