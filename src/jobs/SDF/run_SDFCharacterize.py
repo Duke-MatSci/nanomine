@@ -77,7 +77,7 @@ if rc ==0:
   file = open(jobDir+"/"+"job_output_parameters.json","w")
   file.write('{\n"inputFileName": "output/Input1.jpg",\n')
   file.write('"SDFPlot": "output/SDF_2D.jpg",\n')
-  file.write('"zipFileName": "output/Results.zip"\n}')
+  file.write('"zipFileName": "output/Results.zip",\n')
   file.write('"errors": "output/errors.txt"\n}')
   file.close()
 else:
