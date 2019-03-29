@@ -84,7 +84,7 @@ if rc ==0:
   file = open(jobDir+"/"+"job_output_parameters.json","w")
   file.write('{\n"inputFileName": "output/Input1.jpg",\n')
   file.write('"CorrelationPlot": "output/Correlation.jpg",\n')
-  file.write('"zipFileName": "output/Results.zip"\n}')
+  file.write('"zipFileName": "output/Results.zip",\n')
   file.write('"errors": "output/errors.txt"\n}')
   file.close()
 else:
