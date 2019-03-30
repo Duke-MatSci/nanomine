@@ -58,11 +58,15 @@ sudo systemctl restart apache2  # may be optional depending on what was changed.
 -->  
   - NOTE: need both /etc/security/limits.conf settings and /etc/systemd/system.conf.d/limits.conf (system.conf.d may be new directory)
   - add to /etc/security/limits.conf (sudo vi /etc/security/limits.conf)
-  -   whyis hard nofile 40000
-  -   whyis soft nofile 40000
-  - add to /etc/systemd/system.conf.d/limits.conf (sudo mkdir /etc/systemd/system.conf.d; sudo vi /etc/systemd/system.conf.d/limits.conf) 
-  -   [Manager]
-  -   DefaultLimitNOFILE=40000
+  ```
+    whyis hard nofile 40000
+    whyis soft nofile 40000
+  ```  
+  - add to /etc/systemd/system.conf.d/limits.conf (sudo mkdir /etc/systemd/system.conf.d; sudo vi /etc/systemd/system.conf.d/limits.conf)
+  ``` 
+     [Manager]
+     DefaultLimitNOFILE=40000
+  ```   
 <!--  
   sudo cp /apps/nanomine/install/nm-neo4j.service /etc/systemd/system
   sudo systemctl daemon-reload
@@ -93,10 +97,4 @@ Fork the nanomine repository and use the 'dev' branch for
 development (git checkout dev). Ensure 
 that pull requests are for the dev branch and not master and not QA.
 
-NOTE: The install instructions above clone the repo from the duke-matsci
-using https. Additionally, the files become owned by the 'whyis' user.
-This may make it a bit difficult for on-going development. The best work-around
-for now is probably to fork the repo and use git ssh under your own user.
-However, this will complicate runtime. The readme will be updated with better
-instructions once a good alternative is worked out.
 
