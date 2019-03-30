@@ -13,6 +13,7 @@
         <v-btn flat href="/home"><i class="material-icons nm-search-icon" v-if="searchEnabled()">search</i>
         </v-btn>
         <v-btn v-if="isLoggedIn()" flat to="/mypage">My Page</v-btn>
+        <v-btn v-else flat to="/mypage">My Page</v-btn>
         <v-btn v-if="isLoggedIn()" flat v-on:click="logoutDialog = true">
           <i class="material-icons nm-user-icon" v-bind:class="{'nm-admin-icon': (isAdmin && !isRunAs), 'nm-runas-icon': isRunAs}">
             perm_identity
@@ -26,6 +27,12 @@
           <span v-else>
             &nbsp;&nbsp;{{auth.getRunAsUser()}}
           </span>
+        </v-btn>
+        <v-btn v-else flat v-on:click="loginDialog = true">
+          <i class="material-icons nm-user-icon">
+            perm_identity
+          </i>
+          <span>&nbsp;&nbsp;Login</span>
         </v-btn>
       </v-toolbar-items>
     </v-toolbar>
@@ -52,16 +59,43 @@
           <v-btn
             color="blue darken-1"
             flat="flat"
-            v-on:click="logout()"
+            href="/nmr/doLogout"
           >
             Yes
           </v-btn>
-          <a
-            style="display: none"
-            ref="logoutLink"
-            v-bind:href="logoutUrl"
-            v-on:click="log('clicked')"
-          />
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <v-dialog
+      v-model="loginDialog"
+      max-width="290"
+    >
+      <v-card>
+        <v-card-title class="headline blue lighten-2" primary-title>Login</v-card-title>
+        <v-card-text>
+          Log into NanoMine?
+        </v-card-text>
+        <v-card-text>
+          If you already have a Duke University account, proceed to login.  Otherwise create a <a href="https://accounts.oit.duke.edu/onelink/register" target="_blank">Duke OneLink</a> account.
+        </v-card-text>
+        <v-divider></v-divider>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            color="blue darken-1"
+            flat="flat"
+            @click="loginDialog = false"
+          >
+            Cancel
+          </v-btn>
+
+          <v-btn
+            color="blue darken-1"
+            flat="flat"
+            href="/secure"
+          >
+            Login
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -78,43 +112,55 @@ export default {
   beforeMount: function () {
     let vm = this
     vm.auth = new Auth()
-    vm.ckLogout = new Promise(function (resolve, reject) {
-      vm.auth.getLogoutUrl()
-        .then(function (logoutUrl) {
-          vm.logoutUrl = logoutUrl
-          resolve()
-        })
-        .catch(function (err) {
-          // console.log('error getting logout URL: ' + err)
-          reject(err)
-          vm.logoutUrl = '#'
-        })
-    })
-    vm.ckLogout.then(function () {
-      console.log('query = ' + JSON.stringify(vm.$route.query))
-      let qlogout = vm.$route.query.logout
-      if (qlogout && qlogout.match(/(true).*/)) {
-        setTimeout(function () {
-          vm.logoutRouted = true
-          vm.logoutDialog = true
-          console.log('set logoutDialog to true')
-        }, 50)
-      } else {
-        console.log('logout not requested')
-      }
-    })
-      .catch(function (err) {
-        console.log('error getting logout URL: ' + err)
-      })
+    // vm.ckLogout = new Promise(function (resolve, reject) {
+    //   vm.auth.getLogoutUrl()
+    //     .then(function (logoutUrl) {
+    //       vm.logoutUrl = logoutUrl
+    //       resolve()
+    //     })
+    //     .catch(function (err) {
+    //       // console.log('error getting logout URL: ' + err)
+    //       reject(err)
+    //       vm.logoutUrl = '#'
+    //     })
+    // })
+    // vm.ckLogout.then(function () {
+    console.log('query = ' + JSON.stringify(vm.$route.query))
+    let qlogout = vm.$route.query.logout
+    if (qlogout && qlogout.match(/(true).*/)) {
+      setTimeout(function () {
+        vm.logoutRouted = true
+        vm.logoutDialog = true
+        console.log('set logoutDialog to true')
+      }, 50)
+    } else {
+      console.log('logout not requested')
+    }
+    let qlogin = vm.$route.query.login
+    if (qlogin && qlogin.match(/(true).*/)) {
+      setTimeout(function () {
+        vm.loginRouted = true
+        vm.loginDialog = true
+        console.log('set loginDialog to true')
+      }, 50)
+    } else {
+      console.log('login not requested')
+    }
+    // })
+    //   .catch(function (err) {
+    //     console.log('error getting logout URL: ' + err)
+    //   })
   },
   methods: {
     log: function (msg) {
       console.log(msg)
     },
     logout: function () {
-      this.auth.logout()
-      this.$refs.logoutLink.click()
-      this.logoutDialog = false
+      let vm = this
+      vm.auth.logout()
+      vm.logoutUrl = '/nmr/doLogout'
+      vm.$refs.logoutLink.click()
+      vm.logoutDialog = false
     },
     cancelLogout: function () {
       let vm = this
@@ -158,6 +204,7 @@ export default {
     return {
       msg: 'PageHeader',
       auth: null,
+      loginDialog: false,
       logoutDialog: false,
       logoutRouted: false,
       logoutUrl: null

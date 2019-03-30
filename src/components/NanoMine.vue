@@ -97,7 +97,7 @@ export default {
   .v-jumbotron {
     color: white;
     padding: 0.5rem 0.5rem;
-    background-color: #000000;
+    background-color: #08233c;
     border-radius: 0px;
     margin-top: 0px;
     max-height: 200px;
