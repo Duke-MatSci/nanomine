@@ -39,7 +39,7 @@ sudo systemctl restart apache2  # may be optional depending on what was changed.
 ```
   sudo systemctl restart nm-rest
 ```
-  
+<!--  
   ### NOTE OPTIONAL!
   ###  Neo4j is optional -- most devs should probably not install
   cd /apps
@@ -51,6 +51,7 @@ sudo systemctl restart apache2  # may be optional depending on what was changed.
   ### start neo4j with this command
   /apps/neo4j/bin/neo4j start 
   - the neo4j browser will be available at http://localhost:7474 -- NOTE: ONLY available to browser running on VM directly
+-->  
   - NOTE: need both /etc/security/limits.conf settings and /etc/systemd/system.conf.d/limits.conf (system.conf.d may be new directory)
   - add to /etc/security/limits.conf (sudo vi /etc/security/limits.conf)
   -   whyis hard nofile 40000
@@ -58,13 +59,13 @@ sudo systemctl restart apache2  # may be optional depending on what was changed.
   - add to /etc/systemd/system.conf.d/limits.conf (sudo mkdir /etc/systemd/system.conf.d; sudo vi /etc/systemd/system.conf.d/limits.conf) 
   -   [Manager]
   -   DefaultLimitNOFILE=40000
-  
+<!--  
   sudo cp /apps/nanomine/install/nm-neo4j.service /etc/systemd/system
   sudo systemctl daemon-reload
   sudo systemctl start nm-neo4j  # can also restart or stop as necessary
   sudo systemctl enable nm-neo4j # ensure that neo4j runs after reboot
   ## NOTE -- END of Neo4j install
-  
+-->  
 
 # Components and Libraries Used
 - https://vuejs.org VueJS Javascript Framework
