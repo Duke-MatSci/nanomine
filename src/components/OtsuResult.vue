@@ -9,19 +9,15 @@
     </v-alert>
     <h1>{{msg}}</h1>
     <v-container>
-      <v-layout>
-        <v-flex xs6>
-          <h4>Uploaded Image</h4>
-          <img :src="getInputImage()"/>
-          {{inputImage}}
-          <p></p>
-        </v-flex>
-        <v-flex xs6>
-          <h4>Binarized Image</h4>
-          <img :src="getOutputImage()"/>
-          {{outputImage}}
-          <p></p>
-        </v-flex>
+      <v-layout row v-for="(file, idx) in files">
+        <v-container xs6>
+          <h4>{{file.input}}</h4>
+          <img :src="getInputImage(idx)"/>
+        </v-container>
+        <v-container xs6>
+          <h4>{{file.output}}</h4>
+          <img :src="getOutputImage(idx)"/>
+        </v-container>
       </v-layout>
       <!--v-layout>
         <v-flex xs12>
@@ -50,9 +46,8 @@ export default {
       msg: 'Otsu Binarization Results',
       resultsError: false,
       resultsErrorMsg: '',
-      inputFileName: '',
-      binarizedFileName: '',
-      zipFileName: ''
+      zipFileName: '',
+      files: []
     })
   },
   mounted: function () {
@@ -65,13 +60,13 @@ export default {
     resetLoading: function () {
       this.$store.commit('notLoading')
     },
-    getInputImage: function () {
+    getInputImage: function (idx) {
       let vm = this
-      return vm.$route.query.refuri + '/' + vm.inputFileName
+      return vm.$route.query.refuri + '/' + vm.files[idx].input
     },
-    getOutputImage: function () {
+    getOutputImage: function (idx) {
       let vm = this
-      return vm.$route.query.refuri + '/' + vm.binarizedFileName
+      return vm.$route.query.refuri + '/' + vm.files[idx].output
     },
     getZipFile: function () {
       let vm = this
@@ -85,8 +80,9 @@ export default {
         .then(function (response) {
           console.log(response.data)
           let myOutputParams = response.data // Axios did the JSON parse for us
-          vm.inputFileName = myOutputParams.inputFileName
-          vm.binarizedFileName = myOutputParams.binarizedFileName
+          vm.files = myOutputParams.files // use files array instead of individual file references
+          // vm.inputFileName = myOutputParams.inputFileName
+          // vm.binarizedFileName = myOutputParams.binarizedFileName
           vm.zipFileName = myOutputParams.zipFileName
           vm.resetLoading()
         })
