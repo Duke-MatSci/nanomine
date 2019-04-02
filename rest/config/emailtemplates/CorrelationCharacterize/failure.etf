@@ -1,12 +1,20 @@
 <br/>Hello ${user},
-
-<br/> Greetings from Nanomine!
-
-<br/>Unfortunately, Correlation characterization was not successful. Job id is ${jobid}
+<br/>
+<br/>Unfortunately, Correlation characterization submission was not successful.
+<br/>
+<br/>jobid: ${jobid}
 
 <br/>job result code: ${jobinfo.resultcode}
 
-<br/>Please visit <a href="https://nanomine.org/joboutput/${jobid}">your job output</a> for more information
+<br/>Errors:
+<br/>${jobinfo.errors}
+<br/>
+<br/>In most cases, these errors will need to be addressed before the job will run successfully.
+<br/>If you're unsure of how to fix the errors or the errors are beyond your control,
+<br/>then copy the errors, resultcode and the job id from this email and paste them into a problem
+<br/>report using the <a href="https://nanomine.org/nm#/contact" target="_blank">NanoMine contact page</a> so we can help resolve the problem.
+<br/>
+
 
 <br/>
 Regards,

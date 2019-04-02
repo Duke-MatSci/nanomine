@@ -1,4 +1,11 @@
-function Descriptor_C2_Binary(path_to_write,input_type)
+%UMAR EXTRA
+% imwrite(img,[path_to_write,'/','Input1.jpg']);
+%UMAR END
+
+% UMar change
+function[er]= Descriptor_C2_Binary(path_to_write,input_type)
+% function Descriptor_C2_Binary(img)
+% Umar end
 
 % Descriptor-based characterization of the BINARY size microstructure image
 % ------------------------------------------------------------------------- 
@@ -13,21 +20,38 @@ function Descriptor_C2_Binary(path_to_write,input_type)
 % 2 : ZIP file containing JPEG images
 % 3 : Image in .mat file
 %% Specify import function according to input option
+% % % Umar commented out for TESTING
+
+er=0; % To out type of issue faced
+% er=1 for zip file error
+% er=2 for 
 switch input_type
     case 1
         img = imread([path_to_write,'/Input1.jpg']); % read the incming target and store pixel values
         if size(img) > 1
-           img = double(round(img(:,:,1)/256));
+           img = img(:,:,1);
+
+        %%
         end
     case 2 
-%         img = unzip([path_to_file,fname],[path_to_write,'/input']);
+        img = unzip([path_to_file,fname],[path_to_write,'/input']);
     case 3
         img = imread([path_to_write,'/Input1.jpg']); % read the incming target and store pixel values
         if size(img) > 1
-           img = double(round(img(:,:,1)/256));
+           img = img(:,:,1)
         end
 end
+% % % % Umar end
 
+
+        %% Umar added to check and binarize the image using Otsu 02/27/2019
+        if max(img(:))>1
+            Target = double(img);
+            Target = Target/256; %
+            level = graythresh(Target);
+            img = im2bw(Target,level);
+        end
+%Umar commented out
 if input_type ~= 2
     image = img;
     L1 = size(image,1); L2 = size(image,2); % get image size
@@ -58,12 +82,23 @@ if input_type ~= 2
     
     Cluster_data = cat(2,Areas,Nearest_neighbor,Aspect_Ratio);
     Image_data = cat(2,VF,Num_Clusters,Mean_Radius,mean_nd,mean_asp,mean_area);
-    
+
+% % % Umar commented out for testing
     writetable(Cluster_data,[path_to_write,'/Cluster_data.csv']);
     writetable(Image_data,[path_to_write,'/Image_data.csv']);
+% % % Umar end
+ 
     % save_path = strcat(path_to_write,'/ch_result.mat');
     % save(save_path);
+    
+% % %Umar commented out
 else
+    try
     zip_file_processing(path_to_write);
-end
+    catch
+    er=1;    
+    end
+    
+    end
+% % % %Umar end
 end

@@ -28,6 +28,13 @@
                   <strong> The mean value of chosen correlation (averaged over all images) will be used for reconstruction.</strong> </p>
       </v-flex>
       <v-alert
+        v-model="loginRequired"
+        type="error"
+        outline
+      >
+        {{loginRequiredMsg}}
+      </v-alert>
+      <v-alert
         v-model="errorAlert"
         type="error"
         dismissible
@@ -88,6 +95,7 @@
 <script>
 import {} from 'vuex'
 import {JobMgr} from '@/modules/JobMgr.js'
+import {Auth} from '@/modules/Auth.js'
 
 export default {
   name: 'CorrelationReconstruct',
@@ -102,6 +110,8 @@ export default {
       filesDisplay: [],
       errorAlert: false,
       errorAlertMsg: '',
+      loginRequired: false,
+      loginRequiredMsg: '',
       fileUploaded: false,
       successDlg: false,
       jobId: '',
@@ -114,6 +124,14 @@ export default {
         'Autocorrelation', 'Lineal Path Correlation', 'Cluster Correlation', 'Surface Correlation'
       ]
     })
+  },
+  beforeMount: function () {
+    let vm = this
+    vm.auth = new Auth()
+    if (!vm.auth.isLoggedIn()) {
+      vm.loginRequired = true
+      vm.loginRequiredMsg = 'Login is required.'
+    }
   },
   methods: {
     setLoading: function () {

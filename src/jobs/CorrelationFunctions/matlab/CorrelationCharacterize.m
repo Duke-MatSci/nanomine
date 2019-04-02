@@ -29,8 +29,19 @@ try
       case 2
           img = unzip([path_to_read,file_name],[path_to_write,'/input']);
       case 3
-          load([path_to_file,file_name]);
-          img = Input;
+path=[path_to_read,file_name];
+k=load(path);
+[no_need,f_name,ext]=fileparts(file_name);
+try
+img = getfield(k,f_name);
+catch ex
+rc = 98;
+msg = getReport(ex);
+writeError([path_to_write, '/errors.txt'], 'The variable name inside the material file shold be the same as the name of the file. Technical details below:');
+writeError([path_to_write, '/errors.txt'], msg);
+writeError([path_to_write, '/errors.txt'], sprintf('\n'));
+exit(rc);
+end
     img_viewable = 256 * img;
     imwrite(img_viewable,[path_to_write,'/','Input1.jpg']);
   end

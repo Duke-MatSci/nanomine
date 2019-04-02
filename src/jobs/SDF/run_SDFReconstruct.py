@@ -77,7 +77,8 @@ if rc ==0:
   file = open(jobDir+"/"+"job_output_parameters.json","w")
   file.write('{\n"inputFileName": "output/Input1.jpg",\n')
   file.write('"ReconstructedFileName": "output/Reconstruct1.jpg",\n')
-  file.write('"zipFileName": "output/Results.zip"\n}')
+  file.write('"zipFileName": "output/Results.zip",\n')
+  file.write('"errors": "output/errors.txt"\n}')
   file.close()
 
 # If the NM_SMTP_TEST environment variable is set to true, then emails are not sent via email and are instead
@@ -119,7 +120,8 @@ else: # send error email
       "emailtemplatename": "failure",
       "emailvars": {
         "jobinfo": {
-          "resultcode":rc
+          "resultcode":rc,
+          "errors": errmsgs
         },
         "user": userId
       }

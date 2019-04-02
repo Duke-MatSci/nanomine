@@ -3,6 +3,14 @@
     <h1>Dynamfit - Prony Series coefficient fitting</h1>
     <v-container>
       <h3 class="text-xs-left">An Example - Part II</h3>
+      <v-container>
+        <v-alert
+          v-model="loginRequired"
+          type="error"
+          outline
+        >
+          {{loginRequiredMsg}}
+        </v-alert>
       <br>
       <p class="text-xs-left">In this page, you will learn to use and modify all the parameters available in Dynamfit. An email will be sent to your registered email address once the job is completed. You will then be able to compare the fitting results with the example given in the previous page.
       </p>
@@ -102,6 +110,7 @@
 <script>
 import {} from 'vuex'
 import {JobMgr} from '@/modules/JobMgr.js'
+import {Auth} from '@/modules/Auth.js'
 
 export default {
   name: 'DynamfitExampleInput',
@@ -119,8 +128,18 @@ export default {
       dtRadios: '',
       uploadError: false,
       uploadErrorMsg: '',
+      loginRequired: false,
+      loginRequiredMsg: '',
       successDlg: false,
       jobId: ''
+    }
+  },
+  beforeMount: function () {
+    let vm = this
+    vm.auth = new Auth()
+    if (!vm.auth.isLoggedIn()) {
+      vm.loginRequired = true
+      vm.loginRequiredMsg = 'Login is required.'
     }
   },
   methods: {
@@ -218,3 +237,12 @@ export default {
   }
 }
 </script>
+<style scoped>
+
+  h1 {
+    margin-top: 10px;
+    background-color: black;
+    color: white;
+  }
+
+</style>
