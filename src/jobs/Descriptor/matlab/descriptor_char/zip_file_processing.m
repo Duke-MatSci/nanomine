@@ -32,10 +32,18 @@ for i = 1 : num_images
     if length(size(image)) > 2
        image = image(:,:,1);
     end
-
-    if (max(max(image))) > 1
-     image = double(round(image/256));
-    end
+%% Umar edded to binarize
+if max(image(:))>1
+    Target = double(image);
+    Target = Target/256; %
+    level = graythresh(Target);
+    image = im2bw(Target,level);
+    
+end
+%%   
+%     if (max(max(image))) > 1
+%      image = double(round(image/256));
+%     end
     
     L1 = size(image,1); L2 = size(image,2); % get image size
     vf = sum( image(:) ) / (L1*L2);  % volume fraction

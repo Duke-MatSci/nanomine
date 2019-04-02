@@ -110,6 +110,7 @@
           <v-card-title v-show="!datasetHideSelector">
             <!--v-btn v-on:click="mineOnly()"><span v-show="showMineOnly">Show All</span><span v-show="!showMineOnly">Mine Only</span></v-btn-->
             <v-checkbox
+              v-if="isLoggedIn()"
               v-model="showMineOnly"
               primary
               hide-details
@@ -442,6 +443,10 @@ export default {
     }
   },
   methods: {
+    isLoggedIn: function () {
+      let vm = this
+      return vm.auth.isLoggedIn()
+    },
     getUserIndeterminate: function () {
       let vm = this
       return vm.userindeterminate
