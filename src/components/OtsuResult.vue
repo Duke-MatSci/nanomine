@@ -9,7 +9,8 @@
     </v-alert>
     <h1>{{msg}}</h1>
     <v-container>
-      <v-layout row v-for="(file, idx) in files">
+      <!-- eslint-disable-next-line vue/valid-v-for --> <!-- otherwise eslint shows error, but statement works with no key -->
+      <v-layout v-for="(file, idx) in files">
         <v-container xs6>
           <h4>{{file.input}}</h4>
           <img :src="getInputImage(idx)"/>
