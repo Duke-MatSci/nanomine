@@ -49,7 +49,7 @@
                   properties of a specific composite or a certain matrix or filler of interest. </p>
                 <!--p class="text-left"> •   Database Overview (under construction) will offera visual summary of the data in NanoMine. </p-->
               </div>
-              <img style="width:680px;height:auto;" src="/cdn/img/visualization_hero.jpg"/>
+              <img style="width:680px;height:auto;" src="/nmstatic/img/visualization_hero.jpg"/>
               <br>
               <!--h4 class="text-left">While many of these functions are under construction, an example illustrating the types of visualizations which will be readily available in the next months is below. </h4-->
               <p class="text-left">To re-create the sample visualization shown above: </p>
@@ -60,7 +60,7 @@
                 <p class="text-left"> • Refinement can be obtained by playing with other features on the page </p>
                 <p class="text-left"> • The table below the graph contains the information of the graph in tabular
                   form.</p>
-                <img src="/cdn/img/visualization_hero2.png"/>
+                <img src="/nmstatic/img/visualization_hero2.png"/>
               </div>
               <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2"></div>
             </div>

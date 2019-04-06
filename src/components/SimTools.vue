@@ -15,7 +15,7 @@
         <v-flex d-flex xs2>
         </v-flex>
         <v-flex d-flex xs3>
-          <img src="/cdn/img/prop_simu.png"/>
+          <img src="/nmstatic/img/prop_simu.png"/>
         </v-flex>
         <v-flex d-flex xs5>
           <v-card-text>
@@ -38,7 +38,7 @@
         <v-flex d-flex xs2>
         </v-flex>
         <v-flex d-flex xs3>
-          <img src="/cdn/img/FEA_dielectrics.png"/>
+          <img src="/nmstatic/img/FEA_dielectrics.png"/>
         </v-flex>
         <v-flex d-flex xs5>
           <v-card-text>
@@ -61,7 +61,7 @@
         <v-flex d-flex xs2>
         </v-flex>
         <v-flex d-flex xs3>
-          <img src="/cdn/img/MCFEA.jpg"/>
+          <img src="/nmstatic/img/MCFEA.jpg"/>
         </v-flex>
         <v-flex d-flex xs5>
           <v-card-text>
