@@ -451,6 +451,7 @@ function authMiddleware (authOptions) {
 
 app.use(authMiddleware(authOptions))
 /* END Api Authorization */
+app.use('/nmstatic', express.static('../dist/nmstatic'))
 
 let oneHour = 60 * 60 // in seconds. TODO test rest API behavior with short LOCAL timeout
 let tokenTTL = 4 * oneHour
@@ -634,7 +635,6 @@ app.get('/secure', function (req, res, next) {
     })
 })
 
-// app.use('/nm', express.static('../dist'))
 app.get('/nm', function (req, res) {
   let idx = '../dist/index.html'
   // logger.debug('headers: ' + JSON.stringify(req.headers))

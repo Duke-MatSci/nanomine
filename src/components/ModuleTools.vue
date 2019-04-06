@@ -15,7 +15,7 @@
         <v-flex d-flex xs2>
         </v-flex>
         <v-flex d-flex xs3>
-          <img src="/cdn/img/recon_tool.PNG"/>
+          <img src="/nmstatic/img/recon_tool.PNG"/>
         </v-flex>
         <v-flex d-flex xs5>
           <v-card-text>
@@ -37,7 +37,7 @@
         <v-flex d-flex xs2>
         </v-flex>
         <v-flex d-flex xs3>
-          <img src="/cdn/img/dynamfit.png"/>
+          <img src="/nmstatic/img/dynamfit.png"/>
         </v-flex>
         <v-flex d-flex xs5>
           <v-card-text>
@@ -58,7 +58,7 @@
         <v-flex d-flex xs2>
         </v-flex>
         <v-flex d-flex xs3>
-          <img src="/cdn/img/webtool_tuneshifting.png"/>
+          <img src="/nmstatic/img/webtool_tuneshifting.png"/>
         </v-flex>
         <v-flex d-flex xs5>
           <v-card-text>

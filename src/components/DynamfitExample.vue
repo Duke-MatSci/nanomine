@@ -4,7 +4,7 @@
     <v-container>
       <h3 class="text-xs-left">An Example - Part I</h3>
       <br>
-      <p class="text-xs-left">Please click <a href="cdn/dynamfit/EXAMPLE.X_T">here</a> to download example data file. This file is a .X_T file with three columns per line (Frequency, X', X'').
+      <p class="text-xs-left">Please click <a href="nmstatic/dynamfit/EXAMPLE.X_T">here</a> to download example data file. This file is a .X_T file with three columns per line (Frequency, X', X'').
       </p>
       <br>
       <h3 class="text-xs-left">Instructions</h3>
@@ -41,13 +41,13 @@
         <v-flex xs5>
           <v-layout column>
             <div class="subheading">Epsilon Prime</div>
-            <v-img src="cdn/img/dynamfit_example_E.png" contain></v-img>
+            <v-img src="nmstatic/img/dynamfit_example_E.png" contain></v-img>
           </v-layout>
         </v-flex>
         <v-flex xs5>
           <v-layout column>
             <div class="subheading">Epsilon Double Prime</div>
-            <v-img src="cdn/img/dynamfit_example_EE.png" contain></v-img>
+            <v-img src="nmstatic/img/dynamfit_example_EE.png" contain></v-img>
           </v-layout>
         </v-flex>
       </v-layout>

@@ -8,9 +8,9 @@ import * as CodeMirror from 'codemirror'
 
 // Make CodeMirror available globally so the modes' can register themselves.
 window.CodeMirror = CodeMirror
-CodeMirror.modeURL = /* store.state.baseURL + */ '/cdn/js/codemirror/mode/%N/%N.js'
-CodeMirror.helperURL = '/cdn/js/codemirror/addon/%T/%N.js'
-CodeMirror.helperStyleURL = '/cdn/js/codemirror/addon/%T/%N.css'
+CodeMirror.modeURL = /* store.state.baseURL + */ '/nmstatic/js/codemirror/mode/%N/%N.js'
+CodeMirror.helperURL = '/nmstatic/js/codemirror/addon/%T/%N.js'
+CodeMirror.helperStyleURL = '/nmstatic/js/codemirror/addon/%T/%N.css'
 var loading = {}
 
 function splitCallback (cont, n) {
