@@ -89,7 +89,7 @@ export default {
       // var domParser = new DOMParser()
       // var xmlText = domParser.parseFromString(vm.rawData, 'text/xml')
       // var xsltDoc = domParser.parseFromString(vm.xsl, 'text/xml')
-      // // var xsl = vm.loadXMLDoc('/cdn/xml2html.xsl', 'XML')
+      // // var xsl = vm.loadXMLDoc('/nmstatic/xml2html.xsl', 'XML')
       // console.log(xmlText)
       // console.log(xsltDoc)
       // var xsltProcessor = new XSLTProcessor()
