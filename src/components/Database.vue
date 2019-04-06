@@ -4,14 +4,14 @@
     <v-container grid-list-xl>
       <v-layout row wrap>
         <!--v-flex xs4>
-          <img src="/cdn/img/visualize_data.png"/>
+          <img src="/nmstatic/img/visualize_data.png"/>
           <h4>
             <a href="https://nanomine.oit.duke.edu:8443/viz" target="_blank">Visualize</a>
           </h4>
           <p>Visualize nanocomposite data.</p>
         </v-flex-->
         <v-flex xs4>
-          <img src="/cdn/img/excel.png" />
+          <img src="/nmstatic/img/excel.png" />
           <h4>
             <router-link to="/XMLCONV">Curate Using Uploader</router-link>
           </h4>
@@ -20,7 +20,7 @@
           </p>
         </v-flex>
         <v-flex xs4 v-if="false">
-          <img src="/cdn/img/edit-big.png" />
+          <img src="/nmstatic/img/edit-big.png" />
           <h4>
             <router-link to="/editor">Curate online</router-link>
           </h4>
@@ -29,21 +29,21 @@
           </p>
         </v-flex>
         <v-flex xs4 v-if="false">
-          <img src="/cdn/img/search-big.png" />
+          <img src="/nmstatic/img/search-big.png" />
           <h4>
             <router-link href="/home">Explore the repository</router-link>
           </h4>
           <p>Search this nanocomposite data resource using flexible queries.</p>
         </v-flex>
         <v-flex xs4 v-if="false">
-          <img src="/cdn/img/edit-big.png"/>
+          <img src="/nmstatic/img/edit-big.png"/>
           <h4>
             <router-link to="/compose">Compose a schema</router-link>
           </h4>
           <p>Compose your own schema.</p>
         </v-flex>
         <v-flex xs4 v-if="true">
-          <img src="/cdn/img/visualize_data.png"/>
+          <img src="/nmstatic/img/visualize_data.png"/>
           <h4>
             <a href="/home">Visualization and Search</a>
           </h4>
