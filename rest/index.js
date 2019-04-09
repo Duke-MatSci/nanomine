@@ -624,7 +624,8 @@ function handleLogin (req, res) {
 }
 
 app.get('/secure', function (req, res, next) {
-  logger.debug('headers: ' + inspect(req.headers))
+  let func = '/secure handler'
+  logger.debug(func + ' - headers: ' + inspect(req.headers))
   handleLogin(req, res)
     .then(function (res) {
       res.redirect('/nm')
