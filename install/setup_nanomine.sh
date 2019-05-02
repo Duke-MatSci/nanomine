@@ -33,8 +33,12 @@ echo 'export NM_LOGFILE="nanomine.log"' >> /apps/nanomine_env # use this log for
 echo 'export NM_MATLAB_AVAILABLE="no"' >> /apps/nanomine_env # run TEST_XXXXXX matlab scripts instead of matlab directly
 echo 'export NM_NEO4J_IMAGE="http://path.to.neo4j.tgz"' >> /apps/nanomine_env  # Before using, obtain the actual location for this reference
 
+# pick up the variable changes before the next script runs
+source /apps/nanomine_env
+
 /apps/nanomine/rest/update_api_tokens.sh
 
+# variables changed by update_api_tokens, so pick those up as well
 source /apps/nanomine_env
 
 cd /apps/whyis
