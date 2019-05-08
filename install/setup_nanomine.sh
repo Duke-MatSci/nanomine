@@ -45,8 +45,8 @@ cd /apps/whyis
 
 python manage.py createuser -e nouser@nodomain.edu -p none -f nanomine -l test -u ${NM_AUTH_SYSTEM_USER_ID} --roles=admin
 
-python manage.py load -i /apps/nanomine/nm.ttl -f turtle
-python manage.py load -i /apps/nanomine/setl/ontology.setl.ttl -f turtle
+# python manage.py load -i /apps/nanomine/nm.ttl -f turtle  ## Apparently no longer needed
+# python manage.py load -i /apps/nanomine/setl/ontology.setl.ttl -f turtle  ## Apparently no longer needed
 python manage.py load -i /apps/nanomine/setl/xml_ingest.setl.ttl -f turtle
 python manage.py load -i /apps/nanomine/setl/nanomine.ttl -f turtle
 
