@@ -204,7 +204,7 @@ function handleCuratorRunComplete (failed) {
   if (failed) {
     logger.info('Curator run completed ' + (failed ? 'unsuccessfully.' : 'successfully.'))
   }
-  nextInterval = 5000
+  nextInterval = 2000
   if (consecutiveFailureCount < 5) {
     logger.trace(func + ' - rescheduling curator. Failure count is below threshold. FailureCount: ' + consecutiveFailureCount)
     curator() // re-schedule self after run
