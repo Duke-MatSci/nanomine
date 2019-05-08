@@ -270,7 +270,8 @@ function j2x (o, parent, indent) {
   } else {
     let heo = o
     if (typeof o === 'string') {
-      heo = he.encode(o, {
+      heo = he.decode(o)
+      heo = he.encode(heo, {
         'useNamedReferences': false,
         'decimal': true
       })
