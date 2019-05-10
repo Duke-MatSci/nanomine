@@ -3463,4 +3463,26 @@ where {
   ?nanopub a <https://www.iana.org/assignments/media-types/text/xml>
 }
 
+-- Ontology based queries
+
+SELECT DISTINCT ?count ?value ?unit
+ WHERE {
+   SELECT DISTINCT ?count ?value ?unit {
+     {
+       SELECT DISTINCT (count(DISTINCT ?id) as ?count) ?value ?unit {
+         ?id rdf:type/rdfs:subClassOf* <http://nanomine.org/ns/PolymerNanocomposite> .
+         FILTER (!ISBLANK(?id))
+         FILTER ( !strstarts(str(?id), "bnode:") )
+         ?id <http://semanticscience.org/resource/hasComponentPart>/<http://semanticscience.org/resource/isSurroundedBy>/<http://semanticscience.org/resource/hasAttribute>/rdf:type ?value .
+         ?id <http://semanticscience.org/resource/hasComponentPart>/<http://semanticscience.org/resource/isSurroundedBy> ?surfacePart. ?surfacePart <http://semanticscience.org/resource/hasRole> [ a <http://nanomine.org/ns/SurfaceTreatment>]. ?surfacePart <http://semanticscience.org/resource/hasAttribute>/rdf:type ?value.
+         optional { ?id <http://semanticscience.org/resource/hasComponentPart>/<http://semanticscience.org/resource/isSurroundedBy>/<http://semanticscience.org/resource/hasAttribute>/<http://semanticscience.org/resource/hasUnit> ?unit. }
+
+         ?id rdf:type/rdfs:subClassOf* <http://nanomine.org/ns/PolymerNanocomposite>.
+         FILTER (!ISBLANK(?id))
+         FILTER ( !strstarts(str(?id), "bnode:") )
+       } GROUP BY ?value ?unit
+     }
+     FILTER(BOUND(?value))
+   }
+ }
 */
