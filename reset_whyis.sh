@@ -10,8 +10,8 @@ echo "Deleting file depot files"
 rm -rf /apps/nanomine-data/files/*
 echo "Stopping celeryd"
 systemctl stop celeryd
-echo "Restarting jetty8"
-systemctl restart jetty8
+#### echo "Restarting jetty8"
+#### systemctl restart jetty8
 echo "Flushing/deleting redis data"
 redis-cli flushall
 echo "Restarting apache2/whyis"

@@ -1675,6 +1675,9 @@ app.get('/xml/:id?', function (req, res) { // currently only supports JWT style 
       let schemaId = versions[0].currentRef[0]._id
       let schemaQuery = {'schemaId': {'$eq': schemaId}}
       if (id) {
+        if (id.match(/.*\.xml$/) === null) {
+          id += '.xml' // actual title field of xml data record has .xml appended. Lookup will fail if it's not there.
+        }
         dataQuery = {'title': {'$eq': id}}
       } else if (dsSeq) {
         dataQuery = {'dsSeq': {$eq: dsSeq}}
