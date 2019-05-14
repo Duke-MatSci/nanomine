@@ -3488,4 +3488,11 @@ SELECT DISTINCT ?count ?value ?unit
      FILTER(BOUND(?value))
    }
  }
+
+ --- ingested count
+ SELECT DISTINCT (count(distinct ?id) as ?count)
+ WHERE {
+         ?id rdf:type/rdfs:subClassOf* <http://nanomine.org/ns/PolymerNanocomposite>.
+   }
+
 */
