@@ -1,7 +1,7 @@
 <template>
   <div class="header">
     <v-toolbar app dense>
-      <!--v-toolbar-side-icon @click="toggleLeftMenu()"></v-toolbar-side-icon-->
+      <v-toolbar-side-icon @click="toggleLeftMenu()" class="hidden-md-and-up"></v-toolbar-side-icon>
       <v-btn flat to="/">
         <v-toolbar-title><i class="material-icons nm-home-icon">home</i>NanoMine</v-toolbar-title>
       </v-btn>
@@ -10,11 +10,17 @@
         <v-btn flat to="/db">Database</v-btn>
         <v-btn flat to="/mtools">Module Tools</v-btn>
         <v-btn flat to="/simtools">Simulation Tools</v-btn>
-        <v-btn flat href="/home"><i class="material-icons nm-search-icon" v-if="searchEnabled()">search</i>
+        <v-btn fab flat href="/home"><i class="material-icons nm-search-icon" v-if="searchEnabled()">search</i>
         </v-btn>
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on }">
+            <v-btn fab flat to="/contact" v-on="on"><i class="material-icons nm-search-icon">contact_support</i></v-btn>
+          </template>
+          <span>Contact Us</span>
+        </v-tooltip>
         <v-btn v-if="isLoggedIn()" flat to="/mypage">My Page</v-btn>
         <v-btn v-else flat to="/mypage">My Page</v-btn>
-        <v-btn v-if="isLoggedIn()" flat v-on:click="logoutDialog = true">
+        <v-btn v-if="isLoggedIn()" flat v-on:click="$store.commit('setLoginLogout')">
           <i class="material-icons nm-user-icon" v-bind:class="{'nm-admin-icon': (isAdmin && !isRunAs), 'nm-runas-icon': isRunAs}">
             perm_identity
           </i>
@@ -28,13 +34,12 @@
             &nbsp;&nbsp;{{auth.getRunAsUser()}}
           </span>
         </v-btn>
-        <v-btn v-else flat v-on:click="loginDialog = true">
+        <v-btn v-else flat v-on:click="$store.commit('setLoginLogout')">
           <i class="material-icons nm-user-icon">
             perm_identity
           </i>
           <span>&nbsp;&nbsp;Login</span>
         </v-btn>
-        <v-btn flat to="/contact"><i class="material-icons nm-search-icon">contact_support</i>
       </v-toolbar-items>
     </v-toolbar>
     <v-dialog
@@ -85,7 +90,7 @@
           <v-btn
             color="blue darken-1"
             flat="flat"
-            @click="loginDialog = false"
+            @click="$store.commit('resetLoginLogout')"
           >
             Cancel
           </v-btn>
@@ -113,25 +118,14 @@ export default {
   beforeMount: function () {
     let vm = this
     vm.auth = new Auth()
-    // vm.ckLogout = new Promise(function (resolve, reject) {
-    //   vm.auth.getLogoutUrl()
-    //     .then(function (logoutUrl) {
-    //       vm.logoutUrl = logoutUrl
-    //       resolve()
-    //     })
-    //     .catch(function (err) {
-    //       // console.log('error getting logout URL: ' + err)
-    //       reject(err)
-    //       vm.logoutUrl = '#'
-    //     })
-    // })
-    // vm.ckLogout.then(function () {
+    vm.$store.subscribe(vm.handleLoginDialogChange)
     console.log('query = ' + JSON.stringify(vm.$route.query))
     let qlogout = vm.$route.query.logout
     if (qlogout && qlogout.match(/(true).*/)) {
       setTimeout(function () {
         vm.logoutRouted = true
-        vm.logoutDialog = true
+        // vm.logoutDialog = true
+        vm.$store.commit('setLoginLogout')
         console.log('set logoutDialog to true')
       }, 50)
     } else {
@@ -142,15 +136,12 @@ export default {
       setTimeout(function () {
         vm.loginRouted = true
         vm.loginDialog = true
+        vm.$store.commit('setLoginLogout')
         console.log('set loginDialog to true')
       }, 50)
     } else {
       console.log('login not requested')
     }
-    // })
-    //   .catch(function (err) {
-    //     console.log('error getting logout URL: ' + err)
-    //   })
   },
   methods: {
     log: function (msg) {
@@ -180,6 +171,25 @@ export default {
     toggleAdminAvailable: function () {
       this.$store.commit('toggleAdminActive')
     },
+    handleLoginDialogChange: function (mutation, state) {
+      let vm = this
+      console.log('handleLoginDialogChange: ' + mutation.type)
+      if (mutation.type === 'setLoginLogout') {
+        if (state.loginLogout && !vm.isLoggedIn()) {
+          vm.loginDialog = true
+        } else {
+          vm.loginDialog = false
+        }
+        if (state.loginLogout && vm.isLoggedIn()) {
+          vm.logoutDialog = true
+        } else {
+          vm.logoutDialog = false
+        }
+      } else if (mutation.type === 'resetLoginLogout') {
+        vm.loginDialog = false
+        vm.logoutDialog = false
+      }
+    },
     isLoggedIn: function () {
       return this.auth.isLoggedIn()
     },
@@ -199,8 +209,7 @@ export default {
     },
     isRunAs: function () {
       return this.$store.getters.runAsUser != null
-    }
-  },
+    } },
   data () {
     return {
       msg: 'PageHeader',
