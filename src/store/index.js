@@ -8,6 +8,7 @@ const store = new Vuex.Store({
     leftMenuActive: false,
     adminAvailable: false,
     isWaiting: false,
+    loginLogout: false, // used to toggle either login or logout in pageheader (actually does logout, dialog for login)
     runAsUser: null,
     'editor': { // editor store should contain all editor state including tabs and data for each tab
       'tab': [
@@ -58,6 +59,12 @@ const store = new Vuex.Store({
     setSampleList: function (state, sampleList) {
       state.sampleList = sampleList
     },
+    setLoginLogout: function (state) {
+      state.loginLogout = true
+    },
+    resetLoginLogout: function (state) {
+      state.loginLogout = false
+    },
     toggleLeftMenu: function (state) {
       state.leftMenuActive = !state.leftMenuActive
     },
@@ -72,6 +79,9 @@ const store = new Vuex.Store({
     }
   },
   getters: {
+    loginLogout: function (state) {
+      return state.loginLogout
+    },
     isLoading: function (state) {
       return state.isWaiting
     },

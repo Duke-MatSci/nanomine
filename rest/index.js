@@ -1675,6 +1675,9 @@ app.get('/xml/:id?', function (req, res) { // currently only supports JWT style 
       let schemaId = versions[0].currentRef[0]._id
       let schemaQuery = {'schemaId': {'$eq': schemaId}}
       if (id) {
+        if (id.match(/.*\.xml$/) === null) {
+          id += '.xml' // actual title field of xml data record has .xml appended. Lookup will fail if it's not there.
+        }
         dataQuery = {'title': {'$eq': id}}
       } else if (dsSeq) {
         dataQuery = {'dsSeq': {$eq: dsSeq}}
@@ -3462,5 +3465,34 @@ where {
   ?file a <http://purl.org/net/provenance/ns#File>.
   ?nanopub a <https://www.iana.org/assignments/media-types/text/xml>
 }
+
+-- Ontology based queries
+
+SELECT DISTINCT ?count ?value ?unit
+ WHERE {
+   SELECT DISTINCT ?count ?value ?unit {
+     {
+       SELECT DISTINCT (count(DISTINCT ?id) as ?count) ?value ?unit {
+         ?id rdf:type/rdfs:subClassOf* <http://nanomine.org/ns/PolymerNanocomposite> .
+         FILTER (!ISBLANK(?id))
+         FILTER ( !strstarts(str(?id), "bnode:") )
+         ?id <http://semanticscience.org/resource/hasComponentPart>/<http://semanticscience.org/resource/isSurroundedBy>/<http://semanticscience.org/resource/hasAttribute>/rdf:type ?value .
+         ?id <http://semanticscience.org/resource/hasComponentPart>/<http://semanticscience.org/resource/isSurroundedBy> ?surfacePart. ?surfacePart <http://semanticscience.org/resource/hasRole> [ a <http://nanomine.org/ns/SurfaceTreatment>]. ?surfacePart <http://semanticscience.org/resource/hasAttribute>/rdf:type ?value.
+         optional { ?id <http://semanticscience.org/resource/hasComponentPart>/<http://semanticscience.org/resource/isSurroundedBy>/<http://semanticscience.org/resource/hasAttribute>/<http://semanticscience.org/resource/hasUnit> ?unit. }
+
+         ?id rdf:type/rdfs:subClassOf* <http://nanomine.org/ns/PolymerNanocomposite>.
+         FILTER (!ISBLANK(?id))
+         FILTER ( !strstarts(str(?id), "bnode:") )
+       } GROUP BY ?value ?unit
+     }
+     FILTER(BOUND(?value))
+   }
+ }
+
+ --- ingested count
+ SELECT DISTINCT (count(distinct ?id) as ?count)
+ WHERE {
+         ?id rdf:type/rdfs:subClassOf* <http://nanomine.org/ns/PolymerNanocomposite>.
+   }
 
 */

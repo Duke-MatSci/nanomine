@@ -47,7 +47,7 @@ python manage.py createuser -e nouser@nodomain.edu -p none -f nanomine -l test -
 
 # python manage.py load -i /apps/nanomine/nm.ttl -f turtle  ## Apparently no longer needed
 # python manage.py load -i /apps/nanomine/setl/ontology.setl.ttl -f turtle  ## Apparently no longer needed
-python manage.py load -i /apps/nanomine/setl/xml_ingest.setl.ttl -f turtle
 python manage.py load -i /apps/nanomine/setl/nanomine.ttl -f turtle
+python manage.py load -i /apps/nanomine/setl/xml_ingest.setl.ttl -f turtle
 
 
