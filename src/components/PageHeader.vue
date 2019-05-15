@@ -34,6 +34,7 @@
           </i>
           <span>&nbsp;&nbsp;Login</span>
         </v-btn>
+        <v-btn flat to="/contact"><i class="material-icons nm-search-icon">contact_support</i>
       </v-toolbar-items>
     </v-toolbar>
     <v-dialog
