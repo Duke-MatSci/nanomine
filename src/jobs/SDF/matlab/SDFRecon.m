@@ -12,12 +12,15 @@ try
     path_to_write = [jobSrcDir,'/output'];
     mkdir(path_to_write);
     
+    writeError([path_to_write, '/errors.txt'], ''); % ensure that errors.txt exists
+    
     %% Specify import function according to input option
+    try
     switch str2num(input_type)
         case 1
             img = imread([path_to_read,file_name]); % read the incming target and store pixel values
             
-            if length(size(img)) > 3
+            if length(size(img)) > 2
                 img_original = img(:,:,1:3);
             else
                 img_original = img;
@@ -34,6 +37,9 @@ try
             load([path_to_read,file_name]);
             img_original = Input;
             imwrite(256*img_original,[path_to_write,'/','Input1.jpg']);
+    end
+    catch
+       writeError([path_to_write, '/errors.txt'], ['Failed to read image file']); 
     end
     
     if str2num(input_type) ~= 2
@@ -106,4 +112,9 @@ catch ex
     rc = 99;
     exit(rc);
 end
+    function writeError(file, msg)
+        f = fopen(file,'a+');
+        fprintf(f, '%s\n', msg);
+        fclose(f);
+    end
 end
