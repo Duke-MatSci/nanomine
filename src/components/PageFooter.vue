@@ -21,7 +21,7 @@ export default {
   },
   computed: {
     footerfont () {
-      console.log('breakpoint info: ' + JSON.stringify(this.$vuetify.breakpoint))
+      // console.log('breakpoint info: ' + JSON.stringify(this.$vuetify.breakpoint))
       return {
         'footer-font-small': this.$vuetify.breakpoint.xsOnly, // smAndDown
         'footer-font': this.$vuetify.breakpoint.smAndUp
