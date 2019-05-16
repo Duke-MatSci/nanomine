@@ -2,7 +2,7 @@
   <div class="header">
     <v-toolbar app dense>
       <v-toolbar-side-icon @click="toggleLeftMenu()" class="hidden-md-and-up"></v-toolbar-side-icon>
-      <v-btn flat to="/">
+      <v-btn flat to="/" @click="resetLeftMenu()">
         <v-toolbar-title><i class="material-icons nm-home-icon">home</i>NanoMine</v-toolbar-title>
       </v-btn>
       <v-spacer></v-spacer>
@@ -167,6 +167,9 @@ export default {
     },
     toggleLeftMenu: function () {
       this.$store.commit('toggleLeftMenu')
+    },
+    resetLeftMenu: function () {
+      this.$store.commit('resetLeftMenu')
     },
     toggleAdminAvailable: function () {
       this.$store.commit('toggleAdminActive')

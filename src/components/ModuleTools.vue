@@ -1,7 +1,7 @@
 <template>
   <div class="mtools">
     <h1>{{ msg }}</h1>
-    <v-container>
+    <v-container fluid grid-list-md>
       <v-layout row wrap>
         <v-flex d-flex xs12>
           <v-card-text>
@@ -12,12 +12,12 @@
             </p>
           </v-card-text>
         </v-flex>
-        <v-flex d-flex xs2>
+        <v-flex d-flex xs1>
         </v-flex>
-        <v-flex d-flex xs3>
-          <img src="/nmstatic/img/recon_tool.PNG"/>
+        <v-flex d-flex xs12 sm5 md3>
+          <v-img src="/nmstatic/img/recon_tool.PNG" aspect-ratio="1.7" contain xs12 sm6></v-img>
         </v-flex>
-        <v-flex d-flex xs5>
+        <v-flex d-flex xs12 sm6 md8>
           <v-card-text>
             <h4 class="text-xs-left">
               <span>
@@ -32,14 +32,12 @@
             </p>
           </v-card-text>
         </v-flex>
-        <v-flex d-flex xs2>
+        <v-flex d-flex xs1>
         </v-flex>
-        <v-flex d-flex xs2>
+        <v-flex d-flex xs12 sm5 md3>
+        <v-img src="/nmstatic/img/dynamfit.png" aspect-ratio="1.7" contain xs12 sm6></v-img>
         </v-flex>
-        <v-flex d-flex xs3>
-          <img src="/nmstatic/img/dynamfit.png"/>
-        </v-flex>
-        <v-flex d-flex xs5>
+        <v-flex d-flex xs12 sm6 md8>
           <v-card-text>
             <h4 class="text-xs-left">
               <span>
@@ -53,14 +51,12 @@
             </p>
           </v-card-text>
         </v-flex>
-        <v-flex d-flex xs2>
+        <v-flex d-flex xs1>
         </v-flex>
-        <v-flex d-flex xs2>
+        <v-flex d-flex xs12 sm5 md3>
+          <v-img src="/nmstatic/img/webtool_tuneshifting.png" aspect-ratio="1.7" contain xs12 sm6></v-img>
         </v-flex>
-        <v-flex d-flex xs3>
-          <img src="/nmstatic/img/webtool_tuneshifting.png"/>
-        </v-flex>
-        <v-flex d-flex xs5>
+        <v-flex d-flex xs12 sm6 md8>
           <v-card-text>
             <h4 class="text-xs-left">
               <span>
@@ -69,12 +65,13 @@
                 <!--/router-link-->
               </span>
             </h4>
-            <p class="text-xs-left">
+            <div class="text-xs-left">
+            <h3>Under construction. Not currently available.</h3>
               This algorithm derives interphase relaxation properties in nanocomposites using an inverse method that
               starts from composite properties and microstructure. It integrates finite element analysis and
               metamodeling optimization that predicts the interphase properties that results in minimal error between
-              simulated properties from FEA and experimental composite properties.
-            </p><h3>Under construction. Not currently available.</h3>
+            simulated properties from FEA and experimental composite properties.
+            </div>
           </v-card-text>
         </v-flex>
         <v-flex d-flex xs2>

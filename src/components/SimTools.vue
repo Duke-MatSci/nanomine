@@ -12,12 +12,12 @@
             </p>
           </v-card-text>
         </v-flex>
-        <v-flex d-flex xs2>
+        <v-flex d-flex xs1>
         </v-flex>
-        <v-flex d-flex xs3>
-          <img src="/nmstatic/img/prop_simu.png"/>
+        <v-flex d-flex xs12 sm5 md3>
+          <v-img src="/nmstatic/img/prop_simu.png" aspect-ratio="1.7" contain xs12 sm6></v-img>
         </v-flex>
-        <v-flex d-flex xs5>
+        <v-flex d-flex xs12 sm6 md8>
           <v-card-text>
             <h4 class="text-xs-left">
               <span>
@@ -33,14 +33,12 @@
             </p>
           </v-card-text>
         </v-flex>
-        <v-flex d-flex xs2>
+        <v-flex d-flex xs1>
         </v-flex>
-        <v-flex d-flex xs2>
+        <v-flex d-flex xs12 sm5 md3>
+          <v-img src="/nmstatic/img/FEA_dielectrics.png" contain xs12 sm6></v-img>
         </v-flex>
-        <v-flex d-flex xs3>
-          <img src="/nmstatic/img/FEA_dielectrics.png"/>
-        </v-flex>
-        <v-flex d-flex xs5>
+        <v-flex d-flex xs12 sm6 md8>
           <v-card-text>
             <h4 class="text-xs-left">
               <span>
@@ -49,21 +47,20 @@
                 <!--/router-link-->
               </span>
             </h4>
-            <p class="text-xs-left">
+            <div class="text-xs-left">
+              <h3>Under construction. Not currently available.</h3>
               This web app simulates the dielectric spectroscopy in nanocomposites with explicit implementation of
               microstructure dispersion as well as interphase relaxation model. This project is in collaboration with
               Rensselaer Polytechnic Institute.
-            </p><h3>Under construction. Not currently available.</h3>
+           </div>
           </v-card-text>
         </v-flex>
-        <v-flex d-flex xs2>
+        <v-flex d-flex xs1>
         </v-flex>
-        <v-flex d-flex xs2>
+        <v-flex d-flex xs12 sm5 md3>
+          <v-img src="/nmstatic/img/MCFEA.jpg" contain xs12 sm6></v-img>
         </v-flex>
-        <v-flex d-flex xs3>
-          <img src="/nmstatic/img/MCFEA.jpg"/>
-        </v-flex>
-        <v-flex d-flex xs5>
+        <v-flex d-flex xs12 sm6 md8>
           <v-card-text>
             <h4 class="text-xs-left">
               <span>
@@ -72,11 +69,12 @@
                 <!--/router-link-->
               </span>
             </h4>
-            <p class="text-xs-left">
+            <div class="text-xs-left">
+            <h3>Under construction. Not currently available.</h3>
               This web app simulates the charge transport in dielectric polymers and their nanocomposites by compling
               finite element analysis and Monte Carlo. This project is in collaboration with Rensselaer Polytechnic
               Institute.
-            </p><h3>Under construction. Not currently available.</h3>
+            </div>
           </v-card-text>
         </v-flex>
         <v-flex d-flex xs2>

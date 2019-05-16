@@ -32,7 +32,7 @@
         href="https://github.com/Duke-MatSci/nanomine-schema/tree/master/xml" target="_blank">schema</a> and an ontology to provide a robustness to the FAIR principles. NanoMine also allows for the registration of materials resources, bridging the gap between existing resources and the end users and making those existing resources available for research to material community.</span>
       </p>
 
-      <p style="text-align:center;"><img src="/nmstatic/img/sponsors3.png"></p>
+      <p style="text-align:center;"><v-img src="/nmstatic/img/sponsors3.png"  aspect-ratio="4.2" contain xs12 sm6></v-img></p>
 
       <p style="font-weight:bold;text-align:left;padding-left:15%;padding-right:15%;">NSF supported the initial
         concept of NanoMine as a joint Northwestern University/Rensselaer Polytechnic Institute project through the
@@ -100,7 +100,7 @@ export default {
     background-color: #08233c;
     border-radius: 0px;
     margin-top: 0px;
-    max-height: 200px;
+    max-height: 240px;
   }
 
   img {
