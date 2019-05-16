@@ -21,7 +21,7 @@ try
             img = imread([path_to_read,file_name]); % read the incming target and store pixel values
             
             if length(size(img)) > 2
-                img_original = img(:,:,1:3);
+                img_original = img(:,:,1);
             else
                 img_original = img;
             end
