@@ -68,6 +68,9 @@ const store = new Vuex.Store({
     toggleLeftMenu: function (state) {
       state.leftMenuActive = !state.leftMenuActive
     },
+    resetLeftMenu: function (state) {
+      state.leftMenuActive = false
+    },
     toggleAdminActive: function (state) {
       state.adminAvailable = !state.adminAvailable
     },
