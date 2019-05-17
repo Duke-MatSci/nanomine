@@ -198,11 +198,6 @@ export default {
     },
     isTestUser: function () {
       return this.auth.isTestUser()
-    },
-    refreshSession: function () {
-      let vm = this
-      vm.showSessionTimeoutDialog = false
-      window.location.reload()
     }
   },
   computed: {
@@ -225,8 +220,7 @@ export default {
       loginDialog: false,
       logoutDialog: false,
       logoutRouted: false,
-      logoutUrl: null,
-      showSessionTimeoutDialog: false
+      logoutUrl: null
     }
   }
 }
