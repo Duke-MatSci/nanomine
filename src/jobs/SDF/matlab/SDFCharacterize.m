@@ -4,7 +4,9 @@ function SDFCharacterize(userId, jobId, jobType, jobSrcDir, jobDir, webBaseUri,i
 % 1 : Single JPEG Image
 % 2 : ZIP file containing JPEG images
 % 3 : Image in .mat file
-%%
+%% Added changed
+% Accept Odd shaped images 
+% Binarize raw jpg image
 rc=0;
 try
     path_to_read = [jobSrcDir,'/'];
@@ -58,6 +60,11 @@ try
         else
             img_original = img;
         end
+        %%Umar added to deal with odd shaped images
+        
+        md=min(size(img_original));
+        img_original=img_original(1:md,1:md);
+        
         %% Umar added to check and binarize the image using Otsu 02/27/2019
         if max(img_original(:))>1
             Target = double(img_original);
