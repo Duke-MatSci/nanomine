@@ -4,8 +4,9 @@ function SDFRecon(userId, jobId, jobType, jobSrcDir, jobDir, webBaseUri,input_ty
 % 1 : Single JPEG Image
 % 2 : ZIP file containing JPEG images
 % 3 : Image in .mat file
-%%
-%
+%% Changes
+% Otsu
+% Odd shape fix
 rc=0;
 try
     path_to_read = [jobSrcDir,'/'];
@@ -16,35 +17,47 @@ try
     
     %% Specify import function according to input option
     try
-    switch str2num(input_type)
-        case 1
-            img = imread([path_to_read,file_name]); % read the incming target and store pixel values
-            
-            if length(size(img)) > 2
-                img_original = img(:,:,1);
-            else
-                img_original = img;
-            end
-            if max(img_original(:)) > 1
-                imwrite(img_original,[path_to_write,'/','Input1.jpg'])
-                img_original = round(img_original/256);
-            else
-                imwrite(256*img_original,[path_to_write,'/','Input1.jpg'])
-            end
-        case 2
-            unzip([path_to_read,file_name],[path_to_write,'/input']);
-        case 3
-            load([path_to_read,file_name]);
-            img_original = Input;
-            imwrite(256*img_original,[path_to_write,'/','Input1.jpg']);
-    end
+        switch str2num(input_type)
+            case 1
+                img = imread([path_to_read,file_name]); % read the incming target and store pixel values
+                
+                if length(size(img)) > 2
+                    img_original = img(:,:,1);
+                else
+                    img_original = img;
+                end
+                if max(img_original(:)) > 1
+                    imwrite(img_original,[path_to_write,'/','Input1.jpg'])
+                    img_original = round(img_original/256);
+                else
+                    imwrite(256*img_original,[path_to_write,'/','Input1.jpg'])
+                end
+            case 2
+                unzip([path_to_read,file_name],[path_to_write,'/input']);
+            case 3
+                load([path_to_read,file_name]);
+                img_original = Input;
+                imwrite(256*img_original,[path_to_write,'/','Input1.jpg']);
+        end
     catch
-       writeError([path_to_write, '/errors.txt'], ['Failed to read image file']); 
+        writeError([path_to_write, '/errors.txt'], ['Failed to read image file']);
     end
     
     if str2num(input_type) ~= 2
         %% SDF code - Shuangchen & Yichi
         % img_original - binary original image
+        %% Umar added to check and binarize the image using Otsu
+        %% Umar added to deal with odd shaped images
+        md=min(size(img_original));
+        img_original=img_original(1:md,1:md);
+        
+        if max(img_original(:))>1
+            Target = double(img_original);
+            Target = Target/256; %
+            level = graythresh(Target);
+            img_original = im2bw(Target,level);
+        end
+        %%
         img_original = double(img_original);
         vf = mean(img_original(:));
         pixel = size(img_original,1);
