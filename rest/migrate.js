@@ -270,8 +270,8 @@ function j2x (o, parent, indent) {
   } else {
     let heo = o
     if (typeof o === 'string') {
-      heo = he.decode(o)
-      heo = he.encode(heo, {
+      heo = he.decode(o) // decode any named character entities since they're not compatible with python rdflib
+      heo = he.encode(heo, { // re-encode special entity characters using decimal (hex will not work) encoding for rdflib
         'useNamedReferences': false,
         'decimal': true
       })
