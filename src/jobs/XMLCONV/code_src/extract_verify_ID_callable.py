@@ -94,7 +94,7 @@ def extractID(xlsxName, jobDir, code_srcDir, restbase, user):
                 message += verifyID(ID_raw)
         # DOI
         if match(sheet_sample.row_values(row)[0], 'DOI'):
-            DOI = str(sheet_sample.row_values(row)[1])
+            DOI = str(sheet_sample.row_values(row)[1]).strip()
     # if no error detected
     if message == '':
         # call restDOI here
@@ -205,49 +205,49 @@ def generateID(response, SID, SI_flag):
 def mapToRest(crawlerDict):
     restDict = {}
     # citationType
-    if 'CitationType' in crawlerDict:
+    if 'CitationType' in crawlerDict and len(crawlerDict['CitationType']) > 0:
         restDict['citationType'] = crawlerDict['CitationType'][0]
     # publication
-    if 'Publication' in crawlerDict:
+    if 'Publication' in crawlerDict and len(crawlerDict['Publication']) > 0:
         restDict['publication'] = crawlerDict['Publication'][0]
     # title
-    if 'Title' in crawlerDict:
+    if 'Title' in crawlerDict and len(crawlerDict['Title']) > 0:
         restDict['title'] = crawlerDict['Title'][0]
     # author
-    if 'Author' in crawlerDict:
+    if 'Author' in crawlerDict and len(crawlerDict['Author']) > 0:
         restDict['author'] = crawlerDict['Author']
     # keyword
-    if 'Keyword' in crawlerDict:
+    if 'Keyword' in crawlerDict and len(crawlerDict['Keyword']) > 0:
         restDict['keyword'] = crawlerDict['Keyword']
     # publisher
-    if 'Publisher' in crawlerDict:
+    if 'Publisher' in crawlerDict and len(crawlerDict['Publisher']) > 0:
         restDict['publisher'] = crawlerDict['Publisher'][0]
     # publicationYear
-    if 'PublicationYear' in crawlerDict:
+    if 'PublicationYear' in crawlerDict and len(crawlerDict['PublicationYear']) > 0:
         restDict['publicationYear'] = crawlerDict['PublicationYear'][0]
     # doi
-    if 'DOI' in crawlerDict:
+    if 'DOI' in crawlerDict and len(crawlerDict['DOI']) > 0:
         restDict['doi'] = crawlerDict['DOI'][0]
     # volume
-    if 'Volume' in crawlerDict:
+    if 'Volume' in crawlerDict and len(crawlerDict['Volume']) > 0:
         restDict['volume'] = crawlerDict['Volume'][0]
     # url
-    if 'URL' in crawlerDict:
+    if 'URL' in crawlerDict and len(crawlerDict['URL']) > 0:
         restDict['url'] = crawlerDict['URL'][0]
     # language
-    if 'Language' in crawlerDict:
+    if 'Language' in crawlerDict and len(crawlerDict['Language']) > 0:
         restDict['language'] = crawlerDict['Language'][0]
     # location
-    if 'Institution' in crawlerDict:
+    if 'Institution' in crawlerDict and len(crawlerDict['Institution']) > 0:
         restDict['location'] = crawlerDict['Institution'][0]
     # dateOfCitation
-    if 'DateOfCitation' in crawlerDict:
+    if 'DateOfCitation' in crawlerDict and len(crawlerDict['DateOfCitation']) > 0:
         restDict['dateOfCitation'] = crawlerDict['DateOfCitation'][0]
     # issn
-    if 'ISSN' in crawlerDict:
+    if 'ISSN' in crawlerDict and len(crawlerDict['ISSN']) > 0:
         restDict['issn'] = crawlerDict['ISSN'][0]
     # issue
-    if 'Issue' in crawlerDict:
+    if 'Issue' in crawlerDict and len(crawlerDict['Issue']) > 0:
         restDict['issue'] = crawlerDict['Issue'][0]
     # final formatting
     restDict = {'dsInfo': restDict}
