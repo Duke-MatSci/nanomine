@@ -2,10 +2,6 @@
 NanoMine Nanocomposites Data Resource
 
 ##### NOTE: Prototype code. Some approaches will change. Monitor this README for updates.
-# NanoMine
-NanoMine Nanocomposites Data Resource
-
-##### NOTE: Prototype code. Some approaches will change. Monitor this README for updates.
 
 # Installation 
 #### (REQUIRES ubuntu 16.04 -- 18.04 will not work yet)
