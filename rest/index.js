@@ -234,6 +234,7 @@ let authOptions = {
     {path: '/jobsubmit', loginAuth: true, membership: [], apiAuth: true, apiGroup: 'jobs'},
     {path: '/publishfiles2rdf', loginAuth: false, membership: ['admin'], apiAuth: true, apiGroup: 'curate'},
     {path: '/publishxml2rdf', loginAuth: false, membership: ['admin'], apiAuth: true, apiGroup: 'curate'},
+    {path: '/sessiontest', loginAuth: true, membership: [], apiAuth: false, apiGroup: 'none'},
     {path: '/testpubfiles2rdf', loginAuth: true, membership: ['admin'], apiAuth: true, apiGroup: 'curate'},
     {path: '/testpubschema2rdf', loginAuth: true, membership: ['admin'], apiAuth: true, apiGroup: 'curate'},
     {path: '/testpubxml2rdf', loginAuth: true, membership: ['admin'], apiAuth: true, apiGroup: 'curate'},
@@ -1450,6 +1451,9 @@ app.post('/publishxml2rdf', function (req, res) {
     jsonResp.error = 'invalid xml title: ' + xmlTitle
     res.status(400).json(jsonResp)
   }
+})
+app.get('/sessiontest', function (req, res) {
+  res.status(200).send('OK')
 })
 
 // Test publishFiles (xml, and datafiles pushed to rdf
