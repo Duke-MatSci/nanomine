@@ -6,6 +6,7 @@ import {} from 'vuex'
 // import Axios from 'axios'
 import jwt from 'jsonwebtoken'
 import Vue from '../main'
+import Moment from 'moment'
 
 export function Auth () {
   this.err = null
@@ -47,8 +48,19 @@ Auth.prototype = {
     }
     return rv
   },
+  isSessionExpired () {
+    let expiration = this.getSessionExpiration()
+    if (!expiration) {
+      expiration = 0
+    }
+    let now = Moment().unix()
+    let isExpired = (now > expiration)
+    // console.log('isSessionExpired: ' + isExpired + ' expiration: ' + expiration + ' now: ' + now)
+    return isExpired
+  },
   isLoggedIn: function () {
-    return this.getUserId() !== null
+    let vm = this
+    return (vm.getUserId() !== null && !vm.isSessionExpired())
   },
   isTestUser: function () {
     let vm = this
@@ -63,7 +75,7 @@ Auth.prototype = {
     let rv = false
     let tv = vm.tokenValues
     if (tv && tv.isAdmin) {
-      rv = true
+      rv = !vm.isSessionExpired()
     }
     return rv
   },
@@ -101,6 +113,16 @@ Auth.prototype = {
     let rv = null
     if (tv && tv.givenName && tv.givenName.length > 0) {
       rv = tv.givenName
+    }
+    return rv
+  },
+  getSessionExpiration: function () {
+    let vm = this
+    let tv = vm.tokenValues
+    let rv = null
+    // console.log('getSessionExpiration: tv.exp = ' + tv.exp + ' tv.exp.length: ' + tv.exp.length + ' +(tv.exp): ' + +(tv.exp))
+    if (tv && tv.exp) {
+      rv = +(tv.exp)
     }
     return rv
   },
@@ -164,30 +186,30 @@ Auth.prototype = {
   },
   getPermissions: function (successFunction, failureFunction) {
     // refresh permissions for this user
-  },
-  setJobType: function (jobType) {
-    this.jobType = jobType
-  },
-  getJobType: function () {
-    return this.jobType
-  },
-  getFileCount: function () {
-    return this.jobInputFiles.length
-  },
-  getFileInfo: function (idx) {
-    let rv = null
-    if (idx >= 0 && idx < this.jobInputFiles.length) {
-      rv = this.jobInputFiles[idx]
-    }
-    return rv
-  },
-  addInputFile: function (fileName, dataUri) {
-    let idx = this.jobInputFiles.length
-    this.jobInputFiles.push({ 'idx': idx, 'fileName': fileName, 'dataUri': dataUri, 'statusCode': null, 'statusText': null })
-  },
-  setJobParameters: function (paramsObject) {
-    this.jobParameters = paramsObject
   }
+  // setJobType: function (jobType) {
+  //   this.jobType = jobType
+  // },
+  // getJobType: function () {
+  //   return this.jobType
+  // },
+  // getFileCount: function () {
+  //   return this.jobInputFiles.length
+  // },
+  // getFileInfo: function (idx) {
+  //   let rv = null
+  //   if (idx >= 0 && idx < this.jobInputFiles.length) {
+  //     rv = this.jobInputFiles[idx]
+  //   }
+  //   return rv
+  // },
+  // addInputFile: function (fileName, dataUri) {
+  //   let idx = this.jobInputFiles.length
+  //   this.jobInputFiles.push({ 'idx': idx, 'fileName': fileName, 'dataUri': dataUri, 'statusCode': null, 'statusText': null })
+  // },
+  // setJobParameters: function (paramsObject) {
+  //   this.jobParameters = paramsObject
+  // }
 }
 
 /*
