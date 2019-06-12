@@ -149,7 +149,7 @@ export default {
       if (vm.auth) {
         vm.loggedInStatus = vm.isLoggedIn()
       }
-    }, 2000)
+    }, 1000)
   },
   methods: {
     log: function (msg) {
