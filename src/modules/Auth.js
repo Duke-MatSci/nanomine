@@ -53,8 +53,10 @@ Auth.prototype = {
     if (!expiration) {
       expiration = 0
     }
-    let now = Moment.unix()
-    return (now > expiration)
+    let now = Moment().unix()
+    let isExpired = (now > expiration)
+    // console.log('isSessionExpired: ' + isExpired + ' expiration: ' + expiration + ' now: ' + now)
+    return isExpired
   },
   isLoggedIn: function () {
     let vm = this
@@ -118,7 +120,8 @@ Auth.prototype = {
     let vm = this
     let tv = vm.tokenValues
     let rv = null
-    if (tv && tv.exp && tv.exp.length > 0) {
+    // console.log('getSessionExpiration: tv.exp = ' + tv.exp + ' tv.exp.length: ' + tv.exp.length + ' +(tv.exp): ' + +(tv.exp))
+    if (tv && tv.exp) {
       rv = +(tv.exp)
     }
     return rv

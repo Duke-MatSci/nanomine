@@ -20,7 +20,7 @@
         </v-tooltip>
         <v-btn v-if="isLoggedIn()" flat to="/mypage">My Page</v-btn>
         <v-btn v-else flat to="/mypage">My Page</v-btn>
-        <v-btn v-if="isLoggedIn()" flat v-on:click="$store.commit('setLoginLogout')">
+        <v-btn v-if="loginStatus" flat v-on:click="$store.commit('setLoginLogout')">
           <i class="material-icons nm-user-icon" v-bind:class="{'nm-admin-icon': (isAdmin && !isRunAs), 'nm-runas-icon': isRunAs}">
             perm_identity
           </i>
@@ -143,6 +143,14 @@ export default {
       console.log('login not requested')
     }
   },
+  created: function () {
+    let vm = this
+    setInterval(function () {
+      if (vm.auth) {
+        vm.loggedInStatus = vm.isLoggedIn()
+      }
+    }, 2000)
+  },
   methods: {
     log: function (msg) {
       console.log(msg)
@@ -201,6 +209,10 @@ export default {
     }
   },
   computed: {
+    loginStatus: function () { // reactive isLoggedIn to keep status updated in page header
+      console.log('Updating login status')
+      return this.loggedInStatus
+    },
     userId: function () {
       return this.auth.getUserId()
     },
@@ -217,6 +229,7 @@ export default {
     return {
       msg: 'PageHeader',
       auth: null,
+      loggedInStatus: false,
       loginDialog: false,
       logoutDialog: false,
       logoutRouted: false,
