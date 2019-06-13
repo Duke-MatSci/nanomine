@@ -51,7 +51,7 @@ def extractID(xlsxName, jobDir, code_srcDir, restbase, user):
     sheets = xlfile.sheets()
     for sheet in sheets:
         # check the header of the sheet to determine what it has inside
-        if (sheet.row_values(0)[0].strip().lower() == "sample info"):
+        if (sheet.nrows > 0 and sheet.row_values(0)[0].strip().lower() == "sample info"):
             sheet_sample = sheet
     # if the sheet with ID is not found, write error message in jobDir/ID.txt
     message = ''

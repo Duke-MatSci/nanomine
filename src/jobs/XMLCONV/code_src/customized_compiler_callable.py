@@ -3395,6 +3395,9 @@ def compiler(jobDir, code_srcDir, xsdDir, templateName, restbase):
     # store those sheet objects in a list and loop through the list
     sheet_content = xlfile.sheets()
     for sheet in sheet_content:
+        # skip empty sheets
+        if (sheet.nrows == 0):
+            continue
         # check the header of the sheet to determine what it has inside
         if (sheet.row_values(0)[0].strip().lower() == "sample info"):
             # sample info sheet
