@@ -39,6 +39,13 @@
                   The reconstructed images will be provided in JPEG format along with a plot comparing their autocorrelation function with the mean autocorrelation of input images.</p>
       </v-flex>
       <v-alert
+        v-model="loginRequired"
+        type="error"
+        outline
+      >
+        {{loginRequiredMsg}}
+      </v-alert>
+      <v-alert
         v-model="errorAlert"
         type="error"
         dismissible
@@ -100,6 +107,7 @@
 <script>
 import {} from 'vuex'
 import {JobMgr} from '@/modules/JobMgr.js'
+import {Auth} from '@/modules/Auth.js'
 
 export default {
   name: 'SDFReconstruct',
@@ -114,6 +122,8 @@ export default {
       filesDisplay: [],
       errorAlert: false,
       errorAlertMsg: '',
+      loginRequired: false,
+      loginRequiredMsg: '',
       fileUploaded: false,
       successDlg: false,
       jobId: '',
@@ -122,6 +132,14 @@ export default {
         '1', '2', '3', '4', '5'
       ]
     })
+  },
+  beforeMount: function () {
+    let vm = this
+    vm.auth = new Auth()
+    if (!vm.auth.isLoggedIn()) {
+      vm.loginRequired = true
+      vm.loginRequiredMsg = 'Login is required.'
+    }
   },
   methods: {
     setLoading: function () {

@@ -13,9 +13,9 @@
       </p>
       <br>
       <h3 class="text-xs-left">Steps</h3>
-      <p class="text-xs-left">Step 1: Click <a href="/cdn/xmlconv/master_template.zip" download>here</a> to download the
+      <p class="text-xs-left">Step 1: Click <a href="/nmstatic/xmlconv/master_template.zip" download>here</a> to download the
         blank MS Excel template (137 kB).
-        (Click <a href="/cdn/xmlconv/example.zip" download>here</a> to see an example, 263 kB)<br>
+        (Click <a href="/nmstatic/xmlconv/example.zip" download>here</a> to see an example, 263 kB)<br>
         Step 2: Fill in the parameters for all applicable cells in the Excel template file. Prepare the supplementary
         images and raw data files.<br>
         Step 3: Select the completed Excel template file in the first uploading box.<br>
@@ -32,6 +32,13 @@
         the corresponding cells in the Excel template file.
       </p>
       <h3 class="text-xs-left">Inputs</h3><br>
+      <v-alert
+        v-model="loginRequired"
+        type="error"
+        outline
+      >
+        {{loginRequiredMsg}}
+      </v-alert>
       <v-alert
         v-model="uploadError"
         type="error"
@@ -110,6 +117,7 @@
 <script>
 import {} from 'vuex'
 import {JobMgr} from '@/modules/JobMgr.js'
+import {Auth} from '@/modules/Auth.js'
 
 export default {
   name: 'XMLCONV',
@@ -123,10 +131,20 @@ export default {
     filesDisplay: [],
     uploadError: false,
     uploadErrorMsg: '',
+    loginRequired: false,
+    loginRequiredMsg: '',
     templateUploaded: false,
     successDlg: false,
     jobId: ''
   }),
+  beforeMount: function () {
+    let vm = this
+    vm.auth = new Auth()
+    if (!vm.auth.isLoggedIn()) {
+      vm.loginRequired = true
+      vm.loginRequiredMsg = 'Login is required before uploading files.'
+    }
+  },
   methods: {
     setLoading: function () {
       this.$store.commit('isLoading')
@@ -203,7 +221,6 @@ export default {
         }
       }
     },
-
     successDlgClicked: function () {
       let vm = this
       console.log('Success dlg button clicked')

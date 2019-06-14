@@ -33,17 +33,21 @@ echo 'export NM_LOGFILE="nanomine.log"' >> /apps/nanomine_env # use this log for
 echo 'export NM_MATLAB_AVAILABLE="no"' >> /apps/nanomine_env # run TEST_XXXXXX matlab scripts instead of matlab directly
 echo 'export NM_NEO4J_IMAGE="http://path.to.neo4j.tgz"' >> /apps/nanomine_env  # Before using, obtain the actual location for this reference
 
-(su - whyis -c "/apps/nanomine/rest/update_api_tokens.sh")
+# pick up the variable changes before the next script runs
+source /apps/nanomine_env
 
+/apps/nanomine/rest/update_api_tokens.sh
+
+# variables changed by update_api_tokens, so pick those up as well
 source /apps/nanomine_env
 
 cd /apps/whyis
 
 python manage.py createuser -e nouser@nodomain.edu -p none -f nanomine -l test -u ${NM_AUTH_SYSTEM_USER_ID} --roles=admin
 
-python manage.py load -i /apps/nanomine/nm.ttl -f turtle
-python manage.py load -i /apps/nanomine/setl/ontology.setl.ttl -f turtle
+# python manage.py load -i /apps/nanomine/nm.ttl -f turtle  ## Apparently no longer needed
+# python manage.py load -i /apps/nanomine/setl/ontology.setl.ttl -f turtle  ## Apparently no longer needed
+python manage.py load -i /apps/nanomine/setl/nanomine.ttl -f turtle
 python manage.py load -i /apps/nanomine/setl/xml_ingest.setl.ttl -f turtle
-python manage.py load -i /apps/nanomine/setl/nanomine.setl.ttl -f turtle
 
 

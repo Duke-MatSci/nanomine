@@ -11,6 +11,7 @@ import SubHeader from '@/components/PageSubHeader'
 import Footer from '@/components/PageFooter'
 import LeftMenu from '@/components/LeftMenu'
 import Waiting from '@/components/Waiting'
+import Analytics from '@/components/Analytics'
 import store from './store'
 import VueGoogleCharts from 'vue-google-charts'
 import TreeView from 'vue-json-tree-view'
@@ -39,6 +40,7 @@ Vue.component('page-subheader', SubHeader)
 Vue.component('page-footer', Footer)
 Vue.component('LeftMenu', LeftMenu)
 Vue.component('waiting', Waiting)
+Vue.component('analytics', Analytics)
 /* eslint-disable no-new */
 
 export default new Vue({
