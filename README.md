@@ -10,7 +10,7 @@ NanoMine Nanocomposites Data Resource
 
 - whyis will be installed in /apps/whyis
 
-- Run these commands after adjusting the mongo dump location in a terminal window on your Ubuntu VM or native Ubuntu install:
+- Run these commands after adjusting the mongo dump location and your fork and branch in a terminal window on your Ubuntu VM or native Ubuntu install:
 ```
 export MONGO_DUMP_DOWNLOAD_LOCATION=http://somewhere.edu/mgi.tgz  # adjust this to the real download location
 export NM_INSTALL_FORK='duke-matsci' # this should probably be YOUR github userid if you intend to push changes
