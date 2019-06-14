@@ -4,6 +4,7 @@
 
 <script>
 import Axios from 'axios'
+
 export default {
   name: 'Analytics',
   data () {
@@ -27,9 +28,13 @@ export default {
     }
   },
   created: function () { // handle page load since it does not fire route change
+    let vm = this
+    let url = window.location.href.split('?')
+    let q = (url.length === 2 ? url[1] : null)
+    // console.log('stringified query: ' + q)
     Axios.post('/nmr/analytics', {
       data: {
-        url: window.location.pathname /* + '/' */ + this.$route.path,
+        url: window.location.pathname /* + '/' */ + vm.$route.path + (q ? ('?' + q) : ''),
         referrer: (document.referrer ? document.referrer : '-')
       }
     })
