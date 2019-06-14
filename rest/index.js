@@ -640,31 +640,36 @@ app.get('/secure', function (req, res, next) {
     })
 })
 
+function handleLocalUserIfNecessary (req, res) {
+  if (nmAuthType === 'local') {
+    return handleLogin(req, res)
+  } else {
+    return new Promise(function (resolve, reject) {
+      resolve()
+    })
+  }
+}
+
 app.get('/nm', function (req, res) {
   let idx = '../dist/index.html'
-  // logger.debug('headers: ' + JSON.stringify(req.headers))
-  // handleLogin(req.headers)
-  // NOTE: For now, login is required to get to the site.
-  // let remoteUser = req.headers['remote_user'] // this only works with NetIDs and will not work with OneLink
-  //  handleLogin(req, res)
-  //    .then(function (res) {
   logger.debug('cookies: ' + inspect(req.cookies))
-  try {
-    fs.readFile(idx, 'utf8', function (err, data) { // TODO Cache this
-      if (err) {
-        return res.status(400).send('cannot open index')
-      } else {
-        return res.send(data)
+  handleLocalUserIfNecessary(req, res)
+    .then(function () {
+      try {
+        fs.readFile(idx, 'utf8', function (err, data) { // TODO Cache this
+          if (err) {
+            return res.status(400).send('cannot open index')
+          } else {
+            return res.send(data)
+          }
+        })
+      } catch (err) {
+        return res.status(404).send(err)
       }
     })
-  } catch (err) {
-    return res.status(404).send(err)
-  }
-  // })
-  // .catch(function (err) {
-  //   logger.error('login error caught from handleLogin: ' + err)
-  //   return res.status(500).send('login error occurred: ' + err)
-  // })
+    .catch(function(err) {
+      return res.status(404).send(err)
+    })
 })
 app.get('/logout', function (req, res) {
   return res.status(200).json({error: null, data: {logoutUrl: nmAuthLogoutUrl}})
