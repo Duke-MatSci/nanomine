@@ -102,6 +102,9 @@ let nmAuthTestUser = env.nmAuthTestUser
 let nmAuthAdminGroupName = env.nmAuthAdminGroupName
 let nmAuthLogoutUrl = env.nmAuthLogoutUrl
 
+let nmStaticDir = '../dist/nmstatic'
+let nmStaticImageDir = nmStaticDir + '/img'
+
 let APIACCESS_APITOKEN_PART = 0
 let APIACCESS_REFRESHTOKEN_PART = 1
 let APIACCESS_ACCESSTOKEN_PART = 2
@@ -452,7 +455,7 @@ function authMiddleware (authOptions) {
 
 app.use(authMiddleware(authOptions))
 /* END Api Authorization */
-app.use('/nmstatic', express.static('../dist/nmstatic'))
+app.use('/nmstatic', express.static(nmStaticDir))
 
 let oneHour = 60 * 60 // in seconds. TODO test rest API behavior with short LOCAL timeout
 let tokenTTL = 4 * oneHour
@@ -1454,6 +1457,75 @@ app.post('/publishxml2rdf', function (req, res) {
 })
 app.get('/sessiontest', function (req, res) {
   res.status(200).send('OK')
+})
+
+let png = null
+app.get('/static.png', function (req, res) {
+  let url = req.query.u
+  let referrer = req.query.r
+  let query = req.query.q
+  if (!url) {
+    url = '-'
+  }
+  if (!referrer) {
+    referrer = '-'
+  }
+  if (!query) {
+    query = ''
+  }
+  let fwd = req.get('x-forwarded-for')
+  let ip = '-'
+  if (fwd) {
+    ip = fwd.split(',')[0]
+  }
+  let ua = req.get('User-Agent')
+  if (!ua) {
+    ua = '-'
+  }
+  let datetime = moment().format('DD/MMM/YYYY:HH:mm:ss ZZ') // Apache log date/time format
+  let msg = `${ip} - - [${datetime}] "GET ${url} HTTP/1.1" 200 - "${referrer}" "${ua}"\n`
+  fs.appendFile('analytics.log', msg, {encoding: 'utf8'}, function (err, data) {
+    if (err) {
+      res.status(500).send('error: ' + err)
+    } else {
+      if (png) {
+        res.set('Content-Type', 'image/png')
+        res.send(png)
+      } else {
+        fs.readFile(nmStaticImageDir + '/static.png', function (err, data) {
+          if (err) {
+            res.status(404).send('NOTFND')
+          } else {
+            png = data
+            res.set('Content-Type', 'image/png')
+            res.send(png)
+          }
+        })
+      }
+    }
+  })
+})
+
+app.post('/analytics', function (req, res) {
+  let data = req.body.data
+  let fwd = req.get('x-forwarded-for')
+  let ip = '-'
+  if (fwd) {
+    ip = fwd.split(',')[0]
+  }
+  let ua = req.get('User-Agent')
+  if (!ua) {
+    ua = '-'
+  }
+  let datetime = moment().format('DD/MMM/YYYY:HH:mm:ss ZZ') // Apache log date/time format
+  let msg = `${ip} - - [${datetime}] "GET ${data.url} HTTP/1.1" 200 - "${data.referrer}" "${ua}"\n`
+  fs.appendFile('analytics.log', msg, {encoding: 'utf8'}, function (err, data) {
+    if (err) {
+      res.status(500).json({'error': err, 'data': null})
+    } else {
+      res.status(201).json({'error': null, 'data': null})
+    }
+  })
 })
 
 // Test publishFiles (xml, and datafiles pushed to rdf

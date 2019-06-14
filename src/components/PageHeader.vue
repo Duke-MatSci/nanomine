@@ -1,5 +1,6 @@
 <template>
   <div class="header">
+    <analytics/>
     <v-toolbar app dense>
       <v-toolbar-side-icon @click="toggleLeftMenu()" class="hidden-md-and-up"></v-toolbar-side-icon>
       <v-btn flat to="/" @click="resetLeftMenu()">
