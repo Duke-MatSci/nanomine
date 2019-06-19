@@ -31,7 +31,7 @@ function addJobInfo(dir, jobParams) {
   let user = jobParams.submittingUser
   if (jobParams.user && jobParams.user.length > 0) {
     user = jobParams.user
-  } else if(jobParams.originalUser && jobParams.originalUser.length > 0) {
+  } else if (jobParams.originalUser && jobParams.originalUser.length > 0) {
     user = jobParams.originalUser
   }
   if (jobInfo[jobtype]) {
