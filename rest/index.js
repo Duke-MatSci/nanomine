@@ -46,6 +46,8 @@ const nanomineUtils = require('./modules/utils')
 let matchValidXmlTitle = nanomineUtils.matchValidXmlTitle
 let env = nanomineUtils.getEnv()
 const getDatasetXmlFileList = nanomineUtils.getDatasetXmlFileList
+const getLatestSchemas = nanomineUtils.getLatestSchemas
+const sortSchemas = nanomineUtils.sortSchemas
 
 // const session = require('cookie-session')
 
@@ -66,7 +68,7 @@ const getDatasetXmlFileList = nanomineUtils.getDatasetXmlFileList
 let logger = configureLogger()
 logger.info('NanoMine REST server version ' + config.version + ' starting')
 
-let datasetBucketName = nanomineUtils.datasetBucketName
+// let datasetBucketName = nanomineUtils.datasetBucketName
 
 let sendEmails = env.sendEmails
 let emailHost = env.emailHost
@@ -99,6 +101,9 @@ let nmAuthType = env.nmAuthType
 let nmAuthTestUser = env.nmAuthTestUser
 let nmAuthAdminGroupName = env.nmAuthAdminGroupName
 let nmAuthLogoutUrl = env.nmAuthLogoutUrl
+
+let nmStaticDir = '../dist/nmstatic'
+let nmStaticImageDir = nmStaticDir + '/img'
 
 let APIACCESS_APITOKEN_PART = 0
 let APIACCESS_REFRESHTOKEN_PART = 1
@@ -223,15 +228,19 @@ let authOptions = {
   protect: [
     // path is req.path, loginAuth is whether logged in users(jwtToken via cookie) have access and apiAuth allows access using api tokens
     //   loginAuth also forces group membership check if membership is set - empty membership === any or no group OK
-    // not yet    { path: '/curate', loginAuth: false, membership: [], apiAuth: true, apiGroup: 'curate' },
     // not yet    { path: '/dataset/create', loginAuth: false, membership: [], apiAuth: true, apiGroup: 'curate' },
+    {path: '/curate', loginAuth: false, membership: [], apiAuth: true, apiGroup: 'curate'},
     {path: '/datasets', loginAuth: true, membership: [], apiAuth: true, apiGroup: 'curate'},
     {path: '/jobemail', loginAuth: false, membership: [], apiAuth: true, apiGroup: 'email'},
+    {path: '/jobcreate', loginAuth: true, membership: [], apiAuth: true, apiGroup: 'jobs'},
+    {path: '/jobpostfile', loginAuth: true, membership: [], apiAuth: true, apiGroup: 'jobs'},
     {path: '/jobsubmit', loginAuth: true, membership: [], apiAuth: true, apiGroup: 'jobs'},
+    {path: '/publishfiles2rdf', loginAuth: false, membership: ['admin'], apiAuth: true, apiGroup: 'curate'},
+    {path: '/publishxml2rdf', loginAuth: false, membership: ['admin'], apiAuth: true, apiGroup: 'curate'},
+    {path: '/sessiontest', loginAuth: true, membership: [], apiAuth: false, apiGroup: 'none'},
     {path: '/testpubfiles2rdf', loginAuth: true, membership: ['admin'], apiAuth: true, apiGroup: 'curate'},
     {path: '/testpubschema2rdf', loginAuth: true, membership: ['admin'], apiAuth: true, apiGroup: 'curate'},
     {path: '/testpubxml2rdf', loginAuth: true, membership: ['admin'], apiAuth: true, apiGroup: 'curate'},
-    // {path: '/pubfiles2rdf', loginAuth: false, membership: [], apiAuth: true, apiGroup: 'curate'},
     {path: '/users', loginAuth: true, membership: ['admin'], apiAuth: true, apiGroup: 'admin'},
     {path: '/user', loginAuth: false, membership: ['admin'], apiAuth: true, apiGroup: 'admin'}
   ]
@@ -303,138 +312,153 @@ function authMiddleware (authOptions) {
   // TODO review this code
   return function (req, res, next) {
     let func = 'authMiddleWare(' + req.path + ')'
-    let pathProtected = false
-    let loginAuth = false
-    let loginMembership = []
-    let apiAuth = false
-    // let apiGroup = null
-    let loginUserId = null
-    let isAdmin = false
-    // let runAsUserId = null // Allow admins to set runAsUserId
-    // let apiUserId = null
     let jsonResp = {'error': null, 'data': null}
-    authOptions.protect.forEach(function (v) {
-      if (v.path === req.path) {
-        pathProtected = true
-        loginAuth = v.loginAuth
-        loginMembership = v.membership
-        apiAuth = v.apiAuth
-        // apiGroup = v.apiGroup
-      }
-    })
-    let token = req.cookies['token']
-    if (token) {
-      try {
-        let decoded = jwtBase.verify(token, nmAuthSecret)
-        loginUserId = decoded.sub // subject
-        isAdmin = decoded.isAdmin
-        logger.debug(func + ' - user: ' + loginUserId + ' accessing: ' + req.path)
-        req.headers['nmLoginUserId'] = decoded.sub
-      } catch (err) {
-        logger.error(func + ' - check jwt token failed. err: ' + err)
-      }
-    } else {
-      logger.trace(func + ' - no jwt token found in cookie.')
-    }
-
-    if (pathProtected) {
-      logger.error('protected path: ' + req.path)
-      let authFailed = true
-      let groupCheckFailed = false // TODO recheck this logic related to loginUserId
-      if (loginAuth) {
-        loginMembership.forEach(function (v) { // TODO update for memberships other than admin i.e. make dynamic
-          if (v === 'admin') {
-            if (!isAdmin) {
-              groupCheckFailed = true
-            }
-          }
-        })
-        if (loginUserId !== null && groupCheckFailed === false) {
-          authFailed = false
+    try {
+      logger.debug(func + ' - function entry')
+      let pathProtected = false
+      let loginAuth = false
+      let loginMembership = []
+      let apiAuth = false
+      // let apiGroup = null
+      let loginUserId = null
+      let isAdmin = false
+      // let runAsUserId = null // Allow admins to set runAsUserId
+      // let apiUserId = null
+      authOptions.protect.forEach(function (v) {
+        if (v.path === req.path) {
+          pathProtected = true
+          loginAuth = v.loginAuth
+          loginMembership = v.membership
+          apiAuth = v.apiAuth
+          // apiGroup = v.apiGroup
         }
-      }
-      let apiAuthPromise = null
-      if (apiAuth && authFailed) {
-        let authHeader = req.get('Authentication')
-        let bearerToken = null
-        if (authHeader) {
-          let btParts = authHeader.split(' ')
-          if (btParts[0] === 'Bearer' && btParts[1] && btParts[1].length > 0) {
-            bearerToken = btParts[1]
-          }
-          if (bearerToken) {
-            // Look up bearer token in users
-            apiAuthPromise = new Promise(function (resolve, reject) {
-              getBearerTokenInfo(bearerToken)
-                .then(function (tokenInfo) {
-                  if (tokenInfo !== null) {
-                    // may be expired
-                    let now = moment().unix()
-                    let expired = (+(tokenInfo.expiration) < now)
-                    if (!expired) {
-                      logger.debug(func + ' - bearer: ' + bearerToken + ' success. Token info: ' + JSON.stringify(tokenInfo) + ' accessing: ' + req.path)
-                      resolve(tokenInfo)
-                    } else {
-                      logger.debug(func + ' - bearer: ' + bearerToken + ' access token expired: ' + JSON.stringify(tokenInfo) + ' accessing: ' + req.path)
-                      resolve(null)
-                    }
-                  } else {
-                    logger.debug(func + ' - bearer: ' + bearerToken + ' FAILED. Token info not found accessing: ' + req.path)
-                    resolve(null)
-                  }
-                })
-                .catch(function (err) {
-                  logger.error(func + ' - could not obtain info for bearer token: ' + bearerToken + ' err: ' + err)
-                  reject(err)
-                })
-            })
-          } else {
-            logger.error(func + ' - No bearer token specified')
-          }
-          // if found, the record will hold the associated api token
-          // get the api definition from the target api
-          // set nmApiUserId into header
-        } else {
-          logger.error(func + ' - api authentication failed for bearer token: ' + bearerToken)
-        }
-      } else if (loginAuth && authFailed) {
-        logger.error(func + ' - login auth failed for userid: ' + loginUserId)
-      }
-
-      if (!apiAuthPromise) { // TODO evaluate whether these return values should differ depending on protocol (get vs post)
-        if (!authFailed) {
-          next()
-        } else {
-          jsonResp.error = 'not authorized'
-          return res.status(403).json(jsonResp)
+      })
+      let token = req.cookies['token']
+      if (token) {
+        try {
+          let decoded = jwtBase.verify(token, nmAuthSecret)
+          loginUserId = decoded.sub // subject
+          isAdmin = decoded.isAdmin
+          logger.debug(func + ' - user: ' + loginUserId + ' accessing: ' + req.path)
+          req.headers['nmLoginUserId'] = decoded.sub
+        } catch (err) {
+          logger.error(func + ' - check jwt token failed. err: ' + err)
         }
       } else {
-        apiAuthPromise
-          .then(function (tokenInfo) {
-            if (tokenInfo) {
-              req.headers['nmLoginUserId'] = tokenInfo.userId
-              next()
-            } else {
-              jsonResp.error = 'invalid token'
-              return res.status(403).json(jsonResp)
+        logger.trace(func + ' - no jwt token found in cookie.')
+      }
+
+      if (pathProtected) {
+        logger.error('protected path: ' + req.path)
+        let authFailed = true
+        let groupCheckFailed = false // TODO recheck this logic related to loginUserId
+        if (loginAuth) {
+          loginMembership.forEach(function (v) { // TODO update for memberships other than admin i.e. make dynamic
+            if (v === 'admin') {
+              if (!isAdmin) {
+                groupCheckFailed = true
+              }
             }
           })
-          .catch(function (err) {
-            jsonResp.error = err
+          if (loginUserId !== null && groupCheckFailed === false) {
+            authFailed = false
+          }
+        }
+        let apiAuthPromise = null
+        if (apiAuth && authFailed) {
+          let authHeader = req.get('Authentication')
+          if (!authHeader) {
+            authHeader = req.get('Authorization') // Authorization is the correct header, BTW
+          }
+          logger.debug(func + ' - authHeader is: ' + authHeader)
+          let bearerToken = null
+          if (authHeader) {
+            let btParts = authHeader.split(' ')
+            if (btParts[0] === 'Bearer' && btParts[1] && btParts[1].length > 0) {
+              bearerToken = btParts[1]
+            }
+            if (bearerToken) {
+              logger.debug(func + ' - found bearer token')
+              // Look up bearer token in users
+              apiAuthPromise = new Promise(function (resolve, reject) {
+                getBearerTokenInfo(bearerToken)
+                  .then(function (tokenInfo) {
+                    if (tokenInfo !== null) {
+                      // may be expired
+                      let now = moment().unix()
+                      let expired = (+(tokenInfo.expiration) < now)
+                      if (!expired) {
+                        logger.debug(func + ' - bearer: ' + bearerToken + ' success. Token info: ' + JSON.stringify(tokenInfo) + ' accessing: ' + req.path)
+                        resolve(tokenInfo)
+                      } else {
+                        logger.debug(func + ' - bearer: ' + bearerToken + ' access token expired: ' + JSON.stringify(tokenInfo) + ' accessing: ' + req.path)
+                        resolve(null)
+                      }
+                    } else {
+                      logger.debug(func + ' - bearer: ' + bearerToken + ' FAILED. Token info not found accessing: ' + req.path)
+                      resolve(null)
+                    }
+                  })
+                  .catch(function (err) {
+                    logger.error(func + ' - could not obtain info for bearer token: ' + bearerToken + ' err: ' + err)
+                    reject(err)
+                  })
+              })
+            } else {
+              logger.error(func + ' - No bearer token specified')
+            }
+            // if found, the record will hold the associated api token
+            // get the api definition from the target api
+            // set nmApiUserId into header
+          } else {
+            logger.error(func + ' - api authentication failed for bearer token: ' + bearerToken)
+          }
+        } else if (loginAuth && authFailed) {
+          logger.error(func + ' - login auth failed for userid: ' + loginUserId)
+        }
+
+        if (!apiAuthPromise) { // TODO evaluate whether these return values should differ depending on protocol (get vs post)
+          if (!authFailed) {
+            next()
+          } else {
+            jsonResp.error = 'not authorized'
             return res.status(403).json(jsonResp)
-          })
+          }
+        } else {
+          apiAuthPromise
+            .then(function (tokenInfo) {
+              if (tokenInfo) {
+                req.headers['nmLoginUserId'] = tokenInfo.userId
+                next()
+              } else {
+                jsonResp.error = 'invalid token'
+                return res.status(403).json(jsonResp)
+              }
+            })
+            .catch(function (err) {
+              jsonResp.error = err
+              return res.status(403).json(jsonResp)
+            })
+        }
+      } else {
+        logger.trace('non-protected path: ' + req.path)
+        next()
       }
-    } else {
-      logger.trace('non-protected path: ' + req.path)
-      next()
+    } catch (err) {
+      let msg = func + ' - exception in authMiddleware. Error: ' + err
+      logger.error(msg)
+      jsonResp.error = err
+      return res.status(401).json(jsonResp)
     }
   }
 }
 
 app.use(authMiddleware(authOptions))
 /* END Api Authorization */
+app.use('/nmstatic', express.static(nmStaticDir))
 
-let fourHours = 4 * 60 * 60 * 1000 // TODO test rest API behavior with short LOCAL timeout
+let oneHour = 60 * 60 // in seconds. TODO test rest API behavior with short LOCAL timeout
+let tokenTTL = 4 * oneHour
 function handleLogin (req, res) {
   let func = 'handleLogin'
   let remoteUser = null
@@ -443,6 +467,7 @@ function handleLogin (req, res) {
   let surName = null
   let emailAddr = null
   let sessionExpiration = null
+  let isAnonymous = false
   let userExists = false
   if (nmAuthType === 'local') {
     remoteUser = nmAuthTestUser
@@ -450,7 +475,7 @@ function handleLogin (req, res) {
     displayName = nmAuthTestUser
     surName = nmAuthTestUser
     emailAddr = emailTestAddr
-    sessionExpiration = moment().unix() + fourHours
+    sessionExpiration = moment().unix() + tokenTTL
   } else {
     remoteUser = req.headers[nmAuthUserHeader] // OneLink users do not have NetIDs, but all have dudukeids
     givenName = req.headers[nmAuthGivenNameHeader]
@@ -458,9 +483,18 @@ function handleLogin (req, res) {
     surName = req.headers[nmAuthSurNameHeader]
     emailAddr = req.headers[nmAuthEmailHeader]
     sessionExpiration = +(req.headers[nmAuthSessionExpirationHeader])
+    if (remoteUser === undefined) {
+      isAnonymous = true
+      remoteUser = 'anonymous'
+      givenName = 'anonymous'
+      displayName = 'anonymous user'
+      surName = 'anonymous'
+      emailAddr = 'anonymous@nodomain.edu'
+      sessionExpiration = Math.floor(Date.now() / 1000) + (20 * 60)
+    }
   }
   logger.debug(func + ' - headers: ' + JSON.stringify(req.headers))
-  logger.debug(`${func} - user info: remoteUser=${remoteUser} givenName=${givenName} displayName=${displayName} surName=${surName} email=${emailAddr} sessionExpiration=${sessionExpiration}`)
+  logger.debug(`${func} - user info: isAnonymous=${isAnonymous} remoteUser=${remoteUser} givenName=${givenName} displayName=${displayName} surName=${surName} email=${emailAddr} sessionExpiration=${sessionExpiration}`)
   let token = req.cookies['token']
   if (token) {
     logger.debug('found session token: ' + token)
@@ -560,7 +594,7 @@ function handleLogin (req, res) {
         .then(function (isMember) {
           let isAdmin = isMember
           let isUser = true // for now everyone is a user
-          let isAnonymous = (givenName === 'Anon' && surName === 'Nanomine')
+          // let isAnonymous = (givenName === 'Anon' && surName === 'Nanomine')
           // let logoutUrl = nmAuthLogoutUrl
           let jwToken = jwtBase.sign({
             'sub': remoteUser,
@@ -593,15 +627,34 @@ function handleLogin (req, res) {
   })
 }
 
-// app.use('/nm', express.static('../dist'))
-app.get('/nm', function (req, res) {
-  let idx = '../dist/index.html'
-  // console.log('headers: ' + JSON.stringify(req.headers))
-  // handleLogin(req.headers)
-  // NOTE: For now, login is required to get to the site. TODO change login so that it is optional to access protected functions
-  // let remoteUser = req.headers['remote_user'] // this only works with NetIDs and will not work with OneLink
+app.get('/secure', function (req, res, next) {
+  let func = '/secure handler'
+  logger.debug(func + ' - headers: ' + inspect(req.headers))
   handleLogin(req, res)
     .then(function (res) {
+      res.redirect('/nm')
+    })
+    .catch(function (err) {
+      logger.error('login error caught from handleLogin: ' + err)
+      return res.status(500).send('login error occurred: ' + err)
+    })
+})
+
+function handleLocalUserIfNecessary (req, res) {
+  if (nmAuthType === 'local') {
+    return handleLogin(req, res)
+  } else {
+    return new Promise(function (resolve, reject) {
+      resolve()
+    })
+  }
+}
+
+app.get('/nm', function (req, res) {
+  let idx = '../dist/index.html'
+  logger.debug('cookies: ' + inspect(req.cookies))
+  handleLocalUserIfNecessary(req, res)
+    .then(function () {
       try {
         fs.readFile(idx, 'utf8', function (err, data) { // TODO Cache this
           if (err) {
@@ -614,13 +667,18 @@ app.get('/nm', function (req, res) {
         return res.status(404).send(err)
       }
     })
-    .catch(function (err) {
-      logger.error('login error caught from handleLogin: ' + err)
-      return res.status(500).send('login error occurred: ' + err)
+    .catch(function(err) {
+      return res.status(404).send(err)
     })
 })
 app.get('/logout', function (req, res) {
   return res.status(200).json({error: null, data: {logoutUrl: nmAuthLogoutUrl}})
+})
+
+app.get('/doLogout', function (req, res) {
+  res.clearCookie('session', {'httpOnly': true, 'path': '/'})
+  res.clearCookie('token', {})
+  res.redirect(nmAuthLogoutUrl)
 })
 
 /* BEGIN general utility functions */
@@ -826,7 +884,7 @@ function createUser (userid, emailAddr, givenName, surName, displayName) {
   })
 }
 
-function getCurrentSchemas () { // returns promise resolved with sorted list of current schemas -- latest is first
+function getCurrentSchemas () { // returns promise resolved with sorted list of current schemas -- latest is first TODO dup of utils.getLatestSchemas
   return new Promise(function (resolve, reject) {
     XsdVersionSchema.find({isDeleted: {$eq: false}}).populate('currentRef').exec(function (err, versions) {
       if (err) {
@@ -977,7 +1035,7 @@ function publishFiles (userid, xmlTitle, cb) { // xmlText, schemaName, filesInfo
     //   Add each file's name to the section in the JsonLD that lists the file as related to the dataset (fileListLD)
 
     // get latest schema/schemaId
-    getLatestSchemas()
+    getLatestSchemas(XsdVersionSchema, logger)
       .then(function (schemas) {
         if (schemas && schemas.length > 0) {
           // logger.error('xmlText: ' + xmlText)
@@ -1354,6 +1412,7 @@ function publishLatestSchema (userid, cb) {
 }
 app.post('/publishfiles2rdf', function (req, res) {
   let func = 'publishfiles2rdf'
+  logger.debug(func + ' - function entry')
   let xmlTitle = req.body.xmltitle // {title: title, userid: userid}
   let targetUserid = req.body.userid
   let jsonResp = {error: null, data: null}
@@ -1377,6 +1436,7 @@ app.post('/publishfiles2rdf', function (req, res) {
 })
 app.post('/publishxml2rdf', function (req, res) {
   let func = 'publishxml2rdf'
+  logger.debug(func + ' - function entry')
   let xmlTitle = req.body.xmltitle // {title: title, userid: userid}
   let xmlText = req.body.xmltext
   let schemaName = req.body.schemaname
@@ -1399,6 +1459,78 @@ app.post('/publishxml2rdf', function (req, res) {
     jsonResp.error = 'invalid xml title: ' + xmlTitle
     res.status(400).json(jsonResp)
   }
+})
+app.get('/sessiontest', function (req, res) {
+  res.status(200).send('OK')
+})
+
+let png = null
+app.get('/static.png', function (req, res) {
+  let url = req.query.u
+  let referrer = req.query.r
+  let query = req.query.q
+  if (!url) {
+    url = '-'
+  }
+  if (!referrer) {
+    referrer = '-'
+  }
+  if (!query) {
+    query = ''
+  }
+  let fwd = req.get('x-forwarded-for')
+  let ip = '-'
+  if (fwd) {
+    ip = fwd.split(',')[0]
+  }
+  let ua = req.get('User-Agent')
+  if (!ua) {
+    ua = '-'
+  }
+  let datetime = moment().format('DD/MMM/YYYY:HH:mm:ss ZZ') // Apache log date/time format
+  let msg = `${ip} - - [${datetime}] "GET ${url} HTTP/1.1" 200 - "${referrer}" "${ua}"\n`
+  fs.appendFile('analytics.log', msg, {encoding: 'utf8'}, function (err, data) {
+    if (err) {
+      res.status(500).send('error: ' + err)
+    } else {
+      if (png) {
+        res.set('Content-Type', 'image/png')
+        res.send(png)
+      } else {
+        fs.readFile(nmStaticImageDir + '/static.png', function (err, data) {
+          if (err) {
+            res.status(404).send('NOTFND')
+          } else {
+            png = data
+            res.set('Content-Type', 'image/png')
+            res.send(png)
+          }
+        })
+      }
+    }
+  })
+})
+
+app.post('/analytics', function (req, res) {
+  let data = req.body.data
+  let fwd = req.get('x-forwarded-for')
+  let ip = '-'
+  if (fwd) {
+    ip = fwd.split(',')[0]
+  }
+  let ua = req.get('User-Agent')
+  if (!ua) {
+    ua = '-'
+  }
+  let datetime = moment().format('DD/MMM/YYYY:HH:mm:ss ZZ') // Apache log date/time format
+  let msg = `${ip} - - [${datetime}] "GET ${data.url} HTTP/1.1" 200 - "${data.referrer}" "${ua}"\n`
+  fs.appendFile('analytics.log', msg, {encoding: 'utf8'}, function (err, data) {
+    if (err) {
+      res.status(500).json({'error': err, 'data': null})
+    } else {
+      res.status(201).json({'error': null, 'data': null})
+    }
+  })
 })
 
 // Test publishFiles (xml, and datafiles pushed to rdf
@@ -1495,61 +1627,9 @@ app.get('/templates/versions/select/all', function (req, res) {
   })
 })
 
-function sortSchemas (allActive) { // sort by date descending and choose first
-  allActive.sort((a, b) => { // Sort in reverse order
-    let rv = 0
-    let rea = a.currentRef[0].title.match(/(\d{2})(\d{2})(\d{2})/)
-    let reb = b.currentRef[0].title.match(/(\d{2})(\d{2})(\d{2})/)
-    let yra = parseInt(rea[3])
-    let yrb = parseInt(reb[3])
-    let moa = parseInt(rea[1])
-    let mob = parseInt(reb[1])
-    let dya = parseInt(rea[2])
-    let dyb = parseInt(reb[2])
-    if (yrb > yra) {
-      rv = 1 // reverse sort
-    } else if (yrb < yra) {
-      rv = -1
-    }
-    if (rv === 0 && mob > moa) {
-      rv = 1
-    } else if (rv === 0 && moa > mob) {
-      rv = -1
-    }
-    if (rv === 0 && dyb > dya) {
-      rv = 1
-    } else if (rv === 0 && dya > dyb) {
-      rv = -1
-    }
-    return rv
-  })
-}
-
-function getLatestSchemas () { // duplicate of getCurrentSchemas!! TODO
-  return new Promise(function (resolve, reject) {
-    XsdVersionSchema.find({isDeleted: {$eq: false}}).populate('currentRef').exec(function (err, versions) {
-      if (err) {
-        reject(err)
-      } else if (versions == null || versions.length <= 0) {
-        resolve(null) // not found
-      } else {
-        try {
-          sortSchemas(versions) /* In-place sort by title i.e. 081218 will date sort to top relative to 060717 (reverse sort) so that
-                                 client can assume latest schema is first
-                                 */
-          resolve(versions)
-        } catch (err) {
-          logger.error('schema sort reverse by date failed :( - error' + err)
-          reject(err)
-        }
-      }
-    })
-  })
-}
-
 app.get('/templates/versions/select/allactive', function (req, res) {
   let jsonResp = {'error': null, 'data': null}
-  getLatestSchemas()
+  getLatestSchemas(XsdVersionSchema, logger)
     .then(function (schemas) { // schemas[0].currentRef[0] is latest schema
       if (schemas && schemas.length > 0) {
         jsonResp.data = schemas
@@ -1645,6 +1725,7 @@ app.get('/xml/:id?', function (req, res) { // currently only supports JWT style 
   //   or user is admin
   let jsonResp = {'error': null, 'data': null}
   let id = req.params.id // may be null
+  let fmt = req.query.format
   let dsSeq = req.query.dataset // may be null -- to get all xmls for a dataset (mutually exclusive of id)
   let userid = null
   let isAdmin = false
@@ -1676,6 +1757,9 @@ app.get('/xml/:id?', function (req, res) { // currently only supports JWT style 
       let schemaId = versions[0].currentRef[0]._id
       let schemaQuery = {'schemaId': {'$eq': schemaId}}
       if (id) {
+        if (id.match(/.*\.xml$/) === null) {
+          id += '.xml' // actual title field of xml data record has .xml appended. Lookup will fail if it's not there.
+        }
         dataQuery = {'title': {'$eq': id}}
       } else if (dsSeq) {
         dataQuery = {'dsSeq': {$eq: dsSeq}}
@@ -1714,7 +1798,14 @@ app.get('/xml/:id?', function (req, res) { // currently only supports JWT style 
           //   })
           // })
           logger.info('/xml query=' + JSON.stringify(theQuery) + ' returned: ' + jsonResp.data.length + ' records.')
-          res.json(jsonResp)
+          if (fmt && fmt.toLowerCase() === 'xml') { // format xml only returns raw xml text with no other fields
+            setTimeout(function () {
+              res.set('Content-Type', 'application/xml')
+              return res.send(xmlRecs[0].xml_str)
+            }, 200)
+          } else {
+            return res.json(jsonResp)
+          }
         }
       })
     })
@@ -2212,7 +2303,7 @@ app.get('/users', function (req, res) {
 
 /* BEGIN -- refresh token service */
 function newAccessTokenAndExpiration () {
-  let hr4 = 4 * 60 * 60 * 1000 // 4 hrs in seconds
+  let hr4 = 4 * 60 * 60 // 4 hrs in seconds
   return {'accessToken': shortUUID.new(), 'expiration': (moment().unix() + hr4)}
 }
 
@@ -2282,7 +2373,7 @@ app.post('/refreshtoken', function (req, res) {
                     if (parts[APIACCESS_ACCESSTOKEN_PART]) { // existing access token
                       if (parts[APIACCESS_EXPIRATION_PART] && !isNaN(+(parts[APIACCESS_EXPIRATION_PART]))) { // has it expired?
                         let exp = +(parts[APIACCESS_EXPIRATION_PART])
-                        let hr = 60 * 60 * 1000 // seconds
+                        let hr = 60 * 60 // seconds
                         let now = moment().unix() // unix timestamp
                         logger.debug(func + ' now: ' + now + ' 1 hr: ' + hr + ' exp: ' + exp + ' exp - hr: ' + (exp - hr) + ' (exp-hr)>now ' + ((exp - hr) > now))
                         if ((exp - hr) > now) { // expires in more than 1 hr, return current token
@@ -2683,89 +2774,6 @@ app.post('/jobsubmit', function (req, res) {
       jsonResp.error = err
       return res.status(500).json(jsonResp)
     })
-  // execute the configured job in the background
-  //   will do better later. At least client code on each side of the interface won't change
-  // let pgms = config.jobtypes
-  // let pgm = null
-  // let pgmdir = null
-  // pgms.forEach(function (v) {
-  //   if (v.jobtype === jobType) {
-  //     pgmdir = v.pgmdir
-  //     pgm = v.pgmname
-  //   }
-  // })
-  // try {
-  //   let jobParams = null
-  //   fs.readFile(paramFileName, {encoding: 'utf8'}, function (err, jobParamsStr) {
-  //     if (err) {
-  //       updateJobStatus(jobDir, 'readParametersOnSubmitError' + '-' + paramFileName)
-  //       let msg = '/jobsubmit write job file error - file: ' + paramFileName + ' err: ' + err
-  //       logger.error(msg)
-  //       jsonResp.data = null
-  //       jsonResp.error = msg
-  //       return res.status(500).json(jsonResp)
-  //     } else {
-  //       jobParams = JSON.parse(jobParamsStr)
-  //       let token = getTokenDataFromReq(req)
-  //       if (token) { // always update user in parameters to either current user or if current=admin same user spec'd in parms
-  //         let userid = token.sub
-  //         let newUser = null
-  //         let oldUser = jobParams.user
-  //         if (token.isAdmin && oldUser && oldUser.length > 0 && userid !== oldUser) { // allow admin to override runAs user
-  //           newUser = oldUser
-  //         } else {
-  //           newUser = userid // set to user running job if not admin or override not requested
-  //         }
-  //         jobParams.user = newUser
-  //         jobParams.submittingUser = userid
-  //         jobParams.originalUser = oldUser
-  //         fs.writeFile(paramFileName, JSON.stringify(jobParams), {'encoding': 'utf8'}, function (err, data) {
-  //           if (err) {
-  //             updateJobStatus(jobDir, 'updateUserOnSubmitError' + '-' + paramFileName)
-  //             let msg = '/jobsubmit write job parameter file error - file: ' + paramFileName + ' err: ' + err
-  //             logger.error(msg)
-  //             jsonResp.data = null
-  //             jsonResp.error = msg
-  //             return res.status(500).json(jsonResp)
-  //           } else {
-  //             updateJobStatus(jobDir, 'userUpdatedOnSubmit-Old(' + oldUser + ')--New(' + newUser + ')')
-  //             if (pgm != null && pgmdir) {
-  //               let jobPid = null
-  //               // TODO track child status and output with events and then update job status, but for now, just kick it off
-  //               let cwd = process.cwd()
-  //               let pgmpath = pathModule.join(cwd, pgmdir)
-  //               pgm = pathModule.join(pgmpath, pgm)
-  //               logger.info('executing: ' + pgm + ' in: ' + pgmpath)
-  //               let localEnv = {'PYTHONPATH': pathModule.join(cwd, '../src/jobs/lib')}
-  //               localEnv = _.merge(localEnv, process.env)
-  //               let child = require('child_process').spawn(pgm, [jobType, jobId, jobDir], {
-  //                 'cwd': pgmpath,
-  //                 'env': localEnv
-  //               })
-  //               jobPid = child.pid
-  //               updateJobStatus(jobDir, {'status': 'submitted', 'pid': jobPid})
-  //               jsonResp.data = {'jobPid': jobPid}
-  //               return res.json(jsonResp)
-  //             } else {
-  //               updateJobStatus(jobDir, 'failed-no-pgm-defined')
-  //               jsonResp.error = 'job type has program not defined'
-  //               return res.status(400).json(jsonResp)
-  //             }
-  //           }
-  //         })
-  //       } else {
-  //         let msg = 'Did not run job because proper userid was not set in JWT token. This should not happen since auth required to get here!'
-  //         logger.error(msg + ' token: ' + JSON.stringify(token))
-  //         jsonResp.error = msg
-  //         return res.status(500).json(jsonResp)
-  //       }
-  //     }
-  //   })
-  // } catch (err) {
-  //   updateJobStatus(jobDir, 'failed-to-exec-' + err)
-  //   jsonResp.error = 'job failed to exec: ' + err
-  //   res.status(400).json(jsonResp)
-  // }
 })
 
 /* end job related rest services */
@@ -2960,88 +2968,88 @@ app.post('/contact', function (req, res, next) { // bearer auth
 /* email related rest services - end */
 
 /* Visualization related requests - begin */
-app.get('/visualization/fillerPropertyList', function (req, res) {
-  let query = `
-prefix sio:<http://semanticscience.org/resource/>
-prefix ns:<http://nanomine.tw.rpi.edu/ns/>
-select distinct ?fillerProperty
-where {
-    ?filler sio:hasRole [a ns:Filler].
-    ?filler sio:hasAttribute ?fillerAttribute .
-    ?fillerAttribute a ?fillerProperty .
-} order by ?fillerProperty  
-`
-  return postSparql(req.path, query, req, res)
-})
-
-app.get('/visualization/materialPropertyList', function (req, res) {
-  let query = `
-prefix sio:<http://semanticscience.org/resource/>
-  prefix ns:<http://nanomine.tw.rpi.edu/ns/>
-  select distinct ?materialProperty
-  where {
-     ?sample sio:hasComponentPart ?filler . 
-     ?sample sio:hasAttribute ?sampleAttribute .
-     ?sampleAttribute a ?materialProperty .
-     ?filler sio:hasRole [a ns:Filler].
-} order by ?materialProperty
-`
-  return postSparql(req.path, query, req, res)
-})
-
-app.get('/visualization/materialPropertiesForFillerProperty', function (req, res) {
-  let fillerPropertyUri = req.query.fillerPropertyUri
-  let query = `
-prefix sio:<http://semanticscience.org/resource/>
-prefix ns:<http://nanomine.tw.rpi.edu/ns/>
-select distinct ?materialProperty (count(?materialProperty) as ?count)
-   where {
-      ?sample sio:hasComponentPart ?filler .
-      ?sample sio:hasAttribute ?sampleAttribute .
-      ?sampleAttribute a ?materialProperty .
-      ?filler sio:hasRole [a ns:Filler].
-      ?filler sio:hasAttribute [a <${fillerPropertyUri}>]. 
-   }
-group by ?materialProperty order by desc(?count)
-`
-  return postSparql(req.path, query, req, res)
-})
-app.get('/visualization/fillerPropertyMaterialPropertyGraphData', function (req, res) {
-  let fillerPropertyUri = req.query.fillerPropertyUri
-  let materialPropertyUri = req.query.materialPropertyUri
-  let query = `
-prefix sio:<http://semanticscience.org/resource/>
-prefix ns:<http://nanomine.tw.rpi.edu/ns/> 
-prefix np: <http://www.nanopub.org/nschema#> 
-prefix dcterms: <http://purl.org/dc/terms/> 
-select distinct ?sample ?x ?y ?xUnit ?yUnit ?matrixPolymer ?fillerPolymer ?doi ?title 
-where { 
-  ?nanopub np:hasAssertion ?ag. 
-  graph ?ag { 
-    ?sample sio:hasAttribute ?sampleAttribute .
-    ?sampleAttribute a <${materialPropertyUri}> .
-    ?sampleAttribute sio:hasValue ?y.
-    optional{?sampleAttribute sio:hasUnit ?yUnit.}
-    ?sample sio:hasComponentPart ?matrix .
-    ?sample sio:hasComponentPart ?filler .
-    ?matrix a ?matrixPolymer .
-    ?filler a ?fillerPolymer .
-    ?matrix sio:hasRole [a ns:Matrix].
-    ?filler sio:hasRole [a ns:Filler].
-    ?filler sio:hasAttribute ?fillerAttribute .
-    ?fillerAttribute a <${fillerPropertyUri}> .
-    ?fillerAttribute sio:hasValue ?x .
-    optional{?fillerAttribute sio:hasUnit ?xUnit.}
-  } 
-  ?nanopub np:hasProvenance ?pg. 
-  graph ?pg { 
-    ?doi dcterms:isPartOf ?journal. 
-    ?doi dcterms:title ?title. 
-  } 
-}
-  `
-  return postSparql(req.path, query, req, res)
-})
+// app.get('/visualization/fillerPropertyList', function (req, res) {
+//   let query = `
+// prefix sio:<http://semanticscience.org/resource/>
+// prefix ns:<http://nanomine.tw.rpi.edu/ns/>
+// select distinct ?fillerProperty
+// where {
+//     ?filler sio:hasRole [a ns:Filler].
+//     ?filler sio:hasAttribute ?fillerAttribute .
+//     ?fillerAttribute a ?fillerProperty .
+// } order by ?fillerProperty
+// `
+//   return postSparql(req.path, query, req, res)
+// })
+//
+// app.get('/visualization/materialPropertyList', function (req, res) {
+//   let query = `
+// prefix sio:<http://semanticscience.org/resource/>
+//   prefix ns:<http://nanomine.tw.rpi.edu/ns/>
+//   select distinct ?materialProperty
+//   where {
+//      ?sample sio:hasComponentPart ?filler .
+//      ?sample sio:hasAttribute ?sampleAttribute .
+//      ?sampleAttribute a ?materialProperty .
+//      ?filler sio:hasRole [a ns:Filler].
+// } order by ?materialProperty
+// `
+//   return postSparql(req.path, query, req, res)
+// })
+//
+// app.get('/visualization/materialPropertiesForFillerProperty', function (req, res) {
+//   let fillerPropertyUri = req.query.fillerPropertyUri
+//   let query = `
+// prefix sio:<http://semanticscience.org/resource/>
+// prefix ns:<http://nanomine.tw.rpi.edu/ns/>
+// select distinct ?materialProperty (count(?materialProperty) as ?count)
+//    where {
+//       ?sample sio:hasComponentPart ?filler .
+//       ?sample sio:hasAttribute ?sampleAttribute .
+//       ?sampleAttribute a ?materialProperty .
+//       ?filler sio:hasRole [a ns:Filler].
+//       ?filler sio:hasAttribute [a <${fillerPropertyUri}>].
+//    }
+// group by ?materialProperty order by desc(?count)
+// `
+//   return postSparql(req.path, query, req, res)
+// })
+// app.get('/visualization/fillerPropertyMaterialPropertyGraphData', function (req, res) {
+//   let fillerPropertyUri = req.query.fillerPropertyUri
+//   let materialPropertyUri = req.query.materialPropertyUri
+//   let query = `
+// prefix sio:<http://semanticscience.org/resource/>
+// prefix ns:<http://nanomine.tw.rpi.edu/ns/>
+// prefix np: <http://www.nanopub.org/nschema#>
+// prefix dcterms: <http://purl.org/dc/terms/>
+// select distinct ?sample ?x ?y ?xUnit ?yUnit ?matrixPolymer ?fillerPolymer ?doi ?title
+// where {
+//   ?nanopub np:hasAssertion ?ag.
+//   graph ?ag {
+//     ?sample sio:hasAttribute ?sampleAttribute .
+//     ?sampleAttribute a <${materialPropertyUri}> .
+//     ?sampleAttribute sio:hasValue ?y.
+//     optional{?sampleAttribute sio:hasUnit ?yUnit.}
+//     ?sample sio:hasComponentPart ?matrix .
+//     ?sample sio:hasComponentPart ?filler .
+//     ?matrix a ?matrixPolymer .
+//     ?filler a ?fillerPolymer .
+//     ?matrix sio:hasRole [a ns:Matrix].
+//     ?filler sio:hasRole [a ns:Filler].
+//     ?filler sio:hasAttribute ?fillerAttribute .
+//     ?fillerAttribute a <${fillerPropertyUri}> .
+//     ?fillerAttribute sio:hasValue ?x .
+//     optional{?fillerAttribute sio:hasUnit ?xUnit.}
+//   }
+//   ?nanopub np:hasProvenance ?pg.
+//   graph ?pg {
+//     ?doi dcterms:isPartOf ?journal.
+//     ?doi dcterms:title ?title.
+//   }
+// }
+//   `
+//   return postSparql(req.path, query, req, res)
+// })
 
 /* Visualization related requests - end */
 
@@ -3546,5 +3554,34 @@ where {
   ?file a <http://purl.org/net/provenance/ns#File>.
   ?nanopub a <https://www.iana.org/assignments/media-types/text/xml>
 }
+
+-- Ontology based queries
+
+SELECT DISTINCT ?count ?value ?unit
+ WHERE {
+   SELECT DISTINCT ?count ?value ?unit {
+     {
+       SELECT DISTINCT (count(DISTINCT ?id) as ?count) ?value ?unit {
+         ?id rdf:type/rdfs:subClassOf* <http://nanomine.org/ns/PolymerNanocomposite> .
+         FILTER (!ISBLANK(?id))
+         FILTER ( !strstarts(str(?id), "bnode:") )
+         ?id <http://semanticscience.org/resource/hasComponentPart>/<http://semanticscience.org/resource/isSurroundedBy>/<http://semanticscience.org/resource/hasAttribute>/rdf:type ?value .
+         ?id <http://semanticscience.org/resource/hasComponentPart>/<http://semanticscience.org/resource/isSurroundedBy> ?surfacePart. ?surfacePart <http://semanticscience.org/resource/hasRole> [ a <http://nanomine.org/ns/SurfaceTreatment>]. ?surfacePart <http://semanticscience.org/resource/hasAttribute>/rdf:type ?value.
+         optional { ?id <http://semanticscience.org/resource/hasComponentPart>/<http://semanticscience.org/resource/isSurroundedBy>/<http://semanticscience.org/resource/hasAttribute>/<http://semanticscience.org/resource/hasUnit> ?unit. }
+
+         ?id rdf:type/rdfs:subClassOf* <http://nanomine.org/ns/PolymerNanocomposite>.
+         FILTER (!ISBLANK(?id))
+         FILTER ( !strstarts(str(?id), "bnode:") )
+       } GROUP BY ?value ?unit
+     }
+     FILTER(BOUND(?value))
+   }
+ }
+
+ --- ingested count
+ SELECT DISTINCT (count(distinct ?id) as ?count)
+ WHERE {
+         ?id rdf:type/rdfs:subClassOf* <http://nanomine.org/ns/PolymerNanocomposite>.
+   }
 
 */

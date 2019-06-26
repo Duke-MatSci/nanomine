@@ -6,6 +6,7 @@
         "facetId" : "Author",
         "predicate": "<http://www.w3.org/ns/prov#wasAttributedTo>",
         "typeProperty" : "",
+        "type" : "text",
         "propertyType": "http://www.w3.org/2002/07/owl#ObjectProperty"
     },
     {
@@ -15,6 +16,7 @@
         "facetId" : "Article",
         "predicate": "^<http://semanticscience.org/resource/hasPart>",
         "typeProperty" : "",
+        "type" : "text",
         "propertyType": "http://www.w3.org/2002/07/owl#ObjectProperty"
     },
     {
@@ -22,6 +24,7 @@
         "label": "Keyword",
         "multiType": "union",
         "facetId" : "Keyword",
+        "type" : "text",
         "predicate": "^<http://semanticscience.org/resource/hasPart>/<http://www.w3.org/ns/dcat#keyword>",
         "propertyType": "http://www.w3.org/2002/07/owl#DataProperty"
     },

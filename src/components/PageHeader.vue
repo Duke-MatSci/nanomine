@@ -1,8 +1,9 @@
 <template>
   <div class="header">
+    <analytics/>
     <v-toolbar app dense>
-      <!--v-toolbar-side-icon @click="toggleLeftMenu()"></v-toolbar-side-icon-->
-      <v-btn flat to="/">
+      <v-toolbar-side-icon @click="toggleLeftMenu()" class="hidden-md-and-up"></v-toolbar-side-icon>
+      <v-btn flat to="/" @click="resetLeftMenu()">
         <v-toolbar-title><i class="material-icons nm-home-icon">home</i>NanoMine</v-toolbar-title>
       </v-btn>
       <v-spacer></v-spacer>
@@ -10,10 +11,17 @@
         <v-btn flat to="/db">Database</v-btn>
         <v-btn flat to="/mtools">Module Tools</v-btn>
         <v-btn flat to="/simtools">Simulation Tools</v-btn>
-        <v-btn flat href="/home"><i class="material-icons nm-search-icon" v-if="searchEnabled()">search</i>
+        <v-btn fab flat href="/home"><i class="material-icons nm-search-icon" v-if="searchEnabled()">search</i>
         </v-btn>
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on }">
+            <v-btn fab flat to="/contact" v-on="on"><i class="material-icons nm-search-icon">contact_support</i></v-btn>
+          </template>
+          <span>Contact Us</span>
+        </v-tooltip>
         <v-btn v-if="isLoggedIn()" flat to="/mypage">My Page</v-btn>
-        <v-btn v-if="isLoggedIn()" flat v-on:click="logoutDialog = true">
+        <v-btn v-else flat to="/mypage">My Page</v-btn>
+        <v-btn v-if="loginStatus" flat v-on:click="$store.commit('setLoginLogout')">
           <i class="material-icons nm-user-icon" v-bind:class="{'nm-admin-icon': (isAdmin && !isRunAs), 'nm-runas-icon': isRunAs}">
             perm_identity
           </i>
@@ -26,6 +34,12 @@
           <span v-else>
             &nbsp;&nbsp;{{auth.getRunAsUser()}}
           </span>
+        </v-btn>
+        <v-btn v-else flat v-on:click="$store.commit('setLoginLogout')">
+          <i class="material-icons nm-user-icon">
+            perm_identity
+          </i>
+          <span>&nbsp;&nbsp;Login/Register</span>
         </v-btn>
       </v-toolbar-items>
     </v-toolbar>
@@ -52,16 +66,44 @@
           <v-btn
             color="blue darken-1"
             flat="flat"
-            v-on:click="logout()"
+            href="/nmr/doLogout"
           >
             Yes
           </v-btn>
-          <a
-            style="display: none"
-            ref="logoutLink"
-            v-bind:href="logoutUrl"
-            v-on:click="log('clicked')"
-          />
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <v-dialog
+      v-model="loginDialog"
+      max-width="290"
+    >
+      <v-card>
+        <v-card-title class="headline blue lighten-2" primary-title>Login</v-card-title>
+        <v-card-text>
+          Log into NanoMine?
+        </v-card-text>
+        <v-card-text>
+          If you already have a Duke University account, proceed to login.  Otherwise create a <a href="https://accounts.oit.duke.edu/onelink/register" target="_blank">Duke OneLink</a> account.
+          <br/><strong>Coming Soon:</strong> InCommon support for using your own university's credentials for login. <a href="https://www.incommon.org/federation/incommon-federation-participants/" target="_blank">What is InCommon?</a>
+        </v-card-text>
+        <v-divider></v-divider>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            color="blue darken-1"
+            flat="flat"
+            @click="$store.commit('resetLoginLogout')"
+          >
+            Cancel
+          </v-btn>
+
+          <v-btn
+            color="blue darken-1"
+            flat="flat"
+            href="/secure"
+          >
+            Login
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -78,43 +120,49 @@ export default {
   beforeMount: function () {
     let vm = this
     vm.auth = new Auth()
-    vm.ckLogout = new Promise(function (resolve, reject) {
-      vm.auth.getLogoutUrl()
-        .then(function (logoutUrl) {
-          vm.logoutUrl = logoutUrl
-          resolve()
-        })
-        .catch(function (err) {
-          // console.log('error getting logout URL: ' + err)
-          reject(err)
-          vm.logoutUrl = '#'
-        })
-    })
-    vm.ckLogout.then(function () {
-      console.log('query = ' + JSON.stringify(vm.$route.query))
-      let qlogout = vm.$route.query.logout
-      if (qlogout && qlogout.match(/(true).*/)) {
-        setTimeout(function () {
-          vm.logoutRouted = true
-          vm.logoutDialog = true
-          console.log('set logoutDialog to true')
-        }, 50)
-      } else {
-        console.log('logout not requested')
+    vm.$store.subscribe(vm.handleLoginDialogChange)
+    console.log('query = ' + JSON.stringify(vm.$route.query))
+    let qlogout = vm.$route.query.logout
+    if (qlogout && qlogout.match(/(true).*/)) {
+      setTimeout(function () {
+        vm.logoutRouted = true
+        // vm.logoutDialog = true
+        vm.$store.commit('setLoginLogout')
+        console.log('set logoutDialog to true')
+      }, 50)
+    } else {
+      console.log('logout not requested')
+    }
+    let qlogin = vm.$route.query.login
+    if (qlogin && qlogin.match(/(true).*/)) {
+      setTimeout(function () {
+        vm.loginRouted = true
+        vm.loginDialog = true
+        vm.$store.commit('setLoginLogout')
+        console.log('set loginDialog to true')
+      }, 50)
+    } else {
+      console.log('login not requested')
+    }
+  },
+  created: function () {
+    let vm = this
+    setInterval(function () {
+      if (vm.auth) {
+        vm.loggedInStatus = vm.isLoggedIn()
       }
-    })
-      .catch(function (err) {
-        console.log('error getting logout URL: ' + err)
-      })
+    }, 1000)
   },
   methods: {
     log: function (msg) {
       console.log(msg)
     },
     logout: function () {
-      this.auth.logout()
-      this.$refs.logoutLink.click()
-      this.logoutDialog = false
+      let vm = this
+      vm.auth.logout()
+      vm.logoutUrl = '/nmr/doLogout'
+      vm.$refs.logoutLink.click()
+      vm.logoutDialog = false
     },
     cancelLogout: function () {
       let vm = this
@@ -130,8 +178,30 @@ export default {
     toggleLeftMenu: function () {
       this.$store.commit('toggleLeftMenu')
     },
+    resetLeftMenu: function () {
+      this.$store.commit('resetLeftMenu')
+    },
     toggleAdminAvailable: function () {
       this.$store.commit('toggleAdminActive')
+    },
+    handleLoginDialogChange: function (mutation, state) {
+      let vm = this
+      console.log('handleLoginDialogChange: ' + mutation.type)
+      if (mutation.type === 'setLoginLogout') {
+        if (state.loginLogout && !vm.isLoggedIn()) {
+          vm.loginDialog = true
+        } else {
+          vm.loginDialog = false
+        }
+        if (state.loginLogout && vm.isLoggedIn()) {
+          vm.logoutDialog = true
+        } else {
+          vm.logoutDialog = false
+        }
+      } else if (mutation.type === 'resetLoginLogout') {
+        vm.loginDialog = false
+        vm.logoutDialog = false
+      }
     },
     isLoggedIn: function () {
       return this.auth.isLoggedIn()
@@ -141,6 +211,10 @@ export default {
     }
   },
   computed: {
+    loginStatus: function () { // reactive isLoggedIn to keep status updated in page header
+      console.log('Updating login status')
+      return this.loggedInStatus
+    },
     userId: function () {
       return this.auth.getUserId()
     },
@@ -152,12 +226,13 @@ export default {
     },
     isRunAs: function () {
       return this.$store.getters.runAsUser != null
-    }
-  },
+    } },
   data () {
     return {
       msg: 'PageHeader',
       auth: null,
+      loggedInStatus: false,
+      loginDialog: false,
       logoutDialog: false,
       logoutRouted: false,
       logoutUrl: null

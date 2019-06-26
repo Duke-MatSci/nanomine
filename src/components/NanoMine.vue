@@ -1,6 +1,6 @@
 <template>
   <div class="main">
-    <v-jumbotron src="/cdn/img/random_network.png">
+    <v-jumbotron src="/nmstatic/img/random_network.png">
       <v-container fill-height>
         <v-layout align-center>
           <v-flex>
@@ -8,7 +8,7 @@
             <span class="subheading">Material Informatics for Polymer Nanocomposites</span>
             <v-divider class="my-3"></v-divider>
             <v-btn class="mx-0" color="primary" href="/home">Visualization&nbsp;<v-icon>search</v-icon></v-btn>
-            <v-btn class="mx-0" color="secondary" to="/XMLCONV">CURATION</v-btn>
+            <v-btn class="mx-0" color="secondary" to="/XMLCONV">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CURATION&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</v-btn>
           </v-flex>
         </v-layout>
       </v-container>
@@ -28,11 +28,28 @@
         </li>
         <li><span>Improve the ability to design nanocomposites through simulation and design tools.</span></li>
       </ul>
+      <v-flex d-flex xs12>
+        <v-layout row wrap>
+          <v-flex d-flex class="login-info">
+            <v-card-text>
+              <strong>Login or register</strong> for an account to enable advanced analysis and upload features.  Registering for an account is easy
+              using <a href="https://accounts.oit.duke.edu/onelink/register" target="_blank">Duke's OneLink feature</a>.
+              InCommon support is coming soon.
+              <a href="https://www.incommon.org/federation/incommon-federation-participants/" target="_blank">InCommon federation</a> allows
+              many university users to login with the same credentials they use for their own university.
+            </v-card-text>
+          </v-flex>
+        </v-layout>
+      </v-flex>
       <p style="padding-left:15%;padding-right:15%;text-align:left"><span>NanoMine is built on both a <a
         href="https://github.com/Duke-MatSci/nanomine-schema/tree/master/xml" target="_blank">schema</a> and an ontology to provide a robustness to the FAIR principles. NanoMine also allows for the registration of materials resources, bridging the gap between existing resources and the end users and making those existing resources available for research to material community.</span>
       </p>
 
-      <p style="text-align:center;"><img src="/cdn/img/sponsors3.png"></p>
+      <v-flex d-flex xs12>
+        <v-layout row wrap justify-center>
+          <v-img src="/nmstatic/img/sponsors3.png" max-width="1024"  aspect-ratio="4.6" contain></v-img>
+        </v-layout>
+      </v-flex>
 
       <p style="font-weight:bold;text-align:left;padding-left:15%;padding-right:15%;">NSF supported the initial
         concept of NanoMine as a joint Northwestern University/Rensselaer Polytechnic Institute project through the
@@ -74,7 +91,7 @@ export default {
     padding-left: 20%;
     padding-right: 15%;
     margin-top: 20px;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
   }
 
   .mainheading { /* class of large text in jumbotron*/
@@ -97,18 +114,21 @@ export default {
   .v-jumbotron {
     color: white;
     padding: 0.5rem 0.5rem;
-    background-color: #000000;
+    background-color: #08233c;
     border-radius: 0px;
     margin-top: 0px;
-    max-height: 200px;
+    max-height: 240px;
   }
-
+  .login-info {
+    text-align: left;
+    padding-left: 13.8%;
+    padding-right: 12%;
+  }
   img {
     height: 125px;
     width: auto;
   }
-
   a {
-    color: #4Cc0ff;
+    color: #3a64ff;
   }
 </style>

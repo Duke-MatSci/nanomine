@@ -35,6 +35,13 @@
         </v-flex>
       </v-layout>
       <v-alert
+        v-model="loginRequired"
+        type="error"
+        outline
+      >
+        {{loginRequiredMsg}}
+      </v-alert>
+      <v-alert
         v-model="errorAlert"
         type="error"
         dismissible
@@ -94,6 +101,7 @@
 <script>
 import {} from 'vuex'
 import {JobMgr} from '@/modules/JobMgr.js'
+import {Auth} from '@/modules/Auth.js'
 
 export default {
   name: 'DescriptorCharacterize',
@@ -108,10 +116,20 @@ export default {
       filesDisplay: [],
       errorAlert: false,
       errorAlertMsg: '',
+      loginRequired: false,
+      loginRequiredMsg: '',
       fileUploaded: false,
       successDlg: false,
       jobId: ''
     })
+  },
+  beforeMount: function () {
+    let vm = this
+    vm.auth = new Auth()
+    if (!vm.auth.isLoggedIn()) {
+      vm.loginRequired = true
+      vm.loginRequiredMsg = 'Login is required.'
+    }
   },
   methods: {
     setLoading: function () {

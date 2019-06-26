@@ -38,6 +38,13 @@
           Additionally, a plot (Autocorrelation_comparison.jpg) comparing the autocorrelation of input image with 10 randomly chosen 2D slices from reconstruction is
           provided to validate the accuracy of reconstruction.  </p>
        </v-flex>
+      <v-alert
+        v-model="loginRequired"
+        type="error"
+        outline
+      >
+        {{loginRequiredMsg}}
+      </v-alert>
         <v-alert
           v-model="errorAlert"
           type="error"
@@ -98,6 +105,7 @@
 <script>
 import {} from 'vuex'
 import {JobMgr} from '@/modules/JobMgr.js'
+import {Auth} from '@/modules/Auth.js'
 
 export default {
   name: 'DescriptorReconstruct',
@@ -112,10 +120,20 @@ export default {
       filesDisplay: [],
       errorAlert: false,
       errorAlertMsg: '',
+      loginRequired: false,
+      loginRequiredMsg: '',
       fileUploaded: false,
       successDlg: false,
       jobId: ''
     })
+  },
+  beforeMount: function () {
+    let vm = this
+    vm.auth = new Auth()
+    if (!vm.auth.isLoggedIn()) {
+      vm.loginRequired = true
+      vm.loginRequiredMsg = 'Login is required.'
+    }
   },
   methods: {
     setLoading: function () {

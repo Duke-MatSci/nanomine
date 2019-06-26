@@ -3,9 +3,11 @@
 */
 
 import {} from 'vuex'
-import Axios from 'axios'
+// import Axios from 'axios'
 import jwt from 'jsonwebtoken'
 import Vue from '../main'
+import Moment from 'moment'
+
 export function Auth () {
   this.err = null
   this.getAuthPath = '/nmr/auth'
@@ -46,8 +48,19 @@ Auth.prototype = {
     }
     return rv
   },
+  isSessionExpired () {
+    let expiration = this.getSessionExpiration()
+    if (!expiration) {
+      expiration = 0
+    }
+    let now = Moment().unix()
+    let isExpired = (now > expiration)
+    // console.log('isSessionExpired: ' + isExpired + ' expiration: ' + expiration + ' now: ' + now)
+    return isExpired
+  },
   isLoggedIn: function () {
-    return this.getUserId() !== null
+    let vm = this
+    return (vm.getUserId() !== null && !vm.isSessionExpired())
   },
   isTestUser: function () {
     let vm = this
@@ -62,7 +75,7 @@ Auth.prototype = {
     let rv = false
     let tv = vm.tokenValues
     if (tv && tv.isAdmin) {
-      rv = true
+      rv = !vm.isSessionExpired()
     }
     return rv
   },
@@ -84,25 +97,15 @@ Auth.prototype = {
     }
     return rv
   },
-  getLogoutUrl: function () {
-    let p = new Promise(function (resolve, reject) {
-      Axios.get('/nmr/logout')
-        .then(function (response) {
-          console.log('getLogoutUrl response: ')
-          console.log(response)
-          resolve(response.data.data.logoutUrl)
-        })
-        .catch(function (err) {
-          console.log('error logging out: ' + err)
-          reject(err)
-        })
-    })
-    return p
-  },
   deleteTokenCookie: function () {
     let cookieDate = new Date()
     cookieDate.setTime(cookieDate.getTime() - 1)
     document.cookie = 'token=; expires=' + cookieDate.toGMTString()
+  },
+  deleteSessionCookie: function () {
+    let cookieDate = new Date()
+    cookieDate.setTime(cookieDate.getTime() - 1)
+    document.cookie = 'session=; expires=' + cookieDate.toGMTString()
   },
   getGivenName: function () {
     let vm = this
@@ -110,6 +113,16 @@ Auth.prototype = {
     let rv = null
     if (tv && tv.givenName && tv.givenName.length > 0) {
       rv = tv.givenName
+    }
+    return rv
+  },
+  getSessionExpiration: function () {
+    let vm = this
+    let tv = vm.tokenValues
+    let rv = null
+    // console.log('getSessionExpiration: tv.exp = ' + tv.exp + ' tv.exp.length: ' + tv.exp.length + ' +(tv.exp): ' + +(tv.exp))
+    if (tv && tv.exp) {
+      rv = +(tv.exp)
     }
     return rv
   },
@@ -163,6 +176,7 @@ Auth.prototype = {
   },
   logout: function (successFunction, failureFunction) {
     this.deleteTokenCookie()
+    this.deleteSessionCookie()
   },
   notAuthorizedHandler: function (successFunction, failureFunction) {
     // call this if the user does something that returns 403, or that user is not permitted to do based on permissions
@@ -172,30 +186,30 @@ Auth.prototype = {
   },
   getPermissions: function (successFunction, failureFunction) {
     // refresh permissions for this user
-  },
-  setJobType: function (jobType) {
-    this.jobType = jobType
-  },
-  getJobType: function () {
-    return this.jobType
-  },
-  getFileCount: function () {
-    return this.jobInputFiles.length
-  },
-  getFileInfo: function (idx) {
-    let rv = null
-    if (idx >= 0 && idx < this.jobInputFiles.length) {
-      rv = this.jobInputFiles[idx]
-    }
-    return rv
-  },
-  addInputFile: function (fileName, dataUri) {
-    let idx = this.jobInputFiles.length
-    this.jobInputFiles.push({ 'idx': idx, 'fileName': fileName, 'dataUri': dataUri, 'statusCode': null, 'statusText': null })
-  },
-  setJobParameters: function (paramsObject) {
-    this.jobParameters = paramsObject
   }
+  // setJobType: function (jobType) {
+  //   this.jobType = jobType
+  // },
+  // getJobType: function () {
+  //   return this.jobType
+  // },
+  // getFileCount: function () {
+  //   return this.jobInputFiles.length
+  // },
+  // getFileInfo: function (idx) {
+  //   let rv = null
+  //   if (idx >= 0 && idx < this.jobInputFiles.length) {
+  //     rv = this.jobInputFiles[idx]
+  //   }
+  //   return rv
+  // },
+  // addInputFile: function (fileName, dataUri) {
+  //   let idx = this.jobInputFiles.length
+  //   this.jobInputFiles.push({ 'idx': idx, 'fileName': fileName, 'dataUri': dataUri, 'statusCode': null, 'statusText': null })
+  // },
+  // setJobParameters: function (paramsObject) {
+  //   this.jobParameters = paramsObject
+  // }
 }
 
 /*

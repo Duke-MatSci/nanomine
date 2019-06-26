@@ -73,13 +73,47 @@ print('MATLAB return code - rc: ' + str(rc))
 
 # write job_output_parameters.json
 if rc == 0:
+  files = []
+  batchname = jobDir+'/output/Batch_data.csv'
+  try:
+    csvfile = open(batchname, 'r')
+    lines = csvfile.readlines()
+    i = 1 # skip first line (0) since it contains headers
+    while i < len(lines):
+      line = lines[i].strip()
+      f = line.split(',')
+      files.append([f[1],f[2]]) # f[0] is original input file name
+      logging.debug('files: ' + str(files))
+      i += 1
+  except:
+    logging.debug('exception opening ' + batchname + '. Handling as single input file instead. ex: ' + traceback.format_exc())
+    files.append(['Input1.jpg', 'Binarized_Input1.jpg']) # default to single image version, but still use array of 1
+
   file = open(jobDir+"/"+"job_output_parameters.json","w")
-  file.write('{\n"inputFileName": "output/Input1.jpg",\n')
-  file.write('"binarizedFileName": "output/Binarized_Input1.jpg",\n')
-  file.write('"zipFileName": "output/Results.zip",\n')
-  file.write('"errors": "output/errors.txt"\n}')
+#  file.write('{\n"inputFileName": "output/Input1.jpg",\n')
+#  file.write('"binarizedFileName": "output/Binarized_Input1.jpg",\n')
+  file.write('{\n')
+  file.write('  "files": [\n')
+  i = 0
+  while i < len(files):
+    f = files[i]
+    file.write('    {\n')
+    file.write('      "input": "output/' + f[0] +'",\n')
+    file.write('      "output": "output/' + f[1] + '"\n')
+    file.write('    }')
+    if (i < (len(files) - 1)):
+      file.write(',')
+    file.write('\n')
+    i += 1
+  # after loop, close the array
+  file.write('  ],\n')
+
+  file.write('  "zipFileName": "output/Results.zip",\n')  # NOTE. For some reason no results.zip is actually generated, so it does not exist
+  file.write('  "errors": "output/errors.txt"\n')
+  file.write('}\n')
   file.close()
-else:
+
+else: # if rc != 0
   file = open(jobDir+"/"+"job_output_parameters.json","w")
   file.write('{\n"errors": "output/errors.txt"\n}')
   file.close()
@@ -89,7 +123,7 @@ try:
     errmsgs = f.read()
   errmsgs = str.replace(errmsgs, '\n','<br/>\n')
 except:
-  logging.info('exception resading otsu matlab job error messages')
+  logging.info('exception reading otsu matlab job error messages')
   logging.info('exception: ' + traceback.format_exc())
   errmsgs = ''
 

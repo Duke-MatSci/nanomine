@@ -60,7 +60,7 @@ const devWebpackConfig = merge(baseWebpackConfig, {
     // copy custom cdn assets
     new CopyWebpackPlugin([
       {
-        from: path.resolve(__dirname, '../cdn'),
+        from: path.resolve(__dirname, '../nmstatic'),
         to: config.dev.assetsSubDirectory,
         ignore: ['.*']
       },

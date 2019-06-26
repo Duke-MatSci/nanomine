@@ -33,7 +33,7 @@ Config = dict(
 
     site_header_image = '/static/images/random_network.png',
 
-    site_description = 'Materials Informatics for Polymer Nanocomposites',
+    site_description = 'Material Informatics for Polymer Nanocomposites',
 
     root_path = '/apps/whyis',
 
@@ -63,7 +63,7 @@ Config = dict(
 
     # LOGGING
     LOGGER_NAME = "%s_log" % project_name,
-    LOG_FILENAME = "/var/log/%s/output-%s.log" % (project_name,str(datetime.now()).replace(' ','_')),
+    LOG_FILENAME = "/var/log/%s/output-%s.log" % (project_name, str(datetime.now()).replace(' ','_')),
     LOG_LEVEL = logging.INFO,
     LOG_FORMAT = "%(asctime)s %(levelname)s\t: %(message)s", # used by logging.Formatter
 

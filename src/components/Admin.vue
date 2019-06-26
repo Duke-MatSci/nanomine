@@ -4,7 +4,7 @@
     <v-container grid-list-xl>
       <v-layout row wrap>
         <v-flex xs4 v-on:click="$router.push('/admin')">
-          <img src="/cdn/img/admin-icon.jpg" />
+          <img src="/nmstatic/img/admin-icon.jpg" />
           <h4>
             Administrative Functions
           </h4>
