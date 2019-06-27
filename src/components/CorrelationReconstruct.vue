@@ -82,7 +82,9 @@
           </v-list-tile>
         </v-list>
       </v-flex>
+      <v-flex class="text-xs-center">
       <v-btn v-on:click="submit()" color="primary">Reconstruct</v-btn>
+      </v-flex>
       <h4>References</h4>
       <v-flex xs12>
         <p>Rintoul, M.D. and Torquato, S., 1997. Reconstruction of the structure of dispersions. Journal of Colloid and Interface Science, 186(2), pp.467-476.</p>
