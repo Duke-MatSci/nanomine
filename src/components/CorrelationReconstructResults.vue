@@ -49,7 +49,7 @@
         </v-flex>
       </v-layout>
     </v-container>
-    <h4>Reference</h4>
+    <h4>References</h4>
     <v-flex xs12>
       <p>Rintoul, M.D. and Torquato, S., 1997. Reconstruction of the structure of dispersions. Journal of Colloid and Interface Science, 186(2), pp.467-476.</p>
       <p>Yeong,C. and Torquato,S., 1998. Reconstructing random media Physical Review E, vol. 57, no. 1, p. 495</p>

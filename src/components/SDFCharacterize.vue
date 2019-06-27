@@ -11,7 +11,7 @@
 ################################################################################
 -->
 <template>
-  <div class="SDFCharacterize">
+  <div class="SDFCharacterize" align="left">
     <h1>{{ msg }}</h1>
     <v-container>
       <v-layout row wrap>
@@ -89,7 +89,7 @@
       <v-btn v-on:click="submit()" color="primary">Characterize</v-btn>
     </v-container>
 
-    <h4>Reference</h4>
+    <h4>References</h4>
     <v-flex xs12>
       <p>Yu, S., Zhang, Y., Wang, C., Lee, W.K., Dong, B., Odom, T.W., Sun, C. and Chen, W., 2017. Characterization and design of functional quasi-random nanostructured materials using spectral density function. Journal of Mechanical Design, 139(7), p.071401.</p>
       <p>Lee, W. K., Yu, S., Engel, C. J., Reese, T., Rhee, D., Chen, W., & Odom, T. W. (2017). Concurrent design of quasi-random photonic nanostructures. Proceedings of the National Academy of Sciences, 114(33), 8734-8739.</p>

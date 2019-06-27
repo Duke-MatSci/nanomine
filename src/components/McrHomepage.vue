@@ -11,7 +11,7 @@
 ################################################################################
 -->
 <template>
-  <div class="mcr_homepage">
+  <div class="mcr_homepage" align="left">
     <h1>{{ msg }}</h1>
     <v-container>
           <div>
@@ -22,7 +22,7 @@
           </div>
     </v-container>
     <v-container>
-      <v-layout align-space-between justify-center row fill-height>
+      <v-layout align-space-between justify-left row fill-height>
       <v-flex xs8>
           <!-- Binarization -->
           <div>
@@ -57,7 +57,7 @@
       </v-layout>
     </v-container>
 
-    <h4>Reference</h4>
+    <h4 justify-left>References</h4>
     <v-flex xs12>
         <p>Khurshid, K., Siddiqi, I., Faure, C. and Vincent, N., 2009. Comparison of Niblack inspired binarization methods for ancient documents. DRR, 7247, pp.1-10.</p>
         <p>Rintoul, M.D. and Torquato, S., 1997. Reconstruction of the structure of dispersions. Journal of Colloid and Interface Science, 186(2), pp.467-476.</p>
