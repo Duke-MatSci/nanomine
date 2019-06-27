@@ -12,9 +12,9 @@
 -->
 
 <template>
-  <div class="Otsu" align="left">
+  <div class="Otsu">
     <h1>{{ msg }}</h1>
-    <v-container>
+    <v-container class="text-xs-left">
       <v-layout row wrap>
         <v-flex xs12>
           <h3>Description</h3>
@@ -85,15 +85,18 @@
           </v-list-tile>
         </v-list>
       </v-flex>
+      <v-flex class="text-xs-center">
       <v-btn v-on:click="submit()" color="primary">Binarize</v-btn>
+      </v-flex>
+      <h4>References</h4>
+      <v-flex xs12>
+        <p> N. Otsu, A threshold selection method from gray-level histograms, IEEE transactions on systems, man, and
+          cybernetics, vol. 9, no. 1, pp. 62-66, 1979.</p>
+
+      </v-flex>
     </v-container>
 
-    <h4>References</h4>
-    <v-flex xs12>
-      <p> N. Otsu, A threshold selection method from gray-level histograms, IEEE transactions on systems, man, and
-        cybernetics, vol. 9, no. 1, pp. 62-66, 1979.</p>
 
-    </v-flex>
   </div>
 </template>
 
