@@ -28,6 +28,19 @@
         </li>
         <li><span>Improve the ability to design nanocomposites through simulation and design tools.</span></li>
       </ul>
+      <v-flex d-flex xs12>
+        <v-layout row wrap>
+          <v-flex d-flex class="login-info">
+            <v-card-text>
+              <strong>Login or register</strong> for an account to enable advanced analysis and upload features.  Registering for an account is easy
+              using <a href="https://accounts.oit.duke.edu/onelink/register" target="_blank">Duke's OneLink feature</a>.
+              InCommon support is coming soon.
+              <a href="https://www.incommon.org/federation/incommon-federation-participants/" target="_blank">InCommon federation</a> allows
+              many university users to login with the same credentials they use for their own university.
+            </v-card-text>
+          </v-flex>
+        </v-layout>
+      </v-flex>
       <p style="padding-left:15%;padding-right:15%;text-align:left"><span>NanoMine is built on both a <a
         href="https://github.com/Duke-MatSci/nanomine-schema/tree/master/xml" target="_blank">schema</a> and an ontology to provide a robustness to the FAIR principles. NanoMine also allows for the registration of materials resources, bridging the gap between existing resources and the end users and making those existing resources available for research to material community.</span>
       </p>
@@ -78,7 +91,7 @@ export default {
     padding-left: 20%;
     padding-right: 15%;
     margin-top: 20px;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
   }
 
   .mainheading { /* class of large text in jumbotron*/
@@ -106,13 +119,16 @@ export default {
     margin-top: 0px;
     max-height: 240px;
   }
-
+  .login-info {
+    text-align: left;
+    padding-left: 13.8%;
+    padding-right: 12%;
+  }
   img {
     height: 125px;
     width: auto;
   }
-
   a {
-    color: #4Cc0ff;
+    color: #3a64ff;
   }
 </style>

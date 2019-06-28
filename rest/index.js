@@ -1725,6 +1725,7 @@ app.get('/xml/:id?', function (req, res) { // currently only supports JWT style 
   //   or user is admin
   let jsonResp = {'error': null, 'data': null}
   let id = req.params.id // may be null
+  let fmt = req.query.format
   let dsSeq = req.query.dataset // may be null -- to get all xmls for a dataset (mutually exclusive of id)
   let userid = null
   let isAdmin = false
@@ -1797,7 +1798,14 @@ app.get('/xml/:id?', function (req, res) { // currently only supports JWT style 
           //   })
           // })
           logger.info('/xml query=' + JSON.stringify(theQuery) + ' returned: ' + jsonResp.data.length + ' records.')
-          res.json(jsonResp)
+          if (fmt && fmt.toLowerCase() === 'xml') { // format xml only returns raw xml text with no other fields
+            setTimeout(function () {
+              res.set('Content-Type', 'application/xml')
+              return res.send(xmlRecs[0].xml_str)
+            }, 200)
+          } else {
+            return res.json(jsonResp)
+          }
         }
       })
     })
