@@ -14,8 +14,8 @@
 <template>
   <div class="CorrelationReconstruct">
     <h1>{{ msg }}</h1>
-    <v-container>
-      <v-flex xs12>
+    <v-container class="text-xs-left">
+      <v-flex xs12 >
           <h3>Description</h3>
           <br>
             <p>Upload a binarized image / ZIP file containing set of images (Supported file formats: .jpg, .tif, .png) and click "Reconstruct" to reconstruct statistically equivalent image.
@@ -82,13 +82,16 @@
           </v-list-tile>
         </v-list>
       </v-flex>
+      <v-flex class="text-xs-center">
       <v-btn v-on:click="submit()" color="primary">Reconstruct</v-btn>
-    </v-container>
-    <h4>Reference</h4>
-    <v-flex xs12>
+      </v-flex>
+      <h4>References</h4>
+      <v-flex xs12>
         <p>Rintoul, M.D. and Torquato, S., 1997. Reconstruction of the structure of dispersions. Journal of Colloid and Interface Science, 186(2), pp.467-476.</p>
         <p>Yeong,C. and Torquato,S., 1998. Reconstructing random media Physical Review E, vol. 57, no. 1, p. 495</p>
-    </v-flex>
+      </v-flex>
+    </v-container>
+
   </div>
 </template>
 

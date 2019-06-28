@@ -150,7 +150,3 @@ else: # send error email
   except:
     logging.info('exception occurred sending run_SDFCharacterize failure email')
     logging.info('exception: ' + traceback.format_exc())
-
-
-
-

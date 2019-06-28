@@ -14,11 +14,11 @@
 <template>
   <div class="binarization_homepage">
     <h1>{{ msg }}</h1>
-    <v-container>
+    <v-container class="text-xs-left">
           <div>
             <p> Choose the Binarization method from the options below.</p>
           </div>
-      <v-layout align-space-between justify-center row fill-height>
+      <v-layout align-space-between justify-left row fill-height>
         <v-flex>
             <div>
               <h2> Otsu's Method </h2>
@@ -39,14 +39,15 @@
             </div>
         </v-flex>
       </v-layout>
-    </v-container>
-
-    <h4>Reference</h4>
-    <v-flex xs12>
+      <h4>References</h4>
+      <v-flex xs12>
         <p>N. Otsu, A threshold selection method from gray-level histograms, IEEE transactions on systems, man, and cybernetics, vol. 9, no. 1, pp. 62-66, 1979.</p>
         <p>W. Niblack, An Introduction to Image Processing. Englewood Cliffs, NJ: Prentice-Hall, 1986, pp. 115-116.</p>
         <p>Khurshid, K.,Siddiqi, I., Faure, C. and Vincent, N., 2009. Comparison of Niblack inspired Binarization methods for ancient document. DRR, 7247, pp.1-10</p>
-     </v-flex>
+      </v-flex>
+    </v-container>
+
+
   </div>
 </template>
 
