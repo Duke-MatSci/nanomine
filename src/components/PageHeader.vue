@@ -39,7 +39,7 @@
           <i class="material-icons nm-user-icon">
             perm_identity
           </i>
-          <span>&nbsp;&nbsp;Login</span>
+          <span>&nbsp;&nbsp;Login/Register</span>
         </v-btn>
       </v-toolbar-items>
     </v-toolbar>
@@ -84,6 +84,7 @@
         </v-card-text>
         <v-card-text>
           If you already have a Duke University account, proceed to login.  Otherwise create a <a href="https://accounts.oit.duke.edu/onelink/register" target="_blank">Duke OneLink</a> account.
+          <br/><strong>Coming Soon:</strong> InCommon support for using your own university's credentials for login. <a href="https://www.incommon.org/federation/incommon-federation-participants/" target="_blank">What is InCommon?</a>
         </v-card-text>
         <v-divider></v-divider>
         <v-card-actions>
