@@ -1025,7 +1025,7 @@ def sheetProcTypeHelper(sheet, row, temp_list, stop_sign, myXSDtree, jobDir):
         # Description
         if match(sheet.cell_value(irow, 0), 'Other - description'):
             # temp = insert('Description', sheet.cell_value(irow, 1), temp)
-            temp = str(sheet.cell_value(irow, 1)).strip() # DANGEROUS! type(temp) changes here
+            temp = unicode(sheet.cell_value(irow, 1)).strip() # DANGEROUS! type(temp) changes here
     # Additive
         # Description
         if match(sheet.cell_value(irow, 0), 'Additive - description'):
@@ -3395,6 +3395,9 @@ def compiler(jobDir, code_srcDir, xsdDir, templateName, restbase):
     # store those sheet objects in a list and loop through the list
     sheet_content = xlfile.sheets()
     for sheet in sheet_content:
+        # skip empty sheets
+        if (sheet.nrows == 0):
+            continue
         # check the header of the sheet to determine what it has inside
         if (sheet.row_values(0)[0].strip().lower() == "sample info"):
             # sample info sheet
