@@ -16,6 +16,7 @@ class matlab:
       pass
 
   def run(self, userId, jobId, jobType, jobSrcDir, jobDir, webBaseUri, jobDataUriSuffix, matlabPgm, matlabPgmParams):
+    self.logger.info('path ' + os.environ['PATH'])
     rc = 2
     mlparams = '\'' + userId + '\',' + '\'' + jobId + '\',' + '\'' + jobType + '\',' + '\'' + jobDir + '\',' + '\'' + webBaseUri + '\',' + '\'' + jobDataUriSuffix + '\','
     for mlp in matlabPgmParams:
