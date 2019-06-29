@@ -22,6 +22,30 @@ chmod a+x ./nminstall.sh
 sudo -E ./nminstall.sh 2>&1 | tee nminstall.log # Take a break. It will take a while.
 ```
 
+-  <strong>IMPORTANT:</strong> Post install step - To set up <strong>email</strong> for job results
+   - NOTE: most email vendors have a help page for setting up application access to send email. Consult your email provider's documentation for the proper values to use for the settings.
+   - Edit /apps/nanomine_env
+     - change the NM_SMTP_SERVER value to your email server i.e. smtp.gmail.com
+     - NM_SMTP_PORT may need to change, but 587 usually works (TLS port)
+     - NM_SMTP_TEST needs to be set to "false" instead of "true" to actually send emails
+     - NM_SMTP_AUTH_USER="your email address or smtp server userid" 
+     - NM_SMTP_AUTH_PWD="your smtp server password"
+       - Note that most email servers will allow creation of application passwords that are easily revoked without revoking your personal password. An application password may be used here. To find out more about application specific passwords consult your email provider's documentation.  
+
+-  <strong>IMPORTANT:</strong> Post install step for <strong>MATLAB</strong>
+   - To test jobs that require MATLAB
+     - Edit /apps/nanomine_env
+       - Enable calling MATLAB from scripts by setting 'NM_MATLAB_AVAILABLE="yes"'
+     - ensure that MATLAB is in the system path for Ubuntu
+       - You should be able to go to a terminal command line and type 'matlab' (with no additional path)
+         - If MATLAB will not start this way, ensure that it has been installed and note the path to the binary
+           - The path may be something like /opt/matlab/bin
+           - Add a file called matlab.sh to the /etc/profile.d directory (sudo nano /etc/profile.d/matlab.sh)
+             - The file should contain the single line 'export PATH=$PATH:YOUR_MATLAB_PATH' 
+           - Log out of whyis and login again
+           - verify that entering 'matlab' on a command line executes MATLAB              
+         
+  
 - When loading data into whyis, 
   - The load process can be monitored with 'sudo tail -f /var/log/celery/w1.log', but note that loading will usually not occur until upload via XMLCONV GUI
   
