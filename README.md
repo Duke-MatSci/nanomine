@@ -41,9 +41,12 @@ sudo -E ./nminstall.sh 2>&1 | tee nminstall.log # Take a break. It will take a w
          - If MATLAB will not start this way, ensure that it has been installed and note the path to the binary
            - The path may be something like /opt/matlab/bin
            - Add a file called matlab.sh to the /etc/profile.d directory (sudo nano /etc/profile.d/matlab.sh)
-             - The file should contain the single line 'export PATH=$PATH:YOUR_MATLAB_PATH' 
+             - Assuming the path is /opt/matlab/bin (test this with /opt/matlab/bin/matlab -- it should start)
+             - The file should contain the single line 'export PATH=$PATH:/opt/matlab/bin'
+             - Be sure the path entered is the path to YOUR matlab bin -- it could be different 
            - Log out of whyis and login again
-           - verify that entering 'matlab' on a command line executes MATLAB              
+           - verify that entering 'matlab' on a command line executes MATLAB 
+     - Assuming MATLAB is marked enabled for the server runtime and it's accessible via the system path, MATLAB jobs should be able to execute successfully.            
          
   
 - When loading data into whyis, 
