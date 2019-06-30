@@ -29,7 +29,6 @@
         <p>Xu, H., Dikin, D.A., Burkhart, C. and Chen, W., 2014. Descriptor-based methodology for statistical characterization and 3D reconstruction of microstructural materials. Computational Materials Science, 85, pp.206-216.</p>
       </v-flex>
     </v-container>
-
   </div>
 </template>
 

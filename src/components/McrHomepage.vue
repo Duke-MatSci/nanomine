@@ -26,15 +26,16 @@
       <v-flex xs8>
           <!-- Binarization -->
           <div>
+            <p></p>
             <h2> Image Binarization </h2>
             <p> Binarization is the process of converting a micrograph to a black & white image (assuming there are only 2 phases) by removing noise and thus simplifying its analysis.
                 All Characterization and Reconstruction algorithms work with binarized images only.
-            </p>
-            <router-link to="/binarization_homepage">Binarize Image</router-link>
+            </p> <router-link to="/binarization_homepage">Binarize Image</router-link>
           </div>
 
           <!-- Characterization -->
           <div>
+            <p></p>
             <h2> Microstructure Characterization </h2>
             <p> Microstructure Characterization refes to a statistical quantification of morphology. It essentially converts multi-dimensional microstructure recorded in images
                 into a set of functions (aka features/descriptors/predictors) that encode significant morphological details.
@@ -46,6 +47,7 @@
 
           <!-- Reconstruction -->
           <div>
+            <p></p>
             <h2> Microstructure Reconstruction </h2>
             <p> Reconstruction involves constructing a statistically equivalent microstructure image given some statistical characterization. In most cases,
                 reconstruction is cast as an optimization problem; with the goal of matching characteristics of reconstructed image to that of input image.
@@ -54,6 +56,9 @@
             <router-link to="/reconstruction_homepage">Reconstruct Microstructure</router-link>
             <h4>References</h4>
             <v-flex xs12>
+              <p>Bostanabad, R., Zhang, Y., Li, X., Kearney, T., Brinson, L. C., Apley,  D., Wing K., and Chen, W., <i>Computational Microstructure Characterization and Reconstruction: Review of the State-of-the-art Techniques</i>, Progress in Materials Science, 95, June 2018.</p>
+              <p>Li, X., Zhang, Y., Zhao, H., Burkhart, C., Brinson, L.C., Chen, W., <i>A Transfer Learning Approach for Microstructure Reconstruction and Structure-property Predictions<i/>, Scientific Report, accepted 2018.</p>
+              <p>Ghumman, U.F., Iyer, A., Dulal, R., Munshi, J., Wang, A., Chien, T., Balasubramanian, G., and Chen, W., <i>A Spectral Density Function Approach for Active Layer Design of Organic Photovoltaic Cells<i/>, Journal of Mechanical Design, Special Issue on Design of Engineered Materials and Structures, accepted July 2018. doi:10.1115/1.4040912.</p>
               <p>Khurshid, K., Siddiqi, I., Faure, C. and Vincent, N., 2009. Comparison of Niblack inspired binarization methods for ancient documents. DRR, 7247, pp.1-10.</p>
               <p>Rintoul, M.D. and Torquato, S., 1997. Reconstruction of the structure of dispersions. Journal of Colloid and Interface Science, 186(2), pp.467-476.</p>
               <p>Yeong,C. and Torquato,S., 1998. Reconstructing random media Physical Review E, vol. 57, no. 1, p. 495</p>
@@ -64,12 +69,8 @@
             </v-flex>
           </div>
       </v-flex>
-
       </v-layout>
-
     </v-container>
-
-
   </div>
 </template>
 

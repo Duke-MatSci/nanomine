@@ -53,9 +53,9 @@
           <div class="mydivider">&nbsp;</div>
         </v-flex>
       </v-layout>
-
       <h4>References:</h4>
       <v-flex xs12 >
+        <p>Bostanabad, R., Zhang, Y., Li, X., Kearney, T., Brinson, L. C., Apley,  D., Wing K., and Chen, W., <i>Computational Microstructure Characterization and Reconstruction: Review of the State-of-the-art Techniques</i>, Progress in Materials Science, 95, June 2018.</p>
         <p>Rintoul, M.D. and Torquato, S., 1997. Reconstruction of the structure of dispersions. Journal of Colloid and Interface Science, 186(2), pp.467-476. </p>
         <p>Yeong,C. and Torquato,S., 1998. Reconstructing random media Physical Review E., vol. 57, no. 1, p. 495. </p>
         <p>Liu, Y., Greene, M.S., Chen, W., Dikin, D., Liu, W.K., <i>Computational Microstructure Characterization and Reconstruction for Stochastic Multiscale Design</i>, Computer Aided Design, 45 (1), 65-76, 2013. </p>
@@ -64,9 +64,6 @@
         <p>Xu, H., Dikin, D.A., Burkhart, C. and Chen, W., 2014. Descriptor-based methodology for statistical characterization and 3D reconstruction of microstructural materials. Computational Materials Science, 85, pp.206-216. </p>
       </v-flex>
     </v-container>
-
-
-
   </div>
 </template>
 

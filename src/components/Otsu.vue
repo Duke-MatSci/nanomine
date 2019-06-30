@@ -92,11 +92,8 @@
       <v-flex xs12>
         <p> N. Otsu, A threshold selection method from gray-level histograms, IEEE transactions on systems, man, and
           cybernetics, vol. 9, no. 1, pp. 62-66, 1979.</p>
-
       </v-flex>
     </v-container>
-
-
   </div>
 </template>
 
