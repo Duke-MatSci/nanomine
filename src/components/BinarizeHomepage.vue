@@ -46,8 +46,6 @@
         <p>Khurshid, K.,Siddiqi, I., Faure, C. and Vincent, N., 2009. Comparison of Niblack inspired Binarization methods for ancient document. DRR, 7247, pp.1-10</p>
       </v-flex>
     </v-container>
-
-
   </div>
 </template>
 
