@@ -91,7 +91,6 @@
         <p>Yeong,C. and Torquato,S., 1998. Reconstructing random media Physical Review E, vol. 57, no. 1, p. 495</p>
       </v-flex>
     </v-container>
-
   </div>
 </template>
 
