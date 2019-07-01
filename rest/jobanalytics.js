@@ -64,7 +64,7 @@ jobDirs.forEach(function (v,idx) {
 let jobs = Object.keys(jobInfo)
 jobs.forEach(function (k) {
   console.log('   ' + k + ' ' + jobInfo[k].runs + ' ' + jobInfo[k].users.length)
-  jobInfo[k].users.forEach(function (u) {
-    console.log('            ' + u)
-  })
+  // jobInfo[k].users.forEach(function (u) {
+  //   console.log('            ' + u)
+  // })
 })
