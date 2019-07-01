@@ -25,8 +25,7 @@ jobDirs = _.remove(jobDirs, function (v) {
 })
 
 let jobInfo = {} // jobtype, # instances, userlist
-
-function addJobInfo(dir, jobParams) {
+function addJobInfo (dir, jobParams) {
   let jobtype = dir.split('-')[0]
   let user = jobParams.submittingUser
   if (jobParams.user && jobParams.user.length > 0) {
@@ -44,7 +43,7 @@ function addJobInfo(dir, jobParams) {
   }
 }
 
-function getJobParams(dir) {
+function getJobParams (dir) {
   let jobDir = jobDataDir + '/' + dir
   let json = fs.readFileSync(jobDir + '/job_parameters.json')
   let jp = null
@@ -62,9 +61,11 @@ jobDirs.forEach(function (v,idx) {
 })
 
 let jobs = Object.keys(jobInfo)
+console.log('<html><head><title>Job Statistics</title></head><body><table><tr><th>Job Name</th><th># Runs</th><th># Users</th></tr>')
 jobs.forEach(function (k) {
-  console.log('   ' + k + ' ' + jobInfo[k].runs + ' ' + jobInfo[k].users.length)
+  console.log('<tr><td>' + k + '</td><td style="text-align:right;">' + jobInfo[k].runs + '</td><td style="text-align:right;">' + jobInfo[k].users.length + '</td></tr>')
   // jobInfo[k].users.forEach(function (u) {
   //   console.log('            ' + u)
   // })
 })
+console.log('</table></body></html>')
