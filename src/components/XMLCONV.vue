@@ -112,8 +112,8 @@
       <v-btn v-on:click="submit()" color="primary">Submit</v-btn>
       <br>
       <h4 class="text-xs-left">Reference</h4>
-      <p class="text-xs-left">Zhao, H., Li, X., Zhang, Y., Schadler, L. S., Chen, W., & Brinson, L. C. (2016). <i><a href="https://aip.scitation.org/doi/abs/10.1063/1.4943679">Perspective: NanoMine: A material genome approach for polymer nanocomposites analysis and design</a></i>. APL Materials, 4(5), 053204.</p>
-      <p class="text-xs-left">Zhao, H., Wang, Y., Lin, A., Hu, B., Yan, R., McCusker, J., ... & Brinson, L. C. (2018). <i><a href="https://aip.scitation.org/doi/10.1063/1.5046839">NanoMine schema: An extensible data representation for polymer nanocomposites</i></a>. APL Materials, 6(11), 111108.</p>
+      <p class="text-xs-left">Zhao, H., Li, X., Zhang, Y., Schadler, L. S., Chen, W., &amp; Brinson, L. C. (2016). <i><a href="https://aip.scitation.org/doi/abs/10.1063/1.4943679">Perspective: NanoMine: A material genome approach for polymer nanocomposites analysis and design</a></i>. APL Materials, 4(5), 053204.</p>
+      <p class="text-xs-left">Zhao, H., Wang, Y., Lin, A., Hu, B., Yan, R., McCusker, J., ... &amp; Brinson, L. C. (2018). <i><a href="https://aip.scitation.org/doi/10.1063/1.5046839">NanoMine schema: An extensible data representation for polymer nanocomposites</i></a>. APL Materials, 6(11), 111108.</p>
     </v-container>
   </div>
 </template>
