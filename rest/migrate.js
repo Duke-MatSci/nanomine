@@ -586,7 +586,7 @@ function adjustImageBlob (json) {
   return json
 }
 
-function insertXmlData(doc2Insert) {
+function insertXmlData (doc2Insert) {
   let func = 'insertXmlData'
   let p = new Promise(function (resolve, reject) {
     let xmldata = db.collection('xmldata')
@@ -601,7 +601,7 @@ function insertXmlData(doc2Insert) {
       })
       .catch(function (err) {
         let msg = func + ' - error inserting data for schema: ' + doc2Insert.schemaId + ' title: ' + doc2Insert.title + ' error: ' + err
-        reject(err)
+        reject(msg)
       })
   })
   return p
@@ -613,7 +613,7 @@ function copyXmlData2Schema (fromSchema, toSchema) {
     let xmldata = db.collection('xmldata')
     xmldata.find({'schemaId': {$eq: fromSchema}}, {}).forEach((xmldoc) => {
       let msg = func + ' - copy title: ' + xmldoc.title + ' schema: ' + xmldoc.schema + ' to new schemaid: ' + toSchema
-      logDebug( msg)
+      logDebug(msg)
       // !!! xmldoc.schemaId = xmldoc.schema // fix schema id name
       let doc2Insert = xmldoc
       doc2Insert.schema = toSchema // dup'd original schema id since 'schema' is mongoose keyword. Data can be there, but mongoose cannot access
@@ -644,7 +644,7 @@ function copyXmlData2Schema (fromSchema, toSchema) {
   return p
 }
 
-function updateDatasetsObject(ds, dsExt) {
+function updateDatasetsObject (seq, ds, dsExt) {
   let issue = null
   let issn = null
   if (dsExt) {
@@ -655,7 +655,7 @@ function updateDatasetsObject(ds, dsExt) {
     // logError('title: ' + xmldoc.title + ' schema: ' + xmldoc.schema + ' - dsExt (journal info) is null or undefined for dataset seq: ' + seq)
     logError('dsExt (journal info) is null or undefined for dataset seq: ' + seq)
   }
-  if (ds !== null) {
+  if (ds) {
     datasets[seq] = {
       'citationType': ds.CitationType,
       'publication': ds.Publication,
@@ -691,8 +691,10 @@ function updateDatasetsObject(ds, dsExt) {
       datasets[seq].keyword.push(ds.Keyword)
     }
     logInfo('created dataset reference - seq: ' + seq + ' - ' + inspect(datasets[seq]) + '\n\n')
+  } else {
+    // no dataset info passed
   }
-
+}
 // NOTE: this is a point in time migration for production data that's at SpDev2 that
 //   removes the old data for the current schema (after a backup to a mock schema),
 //   removes all datasets and re-creates the data from a set of data supplied on disk.
@@ -789,7 +791,7 @@ function migrateToNmSpDev3 (fromVer, toVer) {
                                           .then(function (mongoError, result) {
                                             if (mongoError) {
                                               let msg = func + ' - failed to remove all xmldata records for current schema. Error: ' + mongoError
-                                              reject(err)
+                                              reject(msg)
                                             } else {
                                               let msg = func + ' - deleted ' + result['n'] + ' xmldata records for schemaId: ' + fromSchemaId
                                               logInfo(msg)
@@ -853,7 +855,6 @@ function migrateToNmSpDev3 (fromVer, toVer) {
                                             let msg = func + ' - failed to remove all xmldata records for current schema. Error: ' + err
                                             reject(msg)
                                           })
-
                                       }
                                     })
                                     .catch(function (err) {
@@ -1008,7 +1009,8 @@ function migrateToNmSpDev1 (fromVer, toVer) {
               if (datasets[seq] === undefined) { // && isValidSchema && (xmldoc.schema === latestSchema().schemaId)) { // try to get latest data
                 let ds = _.get(json, 'PolymerNanocomposite.DATA_SOURCE.Citation.CommonFields', null)
                 let dsExt = _.get(json, 'PolymerNanocomposite.DATA_SOURCE.Citation.CitationType.Journal', null)
-                updateDatasetsObject(ds, dsExt)
+                if (ds) {
+                  updateDatasetsObject(seq, ds, dsExt)
                 } else {
                   logInfo('cannot find key path in BSON object to build dataset info: ' + seq + ' for schema: ' + xmldoc.schema + ' title: ' + xmldoc.title)
                 }
@@ -1021,7 +1023,7 @@ function migrateToNmSpDev1 (fromVer, toVer) {
               //  .//MICROSTRUCTURE/ImageFile/File
               adjustImageBlob(json)
               logDebug(j2x(json, null, indent))
-              let xsd = getSchemaInfo(xmldoc.schema)
+              // let xsd = getSchemaInfo(xmldoc.schema)
               /* Cannot verify all xmls without process running out of memory. Need another way to verify.
               if (xsd) {
                 let errors = validateXml({'xml': xml, 'schema': xsd.content, TOTAL_MEMORY:4194304})
@@ -1111,7 +1113,7 @@ function migrateToNmSpDev1 (fromVer, toVer) {
 
 const migrationTable = [ // Array of version to version conversion function mappings
   { 'from': versionOriginal, 'to': versionSpDev1, 'use': migrateToNmSpDev1 },
-  { 'from': versionSpDev1, 'to': versionSpDev2, 'use': migrateToNmSpDev2 },
+  { 'from': versionSpDev1, 'to': versionSpDev2, 'use': migrateToNmSpDev2 }
   // { 'from': versionSpDev2, 'to': versionSpDev3, 'use': migrateToNmSpDev3 }
 ]
 
@@ -1192,7 +1194,7 @@ function loadSchemas () {
       .then(() => {
         let xsdVersions = db.collection('template_version')
         if (xsdVersions) {
-          let cur = xsdVersions.find({}).forEach((xsdVer) => { // iterator callback
+          xsdVersions.find({}).forEach((xsdVer) => { // iterator callback
             logInfo('xsdVersion: ' + xsdVer.current + ' isDeleted: ' + xsdVer.isDeleted)
             schemaInfo.push({'schemaId': xsdVer.current, 'isDeleted': xsdVer.isDeleted})
           }, (err) => { // done iterating callback with possible error (weird Mongo stuff)
