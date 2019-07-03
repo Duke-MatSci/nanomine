@@ -13,15 +13,17 @@
 <template>
   <div class="mcr_homepage">
     <h1>{{ msg }}</h1>
-    <v-container class="text-xs-left">
-      <v-layout row wrap>
-      <v-flex xs12 class="title bold">
+    <v-container fluid grid-list-md>
+      <v-flex xs12 class="body bold text-xs-left">
         Microstructure Characterization and Reconstruction (MCR) is an essential component of computational material
         design as it helps in understanding structure - property
         relationships. This page allows you to characterize and reconstruct images of polymer nanocomposites.
         All webtools accept inputs in multiple formats and allow download of results. Please click on the appropriate
         button.
       </v-flex>
+    </v-container>
+    <v-container class="text-xs-left">
+      <v-layout row wrap>
         <v-flex xs10>
             <!-- Binarization -->
           <v-flex class="title cap heavy skip">Image Binarization</v-flex>
