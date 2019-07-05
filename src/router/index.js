@@ -3,12 +3,12 @@ import Router from 'vue-router'
 import Admin from '@/components/Admin'
 import NanoMine from '@/components/NanoMine'
 import Database from '@/components/Database'
-import Insight from '@/components/Insight'
+// import Insight from '@/components/Insight'
 import ModuleTools from '@/components/ModuleTools'
 import MyPage from '@/components/MyPage'
 import SimTools from '@/components/SimTools'
 import XMLCONV from '@/components/XMLCONV'
-import NmEditor from '@/components/Editor'
+// import NmEditor from '@/components/Editor'
 import McrHomepage from '@/components/McrHomepage'
 import BinarizeHomepage from '@/components/BinarizeHomepage'
 import Otsu from '@/components/Otsu'
@@ -22,7 +22,7 @@ import ReconstructionHomepage from '@/components/ReconstructionHomepage'
 import CorrelationReconstruct from '@/components/CorrelationReconstruct'
 import SDFReconstruct from '@/components/SDFReconstruct'
 import DescriptorReconstruct from '@/components/DescriptorReconstruct'
-import Visualization from '@/components/Visualization'
+// import Visualization from '@/components/Visualization'
 import SDFCharacterizeResults from '@/components/SDFCharacterizeResults'
 import DescriptorCharacterizeResults from '@/components/DescriptorCharacterizeResults'
 import CorrelationCharacterizeResults from '@/components/CorrelationCharacterizeResults'
@@ -63,11 +63,11 @@ export default new Router({
       name: 'Contact',
       component: Contact
     },
-    {
-      path: '/insight',
-      name: 'Insight',
-      component: Insight
-    },
+    // {
+    //   path: '/insight',
+    //   name: 'Insight',
+    //   component: Insight
+    // },
     {
       path: '/simtools',
       name: 'SimTools',
@@ -88,11 +88,11 @@ export default new Router({
       name: 'XMLCONV',
       component: XMLCONV
     },
-    {
-      path: '/editor',
-      name: 'NmEditor',
-      component: NmEditor
-    },
+    // {
+    //   path: '/editor',
+    //   name: 'NmEditor',
+    //   component: NmEditor
+    // },
     {
       path: '/mcr_homepage',
       name: 'McrHomepage',
@@ -158,11 +158,11 @@ export default new Router({
       name: 'DescriptorReconstruct',
       component: DescriptorReconstruct
     },
-    {
-      path: '/Visualization',
-      name: 'Visualization',
-      component: Visualization
-    },
+    // {
+    //   path: '/Visualization',
+    //   name: 'Visualization',
+    //   component: Visualization
+    // },
     {
       path: '/OtsuResult',
       name: 'OtsuResult',
