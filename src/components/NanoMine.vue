@@ -19,7 +19,7 @@
       <h3><span>NanoMine is an open source, data resource for members of the nanocomposites community with four key goals:</span>
       </h3>
       <ul>
-        <li><span>Provide a <router-link to="/XMLCONV">curation</router-link> platform for sharing of data across the community in a format that is makes the data findable, accessible, interoperable and reusable (FAIR <a
+        <li><span>Provide a <router-link to="/XMLCONV">curation</router-link> platform for sharing of data across the community in ways that are findable, accessible, interoperable and reusable (FAIR <a
           href="https://www.force11.org/" target="_blank">www.force11.org</a>).</span></li>
         <li>
           <span>Provide a platform for <a href="/home">visualizing data</a>, and mechanisms for visualization methods to be shared.</span>
