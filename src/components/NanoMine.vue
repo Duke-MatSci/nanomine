@@ -19,14 +19,14 @@
       <h3><span>NanoMine is an open source, data resource for members of the nanocomposites community with four key goals:</span>
       </h3>
       <ul>
-        <li><span>Provide a platform for sharing of data across the community in a format that is makes the data findable, accessible, interoperable and reusable (FAIR <a
+        <li><span>Provide a <router-link to="/XMLCONV">curation</router-link> platform for sharing of data across the community in ways that are findable, accessible, interoperable and reusable (FAIR <a
           href="https://www.force11.org/" target="_blank">www.force11.org</a>).</span></li>
         <li>
-          <span>Provide a platform for visualizing data, and a mechanism for methods for visualization to be shared.</span>
+          <span>Provide a platform for <a href="/home">visualizing data</a>, and mechanisms for visualization methods to be shared.</span>
         </li>
-        <li><span>Provide tools that improve the quantification of nanofiller dispersion and morphology as well as the ability to reconstruct those morphologies for subsequent modeling and analysis.</span>
+        <li><span>Provide <router-link to="/mtools">module tools</router-link> that improve the quantification of nanofiller dispersion and morphology as well as the ability to reconstruct those morphologies for subsequent modeling and analysis.</span>
         </li>
-        <li><span>Improve the ability to design nanocomposites through simulation and design tools.</span></li>
+        <li><span>Improve the ability to design nanocomposites through <router-link to="/simtools">simulation and design tools</router-link>.</span></li>
       </ul>
       <v-flex d-flex xs12>
         <v-layout row wrap>
@@ -42,7 +42,7 @@
         </v-layout>
       </v-flex>
       <p style="padding-left:15%;padding-right:15%;text-align:left"><span>NanoMine is built on both a <a
-        href="https://github.com/Duke-MatSci/nanomine-schema/tree/master/xml" target="_blank">schema</a> and an ontology to provide a robustness to the FAIR principles. NanoMine also allows for the registration of materials resources, bridging the gap between existing resources and the end users and making those existing resources available for research to material community.</span>
+        href="https://github.com/Duke-MatSci/nanomine-schema/tree/master/xml" target="_blank">schema</a>* and an ontology to provide a robustness to the FAIR principles. NanoMine also allows for the registration of materials resources, bridging the gap between existing resources and the end users and making those existing resources available for research to material community.</span>
       </p>
 
       <v-flex d-flex xs12>
@@ -53,11 +53,30 @@
 
       <p style="font-weight:bold;text-align:left;padding-left:15%;padding-right:15%;">NSF supported the initial
         concept of NanoMine as a joint Northwestern University/Rensselaer Polytechnic Institute project through the
-        CDMR program and is currently supporting a robust ontology and software framework via the DIBBS program. The
-        DMREF program currently supports the development and publication of innovative material simulation and design
-        tools. The DIBBS program currently supports infrastructure and software development and integration.
+        CDMR program and development of a robust ontology and software framework via the
+        DIBBS program. The
+        DMREF program (Duke University, Northwestern University, Rensselaer Polytechnic Institute and the University of Vermont)
+        currently supports the development and publication of innovative material simulation and design
+        tools. The CSSI program (Duke University, Northwestern University, Rensselaer Polytechnic Institute, University of Vermont and CalTech)
+        currently supports infrastructure and software development, integration and extension to the domain of meta-materials.
         NIST/CHIMAD support data curation, demonstration materials design problems, and integration into the larger
-        MGI network as well as provide backbone use of the Materials Data Curator system run by NIST.</p>
+        MGI network and connection to the Materials Data Curator system run by NIST.
+      </p>
+      <h4 style="text-align:left;padding-left:12%;padding-right:12%;">* References</h4>
+      <p style="text-align:left;padding-left:12%;padding-right:12%;">Zhao, H., Li, X., Zhang, Y., Schadler, L. S., Chen, W., &amp; Brinson, L. C. (2016).
+        <i>
+          <a href="https://aip.scitation.org/doi/abs/10.1063/1.4943679">Perspective: NanoMine: A material genome approach for polymer nanocomposites analysis and design</a>
+        </i>
+        . APL Materials, 4(5), 053204.
+      </p>
+      <p style="text-align:left;padding-left:12%;padding-right:12%;">Zhao, H., Wang, Y., Lin, A., Hu, B., Yan, R., McCusker, J., ... &amp; Brinson, L. C. (2018).
+        <i>
+          <a href="https://aip.scitation.org/doi/10.1063/1.5046839">NanoMine schema: An extensible data representation for polymer nanocomposites
+          </a>
+        </i>
+        . APL Materials, 6(11), 111108.
+      </p>
+
     </v-container>
   </div>
 </template>
