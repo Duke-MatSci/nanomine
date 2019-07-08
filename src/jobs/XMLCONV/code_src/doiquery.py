@@ -8,9 +8,9 @@ import xml.etree.ElementTree as ET
 import collections
 from datetime import date
 
-def runDOIquery(doi):
+def runDOIquery(doi, code_srcDir):
     # read the credentials
-    with open('account.txt') as f:
+    with open('%s/account.txt' %(code_srcDir)) as f:
         account = f.read()
     # form the query
     query = "https://www.crossref.org/openurl/?pid=%s&format=unixref&id=doi:%s&noredirect=true" %(account.strip(), doi.strip())

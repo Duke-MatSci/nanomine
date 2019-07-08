@@ -74,10 +74,18 @@ def axisStd(header):
         # find the punctuation that appears first
     firstPunc = sorted(puncs, key = puncs.get)[0]
         # if none of the puncs appears, then we have a label and a unit (dimensionless)
-    if puncs[firstPunc] == len(header):
-        return (header, 'dimensionless')
-    label = header[0:puncs[firstPunc]].strip()
-    unit = header[puncs[firstPunc]+1:].strip()
+    # special case, end with '%' (e.g. strain)
+    if header[-1] != '%':
+        if puncs[firstPunc] == len(header):
+            return (header, 'dimensionless')
+        label = header[0:puncs[firstPunc]].strip()
+        unit = header[puncs[firstPunc]+1:].strip()
+    elif ' ' in header: # unit separated by white space
+        label = header[:header.rfind(' ')].strip()
+        unit = header[header.rfind(' ')+1:].strip()
+    else: # % unit not separated by white space
+        label = header[:-1]
+        unit = header[-1]
     # standardize label
         # make every leading letter in the label capital
     if len(label) == 1:
@@ -459,7 +467,7 @@ def sheetSampleInfo(sheet, DATA, myXSDtree, jobDir, restbase):
     try:
         dsurl = restbase + '/nmr/dataset?seq='+seq
         rq = urllib.request.Request(dsurl)
-        j = json.loads(urllib.request.urlopen(rq, context=ssl._create_unverified_context()).read())
+        j = json.loads(urllib.request.urlopen(rq, context=ssl._create_unverified_context()).read().decode("utf-8"))
         response = j["data"][0]
     except:
         print('exception occurred during dataset GET by doi')

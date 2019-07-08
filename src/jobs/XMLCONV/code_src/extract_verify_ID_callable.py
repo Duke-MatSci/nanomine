@@ -129,7 +129,7 @@ def restDOI(DOI, code_srcDir, restbase, sheet_sample, user):
     try:
         dsurl = restbase + '/nmr/dataset?doi='+DOI
         rq = urllib.request.Request(dsurl)
-        j = json.loads(urllib.request.urlopen(rq, context=ssl._create_unverified_context()).read())
+        j = json.loads(urllib.request.urlopen(rq, context=ssl._create_unverified_context()).read().decode('utf-8'))
         if len(j["data"]) > 0:
             exist = True
             response = j["data"][0]
@@ -169,9 +169,9 @@ def restDOI(DOI, code_srcDir, restbase, sheet_sample, user):
             dsInfo['userid'] = user
             # NOTE END
 
-            r = urllib.request.urlopen(rq, json.dumps(ds_data), context=ssl._create_unverified_context())
+            r = urllib.request.urlopen(rq, json.dumps(ds_data).encode("utf-8"), context=ssl._create_unverified_context())
             # logging.info('dataset create request posted: ' + str(r.getcode()))
-            response = json.loads(r.read())['data']
+            response = json.loads(r.read().decode("utf-8"))['data']
         except:
             message += 'exception occurred during dataset-create\n'
             message += 'exception: ' + str(traceback.format_exc()) + '\n'

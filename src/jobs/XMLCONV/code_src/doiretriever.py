@@ -1223,11 +1223,11 @@ def nameLastFirst(nameList):
     return nameList
 
 # main function, input doi string, output meta data in a dictionary
-def mainDOI(doi):
+def mainDOI(doi, code_srcDir):
     doi = quote_plus(doi)
-    if not doiValid(doi):
+    if not doiValid(doi, code_srcDir):
         return {}
-    queryDict = runDOIquery(doi)
+    queryDict = runDOIquery(doi, code_srcDir)
     if len(queryDict) > 0:
         return queryDict
     url = doiToURL(doi)
@@ -1249,9 +1249,9 @@ def mainDOI(doi):
 
 # main function, input doi string, output meta data in a dictionary, use bs4
 # module first
-def mainDOIsoupFirst(doi):
+def mainDOIsoupFirst(doi, code_srcDir):
     doi = quote_plus(doi)
-    if not doiValid(doi):
+    if not doiValid(doi, code_srcDir):
         return {}
     url = doiToURL(doi)
     (url, publisher) = fetchRdrctURLPub(url)
@@ -1266,13 +1266,13 @@ def mainDOIsoupFirst(doi):
         if "&amp;" in myDict["Institution"][i]:
             myDict["Institution"][i] = myDict["Institution"][i].replace('&amp;','and')
     # call query module to fill in the blank
-    queryDict = runDOIquery(doi)
+    queryDict = runDOIquery(doi, code_srcDir)
     myDict.update(queryDict) # update dict by bs4 module with query dict
     return myDict
 
 # avoid Http 404 when users input invalid doi
-def doiValid(doi):
-    if len(runDOIquery(doi)) == 0:
+def doiValid(doi, code_srcDir):
+    if len(runDOIquery(doi, code_srcDir)) == 0:
         return False
     return True
 
