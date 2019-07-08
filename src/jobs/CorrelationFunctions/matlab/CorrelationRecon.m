@@ -15,13 +15,15 @@ function CorrelationRecon(userId, jobId, jobType, jobSrcDir, jobDir, webBaseUri,
 %%% Umar edits
 % 1: Fix the reconstruction size to 200 by 200 for images with greater sizes
 %%%
-writeError([path_to_write, '/errors.txt'], ''); % ensure that errors.txt exists
+
 rc=0;
-try
   path_to_read = [jobSrcDir,'/'];
   path_to_write = [jobSrcDir,'/output'];
   
   mkdir(path_to_write);
+  writeError([path_to_write, '/errors.txt'], ''); % ensure that errors.txt exists
+try
+
   num_recon = str2num(NumOfRecon);
   correlation_choice = str2num(correlation_choice);
   %% Specify import function according to input option

@@ -52,7 +52,7 @@ xx = 0 : N-1;
 x2 = 0 : length(f_obj) - 1;
 f_obj1 = interp1(x2, f_obj, xx, 'spline');
 
-niter = 1;
+niter = 1e4;
 err = 1e5;
 tol = 1e-5;
 
