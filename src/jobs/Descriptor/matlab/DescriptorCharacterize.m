@@ -13,6 +13,7 @@ try
     
     path_to_read = [jobSrcDir,'/'];
     path_to_write = [jobSrcDir,'/output'];
+    mkdir(path_to_write);
     writeError([path_to_write, '/errors.txt'], ''); % ensure that errors.txt exists
     
     
