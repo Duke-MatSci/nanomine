@@ -18,13 +18,13 @@ import dicttoxml
 
 # -------------------------------------------- XML Schemas
 import collections                        # Python standard library
-import xml.etree.ElementTree as ET
+from lxml import etree
 
 # -------------------------------------------- XML-XSD validation tool
 from xml_update_validator import runValidation
 
 # -------------------------------------------- REST service
-import urllib2
+import urllib.request
 import json
 import logging
 
@@ -54,7 +54,7 @@ def read_excel_profile(filename, jobDir):
     start_row = 1
     end_row = data_content.nrows
     profile_data = []
-    for i in xrange(start_row, end_row):
+    for i in range(start_row, end_row):
         profile_data.append({'row':({'column':data_content.row_values(i)[0]},
                                     {'column':data_content.row_values(i)[1]})}) 
     return {'headers': header, 'rows': profile_data}
@@ -235,19 +235,19 @@ def sortSequence(myList, myClassName, myXSDtree):
         seq[ele.get('name')] = index
         index += 1
     # sort myList by the index for each element key
-    myList.sort(key=lambda x: seq[x.keys()[0]])
+    myList.sort(key=lambda x: seq[list(x.keys())[0]])
     return myList
 
 # a helper method to check the length of a cell input
 def hasLen(val):
-    if (type(val) == unicode and len(val.strip()) > 0) or len(str(val).strip()) > 0:
+    if (type(val) == str and len(val.strip()) > 0) or len(str(val).strip()) > 0:
         return True
     return False
 
 # a helper method to insert a dict with {key: val} into a list
 def insert(key, val, container):
     if hasLen(val):
-        if (type(val) == str or type(val) == unicode):
+        if (type(val) == str):
             container.append({key: val.strip()})
             return container
         else:
@@ -258,7 +258,7 @@ def insert(key, val, container):
 # a helper method to add a {key: val} pair into the input dict
 def addKV(key, val, dict_in):
     if hasLen(val):
-        if (type(val) == str or type(val) == unicode):
+        if (type(val) == str):
             dict_in[key] = val.strip()
             return dict_in
         else:
@@ -270,17 +270,17 @@ def addKV(key, val, dict_in):
 def addKVU(key, description, value, unit, unc_type, unc_value,
            data_des, data_file, dict_in, jobDir, myXSDtree):
     # first strip all the input
-    if (type(value) == str or type(value) == unicode):
+    if (type(value) == str):
         value = value.strip()
-    if (type(unit) == str or type(unit) == unicode):
+    if (type(unit) == str):
         unit = unit.strip()
-    if (type(unc_type) == str or type(unc_type) == unicode):
+    if (type(unc_type) == str):
         unc_type = unc_type.strip()
-    if (type(description) == str or type(description) == unicode):
+    if (type(description) == str):
         description = description.strip()
-    if (type(data_des) == str or type(data_des) == unicode):
+    if (type(data_des) == str):
         data_des = data_des.strip()
-    if (type(data_file) == str or type(data_file) == unicode):
+    if (type(data_file) == str):
         data_file = data_file.strip()
     # create 4 internal dicts
     small_dict = collections.OrderedDict()
@@ -322,19 +322,19 @@ def addKVU(key, description, value, unit, unc_type, unc_value,
 def addKVSU(key, description, value, unit, unc_type, unc_value, stdDev,
             data_des, data_file, dict_in, jobDir, myXSDtree):
     # first strip all the input
-    if (type(value) == str or type(value) == unicode):
+    if (type(value) == str):
         value = value.strip()
-    if (type(unit) == str or type(unit) == unicode):
+    if (type(unit) == str):
         unit = unit.strip()
-    if (type(unc_type) == str or type(unc_type) == unicode):
+    if (type(unc_type) == str):
         unc_type = unc_type.strip()
-    if (type(stdDev) == str or type(stdDev) == unicode):
+    if (type(stdDev) == str):
         stdDev = stdDev.strip()
-    if (type(description) == str or type(description) == unicode):
+    if (type(description) == str):
         description = description.strip()
-    if (type(data_des) == str or type(data_des) == unicode):
+    if (type(data_des) == str):
         data_des = data_des.strip()
-    if (type(data_file) == str or type(data_file) == unicode):
+    if (type(data_file) == str):
         data_file = data_file.strip()
     # create 4 internal dicts
     small_dict = collections.OrderedDict()
@@ -377,7 +377,7 @@ def addKVSU(key, description, value, unit, unc_type, unc_value, stdDev,
 def addKKV(key_1, key_2, val, dict_in):
     if hasLen(val):
         subdict = collections.OrderedDict()
-        if type(val) == str or type(val) == unicode:
+        if type(val) == str:
             subdict[key_2] = val.strip()
         else:
             subdict[key_2] = val
@@ -393,7 +393,7 @@ def whichProp(sheet, DATA_PROP, myXSDtree, jobDir):
     # Each property should only have one sheet and its corresponding helper
     # method should only be called once, create flags here for that purpose.
     (me, vi, el, th, vo, rh) = (False, False,  False,  False,  False,  False)
-    for row in xrange(sheet.nrows):
+    for row in range(sheet.nrows):
         # scan the first column until we find a match in propSet
         if (sheet.cell_value(row, 0).strip().lower() in propSet):
             if (sheet.cell_value(row, 0).strip().lower() == "mechanical" and not me):
@@ -422,14 +422,14 @@ def doiAdd(doiKVPair, CommonFields):
     # doiKVPair example:
     # {'Author' : [u'Melo, M.', u'Ara\xfajo, E. B.', u'Shvartsman, V. V.', u'Shur, V. Ya.', u'Kholkin, A. L.']}
     toDel = [] # a list of index to delete in CommonFields
-    for i in xrange(len(CommonFields)):
+    for i in range(len(CommonFields)):
         # remove duplicate
-        if CommonFields[i].keys()[0] == doiKVPair.keys()[0]:
+        if list(CommonFields[i].keys())[0] == list(doiKVPair.keys())[0]:
             toDel.append(i)
     for j in toDel:
         del CommonFields[j]
     # write
-    doiK = doiKVPair.keys()[0]
+    doiK = list(doiKVPair.keys())[0]
     doiVlist = doiKVPair[doiK]
     for doiV in doiVlist:
         doiV = doiV.replace('&amp;','and') # replace html expression '&amp;'
@@ -458,11 +458,11 @@ def sheetSampleInfo(sheet, DATA, myXSDtree, jobDir, restbase):
     response = {}
     try:
         dsurl = restbase + '/nmr/dataset?seq='+seq
-        rq = urllib2.Request(dsurl)
-        j = json.loads(urllib2.urlopen(rq, context=ssl._create_unverified_context()).read())
+        rq = urllib.request.Request(dsurl)
+        j = json.loads(urllib.request.urlopen(rq, context=ssl._create_unverified_context()).read())
         response = j["data"][0]
     except:
-        print 'exception occurred during dataset GET by doi'
+        print('exception occurred during dataset GET by doi')
         #print 'exception: ' + str(sys.exc_info()[0])
         print('exception: '  + str(traceback.format_exc()))
 
@@ -478,7 +478,7 @@ def sheetSampleInfo(sheet, DATA, myXSDtree, jobDir, restbase):
     if 'issn' in response:
         Journal = insert('ISSN', response['issn'], Journal)
     # loop through the rows in the excel
-    for row in xrange(sheet.nrows):
+    for row in range(sheet.nrows):
         # Control_ID
         if match(sheet.row_values(row)[0], 'Control sample ID'):
             control = sheet.row_values(row)[1]
@@ -607,7 +607,7 @@ def sheetMatType(sheet, DATA, myXSDtree, jobDir):
     temp = [] # always save temp if not empty when we find a match in headers
     prevTemp = '' # save the previous cleanTemp
     prevTempPST = '' # save the previous cleanTempPST
-    for row in xrange(sheet.nrows):
+    for row in range(sheet.nrows):
         # First deal with the ParticleSurfaceTreatment
         cleanTempPST = matchList(sheet.cell_value(row, 0), headers_PST.keys())
         if cleanTempPST:
@@ -1025,7 +1025,7 @@ def sheetProcTypeHelper(sheet, row, temp_list, stop_sign, myXSDtree, jobDir):
         # Description
         if match(sheet.cell_value(irow, 0), 'Other - description'):
             # temp = insert('Description', sheet.cell_value(irow, 1), temp)
-            temp = unicode(sheet.cell_value(irow, 1)).strip() # DANGEROUS! type(temp) changes here
+            temp = str(sheet.cell_value(irow, 1)).strip() # DANGEROUS! type(temp) changes here
     # Additive
         # Description
         if match(sheet.cell_value(irow, 0), 'Additive - description'):
@@ -1679,7 +1679,7 @@ def sheetProcType(sheet, DATA, myXSDtree, jobDir):
     temp_list = [] # a temperary list in case multiple processing methods
 
     ExpPrc = [] # an emptry list for ExperimentalProcedure
-    for row in xrange(sheet.nrows):
+    for row in range(sheet.nrows):
         # Experimental Procedure, assume no duplication allowed
         if match(sheet.row_values(row)[0], 'Experimental Procedure'):
             if len(sheet.cell_value(row, 1).strip()) > 0:
@@ -1756,7 +1756,7 @@ def sheetCharMeth(sheet, DATA, myXSDtree, jobDir):
     temp_list = [] # the highest level list for CHARACTERIZATION
     temp = [] # always save temp if not empty when we find a match in headers
     prevTemp = '' # save the previous cleanTemp
-    for row in xrange(sheet.nrows):
+    for row in range(sheet.nrows):
         cleanTemp = matchList(sheet.cell_value(row, 0), headers.keys())
         if cleanTemp:
             if len(prevTemp) == 0: # initialize prevTemp
@@ -1782,7 +1782,7 @@ def sheetCharMeth(sheet, DATA, myXSDtree, jobDir):
             mag = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             mag = addKVU('Magnification', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], mag, jobDir, myXSDtree)
             if len(mag) > 0:
                 temp.append(mag)
@@ -1791,7 +1791,7 @@ def sheetCharMeth(sheet, DATA, myXSDtree, jobDir):
             accV = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             accV = addKVU('AcceleratingVoltage', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], accV, jobDir, myXSDtree)
             if len(accV) > 0:
                 temp.append(accV)
@@ -1800,7 +1800,7 @@ def sheetCharMeth(sheet, DATA, myXSDtree, jobDir):
             emiC = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             emiC = addKVU('EmissionCurrent', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], emiC, jobDir, myXSDtree)
             if len(emiC) > 0:
                 temp.append(emiC)
@@ -1809,7 +1809,7 @@ def sheetCharMeth(sheet, DATA, myXSDtree, jobDir):
             worD = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             worD = addKVU('WorkingDistance', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], worD, jobDir, myXSDtree)
             if len(worD) > 0:
                 temp.append(worD)
@@ -1818,7 +1818,7 @@ def sheetCharMeth(sheet, DATA, myXSDtree, jobDir):
             expT = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             expT = addKVU('ExposureTime', '', myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], expT, jobDir, myXSDtree)
             if len(expT) > 0:
                 temp.append(expT)
@@ -1827,7 +1827,7 @@ def sheetCharMeth(sheet, DATA, myXSDtree, jobDir):
             resD = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             resD = addKVU('data', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], resD, jobDir, myXSDtree)
             if len(resD) > 0:
                 temp.append(resD)
@@ -1836,7 +1836,7 @@ def sheetCharMeth(sheet, DATA, myXSDtree, jobDir):
             heaR = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             heaR = addKVU('HeatingRate', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], heaR, jobDir, myXSDtree)
             if len(heaR) > 0:
                 temp.append(heaR)
@@ -1845,7 +1845,7 @@ def sheetCharMeth(sheet, DATA, myXSDtree, jobDir):
             cooR = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             cooR = addKVU('CoolingRate', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], cooR, jobDir, myXSDtree)
             if len(cooR) > 0:
                 temp.append(cooR)
@@ -1890,7 +1890,7 @@ def sheetPropMech(sheet, DATA_PROP, myXSDtree, jobDir):
     prevTemp = '' # save the previous cleanTemp
     prevTempFrac = '' # save the previous cleanTempFrac
     underFrac = False # a flag, True if our cursor is under a Fracture field. We need this flag in case the Excel sheet ends with a shared "Loading Profile (filename.xlsx)"
-    for row in xrange(sheet.nrows):
+    for row in range(sheet.nrows):
         # First deal with the Fracture
         cleanTempFrac = matchList(sheet.cell_value(row, 0), headers_fracture.keys())
         if cleanTempFrac:
@@ -1951,7 +1951,7 @@ def sheetPropMech(sheet, DATA_PROP, myXSDtree, jobDir):
             tenM = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             tenM = addKVU('TensileModulus', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], tenM, jobDir, myXSDtree)
             if len(tenM) > 0:
                 temp.append(tenM)
@@ -1960,7 +1960,7 @@ def sheetPropMech(sheet, DATA_PROP, myXSDtree, jobDir):
             tenB = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             tenB = addKVU('TensileStressAtBreak', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], tenB, jobDir, myXSDtree)
             if len(tenB) > 0:
                 temp.append(tenB)
@@ -1969,7 +1969,7 @@ def sheetPropMech(sheet, DATA_PROP, myXSDtree, jobDir):
             tenY = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             tenY = addKVU('TensileStressAtYield', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], tenY, jobDir, myXSDtree)
             if len(tenY) > 0:
                 temp.append(tenY)
@@ -1978,7 +1978,7 @@ def sheetPropMech(sheet, DATA_PROP, myXSDtree, jobDir):
             tenT = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             tenT = addKVU('TensileToughness', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], tenT, jobDir, myXSDtree)
             if len(tenT) > 0:
                 temp.append(tenT)
@@ -1987,7 +1987,7 @@ def sheetPropMech(sheet, DATA_PROP, myXSDtree, jobDir):
             eloB = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             eloB = addKVU('ElongationAtBreak', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], eloB, jobDir, myXSDtree)
             if len(eloB) > 0:
                 temp.append(eloB)
@@ -1996,7 +1996,7 @@ def sheetPropMech(sheet, DATA_PROP, myXSDtree, jobDir):
             eloY = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             eloY = addKVU('ElongationAtYield', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], eloY, jobDir, myXSDtree)
             if len(eloY) > 0:
                 temp.append(eloY)
@@ -2005,7 +2005,7 @@ def sheetPropMech(sheet, DATA_PROP, myXSDtree, jobDir):
             fibM = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             fibM = addKVU('FiberTensileModulus', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], fibM, jobDir, myXSDtree)
             if len(fibM) > 0:
                 temp.append(fibM)
@@ -2014,7 +2014,7 @@ def sheetPropMech(sheet, DATA_PROP, myXSDtree, jobDir):
             fibS = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             fibS = addKVU('FiberTensileStrength', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], fibS, jobDir, myXSDtree)
             if len(fibS) > 0:
                 temp.append(fibS)
@@ -2023,7 +2023,7 @@ def sheetPropMech(sheet, DATA_PROP, myXSDtree, jobDir):
             fibE = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             fibE = addKVU('FiberTensileElongation', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], fibE, jobDir, myXSDtree)
             if len(fibE) > 0:
                 temp.append(fibE)
@@ -2036,7 +2036,7 @@ def sheetPropMech(sheet, DATA_PROP, myXSDtree, jobDir):
             fleM = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             fleM = addKVU('FlexuralModulus', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], fleM, jobDir, myXSDtree)
             if len(fleM) > 0:
                 temp.append(fleM)
@@ -2045,7 +2045,7 @@ def sheetPropMech(sheet, DATA_PROP, myXSDtree, jobDir):
             fleB = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             fleB = addKVU('FlexuralStressAtBreak', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], fleB, jobDir, myXSDtree)
             if len(fleB) > 0:
                 temp.append(fleB)
@@ -2054,7 +2054,7 @@ def sheetPropMech(sheet, DATA_PROP, myXSDtree, jobDir):
             fleY = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             fleY = addKVU('FlexuralStressAtYield', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], fleY, jobDir, myXSDtree)
             if len(fleY) > 0:
                 temp.append(fleY)
@@ -2063,7 +2063,7 @@ def sheetPropMech(sheet, DATA_PROP, myXSDtree, jobDir):
             fleT = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             fleT = addKVU('FlexuralToughness', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], fleT, jobDir, myXSDtree)
             if len(fleT) > 0:
                 temp.append(fleT)
@@ -2073,7 +2073,7 @@ def sheetPropMech(sheet, DATA_PROP, myXSDtree, jobDir):
             comM = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             comM = addKVU('CompressionModulus', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], comM, jobDir, myXSDtree)
             if len(comM) > 0:
                 temp.append(comM)
@@ -2082,7 +2082,7 @@ def sheetPropMech(sheet, DATA_PROP, myXSDtree, jobDir):
             comB = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             comB = addKVU('CompressionStressAtBreak', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], comB, jobDir, myXSDtree)
             if len(comB) > 0:
                 temp.append(comB)
@@ -2091,7 +2091,7 @@ def sheetPropMech(sheet, DATA_PROP, myXSDtree, jobDir):
             comY = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             comY = addKVU('CompressionStressAtYield', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], comY, jobDir, myXSDtree)
             if len(comY) > 0:
                 temp.append(comY)
@@ -2100,7 +2100,7 @@ def sheetPropMech(sheet, DATA_PROP, myXSDtree, jobDir):
             comT = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             comT = addKVU('CompressiveToughness', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], comT, jobDir, myXSDtree)
             if len(comT) > 0:
                 temp.append(comT)
@@ -2110,7 +2110,7 @@ def sheetPropMech(sheet, DATA_PROP, myXSDtree, jobDir):
             sheM = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             sheM = addKVU('ShearModulus', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], sheM, jobDir, myXSDtree)
             if len(sheM) > 0:
                 temp.append(sheM)
@@ -2119,7 +2119,7 @@ def sheetPropMech(sheet, DATA_PROP, myXSDtree, jobDir):
             sheB = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             sheB = addKVU('ShearStressAtBreak', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], sheB, jobDir, myXSDtree)
             if len(sheB) > 0:
                 temp.append(sheB)
@@ -2128,7 +2128,7 @@ def sheetPropMech(sheet, DATA_PROP, myXSDtree, jobDir):
             sheY = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             sheY = addKVU('ShearStressAtYield', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], sheY, jobDir, myXSDtree)
             if len(sheY) > 0:
                 temp.append(sheY)
@@ -2141,7 +2141,7 @@ def sheetPropMech(sheet, DATA_PROP, myXSDtree, jobDir):
             strR = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             strR = addKVU('strainRate', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], strR, jobDir, myXSDtree)
             if len(strR) > 0:
                 tempFracture.append(strR)
@@ -2163,7 +2163,7 @@ def sheetPropMech(sheet, DATA_PROP, myXSDtree, jobDir):
             izoA = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             izoA = addKVU('IZOD_Area', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], izoA, jobDir, myXSDtree)
             if len(izoA) > 0:
                 temp.append(izoA)
@@ -2172,7 +2172,7 @@ def sheetPropMech(sheet, DATA_PROP, myXSDtree, jobDir):
             izoI = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             izoI = addKVU('IZOD_ImpactEnergy', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], izoI, jobDir, myXSDtree)
             if len(izoI) > 0:
                 temp.append(izoI)
@@ -2181,7 +2181,7 @@ def sheetPropMech(sheet, DATA_PROP, myXSDtree, jobDir):
             chaI = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             chaI = addKVU('CharpyImpactEnergy', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], chaI, jobDir, myXSDtree)
             if len(chaI) > 0:
                 temp.append(chaI)
@@ -2190,7 +2190,7 @@ def sheetPropMech(sheet, DATA_PROP, myXSDtree, jobDir):
             impT = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             impT = addKVU('ImpactToughness', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], impT, jobDir, myXSDtree)
             if len(impT) > 0:
                 temp.append(impT)                
@@ -2201,7 +2201,7 @@ def sheetPropMech(sheet, DATA_PROP, myXSDtree, jobDir):
             conS = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             conS = addKVU('StrainRate', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], conS, jobDir, myXSDtree)
             if len(conS) > 0:
                 Conditions.append(conS)
@@ -2210,7 +2210,7 @@ def sheetPropMech(sheet, DATA_PROP, myXSDtree, jobDir):
             conP = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             conP = addKVU('PreLoad', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], conP, jobDir, myXSDtree)
             if len(conP) > 0:
                 Conditions.append(conP)
@@ -2233,7 +2233,7 @@ def sheetPropMech(sheet, DATA_PROP, myXSDtree, jobDir):
             harV = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             harV = addKVU('HardnessValue', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], harV, jobDir, myXSDtree)
             if len(harV) > 0:
                 temp.append(harV)   
@@ -2303,7 +2303,7 @@ def sheetPropVisc(sheet, DATA_PROP, myXSDtree, jobDir):
     prevDMA = '' # save the previous cleanDMA, "Frequency sweep", "Temperature sweep" or "Strain sweep"
     DMA_file_num = 0 # count the number of DMA file.xlsx specified by the user
 
-    for row in xrange(sheet.nrows):
+    for row in range(sheet.nrows):
         # First deal with the DMA_Test
         if matchList(sheet.cell_value(row, 0), headers.keys()) or matchList(sheet.cell_value(row, 0), headers_creep.keys()):
             if len(DMA_Test) > 0 and len(prevDMA) > 0: # update DMA_Test if it's not empty and user has selected DMA_mode
@@ -2355,7 +2355,7 @@ def sheetPropVisc(sheet, DATA_PROP, myXSDtree, jobDir):
             temP = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             temP = addKVU('temperature', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], temP, jobDir, myXSDtree)
             if len(temP) > 0:
                 DMA_Test.append(temP)
@@ -2364,7 +2364,7 @@ def sheetPropVisc(sheet, DATA_PROP, myXSDtree, jobDir):
             strR = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             strR = addKVU('strainAmplitude', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], strR, jobDir, myXSDtree)
             if len(strR) > 0:
                 DMA_Test.append(strR)
@@ -2373,7 +2373,7 @@ def sheetPropVisc(sheet, DATA_PROP, myXSDtree, jobDir):
             freQ = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             freQ = addKVU('frequency', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], freQ, jobDir, myXSDtree)
             if len(freQ) > 0:
                 DMA_Test.append(freQ)
@@ -2382,7 +2382,7 @@ def sheetPropVisc(sheet, DATA_PROP, myXSDtree, jobDir):
             dynP = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             dynP = addKVU('DynamicPropertyProfile',
                           '', '', '', '', '', myRow[1], myRow[2], dynP, jobDir, myXSDtree)
             if len(dynP) > 0:
@@ -2395,7 +2395,7 @@ def sheetPropVisc(sheet, DATA_PROP, myXSDtree, jobDir):
             myRow = sheet.row_values(row) # save the list of row_values
             if hasLen(myRow[1]):
                 masC['description'] = myRow[1]
-            if (type(myRow[2]) == str or type(myRow[2]) == unicode) and len(myRow[2]) > 0:
+            if type(myRow[2]) == str and len(myRow[2]) > 0:
                 data = read_excel_profile(myRow[2], jobDir)
                 small_dict_axis = axisInfo(data)
                 if len(small_dict_axis) > 0:
@@ -2410,7 +2410,7 @@ def sheetPropVisc(sheet, DATA_PROP, myXSDtree, jobDir):
             comS = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             comS = addKVU('CompressiveCreepRuptureStrength', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], comS, jobDir, myXSDtree)
             if len(comS) > 0:
                 temp_Creep.append(comS)
@@ -2419,7 +2419,7 @@ def sheetPropVisc(sheet, DATA_PROP, myXSDtree, jobDir):
             comT = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             comT = addKVU('CompressiveCreepRuptureTime', '', myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], comT, jobDir, myXSDtree)
             if len(comT) > 0:
                 temp_Creep.append(comT)
@@ -2428,7 +2428,7 @@ def sheetPropVisc(sheet, DATA_PROP, myXSDtree, jobDir):
             comS = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             comS = addKVU('CompressiveCreepStrain', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], comS, jobDir, myXSDtree)
             if len(comS) > 0:
                 temp_Creep.append(comS)
@@ -2440,7 +2440,7 @@ def sheetPropVisc(sheet, DATA_PROP, myXSDtree, jobDir):
             tenM = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             tenM = addKVU('TensileCreepModulus', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], tenM, jobDir, myXSDtree)
             if len(tenM) > 0:
                 temp_Creep.append(tenM)
@@ -2449,7 +2449,7 @@ def sheetPropVisc(sheet, DATA_PROP, myXSDtree, jobDir):
             tenC = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             tenC = addKVU('TensileCreepCompliance', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], tenC, jobDir, myXSDtree)
             if len(tenC) > 0:
                 temp_Creep.append(tenC) 
@@ -2458,7 +2458,7 @@ def sheetPropVisc(sheet, DATA_PROP, myXSDtree, jobDir):
             tenS = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             tenS = addKVU('TensileCreepRuptureStrength', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], tenS, jobDir, myXSDtree)
             if len(tenS) > 0:
                 temp_Creep.append(tenS)
@@ -2467,7 +2467,7 @@ def sheetPropVisc(sheet, DATA_PROP, myXSDtree, jobDir):
             tenT = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             tenT = addKVU('TensileCreepRuptureTime', '', myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], tenT, jobDir, myXSDtree)
             if len(tenT) > 0:
                 temp_Creep.append(tenT)
@@ -2476,7 +2476,7 @@ def sheetPropVisc(sheet, DATA_PROP, myXSDtree, jobDir):
             tenS = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             tenS = addKVU('TensileCreepStrain', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], tenS, jobDir, myXSDtree)
             if len(tenS) > 0:
                 temp_Creep.append(tenS)
@@ -2485,7 +2485,7 @@ def sheetPropVisc(sheet, DATA_PROP, myXSDtree, jobDir):
             fleS = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             fleS = addKVU('FlexuralCreepRuptureStrength', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], fleS, jobDir, myXSDtree)
             if len(fleS) > 0:
                 temp_Creep.append(fleS)
@@ -2494,7 +2494,7 @@ def sheetPropVisc(sheet, DATA_PROP, myXSDtree, jobDir):
             fleT = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             fleT = addKVU('FlexuralCreepRuptureTime', '', myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], fleT, jobDir, myXSDtree)
             if len(fleT) > 0:
                 temp_Creep.append(fleT)
@@ -2503,7 +2503,7 @@ def sheetPropVisc(sheet, DATA_PROP, myXSDtree, jobDir):
             fleS = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             fleS = addKVU('FlexuralCreepStrain', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], fleS, jobDir, myXSDtree)
             if len(fleS) > 0:
                 temp_Creep.append(fleS)
@@ -2531,7 +2531,7 @@ def sheetPropVisc(sheet, DATA_PROP, myXSDtree, jobDir):
     # scan for multiple DynamicPropertyProfile (DMA_file.xlsx)
     if DMA_file_num > 0:
         temp_list_new = [] # prepare a new temp_list
-        for i in xrange(len(temp_list)):
+        for i in range(len(temp_list)):
             myDict = temp_list[i]
             if 'DynamicProperties' in myDict.keys():
                 dynP_list = myDict['DynamicProperties'] # get the list of subdicts out
@@ -2539,7 +2539,7 @@ def sheetPropVisc(sheet, DATA_PROP, myXSDtree, jobDir):
                 dynPPs = [] # a list for non DynamicProperties/DynamicPropertyProfile subdicts
                 poplist = [] # a list for DPP index to be poped
                 # loop thru Description, MeasurementMode, DMA_mode, DynamicPropertyProfile ...
-                for i in xrange(len(dynP_list)):
+                for i in range(len(dynP_list)):
                     od = dynP_list[i]
                     # if we find a DPP OrderedDict
                     if 'DynamicPropertyProfile' in od.keys():
@@ -2585,7 +2585,7 @@ def sheetPropElec(sheet, DATA_PROP, myXSDtree, jobDir):
     temp_list = [] # the highest level list for PROPERTIES/Electrical
     temp = [] # always save temp if not empty when we find a match in headers
     prevTemp = '' # save the previous cleanTemp
-    for row in xrange(sheet.nrows):
+    for row in range(sheet.nrows):
         cleanTemp = matchList(sheet.cell_value(row, 0), headers.keys())
         if cleanTemp:
             if len(prevTemp) == 0: # initialize prevTemp
@@ -2602,7 +2602,7 @@ def sheetPropElec(sheet, DATA_PROP, myXSDtree, jobDir):
             eleC = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             eleC = addKVU('ElectricConductivity', myRow[1], myRow[2], myRow[3], '', '', '', myRow[4], eleC, jobDir, myXSDtree)
             if len(eleC) > 0:
                 temp_list.append(eleC) # directly append to the higher level list
@@ -2611,7 +2611,7 @@ def sheetPropElec(sheet, DATA_PROP, myXSDtree, jobDir):
             curD = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             curD = addKVU('CurrentDensity', myRow[1], myRow[2], myRow[3], '', '', '', myRow[4], curD, jobDir, myXSDtree)
             if len(curD) > 0:
                 temp_list.append(curD) # directly append to the higher level list
@@ -2620,7 +2620,7 @@ def sheetPropElec(sheet, DATA_PROP, myXSDtree, jobDir):
             eneD = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             eneD = addKVU('EnergyDensity', myRow[1], myRow[2], myRow[3], '', '', '', myRow[4], eneD, jobDir, myXSDtree)
             if len(eneD) > 0:
                 temp_list.append(eneD) # directly append to the higher level list
@@ -2629,7 +2629,7 @@ def sheetPropElec(sheet, DATA_PROP, myXSDtree, jobDir):
             surR = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             surR = addKVU('SurfaceResistivity', myRow[1], myRow[2], myRow[3], '', '', '', myRow[4], surR, jobDir, myXSDtree)
             if len(surR) > 0:
                 temp_list.append(surR) # directly append to the higher level list
@@ -2638,7 +2638,7 @@ def sheetPropElec(sheet, DATA_PROP, myXSDtree, jobDir):
             volR = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             volR = addKVU('VolumeResistivity', myRow[1], myRow[2], myRow[3], '', '', '', myRow[4], volR, jobDir, myXSDtree)
             if len(volR) > 0:
                 temp_list.append(volR) # directly append to the higher level list
@@ -2647,7 +2647,7 @@ def sheetPropElec(sheet, DATA_PROP, myXSDtree, jobDir):
             arcR = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             arcR = addKVU('ArcResistance', myRow[1], myRow[2], myRow[3], '', '', '', myRow[4], arcR, jobDir, myXSDtree)
             if len(arcR) > 0:
                 temp_list.append(arcR) # directly append to the higher level list
@@ -2656,7 +2656,7 @@ def sheetPropElec(sheet, DATA_PROP, myXSDtree, jobDir):
             impE = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             impE = addKVU('Impedance', myRow[1], myRow[2], myRow[3], '', '', '', myRow[4], impE, jobDir, myXSDtree)
             if len(impE) > 0:
                 temp_list.append(impE) # directly append to the higher level list
@@ -2665,7 +2665,7 @@ def sheetPropElec(sheet, DATA_PROP, myXSDtree, jobDir):
             perT = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             perT = addKVU('ElectricPercolationThreshold', myRow[1], myRow[2], myRow[3], '', '', '', myRow[4], perT, jobDir, myXSDtree)
             if len(perT) > 0:
                 temp_list.append(perT) # directly append to the higher level list
@@ -2674,7 +2674,7 @@ def sheetPropElec(sheet, DATA_PROP, myXSDtree, jobDir):
             dcdC = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             dcdC = addKVU('DC_DielectricConstant', myRow[1], myRow[2], myRow[3], '', '', '', myRow[4], dcdC, jobDir, myXSDtree)
             if len(dcdC) > 0:
                 temp_list.append(dcdC) # directly append to the higher level list
@@ -2688,7 +2688,7 @@ def sheetPropElec(sheet, DATA_PROP, myXSDtree, jobDir):
             reaP = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             reaP = addKVU('Dielectric_Real_Permittivity', myRow[1], myRow[2], myRow[3], '', '', '', myRow[4], reaP, jobDir, myXSDtree)
             if len(reaP) > 0:
                 temp.append(reaP)
@@ -2697,7 +2697,7 @@ def sheetPropElec(sheet, DATA_PROP, myXSDtree, jobDir):
             losP = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             losP = addKVU('Dielectric_Loss_Permittivity', myRow[1], myRow[2], myRow[3], '', '', '', myRow[4], losP, jobDir, myXSDtree)
             if len(losP) > 0:
                 temp.append(losP)
@@ -2706,7 +2706,7 @@ def sheetPropElec(sheet, DATA_PROP, myXSDtree, jobDir):
             losT = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             losT = addKVU('Dielectric_Loss_Tangent', myRow[1], myRow[2], myRow[3], '', '', '', myRow[4], losT, jobDir, myXSDtree)
             if len(losT) > 0:
                 temp.append(losT)
@@ -2723,7 +2723,7 @@ def sheetPropElec(sheet, DATA_PROP, myXSDtree, jobDir):
             wePl = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             wePl = addKVU('WeibullPlot', '', '', '', '', '', myRow[1], myRow[2], wePl, jobDir, myXSDtree)
             if len(wePl) > 0:
                 temp.append(wePl)
@@ -2732,7 +2732,7 @@ def sheetPropElec(sheet, DATA_PROP, myXSDtree, jobDir):
             weiP = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             weiP = addKVU('WeibullParameter', '',
                           myRow[1], myRow[2], myRow[3], myRow[4], '', '', weiP, jobDir, myXSDtree)
             if len(weiP) > 0:
@@ -2772,7 +2772,7 @@ def sheetPropTher(sheet, DATA_PROP, myXSDtree, jobDir):
     temp_list = [] # the highest level list for PROPERTIES/Thermal
     temp = [] # always save temp if not empty when we find a match in headers
     prevTemp = '' # save the previous cleanTemp
-    for row in xrange(sheet.nrows):
+    for row in range(sheet.nrows):
         cleanTemp = matchList(sheet.cell_value(row, 0), headers.keys())
         if cleanTemp:
             if len(prevTemp) == 0: # initialize prevTemp
@@ -2801,7 +2801,7 @@ def sheetPropTher(sheet, DATA_PROP, myXSDtree, jobDir):
             degC = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             degC = addKVU('DegreeOfCrystallization', myRow[1],
                           myRow[2], myRow[3], myRow[4], myRow[5],
                           '', myRow[6], degC, jobDir, myXSDtree)
@@ -2812,7 +2812,7 @@ def sheetPropTher(sheet, DATA_PROP, myXSDtree, jobDir):
             groC = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             groC = addKVU('GrowthRateOfCrystal', myRow[1],
                           myRow[2], myRow[3], myRow[4], myRow[5],
                           '', myRow[6], groC, jobDir, myXSDtree)
@@ -2823,7 +2823,7 @@ def sheetPropTher(sheet, DATA_PROP, myXSDtree, jobDir):
             groA = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             groA = addKVU('GrowthRateParameterOfAvramiEquation', myRow[1],
                           myRow[2], myRow[3], myRow[4], myRow[5],
                           '', myRow[6], groA, jobDir, myXSDtree)
@@ -2834,7 +2834,7 @@ def sheetPropTher(sheet, DATA_PROP, myXSDtree, jobDir):
             nucA = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             nucA = addKVU('NucleationParameterOfAvramiEquation', myRow[1],
                           myRow[2], myRow[3], myRow[4], myRow[5],
                           '', myRow[6], nucA, jobDir, myXSDtree)
@@ -2845,7 +2845,7 @@ def sheetPropTher(sheet, DATA_PROP, myXSDtree, jobDir):
             halC = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             halC = addKVU('HalflifeOfCrystallization', myRow[1],
                           myRow[2], myRow[3], myRow[4], myRow[5],
                           '', myRow[6], halC, jobDir, myXSDtree)
@@ -2856,7 +2856,7 @@ def sheetPropTher(sheet, DATA_PROP, myXSDtree, jobDir):
             cryT = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             cryT = addKVU('CrystalizationTemperature', myRow[1],
                           myRow[2], myRow[3], myRow[4], myRow[5],
                           '', myRow[6], cryT, jobDir, myXSDtree)
@@ -2867,7 +2867,7 @@ def sheetPropTher(sheet, DATA_PROP, myXSDtree, jobDir):
             heaC = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             heaC = addKVU('HeatOfCrystallization', myRow[1],
                           myRow[2], myRow[3], myRow[4], myRow[5],
                           '', myRow[6], heaC, jobDir, myXSDtree)
@@ -2878,7 +2878,7 @@ def sheetPropTher(sheet, DATA_PROP, myXSDtree, jobDir):
             heaF = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             heaF = addKVU('HeatOfFusion', myRow[1],
                          myRow[2], myRow[3], myRow[4], myRow[5],
                          '', myRow[6], heaF, jobDir, myXSDtree)
@@ -2889,7 +2889,7 @@ def sheetPropTher(sheet, DATA_PROP, myXSDtree, jobDir):
             theT = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             theT = addKVU('ThermalDecompositionTemperature', myRow[1],
                           myRow[2], myRow[3], myRow[4], myRow[5],
                           '', myRow[6], theT, jobDir, myXSDtree)
@@ -2900,7 +2900,7 @@ def sheetPropTher(sheet, DATA_PROP, myXSDtree, jobDir):
             glaT = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             glaT = addKVU('GlassTransitionTemperature', myRow[1],
                           myRow[2], myRow[3], myRow[4], myRow[5],
                           '', myRow[6], glaT, jobDir, myXSDtree)
@@ -2911,7 +2911,7 @@ def sheetPropTher(sheet, DATA_PROP, myXSDtree, jobDir):
             lcpT = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             lcpT = addKVU('LC_PhaseTransitionTemperature', myRow[1],
                           myRow[2], myRow[3], myRow[4], myRow[5],
                           '', myRow[6], lcpT, jobDir, myXSDtree)
@@ -2922,7 +2922,7 @@ def sheetPropTher(sheet, DATA_PROP, myXSDtree, jobDir):
             melT = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             melT = addKVU('MeltingTemperature', myRow[1],
                           myRow[2], myRow[3], myRow[4], myRow[5],
                           '', myRow[6], melT, jobDir, myXSDtree)
@@ -2933,7 +2933,7 @@ def sheetPropTher(sheet, DATA_PROP, myXSDtree, jobDir):
             speP = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             speP = addKVU('SpecificHeatCapacity_Cp', myRow[1],
                           myRow[2], myRow[3], myRow[4], myRow[5],
                           '', myRow[6], speP, jobDir, myXSDtree)
@@ -2944,7 +2944,7 @@ def sheetPropTher(sheet, DATA_PROP, myXSDtree, jobDir):
             speV = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             speV = addKVU('SpecificHeatCapacity_Cv', myRow[1],
                           myRow[2], myRow[3], myRow[4], myRow[5],
                           '', myRow[6], speV, jobDir, myXSDtree)
@@ -2955,7 +2955,7 @@ def sheetPropTher(sheet, DATA_PROP, myXSDtree, jobDir):
             theC = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             theC = addKVU('ThermalConductivity', myRow[1],
                           myRow[2], myRow[3], myRow[4], myRow[5],
                           '', myRow[6], theC, jobDir, myXSDtree)
@@ -2966,7 +2966,7 @@ def sheetPropTher(sheet, DATA_PROP, myXSDtree, jobDir):
             theD = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             theD = addKVU('ThermalDiffusivity', myRow[1],
                           myRow[2], myRow[3], myRow[4], myRow[5],
                           '', myRow[6], theD, jobDir, myXSDtree)
@@ -2977,7 +2977,7 @@ def sheetPropTher(sheet, DATA_PROP, myXSDtree, jobDir):
             briT = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             briT = addKVU('BrittleTemperature', myRow[1],
                           myRow[2], myRow[3], myRow[4], myRow[5],
                           '', myRow[6], briT, jobDir, myXSDtree)
@@ -3010,7 +3010,7 @@ def sheetPropVolu(sheet, DATA_PROP, myXSDtree, jobDir):
                'Water absorption': 'WaterAbsorption'}
     temp_list = [] # the highest level list for PROPERTIES/Volumetric
     prevTemp = '' # save the previous cleanTemp
-    for row in xrange(sheet.nrows):
+    for row in range(sheet.nrows):
         cleanTemp = matchList(sheet.cell_value(row, 0), headers.keys())
         if cleanTemp:
             if len(prevTemp) == 0: # initialize prevTemp
@@ -3021,7 +3021,7 @@ def sheetPropVolu(sheet, DATA_PROP, myXSDtree, jobDir):
             weiL = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             weiL = addKVU('WeightLoss', myRow[1],
                           myRow[2], myRow[3], myRow[4], myRow[5],
                           '', myRow[6], weiL, jobDir, myXSDtree)
@@ -3032,7 +3032,7 @@ def sheetPropVolu(sheet, DATA_PROP, myXSDtree, jobDir):
             intT = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             intT = addKVU('InterphaseThickness', myRow[1],
                           myRow[2], myRow[3], myRow[4], myRow[5],
                           '', myRow[6], intT, jobDir, myXSDtree)
@@ -3043,7 +3043,7 @@ def sheetPropVolu(sheet, DATA_PROP, myXSDtree, jobDir):
             denS = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             denS = addKVU('Density', myRow[1],
                           myRow[2], myRow[3], myRow[4], myRow[5],
                           '', myRow[6], denS, jobDir, myXSDtree)
@@ -3054,7 +3054,7 @@ def sheetPropVolu(sheet, DATA_PROP, myXSDtree, jobDir):
             linC = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             linC = addKVU('LinearExpansionCoefficient', myRow[1],
                           myRow[2], myRow[3], myRow[4], myRow[5],
                           '', myRow[6], linC, jobDir, myXSDtree)
@@ -3065,7 +3065,7 @@ def sheetPropVolu(sheet, DATA_PROP, myXSDtree, jobDir):
             volC = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             volC = addKVU('VolumeExpansionCoefficient', myRow[1],
                           myRow[2], myRow[3], myRow[4], myRow[5],
                           '', myRow[6], volC, jobDir, myXSDtree)
@@ -3076,7 +3076,7 @@ def sheetPropVolu(sheet, DATA_PROP, myXSDtree, jobDir):
             surT = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             surT = addKVU('SurfaceTension', myRow[1],
                           myRow[2], myRow[3], myRow[4], myRow[5],
                           '', myRow[6], surT, jobDir, myXSDtree)
@@ -3087,7 +3087,7 @@ def sheetPropVolu(sheet, DATA_PROP, myXSDtree, jobDir):
             intT = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             intT = addKVU('InterfacialTension', myRow[1],
                           myRow[2], myRow[3], myRow[4], myRow[5],
                           '', myRow[6], intT, jobDir, myXSDtree)
@@ -3098,7 +3098,7 @@ def sheetPropVolu(sheet, DATA_PROP, myXSDtree, jobDir):
             watA = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             watA = addKVU('WaterAbsorption', myRow[1],
                           myRow[2], myRow[3], myRow[4], myRow[5],
                           '', myRow[6], watA, jobDir, myXSDtree)
@@ -3124,7 +3124,7 @@ def sheetPropRheo(sheet, DATA_PROP, myXSDtree, jobDir):
     DMA_Test = [] # a list for Rheological/.../RheometerMode/.../condition
     prevTemp = '' # save the previous cleanTemp, "Complex Modulus" or "Viscosity"
     prevDMA = '' # save the previous cleanDMA, "Frequency sweep", "Temperature sweep" or "Strain sweep"
-    for row in xrange(sheet.nrows):
+    for row in range(sheet.nrows):
         # First deal with the DMA_Test
         if matchList(sheet.cell_value(row, 0), headers.keys()):
             if len(DMA_Test) > 0 and len(prevDMA) > 0: # update DMA_Test if it's not empty and user has selected DMA_mode
@@ -3154,7 +3154,7 @@ def sheetPropRheo(sheet, DATA_PROP, myXSDtree, jobDir):
             temP = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             temP = addKVU('temperature', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], temP, jobDir, myXSDtree)
             if len(temP) > 0:
                 DMA_Test.append(temP)
@@ -3163,7 +3163,7 @@ def sheetPropRheo(sheet, DATA_PROP, myXSDtree, jobDir):
             strR = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             strR = addKVU('strainAmplitude', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], strR, jobDir, myXSDtree)
             if len(strR) > 0:
                 DMA_Test.append(strR)
@@ -3172,7 +3172,7 @@ def sheetPropRheo(sheet, DATA_PROP, myXSDtree, jobDir):
             freQ = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             freQ = addKVU('frequency', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], freQ, jobDir, myXSDtree)
             if len(freQ) > 0:
                 DMA_Test.append(freQ)
@@ -3181,7 +3181,7 @@ def sheetPropRheo(sheet, DATA_PROP, myXSDtree, jobDir):
             rheS = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             rheS = addKVU('RheologicalStorageModulus',
                           '', '', '', '', '', myRow[1], myRow[2], rheS, jobDir, myXSDtree)
             if len(rheS) > 0:
@@ -3191,7 +3191,7 @@ def sheetPropRheo(sheet, DATA_PROP, myXSDtree, jobDir):
             rheL = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             rheL = addKVU('RheologicalLossModulus',
                           '', '', '', '', '', myRow[1], myRow[2], rheL, jobDir, myXSDtree)
             if len(rheL) > 0:
@@ -3201,7 +3201,7 @@ def sheetPropRheo(sheet, DATA_PROP, myXSDtree, jobDir):
             rheT = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             rheT = addKVU('RheologicalLossTangent',
                           '', '', '', '', '', myRow[1], myRow[2], rheT, jobDir, myXSDtree)
             if len(rheT) > 0:
@@ -3213,7 +3213,7 @@ def sheetPropRheo(sheet, DATA_PROP, myXSDtree, jobDir):
             myRow = sheet.row_values(row) # save the list of row_values
             if hasLen(myRow[1]):
                 masC['description'] = myRow[1]
-            if (type(myRow[2]) == str or type(myRow[2]) == unicode) and len(myRow[2]) > 0:
+            if type(myRow[2]) == str and len(myRow[2]) > 0:
                 data = read_excel_profile(myRow[2], jobDir)
                 small_dict_axis = axisInfo(data)
                 if len(small_dict_axis) > 0:
@@ -3228,7 +3228,7 @@ def sheetPropRheo(sheet, DATA_PROP, myXSDtree, jobDir):
             dynV = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             dynV = addKVU('DynamicViscosity', myRow[1],
                           myRow[2], myRow[3], myRow[4], myRow[5],
                           '', myRow[6], dynV, jobDir, myXSDtree)
@@ -3239,7 +3239,7 @@ def sheetPropRheo(sheet, DATA_PROP, myXSDtree, jobDir):
             melV = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             melV = addKVU('MeltViscosity', myRow[1],
                           myRow[2], myRow[3], myRow[4], myRow[5],
                           '', myRow[6], melV, jobDir, myXSDtree)
@@ -3274,7 +3274,7 @@ def sheetMicrostructure(sheet, DATA, myXSDtree, jobDir):
     temp = [] # always save temp if not empty when we find a match in headers
     Dimension = [] # a list for image dimension
     prevTemp = '' # save the previous cleanTemp
-    for row in xrange(sheet.nrows):
+    for row in range(sheet.nrows):
         cleanTemp = matchList(sheet.cell_value(row, 0), headers.keys())
         if cleanTemp:
             if len(prevTemp) == 0: # initialize prevTemp
@@ -3339,7 +3339,7 @@ def sheetMicrostructure(sheet, DATA, myXSDtree, jobDir):
             samS = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             samS = addKVU('SampleSize', '', myRow[1], myRow[2], '', '', '', '', samS, jobDir, myXSDtree)
             if len(samS) > 0:
                 temp.append(samS)
@@ -3348,7 +3348,7 @@ def sheetMicrostructure(sheet, DATA, myXSDtree, jobDir):
             samT = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
-                myRow.append(unicode('')) # prevent IndexError
+                myRow.append('') # prevent IndexError
             samT = addKVU('SampleThickness', '', myRow[1], myRow[2], '', '', '', '', samT, jobDir, myXSDtree)
             if len(samT) > 0:
                 temp.append(samT)
@@ -3378,7 +3378,7 @@ def sheetMicrostructure(sheet, DATA, myXSDtree, jobDir):
 def compiler(jobDir, code_srcDir, xsdDir, templateName, restbase):
     ## Global variable myXSDtree
     # read the xsd tree
-    myXSDtree = ET.parse(xsdDir)
+    myXSDtree = etree.parse(xsdDir)
     # DATA containers
     DATA = [] # the list that will finally be turned into a dict for dicttoxml
     DATA_PROP = [] # the list for the PROPERTIES section
@@ -3435,10 +3435,10 @@ def compiler(jobDir, code_srcDir, xsdDir, templateName, restbase):
     # using dicttoxml library to convert dictionary to xml
     diffusionDataxml = dicttoxml.dicttoxml(diffusionData,custom_root='PolymerNanocomposite',attr_type=False)
     # need to remove all <item> and </item> and <item > in the xml
-    diffusionDataxml = diffusionDataxml.replace('<item>', '').replace('</item>', '').replace('<item >', '')
-    # load xmlstring into ET
-    tree = ET.ElementTree()
-    root = ET.fromstring(diffusionDataxml)
+    diffusionDataxml = diffusionDataxml.replace(b'<item>', b'').replace(b'</item>', b'').replace(b'<item/>',b'').replace(b'<item >', b'')
+    # load xmlstring into etree
+    tree = etree.ElementTree()
+    root = etree.XML(diffusionDataxml)
     tree._setroot(root)
     # make directory for xml output
     os.mkdir(jobDir + '/xml')

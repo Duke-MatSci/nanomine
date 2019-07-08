@@ -1,12 +1,12 @@
 import os
 import sys
-import urllib2
+import urllib.request
 import ssl
 import time
 import json
 import traceback
 
-# rest_request takes a urllib2 request and executes it after requesting a new access token for the
+# rest_request takes a urllib.request and executes it after requesting a new access token for the
 #   service being requested
 class nm_rest:
   def __init__(self, logger, sysToken=None, apiToken=None, refreshToken=None, urllib2req=None):
@@ -16,7 +16,7 @@ class nm_rest:
     self.refreshToken = refreshToken
     self.accessToken = None
     self.accessExpiration = None
-    self.callerReq = urllib2req # caller's urllib2 request
+    self.callerReq = urllib2req # caller's urllib.request
     self.refreshUrl = '/nmr/refreshtoken'
     self.baseUrl = os.environ['NM_LOCAL_REST_BASE']
     self.logger.debug('nm_rest init. sysToken = %s, apiToken = %s, refreshToken = %s' % (self.sysToken, self.apiToken, self.refreshToken) )
@@ -36,10 +36,10 @@ class nm_rest:
       "refreshToken": self.refreshToken
       }
       self.logger.debug('refreshData: %s' % refreshData)
-      atReq = urllib2.Request(self.baseUrl + self.refreshUrl)
+      atReq = urllib.request.Request(self.baseUrl + self.refreshUrl)
       atReq.add_header('Content-Type','application/json')
       try:
-        r = urllib2.urlopen(atReq, json.dumps(refreshData), context=ssl._create_unverified_context())
+        r = urllib.request.urlopen(atReq, json.dumps(refreshData), context=ssl._create_unverified_context())
         sdata = r.read()
         self.logger.debug('access token: ' + sdata)
         data = json.loads(sdata)['data']
@@ -51,5 +51,5 @@ class nm_rest:
 
      # now, execute the original request with the correct bearer token
     self.callerReq.add_header('Authentication', 'Bearer ' + self.accessToken)
-    rv = urllib2.urlopen(self.callerReq, rqData, context=ssl._create_unverified_context())
+    rv = urllib.request.urlopen(self.callerReq, rqData, context=ssl._create_unverified_context())
     return rv
