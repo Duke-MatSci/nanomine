@@ -152,7 +152,7 @@ def conversion(jobDir, code_srcDir, xsdDir, templateName, user):
         # rest call for schemaID
         schemaurl = restbase + '/nmr/templates/select?filename='+xsdFilename
         rq = urllib.request.Request(schemaurl)
-        j = json.loads(urllib.request.urlopen(rq, context=ssl._create_unverified_context()).read())
+        j = json.loads(urllib.request.urlopen(rq, context=ssl._create_unverified_context()).read().decode("utf-8"))
         schemaId = j["data"][0]["_id"]
         # upload input files and image files referenced in xml
         uploadFilesAndAdjustXMLImageRefs(jobDir, schemaId, ID)
