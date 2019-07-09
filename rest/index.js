@@ -17,7 +17,6 @@ const mimetypes = require('mime-types')
 // was used for posting to rdf - const FormData = require('form-data')
 const config = require('config').get('nanomine')
 
-// const winston = require('winston')
 const {createLogger, format, transports} = require('winston')
 const { combine, label, printf, prettyPrint } = format
 const logFormat = printf(({level, message, label}) => {
@@ -41,6 +40,7 @@ const jwt = require('express-jwt')
 const shortUUID = require('short-uuid')() // https://github.com/oculus42/short-uuid (npm i --save short-uuid)
 const groupMgr = require('./modules/groupMgr').groupmgr
 const s2a = require('stream-to-array')
+const libxml = require('libxmljs')
 
 const nanomineUtils = require('./modules/utils')
 let matchValidXmlTitle = nanomineUtils.matchValidXmlTitle
@@ -223,13 +223,17 @@ app.use(jwt({
 }))
 
 /* BEGIN Api Authorization */
-
+let allMethods = ['connect', 'delete', 'get', 'head', 'options', 'patch', 'post', 'put', 'trace']
 let authOptions = {
   protect: [
     // path is req.path, loginAuth is whether logged in users(jwtToken via cookie) have access and apiAuth allows access using api tokens
     //   loginAuth also forces group membership check if membership is set - empty membership === any or no group OK
+    // NOTE: need to add applicable methods for a path and associate different rules for a path with multiple method filters
+    //    If a method is not listed, then the path is NOT protected for that method
+    //    The set of all path+methodlist entries should cover all possible combinations for which security is required
+    //    The methods field is NOT currently being used but it will be needed
     // not yet    { path: '/dataset/create', loginAuth: false, membership: [], apiAuth: true, apiGroup: 'curate' },
-    {path: '/curate', loginAuth: false, membership: [], apiAuth: true, apiGroup: 'curate'},
+    {path: '/curate', methods: allMethods, loginAuth: false, membership: [], apiAuth: true, apiGroup: 'curate'},
     {path: '/datasets', loginAuth: true, membership: [], apiAuth: true, apiGroup: 'curate'},
     {path: '/jobemail', loginAuth: false, membership: [], apiAuth: true, apiGroup: 'email'},
     {path: '/jobcreate', loginAuth: true, membership: [], apiAuth: true, apiGroup: 'jobs'},
@@ -238,6 +242,7 @@ let authOptions = {
     {path: '/publishfiles2rdf', loginAuth: false, membership: ['admin'], apiAuth: true, apiGroup: 'curate'},
     {path: '/publishxml2rdf', loginAuth: false, membership: ['admin'], apiAuth: true, apiGroup: 'curate'},
     {path: '/sessiontest', loginAuth: true, membership: [], apiAuth: false, apiGroup: 'none'},
+    {path: '/schema', loginAuth: true, membership: ['admin'], apiAuth: false, apiGroup: 'none'},
     {path: '/testpubfiles2rdf', loginAuth: true, membership: ['admin'], apiAuth: true, apiGroup: 'curate'},
     {path: '/testpubschema2rdf', loginAuth: true, membership: ['admin'], apiAuth: true, apiGroup: 'curate'},
     {path: '/testpubxml2rdf', loginAuth: true, membership: ['admin'], apiAuth: true, apiGroup: 'curate'},
@@ -1594,6 +1599,37 @@ function validQueryParam (p) {
   }
   return rv
 }
+
+function saveSchema (filename, xsd) {
+  let m = filename.match(/(.*)(\.xsd|\.xml)/)
+  // let templatename = (m !== null ? m[1] : filename)
+  return new Promise(function (resolve, reject) {
+    resolve({'fun': 'data'})
+  })
+}
+
+app.post('/schema', function (req, res, next) {
+  let jsonResp = {'error': null, 'data': null}
+  let filename = req.body.filename
+  let xsd = req.body.data
+  // eslint-disable-next-line no-unused-vars
+  let xsdDoc = null
+  try {
+    xsdDoc = libxml.parseXml(xsd)
+    saveSchema(filename, xsd)
+      .then(function (resp) {
+        jsonResp.data = resp
+        res.status(201).json(jsonResp)
+      })
+      .catch(function (err) {
+        jsonResp.error = 'error storing schema - ' + filename + '. error: ' + err
+        res.status(500).json(jsonResp)
+      })
+  } catch (err) {
+    jsonResp.error = 'Unable to translate schema. Error: ' + err
+    res.status(400).json(jsonResp)
+  }
+})
 
 app.get('/templates/select/all', function (req, res) { // it's preferable to read only the current non deleted schemas rather than all
   let jsonResp = {'error': null, 'data': null}

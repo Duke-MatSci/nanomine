@@ -33,7 +33,25 @@
           </v-card-title>
           <span v-show="showAdmin">
           <div class="sect-divider"></div>
-          <h5>Become User...</h5>
+          <h5>Schema Management ...</h5>
+            <v-layout row wrap>
+              <v-card flat>
+                <v-card-text class="title font-weight-light">Upload schema</v-card-text>
+                <v-divider/>
+                <v-btn class="text-xs-left" small color="primary" @click='selectSchemaFile'>Browse</v-btn>
+                <input
+                  type="file"
+                  style="display: none"
+                  accept=".xsd"
+                  ref="schemaFileRef"
+                  @change="onSchemaSelected"
+                >
+
+                <v-card-text class="body">Selected: {{schemaFileName}}</v-card-text>
+              </v-card>
+            </v-layout>
+          <div class="sect-divider"></div>
+          <h5>Become User ...</h5>
           <v-data-table
             v-model="userselected"
             :headers="userheaders"
@@ -156,21 +174,21 @@
         <v-card style="width:100%;" v-show="datasetSelected !== null">
           <v-card-title class="samples-header"><span style="width:50%;" class="text-xs-left">
             <v-btn
-            fab small
-            color="primary"
-            class="white--text"
-            @click="toggleSamplesHide"
-          >
+              fab small
+              color="primary"
+              class="white--text"
+              @click="toggleSamplesHide"
+            >
             <v-icon light v-if="!samplesHideSelector">expand_more</v-icon>
             <v-icon light v-else>expand_less</v-icon>
 
            </v-btn>Samples</span>
-           <span class="text-xs-right" style="width:50%;" v-show="sampleSelected !== null">
-             <v-btn  v-if="sampleFileinfo.length > 0"
-               fab small
-               color="primary"
-               class="white--text"
-               @click="sampleFilesDialogActive = true"
+            <span class="text-xs-right" style="width:50%;" v-show="sampleSelected !== null">
+             <v-btn v-if="sampleFileinfo.length > 0"
+                    fab small
+                    color="primary"
+                    class="white--text"
+                    @click="sampleFilesDialogActive = true"
              >
              <v-icon light>cloud_download</v-icon>
              </v-btn>
@@ -217,7 +235,7 @@
             </v-alert>
           </v-data-table>
         </v-card>
-        <v-card  style="width:100%;" v-show="sampleSelected !== null">
+        <v-card style="width:100%;" v-show="sampleSelected !== null">
           <v-container v-bind:style="{'display': formInView}" fluid justify-start fill-height>
             <v-layout row wrap align-start fill-height>
               <v-flex fill-height xs12 align-start justify-start>
@@ -312,6 +330,9 @@ export default {
       showAdmin: false,
       myPageError: false,
       myPageErrorMsg: '',
+      // Schemas
+      schemaFileText: '',
+      schemaFileName: '',
       // Users
       userall: true,
       userpagination: {
@@ -443,6 +464,33 @@ export default {
     }
   },
   methods: {
+    selectSchemaFile () {
+      this.$refs.schemaFileRef.click()
+    },
+
+    resetSelectedSchema: function () {
+      let vm = this
+      vm.schemaFileText = ''
+      vm.schemaFileName = ''
+    },
+
+    onSchemaSelected (e) {
+      let vm = this
+      vm.resetSelectedSchema()
+      const files = e.target.files
+      let f = files[0]
+      if (f !== undefined) {
+        vm.schemaFileName = f.name
+        const fr = new FileReader()
+        fr.readAsText(f)
+        fr.addEventListener('load', () => {
+          vm.schemaFileText = fr.result
+          console.log(vm.schemaFileText)
+        })
+      } else {
+        this.resetSelectedSchema()
+      }
+    },
     isLoggedIn: function () {
       let vm = this
       return vm.auth.isLoggedIn()
@@ -705,9 +753,11 @@ export default {
     background-color: black;
     color: white;
   }
+
   p {
     margin-bottom: 2px;
   }
+
   .warn-red {
     background-color: red;
     color: white;
@@ -717,9 +767,9 @@ export default {
   .sect-divider {
     height: 5px;
     background-color: #2ff2ff;
-    padding-top:2px;
-    padding-bottom:2px;
-    width:100%;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    width: 100%;
   }
 
   .admin-header {
@@ -742,12 +792,14 @@ export default {
     font-size: 22px;
     font-weight: bold;
   }
+
   .sample-file-download-header {
     background-color: #03A9F4;
     color: #ffffff;
     font-size: 22px;
     font-weight: bold;
   }
+
   .download-footer {
     background-color: #03A9F4;
     color: #000000;
