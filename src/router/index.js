@@ -1,16 +1,22 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Admin from '@/components/Admin'
-import NanoMine from '@/components/NanoMine'
+import BinarizeHomepage from '@/components/BinarizeHomepage'
 import Database from '@/components/Database'
 // import Insight from '@/components/Insight'
+import Contact from '@/components/Contact'
+import Dynamfit from '@/components/Dynamfit'
+import DynamfitExample from '@/components/DynamfitExample'
+import DynamfitExampleInput from '@/components/DynamfitExampleInput'
+import DynamfitResult from '@/components/DynamfitResult'
 import ModuleTools from '@/components/ModuleTools'
 import MyPage from '@/components/MyPage'
+import NanoMine from '@/components/NanoMine'
+import PixelUnit from '@/components/metamine/PixelUnit'
 import SimTools from '@/components/SimTools'
 import XMLCONV from '@/components/XMLCONV'
 // import NmEditor from '@/components/Editor'
 import McrHomepage from '@/components/McrHomepage'
-import BinarizeHomepage from '@/components/BinarizeHomepage'
 import Otsu from '@/components/Otsu'
 import OtsuResult from '@/components/OtsuResult'
 import Niblack from '@/components/Niblack'
@@ -30,11 +36,6 @@ import SDFReconstructResults from '@/components/SDFReconstructResults'
 import CorrelationReconstructResults from '@/components/CorrelationReconstructResults'
 import DescriptorReconstructResults from '@/components/DescriptorReconstructResults'
 import ViewData from '@/components/ViewData'
-import Contact from '@/components/Contact'
-import Dynamfit from '@/components/Dynamfit'
-import DynamfitExample from '@/components/DynamfitExample'
-import DynamfitExampleInput from '@/components/DynamfitExampleInput'
-import DynamfitResult from '@/components/DynamfitResult'
 
 Vue.use(Router)
 
@@ -127,6 +128,11 @@ export default new Router({
       path: '/Niblack',
       name: 'Niblack',
       component: Niblack
+    },
+    {
+      path: '/mm/pixelunit',
+      name: 'PixelUnit',
+      component: PixelUnit
     },
     {
       path: '/CorrelationCharacterize',
