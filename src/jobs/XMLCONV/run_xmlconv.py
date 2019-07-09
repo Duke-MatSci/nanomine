@@ -102,7 +102,7 @@ try:
   rq.add_header('Content-Type','application/json')
   nmEmail = nm_rest(logging, sysToken, emailApiToken, emailRefreshToken, rq)
   ## r = urllib.request.urlopen(rq, json.dumps(emaildata))
-  r = nmEmail.urlopen(json.dumps(emaildata))
+  r = nmEmail.urlopen(json.dumps(emaildata).encode("utf8"))
   logging.info('sent ' + status + ' email: ' + str(r.getcode()))
 except:
   logging.info('exception occurred')
