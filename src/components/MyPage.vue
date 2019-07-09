@@ -46,6 +46,7 @@
                   ref="schemaFileRef"
                   @change="onSchemaSelected"
                 >
+                <v-btn v-if="schemaFileName" class="text-xs-left" small color="primary">Upload</v-btn>
 
                 <v-card-text class="body">Selected: {{schemaFileName}}</v-card-text>
               </v-card>
