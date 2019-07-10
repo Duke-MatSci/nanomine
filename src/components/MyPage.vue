@@ -34,9 +34,9 @@
           <span v-show="showAdmin">
           <div class="sect-divider"></div>
           <h5>Schema Management ...</h5>
-            <v-layout row wrap>
+            <v-layout row wrap justify-center>
               <v-card flat>
-                <v-card-text class="title font-weight-light">Upload schema</v-card-text>
+                <v-card-text class="title font-weight-light">Upload Schema</v-card-text>
                 <v-divider/>
                 <v-btn class="text-xs-left" small color="primary" @click='selectSchemaFile'>Browse</v-btn>
                 <input
@@ -48,7 +48,7 @@
                 >
                 <v-btn v-if="schemaFileName" class="text-xs-left" small color="primary">Upload</v-btn>
 
-                <v-card-text class="body">Selected: {{schemaFileName}}</v-card-text>
+                <v-card-text v-if="schemaFileName" class="body">Selected: {{schemaFileName}}</v-card-text>
               </v-card>
             </v-layout>
           <div class="sect-divider"></div>
@@ -466,7 +466,9 @@ export default {
   },
   methods: {
     selectSchemaFile () {
-      this.$refs.schemaFileRef.click()
+      let vm = this
+      vm.resetSelectedSchema()
+      vm.$refs.schemaFileRef.click()
     },
 
     resetSelectedSchema: function () {
