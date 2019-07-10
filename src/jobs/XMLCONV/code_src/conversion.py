@@ -133,10 +133,11 @@ def conversion(jobDir, code_srcDir, xsdDir, templateName, user):
             if len(message.strip()) > 0:
                 messages.append(message.strip())    
     # check #4: check the schema validation results
-    with open(logName) as f:
+    with open(logName, 'r', encoding='utf-8') as f:
         vld_log = csv.DictReader(f)
         for row in vld_log:
-            if ID in row['xml directory']:
+            logging.info(str(row))
+            if ID in row['\ufeffxml directory']:
                 if "the atomic type 'xs:double'" in row['error']:
                     messages.append('[XML Schema Validation Error] ' + row['error'].strip() + ', should be a number.')
                 else:

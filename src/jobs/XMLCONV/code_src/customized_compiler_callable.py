@@ -598,7 +598,7 @@ def sheetSampleInfo(sheet, DATA, myXSDtree, jobDir, restbase):
     if len(CommonFields) == 0 and len(Journal) > 0: # very unlikely
         DATA.append({'DATA_SOURCE': {'Citation': {'CitationType': {'Journal':Journal}}}})
     if len(CommonFields) > 0 and len(Journal) > 0:
-        DATA.append({'DATA_SOURCE': {'Citation': {'CommonFields':CommonFields, 'CitationType': {'Journal':Journal}}}})
+        DATA.append({'DATA_SOURCE': {'Citation': collections.OrderedDict([('CommonFields', CommonFields), ('CitationType', {'Journal':Journal})])}})
     if len(LabGenerated) > 0:
         DATA.append({'DATA_SOURCE': {'LabGenerated': LabGenerated}})
     return (ID, DATA)
