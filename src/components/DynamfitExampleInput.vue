@@ -3,7 +3,7 @@
     <h1>Dynamfit - Prony Series coefficient fitting</h1>
     <v-container>
       <h3 class="text-xs-left">An Example - Part II</h3>
-      <v-container>
+      <!--v-container-->
         <v-alert
           v-model="loginRequired"
           type="error"
