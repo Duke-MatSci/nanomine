@@ -5,11 +5,11 @@ from nm.common import *
 from nm.common.nm_rest import nm_rest
 import os
 import csv
-import urllib2
+import urllib.request
 import json
 import sys
 import re
-import xml.etree.ElementTree as ET
+from lxml import etree
 from datauri import DataURI
 import traceback
 import ssl
@@ -34,7 +34,7 @@ def uploadFilesAndAdjustXMLImageRefs(jobDir, schemaId, xmlId):
 
     datasetId = reMatch.group(1)
     xmlName = jobDir + '/xml/' + xmlId + '.xml'
-    xmlTree = ET.parse(xmlName)
+    xmlTree = etree.parse(xmlName)
     updatedXml = False
     for f in xmlTree.findall('.//MICROSTRUCTURE/ImageFile/File'):
       fn = f.text.split('/')[-1]
@@ -47,7 +47,7 @@ def uploadFilesAndAdjustXMLImageRefs(jobDir, schemaId, xmlId):
       curatefiledata = '{"filename":"'+ fn + '","dataUri":"' + dataUri + '"}'
       # logging.debug(curatefiledata + ' len is: ' + str(len(curatefiledata)))
       curatefiledata = json.loads(curatefiledata)
-      rq = urllib2.Request(curateFilesUrl)
+      rq = urllib.request.Request(curateFilesUrl)
       logging.debug('request created using createFilesUrl')
       rq.add_header('Content-Type','application/json')
       nmCurateFiles = nm_rest(logging, sysToken, curateApiToken, curateRefreshToken, rq)
@@ -78,7 +78,7 @@ def uploadFilesAndAdjustXMLImageRefs(jobDir, schemaId, xmlId):
         curatefiledata = '{"filename":"'+ objFN + '","bucketName":"curateinput","dataUri":"' + dataUri + '"}'
         # logging.debug(curatefiledata + ' len is: ' + str(len(curatefiledata)))
         curatefiledata = json.loads(curatefiledata)
-        rq = urllib2.Request(curateFilesUrl)
+        rq = urllib.request.Request(curateFilesUrl)
         logging.debug('request created using createFilesUrl')
         rq.add_header('Content-Type','application/json')
         nmCurateFiles = nm_rest(logging, sysToken, curateApiToken, curateRefreshToken, rq)
@@ -151,8 +151,8 @@ def conversion(jobDir, code_srcDir, xsdDir, templateName, user):
 
         # rest call for schemaID
         schemaurl = restbase + '/nmr/templates/select?filename='+xsdFilename
-        rq = urllib2.Request(schemaurl)
-        j = json.loads(urllib2.urlopen(rq, context=ssl._create_unverified_context()).read())
+        rq = urllib.request.Request(schemaurl)
+        j = json.loads(urllib.request.urlopen(rq, context=ssl._create_unverified_context()).read().decode("utf-8"))
         schemaId = j["data"][0]["_id"]
         # upload input files and image files referenced in xml
         uploadFilesAndAdjustXMLImageRefs(jobDir, schemaId, ID)
@@ -170,10 +170,10 @@ def conversion(jobDir, code_srcDir, xsdDir, templateName, user):
             "isPublic": "false",
             "content": content
         }
-        rq = urllib2.Request(curate_insert_url)
+        rq = urllib.request.Request(curate_insert_url)
         # logging.info('request created using curate_insert_url')
         rq.add_header('Content-Type','application/json')
-        ## r = urllib2.urlopen(rq, json.dumps(curate_data), context=ssl._create_unverified_context())
+        ## r = urllib.request.urlopen(rq, json.dumps(curate_data), context=ssl._create_unverified_context())
         nmCurateFiles = nm_rest(logging, sysToken, curateApiToken, curateRefreshToken, rq)
         r = nmCurateFiles.urlopen(json.dumps(curate_data).encode("utf8"))
 

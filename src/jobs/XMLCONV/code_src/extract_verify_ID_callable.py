@@ -6,7 +6,7 @@ import sys
 from doiretriever import mainDOIsoupFirst
 import datetime
 import json
-import urllib2
+import urllib.request
 import ssl
 import traceback
 
@@ -51,7 +51,7 @@ def extractID(xlsxName, jobDir, code_srcDir, restbase, user):
     sheets = xlfile.sheets()
     for sheet in sheets:
         # check the header of the sheet to determine what it has inside
-        if (sheet.row_values(0)[0].strip().lower() == "sample info"):
+        if (sheet.nrows > 0 and sheet.row_values(0)[0].strip().lower() == "sample info"):
             sheet_sample = sheet
     # if the sheet with ID is not found, write error message in jobDir/ID.txt
     message = ''
@@ -62,7 +62,7 @@ def extractID(xlsxName, jobDir, code_srcDir, restbase, user):
         return
     # special case for experimental data
     lab = False
-    for row in xrange(sheet_sample.nrows):
+    for row in range(sheet_sample.nrows):
         if match(sheet_sample.row_values(row)[0], 'Sample ID'):
             ID_raw = str(sheet_sample.row_values(row)[1])
             # if no ID is entered in the cell
@@ -82,7 +82,7 @@ def extractID(xlsxName, jobDir, code_srcDir, restbase, user):
                 fid.write(ID_raw.strip())
         return
     # otherwise, find and save the ID in jobDir/ID.txt
-    for row in xrange(sheet_sample.nrows):
+    for row in range(sheet_sample.nrows):
         # ID
         if match(sheet_sample.row_values(row)[0], 'Sample ID'):
             ID_raw = str(sheet_sample.row_values(row)[1])
@@ -94,7 +94,7 @@ def extractID(xlsxName, jobDir, code_srcDir, restbase, user):
                 message += verifyID(ID_raw)
         # DOI
         if match(sheet_sample.row_values(row)[0], 'DOI'):
-            DOI = str(sheet_sample.row_values(row)[1])
+            DOI = str(sheet_sample.row_values(row)[1]).strip()
     # if no error detected
     if message == '':
         # call restDOI here
@@ -128,8 +128,8 @@ def restDOI(DOI, code_srcDir, restbase, sheet_sample, user):
     # check existence
     try:
         dsurl = restbase + '/nmr/dataset?doi='+DOI
-        rq = urllib2.Request(dsurl)
-        j = json.loads(urllib2.urlopen(rq, context=ssl._create_unverified_context()).read())
+        rq = urllib.request.Request(dsurl)
+        j = json.loads(urllib.request.urlopen(rq, context=ssl._create_unverified_context()).read().decode('utf-8'))
         if len(j["data"]) > 0:
             exist = True
             response = j["data"][0]
@@ -158,7 +158,7 @@ def restDOI(DOI, code_srcDir, restbase, sheet_sample, user):
         # POST ds-create
         try:
             ds_create_url = restbase + '/nmr/dataset/create'
-            rq = urllib2.Request(ds_create_url)
+            rq = urllib.request.Request(ds_create_url)
             # logging.info('request created using ds_create_url')
             rq.add_header('Content-Type','application/json')
 
@@ -169,9 +169,9 @@ def restDOI(DOI, code_srcDir, restbase, sheet_sample, user):
             dsInfo['userid'] = user
             # NOTE END
 
-            r = urllib2.urlopen(rq, json.dumps(ds_data), context=ssl._create_unverified_context())
+            r = urllib.request.urlopen(rq, json.dumps(ds_data).encode("utf-8"), context=ssl._create_unverified_context())
             # logging.info('dataset create request posted: ' + str(r.getcode()))
-            response = json.loads(r.read())['data']
+            response = json.loads(r.read().decode("utf-8"))['data']
         except:
             message += 'exception occurred during dataset-create\n'
             message += 'exception: ' + str(traceback.format_exc()) + '\n'
@@ -205,49 +205,49 @@ def generateID(response, SID, SI_flag):
 def mapToRest(crawlerDict):
     restDict = {}
     # citationType
-    if 'CitationType' in crawlerDict:
+    if 'CitationType' in crawlerDict and len(crawlerDict['CitationType']) > 0:
         restDict['citationType'] = crawlerDict['CitationType'][0]
     # publication
-    if 'Publication' in crawlerDict:
+    if 'Publication' in crawlerDict and len(crawlerDict['Publication']) > 0:
         restDict['publication'] = crawlerDict['Publication'][0]
     # title
-    if 'Title' in crawlerDict:
+    if 'Title' in crawlerDict and len(crawlerDict['Title']) > 0:
         restDict['title'] = crawlerDict['Title'][0]
     # author
-    if 'Author' in crawlerDict:
+    if 'Author' in crawlerDict and len(crawlerDict['Author']) > 0:
         restDict['author'] = crawlerDict['Author']
     # keyword
-    if 'Keyword' in crawlerDict:
+    if 'Keyword' in crawlerDict and len(crawlerDict['Keyword']) > 0:
         restDict['keyword'] = crawlerDict['Keyword']
     # publisher
-    if 'Publisher' in crawlerDict:
+    if 'Publisher' in crawlerDict and len(crawlerDict['Publisher']) > 0:
         restDict['publisher'] = crawlerDict['Publisher'][0]
     # publicationYear
-    if 'PublicationYear' in crawlerDict:
+    if 'PublicationYear' in crawlerDict and len(crawlerDict['PublicationYear']) > 0:
         restDict['publicationYear'] = crawlerDict['PublicationYear'][0]
     # doi
-    if 'DOI' in crawlerDict:
+    if 'DOI' in crawlerDict and len(crawlerDict['DOI']) > 0:
         restDict['doi'] = crawlerDict['DOI'][0]
     # volume
-    if 'Volume' in crawlerDict:
+    if 'Volume' in crawlerDict and len(crawlerDict['Volume']) > 0:
         restDict['volume'] = crawlerDict['Volume'][0]
     # url
-    if 'URL' in crawlerDict:
+    if 'URL' in crawlerDict and len(crawlerDict['URL']) > 0:
         restDict['url'] = crawlerDict['URL'][0]
     # language
-    if 'Language' in crawlerDict:
+    if 'Language' in crawlerDict and len(crawlerDict['Language']) > 0:
         restDict['language'] = crawlerDict['Language'][0]
     # location
-    if 'Institution' in crawlerDict:
+    if 'Institution' in crawlerDict and len(crawlerDict['Institution']) > 0:
         restDict['location'] = crawlerDict['Institution'][0]
     # dateOfCitation
-    if 'DateOfCitation' in crawlerDict:
+    if 'DateOfCitation' in crawlerDict and len(crawlerDict['DateOfCitation']) > 0:
         restDict['dateOfCitation'] = crawlerDict['DateOfCitation'][0]
     # issn
-    if 'ISSN' in crawlerDict:
+    if 'ISSN' in crawlerDict and len(crawlerDict['ISSN']) > 0:
         restDict['issn'] = crawlerDict['ISSN'][0]
     # issue
-    if 'Issue' in crawlerDict:
+    if 'Issue' in crawlerDict and len(crawlerDict['Issue']) > 0:
         restDict['issue'] = crawlerDict['Issue'][0]
     # final formatting
     restDict = {'dsInfo': restDict}
@@ -258,7 +258,7 @@ def specialIssueRest(sheet, DOI):
     restDict = {'doi':DOI}
     authors = [] # a list for author
     keywords = [] # a list for keyword
-    for row in xrange(sheet.nrows):
+    for row in range(sheet.nrows):
         # publication
         if match(sheet.row_values(row)[0], 'Publication'):
             publication = str(sheet.row_values(row)[1])
