@@ -1608,7 +1608,7 @@ function saveSchema (filename, xsd) {
     if (dt && dt[1] && dt[2] && dt[3] && (+(dt[1]) <= 12) && (+(dt[1]) >= 1) && (+(dt[2]) <= 31) && (+(dt[2]) >= 1) && (+(dt[3]) <= 99) && (+(dt[3]) >= 15)) {
       resolve('Lovely filename: ' + filename + ' schemaName: ' + schemaname)
     } else {
-      reject(new Error('' + filename + ' does not fit accepted format of alpha leading characters followed by MMDDYY e.g. PNC_schema_081218'))
+      reject(new Error('' + filename + ' does not fit accepted format of alphanumeric characters followed by MMDDYY e.g. PNC_schema_081218'))
     }
   })
 }
@@ -1628,7 +1628,7 @@ app.post('/schema', function (req, res, next) {
           return res.status(201).json(jsonResp)
         })
         .catch(function (err) {
-          jsonResp.error = 'error storing schema - ' + filename + '. error: ' + err
+          jsonResp.error = '' + err
           return res.status(500).json(jsonResp)
         })
     } catch (err) {
