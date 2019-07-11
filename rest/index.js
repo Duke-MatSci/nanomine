@@ -1602,32 +1602,43 @@ function validQueryParam (p) {
 
 function saveSchema (filename, xsd) {
   let m = filename.match(/(.*)(\.xsd|\.xml)/)
-  // let templatename = (m !== null ? m[1] : filename)
+  let schemaname = (m !== null ? m[1] : filename)
   return new Promise(function (resolve, reject) {
-    resolve({'fun': 'data'})
+    let dt = filename.match(/(\d{2})(\d{2})(\d{2})/) // MM DD YY
+    if (dt && dt[1] && dt[2] && dt[3] && (+(dt[1]) <= 12) && (+(dt[1]) >= 1) && (+(dt[2]) <= 31) && (+(dt[2]) >= 1) && (+(dt[3]) <= 99) && (+(dt[3]) >= 15)) {
+      resolve('Lovely filename: ' + filename + ' schemaName: ' + schemaname)
+    } else {
+      reject(new Error('' + filename + ' does not fit accepted format of alpha leading characters followed by MMDDYY e.g. PNC_schema_081218'))
+    }
   })
 }
 
 app.post('/schema', function (req, res, next) {
   let jsonResp = {'error': null, 'data': null}
   let filename = req.body.filename
-  let xsd = req.body.data
-  // eslint-disable-next-line no-unused-vars
-  let xsdDoc = null
-  try {
-    xsdDoc = libxml.parseXml(xsd)
-    saveSchema(filename, xsd)
-      .then(function (resp) {
-        jsonResp.data = resp
-        res.status(201).json(jsonResp)
-      })
-      .catch(function (err) {
-        jsonResp.error = 'error storing schema - ' + filename + '. error: ' + err
-        res.status(500).json(jsonResp)
-      })
-  } catch (err) {
-    jsonResp.error = 'Unable to translate schema. Error: ' + err
-    res.status(400).json(jsonResp)
+  let xsd = req.body.xsd
+  if (xsd && xsd.length > 0 && filename && filename.length > 0) {
+    // eslint-disable-next-line no-unused-vars
+    let xsdDoc = null
+    try {
+      xsdDoc = libxml.parseXml(xsd)
+      saveSchema(filename, xsd)
+        .then(function (resp) {
+          jsonResp.data = resp
+          return res.status(201).json(jsonResp)
+        })
+        .catch(function (err) {
+          jsonResp.error = 'error storing schema - ' + filename + '. error: ' + err
+          return res.status(500).json(jsonResp)
+        })
+    } catch (err) {
+      jsonResp.error = 'Unable to translate schema -- ' + err
+      return res.status(400).json(jsonResp)
+    }
+  } else {
+    let msg = 'both filename and text of schema are required.'
+    jsonResp.error = msg
+    return res.status(400).json(jsonResp)
   }
 })
 

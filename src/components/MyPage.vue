@@ -34,6 +34,20 @@
           <span v-show="showAdmin">
           <div class="sect-divider"></div>
           <h5>Schema Management ...</h5>
+            <v-alert
+              v-model="schemaSuccess"
+              type="success"
+              dismissible
+            >
+            {{schemaSuccessMsg}}
+            </v-alert>
+            <v-alert
+              v-model="schemaError"
+              type="error"
+              dismissible
+            >
+            {{schemaErrorMsg}}
+            </v-alert>
             <v-layout row wrap justify-center>
               <v-card flat>
                 <v-card-text class="title font-weight-light">Upload Schema</v-card-text>
@@ -46,9 +60,9 @@
                   ref="schemaFileRef"
                   @change="onSchemaSelected"
                 >
-                <v-btn v-if="schemaFileName" class="text-xs-left" small color="primary">Upload</v-btn>
+                <v-btn v-if="schemaFileName && schemaFileName.length > 0" class="text-xs-left" small color="primary" @click="doSchemaUpload()">Upload</v-btn>
 
-                <v-card-text v-if="schemaFileName" class="body">Selected: {{schemaFileName}}</v-card-text>
+                <v-card-text v-if="schemaFileName && schemaFileName.length > 0" class="body">Selected: {{schemaFileName}}</v-card-text>
               </v-card>
             </v-layout>
           <div class="sect-divider"></div>
@@ -334,6 +348,10 @@ export default {
       // Schemas
       schemaFileText: '',
       schemaFileName: '',
+      schemaError: false,
+      schemaErrorMsg: '',
+      schemaSuccess: false,
+      schemaSuccessMsg: '',
       // Users
       userall: true,
       userpagination: {
@@ -465,12 +483,53 @@ export default {
     }
   },
   methods: {
+    setSchemaError (msg) {
+      let vm = this
+      vm.schemaError = true
+      vm.schemaErrorMsg = msg
+    },
+    resetSchemaError () {
+      let vm = this
+      vm.schemaError = false
+      vm.schemErrorMsg = ''
+    },
+    setSchemaSuccess (msg) {
+      let vm = this
+      vm.schemaSuccess = true
+      vm.schemaSuccessMsg = msg
+    },
+    resetSchemaSuccess () {
+      let vm = this
+      vm.schemaSuccessMsg = ''
+      vm.schemaSuccess = false
+    },
+    doSchemaUpload () {
+      let vm = this
+      let data = {
+        filename: vm.schemaFileName,
+        xsd: vm.schemaFileText
+      }
+      Axios.post('/nmr/schema', data)
+        .then(function (resp) {
+          console.log(resp.data)
+          vm.resetSchemaError()
+          vm.setSchemaSuccess(vm.schemaFileName + ' uploaded successfully.')
+          vm.schemaFileName = ''
+          vm.schemaFileText = ''
+        })
+        .catch(function (err) {
+          vm.resetSchemaSuccess()
+          vm.setSchemaError('' + err + ' : ' + err.response.data.error)
+          vm.schemaSuccess = false
+        })
+    },
     selectSchemaFile () {
       let vm = this
       vm.resetSelectedSchema()
+      vm.resetSchemaError()
+      vm.resetSchemaSuccess()
       vm.$refs.schemaFileRef.click()
     },
-
     resetSelectedSchema: function () {
       let vm = this
       vm.schemaFileText = ''
