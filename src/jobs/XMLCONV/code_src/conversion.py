@@ -53,7 +53,7 @@ def uploadFilesAndAdjustXMLImageRefs(jobDir, schemaId, xmlId):
       nmCurateFiles = nm_rest(logging, sysToken, curateApiToken, curateRefreshToken, rq)
       r = nmCurateFiles.urlopen(json.dumps(curatefiledata).encode("utf8"))
       if r.getcode() == 201:
-        uploadId = json.loads(r.read())['data']['id']
+        uploadId = json.loads(r.read().decode("utf-8"))['data']['id']
         imageRef = webbase + '/nmr/blob?id=' + uploadId
         logging.debug('new image value for XML: ' + imageRef)
         f.text = imageRef # update XML node with new image reference
@@ -84,7 +84,7 @@ def uploadFilesAndAdjustXMLImageRefs(jobDir, schemaId, xmlId):
         nmCurateFiles = nm_rest(logging, sysToken, curateApiToken, curateRefreshToken, rq)
         r = nmCurateFiles.urlopen(json.dumps(curatefiledata).encode("utf8"))
         if r.getcode() == 201:
-          uploadId = json.loads(r.read())['data']['id']
+          uploadId = json.loads(r.read().decode("utf-8"))['data']['id']
           logging.debug('uploaded file ID: ' + uploadId)
           ## testing - raise ValueError('Upload of input successful. returned id: ' + uploadId) ## for testing
         else:

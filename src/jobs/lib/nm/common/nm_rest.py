@@ -41,7 +41,7 @@ class nm_rest:
       try:
         r = urllib.request.urlopen(atReq, json.dumps(refreshData).encode("utf-8"), context=ssl._create_unverified_context())
         sdata = r.read()
-        self.logger.debug('access token: ' + sdata)
+        self.logger.debug('access token: ' + sdata.decode("utf-8"))
         data = json.loads(sdata.decode("utf-8"))['data']
         self.accessToken = data['accessToken']
         self.accessExpiration = int(data['expiration'])
@@ -51,5 +51,5 @@ class nm_rest:
 
      # now, execute the original request with the correct bearer token
     self.callerReq.add_header('Authentication', 'Bearer ' + self.accessToken)
-    rv = urllib.request.urlopen(self.callerReq, rqData.encode("utf-8"), context=ssl._create_unverified_context())
+    rv = urllib.request.urlopen(self.callerReq, rqData, context=ssl._create_unverified_context())
     return rv
