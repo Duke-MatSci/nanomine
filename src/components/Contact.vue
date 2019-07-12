@@ -22,34 +22,27 @@
       </v-layout>
       <v-layout row wrap>
         <v-flex xs2 v-show="contactType=='questions'">
-          We're here for you.
-          <br/>Please be as concise as possible with your questions so that we're able to answer them effectively.
-          <br/>Thank you.
+          Be as concise as possible with your questions so that we're able to answer them effectively.
         </v-flex>
         <v-flex xs2 v-show="contactType=='report-problem'">
-          We're just as disappointed as you are that you've found a problem!
           <br/>To faciliate quick resolution, please describe the issue as succinctly as possible.
           <br/>Use specifics about the steps leading up to the issue especially regarding selections made,
           affected files, relevant error messages (copy/paste if possible) and exactly how the problem might be
           re-created.
-          <br/>Thank you.
         </v-flex>
         <v-flex xs2 v-show="contactType=='suggestions'">
-          We really appreciate your suggestions!
+          We appreciate your suggestions!
           <br/>Be sure to let us know about any specific areas that apply.  If your suggestions are related to processes e.g.
            how samples are uploaded, be sure to help us understand how a different process would help and what steps
           you're suggesting.
-          <br/>Thank you.
         </v-flex>
         <v-flex xs2 v-show="contactType=='comments'">
           Comments are always welcome!
-          <br/>Thank you.
         </v-flex>
         <v-flex xs8>
           <v-textarea v-model="textData" solo name="bodytext" :label="getHelpText()" value="" rows="20" hint=""></v-textarea>
         </v-flex>
         <v-flex xs1>
-          Thank you for using NanoMine!
         </v-flex>
       </v-layout>
       <v-layout>
@@ -100,7 +93,7 @@ export default {
   name: 'Contact',
   data () {
     return {
-      msg: 'Contact the NanoMine Team',
+      msg: 'Contact the MaterialsMine Team',
       helpText: 'Enter problem description',
       textData: '',
       contactType: 'comments',

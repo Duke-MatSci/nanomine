@@ -1,9 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Admin from '@/components/Admin'
 import BinarizeHomepage from '@/components/BinarizeHomepage'
 import Database from '@/components/Database'
-// import Insight from '@/components/Insight'
 import Contact from '@/components/Contact'
 import Dynamfit from '@/components/Dynamfit'
 import DynamfitExample from '@/components/DynamfitExample'
@@ -11,11 +9,12 @@ import DynamfitExampleInput from '@/components/DynamfitExampleInput'
 import DynamfitResult from '@/components/DynamfitResult'
 import ModuleTools from '@/components/ModuleTools'
 import MyPage from '@/components/MyPage'
+import MaterialsMine from '@/components/MaterialsMine'
+import MetaMine from '@/components/metamine/MetaMine'
 import NanoMine from '@/components/NanoMine'
 import PixelUnit from '@/components/metamine/PixelUnit'
 import SimTools from '@/components/SimTools'
 import XMLCONV from '@/components/XMLCONV'
-// import NmEditor from '@/components/Editor'
 import McrHomepage from '@/components/McrHomepage'
 import Otsu from '@/components/Otsu'
 import OtsuResult from '@/components/OtsuResult'
@@ -28,7 +27,6 @@ import ReconstructionHomepage from '@/components/ReconstructionHomepage'
 import CorrelationReconstruct from '@/components/CorrelationReconstruct'
 import SDFReconstruct from '@/components/SDFReconstruct'
 import DescriptorReconstruct from '@/components/DescriptorReconstruct'
-// import Visualization from '@/components/Visualization'
 import SDFCharacterizeResults from '@/components/SDFCharacterizeResults'
 import DescriptorCharacterizeResults from '@/components/DescriptorCharacterizeResults'
 import CorrelationCharacterizeResults from '@/components/CorrelationCharacterizeResults'
@@ -36,6 +34,8 @@ import SDFReconstructResults from '@/components/SDFReconstructResults'
 import CorrelationReconstructResults from '@/components/CorrelationReconstructResults'
 import DescriptorReconstructResults from '@/components/DescriptorReconstructResults'
 import ViewData from '@/components/ViewData'
+// import NmEditor from '@/components/Editor'
+// import Visualization from '@/components/Visualization'
 
 Vue.use(Router)
 
@@ -46,13 +46,18 @@ export default new Router({
   routes: [
     {
       path: '/',
+      name: 'MaterialsMine',
+      component: MaterialsMine
+    },
+    {
+      path: '/nano',
       name: 'NanoMine',
       component: NanoMine
     },
     {
-      path: '/admin',
-      name: 'Admin',
-      component: Admin
+      path: '/meta',
+      name: 'MetaMine',
+      component: MetaMine
     },
     {
       path: '/db',
@@ -64,11 +69,6 @@ export default new Router({
       name: 'Contact',
       component: Contact
     },
-    // {
-    //   path: '/insight',
-    //   name: 'Insight',
-    //   component: Insight
-    // },
     {
       path: '/simtools',
       name: 'SimTools',
@@ -130,7 +130,7 @@ export default new Router({
       component: Niblack
     },
     {
-      path: '/mm/pixelunit',
+      path: '/meta/pixelunit',
       name: 'PixelUnit',
       component: PixelUnit
     },
