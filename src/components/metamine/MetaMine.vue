@@ -7,8 +7,6 @@
             <h3 class="mainheading">MetaMine</h3>
             <span class="subheading">Material Informatics for Metamaterials</span>
             <v-divider class="my-3"></v-divider>
-            <v-btn class="mx-0" color="primary" href="/home">Visualization&nbsp;<v-icon>search</v-icon></v-btn>
-            <v-btn class="mx-0" color="secondary" to="/XMLCONV">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CURATION&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</v-btn>
           </v-flex>
         </v-layout>
       </v-container>
