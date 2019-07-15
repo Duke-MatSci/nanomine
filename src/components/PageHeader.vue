@@ -13,12 +13,7 @@
         <v-btn flat to="/simtools">Simulation Tools</v-btn>
         <v-btn fab flat href="/home"><i class="material-icons nm-search-icon" v-if="searchEnabled()">search</i>
         </v-btn>
-        <v-tooltip bottom>
-          <template v-slot:activator="{ on }">
-            <v-btn fab flat to="/contact" v-on="on"><i class="material-icons nm-search-icon">contact_support</i></v-btn>
-          </template>
-          <span>Contact Us</span>
-        </v-tooltip>
+        <v-btn flat to="/contact" v-on="on">Contact Us<!--i class="material-icons nm-search-icon">contact_support</i--></v-btn>
         <v-btn v-if="isLoggedIn()" flat to="/mypage">My Page</v-btn>
         <v-btn v-else flat to="/mypage">My Page</v-btn>
         <v-btn v-if="loginStatus" flat v-on:click="$store.commit('setLoginLogout')">

@@ -14,7 +14,7 @@
 <template>
   <div class="DescriptorReconstruct">
     <h1>{{ msg }}</h1>
-    <v-container>
+    <v-container class="text-xs-left">
       <v-flex xs12>
           <h3>Description</h3>
           <br>
@@ -90,15 +90,16 @@
               </v-list-tile-content>
             </v-list-tile>
           </v-list>
-        </v-flex>
+        </v-flex >
+      <v-flex class="text-xs-center">
         <v-btn v-on:click="submit()" color="primary">Reconstruct</v-btn>
+      </v-flex >
+      <h4>References</h4>
+      <v-flex xs12>
+        <p> Xu, H., Li, Y., Brinson, C. and Chen, W., 2014. A descriptor-based design methodology for developing heterogeneous microstructural materials system. <i>Journal of Mechanical Design</i>, 136(5), p.051007.</p>
+        <p>Xu, H., Dikin, D.A., Burkhart, C. and Chen, W., 2014. Descriptor-based methodology for statistical characterization and 3D reconstruction of microstructural materials. <i>Computational Materials Science</i>, 85, pp.206-216.</p>
+      </v-flex>
     </v-container>
-
-    <h4>Reference</h4>
-    <v-flex xs12>
-        <p> Xu, H., Li, Y., Brinson, C. and Chen, W., 2014. A descriptor-based design methodology for developing heterogeneous microstructural materials system. Journal of Mechanical Design, 136(5), p.051007.</p>
-        <p>Xu, H., Dikin, D.A., Burkhart, C. and Chen, W., 2014. Descriptor-based methodology for statistical characterization and 3D reconstruction of microstructural materials. Computational Materials Science, 85, pp.206-216.</p>
-    </v-flex>
   </div>
 </template>
 

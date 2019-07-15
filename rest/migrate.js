@@ -24,6 +24,8 @@ const MongoClient = require('mongodb').MongoClient
 const ObjectId = require('mongodb').ObjectId
 const _ = require('lodash')
 const he = require('he')
+const fs = require('fs')
+const xmljs = require('xml-js')
 // const validateXml = require('xmllint').validateXML
 const nmWebBaseUri = process.env['NM_WEB_BASE_URI']
 let shortUUID = require('short-uuid')() // https://github.com/oculus42/short-uuid (npm i --save short-uuid)
@@ -155,6 +157,12 @@ const versionSpDev2 = { // NanoMine SP rewrite dev version 2
   minorVer: 3,
   patchVer: 0,
   labelVer: 'nm-sp-dev-2'
+}
+const versionSpDev3 = { // NanoMine SP rewrite dev version 3
+  majorVer: 1,
+  minorVer: 3,
+  patchVer: 0,
+  labelVer: 'nm-sp-dev-3'
 }
 
 let dbVer = versionOriginal
@@ -577,6 +585,324 @@ function adjustImageBlob (json) {
   }
   return json
 }
+
+function insertXmlData (doc2Insert) {
+  let func = 'insertXmlData'
+  let p = new Promise(function (resolve, reject) {
+    let xmldata = db.collection('xmldata')
+    xmldata.insertOne(doc2Insert, {})
+      .then(function (mongoError, result) {
+        if (result['ok'] === 1 && result['n'] === 1) {
+          resolve()
+        } else {
+          let msg = func + ' - error inserting data for schema: ' + doc2Insert.schemaId + ' title: ' + doc2Insert.title + ' error: ' + mongoError
+          reject(msg)
+        }
+      })
+      .catch(function (err) {
+        let msg = func + ' - error inserting data for schema: ' + doc2Insert.schemaId + ' title: ' + doc2Insert.title + ' error: ' + err
+        reject(msg)
+      })
+  })
+  return p
+}
+
+function copyXmlData2Schema (fromSchema, toSchema) {
+  let func = 'copyXmlData2Schema'
+  let p = new Promise(function (resolve, reject) {
+    let xmldata = db.collection('xmldata')
+    xmldata.find({'schemaId': {$eq: fromSchema}}, {}).forEach((xmldoc) => {
+      let msg = func + ' - copy title: ' + xmldoc.title + ' schema: ' + xmldoc.schema + ' to new schemaid: ' + toSchema
+      logDebug(msg)
+      // !!! xmldoc.schemaId = xmldoc.schema // fix schema id name
+      let doc2Insert = xmldoc
+      doc2Insert.schema = toSchema // dup'd original schema id since 'schema' is mongoose keyword. Data can be there, but mongoose cannot access
+      doc2Insert.schemaId = toSchema // so schemaId introduced for mongoose
+      doc2Insert.entityState = 'EditedValid'
+      doc2Insert.dsSeq = -1
+      writePromises.push(insertXmlData(doc2Insert))
+    }, (err) => { // err is null most of the time unless there was an iteration error
+      if (err) {
+        let msg = func + ' - error processing xmldata collection. error: ' + err
+        reject(msg)
+      } else {
+        let msg = func + ' - done processing xmldata collection. Still waiting on inserts to complete.'
+        logInfo(msg)
+        Promise.all(writePromises)
+          .then(function () {
+            logInfo(func + ' successful.')
+            writePromises = []
+            resolve()
+          })
+          .catch(function (err) {
+            let msg = 'Failure waiting for all inserts. Error: ' + err
+            reject(msg)
+          })
+      }
+    })
+  })
+  return p
+}
+
+function updateDatasetsObject (seq, ds, dsExt) {
+  let issue = null
+  let issn = null
+  if (dsExt) {
+    issue = dsExt.Issue
+    issn = dsExt.ISSN
+    logDebug('issue: ' + issue + ' issn: ' + issn)
+  } else {
+    // logError('title: ' + xmldoc.title + ' schema: ' + xmldoc.schema + ' - dsExt (journal info) is null or undefined for dataset seq: ' + seq)
+    logError('dsExt (journal info) is null or undefined for dataset seq: ' + seq)
+  }
+  if (ds) {
+    datasets[seq] = {
+      'citationType': ds.CitationType,
+      'publication': ds.Publication,
+      'title': ds.Title,
+      'author': [],
+      'keyword': [],
+      'publisher': ds.Publisher,
+      'publicationYear': ds.PublicationYear,
+      'doi': ds.DOI,
+      'volume': ds.Volume,
+      'url': ds.URL,
+      'language': ds.Language,
+      'dateOfCitation': ds.DateOfCitation,
+      'location': ds.Location,
+      'issue': issue,
+      'issn': issn,
+      'userid': nanomineUser.userid,
+      'isPublic': true, // all of the original datasets are public
+      'ispublished': true // all of the original datasets came from published papers
+    }
+    if (_.isArray(ds.Author)) {
+      ds.Author.forEach((a) => {
+        datasets[seq].author.push(a)
+      })
+    } else if (ds.Author && ds.Author.length > 0) {
+      datasets[seq].author.push(ds.Author)
+    }
+    if (_.isArray(ds.Keyword)) {
+      ds.Keyword.forEach((a) => {
+        datasets[seq].keyword.push(a)
+      })
+    } else if (ds.Keyword && ds.Keyword.length > 0) {
+      datasets[seq].keyword.push(ds.Keyword)
+    }
+    logInfo('created dataset reference - seq: ' + seq + ' - ' + inspect(datasets[seq]) + '\n\n')
+  } else {
+    // no dataset info passed
+  }
+}
+// NOTE: this is a point in time migration for production data that's at SpDev2 that
+//   removes the old data for the current schema (after a backup to a mock schema),
+//   removes all datasets and re-creates the data from a set of data supplied on disk.
+//   The datasets are also re-created from the data.
+function migrateToNmSpDev3 (fromVer, toVer) {
+  // requires that new versions of the xml files exist in /apps/xmlupdates
+  // NOTE: this is less of a migration than it is a mass update
+  let func = 'migrateToNmSpDev3'
+  let p = new Promise(function (resolve, reject) {
+    let msg = func + ' - Migrating from: ' + JSON.stringify(fromVer) + ' to: ' + JSON.stringify(toVer)
+    logInfo(msg)
+    // get list of '.xml' files in /apps/xmlupdates
+    //   if directory does not exist or there are no files, fail migration step with reject(msg)
+    let xmlfiles = fs.readdirSync('/apps/xmlupdates')
+    //   Work-around to version current data:
+    //     read schema information for PNC_schema_081218.xsd and create new template and template version
+    //        for PNC_schema_081118.xsd and copy all current xml records for prior schemaid to entries
+    //        with new schemaid.
+    //   Copy all the xmldata records with prior schema id to new records with new schemaid.
+    // Now, read all the xmlupdates, adjust microstructure refs, update xml_str or if new create dataset and xml_data record
+    //
+    const num2Process = 1708
+    if (xmlfiles.length === num2Process) { // num2Process (sanity check)
+      // read schema record for filename PNC_schema_081218.xsd
+      // Create a new schema record for PNC_schema_081118.xsd and save object id
+      //   copy all fields from original to new except objectid
+      // Create a new template version record for new schema record
+      //   set isDeleted=false, nbVersions=1, current=new schema id, versions[0]=newschemaid, currentRef=ObjectId(newschemaid)
+      let tcol = db.collection('template')
+      logInfo(func + ' - Reading: template/schema record for PNC_schema_081218.xsd')
+      tcol.findOne({'filename': {$eq: 'PNC_schema_081218.xsd'}},
+        { // nada
+        }, {}, function (err, result) {
+          if (err) {
+            logInfo(func + ' - Find 081218 schema failed: ' + msg + ' error: ' + err)
+            reject(err)
+          } else {
+            logInfo(func + ' - Find 081218 schema successful: ' + msg)
+            let schemaRec = null
+            if (Array.isArray(result)) {
+              schemaRec = result[0]
+            } else {
+              schemaRec = result
+            }
+            let fromSchemaId = schemaRec.schemaId
+            let toSchemaId = null
+            schemaRec.filename = 'PNC_schema_081118.xsd' // back date it so it isn't current
+            schemaRec.title = 'PNC_schema_081118'
+            schemaRec.templateVersion = 'templateversion id str'
+            tcol.insertOne(schemaRec)
+              .then(function (mongoError, result) {
+                if (result['ok'] === 1 && result['n'] === 1) {
+                  let schemaId = result['insertedId']
+                  toSchemaId = schemaId.toHexString()
+                  // create a template_version referencing the new schema
+                  let tcolv = db.collection('template_version')
+                  let tvrec = {
+                    versions: [schemaId.toHexString()],
+                    deletedVersions: [],
+                    nbVersions: 1,
+                    isDeleted: false,
+                    current: schemaId.toHexString(),
+                    currentRef: schemaId
+                  }
+                  tcolv.insertOne(tvrec)
+                    .then(function (mongoError, result) {
+                      // update the new schema rec with the version ref,
+                      if (result['ok'] === 1 && result['n'] === 1) {
+                        schemaRec.templateVersion = result.insertedId.toHexString()
+                        tcol.updateOne({filename: {$eq: schemaRec.filename}}, {
+                          $set: {
+                            'templateVersion': schemaRec.templateVersion
+                          }
+                        }, {})
+                          .then(function (result) {
+                            if (result['ok'] === 1 && result['n'] === 1) {
+                              // copy all the existing data for the original schemaid to recs
+                              //     ref'ing the new backup schemaid
+                              copyXmlData2Schema(fromSchemaId, toSchemaId)
+                                .then(function () {
+                                  // all data sets need to be removed and re-created from new data later
+                                  let datasets = db.collection('datasets')
+                                  datasets.deleteMany({}, {})
+                                    .then(function (mongoError, result) {
+                                      if (mongoError) {
+                                        let msg = func + ' - failed to remove all datasets  error: ' + mongoError
+                                        reject(msg)
+                                      } else {
+                                        let msg = func + ' - deleted ' + result['n'] + ' dataset records.'
+                                        logInfo(msg)
+                                        let xmldata = db.collection('xmldata')
+                                        // delete the xmldata records for the current schema
+                                        xmldata.deleteMany({'schemaId': {$eq: fromSchemaId}}, {})
+                                          .then(function (mongoError, result) {
+                                            if (mongoError) {
+                                              let msg = func + ' - failed to remove all xmldata records for current schema. Error: ' + mongoError
+                                              reject(msg)
+                                            } else {
+                                              let msg = func + ' - deleted ' + result['n'] + ' xmldata records for schemaId: ' + fromSchemaId
+                                              logInfo(msg)
+                                              // insert xmldata record for each of the xml files in /apps/xmlupdates
+                                              xmlfiles.forEach((f) => {
+                                                let fullname = '/apps/xmlupdates/' + f
+                                                let xml = fs.readFileSync(fullname, 'utf-8')
+                                                let js = xmljs.xml2js(xml, {compact: false})
+                                                let pnc = js.elements[0].elements
+                                                pnc.forEach(function (e) {
+                                                  if (e.name === 'MICROSTRUCTURE') {
+                                                    if (Array.isArray(e.elements)) {
+                                                      e.elements.forEach(function (me) {
+                                                        //          console.log('Array: ' + JSON.stringify(me))
+                                                        if (me.name === 'ImageFile') {
+                                                          if (Array.isArray(me.elements)) {
+                                                            me.elements.forEach((ie) => {
+                                                              if (ie.name === 'File') {
+                                                                // console.log(ie.elements[0].text)
+                                                                ie.elements[0].text = newImageFileValue(ie.elements[0].text)
+                                                              }
+                                                            })
+                                                          } else {
+                                                            // console.log('simple: ' + me.elements.name)
+                                                          }
+                                                        }
+                                                      })
+                                                    } else if (e.elements) {
+                                                      // console.log('non-Array: ' + JSON.stringify(e.elements))
+                                                    }
+                                                  }
+                                                })
+                                                xml = xmljs.js2xml(js, {})
+                                                writePromises.push(insertXmlData({
+                                                  schemaId: fromSchemaId,
+                                                  schema: fromSchemaId,
+                                                  title: f,
+                                                  iduser: nanomineUser.userId,
+                                                  ispublished: true,
+                                                  curateState: 'Edit',
+                                                  entityState: 'EditedValid',
+                                                  dsSeq: -1,
+                                                  isPublic: true,
+                                                  mdcsUpdateState: 'none',
+                                                  xml_str: xml
+                                                }))
+                                              })
+                                              Promise.all(writePromises)
+                                                .then(function () {
+                                                  logInfo(func + ' successful.')
+                                                  writePromises = []
+                                                  resolve() // ???? NEED to create datasets
+                                                })
+                                                .catch(function (err) {
+                                                  let msg = func + ' - failure waiting for all inserts. Error: ' + err
+                                                  reject(msg)
+                                                })
+                                            }
+                                          })
+                                          .catch(function (err) {
+                                            let msg = func + ' - failed to remove all xmldata records for current schema. Error: ' + err
+                                            reject(msg)
+                                          })
+                                      }
+                                    })
+                                    .catch(function (err) {
+                                      let msg = func + ' - failed to remove all datasets  error: ' + err
+                                      reject(msg)
+                                    })
+                                })
+                                .catch(function (err) {
+                                  let msg = func + ' - failed to copy xmldata recs to new backup schema record: ' + toSchemaId + ' from: ' + fromSchemaId + ' error: ' + err
+                                  reject(msg)
+                                })
+                            } else {
+                              let msg = func + ' - cannot update templateVersion for new backup schema record: ' + JSON.stringify(schemaRec) + ' error: ' + new Error('n or ok not correct')
+                              reject(msg)
+                            }
+                          })
+                          .catch(function (err) {
+                            let msg = func + ' - cannot update template version of new schema rec: ' + JSON.stringify(schemaRec) + ' error: ' + err
+                            reject(msg)
+                          })
+                      } else {
+                        let msg = func + ' - cannot insert new schema version record for backup schema: ' + JSON.stringify(tvrec) + ' error: ' + new Error('n or ok not correct - ' + mongoError)
+                        reject(msg)
+                      }
+                    })
+                    .catch(function (err) {
+                      let msg = func + ' - cannot insert schema version record for backup schema: ' + JSON.stringify(tvrec) + ' error: ' + err
+                      reject(msg)
+                    })
+                } else {
+                  let msg = func + ' - cannot insert schema record for backup schema: ' + JSON.stringify(schemaRec) + ' error: ' + new Error('n or ok not correct - ' + mongoError)
+                  reject(msg)
+                }
+              })
+              .catch(function (err) {
+                let msg = func + ' - cannot insert schema record for backup schema: ' + JSON.stringify(schemaRec) + ' error: ' + err
+                reject(msg)
+              })
+          }
+        })
+    } else {
+      let err = new Error(func + ' - invalid number of xml records to process. Expecting: ' + num2Process + ' found: ' + xmlfiles.length)
+      reject(err)
+    }
+  })
+  return p
+}
+
 function migrateToNmSpDev2 (fromVer, toVer) {
   let func = 'migrateToNmSpDev2'
   let p = new Promise(function (resolve, reject) {
@@ -683,52 +1009,8 @@ function migrateToNmSpDev1 (fromVer, toVer) {
               if (datasets[seq] === undefined) { // && isValidSchema && (xmldoc.schema === latestSchema().schemaId)) { // try to get latest data
                 let ds = _.get(json, 'PolymerNanocomposite.DATA_SOURCE.Citation.CommonFields', null)
                 let dsExt = _.get(json, 'PolymerNanocomposite.DATA_SOURCE.Citation.CitationType.Journal', null)
-                let issue = null
-                let issn = null
-                if (dsExt) {
-                  issue = dsExt.Issue
-                  issn = dsExt.ISSN
-                  logDebug('issue: ' + issue + ' issn: ' + issn)
-                } else {
-                  // logError('title: ' + xmldoc.title + ' schema: ' + xmldoc.schema + ' - dsExt (journal info) is null or undefined for dataset seq: ' + seq)
-                  logError('dsExt (journal info) is null or undefined for dataset seq: ' + seq)
-                }
-                if (ds !== null) {
-                  datasets[seq] = {
-                    'citationType': ds.CitationType,
-                    'publication': ds.Publication,
-                    'title': ds.Title,
-                    'author': [],
-                    'keyword': [],
-                    'publisher': ds.Publisher,
-                    'publicationYear': ds.PublicationYear,
-                    'doi': ds.DOI,
-                    'volume': ds.Volume,
-                    'url': ds.URL,
-                    'language': ds.Language,
-                    'dateOfCitation': ds.DateOfCitation,
-                    'location': ds.Location,
-                    'issue': issue,
-                    'issn': issn,
-                    'userid': nanomineUser.userid,
-                    'isPublic': true, // all of the original datasets are public
-                    'ispublished': true // all of the original datasets came from published papers
-                  }
-                  if (_.isArray(ds.Author)) {
-                    ds.Author.forEach((a) => {
-                      datasets[seq].author.push(a)
-                    })
-                  } else if (ds.Author && ds.Author.length > 0) {
-                    datasets[seq].author.push(ds.Author)
-                  }
-                  if (_.isArray(ds.Keyword)) {
-                    ds.Keyword.forEach((a) => {
-                      datasets[seq].keyword.push(a)
-                    })
-                  } else if (ds.Keyword && ds.Keyword.length > 0) {
-                    datasets[seq].keyword.push(ds.Keyword)
-                  }
-                  logInfo('created dataset reference - seq: ' + seq + ' - ' + inspect(datasets[seq]) + '\n\n')
+                if (ds) {
+                  updateDatasetsObject(seq, ds, dsExt)
                 } else {
                   logInfo('cannot find key path in BSON object to build dataset info: ' + seq + ' for schema: ' + xmldoc.schema + ' title: ' + xmldoc.title)
                 }
@@ -741,7 +1023,7 @@ function migrateToNmSpDev1 (fromVer, toVer) {
               //  .//MICROSTRUCTURE/ImageFile/File
               adjustImageBlob(json)
               logDebug(j2x(json, null, indent))
-              let xsd = getSchemaInfo(xmldoc.schema)
+              // let xsd = getSchemaInfo(xmldoc.schema)
               /* Cannot verify all xmls without process running out of memory. Need another way to verify.
               if (xsd) {
                 let errors = validateXml({'xml': xml, 'schema': xsd.content, TOTAL_MEMORY:4194304})
@@ -832,6 +1114,7 @@ function migrateToNmSpDev1 (fromVer, toVer) {
 const migrationTable = [ // Array of version to version conversion function mappings
   { 'from': versionOriginal, 'to': versionSpDev1, 'use': migrateToNmSpDev1 },
   { 'from': versionSpDev1, 'to': versionSpDev2, 'use': migrateToNmSpDev2 }
+  // { 'from': versionSpDev2, 'to': versionSpDev3, 'use': migrateToNmSpDev3 }
 ]
 
 function dbConnectAndOpen () {
@@ -911,7 +1194,7 @@ function loadSchemas () {
       .then(() => {
         let xsdVersions = db.collection('template_version')
         if (xsdVersions) {
-          let cur = xsdVersions.find({}).forEach((xsdVer) => { // iterator callback
+          xsdVersions.find({}).forEach((xsdVer) => { // iterator callback
             logInfo('xsdVersion: ' + xsdVer.current + ' isDeleted: ' + xsdVer.isDeleted)
             schemaInfo.push({'schemaId': xsdVer.current, 'isDeleted': xsdVer.isDeleted})
           }, (err) => { // done iterating callback with possible error (weird Mongo stuff)

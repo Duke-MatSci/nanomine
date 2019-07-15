@@ -28,7 +28,9 @@
               An essential component of computational material design involves microstructure analysis. Our user
               friendly webtools allow users to characterize microstructure images and reconstruct statistically
               equivalent microstructures. Users can choose among
-              multiple input formats as well as characterization and reconstruction methods.
+              multiple input formats as well as characterization and reconstruction methods. Available characterizationd
+              and reconstruction methods include: Correlation Functions (Two-point, Lineal Path, Cluster, and Surface),
+              Spectral Density Function (SDF), and Descriptors.
             </p>
           </v-card-text>
         </v-flex>
