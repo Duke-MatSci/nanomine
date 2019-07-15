@@ -76,11 +76,23 @@ print('MATLAB return code - rc: ' + str(rc))
 if rc ==0:
   file = open(jobDir+"/"+"job_output_parameters.json","w")
   file.write('{\n"inputFileName": "output/Input1.jpg",\n')
-  file.write('"ReconstructedFileName": "output/Reconstruct1.jpg",\n')
+  file.write('"SDFPlot": "output/SDF_2D.jpg",\n')
   file.write('"zipFileName": "output/Results.zip",\n')
   file.write('"errors": "output/errors.txt"\n}')
   file.close()
+else:
+  file = open(jobDir+"/"+"job_output_parameters.json","w")
+  file.write('{\n"errors": "output/errors.txt"\n}')
+  file.close()
 
+try:
+  with open(jobDir+"/"+"output/errors.txt") as f:
+    errmsgs = f.read()
+  errmsgs = str.replace(errmsgs, '\n','<br/>\n')
+except:
+  logging.info('exception reading otsu matlab job error messages')
+  logging.info('exception: ' + traceback.format_exc())
+  errmsgs = ''
 # If the NM_SMTP_TEST environment variable is set to true, then emails are not sent via email and are instead
 #   go into the rest server log file: nanomine/rest/nanomine.log.gz (log file name will get fixed soon)
 # templates are in rest/config/emailtemplates/JOBTYPE/TEMPLATENAME.etf (etf extension is required, but implied in POST data)

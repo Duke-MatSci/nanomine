@@ -4,7 +4,9 @@ function SDFCharacterize(userId, jobId, jobType, jobSrcDir, jobDir, webBaseUri,i
 % 1 : Single JPEG Image
 % 2 : ZIP file containing JPEG images
 % 3 : Image in .mat file
-%%
+%% Added changed
+% Accept Odd shaped images 
+% Binarize raw jpg image
 rc=0;
 try
     path_to_read = [jobSrcDir,'/'];
@@ -31,21 +33,21 @@ try
         case 2
             unzip([path_to_read,file_name],[path_to_write,'/input']);
         case 3
-path=[path_to_read,file_name];
-              k=load(path);
-              [no_need,f_name,ext]=fileparts(file_name);
-              try
-              img = getfield(k,f_name);
-              catch ex
-              rc = 98;
-                    msg = getReport(ex);
-                    writeError([path_to_write, '/errors.txt'], 'The variable name inside the material file shold be the same as the name of the file. Technical details below:');
-
-                    writeError([path_to_write, '/errors.txt'], msg);
-                    writeError([path_to_write, '/errors.txt'], sprintf('\n'));
-                    exit(rc);
-              end
-             % imwrite(img,[path_to_write,'/','Input1.jpg']);
+            path=[path_to_read,file_name];
+            k=load(path);
+            [no_need,f_name,ext]=fileparts(file_name);
+            try
+                img = getfield(k,f_name);
+            catch ex
+                rc = 98;
+                msg = getReport(ex);
+                writeError([path_to_write, '/errors.txt'], 'The variable name inside the material file shold be the same as the name of the file. Technical details below:');
+                
+                writeError([path_to_write, '/errors.txt'], msg);
+                writeError([path_to_write, '/errors.txt'], sprintf('\n'));
+                exit(rc);
+            end
+            % imwrite(img,[path_to_write,'/','Input1.jpg']);
             imwrite(256*img,[path_to_write,'/','Input1.jpg']);
     end
     
@@ -58,6 +60,11 @@ path=[path_to_read,file_name];
         else
             img_original = img;
         end
+        %%Umar added to deal with odd shaped images
+        
+        md=min(size(img_original));
+        img_original=img_original(1:md,1:md);
+        
         %% Umar added to check and binarize the image using Otsu 02/27/2019
         if max(img_original(:))>1
             Target = double(img_original);

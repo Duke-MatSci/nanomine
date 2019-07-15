@@ -14,7 +14,7 @@
 <template>
   <div class="CorrelationCharacterize">
     <h1>{{ msg }}</h1>
-    <v-container>
+    <v-container class="text-xs-left">
       <v-layout row wrap>
         <v-flex xs12>
           <h3>Description</h3>
@@ -86,14 +86,15 @@
           </v-list-tile>
         </v-list>
       </v-flex>
-      <v-btn v-on:click="submit()" color="primary">Characterize</v-btn>
+      <v-flex class="text-xs-center">
+        <v-btn v-on:click="submit()" color="primary">Characterize</v-btn>
+      </v-flex>
+      <h4>References</h4>
+      <v-flex xs12>
+        <p>Rintoul, M.D. and Torquato, S., 1997. Reconstruction of the structure of dispersions. <i>Journal of Colloid and Interface Science</i>, 186(2), pp.467-476.</p>
+        <p>Yeong,C. and Torquato,S., 1998. Reconstructing random media Physical Review E, vol. 57, no. 1, p. 495</p>
+      </v-flex>
     </v-container>
-
-    <h4>Reference</h4>
-    <v-flex xs12>
-      <p>Rintoul, M.D. and Torquato, S., 1997. Reconstruction of the structure of dispersions. Journal of Colloid and Interface Science, 186(2), pp.467-476.</p>
-      <p>Yeong,C. and Torquato,S., 1998. Reconstructing random media Physical Review E, vol. 57, no. 1, p. 495</p>
-    </v-flex>
   </div>
 </template>
 
