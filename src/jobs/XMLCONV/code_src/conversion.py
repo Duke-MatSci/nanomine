@@ -53,7 +53,7 @@ def uploadFilesAndAdjustXMLImageRefs(jobDir, schemaId, xmlId):
       nmCurateFiles = nm_rest(logging, sysToken, curateApiToken, curateRefreshToken, rq)
       r = nmCurateFiles.urlopen(json.dumps(curatefiledata).encode("utf8"))
       if r.getcode() == 201:
-        uploadId = json.loads(r.read())['data']['id']
+        uploadId = json.loads(r.read().decode("utf-8"))['data']['id']
         imageRef = webbase + '/nmr/blob?id=' + uploadId
         logging.debug('new image value for XML: ' + imageRef)
         f.text = imageRef # update XML node with new image reference
@@ -84,7 +84,7 @@ def uploadFilesAndAdjustXMLImageRefs(jobDir, schemaId, xmlId):
         nmCurateFiles = nm_rest(logging, sysToken, curateApiToken, curateRefreshToken, rq)
         r = nmCurateFiles.urlopen(json.dumps(curatefiledata).encode("utf8"))
         if r.getcode() == 201:
-          uploadId = json.loads(r.read())['data']['id']
+          uploadId = json.loads(r.read().decode("utf-8"))['data']['id']
           logging.debug('uploaded file ID: ' + uploadId)
           ## testing - raise ValueError('Upload of input successful. returned id: ' + uploadId) ## for testing
         else:
@@ -133,10 +133,11 @@ def conversion(jobDir, code_srcDir, xsdDir, templateName, user):
             if len(message.strip()) > 0:
                 messages.append(message.strip())    
     # check #4: check the schema validation results
-    with open(logName) as f:
+    with open(logName, 'r', encoding='utf-8') as f:
         vld_log = csv.DictReader(f)
         for row in vld_log:
-            if ID in row['xml directory']:
+            logging.info(str(row))
+            if ID in row['\ufeffxml directory']:
                 if "the atomic type 'xs:double'" in row['error']:
                     messages.append('[XML Schema Validation Error] ' + row['error'].strip() + ', should be a number.')
                 else:
