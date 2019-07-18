@@ -5,6 +5,7 @@ function DescriptorCharacterize(userId, jobId, jobType, jobSrcDir, jobDir, webBa
 % 2 : ZIP file containing JPEG images
 % 3 : Image in .mat file
 %%
+
 rc=0;
 
 
@@ -12,11 +13,12 @@ try
     
     path_to_read = [jobSrcDir,'/'];
     path_to_write = [jobSrcDir,'/output'];
+    mkdir(path_to_write);
     writeError([path_to_write, '/errors.txt'], ''); % ensure that errors.txt exists
     
-    %Umar commented out when directory already made - FOR TESTING
+    
     mkdir(path_to_write);
-    %Umar end
+    
     %
     %% Specify import function according to input option
     switch str2num(input_type)
@@ -35,26 +37,26 @@ try
         case 2
             img = unzip([path_to_read,file_name],[path_to_write,'/input']);
         case 3
-path=[path_to_read,file_name];
-k=load(path);
-[no_need,f_name,ext]=fileparts(file_name);
-try
-img = getfield(k,f_name);
-catch ex
-rc = 98;
-msg = getReport(ex);
-writeError([path_to_write, '/errors.txt'], 'The variable name inside the material file shold be the same as the name of the file. Technical details below:');
-writeError([path_to_write, '/errors.txt'], msg);
-writeError([path_to_write, '/errors.txt'], sprintf('\n'));
-exit(rc);
-end
+            path=[path_to_read,file_name];
+            k=load(path);
+            [no_need,f_name,ext]=fileparts(file_name);
+            try
+                img = getfield(k,f_name);
+            catch ex
+                rc = 98;
+                msg = getReport(ex);
+                writeError([path_to_write, '/errors.txt'], 'The variable name inside the material file shold be the same as the name of the file. Technical details below:');
+                writeError([path_to_write, '/errors.txt'], msg);
+                writeError([path_to_write, '/errors.txt'], sprintf('\n'));
+                exit(rc);
+            end
             imwrite(img,[path_to_write,'/','Input1.jpg']);
     end
     
     % run characterization algorithm
     addpath('./descriptor_char'); % add path of directory holding MAIN.m
     er=Descriptor_C2_Binary(path_to_write,str2num(input_type)); %
-    if er=1
+    if er==1
         writeError([path_to_write, '/errors.txt'], ['Some of the files in zip folder were not accessible ']);
         rc = 99;
         exit(rc);
@@ -69,10 +71,11 @@ end
         rc = 99;
         exit(rc);
     end
+
+end
+end
     function writeError(file, msg)
     f = fopen(file,'a+');
     fprintf(f, '%s\n', msg);
     fclose(f);
     end
-end
-

@@ -31,7 +31,7 @@ display('Before proceeding, please make sure the input image is binarized');
 % L2 = dim;
 VF = target_corrf(1,1);
 
-recon = zeros(L1, L2); 
+recon = zeros(L1, L2);
 % randomly initialize a microstructure with VF
 list = randperm(L1*L2);
 idx = round(length(list)*VF);
@@ -52,7 +52,7 @@ xx = 0 : N-1;
 x2 = 0 : length(f_obj) - 1;
 f_obj1 = interp1(x2, f_obj, xx, 'spline');
 
-niter = 1;
+niter = 1e5;
 err = 1e5;
 tol = 1e-5;
 
@@ -69,16 +69,16 @@ for i = 1 : niter
     zero_list = find_edge_0(recon);
     idx1 = randi(length(one_list));
     idx2 = randi(length(zero_list));
-    
+
     temp = recon;
     row1 = one_list(idx1, 1);
     col1 = one_list(idx1, 2);
     row2 = zero_list(idx2, 1);
     col2 = zero_list(idx2, 2);
-    
+
     temp(row1, col1) = 0;
     temp(row2, col2) = 1;
-    
+
     f_cur = calc_Corr(temp);
     x1 = 0:length(f_cur)-1;
     x1 = x1/L1.*L1;
@@ -93,7 +93,7 @@ for i = 1 : niter
         zero_list(idx2, 2) = col1;
         err = diff;
     end
-    
+
 end
 
 % eval1 = evaluate(img);
@@ -101,7 +101,7 @@ end
 % eval2 = evaluate(recon);
 % xx2 = 0: length(eval2) -1;
 % xx2 = xx2./dim.*L1;
-% 
+%
 % plot(xx1, eval1);
 % hold on;
 % plot(xx2, eval2, 'r');
