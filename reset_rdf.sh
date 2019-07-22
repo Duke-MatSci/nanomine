@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+echo do not use this script!
+exit
 pushd /apps/whyis
 echo "Clearing knowledge namespace"
 curl -X DELETE http://localhost:8080/blazegraph/namespace/knowledge
