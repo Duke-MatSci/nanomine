@@ -35,6 +35,7 @@ Config = dict(
 
     site_description = 'Material Informatics for Polymer Nanocomposites',
 
+    app_path = '/apps/nanomine',
     root_path = '/apps/whyis',
 
     # use TESTING mode?

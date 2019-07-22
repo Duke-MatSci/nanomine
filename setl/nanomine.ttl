@@ -1,20 +1,14 @@
 @prefix : <http://nanomine.org/> .
 @prefix bibo: <http://purl.org/ontology/bibo/> .
-@prefix chear: <http://hadatac.org/ont/chear#> .
-@prefix cmo: <http://purl.org/twc/ontologies/cmo.owl#> .
-@prefix dc: <http://purl.org/dc/terms/> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix nanomine: <http://nanomine.org/ns/> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix prov: <http://www.w3.org/ns/prov#> .
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix sio: <http://semanticscience.org/resource/> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
-@prefix xml: <http://www.w3.org/XML/1998/namespace> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-<file:///apps/nanomine/setl/nan> a owl:Class ;
+<file:///apps/nanomine-graph/setl/nan> a owl:Class ;
     rdfs:label "nan" .
 
 :ns a owl:Ontology ;
@@ -66,13 +60,13 @@ nanomine:Atactic a owl:Class ;
 
 nanomine:AtomicForceMicroscopy a owl:Class ;
     rdfs:label "Atomic Force Microscopy" ;
-    nanomine:hasSelector "2" ;
+    nanomine:hasSelector "//Atomic_Force_Microscopy" ;
     rdfs:subClassOf [ a owl:Restriction ;
             owl:onProperty prov:generated ;
-            owl:someValuesFrom nanomine:ViscoelasticProperty ],
+            owl:someValuesFrom nanomine:MechanicalProperty ],
         [ a owl:Restriction ;
             owl:onProperty prov:generated ;
-            owl:someValuesFrom nanomine:MechanicalProperty ],
+            owl:someValuesFrom nanomine:ViscoelasticProperty ],
         sio:Measuring ;
     skos:definition "Nanoscale probing of material surface characteristics" .
 
@@ -166,6 +160,11 @@ nanomine:CompressiveLoadingProfile a owl:Class ;
     rdfs:subClassOf nanomine:CompressionProperty ;
     skos:definition "Stress vs. strain curve of during compressive loading and/or unloading test" .
 
+nanomine:CompressiveToughness a owl:Class ;
+    rdfs:label "Compressive Toughness" ;
+    nanomine:hasSelector "//CompressiveToughness" ;
+    rdfs:subClassOf nanomine:CompressionProperty .
+
 nanomine:ConePlateRheometery a owl:Class ;
     rdfs:label "Cone-Plate Rheometry" ;
     nanomine:hasSelector "//Rheometery[RheometerType='cone-plate']" ;
@@ -214,7 +213,7 @@ nanomine:DSC_Profile a owl:Class ;
     rdfs:subClassOf nanomine:ThermalProperty ;
     skos:definition "Heat flow vs temperature out of a differential scanning calorimetry experiment" .
 
-nanomine:DegreeOfCrystallinity a owl:Class ;
+nanomine:DegreeOfCrystallization a owl:Class ;
     rdfs:label "Degree of Crystallinity" ;
     nanomine:hasSelector "//DegreeOfCrystallinity" ;
     rdfs:subClassOf nanomine:Crystallinity ;
@@ -283,6 +282,15 @@ nanomine:DynamicMechanicalAnalysis a owl:Class ;
             owl:someValuesFrom nanomine:ViscoelasticProperty ],
         sio:Measuring ;
     skos:definition "Method to get viscoelastic behavior of materials with controlled temperature and frequency" .
+
+nanomine:DynamicProperty a owl:Class ;
+    rdfs:label "Dynamic Property" ;
+    rdfs:subClassOf nanomine:ViscoelasticProperty .
+
+nanomine:DynamicViscosity a owl:Class ;
+    rdfs:label "Dynamic Viscosity" ;
+    nanomine:hasSelector "//DynamicViscosity" ;
+    rdfs:subClassOf nanomine:RheologicalViscosity .
 
 nanomine:Elastomer a owl:Class ;
     rdfs:label "Elastomer" ;
@@ -383,9 +391,9 @@ nanomine:FiberTensileStrength a owl:Class ;
         nanomine:TensileProperty ;
     skos:definition "Tensile Stress along grain direction in fibers" .
 
-nanomine:Filler a owl:Class ;
-    rdfs:label "Filler" ;
-    rdfs:subClassOf sio:Role .
+nanomine:FillerComponenet a owl:Class ;
+    rdfs:label "Filler Component" ;
+    rdfs:subClassOf nanomine:Filler .
 
 nanomine:FlexuralCreepRuptureStrength a owl:Class ;
     rdfs:label "Flexural Creep Rupture Strength" ;
@@ -444,6 +452,11 @@ nanomine:FlexuralStressAtYield a owl:Class ;
         nanomine:FlexuralProperty ;
     skos:definition "Flexural stress corresponding to the yield point" .
 
+nanomine:FlexuralToughness a owl:Class ;
+    rdfs:label "Flexural Toughness" ;
+    nanomine:hasSelector "//FlexuralToughness" ;
+    rdfs:subClassOf nanomine:FlexuralProperty .
+
 nanomine:FourierTransformInfraredSpectroscopy a owl:Class ;
     rdfs:label "Fourier Transform Infrared Spectroscopy" ;
     nanomine:hasSelector "//Fourier_Transform_Infrared_Spectroscopy" ;
@@ -484,6 +497,21 @@ nanomine:Hardner a owl:Class ;
     rdfs:label "Hardener" ;
     rdfs:subClassOf nanomine:Additive ;
     skos:definition "A chemical additive that increases the viscosity of a polymer." .
+
+nanomine:HardnessScale a owl:Class ;
+    rdfs:label "Hardness Scale" ;
+    nanomine:hasSelector "//HardnessScale" ;
+    rdfs:subClassOf nanomine:HardnessProperty .
+
+nanomine:HardnessTestStandard a owl:Class ;
+    rdfs:label "Hardness Test Standard" ;
+    nanomine:hasSelector "//HardnessTestStandard" ;
+    rdfs:subClassOf nanomine:HardnessProperty .
+
+nanomine:HardnessValue a owl:Class ;
+    rdfs:label "Hardness Value" ;
+    nanomine:hasSelector "//HardnessValue" ;
+    rdfs:subClassOf nanomine:HardnessProperty .
 
 nanomine:HeatOfCrystallization a owl:Class ;
     rdfs:label "Heat Of Crystallization" ;
@@ -535,11 +563,10 @@ nanomine:IZOD_ImpactEnergy a owl:Class ;
         nanomine:MechanicalProperty ;
     skos:definition "Energy absorbed by the sample during Izod impact testing, as calculated by the height of swing arm" .
 
-nanomine:Impact a owl:Class ;
-    rdfs:label "Impact" ;
-    nanomine:hasSelector "//Impact" ;
-    rdfs:subClassOf nanomine:FractureToughnessProperty ;
-    skos:definition "Izod impact resistance of materials" .
+nanomine:ImpactToughness a owl:Class ;
+    rdfs:label "Impact Toughness" ;
+    nanomine:hasSelector "//ImpactToughness" ;
+    rdfs:subClassOf nanomine:Impact .
 
 nanomine:Impedance a owl:Class ;
     rdfs:label "nan" ;
@@ -611,6 +638,11 @@ nanomine:Matrix a owl:Class ;
     rdfs:label "Matrix" ;
     rdfs:subClassOf sio:Role .
 
+nanomine:MeltViscosity a owl:Class ;
+    rdfs:label "Melt Viscosity" ;
+    nanomine:hasSelector "//MeltViscosity" ;
+    rdfs:subClassOf nanomine:RheologicalViscosity .
+
 nanomine:MeltingTemperature a owl:Class ;
     rdfs:label "Melting Temperature" ;
     nanomine:hasSelector "//MeltingTemperature" ;
@@ -647,10 +679,10 @@ nanomine:OpticalMicroscopy a owl:Class ;
     nanomine:hasSelector "//OpticalMicroscopy" ;
     rdfs:subClassOf [ a owl:Restriction ;
             owl:onProperty prov:generated ;
-            owl:someValuesFrom nanomine:ViscoelasticProperty ],
+            owl:someValuesFrom nanomine:MechanicalProperty ],
         [ a owl:Restriction ;
             owl:onProperty prov:generated ;
-            owl:someValuesFrom nanomine:MechanicalProperty ],
+            owl:someValuesFrom nanomine:ViscoelasticProperty ],
         sio:Measuring ;
     skos:definition "Magnification of small objects with visible light" .
 
@@ -739,6 +771,31 @@ nanomine:ReviewArticle a owl:Class ;
     rdfs:label "Review Article" ;
     rdfs:subClassOf bibo:AcademicArticle .
 
+nanomine:RheologicalLossModulus a owl:Class ;
+    rdfs:label "Rheological Loss Modulus" ;
+    nanomine:hasSelector "//RheologicalLossModulus" ;
+    rdfs:subClassOf nanomine:RheologicalComplexModulus .
+
+nanomine:RheologicalLossTangent a owl:Class ;
+    rdfs:label "Rheological Loss Tangent" ;
+    nanomine:hasSelector "//RheologicalLossTangent" ;
+    rdfs:subClassOf nanomine:RheologicalComplexModulus .
+
+nanomine:RheologicalMasterCurve a owl:Class ;
+    rdfs:label "Rheological Master Curve" ;
+    nanomine:hasSelector "//RheologicalMasterCurve" ;
+    rdfs:subClassOf nanomine:RheologicalComplexModulus .
+
+nanomine:RheologicalStorageModulus a owl:Class ;
+    rdfs:label "Rheological Storage Modulus" ;
+    nanomine:hasSelector "//RheologicalStorageModulus" ;
+    rdfs:subClassOf nanomine:RheologicalComplexModulus .
+
+nanomine:RheometerMode a owl:Class ;
+    rdfs:label "Rheometer Mode" ;
+    nanomine:hasSelector "//RheometerMode" ;
+    rdfs:subClassOf nanomine:RheologicalComplexModulus .
+
 nanomine:ScanningElectronMicroscopy a owl:Class ;
     rdfs:label "Scanning Electron Microscopy" ;
     nanomine:hasSelector "//Scanning_Electron_Microscopy" ;
@@ -747,19 +804,19 @@ nanomine:ScanningElectronMicroscopy a owl:Class ;
             owl:someValuesFrom nanomine:AcceleratingVoltage ],
         [ a owl:Restriction ;
             owl:onProperty prov:used ;
+            owl:someValuesFrom nanomine:EmissionCurrent ],
+        [ a owl:Restriction ;
+            owl:onProperty prov:used ;
             owl:someValuesFrom nanomine:WorkingDistance ],
-        [ a owl:Restriction ;
-            owl:onProperty prov:used ;
-            owl:someValuesFrom nanomine:ExposureTime ],
-        [ a owl:Restriction ;
-            owl:onProperty prov:used ;
-            owl:someValuesFrom nanomine:Magnification ],
         [ a owl:Restriction ;
             owl:onProperty prov:generated ;
             owl:someValuesFrom nanomine:ElectricalProperty ],
         [ a owl:Restriction ;
             owl:onProperty prov:used ;
-            owl:someValuesFrom nanomine:EmissionCurrent ],
+            owl:someValuesFrom nanomine:Magnification ],
+        [ a owl:Restriction ;
+            owl:onProperty prov:used ;
+            owl:someValuesFrom nanomine:ExposureTime ],
         sio:Measuring ;
     skos:definition "Scanning electron microscopy for obtaining microstructure at microscale" .
 
@@ -818,6 +875,10 @@ nanomine:SpecificHeatCapacity_Cv a owl:Class ;
         nanomine:ThermalProperty ;
     skos:definition "Cv for a gas is the change in internal energy (U) of a system with respect to change in temperature at a fixed volume of the system" .
 
+nanomine:SpecificSurfaceArea a owl:Class ;
+    rdfs:label "Specific Surface Area" ;
+    rdfs:subClassOf sio:SurfaceArea .
+
 nanomine:Strain a owl:Class ;
     rdfs:label "Strain" ;
     rdfs:subClassOf nanomine:MechanicalProperty ;
@@ -873,8 +934,14 @@ nanomine:TechnicalComment a owl:Class ;
     rdfs:label "Technical Comment" ;
     rdfs:subClassOf bibo:Document .
 
+nanomine:TemperatureSweep a owl:Class ;
+    rdfs:label "Temperature Sweep" ;
+    nanomine:hasSelector "//Temperature Sweep" ;
+    rdfs:subClassOf nanomine:DMA_Mode .
+
 nanomine:Tensile a owl:Class ;
     rdfs:label "Tensile" ;
+    nanomine:hasSelector "//MeasurementMode" ;
     rdfs:subClassOf nanomine:ViscoelasticProperty .
 
 nanomine:TensileCreepCompliance a owl:Class ;
@@ -955,6 +1022,11 @@ nanomine:TensileStressAtYield a owl:Class ;
         nanomine:TensileProperty ;
     skos:definition "Tensile stress corresponding to the yield point (an increase in strain does not result in an increase in stress)." .
 
+nanomine:TensileToughness a owl:Class ;
+    rdfs:label "Tensile Toughness" ;
+    nanomine:hasSelector "//TensileToughness" ;
+    rdfs:subClassOf nanomine:TensileProperty .
+
 nanomine:ThermalConductivity a owl:Class ;
     rdfs:label "Thermal Conductivity" ;
     nanomine:hasSelector "//ThermalConductivity" ;
@@ -1017,23 +1089,23 @@ nanomine:TransmissionElectronMicroscopy a owl:Class ;
     rdfs:label "Transmission Electron Microscopy" ;
     nanomine:hasSelector "//Transmission_Electron_Microscopy" ;
     rdfs:subClassOf [ a owl:Restriction ;
+            owl:onProperty prov:generated ;
+            owl:someValuesFrom nanomine:ElectricalProperty ],
+        [ a owl:Restriction ;
             owl:onProperty prov:used ;
             owl:someValuesFrom nanomine:Magnification ],
+        [ a owl:Restriction ;
+            owl:onProperty prov:used ;
+            owl:someValuesFrom nanomine:AcceleratingVoltage ],
         [ a owl:Restriction ;
             owl:onProperty prov:used ;
             owl:someValuesFrom nanomine:ExposureTime ],
         [ a owl:Restriction ;
             owl:onProperty prov:used ;
-            owl:someValuesFrom nanomine:EmissionCurrent ],
-        [ a owl:Restriction ;
-            owl:onProperty prov:used ;
             owl:someValuesFrom nanomine:WorkingDistance ],
         [ a owl:Restriction ;
-            owl:onProperty prov:generated ;
-            owl:someValuesFrom nanomine:ElectricalProperty ],
-        [ a owl:Restriction ;
             owl:onProperty prov:used ;
-            owl:someValuesFrom nanomine:AcceleratingVoltage ],
+            owl:someValuesFrom nanomine:EmissionCurrent ],
         sio:Measuring ;
     skos:definition "Transmission electron microscopy for obtaining microstructure at nanoscale" .
 
@@ -1108,9 +1180,6 @@ sio:AspectRatio a owl:Class ;
 sio:Density a owl:Class ;
     rdfs:label "Density" .
 
-sio:SurfaceArea a owl:Class ;
-    rdfs:label "Surface Area" .
-
 nanomine:Additive a owl:Class ;
     rdfs:label "Additive" ;
     rdfs:subClassOf sio:ChemicalSubstance ;
@@ -1126,10 +1195,27 @@ nanomine:CoolingRate a owl:Class ;
     nanomine:hasSelector "//CoolingRate" ;
     rdfs:subClassOf sio:Parameter .
 
+nanomine:DMA_Mode a owl:Class ;
+    rdfs:label "Dynamic Mechanical Analysis" ;
+    nanomine:hasSelector "//DMA_Mode" ;
+    rdfs:subClassOf nanomine:DynamicProperties,
+        <obo:ID_0000061> .
+
+nanomine:Filler a owl:Class ;
+    rdfs:label "Filler" ;
+    rdfs:subClassOf <file:///>,
+        sio:Role .
+
 nanomine:HeatingRate a owl:Class ;
     rdfs:label "Heating Rate" ;
     nanomine:hasSelector "//HeatingRate" ;
     rdfs:subClassOf sio:Parameter .
+
+nanomine:Impact a owl:Class ;
+    rdfs:label "Impact" ;
+    nanomine:hasSelector "//Impact" ;
+    rdfs:subClassOf nanomine:FractureToughnessProperty ;
+    skos:definition "Izod impact resistance of materials" .
 
 nanomine:Nanocomposite a owl:Class ;
     rdfs:label "Nanocomposite" ;
@@ -1177,6 +1263,9 @@ bibo: rdfs:label "BIBO" .
 
 <http://semanticscience.org/ontology/sio-subset-labels.owl> rdfs:label "SIO" .
 
+sio:SurfaceArea a owl:Class ;
+    rdfs:label "Surface Area" .
+
 <http://www.nanopub.org/nschema#> rdfs:label "Nanopub" .
 
 nanomine:AcceleratingVoltage a owl:Class ;
@@ -1209,6 +1298,15 @@ nanomine:Nanomaterial a owl:Class ;
     skos:definition "materials of which a single unit is sized (in at least one dimension) between 1 and 1000 nanometres (10−9 meter) but is usually 1—100 nm" ;
     prov:wasQuotedFrom "https://en.wikipedia.org/wiki/Nanomaterials" .
 
+nanomine:RheologicalProperty a owl:Class ;
+    rdfs:label "Rheological Property" ;
+    rdfs:subClassOf sio:Quantity .
+
+nanomine:RheologicalViscosity a owl:Class ;
+    rdfs:label "Rheological Viscosity" ;
+    nanomine:hasSelector "//RheologicalViscosity" ;
+    rdfs:subClassOf nanomine:RheologicalProperty .
+
 nanomine:WorkingDistance a owl:Class ;
     rdfs:label "Working Distance" ;
     nanomine:hasSelector "//WorkingDistance" ;
@@ -1235,6 +1333,10 @@ nanomine:FlexuralCreep a owl:Class ;
     rdfs:subClassOf nanomine:Creep ;
     skos:definition "creep during flexural or bending test" .
 
+nanomine:HardnessProperty a owl:Class ;
+    rdfs:label "Hardness Property" ;
+    rdfs:subClassOf sio:Quantity .
+
 nanomine:Plastic a owl:Class ;
     rdfs:label "Plastic" ;
     rdfs:subClassOf sio:Polymer ;
@@ -1245,21 +1347,16 @@ nanomine:Rheometery a owl:Class ;
     rdfs:label "Rheometry" ;
     nanomine:hasSelector "//Rheometery" ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:onProperty prov:generated ;
-            owl:someValuesFrom nanomine:ViscoelasticProperty ],
-        [ a owl:Restriction ;
             owl:onProperty prov:used ;
             owl:someValuesFrom nanomine:CapillarySize ],
+        [ a owl:Restriction ;
+            owl:onProperty prov:generated ;
+            owl:someValuesFrom nanomine:ViscoelasticProperty ],
         sio:Measuring ;
     skos:definition "Measurement of the quantitative and qualitative relationships between deformations and stresses and their derivatives" .
 
 <http://nanomine.org/ns/unit/s> a sio:UnitOfMeasurement ;
     rdfs:label "s" .
-
-nanomine:FlexuralProperty a owl:Class ;
-    rdfs:label "Flexural Property" ;
-    rdfs:subClassOf nanomine:MechanicalProperty ;
-    skos:definition "Properties of how the material will react to forces being applied in bending" .
 
 nanomine:FractureToughnessProperty a owl:Class ;
     rdfs:label "Fracture Toughness Property" ;
@@ -1287,15 +1384,20 @@ sio:Polymer a owl:Class ;
     rdfs:label "Polymer" ;
     rdfs:subClassOf sio:Molecule .
 
-nanomine:CompressionProperty a owl:Class ;
-    rdfs:label "Compression Property" ;
-    rdfs:subClassOf nanomine:MechanicalProperty ;
-    skos:definition "Properties of how the material will react to forces being applied in compression" .
-
 nanomine:Crystallinity a owl:Class ;
     rdfs:label "Crystallinity" ;
     rdfs:subClassOf nanomine:ThermalProperty ;
     skos:definition "degree of structural order in a solid" .
+
+nanomine:FlexuralProperty a owl:Class ;
+    rdfs:label "Flexural Property" ;
+    rdfs:subClassOf nanomine:MechanicalProperty ;
+    skos:definition "Properties of how the material will react to forces being applied in bending" .
+
+nanomine:RheologicalComplexModulus a owl:Class ;
+    rdfs:label "Rheological Complex Modulus" ;
+    nanomine:hasSelector "//RheologicalComplexModulus" ;
+    rdfs:subClassOf nanomine:RheologicalProperty .
 
 nanomine:Spectroscopy a owl:Class ;
     rdfs:label "Spectroscopy" ;
@@ -1308,6 +1410,11 @@ nanomine:Spectroscopy a owl:Class ;
 
 <http://nanomine.org/ns/unit/k> a sio:UnitOfMeasurement ;
     rdfs:label "K" .
+
+nanomine:CompressionProperty a owl:Class ;
+    rdfs:label "Compression Property" ;
+    rdfs:subClassOf nanomine:MechanicalProperty ;
+    skos:definition "Properties of how the material will react to forces being applied in compression" .
 
 nanomine:TensileCreep a owl:Class ;
     rdfs:label "Tensile Creep" ;
@@ -1327,14 +1434,14 @@ nanomine:TensileProperty a owl:Class ;
     rdfs:subClassOf nanomine:MechanicalProperty ;
     skos:definition "Properties of how the material will react to forces being applied in tension." .
 
+nanomine:MechanicalProperty a owl:Class ;
+    rdfs:label "Mechanical Property" ;
+    rdfs:subClassOf sio:Quantity .
+
 nanomine:ViscoelasticProperty a owl:Class ;
     rdfs:label "Viscoelastic Property" ;
     rdfs:subClassOf sio:Quantity ;
     skos:definition "Properties of materials that exhibit both viscous and elastic behaviors" .
-
-nanomine:MechanicalProperty a owl:Class ;
-    rdfs:label "Mechanical Property" ;
-    rdfs:subClassOf sio:Quantity .
 
 nanomine:ThermalProperty a owl:Class ;
     rdfs:label "Thermal Property" ;
