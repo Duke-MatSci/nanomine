@@ -34,7 +34,6 @@ Config = dict(
     site_header_image = '/static/images/random_network.png',
 
     site_description = 'Material Informatics for Polymer Nanocomposites',
-
     app_path = '/apps/nanomine',
     root_path = '/apps/whyis',
 
@@ -176,7 +175,7 @@ Config = dict(
 #              )
     ],
 
-    base_rate_probability = 0.5
+    base_rate_probability = 0.8
 )
 
 
