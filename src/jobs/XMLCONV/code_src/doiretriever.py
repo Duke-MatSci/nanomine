@@ -1,12 +1,12 @@
 ## DOI information extraction tool developed by Bingyin Hu
 from bs4 import BeautifulSoup
 import os
-import mechanize
+import mechanicalsoup
 import ast
 import collections
 from datetime import date # for logging the Date of Citation
 from doiquery import runDOIquery # query
-from urllib import quote_plus
+from urllib.parse import quote_plus
 ### This script is used to retrieve meta datas based on the input doi string.
 ### Different publisher have different meta data format embedded in their sites,
 ### Based on the publisher, we will determine our way to collect meta datas.
@@ -139,7 +139,7 @@ general  = {"Publication": ["citation_journal_title", "prism.publicationName"],
 ################################################################################
 # input a string of doi, output the url
 def doiToURL(doi):
-    assert(type(doi) == str or type(doi) == unicode)
+    assert(type(doi) == str)
     url = "http://doi.org/" + doi
     # exception for t&f publishing:
     # International Journal of Smart and Nano Materials
@@ -244,12 +244,9 @@ def getPublisher(url):
 
 # fetch the redirected url and publisher  
 def fetchRdrctURLPub(url):
-    browser = mechanize.Browser()
-    browser.set_handle_robots(False)
-    browser.addheaders = [("User-agent", "Chrome")]
-##    browser.addheaders = [('User-agent', 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11'), ('Accept', '*/*')]
+    browser = mechanicalsoup.StatefulBrowser(user_agent='Chrome')
     fin = browser.open(url)
-    newURL = fin.geturl()
+    newURL = browser.get_url()
     # elsevier's redirection does not take us to the final page
     if ("linkinghub.elsevier.com" in newURL):
         newURL = ("https://www.sciencedirect.com/science/article" +
@@ -260,22 +257,16 @@ def fetchRdrctURLPub(url):
     return (newURL, publisher)
 
 def fetchSoupByURL(url):
-    browser = mechanize.Browser()
-    browser.set_handle_robots(False)
-    browser.addheaders = [("User-agent", "Chrome")]
-##    browser.addheaders = [('User-agent', 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11'), ('Accept', '*/*')]
+    browser = mechanicalsoup.StatefulBrowser(user_agent='Chrome')
     fin = browser.open(url)
-    soup = BeautifulSoup(fin, 'html5lib')
+    soup = fin.soup
     browser.close()
     return soup
 
 def fetchTxtByURL(url):
-    browser = mechanize.Browser()
-    browser.set_handle_robots(False)
-    browser.addheaders = [("User-agent", "Chrome")]
-##    browser.addheaders = [('User-agent', 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11'), ('Accept', '*/*')]
+    browser = mechanicalsoup.StatefulBrowser(user_agent='Chrome')
     fin = browser.open(url)
-    txt = fin.read()
+    txt = fin.text
     browser.close()
     return txt
 
@@ -405,7 +396,7 @@ def elsevierMeta(soup, txt, doi, url):
     
     # put them into outputDict
     if len(author_fname) == len(author_lname):
-        for x in xrange(len(author_fname)):
+        for x in range(len(author_fname)):
             outputDict["Author"].append(author_fname[x] + " " + author_lname[x])
         # now eliminate duplicate names
         outputDict["Author"] = noDup(outputDict["Author"])
@@ -415,7 +406,7 @@ def elsevierMeta(soup, txt, doi, url):
     # occurrence of "authors":{"content":[ in txt
     institution = txtDigger(txt, '''{"#name":"textfn","_":''',
                             '''"authors":{"content":[''')
-    for x in xrange(len(institution)):
+    for x in range(len(institution)):
         outputDict["Institution"].append(institution[x])
     # now eliminate duplicate names
     outputDict["Institution"] = noDup(outputDict["Institution"])
@@ -423,7 +414,7 @@ def elsevierMeta(soup, txt, doi, url):
     # Keyword
     keywords = txtDigger(txt,
                          '''{"#name":"keyword","$$":[{"#name":"text","_":''', '')
-    for x in xrange(len(keywords)):
+    for x in range(len(keywords)):
         # some Elsevier journals have keywords starting with "A. ", "B. ", etc.
         pre = keywords[x].split(" ")[0]
         if len(pre) == 2 and pre[1] == "." and (pre[0].isupper() or pre[0].isdigit()):
@@ -473,11 +464,11 @@ def aipMeta(soup, doi, url):
 ##    country = getTagStringFromSoup(tagSpans, "country", "class")
 ##    # assemble the insitution and the country into outputDict
 ##    if (len(institution) == len(country)):
-##        for x in xrange(len(institution)):
+##        for x in range(len(institution)):
 ##            outputDict["Institution"].append(institution[x] + ", " +
 ##                                             country[x])
 ##    if (len(country) == 0):
-##        for x in xrange(len(institution)):
+##        for x in range(len(institution)):
 ##            outputDict["Institution"].append(institution[x])
     # Institution (latest version)
     inst = '' # initialize inst
@@ -541,7 +532,7 @@ def acsMeta(soup, doi, url):
     for ele in tagTitle.string.split("-"):
         if ("(ACS Publications)" in ele):
             # we want whatever before "(ACS Publications"
-            outputDict["Publication"] = [unicode(ele.split("(ACS")[0].strip())]
+            outputDict["Publication"] = [str(ele.split("(ACS")[0].strip())]
     #Volume, and Issue
     for tagDiv in tagDivs:
         if ("id" in tagDiv.attrs):
@@ -592,7 +583,7 @@ def acsMeta(soup, doi, url):
         assert(key in outputDict)
         outputDict[key] = getMetaFromSoup(metas, acs[key])
     # acs might put labels with authors' name, need to get rid of them
-    for name in xrange(len(outputDict["Author"])):
+    for name in range(len(outputDict["Author"])):
         trueName = outputDict["Author"][name].split(",")[0]
         # truncate the name until its last char is an alphabet
         while (not trueName[-1].isalpha()):
@@ -701,7 +692,7 @@ def tfMeta(soup, doi, url):
             if (type(tagSpan["class"]) == list):
                 if ("overlay" in tagSpan["class"]):
                     outputDict["Institution"].append(tagSpan.contents[0].strip())
-            if (type(tagSpan["class"]) == unicode):
+            if (type(tagSpan["class"]) == str):
                 if (tagSpan["class"] == "overlay"):
                     outputDict["Institution"].append(tagSpan.contents[0].strip())
     outputDict["Institution"] = noDup(outputDict["Institution"])
@@ -842,7 +833,7 @@ def aiaaMeta(soup, doi, url):
     outputDict["Publisher"] = ["American Institute of Aeronautics and Astronautics"]
     # PublicationYear
     # extract from doi: 10.2514/6.2014-0816  10.2514/6.2003-1702
-    year = unicode(doi.split("-")[0].split(".")[-1])
+    year = str(doi.split("-")[0].split(".")[-1])
     outputDict["PublicationYear"] = [year]
     # Title, Author
     tagSpans = soup.find_all("span")
@@ -1013,7 +1004,7 @@ def ieeeMeta(txt, doi, url):
 
     # Keyword Example: "keywords":[{"type":"IEEE Keywords","kwd":["Electric breakdown","Conductivity","Nanostructured materials","Conducting materials","Dielectric materials","Dielectrics and electrical insulation","Polyethylene","Magnesium oxide","Dielectric measurements","Volume measurement"]},{"type":"INSPEC: Controlled Indexing","kwd":["power cable insulation","electric breakdown","filled polymers","magnesium compounds","nanocomposites","polyethylene insulation"]},{"type":"INSPEC: Non-Controlled Indexing","kwd":["MgO","DC breakdown strength","conduction current","magnesium oxide-LDPE composite material","filler size","electrical insulation","impulse breakdown strength","low-density polyethylene","McKeown type electrode"]}],"
     if ('"keywords"' in metas):
-        keyword_left = metas.index('"keywords"')
+        keyword_left = metas.index('"keywords":[')
         keyword_right = metas.index('],"', keyword_left) + 1
         keyword = metas[keyword_left:keyword_right]
         # now make it a dictionary using ast package
@@ -1022,7 +1013,7 @@ def ieeeMeta(txt, doi, url):
             if ("kwd" in keywordSubDict):
                 outputDict["Keyword"] += keywordSubDict["kwd"]
         outputDict["Keyword"] = noDup(outputDict["Keyword"])
-        for kwd in xrange(len(outputDict["Keyword"])):
+        for kwd in range(len(outputDict["Keyword"])):
             outputDict["Keyword"][kwd] = bracketRemove(outputDict["Keyword"][kwd], "")
         
     # Title Example: "formulaStrippedArticleTitle":"DC Breakdown Strength and Conduction Current of MgO/LDPE Composite Influenced by Filler Size","
@@ -1032,7 +1023,7 @@ def ieeeMeta(txt, doi, url):
         title = metas[title_left:title_right]
         # now make it a dictionary using ast package
         titleDict = ast.literal_eval("{" + title + "}")
-        outputDict["Title"] = [bracketRemove(titleDict.values()[0], "")]
+        outputDict["Title"] = [bracketRemove(list(titleDict.values())[0], "")]
     
     # Publication Example: "displayPublicationTitle":"Electrical Insulation and Dielectric Phenomena, 2008. CEIDP 2008. Annual Report Conference on","    
     if ('"displayPublicationTitle"' in metas):
@@ -1041,7 +1032,7 @@ def ieeeMeta(txt, doi, url):
         pub = metas[pub_left:pub_right]
         # now make it a dictionary using ast package
         pubDict = ast.literal_eval("{" + pub + "}")
-        outputDict["Publication"] = pubDict.values()
+        outputDict["Publication"] = list(pubDict.values())
     
     # Publication Date Example: "publicationDate":"Oct. 2008","
     if ('"publicationDate"' in metas):
@@ -1050,7 +1041,7 @@ def ieeeMeta(txt, doi, url):
         pubDate = metas[pubDate_left:pubDate_right]
         # now make it a dictionary using ast package
         pubDateDict = ast.literal_eval("{" + pubDate + "}")
-        outputDict["PublicationYear"] = pubDateDict.values()
+        outputDict["PublicationYear"] = list(pubDateDict.values())
     
     # Publisher = "IEEE"
     outputDict["Publisher"] = ["IEEE"]
@@ -1063,14 +1054,14 @@ def ieeeMeta(txt, doi, url):
         vol = metas[vol_left:vol_right]
         # now make it a dictionary using ast package
         volDict = ast.literal_eval("{" + vol + "}")
-        outputDict["Volume"] = volDict.values()
+        outputDict["Volume"] = list(volDict.values())
         # issue
         issue_left = metas.index('"issue"')
         issue_right = metas.index('","', issue_left) + 1
         issue = metas[issue_left:issue_right]
         # now make it a dictionary using ast package
         issueDict = ast.literal_eval("{" + issue + "}")
-        outputDict["Issue"] = issueDict.values()
+        outputDict["Issue"] = list(issueDict.values())
         
     # URL is put manually
     outputDict["URL"] = [url]
@@ -1106,7 +1097,7 @@ def bracketRemove(myStr, sep):
     myStrNew = myStr
     if (">" in myStr):
         myStrList = myStr.split(">")
-        for x in xrange(len(myStrList)):
+        for x in range(len(myStrList)):
             ele = myStrList[x]
             if ("<" in ele):
                 if (ele.index("<") == 0 or "/sup" in ele):
@@ -1166,7 +1157,7 @@ def getTagStringFromSoup(tags, myID, pageID):
             if (type(tag[pageID]) == list):
                 if (myID in tag[pageID]):
                     vessel.append(tag.string)
-            if (type(tag[pageID]) == unicode):
+            if (type(tag[pageID]) == str):
                 if (tag[pageID] == myID):
                     vessel.append(tag.string)
     return vessel
@@ -1194,7 +1185,7 @@ def getMetaFromSoup(metas, name):
 def makeMetaDict(doi):
     pairs = [("CitationType", []), ("Publication", []), ("Title", []),
              ("Author", []), ("Keyword", []), ("Publisher", []),
-             ("PublicationYear", []), ("DOI", [unicode(doi)]), ("Volume", []),
+             ("PublicationYear", []), ("DOI", [str(doi)]), ("Volume", []),
              ("URL", []), ("Language", [u'English']), ("Institution", []),
              ("DateOfCitation", []), ("ISSN", []), ("Issue", [])]
     metaDict = collections.OrderedDict(pairs) # initialize the dictionary
@@ -1219,12 +1210,12 @@ def yearFromDate(date):
         alleles += ele.split("-")
     for ele in alleles:
         if (ele.isdigit() and int(ele) > 1800):
-            return unicode(ele)
+            return str(ele)
     return "Year extraction failed"
 
 # convert all author names into Last name, First name sequence
 def nameLastFirst(nameList):
-    for seq in xrange(len(nameList)):
+    for seq in range(len(nameList)):
         name = nameList[seq]
         lastName = name.split(" ")[-1].strip()
         firstName = name[:len(name)-len(lastName)].strip()
@@ -1248,12 +1239,12 @@ def mainDOI(doi, code_srcDir):
     if (myDict["PublicationYear"] != []):
         myDict["PublicationYear"] = [yearFromDate(myDict["PublicationYear"][0])]
     # replace &amp; with & in Institutions
-    for i in xrange(len(myDict["Institution"])):
+    for i in range(len(myDict["Institution"])):
         if "&amp;" in myDict["Institution"][i]:
             myDict["Institution"][i] = myDict["Institution"][i].replace('&amp;','and')
 ##    for key in myDict:
-##        print key + " : " + str(myDict[key])
-##        print "==============================================="
+##        print(key + " : " + str(myDict[key]))
+##        print("===============================================")
     return myDict
 
 # main function, input doi string, output meta data in a dictionary, use bs4
@@ -1271,7 +1262,7 @@ def mainDOIsoupFirst(doi, code_srcDir):
     if (myDict["PublicationYear"] != []):
         myDict["PublicationYear"] = [yearFromDate(myDict["PublicationYear"][0])]
     # replace &amp; with & in Institutions
-    for i in xrange(len(myDict["Institution"])):
+    for i in range(len(myDict["Institution"])):
         if "&amp;" in myDict["Institution"][i]:
             myDict["Institution"][i] = myDict["Institution"][i].replace('&amp;','and')
     # call query module to fill in the blank
@@ -1285,35 +1276,46 @@ def doiValid(doi, code_srcDir):
         return False
     return True
 
+
+# unit test
+def unittest():
+    testDOIs = [("wiley 1", "10.1002/adfm.200700200"),
+                ("wiley 2", "10.1002/adma.200401816"),
+                ("wiley 3" ,"10.1002/1097-4628(20001220)78:13<2272::AID-APP50>3.0.CO;2-U"),
+                ("wiley 4", "10.1002/(SICI)1097-4628(19991003)74:1<133::AID-APP16>3.0.CO;2-N"),
+                ("elsevier 1", "10.1016/j.polymer.2014.12.002"),
+                ("elsevier 2", "10.1016/j.compositesa.2004.12.010"),
+                ("elsevier 3", "10.1016/j.jcis.2017.02.001"),
+                ("rsc 1", "10.1039/C5CS00258C"),
+                ("aip 1", "10.1063/1.4892695"),
+                ("aip 2", "10.1063/1.4994293"),
+                ("aip 3", "10.1063/1.4960137"),
+                ("aip 4", "10.1063/1.3487275"),
+                ("acs 1", "10.1021/ja963361g"),
+                ("acs 2", "10.1021/acs.macromol.5b01573"),
+                ("acs 3", "10.1021/acsmacrolett.7b00603"),
+                ("acs 4", "10.1021/ma060125+"),
+                ("aps 1", "10.1103/PhysRevMaterials.1.043606"),
+                ("aps 2", "10.1103/PhysRevB.96.104426"),
+                ("ieee 1", "10.1109/CEIDP.2008.4772933"),
+                ("ieee 2", "10.1109/TNANO.2013.2285438"),
+                ("tf 1", "10.1080/19475411.2016.1269027"),
+                ("tf 2", "10.1080/19475411.2017.1377312"),
+                ("sage 1", "10.1177/0021998316644846"),
+                ("sage 2", "10.1177/0021998316644847"),
+                ("nature 1", "10.1038/nmat1107"),
+                ("nature 2", "10.1038/nnano.2008.96"),
+                ("iop 1", "10.1088/1757-899X/73/1/012015")]
+    for testDOI in testDOIs:
+        try:
+            testDict = mainDOIsoupFirst(testDOI[1])
+            print("TEST PASSED FOR %s" %(testDOI[0]))
+            for key in testDict:
+                print(key + " : " + str(testDict[key]))
+                print("===============================================")
+        except:
+            print("TEST FAILED FOR %s!!!!!!!!!!!!" %(testDOI[0]))
+            pass
+
 if __name__ == "__main__":
-##    testDOI = "10.1002/adfm.200700200" # wiley test 1 PASS
-##    testDOI = "10.1002/adma.200401816"
-##    testDOI = "10.1016/j.polymer.2014.12.002"
-##    testDOI = "10.1002/1097-4628(20001220)78:13<2272::AID-APP50>3.0.CO;2-U"
-##    testDOI = "10.1039/C5CS00258C" # rsc test PASS
-##    testDOI = "10.1016/j.compositesa.2004.12.010" # elsevier test PASS
-##    testDOI = "10.1063/1.4892695" # aip test 1 PASS
-##    testDOI = "10.1063/1.4994293" # aip test 2, multiple institutions, PASS
-##    testDOI = "10.1021/ja963361g" # acs test 1, PASS
-##    testDOI = "10.1021/acs.macromol.5b01573" # acs test 2, macromol, multiple institutions, PASS
-##    testDOI = "10.1021/acsmacrolett.7b00603" # acs test 3, macrolett
-##    testDOI = "10.1103/PhysRevMaterials.1.043606" # aps test 1 PASS
-##    testDOI = "10.1103/PhysRevB.96.104426" # aps test 2 PASS
-##    testDOI = "10.1038/nmat1107" # nature test 1
-##    testDOI = "10.1109/CEIDP.2008.4772933" # ieee test 1 PASS
-##    testDOI = "10.1109/TNANO.2013.2285438" # ieee test 2 PASS
-##    testDOI = "10.1080/19475411.2016.1269027" # tf test 1 PASS
-##    testDOI = "10.1080/19475411.2017.1377312" # tf test 2, a new paper without volume or issue yet PASS
-##    testDOI = "10.1177/0021998316644846" # sage test 1 PASS
-##    testDOI = "10.1177/0021998316644847" # sage test 2 PASS
-##    testDOI = "10.1063/1.4960137"
-##    testDOI = "10.1038/nnano.2008.96"
-##    testDOI = "10.1063/1.3487275" # aip test 3, PASS
-##    testDOI = "10.1088/1757-899X/73/1/012015" # iop test 1 PASS
-##    testDOI = "10.1016/j.jcis.2017.02.001"
-##    testDOI = "10.1002/(SICI)1097-4628(19991003)74:1<133::AID-APP16>3.0.CO;2-N"
-    testDOI = "10.1021/ma060125+"
-    testDict = mainDOIsoupFirst(testDOI)
-    for key in testDict:
-        print key + " : " + str(testDict[key])
-        print "==============================================="
+    unittest()

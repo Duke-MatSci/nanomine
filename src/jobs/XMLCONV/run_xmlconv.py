@@ -9,7 +9,7 @@ from nm.common.nm_rest import nm_rest
 import os
 import sys
 import json
-import urllib2
+import urllib.request
 import traceback
 
 # import logging # this should be done by a wrapper in the future
@@ -97,12 +97,12 @@ try:
   }
   print('email data: %s' % emaildata)
   #logging.info('emaildata: ' + json.dumps(emaildata))
-  rq = urllib2.Request(emailurl)
+  rq = urllib.request.Request(emailurl)
   logging.info('request created using emailurl')
   rq.add_header('Content-Type','application/json')
   nmEmail = nm_rest(logging, sysToken, emailApiToken, emailRefreshToken, rq)
-  ## r = urllib2.urlopen(rq, json.dumps(emaildata))
-  r = nmEmail.urlopen(json.dumps(emaildata))
+  ## r = urllib.request.urlopen(rq, json.dumps(emaildata))
+  r = nmEmail.urlopen(json.dumps(emaildata).encode("utf8"))
   logging.info('sent ' + status + ' email: ' + str(r.getcode()))
 except:
   logging.info('exception occurred')
