@@ -53,7 +53,8 @@
     prov:used :xml;
     prov:qualifiedUsage [ a prov:Usage; prov:entity :property_classes_table; prov:hadRole [ dcterms:identifier "properties"]];
     prov:qualifiedUsage [ a prov:Usage; prov:entity :characterization_methods_table; prov:hadRole [ dcterms:identifier "methods"]];
-    setl:hasContext '''{
+    setl:hasContext """{
+  "owl" : "http://www.w3.org/2002/07/owl#",
   "sio" :     "http://semanticscience.org/resource/",
   "skos" :    "http://www.w3.org/2004/02/skos/core#",
   "dcterms" :    "http://purl.org/dc/terms/",
@@ -76,7 +77,7 @@
   "void" :    "http://rdfs.org/ns/void#",
   "dcat" : "http://www.w3.org/ns/dcat#",
   "xsd" : "http://www.w3.org/2001/XMLSchema#"
-}''';
+}""";
     prov:value """[{
     "@for": "id in row.findall('ID')",
     "@do": {

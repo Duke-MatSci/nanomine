@@ -40,10 +40,13 @@ source /apps/nanomine_env
 
 # variables changed by update_api_tokens, so pick those up as well
 source /apps/nanomine_env
+cd /apps/nanomine
+pip install -e . #install nanomine app
 
 cd /apps/whyis
 
 python manage.py createuser -e nouser@nodomain.edu -p none -f nanomine -l test -u ${NM_AUTH_SYSTEM_USER_ID} --roles=admin
+python manage.py createuser -e testuser@example.com -p none -f test -l user -u testuser # dev systems need this
 
 # python manage.py load -i /apps/nanomine/nm.ttl -f turtle  ## Apparently no longer needed
 # python manage.py load -i /apps/nanomine/setl/ontology.setl.ttl -f turtle  ## Apparently no longer needed
