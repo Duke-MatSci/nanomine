@@ -84,7 +84,7 @@ export default {
       vm.showSHString()
       vm.generate_table()
     })
-    Axios.get('/nmstatic/metamine/pixelunit.txt')
+    Axios.get('/nmstatic/metamine/osama-bilal-claire-lin-10x10-sym-c4v-15bit-dynamic.txt')
       .then(function (resp) {
         // console.log('pixelunit.txt data: ')
         // console.log(resp.data)
