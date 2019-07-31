@@ -1606,6 +1606,7 @@ function saveSchema (filename, xsd) {
   return new Promise(function (resolve, reject) {
     let dt = filename.match(/(\d{2})(\d{2})(\d{2})/) // MM DD YY
     if (dt && dt[1] && dt[2] && dt[3] && (+(dt[1]) <= 12) && (+(dt[1]) >= 1) && (+(dt[2]) <= 31) && (+(dt[2]) >= 1) && (+(dt[3]) <= 99) && (+(dt[3]) >= 15)) {
+      // save new version of schema and mark this version as the latest
       resolve('Lovely filename: ' + filename + ' schemaName: ' + schemaname)
     } else {
       reject(new Error('' + filename + ' does not fit accepted format of alphanumeric characters followed by MMDDYY e.g. PNC_schema_081218'))
