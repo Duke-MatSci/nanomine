@@ -23,11 +23,11 @@ def plotEandEE(jobDir, experimental_file, data_file, eleNum):
 		rows = f.read().split("\n")
 		for row in rows:
 			expt = row.split()
-			print expt
+			print(expt)
 			ExptFreq.append(np.log10(float(expt[0])))
 			ExptEp.append(float(expt[1]))
 			ExptEpp.append(float(expt[2]))
-	print ExptFreq
+	print(ExptFreq)
 	# read XPR file
 	mm = np.loadtxt(os.path.join(jobDir, data_file))
 	NumOfDebyeTerms = eleNum + 1 # (Actual No. of Terms + 1) for eps_inf

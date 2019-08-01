@@ -7,7 +7,7 @@
 import os
 import sys
 import json
-import urllib2
+import urllib.request
 from nm.common import *
 
 logging.info('nanomine environment keys: ')
@@ -55,10 +55,10 @@ try:
   }
   print('email data: %s' % emaildata)
   #logging.info('emaildata: ' + json.dumps(emaildata))
-  rq = urllib2.Request(emailurl)
+  rq = urllib.request.Request(emailurl)
   logging.info('request created using emailurl')
   rq.add_header('Content-Type','application/json')
-  r = urllib2.urlopen(rq, json.dumps(emaildata))
+  r = urllib.request.urlopen(rq, json.dumps(emaildata).encode('utf-8'))
   logging.info('sent failure email: ' + str(r.getcode()))
 except:
   logging.info('exception occurred')

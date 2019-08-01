@@ -1,5 +1,5 @@
-mechanize==0.3.7
+MechanicalSoup==0.11.0
 dicttoxml==1.7.4
-xlrd==1.1.0
-beautifulsoup4==4.6.0
-lxml==3.7.3
+xlrd==1.2.0
+beautifulsoup4==4.7.1
+lxml==4.3.4

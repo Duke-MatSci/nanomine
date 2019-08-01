@@ -20,7 +20,7 @@ class NmLogWriter: # https://stackoverflow.com/a/19438364
     if msg != '\n':
       self.logger.log(self.level, msg)
   def flush(self):
-    self.level(sys.stderr)
+    pass
 
 sys.stdout = NmLogWriter(logging, loglevel)
 sys.stderr = NmLogWriter(logging, loglevel)

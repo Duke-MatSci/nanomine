@@ -7,7 +7,7 @@
 import os
 import sys
 import json
-import urllib2
+import urllib.request
 import traceback
 
 from nm.common import *
@@ -147,12 +147,12 @@ if rc == 0: # send success email
     }
     print('email data: %s' % emaildata)
     logging.info('emaildata: ' + json.dumps(emaildata))
-    rq = urllib2.Request(emailurl)
+    rq = urllib.request.Request(emailurl)
     logging.info('request created using emailurl')
     rq.add_header('Content-Type','application/json')
     nmEmail = nm_rest(logging, sysToken, emailApiToken, emailRefreshToken, rq)
     #r = urllib2.urlopen(rq, json.dumps(emaildata))
-    r = nmEmail.urlopen(json.dumps(emaildata))
+    r = nmEmail.urlopen(json.dumps(emaildata).encode("utf8"))
     logging.info('sent success email: ' + str(r.getcode()))
   except:
     logging.info('exception occurred sending run_otsu success email')
@@ -174,12 +174,12 @@ else: # send error email
     }
     print('email data: %s' % emaildata)
     logging.info('emaildata: ' + json.dumps(emaildata))
-    rq = urllib2.Request(emailurl)
+    rq = urllib.request.Request(emailurl)
     logging.info('request created using emailurl')
     rq.add_header('Content-Type','application/json')
     nmEmail = nm_rest(logging, sysToken, emailApiToken, emailRefreshToken, rq)
     #r = urllib2.urlopen(rq, json.dumps(emaildata))
-    r = nmEmail.urlopen(json.dumps(emaildata))
+    r = nmEmail.urlopen(json.dumps(emaildata).encode("utf8"))
     logging.info('sent failure email: ' + str(r.getcode()))
   except:
     logging.info('exception occurred sending run_otsu failure email')
