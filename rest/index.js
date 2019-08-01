@@ -23,7 +23,7 @@ const logFormat = printf(({level, message, label}) => {
   let now = moment().format('YYYYMMDDHHmmssSSS')
   return `${now} [${label}] ${level}: ${message}`
 })
-
+const hasha = require('hasha')
 const moment = require('moment')
 const datauri = require('data-uri-to-buffer')
 const stream = require('stream')
@@ -672,7 +672,7 @@ app.get('/nm', function (req, res) {
         return res.status(404).send(err)
       }
     })
-    .catch(function(err) {
+    .catch(function (err) {
       return res.status(404).send(err)
     })
 })
@@ -1601,15 +1601,152 @@ function validQueryParam (p) {
 }
 
 function saveSchema (filename, xsd) {
-  let m = filename.match(/(.*)(\.xsd|\.xml)/)
-  let schemaname = (m !== null ? m[1] : filename)
+  let func = 'saveSchema'
   return new Promise(function (resolve, reject) {
-    let dt = filename.match(/(\d{2})(\d{2})(\d{2})/) // MM DD YY
-    if (dt && dt[1] && dt[2] && dt[3] && (+(dt[1]) <= 12) && (+(dt[1]) >= 1) && (+(dt[2]) <= 31) && (+(dt[2]) >= 1) && (+(dt[3]) <= 99) && (+(dt[3]) >= 15)) {
-      // save new version of schema and mark this version as the latest
-      resolve('Lovely filename: ' + filename + ' schemaName: ' + schemaname)
+    let filenameErr = '' + filename + ' does not fit accepted format of alphanumeric characters followed by MMDDYY and .xsd e.g. PNC_schema_081218.xsd'
+    let m = filename.match(/(.*)(\.[Xx][Ss][Sd]$|\.[Xx][Mm][Ll]$)/)
+    if (m) {
+      let schemaTitle = (m !== null ? m[1] : filename) // m might be null if not .xsd or .xml - need to move this inside promise
+      let dt = filename.match(/(\d{2})(\d{2})(\d{2})/) // MM DD YY
+      if (dt && dt[1] && dt[2] && dt[3] && (+(dt[1]) <= 12) && (+(dt[1]) >= 1) && (+(dt[2]) <= 31) && (+(dt[2]) >= 1) && (+(dt[3]) <= 99) && (+(dt[3]) >= 15)) {
+        // save new version of schema and mark this version as the latest
+        getLatestSchemas(XsdVersionSchema, logger)
+          .then(function (versions) {
+            // spin through list to see if filename is already used
+            let isUsed = -1
+            let newHash = hasha(xsd, {'algorithm': 'sha1'})
+            versions.forEach(function (v, idx) {
+              if (v.currentRef[0].filename === filename) {
+                let curHash = v.currentRef[0].hash
+                isUsed = idx
+                if (curHash !== newHash) {
+                  //   if the filename is used by a template version, then
+                  //     x check the md5 hash against the current version to ensure that it has not already been uploaded
+                  //     use the template version id to create a new schema (template) record using the template version id in the schema rec
+                  //     add the new schema id to the versions array of the template version
+                  //     set the schema version field to the array position in the template record + 1
+                  //     update the template version current id string to the stringified object id of the schema
+                  //     set the template version currentRef to the ObjectId of the new schema
+                  //     update number of versions in template version record
+                  let templateVerId = v._id.toHexString()
+                  let xsdDoc = {
+                    'title': schemaTitle,
+                    'filename': filename,
+                    'content': xsd,
+                    'templateVersion': templateVerId,
+                    'version': v.nbVersions + 1,
+                    'hash': hasha(xsd, {'algorithm': 'sha1'}),
+                    'dependencies': [],
+                    'exporters': [],
+                    'XSLTFiles': []
+                  }
+                  logger.debug(func + '- schema create for existing version record')
+                  XsdSchema.create(xsdDoc)
+                    .then(function (newXsdDoc) {
+                      logger.debug(func + '- create isArray: ' + Array.isArray(newXsdDoc))
+                      let xsdId = newXsdDoc._id
+                      v.nbVersions += 1
+                      v.versions.push(xsdId.toHexString())
+                      v.current = xsdId.toHexString()
+                      logger.debug(func + ' - about to set objectid')
+                      v.currentRef = xsdId // mongoose populate reference
+                      logger.debug(func + ' - got past setting objectid')
+                      XsdVersionSchema.findByIdAndUpdate(v._id, v).exec()
+                        .then(function (opResult) {
+                          logger.debug(func + ' - opResult: ' + inspect(opResult))
+                          resolve('added schema id: ' + xsdId + ' for version: ' + v.nbVersions + ' to versions id: ' + templateVerId)
+                        })
+                        .catch(function (err) {
+                          let msg = func + ' - find and update - ' + err
+                          reject(new Error(msg))
+                        })
+                    })
+                    .catch(function (err) {
+                      let msg = func + ' - create schema - ' + err
+                      reject(new Error(msg))
+                    })
+                } else {
+                  let msg = func + ' - create schema - duplicates current version'
+                  reject(new Error(msg))
+                }
+              }
+            })
+            if (isUsed === -1) {
+              //   if the filename is not used
+              //     create a new template version record with 0 versions and save the id
+              //     create a new schema (template) record with the template version record id and the version field set to 1
+              //     add the new schema id to the array of versions
+              //     add the new schema id to the versions array of the template version
+              //     update the template version current id string to the stringified object id of the schema
+              //     set template versions record nbVersions field to 1
+              let versionDoc = {
+                'versions': [],
+                'deletedVersions': [],
+                'nbVersions': 0,
+                'isDeleted': false,
+                'current': '',
+                'currentRef': null
+              }
+
+              let xsdDoc = {
+                'title': schemaTitle,
+                'filename': filename,
+                'content': xsd,
+                'templateVersion': '',
+                'version': 1,
+                'hash': newHash,
+                'dependencies': [],
+                'exporters': [],
+                'XSLTFiles': []
+              }
+              logger.debug(func + '- schema create for new version record')
+              XsdSchema.create(xsdDoc)
+                .then(function (newXsdDoc) {
+                  logger.debug(func + '- create isArray: ' + Array.isArray(newXsdDoc))
+                  let xsdId = newXsdDoc._id
+                  versionDoc.nbVersions += 1
+                  versionDoc.versions.push(xsdId.toHexString())
+                  versionDoc.current = xsdId.toHexString()
+                  logger.debug(func + ' - about to set objectid')
+                  versionDoc.currentRef = xsdId // mongoose populate reference
+                  logger.debug(func + ' - got past setting objectid')
+                  XsdVersionSchema.create(versionDoc)
+                    .then(function (newVersion) {
+                      logger.debug(func + ' - create version result: ' + inspect(newVersion))
+                      let versionId = newVersion._id
+                      let versionIdStr = versionId.toHexString()
+                      newXsdDoc.templateVersion = versionIdStr
+                      XsdSchema.findByIdAndUpdate(newXsdDoc._id, newXsdDoc).exec()
+                        .then(function (oldDoc) {
+                          logger.debug(func + ' - update doc with new version result (old): ' + inspect(oldDoc) + ' (new):' + inspect(newXsdDoc))
+                          let msg = func + ' - Created new XsdVersionSchema (template version) id: ' + versionIdStr + ' for new schema filename ' + filename + ' new schemaId: ' + xsdId.toHexString()
+                          resolve(msg)
+                        })
+                        .catch(function (err) {
+                          let msg = func + ' - update version info failed: ' + err
+                          reject(new Error(msg))
+                        })
+                    })
+                    .catch(function (err) {
+                      let msg = func + ' - find and update - ' + err
+                      reject(new Error(msg))
+                    })
+                })
+                .catch(function (err) {
+                  let msg = func + ' - create new schema - ' + err
+                  reject(new Error(msg))
+                })
+            }
+          })
+          .catch(function (err) {
+            let msg = 'get latest schema - ' + err
+            reject(new Error(msg))
+          })
+      } else {
+        reject(new Error(filenameErr))
+      }
     } else {
-      reject(new Error('' + filename + ' does not fit accepted format of alphanumeric characters followed by MMDDYY e.g. PNC_schema_081218'))
+      reject(new Error(filenameErr))
     }
   })
 }
@@ -1694,6 +1831,10 @@ app.get('/templates/versions/select/allactive', function (req, res) {
 })
 
 app.get('/templates/select', function (req, res) {
+  // Hey, don't use quotes around qfield values in the browser query!
+  //  The line should look like http://ubuntu.local/nmr/templates/select?filename=/PNC_schema_081218.xsd/
+  //                                                                                ^^ RegEx /
+  //  This was built according to the way MDCS does it :(
   let jsonResp = {'error': null, 'data': null}
   let id = req.query.id
   // for all qfields except id - which is a single record query on its own,
@@ -1728,7 +1869,6 @@ app.get('/templates/select', function (req, res) {
         if (qval.slice(0, 1) === '/' && qval.slice(-1) === '/') {
           qval = qval.replace(/(^[/]|[/]$)/g, '')
           let re = new RegExp(qval, 'i')
-
           let tmp = {}
           tmp[qfld] = {'$regex': re} // TODO test this again with fields mix -- winds up being {'fieldnm': { '$regex': /PATTERN/ }}
           qcomponents.push(tmp)

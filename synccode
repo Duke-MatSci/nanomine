@@ -3,3 +3,4 @@ rsync -avz  -e "ssh " --exclude="venv/*" --exclude="static/*" --exclude="dist/*"
 ssh whyis "cd nanomine;npm run build"
 ssh whyisroot "systemctl restart apache2"
 ssh whyisroot "systemctl restart nm-rest"
+echo finished $(date)
