@@ -141,6 +141,21 @@
         </v-card>
         <div class="sect-divider"></div>
         <!--
+           Select schema
+        -->
+        <v-card style="width:100%">
+          <v-card-title class="dataset-header"><span style="width:40%;" class="text-xs-left">
+          <v-combobox single-line dense
+            v-model="selectedSchemaTitle"
+            @change="onSchemaComboChanged()"
+            :items="schemaTitles"
+            label="Using latest schema - click to change"
+            default="{{firstSchemaTitle}}"
+          ></v-combobox>
+          </span>
+          </v-card-title>
+        </v-card>
+        <!--
 
            Dataset Selection
 
@@ -364,7 +379,7 @@ export default {
       showAdmin: false,
       myPageError: false,
       myPageErrorMsg: '',
-      // Schemas
+      // Schema mgt
       showSchemaMgt: false,
       schemaFileText: '',
       schemaFileName: '',
@@ -372,6 +387,11 @@ export default {
       schemaErrorMsg: '',
       schemaSuccess: false,
       schemaSuccessMsg: '',
+      // schemas
+      firstSchemaTitle: 'first',
+      selectedSchemaId: '',
+      selectedSchemaTitle: '',
+      schemas: [],
       // Users
       showBecomeUser: false,
       userall: true,
@@ -455,6 +475,20 @@ export default {
           vm.myPageErrorMsg = 'fetching users: ' + err
         })
     }
+    Axios.get('/nmr/templates/versions/select/allactive')
+      .then(function (resp) {
+        resp.data.data.forEach(function (v) {
+          let schemaId = v.currentRef[0]._id
+          let title = v.currentRef[0].title
+          vm.schemas.push({'schemaId': schemaId, 'title': title})
+          console.log('schemaId: ' + schemaId + ' title: ' + title)
+        })
+        vm.SelectedSchemaTitle = vm.schemas[0].title
+        vm.SelectedSchemaId = vm.schemas[0].schemaId
+      })
+      .catch(function (err) {
+        console.log('error getting schemas: ' + err)
+      })
     Axios.get('/nmr/dataset')
       .then(function (resp) {
         resp.data.data.forEach(function (v) {
@@ -469,6 +503,15 @@ export default {
       })
   },
   computed: {
+    // schemas
+    schemaTitles () {
+      let titles = []
+      let vm = this
+      vm.schemas.forEach((v) => {
+        titles.push(v.title)
+      })
+      return titles
+    },
     // datasets
     headerDOI: function () {
       let rv = null
@@ -556,8 +599,26 @@ export default {
       vm.schemaFileText = ''
       vm.schemaFileName = ''
     },
-
-    onSchemaSelected (e) {
+    onSchemaComboChanged (evdata) { // select current schema changed
+      let vm = this
+      vm.selectedSchemaId = vm.schemas[0].schemaId
+      if (!vm.selectedSchemaTitle || vm.selectedSchemaTitle === '') {
+        vm.selectedSchemaTitle = vm.schemas[0].title
+      }
+      let selected = -1
+      vm.schemas.forEach((v, idx) => {
+        if (v.title === vm.selectedSchemaTitle) {
+          selected = idx
+          vm.selectedSchemaId = v.schemaId
+        }
+      })
+      if (selected === -1) {
+        vm.selectedSchemaTitle = vm.schemas[0].title
+        vm.selectedSchemaId = vm.schemas[0].schemaId
+      }
+      console.log('selected schema schemaId: ' + vm.selectedSchemaId + ' title: ' + vm.selectedSchemaTitle)
+    },
+    onSchemaSelected (e) { // schema upload
       let vm = this
       vm.resetSelectedSchema()
       const files = e.target.files
@@ -662,7 +723,7 @@ export default {
       vm.sampleSelected = null
       vm.sampleFileinfo = []
       vm.setLoading()
-      Axios.get('/nmr/xml?dataset=' + entry.seq)
+      Axios.get('/nmr/xml?dataset=' + entry.seq + '&schemaid=' + vm.selectedSchemaId)
         .then(function (data) {
           // console.log(data.data.data)
           vm.sampleList = data.data.data // Just had to...
@@ -865,6 +926,13 @@ export default {
 
   .admin-header {
     background-color: #03A9F4;
+    color: #ffffff;
+    font-size: 22px;
+    font-weight: bold;
+  }
+  .select-schema-header {
+    background-color: #03A9F4;
+    height: 30px;
     color: #ffffff;
     font-size: 22px;
     font-weight: bold;

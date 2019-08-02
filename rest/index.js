@@ -1915,6 +1915,7 @@ app.get('/xml/:id?', function (req, res) { // currently only supports JWT style 
   let id = req.params.id // may be null
   let fmt = req.query.format
   let dsSeq = req.query.dataset // may be null -- to get all xmls for a dataset (mutually exclusive of id)
+  let schemaId = req.query.schemaid
   let userid = null
   let isAdmin = false
   let theQuery = {} // default find query
@@ -1942,7 +1943,9 @@ app.get('/xml/:id?', function (req, res) { // currently only supports JWT style 
   }
   getCurrentSchemas()
     .then(function (versions) {
-      let schemaId = versions[0].currentRef[0]._id
+      if (!validQueryParam(schemaId)) {
+        schemaId = versions[0].currentRef[0]._id
+      }
       let schemaQuery = {'schemaId': {'$eq': schemaId}}
       if (id) {
         if (id.match(/.*\.xml$/) === null) {
