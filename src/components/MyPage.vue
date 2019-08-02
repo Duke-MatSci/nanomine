@@ -33,7 +33,16 @@
           </v-card-title>
           <span v-show="showAdmin">
           <div class="sect-divider"></div>
-          <h5>Schema Management ...</h5>
+          <h5 class="text-xs-left">
+           <v-btn
+             small left flat light
+             color="primary"
+             class="white--text"
+             @click="toggleShowSchemaMgt()"
+           >
+           <v-icon light v-if="showSchemaMgt">expand_more</v-icon>
+           <v-icon light v-else>expand_less</v-icon>
+           </v-btn>Schema Management ...</h5>
             <v-alert
               v-model="schemaSuccess"
               type="success"
@@ -48,7 +57,7 @@
             >
             {{schemaErrorMsg}}
             </v-alert>
-            <v-layout row wrap justify-center>
+            <v-layout row wrap justify-center v-if="showSchemaMgt">
               <v-card flat>
                 <v-card-text class="title font-weight-light">Upload Schema</v-card-text>
                 <v-divider/>
@@ -60,14 +69,24 @@
                   ref="schemaFileRef"
                   @change="onSchemaSelected"
                 >
-                <v-btn v-if="schemaFileName && schemaFileName.length > 0" class="text-xs-left" small color="primary" @click="doSchemaUpload()">Upload</v-btn>
+                <v-btn v-if="schemaFileName && schemaFileName.length > 0" class="text-xs-left" small color="primary"
+                       @click="doSchemaUpload()">Upload</v-btn>
 
                 <v-card-text v-if="schemaFileName && schemaFileName.length > 0" class="body">Selected: {{schemaFileName}}</v-card-text>
               </v-card>
             </v-layout>
           <div class="sect-divider"></div>
-          <h5>Become User ...</h5>
-          <v-data-table
+          <h5 class="text-xs-left">
+            <v-btn
+              small left flat light
+              color="primary"
+              class="white--text"
+              @click="toggleShowBecomeUser()"
+            >
+           <v-icon light v-if="showBecomeUser">expand_more</v-icon>
+           <v-icon light v-else>expand_less</v-icon>
+           </v-btn>Become User ...</h5>
+          <v-data-table v-if="showBecomeUser"
             v-model="userselected"
             :headers="userheaders"
             :items="users"
@@ -346,6 +365,7 @@ export default {
       myPageError: false,
       myPageErrorMsg: '',
       // Schemas
+      showSchemaMgt: false,
       schemaFileText: '',
       schemaFileName: '',
       schemaError: false,
@@ -353,6 +373,7 @@ export default {
       schemaSuccess: false,
       schemaSuccessMsg: '',
       // Users
+      showBecomeUser: false,
       userall: true,
       userpagination: {
         sortBy: 'userid'
@@ -564,6 +585,14 @@ export default {
     toggleShowAdmin: function () {
       let vm = this
       vm.showAdmin = !vm.showAdmin
+    },
+    toggleShowSchemaMgt: function () {
+      let vm = this
+      vm.showSchemaMgt = !vm.showSchemaMgt
+    },
+    toggleShowBecomeUser: function () {
+      let vm = this
+      vm.showBecomeUser = !vm.showBecomeUser
     },
     isAdmin: function () {
       let vm = this
