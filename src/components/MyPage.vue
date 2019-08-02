@@ -722,7 +722,10 @@ export default {
       vm.samplesHideSelector = false
       vm.sampleSelected = null
       vm.sampleFileinfo = []
+      vm.sampleList = []
       vm.setLoading()
+      vm.myPageError = false
+      vm.myPageErrorMsg = ''
       Axios.get('/nmr/xml?dataset=' + entry.seq + '&schemaid=' + vm.selectedSchemaId)
         .then(function (data) {
           // console.log(data.data.data)
