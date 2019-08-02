@@ -184,14 +184,14 @@ try {
   fs.mkdirSync(nmWebFilesRoot) // Sync used during startup
 } catch (err) {
   logger.error('mkdir nmWebFilesRoot failed: ' + err)
-  logger.error('NOTE: if the error above is EXISTS, the error can be ignored.')
+  logger.error('NOTE: if the error above is EEXISTS, the error can be ignored.')
 }
 
 try {
   fs.mkdirSync(nmJobDataDir) // Sync used during startup
 } catch (err) {
   logger.error('mkdir nmJobDataDir failed: ' + err)
-  logger.error('NOTE: if the error above is EXISTS, the error can be ignored.')
+  logger.error('NOTE: if the error above is EEXISTS, the error can be ignored.')
 }
 
 let app = express()
