@@ -43,7 +43,17 @@ if [[ ! -d /apps ]]; then
   (su root -c 'mkdir /apps; touch /apps/nanomine_env; chown -R whyis:whyis /apps; ls -lasR /apps')
 fi
 echo installing whyis ...
-bash < <(curl -skL https://raw.githubusercontent.com/tetherless-world/whyis/master/install.sh)
+export WHYIS_FORK='bluedevil-oit'
+export WHYIS_BRANCH='master'
+## bash < <(curl -skL https://raw.githubusercontent.com/tetherless-world/whyis/master/install.sh)
+curl -skL --output whyis-install.tmp https://raw.githubusercontent.com/${WHYIS_FORK}/whyis/${WHYIS_BRANCH}/install.sh
+if [[ $? -ne 0 ]]; then
+  echo 'error obtaining whyis installer'
+  exit
+fi
+
+sed -e 's/tetherless-world\/${WHYIS_BRANCH}/${WHYIS_FORK}\/${WHYIS_BRANCH}/g' < whyis-install.tmp > whyis-install.sh
+bash whyis-install.sh
 
 if [[ ! -z ${whyispw} ]]; then
   echo setting whyis user password
