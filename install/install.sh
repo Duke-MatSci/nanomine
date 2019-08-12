@@ -52,7 +52,7 @@ if [[ $? -ne 0 ]]; then
   exit
 fi
 
-sed -e 's/tetherless-world\/${WHYIS_BRANCH}/${WHYIS_FORK}\/${WHYIS_BRANCH}/g' < whyis-install.tmp > whyis-install.sh
+sed -e 's/tetherless-world\/whyis\/${WHYIS_BRANCH}/${WHYIS_FORK}/\/whyis\/${WHYIS_BRANCH}/g' < whyis-install.tmp > whyis-install.sh
 bash whyis-install.sh
 
 if [[ ! -z ${whyispw} ]]; then
