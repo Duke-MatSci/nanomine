@@ -18,6 +18,7 @@ else
 
   pushd /apps/nanomine/rest
   npm i
-  node --harmony-promise-finally migrate.js
+  #node --harmony-promise-finally migrate.js
+  node migrate.js
   popd
 fi
