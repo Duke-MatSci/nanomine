@@ -75,9 +75,6 @@ cd /apps/nanomine
 #    if gui changes are made.
 npm run build
 
-echo install NanoMine python components for Whyis
-pip install -e .
-
 echo install XMLCONV components
 pip install -r /apps/nanomine/install/xmlconv-requirements.txt
 pip install python-datauri

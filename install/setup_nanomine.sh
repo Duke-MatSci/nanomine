@@ -42,8 +42,18 @@ source /apps/nanomine_env
 
 # variables changed by update_api_tokens, so pick those up as well
 source /apps/nanomine_env
-cd /apps/nanomine
-pip install -e . #install nanomine app
+
+#install nanomine_graph
+export NG_FORK='bluedevil-oit'
+export NG_BRANCH='master'
+
+cd /apps
+echo cloning nanomine-graph fork ${NG_FORK}
+git clone https://github.com/"${NG_FORK}"/nanomine-graph.git # to use the original, use FORKNAME of 'tetherless-world'
+cd nanomine-graph
+echo checking out ${NG_BRANCH}
+git checkout ${NG_BRANCH}
+pip install -e . #install nanomine-graph app
 
 cd /apps/whyis
 
@@ -52,7 +62,7 @@ python manage.py createuser -e testuser@example.com -p none -f test -l user -u t
 
 # python manage.py load -i /apps/nanomine/nm.ttl -f turtle  ## Apparently no longer needed
 # python manage.py load -i /apps/nanomine/setl/ontology.setl.ttl -f turtle  ## Apparently no longer needed
-python manage.py load -i /apps/nanomine/setl/nanomine.ttl -f turtle
-python manage.py load -i /apps/nanomine/setl/xml_ingest.setl.ttl -f turtle
+python manage.py load -i /apps/nanomine-graph/setl/nanomine.ttl -f turtle
+python manage.py load -i /apps/nanomine-graph/setl/xml_ingest.setl.ttl -f turtle
 
 
