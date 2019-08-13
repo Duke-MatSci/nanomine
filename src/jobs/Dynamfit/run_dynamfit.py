@@ -7,7 +7,7 @@
 import os
 import sys
 import json
-import urllib2
+import urllib.request
 from nm.common import *
 from nm.common.nm_rest import nm_rest
 
@@ -67,14 +67,14 @@ if templateName.endswith(".X_T"):
 else:
   messages.append("[Extension Error] Your upload does not seem to have a .X_T file.")
 # weight
-weight = unicode(inputParameters['weight'])
+weight = str(inputParameters['weight'])
 if not weight.replace('.','',1).isdigit():
   messages.append("[Input Error] Weight factor should be a non-negative number. Please read instructions on the Dynamfit page carefully.")
 else:
   if float(weight) < 0.0 or float(weight) > 2.0:
     messages.append("[Input Error] Weight factor should between 0.0 and 2.0. Please read instructions on the Dynamfit page carefully.")
 # nEle
-if not unicode(inputParameters['nEle']).replace('.','',1).isdigit():
+if not str(inputParameters['nEle']).replace('.','',1).isdigit():
   messages.append("[Input Error] The number of element should be a positive number. Please read instructions on the Dynamfit page carefully.")
 else:
   if int(inputParameters['nEle']) != float(int(inputParameters['nEle'])):
@@ -164,12 +164,12 @@ try:
   }
   print('email data: %s' % emaildata)
   #logging.info('emaildata: ' + json.dumps(emaildata))
-  rq = urllib2.Request(emailurl)
+  rq = urllib.request.Request(emailurl)
   logging.info('request created using emailurl')
   rq.add_header('Content-Type','application/json')
   nmEmail = nm_rest(logging, sysToken, emailApiToken, emailRefreshToken, rq)
-  ## r = urllib2.urlopen(rq, json.dumps(emaildata))
-  r = nmEmail.urlopen(json.dumps(emaildata))
+  ## r = urllib.request.urlopen(rq, json.dumps(emaildata))
+  r = nmEmail.urlopen(json.dumps(emaildata).encode("utf8"))
   logging.info('sent ' + status + ' email: ' + str(r.getcode()))
 except:
   logging.info('exception occurred')

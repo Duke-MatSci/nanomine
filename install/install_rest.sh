@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 export myFork='duke-matsci'
 export myBranch='dev'
+
 if [[ -z $1 ]] ; then
   echo "MONGO Dump location required. Pass value for MONGO_DUMP_DOWNLOAD_LOCATION as first parameter to this script ($0)"
   exit 1
@@ -29,23 +30,24 @@ cd nanomine
 echo checking out ${myBranch}
 git checkout ${myBranch}
 
-echo installing nodejs
-curl -L https://git.io/n-install | bash -s -- -y lts
+echo NOT installing private nodejs
+# curl -L https://git.io/n-install | bash -s -- -y lts
 
 ## export N_PREFIX="$HOME/n"; [[ :$PATH: == *":$N_PREFIX/bin:"* ]] || PATH+=":$N_PREFIX/bin"
-if [[ -f ~/.bash_profile ]] ; then
-  grep N_PREFIX ~/.bash_profile 2>/dev/null
-  if [[ $? -ne 0 ]] ; then
-    echo 'export N_PREFIX="$HOME/n"; [[ :$PATH: == *":$N_PREFIX/bin:"* ]] || PATH+=":$N_PREFIX/bin"' >> ~/.bash_profile
-  fi
-  grep nanomine_env ~/.bash_profile 2>/dev/null
-  if [[ $? -ne 0 ]] ; then
-    echo '. /apps/nanomine_env' >> ~/.bash_profile
-  fi
-else
-  echo 'export N_PREFIX="$HOME/n"; [[ :$PATH: == *":$N_PREFIX/bin:"* ]] || PATH+=":$N_PREFIX/bin"' > ~/.bash_profile
-  echo '. /apps/nanomine_env' >> ~/.bash_profile
-fi
+#if [[ -f ~/.bash_profile ]] ; then
+#  grep N_PREFIX ~/.bash_profile 2>/dev/null
+#  if [[ $? -ne 0 ]] ; then
+#    echo 'export N_PREFIX="$HOME/n"; [[ :$PATH: == *":$N_PREFIX/bin:"* ]] || PATH+=":$N_PREFIX/bin"' >> ~/.bash_profile
+#  fi
+#  grep nanomine_env ~/.bash_profile 2>/dev/null
+#  if [[ $? -ne 0 ]] ; then
+#    echo '. /apps/nanomine_env' >> ~/.bash_profile
+#  fi
+#else
+#  echo 'export N_PREFIX="$HOME/n"; [[ :$PATH: == *":$N_PREFIX/bin:"* ]] || PATH+=":$N_PREFIX/bin"' > ~/.bash_profile
+#  echo '. /apps/nanomine_env' >> ~/.bash_profile
+#fi
+
 grep activate ~/.bashrc
 if [[ $? -ne 0 ]]; then
   echo 'source /apps/whyis/venv/bin/activate' >> ~/.bashrc
@@ -58,7 +60,7 @@ fi
 source /apps/.bashrc
 
 # install the VueJS command line processor
-npm i -g vue-cli@2.9.6
+# npm i -g vue-cli@2.9.6
 
 cd /apps/nanomine
 npm i

@@ -1,21 +1,20 @@
 # DOI query agent utilizing CrossRef Query Services through OpenURL
-# Bingyin Hu, Duke University, 06182018
+# Bingyin Hu, Duke University, update to python 3 on 07012019
 # account.txt needs to be generated on your own, request Crossref Query Services
 # account at https://apps.crossref.org/requestaccount/
-import urllib2
+from urllib.request import urlopen
 import contextlib
 import xml.etree.ElementTree as ET
-import string
 import collections
 from datetime import date
 
 def runDOIquery(doi, code_srcDir):
     # read the credentials
-    with open(code_srcDir + '/account.txt') as f:
+    with open('%s/account.txt' %(code_srcDir)) as f:
         account = f.read()
     # form the query
-    query = "https://www.crossref.org/openurl/?pid="+account+"&format=unixref&id=doi:"+doi+"&noredirect=true"
-    with contextlib.closing(urllib2.urlopen(query)) as contents:
+    query = "https://www.crossref.org/openurl/?pid=%s&format=unixref&id=doi:%s&noredirect=true" %(account.strip(), doi.strip())
+    with contextlib.closing(urlopen(query)) as contents:
         xmlstring = contents.read() # get an xml string
     # convert to elementtree
     root = ET.fromstring(xmlstring)
@@ -132,7 +131,7 @@ def journal(root, metaList):
         elif ',' in affList[0]: # multiple affiliations
             metaList.append(('Institution', [affList[0]]))
         else: # segmented affiliation
-            metaList.append(('Institution', [string.join(affList,', ')]))
+            metaList.append(('Institution', [', '.join(affList)]))
     # DateOfCitation
     if len(metaList) > 0:
         metaList.append(('DateOfCitation', [date.today().isoformat()]))
@@ -228,7 +227,7 @@ def conference(root, metaList):
         elif ',' in affList[0]: # multiple affiliations
             metaList.append(('Institution', [affList[0]]))
         else: # segmented affiliation
-            metaList.append(('Institution', [string.join(affList,', ')]))
+            metaList.append(('Institution', [', '.join(affList)]))
     # DateOfCitation
     if len(metaList) > 0:
         metaList.append(('DateOfCitation', [date.today().isoformat()]))
