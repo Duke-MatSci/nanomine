@@ -14,6 +14,8 @@ tar zxvf mgi.tgz
 echo 'export NM_WEBFILES_ROOT="/apps/nanomine-webfiles"' >> /apps/nanomine_env
 echo 'export NM_WEB_BASE_URI="http://localhost"' >> /apps/nanomine_env # external apache uri. May need to tweak this for your local machine/vm depending on external access location -- external uri to apache
 echo 'export NM_RDF_LOD_PREFIX="http://localhost"' >> /apps/nanomine_env
+echo 'export NM_GRAPH_LOD_PREFIX="${NM_RDF_LOD_PREFIX}"' >> /apps/nanomine_env
+echo 'export NM_GRAPH_AUTH_SECRET="${NM_AUTH_SECRET}"' >> /apps/nanomine_env
 echo 'export NM_RDF_URI_BASE=""' >> /apps/nanomine_env
 echo 'export NM_JOB_DATA="${NM_WEBFILES_ROOT}/jobdata"' >> /apps/nanomine_env
 echo 'export NM_JOB_DATA_URI="/nmf/jobdata"' >> /apps/nanomine_env
@@ -40,8 +42,18 @@ source /apps/nanomine_env
 
 # variables changed by update_api_tokens, so pick those up as well
 source /apps/nanomine_env
-cd /apps/nanomine
-pip install -e . #install nanomine app
+
+#install nanomine_graph
+export NG_FORK='bluedevil-oit'
+export NG_BRANCH='master'
+
+cd /apps
+echo cloning nanomine-graph fork ${NG_FORK}
+git clone https://github.com/"${NG_FORK}"/nanomine-graph.git # to use the original, use FORKNAME of 'tetherless-world'
+cd nanomine-graph
+echo checking out ${NG_BRANCH}
+git checkout ${NG_BRANCH}
+pip install -e . #install nanomine-graph app
 
 cd /apps/whyis
 
@@ -50,7 +62,7 @@ python manage.py createuser -e testuser@example.com -p none -f test -l user -u t
 
 # python manage.py load -i /apps/nanomine/nm.ttl -f turtle  ## Apparently no longer needed
 # python manage.py load -i /apps/nanomine/setl/ontology.setl.ttl -f turtle  ## Apparently no longer needed
-python manage.py load -i /apps/nanomine/setl/nanomine.ttl -f turtle
-python manage.py load -i /apps/nanomine/setl/xml_ingest.setl.ttl -f turtle
+python manage.py load -i /apps/nanomine-graph/setl/nanomine.ttl -f turtle
+python manage.py load -i /apps/nanomine-graph/setl/xml_ingest.setl.ttl -f turtle
 
 
