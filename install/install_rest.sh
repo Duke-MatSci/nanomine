@@ -34,19 +34,19 @@ echo NOT installing private nodejs
 # curl -L https://git.io/n-install | bash -s -- -y lts
 
 ## export N_PREFIX="$HOME/n"; [[ :$PATH: == *":$N_PREFIX/bin:"* ]] || PATH+=":$N_PREFIX/bin"
-#if [[ -f ~/.bash_profile ]] ; then
+if [[ -f ~/.bash_profile ]] ; then
 #  grep N_PREFIX ~/.bash_profile 2>/dev/null
 #  if [[ $? -ne 0 ]] ; then
 #    echo 'export N_PREFIX="$HOME/n"; [[ :$PATH: == *":$N_PREFIX/bin:"* ]] || PATH+=":$N_PREFIX/bin"' >> ~/.bash_profile
 #  fi
-#  grep nanomine_env ~/.bash_profile 2>/dev/null
-#  if [[ $? -ne 0 ]] ; then
-#    echo '. /apps/nanomine_env' >> ~/.bash_profile
-#  fi
-#else
+  grep nanomine_env ~/.bash_profile 2>/dev/null
+  if [[ $? -ne 0 ]] ; then
+    echo '. /apps/nanomine_env' >> ~/.bash_profile
+  fi
+else
 #  echo 'export N_PREFIX="$HOME/n"; [[ :$PATH: == *":$N_PREFIX/bin:"* ]] || PATH+=":$N_PREFIX/bin"' > ~/.bash_profile
-#  echo '. /apps/nanomine_env' >> ~/.bash_profile
-#fi
+  echo '. /apps/nanomine_env' >> ~/.bash_profile
+fi
 
 grep activate ~/.bashrc
 if [[ $? -ne 0 ]]; then
