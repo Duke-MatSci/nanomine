@@ -3,14 +3,6 @@ export REST_DIR="/apps/nanomine/rest"
 
 source /apps/nanomine_env
 
-# Restore and migrate mongo dump from production for new version
-mkdir /apps/mongodump
-curl -k -o /apps/mongodump/mgi.tgz $NM_MONGO_DUMP
-cd /apps/mongodump
-tar zxvf mgi.tgz
-# now do the migration -- this will take a few minutes to run
-/apps/nanomine/rest/restore_and_migrate.sh FORCE ## force overrides protection that prevents dropping database!! use wisely!
-
 echo 'export NM_WEBFILES_ROOT="/apps/nanomine-webfiles"' >> /apps/nanomine_env
 echo 'export NM_WEB_BASE_URI="http://localhost"' >> /apps/nanomine_env # external apache uri. May need to tweak this for your local machine/vm depending on external access location -- external uri to apache
 echo 'export NM_RDF_LOD_PREFIX="http://localhost"' >> /apps/nanomine_env
@@ -38,8 +30,6 @@ echo 'export NM_NEO4J_IMAGE="http://path.to.neo4j.tgz"' >> /apps/nanomine_env  #
 # pick up the variable changes before the next script runs
 source /apps/nanomine_env
 
-/apps/nanomine/rest/update_api_tokens.sh
-
 # variables changed by update_api_tokens, so pick those up as well
 source /apps/nanomine_env
 
@@ -65,4 +55,11 @@ python manage.py createuser -e testuser@example.com -p none -f test -l user -u t
 python manage.py load -i /apps/nanomine-graph/setl/nanomine.ttl -f turtle
 python manage.py load -i /apps/nanomine-graph/setl/xml_ingest.setl.ttl -f turtle
 
+# If the mgi.tgz download fails, the last three steps can be re-run to build the db
+# Obtain dump, restore and migrate mongo dump from production for new version
+/apps/nanomine/install/retrieve_mongo_dump.sh
+
+# now do the migration -- this will take a few minutes to run
+/apps/nanomine/rest/restore_and_migrate.sh FORCE ## force overrides protection that prevents dropping database!! use wisely!
+/apps/nanomine/rest/update_api_tokens.sh
 
