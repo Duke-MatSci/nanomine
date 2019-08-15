@@ -6,7 +6,10 @@ if [[ $(whoami) != "whyis" ]]; then
 fi
 
 mkdir /apps/mongodump 2> /dev/null
-if [[ $NM_MONGO_DUMP=="file://*" ]]; then
+if [[ -f /apps/mongodump/mgi.tgz ]]; then
+  rm /apps/mongodump/mgi.tgz
+fi
+if [[ $NM_MONGO_DUMP == file://* ]]; then
   cp_err_msg="Unable to copy ${fn} mongo dump originally referenced as ${NM_MONGO_DUMP}"
   fn=${NM_MONGO_DUMP#file://}
   if [[ -f ${fn} ]]; then
