@@ -10,6 +10,7 @@ if [[ $NM_MONGO_DUMP=="file://*" ]]; then
   cp_err_msg="Unable to copy ${fn} mongo dump originally referenced as ${NM_MONGO_DUMP}"
   fn=${NM_MONGO_DUMP#file://}
   if [[ -f ${fn} ]]; then
+    echo attempting to copy mgi.tgz from ${NM_MONGO_DUMP}
     cp $fn /apps/mongodump/mgi.tgz
     if [[ $? -ne 0 ]]; then
       echo $cp_err_msg
