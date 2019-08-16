@@ -7,7 +7,8 @@ if [[ $x == 'migrate' ]]; then
   pushd /apps/nanomine/rest
   echo running migration
   # npm i
-  node --harmony-promise-finally migrate.js
+  #node --harmony-promise-finally migrate.js
+  node migrate.js
   popd
 else
   echo Aborted.

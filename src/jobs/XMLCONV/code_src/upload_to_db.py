@@ -29,8 +29,8 @@ fileContent = opfile.read()
 data_to_send = {"title": sys.argv[1].split(".")[0] + ".xml",
                 "schema":templateID,"content":fileContent}
 r = requests.post(url, data_to_send, auth=(USER,PSWD))
-print r.ok
-print r.json, r.status_code, r.history
+print(r.ok)
+print(r.json, r.status_code, r.history)
 # if upload is completed
 if r.ok:
     dt = datetime.now()
