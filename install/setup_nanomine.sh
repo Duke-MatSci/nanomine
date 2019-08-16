@@ -3,17 +3,11 @@ export REST_DIR="/apps/nanomine/rest"
 
 source /apps/nanomine_env
 
-# Restore and migrate mongo dump from production for new version
-mkdir /apps/mongodump
-curl -k -o /apps/mongodump/mgi.tgz $NM_MONGO_DUMP
-cd /apps/mongodump
-tar zxvf mgi.tgz
-# now do the migration -- this will take a few minutes to run
-/apps/nanomine/rest/restore_and_migrate.sh FORCE ## force overrides protection that prevents dropping database!! use wisely!
-
 echo 'export NM_WEBFILES_ROOT="/apps/nanomine-webfiles"' >> /apps/nanomine_env
 echo 'export NM_WEB_BASE_URI="http://localhost"' >> /apps/nanomine_env # external apache uri. May need to tweak this for your local machine/vm depending on external access location -- external uri to apache
 echo 'export NM_RDF_LOD_PREFIX="http://localhost"' >> /apps/nanomine_env
+echo 'export NM_GRAPH_LOD_PREFIX="${NM_RDF_LOD_PREFIX}"' >> /apps/nanomine_env
+echo 'export NM_GRAPH_AUTH_SECRET="${NM_AUTH_SECRET}"' >> /apps/nanomine_env
 echo 'export NM_RDF_URI_BASE=""' >> /apps/nanomine_env
 echo 'export NM_JOB_DATA="${NM_WEBFILES_ROOT}/jobdata"' >> /apps/nanomine_env
 echo 'export NM_JOB_DATA_URI="/nmf/jobdata"' >> /apps/nanomine_env
@@ -36,18 +30,36 @@ echo 'export NM_NEO4J_IMAGE="http://path.to.neo4j.tgz"' >> /apps/nanomine_env  #
 # pick up the variable changes before the next script runs
 source /apps/nanomine_env
 
-/apps/nanomine/rest/update_api_tokens.sh
-
 # variables changed by update_api_tokens, so pick those up as well
 source /apps/nanomine_env
+
+#install nanomine_graph
+export NG_FORK='bluedevil-oit'
+export NG_BRANCH='master'
+
+cd /apps
+echo cloning nanomine-graph fork ${NG_FORK}
+git clone https://github.com/"${NG_FORK}"/nanomine-graph.git # to use the original, use FORKNAME of 'tetherless-world'
+cd nanomine-graph
+echo checking out ${NG_BRANCH}
+git checkout ${NG_BRANCH}
+pip install -e . #install nanomine-graph app
 
 cd /apps/whyis
 
 python manage.py createuser -e nouser@nodomain.edu -p none -f nanomine -l test -u ${NM_AUTH_SYSTEM_USER_ID} --roles=admin
+python manage.py createuser -e testuser@example.com -p none -f test -l user -u testuser # dev systems need this
 
 # python manage.py load -i /apps/nanomine/nm.ttl -f turtle  ## Apparently no longer needed
 # python manage.py load -i /apps/nanomine/setl/ontology.setl.ttl -f turtle  ## Apparently no longer needed
-python manage.py load -i /apps/nanomine/setl/nanomine.ttl -f turtle
-python manage.py load -i /apps/nanomine/setl/xml_ingest.setl.ttl -f turtle
+python manage.py load -i /apps/nanomine-graph/setl/nanomine.ttl -f turtle
+python manage.py load -i /apps/nanomine-graph/setl/xml_ingest.setl.ttl -f turtle
 
+# If the mgi.tgz download fails, the last three steps can be re-run to build the db
+# Obtain dump, restore and migrate mongo dump from production for new version
+/apps/nanomine/install/retrieve_mongo_dump.sh
+
+# now do the migration -- this will take a few minutes to run
+/apps/nanomine/rest/restore_and_migrate.sh FORCE ## force overrides protection that prevents dropping database!! use wisely!
+/apps/nanomine/rest/update_api_tokens.sh
 
