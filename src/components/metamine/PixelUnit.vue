@@ -93,57 +93,8 @@ export default {
         let msg = 'error obtaining pixelunit data. Error: ' + err
         console.trace(msg)
       })
-    // Initial drawing on page
   },
   methods: {
-    pt2pixel (w, h, vxsz, pointerX, pointerY) {
-      let vxw = Math.floor(w / vxsz)
-      let vxh = Math.floor(h / vxsz)
-      let x = Math.floor(pointerX / vxw)
-      let y = Math.floor(pointerY / vxh)
-      return {'x': x, 'y': y}
-    },
-    pixelRect (pos, lw, sz, w, h) {
-      let vm = this
-      let x = pos.x
-      let y = pos.y
-      let x1 = Math.floor(x * w / vm.size) + lw / 2
-      let y1 = Math.floor(y * w / vm.size) + lw / 2
-      let sx = Math.floor(w / vm.size) - lw
-      let sy = Math.floor(h / vm.size) - lw
-      console.log('x: ' + x1 + ' y: ' + y1 + ' sx: ' + sx + ' sy: ' + sy)
-      return {'x': x1, 'y': y1, 'sx': sx, 'sy': sy}
-    },
-    getSymmetric (pos, sz) {
-      let pos1 = {}
-      let pos2 = {}
-      let pos3 = {}
-      let pos4 = {}
-      let pos5 = {}
-      let pos6 = {}
-      let pos7 = {}
-      pos1.x = (sz - 1) - pos.x
-      pos1.y = pos.y
-
-      pos2.x = pos.x
-      pos2.y = (sz - 1) - pos.y
-
-      pos3.x = (sz - 1) - pos.x
-      pos3.y = (sz - 1) - pos.y
-
-      pos4.x = (sz - 1) - pos.y
-      pos4.y = pos.x
-
-      pos5.x = pos.y
-      pos5.y = (sz - 1) - pos.x
-
-      pos6.x = (sz - 1) - pos.y
-      pos6.y = (sz - 1) - pos.x
-
-      pos7.x = pos.y
-      pos7.y = pos.x
-      return [pos, pos1, pos2, pos3, pos4, pos5, pos6, pos7]
-    },
     updateFields () {
       let vm = this
       vm.showMatlabString()
