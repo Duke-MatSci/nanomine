@@ -57,7 +57,7 @@ if input_type ~= 2
     L1 = size(image,1); L2 = size(image,2); % get image size
     vf = sum( image(:) ) / (L1*L2);  % volume fraction
 
-    [ ~, N, nd, areas, ellist ] = Characterization_2D_descriptor(image);
+    [ ~, N, nd, areas, ellist,intph ] = Characterization_2D_descriptor(image);
 
     rc_mean = sqrt( (L1*L2) * vf / N / pi ); % mean radius
 
@@ -73,6 +73,9 @@ if input_type ~= 2
     Num_Clusters = array2table(N); Num_Clusters.Properties.VariableNames = {'Num_of_Clusters'};
     VF = array2table(vf); VF.Properties.VariableNames = {'Volume_Fraction'};
     Areas = array2table(areas); Areas.Properties.VariableNames = {'Area_of_Clusters'};
+    %% line  umar added
+    intph = array2table(intph); intph.Properties.VariableNames = {'Interphase_Length'};
+    %%
     Nearest_neighbor = array2table(nd); Nearest_neighbor.Properties.VariableNames = {'Nearest_Neighbor_distance'};
     Aspect_Ratio = array2table(Els); Aspect_Ratio.Properties.VariableNames = {'Aspect_Ratio'};
     Mean_Radius = array2table(rc_mean); Mean_Radius.Properties.VariableNames = {'Mean_Radius'};
