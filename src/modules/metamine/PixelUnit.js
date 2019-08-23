@@ -5,7 +5,7 @@ export default class PixelUnit {
   // This module was converted from Claire's https://github.com/anqiclaire/metaviz (later pushed to NanoMine)
 
   constructor (data, canvas, ctx,
-    sz, width, height, lineWidth,
+    sz, /* width, height, */ lineWidth,
     borderColor, pixelFgColor, pixelBgColor,
     onPixelSet, onPixelReset) {
     let vm = this
@@ -19,13 +19,19 @@ export default class PixelUnit {
     vm.borderColor = borderColor
     vm.pixelFgColor = pixelFgColor
     vm.pixelBgColor = pixelBgColor
-    vm.height = height
-    vm.width = width
+    console.log('canvas width: ' + vm.canvas.width)
+    console.log('canvas height: ' + vm.canvas.height)
     vm.lw = lineWidth
-    // vm.ctx.fillStyle = vm.pixelBgColor
-    // vm.ctx.fillRect(0, 0, vm.c.width, vm.c.height)
 
     vm.pixels = vm.resetPixels(vm.size)
+  }
+
+  getWidth () {
+    return this.canvas.width
+  }
+
+  getHeight () {
+    return this.canvas.height
   }
 
   getPixels () {
@@ -34,21 +40,21 @@ export default class PixelUnit {
 
   pt2pixel (pointerX, pointerY) {
     let vm = this
-    let vxw = Math.floor(vm.width / vm.size)
-    let vxh = Math.floor(vm.height / vm.size)
+    let vxw = Math.floor(vm.getWidth() / vm.size)
+    let vxh = Math.floor(vm.getHeight() / vm.size)
     let x = Math.floor(pointerX / vxw)
     let y = Math.floor(pointerY / vxh)
     return {'x': x, 'y': y}
   }
 
-  pixelRect (pos, lw, sz, w, h) {
+  pixelRect (pos) {
     let vm = this
     let x = pos.x
     let y = pos.y
-    let x1 = Math.floor(x * w / vm.size) + lw / 2
-    let y1 = Math.floor(y * w / vm.size) + lw / 2
-    let sx = Math.floor(w / vm.size) - lw
-    let sy = Math.floor(h / vm.size) - lw
+    let x1 = Math.floor(x * vm.getWidth() / vm.size) + vm.lw / 2
+    let y1 = Math.floor(y * vm.getHeight() / vm.size) + vm.lw / 2
+    let sx = Math.floor(vm.getWidth() / vm.size) - vm.lw
+    let sy = Math.floor(vm.getHeight() / vm.size) - vm.lw
     console.log('x: ' + x1 + ' y: ' + y1 + ' sx: ' + sx + ' sy: ' + sy)
     return {'x': x1, 'y': y1, 'sx': sx, 'sy': sy}
   }
@@ -175,19 +181,19 @@ export default class PixelUnit {
   clearCanvas () {
     // let ctx = canvas.getContext('2d')
     let vm = this
-    vm.ctx.clearRect(0, 0, vm.canvas.width, vm.canvas.height)
+    vm.ctx.clearRect(0, 0, vm.getWidth(), vm.getHeight())
     vm.ctx.beginPath()
   }
 
   drawGrid () {
     let vm = this
-    for (let x = 0; x <= vm.width; x += vm.width / vm.size) {
+    for (let x = 0; x <= vm.getWidth(); x += vm.getWidth() / vm.size) {
       vm.ctx.moveTo(0.5 + x + vm.p, vm.p)
-      vm.ctx.lineTo(0.5 + x + vm.p, vm.height + vm.p)
+      vm.ctx.lineTo(0.5 + x + vm.p, vm.getHeight() + vm.p)
     }
-    for (let x = 0; x <= vm.height; x += vm.height / vm.size) {
+    for (let x = 0; x <= vm.getHeight(); x += vm.getHeight() / vm.size) {
       vm.ctx.moveTo(vm.p, 0.5 + x + vm.p)
-      vm.ctx.lineTo(vm.width + vm.p, 0.5 + x + vm.p)
+      vm.ctx.lineTo(vm.getWidth() + vm.p, 0.5 + x + vm.p)
     }
     vm.ctx.lineWidth = vm.lw
     vm.ctx.strokeStyle = vm.borderColor
@@ -211,7 +217,7 @@ export default class PixelUnit {
 
   resetPixel (pos) {
     let vm = this
-    let vr = vm.pixelRect(pos, vm.lw, vm.size, vm.canvas.width, vm.canvas.height)
+    let vr = vm.pixelRect(pos)
     let x = pos.x
     let y = pos.y
     vm.pixels[x][y] = 0
@@ -221,7 +227,7 @@ export default class PixelUnit {
 
   setPixel (pos) {
     let vm = this
-    let vr = vm.pixelRect(pos, vm.lw, vm.size, vm.canvas.width, vm.canvas.height)
+    let vr = vm.pixelRect(pos)
     let x = pos.x
     let y = pos.y
     vm.pixels[x][y] = 1
@@ -240,6 +246,19 @@ export default class PixelUnit {
     return rv
   }
 
+  getPsv () {
+    let vm = this
+    let mls = vm.getMatlabString()
+    let psv = vm.data['PSV'][mls]
+    let rv = []
+    if (psv) {
+      rv = psv
+    } else {
+      for (let i = 0; i < 16; ++i) { rv.push('N/A') }
+    }
+    return rv
+  }
+
   getShString () { // SH
     let vm = this
     let mls = vm.getMatlabString()
@@ -247,6 +266,19 @@ export default class PixelUnit {
     let rv = 'N/A'
     if (psv) {
       rv = psv.join(', ')
+    }
+    return rv
+  }
+
+  getSh () {
+    let vm = this
+    let mls = vm.getMatlabString()
+    let sh = vm.data['SH'][mls]
+    let rv = []
+    if (sh) {
+      rv = sh
+    } else {
+      for (let i = 0; i < 16; ++i) { rv.push('N/A') }
     }
     return rv
   }
