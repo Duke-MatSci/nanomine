@@ -2,6 +2,8 @@ export default class PixelUnit {
   // Note: this code only handles two materials (foreground and background) and it assumes that
   //    any pixel not set to the foreground material is the background material i.e. there are no
   //    blank spots
+  // This module was converted from Claire's https://github.com/anqiclaire/metaviz (later pushed to NanoMine)
+
   constructor (data, canvas, ctx,
     sz, width, height, lineWidth,
     borderColor, pixelFgColor, pixelBgColor,
@@ -20,6 +22,8 @@ export default class PixelUnit {
     vm.height = height
     vm.width = width
     vm.lw = lineWidth
+    // vm.ctx.fillStyle = vm.pixelBgColor
+    // vm.ctx.fillRect(0, 0, vm.c.width, vm.c.height)
 
     vm.pixels = vm.resetPixels(vm.size)
   }

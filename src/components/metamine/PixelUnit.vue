@@ -1,7 +1,6 @@
 <template>
-  <!-- This module was converted to vue from Claire's https://github.com/anqiclaire/metaviz repository-->
   <div>
-  <label id="sz-label" for="sz"> size: </label> <input type="number" id="sz" name="sz" required minlength="1" maxlength="3" size="3">
+  <!--label id="sz-label" for="sz"> size: </label> <input type="number" id="sz" name="sz" required minlength="1" maxlength="3" size="3"-->
   <button id="doset">reset</button>
   <canvas id="unit-cell" width="800" height="800"></canvas>
   <div>Matlab string: <div id="matlab-string"></div></div>
@@ -28,7 +27,7 @@ export default {
     resetColor: '#c0c0c0',
     bgColor: 'rgb(192,192,192)',
     lw: 4,
-    szInput: null,
+    // szInput: null,
     doSet: null,
     p: 0,
     pixels: null,
@@ -46,14 +45,12 @@ export default {
     let vm = this
     vm.c = document.getElementById('unit-cell')
     vm.ctx = vm.c.getContext('2d')
-    vm.ctx.fillStyle = vm.bgColor
-    vm.ctx.fillRect(0, 0, vm.c.width, vm.c.height)
     vm.lw = 4 // line width
-    vm.szInput = document.getElementById('sz')
+    // vm.szInput = document.getElementById('sz')
     vm.doset = document.getElementById('doset')
     vm.p = 0
     // old vm.pixels = vm.pixelUnit.resetPixels()
-    vm.szInput.value = '' + vm.size
+    // vm.szInput.value = '' + vm.size
     vm.pixelStrElem = document.getElementById('pixel-string')
     vm.matlabStrElem = document.getElementById('matlab-string')
     vm.psvElem = document.getElementById('psv-bandgap')
@@ -74,7 +71,7 @@ export default {
       vm.updateFields()
     })
     vm.doset.addEventListener('click', () => {
-      vm.size = parseInt(vm.szInput.value)
+      vm.size = 10 // parseInt(vm.szInput.value)
       console.log('size change: ' + vm.size + ' ' + ' canvas width: ' + vm.c.width + ' height: ' + vm.c.height)
       vm.pixelUnit.clearCanvas()
       vm.pixelUnit.drawGrid()
