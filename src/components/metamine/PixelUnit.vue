@@ -75,16 +75,12 @@ export default {
 
     vm.c.addEventListener('click', ev => {
       let pixel = vm.pixelUnit.pt2pixel(ev.layerX, ev.layerY)
-      console.log('clicked x: ' + pixel.x + ' y: ' + pixel.y)
-      console.log(' pixels[' + pixel.x + '][' + pixel.y + '] was: ' + ' ' + vm.pixelUnit.getPixels()[pixel.x][pixel.y])
       vm.pixelUnit.handleClick(pixel)
-      console.log(' pixels[' + pixel.x + '][' + pixel.y + '] now: ' + ' ' + vm.pixelUnit.getPixels()[pixel.x][pixel.y])
       vm.updateFields()
     })
     Axios.get('/nmstatic/metamine/lin-bilal-liu-10x10-c4v-15bit-static-dynamic.txt')
       .then(function (resp) {
         vm.pixelUnit = new PixelUnit(resp.data, vm.c, vm.ctx, vm.size,
-          /* vm.c.width, vm.c.height, */
           vm.lw, vm.borderColor,
           vm.setColor, vm.resetColor, null, null)
         vm.pixelUnit.drawGrid()
@@ -104,8 +100,6 @@ export default {
       vm.updateBgPairs()
       vm.showYoungsModulusString()
       vm.showPoissonsRatioString()
-
-      // vm.generate_table()
     },
     handleReset () {
       let vm = this
