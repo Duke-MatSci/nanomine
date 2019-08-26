@@ -11,31 +11,93 @@
               </v-flex>
               <v-flex d-flex xs10></v-flex>
             </v-flex>
-            <v-flex d-flex xs12 sm12 md3 lg3 xl3 justify-left style="min-width:322px;">
-              <canvas id="unit-cell" width="320" height="320"></canvas>
+            <v-flex d-flex xs12 sm12 md3 lg3 xl3 justify-left style="min-width:302px;">
+              <canvas id="unit-cell" width="300" height="300"></canvas>
             </v-flex>
-            <v-flex d-flex xs12 sm12 md9 lg9 xl9>
-              <v-card light flat>
-                <v-card-text>
-                  <div class="title text-xs-left">Geometry: {{matlabStr}}</div>
-                </v-card-text>
-                <v-card-text>
-                  <div class="title text-xs-left">Youngs Modulus (Pa): {{effYmStr}}</div>
-                </v-card-text>
-                <v-card-text>
-                  <div class="title text-xs-left">Poissons Ratio: {{effPrStr}}</div>
-                </v-card-text>
-                <v-card-text>
-                  <div class="title text-xs-left">Bandgap values: </div>
-                  <div v-for="bgpair in bgPairs" :key="bgpair.id">
-                    {{bgpair.sh}} {{bgpair.psv}}
-                  </div>
-                </v-card-text>
-              </v-card>
-            </v-flex>
+            <v-data-iterator
+              :items="geometryitems"
+              :rows-per-page-items="rowsPerPageItems"
+              :pagination.sync="pagination"
+              content-tag="v-layout"
+              hide-actions
+              row
+              wrap
+            >
+              <template v-slot:header>
+                <v-toolbar
+                  class="mb-2"
+                  color="cyan darken-5"
+                  dark
+                  flat
+                >
+                  <v-toolbar-title>Geometry Details</v-toolbar-title>
+                </v-toolbar>
+              </template>
+              <template v-slot:item="props">
+                <v-flex
+                  xs12
+                  sm8
+                  md6
+                  lg4
+                >
+                  <v-card>
+                    <v-card-title color="cyan darken-5" class="subheading font-weight-bold">{{props.item.name}}</v-card-title>
+
+                    <v-divider></v-divider>
+
+                    <v-list dense>
+                      <v-list-tile>
+                        <v-list-tile-content class="align-end">{{props.item.value}}</v-list-tile-content>
+                      </v-list-tile>
+                    </v-list>
+                  </v-card>
+                </v-flex>
+              </template>
+            </v-data-iterator>
           </v-layout>
         </v-flex>
       </v-layout>
+      <v-data-iterator
+        :items="bgitems"
+        :rows-per-page-items="rowsPerPageItems"
+        :pagination.sync="pagination"
+        content-tag="v-layout"
+        hide-actions
+        row
+        wrap
+      >
+        <template v-slot:header>
+          <v-toolbar
+            class="mb-2"
+            color="cyan darken-5"
+            dark
+            flat
+          >
+            <v-toolbar-title>Bandgap Values</v-toolbar-title>
+          </v-toolbar>
+        </template>
+        <template v-slot:item="props">
+          <v-flex
+            xs12
+            sm6
+            md4
+            lg3
+          >
+            <v-card>
+              <v-card-title class="subheading font-weight-bold">{{ props.item.name }}</v-card-title>
+
+              <v-divider></v-divider>
+
+              <v-list dense v-for="bgpair in bgPairs" :key="bgpair.id">
+                <v-list-tile>
+                  <v-list-tile-content v-if="props.item.name === 'SH'" class="align-end">{{getBgValue(bgpair.sh)}}</v-list-tile-content>
+                  <v-list-tile-content v-if="props.item.name === 'PSV'" class="align-end">{{getBgValue(bgpair.psv)}}</v-list-tile-content>
+                </v-list-tile>
+              </v-list>
+            </v-card>
+          </v-flex>
+        </template>
+      </v-data-iterator>
     </v-container>
   </div>
 </template>
@@ -64,7 +126,33 @@ export default {
     effPrStr: '',
     psvStr: '',
     shStr: '',
-    bgPairs: []
+    bgPairs: [],
+    rowsPerPageItems: [4, 8, 12],
+    pagination: {
+      rowsPerPage: 4
+    },
+    geometryitems: [
+      {
+        name: 'Geometry',
+        value: ''
+      },
+      {
+        name: 'Effective Young\'s Modulus (Pa):',
+        value: ''
+      },
+      {
+        name: 'Effective Poisson\'s ratio:',
+        value: ''
+      }
+    ],
+    bgitems: [
+      {
+        name: 'SH'
+      },
+      {
+        name: 'PSV'
+      }
+    ]
   }),
 
   mounted: function () {
@@ -101,6 +189,13 @@ export default {
       vm.showYoungsModulusString()
       vm.showPoissonsRatioString()
     },
+    getBgValue (s) {
+      let v = Number.parseFloat(s).toFixed(8)
+      if (v === Number.NaN) {
+        v = 'N/A'
+      }
+      return v
+    },
     handleReset () {
       let vm = this
       vm.size = 10
@@ -113,8 +208,7 @@ export default {
       let vm = this
       let psv = this.pixelUnit.getPsv()
       let sh = this.pixelUnit.getSh()
-      vm.bgPairs = [
-      ]
+      vm.bgPairs = []
       psv.forEach(function (v, idx) {
         let p = {'id': idx, 'sh': sh[idx], 'psv': v}
         vm.bgPairs.push(p)
@@ -124,6 +218,7 @@ export default {
       let vm = this
       console.log('showMatlabString')
       vm.matlabStr = vm.pixelUnit.getMatlabString()
+      vm.geometryitems[0].value = vm.matlabStr
     },
     showPSVString () {
       let vm = this
@@ -136,10 +231,12 @@ export default {
     showYoungsModulusString () {
       let vm = this
       vm.effYmStr = vm.pixelUnit.getYmString()
+      vm.geometryitems[1].value = vm.effYmStr
     },
     showPoissonsRatioString () {
       let vm = this
       vm.effPrStr = vm.pixelUnit.getPrString()
+      vm.geometryitems[2].value = vm.effPrStr
     }
   }
 }
@@ -163,16 +260,19 @@ export default {
     top: 8px;
     left: 340px;
   }
-
+  .list-tight {
+    padding-top: 1px;
+    padding-bottom: 1px;
+  }
   #unit-cell {
     background-color: #c0c0c0;
     position: relative;
     margin-left: 0px;
     margin-top: 0px;
-    min-width: 320px;
-    min-height: 320px;
-    max-width: 320px;
-    max-height: 320px;
+    min-width: 300px;
+    min-height: 300px;
+    max-width: 300px;
+    max-height: 300px;
   }
 
   h1 {
