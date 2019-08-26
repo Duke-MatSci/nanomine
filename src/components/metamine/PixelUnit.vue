@@ -9,7 +9,13 @@
               <v-flex d-flex xs2>
                 <v-btn class="text-xs-left" color="primary" flat @click="handleReset()">Reset</v-btn>
               </v-flex>
-              <v-flex d-flex xs10></v-flex>
+              <v-text-field v-if="1 === 0" xs5 @keyup.enter="onGeometryEntered"
+                v-model="geometry"
+                label="Custom geometry string"
+                required
+              ></v-text-field>
+              <v-flex v-else d-flex xs5></v-flex>
+              <v-flex d-flex xs5></v-flex>
             </v-flex>
             <v-flex d-flex xs12 sm12 md3 lg3 xl3 justify-left style="min-width:302px;">
               <canvas id="unit-cell" width="300" height="300"></canvas>
@@ -131,17 +137,18 @@ export default {
     pagination: {
       rowsPerPage: 4
     },
+    geometry: '',
     geometryitems: [
       {
         name: 'Geometry',
         value: ''
       },
       {
-        name: 'Effective Young\'s Modulus (Pa):',
+        name: 'Effective Young\'s Modulus (Pa)',
         value: ''
       },
       {
-        name: 'Effective Poisson\'s ratio:',
+        name: 'Effective Poisson\'s ratio',
         value: ''
       }
     ],
@@ -180,6 +187,11 @@ export default {
       })
   },
   methods: {
+    onGeometryEntered () {
+      let vm = this
+      console.log('Geometry: ' + vm.geometry + ' len: ' + vm.geometry.length)
+      this.pixelUnit.setMatlabString(vm.geometry)
+    },
     updateFields () {
       let vm = this
       vm.showMatlabString()

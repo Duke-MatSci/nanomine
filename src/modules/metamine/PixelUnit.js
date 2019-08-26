@@ -122,6 +122,76 @@ export default class PixelUnit {
     return rv
   }
 
+  getPixelString () { // Row major, left to right, top to bottom
+    let vs = ''
+    let vm = this
+    let size = vm.size
+    for (let x = 0; x < size; ++x) {
+      for (let y = 0; y < size; ++y) {
+        vs += ('' + vm.pixels[x][y])
+      }
+    }
+    return vs
+  }
+
+  setMatlabString (mls) {
+    let vm = this
+    // mls is 15 bit matlab string
+    let err = false
+    if (mls.length !== 15) {
+      console.log('invalid matlab string length! len=' + mls.length)
+      err = true
+    }
+    for (let i = 0; i < mls.length; ++i) {
+      if (mls[i] !== '0' && mls[i] !== '1') {
+        console.log('invalid matlab bit: ' + i + ' ' + mls[i])
+        err = true
+      }
+    }
+    if (err) {
+      return
+    }
+    // this only works for 10x10 C4v geometry!
+    const bitMap = [
+      [9, 0],
+      [9, 1],
+      [8, 1],
+      [9, 2],
+      [8, 2],
+      [7, 2],
+      [9, 3],
+      [8, 3],
+      [7, 3],
+      [6, 3],
+      [9, 4],
+      [8, 4],
+      [7, 4],
+      [6, 4],
+      [5, 4]
+    ]
+    vm.clearCanvas()
+    vm.resetPixels()
+    vm.drawGrid()
+    for (let i = mls.length - 1; i >= 0; --i) {
+      if (mls[i] === '1') {
+        let idx = mls.length - (i + 1)
+        console.log('idx: ' + idx + ' pixel: ' + JSON.stringify(bitMap[idx]))
+        let pos = {x: bitMap[idx][0], y: bitMap[idx][1]}
+        vm.setSymmetric(pos, vm.size)
+      }
+    }
+  }
+  getMatlabString () {
+    let vm = this
+    let ml = ''
+    for (let index = 1; index <= vm.sumFromOne(vm.size / 2); index++) {
+      let coord = vm.indexToCoord(index)
+      ml += ('' + vm.pixels[coord.x][coord.y])
+    }
+    console.log('getMatlabString: ' + ml)
+    return ml
+  }
+
   sumFromOne (num) {
     let sum = 0
     for (let x = 0; x <= num; x++) {
@@ -145,29 +215,6 @@ export default class PixelUnit {
         return {'x': row, 'y': col}
       }
     }
-  }
-
-  getPixelString () { // Row major, left to right, top to bottom
-    let vs = ''
-    let vm = this
-    let size = vm.size
-    for (let x = 0; x < size; ++x) {
-      for (let y = 0; y < size; ++y) {
-        vs += ('' + vm.pixels[x][y])
-      }
-    }
-    return vs
-  }
-
-  getMatlabString () {
-    let vm = this
-    let ml = ''
-    for (let index = 1; index <= vm.sumFromOne(vm.size / 2); index++) {
-      let coord = vm.indexToCoord(index)
-      ml += ('' + vm.pixels[coord.x][coord.y])
-    }
-    console.log('getMatlabString: ' + ml)
-    return ml
   }
 
   handleClick (pixel) {
