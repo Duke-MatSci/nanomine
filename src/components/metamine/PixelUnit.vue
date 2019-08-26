@@ -191,7 +191,7 @@ export default {
     },
     getBgValue (s) {
       let v = Number.parseFloat(s).toFixed(8)
-      if (v === Number.NaN) {
+      if (v === Number.NaN || v === 'NaN' || v === Number.Infinity) {
         v = 'N/A'
       }
       return v
