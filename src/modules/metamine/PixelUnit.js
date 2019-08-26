@@ -2,7 +2,8 @@ export default class PixelUnit {
   // Note: this code only handles two materials (foreground and background) and it assumes that
   //    any pixel not set to the foreground material is the background material i.e. there are no
   //    blank spots
-  // This module was converted from Claire's https://github.com/anqiclaire/metaviz (pushed to MaterialsMine 2019/08/20)
+  // This module was converted from Claire's https://github.com/anqiclaire/metaviz 
+  //   (her code was pushed to MaterialsMine 2019/08/20 via commit c611025193b80f02e8444763edfa8a4cfdfc4b3a)
 
   constructor (data, canvas, ctx,
     sz, /* width, height, */ lineWidth,
