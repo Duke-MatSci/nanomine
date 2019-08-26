@@ -10,15 +10,15 @@ rc=0;
 
 
 try
-    
+
     path_to_read = [jobSrcDir,'/'];
     path_to_write = [jobSrcDir,'/output'];
     mkdir(path_to_write);
     writeError([path_to_write, '/errors.txt'], ''); % ensure that errors.txt exists
-    
-    
+
+
     mkdir(path_to_write);
-    
+
     %
     %% Specify import function according to input option
     switch str2num(input_type)
@@ -32,7 +32,7 @@ try
                 writeError([path_to_write, '/errors.txt'], ['failed to read image file: ', file_name]);
                 rc = 97
                 exit(rc)
-                
+
             end
         case 2
             img = unzip([path_to_read,file_name],[path_to_write,'/input']);
@@ -52,7 +52,7 @@ try
             end
             imwrite(img,[path_to_write,'/','Input1.jpg']);
     end
-    
+
     % run characterization algorithm
     addpath('./descriptor_char'); % add path of directory holding MAIN.m
     er=Descriptor_C2_Binary(path_to_write,str2num(input_type)); %
@@ -61,11 +61,11 @@ try
         rc = 99;
         exit(rc);
     end
-    
+
     try
         %% ZIP files %%
         zip([path_to_write,'/Results.zip'],{'*'},path_to_write);
-        
+
     catch ex
         writeError([path_to_write, '/errors.txt'], ['Failed to zip files ']);
         rc = 99;
@@ -73,9 +73,9 @@ try
     end
 
 end
-end
     function writeError(file, msg)
     f = fopen(file,'a+');
     fprintf(f, '%s\n', msg);
     fclose(f);
     end
+end
