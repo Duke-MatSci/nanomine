@@ -5,7 +5,7 @@
 /*
  NOTE: there are posts and gets to localhost:/${XXXX} intended for RDF that will need to change to localhost:/wi/${XXXX} at some point
  */
-
+import PixelUnit from '../src/modules/metamine/PixelUnit'
 const axios = require('axios')
 const https = require('https')
 const util = require('util')
@@ -667,7 +667,7 @@ app.get('/nm', function (req, res) {
         return res.status(404).send(err)
       }
     })
-    .catch(function(err) {
+    .catch(function (err) {
       return res.status(404).send(err)
     })
 })
@@ -1594,6 +1594,34 @@ function validQueryParam (p) {
   }
   return rv
 }
+
+app.get('/geometry/image', function (req, res) {
+  // parameters:
+  //   geometry_type=C4v (only type supported at this time
+  //   geometry_dimensions="10,10,1" (only type supported at this time
+  //   geometry_data="15 bit pattern" (only type supported at this time)
+  //   geometry_data_link_type="embedded" (only type supported at this time)
+  if (req.query.geometry_type !== 'C4v' || req.query.geometry_dimensions !== '10,10,1' ||
+      req.query.geometry_data_link_type !== 'embedded' ||
+      !req.query.geometry_data || (req.query.geometry_data.length !== 15) || !req.query.geometry_data.match(/[0-1]{15}/)) {
+    console.log('get geometry image invalid parameters: ' + JSON.stringify(req.query))
+    return res.status(400).send('Invalid parameter(s)')
+  }
+
+  const { createCanvas } = require('canvas')
+  const canvas = createCanvas(300, 300)
+  const ctx = canvas.getContext('2d')
+  let pixelUnit = new PixelUnit(null, canvas, ctx, 10,
+    4, 'rgb(0, 0, 0)',
+    'rgb(255, 0, 0)', 'rgb(192, 192, 192)', null, null)
+  pixelUnit.drawGrid()
+  pixelUnit.resetPixels()
+  pixelUnit.setMatlabString(req.query.geometry_data)
+  // let dataUrl = canvas.toDataURL('image/jpeg')
+  res.set('Content-Type', 'image/jpeg')
+  res.send(canvas.toBuffer('image/jpeg', { quality: 0.5 }))
+  // ubuntu.local/nmr/geometry/image?geometry_type=C4v&geometry_dimensions=10,10,1&geometry_data_link_type=embedded&geometry_data=000000000000001
+})
 
 app.get('/templates/select/all', function (req, res) { // it's preferable to read only the current non deleted schemas rather than all
   let jsonResp = {'error': null, 'data': null}
