@@ -1620,7 +1620,7 @@ app.get('/geometry/image', function (req, res) {
   // let dataUrl = canvas.toDataURL('image/jpeg')
   res.set('Content-Type', 'image/jpeg')
   res.send(canvas.toBuffer('image/jpeg', { quality: 0.5 }))
-  // ubuntu.local/nmr/geometry/image?geometry_type=C4v&geometry_dimensions=10,10,1&geometry_data_link_type=embedded&geometry_data=000000000000001
+  // https://qa.materialsmine.org/nmr/geometry/image?geometry_type=C4v&geometry_dimensions=10,10,1&geometry_data_link_type=embedded&geometry_data=000000000000001
 })
 
 app.get('/templates/select/all', function (req, res) { // it's preferable to read only the current non deleted schemas rather than all
