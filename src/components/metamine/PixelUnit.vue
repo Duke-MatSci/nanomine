@@ -5,6 +5,22 @@
       <v-layout row wrap>
         <v-flex d-flex xs12>
           <v-layout row wrap>
+            <v-flex d-flex xs12>
+              <div class="title font-weight-thin text-xs-left">
+              Data from Osama Bilal, Claire Lin and Ke Liu composed of 32K simulated results for static and dynamic analysis.
+              </div>
+            </v-flex>
+            <v-flex d-flex xs12>
+              <div class="body-2 font-weight-thin text-xs-left">
+                Click pixels to create a geometry configuration and view the result for the selected geometry.
+              </div>
+            </v-flex>
+            <v-flex d-flex xs12>
+              <div class="body-2 font-weight-thin text-xs-left">
+              Default material is Stratasys Vero White (Poisson's Ratio 0.33, Young's Modulus 2e9 Pa) and selectable material
+                is Stratasys Tango Black (Poisson's Ratio 0.33, Young's Modulus 2e6 Pa).
+              </div>
+            </v-flex>
             <v-flex d-flex xs12 style="align-self: start;">
               <v-flex d-flex xs2>
                 <v-btn class="text-xs-left" color="primary" flat @click="handleReset()">Reset</v-btn>
