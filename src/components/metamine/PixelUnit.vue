@@ -7,7 +7,7 @@
           <v-layout row wrap>
             <v-flex d-flex xs12>
               <div class="title font-weight-thin text-xs-left">
-              Data from Claire Lin, Osama Bilal and Ke Liu composed of 32K simulated results for static and dynamic bandgap analysis.
+              Data from Claire Lin, Osama Bilal and Ke Liu composed of 32K simulated results for static and dynamic analysis.
               </div>
             </v-flex>
             <v-flex d-flex xs12>
