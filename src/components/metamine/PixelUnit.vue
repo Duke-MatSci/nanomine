@@ -17,7 +17,7 @@
               <v-flex v-else d-flex xs5></v-flex>
               <v-flex d-flex xs5></v-flex>
             </v-flex>
-            <v-flex d-flex xs12 sm12 md3 lg3 xl3 justify-left style="min-width:302px;">
+            <v-flex d-flex xs12 sm12 md3 lg3 xl3 justify-left style="min-width:310px;">
               <canvas id="unit-cell" width="300" height="300"></canvas>
             </v-flex>
             <v-data-iterator

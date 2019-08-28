@@ -6,7 +6,7 @@ export default class PixelUnit {
   //   (her code was pushed to MaterialsMine 2019/08/20 via commit c611025193b80f02e8444763edfa8a4cfdfc4b3a)
 
   constructor (data, canvas, ctx,
-    sz, /* width, height, */ lineWidth,
+    sz, lineWidth,
     borderColor, pixelFgColor, pixelBgColor,
     onPixelSet, onPixelReset) {
     let vm = this
@@ -181,6 +181,7 @@ export default class PixelUnit {
       }
     }
   }
+
   getMatlabString () {
     let vm = this
     let ml = ''
@@ -229,7 +230,8 @@ export default class PixelUnit {
   clearCanvas () {
     // let ctx = canvas.getContext('2d')
     let vm = this
-    vm.ctx.clearRect(0, 0, vm.getWidth(), vm.getHeight())
+    vm.ctx.fillStyle = vm.pixelBgColor
+    vm.ctx.fillRect(0, 0, vm.getWidth(), vm.getHeight())
     vm.ctx.beginPath()
   }
 
@@ -249,15 +251,18 @@ export default class PixelUnit {
   }
 
   parseData (data) {
-    let textByLine = data.split('\n')
-    let dataObj = {'PSV': {}, 'SH': {}, 'YoungsModulus': {}, 'PoissonsRatio': {}}
-    for (let r = 0; r < textByLine.length; r++) {
-      if (textByLine[r].trim().length > 0) {
-        let line = textByLine[r].split('/')
-        dataObj['PSV'][line[0]] = line[1].slice(1, -1).replace(/ {2}/g, ',').split(',')
-        dataObj['SH'][line[0]] = line[2].slice(1, -1).replace(/ {2}/g, ',').split(',')
-        dataObj['YoungsModulus'][line[0]] = line[3]
-        dataObj['PoissonsRatio'][line[0]] = line[4]
+    let dataObj = null
+    if (data) {
+      let textByLine = data.split('\n')
+      dataObj = {'PSV': {}, 'SH': {}, 'YoungsModulus': {}, 'PoissonsRatio': {}}
+      for (let r = 0; r < textByLine.length; r++) {
+        if (textByLine[r].trim().length > 0) {
+          let line = textByLine[r].split('/')
+          dataObj['PSV'][line[0]] = line[1].slice(1, -1).replace(/ {2}/g, ',').split(',')
+          dataObj['SH'][line[0]] = line[2].slice(1, -1).replace(/ {2}/g, ',').split(',')
+          dataObj['YoungsModulus'][line[0]] = line[3]
+          dataObj['PoissonsRatio'][line[0]] = line[4]
+        }
       }
     }
     return dataObj
@@ -286,7 +291,7 @@ export default class PixelUnit {
   getPsvString () { // PSV
     let vm = this
     let mls = vm.getMatlabString()
-    let psv = vm.data['PSV'][mls]
+    let psv = (vm.data ? vm.data['PSV'][mls] : null)
     let rv = 'N/A'
     if (psv) {
       rv = psv.join(', ')
@@ -297,7 +302,7 @@ export default class PixelUnit {
   getPsv () {
     let vm = this
     let mls = vm.getMatlabString()
-    let psv = vm.data['PSV'][mls]
+    let psv = (vm.data ? vm.data['PSV'][mls] : null)
     let rv = []
     if (psv) {
       rv = psv
@@ -310,10 +315,10 @@ export default class PixelUnit {
   getShString () { // SH
     let vm = this
     let mls = vm.getMatlabString()
-    let psv = vm.data['SH'][mls]
+    let sh = (vm.data ? vm.data['SH'][mls] : null)
     let rv = 'N/A'
-    if (psv) {
-      rv = psv.join(', ')
+    if (sh) {
+      rv = sh.join(', ')
     }
     return rv
   }
@@ -321,7 +326,7 @@ export default class PixelUnit {
   getSh () {
     let vm = this
     let mls = vm.getMatlabString()
-    let sh = vm.data['SH'][mls]
+    let sh = (vm.data ? vm.data['SH'][mls] : null)
     let rv = []
     if (sh) {
       rv = sh
@@ -334,7 +339,7 @@ export default class PixelUnit {
   getPrString () { // Poissons Ratio
     let vm = this
     let mls = vm.getMatlabString()
-    let psv = vm.data['PoissonsRatio'][mls]
+    let psv = (vm.data ? vm.data['PoissonsRatio'][mls] : null)
     let rv = 'N/A'
     if (psv) {
       rv = psv
@@ -345,7 +350,7 @@ export default class PixelUnit {
   getYmString () { // Youngs Modulus
     let vm = this
     let mls = vm.getMatlabString()
-    let psv = vm.data['YoungsModulus'][mls]
+    let psv = (vm.data ? vm.data['YoungsModulus'][mls] : null)
     let rv = 'N/A'
     if (psv) {
       rv = psv
