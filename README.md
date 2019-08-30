@@ -13,7 +13,7 @@ NanoMine Nanocomposites Data Resource
 - Run these commands after adjusting the mongo dump location and your fork and branch in a terminal window on your Ubuntu VM or native Ubuntu install:
 ```
 # NOTE: the ChemProps google config is optional, ChemProps is not started by default
-export CHEMPROPS_GOOGLE_CONFIG_LOCATION="http://somewhere.edu/chemprops.gs.config" # should be named chemprops.gs.config - installer will rename
+export CHEMPROPS_GS_CONFIG_DOWNLOAD_LOCATION="http://somewhere.edu/chemprops.gs.config" # should be named chemprops.gs.config - installer will rename
 export MONGO_DUMP_DOWNLOAD_LOCATION=http://somewhere.edu/mgi.tgz  # adjust this to the real download location
 export NM_INSTALL_FORK='duke-matsci' # this should probably be YOUR github userid if you intend to push changes
 export NM_INSTALL_BRANCH='dev' # usually, this should be 'dev' if you intend to push changes
