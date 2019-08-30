@@ -64,12 +64,13 @@ fi
 (su whyis -c "curl -skL https://raw.githubusercontent.com/${NM_INSTALL_FORK}/nanomine/${NM_INSTALL_BRANCH}/install/install_rest.sh > /apps/install/install_rest.sh; chmod a+x /apps/install/install_rest.sh")
 (su whyis -c "curl -skL https://raw.githubusercontent.com/${NM_INSTALL_FORK}/nanomine/${NM_INSTALL_BRANCH}/install/setup_mongo.sh > /apps/install/setup_mongo.sh; chmod a+x /apps/install/setup_mongo.sh")
 (su whyis -c "curl -skL https://raw.githubusercontent.com/${NM_INSTALL_FORK}/nanomine/${NM_INSTALL_BRANCH}/install/setup_nanomine.sh > /apps/install/setup_nanomine.sh; chmod a+x /apps/install/setup_nanomine.sh")
+(su whyis -c "curl -skL https://raw.githubusercontent.com/${NM_INSTALL_FORK}/nanomine/${NM_INSTALL_BRANCH}/install/setup_nanomine.sh > /apps/install/setup_nanomine.sh; chmod a+x /apps/install/setup_chemprops.sh")
 
 echo executing rest server install as whyis...
 (su - whyis -c "/apps/install/install_rest.sh ${MONGO_DUMP_DOWNLOAD_LOCATION} ${NM_INSTALL_FORK} ${NM_INSTALL_BRANCH}")
 
 # Note: mongo is installed with defaults for localhost/27017
-echo 'installing mongo (NOTE: installing 3.6 since 4.x does not work well)'
+echo 'installing mongo (NOTE: installing 3.6)'
 sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 2930ADAE8CAF5059EE73BB4B58712A2291FA4AD5
 echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.6 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.6.list
 apt-get update
@@ -125,6 +126,8 @@ cp /apps/nanomine/install/nm-rest.service /etc/systemd/system
 systemctl daemon-reload
 systemctl start nm-rest  # NOTE: can also 'restart' or 'stop' as necessary
 systemctl enable nm-rest # ensure that rest server runs after reboot
+
+(su - whyis -c '/apps/install/setup_chemprops.sh')
 
 (su - whyis -c "/apps/install/setup_nanomine.sh")
 systemctl restart nm-rest # since the db was re-created by setup_nanomine.sh
