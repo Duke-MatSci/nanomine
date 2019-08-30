@@ -64,7 +64,7 @@ fi
 (su whyis -c "curl -skL https://raw.githubusercontent.com/${NM_INSTALL_FORK}/nanomine/${NM_INSTALL_BRANCH}/install/install_rest.sh > /apps/install/install_rest.sh; chmod a+x /apps/install/install_rest.sh")
 (su whyis -c "curl -skL https://raw.githubusercontent.com/${NM_INSTALL_FORK}/nanomine/${NM_INSTALL_BRANCH}/install/setup_mongo.sh > /apps/install/setup_mongo.sh; chmod a+x /apps/install/setup_mongo.sh")
 (su whyis -c "curl -skL https://raw.githubusercontent.com/${NM_INSTALL_FORK}/nanomine/${NM_INSTALL_BRANCH}/install/setup_nanomine.sh > /apps/install/setup_nanomine.sh; chmod a+x /apps/install/setup_nanomine.sh")
-(su whyis -c "curl -skL https://raw.githubusercontent.com/${NM_INSTALL_FORK}/nanomine/${NM_INSTALL_BRANCH}/install/setup_nanomine.sh > /apps/install/setup_nanomine.sh; chmod a+x /apps/install/setup_chemprops.sh")
+(su whyis -c "curl -skL https://raw.githubusercontent.com/${NM_INSTALL_FORK}/nanomine/${NM_INSTALL_BRANCH}/install/setup_chemprops.sh > /apps/install/setup_chemprops.sh; chmod a+x /apps/install/setup_chemprops.sh")
 
 echo executing rest server install as whyis...
 (su - whyis -c "/apps/install/install_rest.sh ${MONGO_DUMP_DOWNLOAD_LOCATION} ${NM_INSTALL_FORK} ${NM_INSTALL_BRANCH}")
