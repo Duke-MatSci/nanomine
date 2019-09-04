@@ -12,6 +12,15 @@ echo 'export NM_MONGO_CHEMPROPS_URI="mongodb://${NM_MONGO_API_USER}:${NM_MONGO_A
 echo 'export NM_AUTOSTART_CHEMPROPS="no"' >> nanomine_env
 wget -O /apps/chemprops/gs.config ${CHEMPROPS_GS_CONFIG_DOWNLOAD_LOCATION}
 mongo --port $NM_MONGO_PORT -u $NM_MONGO_USER -p $NM_MONGO_PWD --authenticationDatabase admin <<EOF
+use admin
+db.createUser(
+  {
+    user: "${NM_MONGO_API_USER}",
+    pwd: "${NM_MONGO_API_PWD}",
+    roles: [ { role: "userAdminAnyDatabase", db: "admin"}, { role: "dbOwner", db: "chemprops"} ]
+  }
+)
+
 use chemprops
 db.createUser(
   {
@@ -20,4 +29,5 @@ db.createUser(
   roles: ["readWrite"]
 });
 EOF
-
+cd chemprops
+python -c 'from nmChemPropsPrepare import nmChemPropsPrepare; nm = nmChemPropsPrepare();nm.updateMongoDB()'
