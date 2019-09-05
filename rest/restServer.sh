@@ -9,6 +9,6 @@ if [ -f /etc/profile.d/matlab.sh ]; then
 fi
 source /apps/nanomine_env
 #/apps/n/bin/node index.js $*
-node index.js $*
+node -r esm index.js $*
 
 

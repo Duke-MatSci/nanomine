@@ -24,7 +24,7 @@ export default {
   },
   data () {
     return {
-      msg: 'NanoMine'
+      msg: 'MaterialsMine'
     }
   }
 }
