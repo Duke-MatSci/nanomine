@@ -1,5 +1,5 @@
 <template>
-  <div class="CorrelationCharacterizeResults">
+  <div class="IntelligentCharacterizeResults">
     <v-alert
       v-model="resultsError"
       type="error"
@@ -16,12 +16,6 @@
           {{inputImage}}
           <p></p>
         </v-flex>
-        <v-flex xs6>
-          <h4>Correlation Function</h4>
-          <img :src="getCorrelationPlot()"/>
-          {{outputImage}}
-          <p></p>
-        </v-flex>
       </v-layout>
       <v-layout>
         <v-flex xs12>
@@ -31,7 +25,8 @@
       </v-layout>
       <h4>References</h4>
       <v-flex xs12>
-        <p>Rintoul, M.D. and Torquato, S., 1997. Reconstruction of the structure of dispersions. <i>Journal of Colloid and Interface Science</i>, 186(2), pp.467-476.</p>
+        <p>Rintoul, M.D. and Torquato, S., 1997. Reconstruction of the structure of dispersions. <i>Journal of Colloid
+          and Interface Science</i>, 186(2), pp.467-476.</p>
         <p>Yeong,C. and Torquato,S., 1998. Reconstructing random media Physical Review E, vol. 57, no. 1, p. 495</p>
       </v-flex>
     </v-container>
@@ -39,18 +34,19 @@
 </template>
 
 <script>
+/* eslint-disable indent */
+
 import Axios from 'axios'
-import {} from 'vuex'
+  import {} from 'vuex'
 
 export default {
-  name: 'CorrelationCharacterizeResults',
+  name: 'IntelligentCharacterizeResults',
   data: () => {
     return ({
-      msg: 'Correlation Function - Characterization Results',
+      msg: 'Intelligent - Characterization Results',
       resultsError: false,
       resultsErrorMsg: '',
       inputFileName: '',
-      CorrelationPlot: '',
       zipFileName: ''
     })
   },
@@ -68,10 +64,6 @@ export default {
       let vm = this
       return vm.$route.query.refuri + '/' + vm.inputFileName
     },
-    getCorrelationPlot: function () {
-      let vm = this
-      return vm.$route.query.refuri + '/' + vm.CorrelationPlot
-    },
     getZipFile: function () {
       let vm = this
       return vm.$route.query.refuri + '/' + vm.zipFileName
@@ -85,7 +77,6 @@ export default {
           console.log(response.data)
           let myOutputParams = response.data // Axios did the JSON parse for us
           vm.inputFileName = myOutputParams.inputFileName
-          vm.CorrelationPlot = myOutputParams.CorrelationPlot
           vm.zipFileName = myOutputParams.zipFileName
           vm.resetLoading()
         })
@@ -109,6 +100,7 @@ export default {
   h4 {
     text-transform: uppercase;
   }
+
   h1 {
     margin-top: 10px;
     background-color: black;
