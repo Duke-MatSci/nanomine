@@ -16,9 +16,6 @@ try
     mkdir(path_to_write);
     writeError([path_to_write, '/errors.txt'], ''); % ensure that errors.txt exists
 
-
-    mkdir(path_to_write);
-
     %
     %% Specify import function according to input option
     switch str2num(input_type)
@@ -71,7 +68,9 @@ try
         rc = 99;
         exit(rc);
     end
-
+catch
+        rc = 99;
+        exit(rc);
 end
     function writeError(file, msg)
     f = fopen(file,'a+');

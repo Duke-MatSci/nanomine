@@ -55,6 +55,12 @@
               reconstructions using method of your choice.
             </v-flex>
             <router-link to="/reconstruction_homepage">Reconstruct Microstructure</router-link>
+
+        <!-- Intelligent Characterization -->
+          <v-flex class="title cap heavy skip">Intelligent Characterization</v-flex>
+          <v-flex class="body">Automatically select the most suitable characterization method and generate the results.
+          </v-flex>
+          <router-link to="/IntelligentCharacterize">Intelligent Characterization</router-link>
         </v-flex>
 
         <!-- references -->
