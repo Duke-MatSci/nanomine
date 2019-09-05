@@ -27,6 +27,7 @@ import ReconstructionHomepage from '@/components/ReconstructionHomepage'
 import CorrelationReconstruct from '@/components/CorrelationReconstruct'
 import SDFReconstruct from '@/components/SDFReconstruct'
 import DescriptorReconstruct from '@/components/DescriptorReconstruct'
+import IntelligentCharacterize from '@/components/IntelligentCharacterize'
 import SDFCharacterizeResults from '@/components/SDFCharacterizeResults'
 import DescriptorCharacterizeResults from '@/components/DescriptorCharacterizeResults'
 import CorrelationCharacterizeResults from '@/components/CorrelationCharacterizeResults'
@@ -34,6 +35,7 @@ import SDFReconstructResults from '@/components/SDFReconstructResults'
 import CorrelationReconstructResults from '@/components/CorrelationReconstructResults'
 import DescriptorReconstructResults from '@/components/DescriptorReconstructResults'
 import ViewData from '@/components/ViewData'
+import IntelligentCharacterizeResults from '@/components/IntelligentCharacterizeResults'
 // import NmEditor from '@/components/Editor'
 // import Visualization from '@/components/Visualization'
 
@@ -125,6 +127,11 @@ export default new Router({
       component: ReconstructionHomepage
     },
     {
+      path: '/IntelligentCharacterize',
+      name: 'IntelligentCharacterize',
+      component: IntelligentCharacterize
+    },
+    {
       path: '/Niblack',
       name: 'Niblack',
       component: Niblack
@@ -183,6 +190,11 @@ export default new Router({
       path: '/DescriptorCharacterizeResults',
       name: 'DescriptorCharacterizeResults',
       component: DescriptorCharacterizeResults
+    },
+    {
+      path: '/IntelligentCharacterizeResults',
+      name: 'IntelligentCharacterizeResults',
+      component: IntelligentCharacterizeResults
     },
     {
       path: '/CorrelationCharacterizeResults',
