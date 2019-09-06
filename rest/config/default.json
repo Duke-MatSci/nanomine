@@ -19,6 +19,12 @@
         "pgmname": "curator.js"
       },
       {
+        "jobtype": "IntelligentCharacterize",
+        "lang": "python",
+        "pgmdir": "../src/jobs/IntelliCharact",
+        "pgmname": "run_IntelligentCharacterize.py"
+      },
+      {
         "jobtype": "example",
         "lang": "python",
         "pgmdir": "../src/jobs/example",

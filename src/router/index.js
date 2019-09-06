@@ -22,6 +22,7 @@ import ReconstructionHomepage from '@/components/ReconstructionHomepage'
 import CorrelationReconstruct from '@/components/CorrelationReconstruct'
 import SDFReconstruct from '@/components/SDFReconstruct'
 import DescriptorReconstruct from '@/components/DescriptorReconstruct'
+import IntelligentCharacterize from '@/components/IntelligentCharacterize'
 // import Visualization from '@/components/Visualization'
 import SDFCharacterizeResults from '@/components/SDFCharacterizeResults'
 import DescriptorCharacterizeResults from '@/components/DescriptorCharacterizeResults'
@@ -35,6 +36,7 @@ import Dynamfit from '@/components/Dynamfit'
 import DynamfitExample from '@/components/DynamfitExample'
 import DynamfitExampleInput from '@/components/DynamfitExampleInput'
 import DynamfitResult from '@/components/DynamfitResult'
+import IntelligentCharacterizeResults from '@/components/IntelligentCharacterizeResults'
 
 Vue.use(Router)
 
@@ -124,6 +126,11 @@ export default new Router({
       component: ReconstructionHomepage
     },
     {
+      path: '/IntelligentCharacterize',
+      name: 'IntelligentCharacterize',
+      component: IntelligentCharacterize
+    },
+    {
       path: '/Niblack',
       name: 'Niblack',
       component: Niblack
@@ -177,6 +184,11 @@ export default new Router({
       path: '/DescriptorCharacterizeResults',
       name: 'DescriptorCharacterizeResults',
       component: DescriptorCharacterizeResults
+    },
+    {
+      path: '/IntelligentCharacterizeResults',
+      name: 'IntelligentCharacterizeResults',
+      component: IntelligentCharacterizeResults
     },
     {
       path: '/CorrelationCharacterizeResults',

@@ -21,7 +21,7 @@ try
     path_to_read = [jobSrcDir,'/'];
     path_to_write = [jobSrcDir,'/output'];
     mkdir(path_to_write);
-    
+    writeError([path_to_write, '/errors.txt'], ''); % ensure that errors.txt exists
     %% Specify import function according to input option
     switch str2num(input_type)
         case 1
@@ -49,16 +49,16 @@ try
             img_viewable = 256 * img;
             imwrite(img_viewable,[path_to_write,'/','Input1.jpg']);
     end
-    
+
     if str2num(input_type) ~= 2
         if length(size(img)) > 2
             img = img(:,:,1);
         end
         %%Umar added to deal with odd shaped images
-        
+
         md=min(size(img));
         img=img(1:md,1:md);
-        
+
         %% Umar added to check and binarize the image using Otsu
         if max(img(:))>1
             Target = double(img);
@@ -68,18 +68,23 @@ try
         else
             Target_img=img;
         end
-        
+
         plot_correlation(Target_img,str2num(correlation_type),path_to_write);
-        
+
     else
         zip_file_processing(path_to_write,str2num(correlation_type));
     end
-    
+
     %% ZIP files %%
     zip([path_to_write,'/Results.zip'],{'*'},path_to_write);
-    
+
 catch ex
     rc = 99;
     exit(rc);
 end
+    function writeError(file, msg)
+        f = fopen(file,'a+');
+        fprintf(f, '%s\n', msg);
+        fclose(f);
+    end
 end
