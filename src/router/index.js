@@ -35,6 +35,7 @@ import Dynamfit from '@/components/Dynamfit'
 import DynamfitExample from '@/components/DynamfitExample'
 import DynamfitExampleInput from '@/components/DynamfitExampleInput'
 import DynamfitResult from '@/components/DynamfitResult'
+import ChemProps from '@/components/ChemProps'
 
 Vue.use(Router)
 
@@ -225,6 +226,11 @@ export default new Router({
       path: '/DynamfitResult',
       name: 'DynamfitResult',
       component: DynamfitResult
+    },
+    {
+      path: '/ChemProps',
+      name: 'ChemProps',
+      component: ChemProps
     }
   ]
 })
