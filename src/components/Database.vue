@@ -49,6 +49,13 @@
           </h4>
           <p>Nanocomposite data insights.</p>
         </v-flex>
+        <v-flex xs4 v-if="true">
+          <img src="/nmstatic/img/Icon_verified_chemical_structure.svg"/>
+          <h4>
+            <router-link to="/ChemProps">ChemProps</router-link>
+          </h4>
+          <p>Standardized Polymer Name and Filler Search</p>
+        </v-flex>
       </v-layout>
     </v-container>
   </div>

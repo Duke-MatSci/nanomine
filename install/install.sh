@@ -137,7 +137,3 @@ systemctl restart apache2
 systemctl restart celeryd
 
 echo "if you would like to login as whyis from the ubuntu login, execute 'sudo passwd whyis' and set a password to use from the login page"
-
-
-
-
