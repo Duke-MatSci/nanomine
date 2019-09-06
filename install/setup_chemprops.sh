@@ -60,5 +60,6 @@ db.createUser({
   ]
 })
 EOF
+
 cd chemprops
 python -c 'from nmChemPropsPrepare import nmChemPropsPrepare; nm = nmChemPropsPrepare(); nm.updateMongoDB()'
