@@ -43,8 +43,8 @@ db.createUser({
       user: "${NM_MONGO_CHEMPROPS_USER}",
       pwd: "${NM_MONGO_CHEMPROPS_PWD}",
       roles: [
-        {role: "readWrite", db: "ChemProps"},
-        {role: "dbAdmin", db: "ChemProps"}
+        {role: "readWrite", db: "${NM_MONGO_CHEMPROPS_DB}"},
+        {role: "dbAdmin", db: "${NM_MONGO_CHEMPROPS_DB}"}
       ]
     })
 
