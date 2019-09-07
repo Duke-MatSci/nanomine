@@ -1,0 +1,22 @@
+<br/>Hello ${user},
+<br/>
+<br/>Unfortunately, your Intelligent Characterization submission was not successful.
+<br/>
+<br/>jobid: ${jobid}
+
+<br/>job result code: ${jobinfo.resultcode}
+
+<br/>Errors:
+<br/>${jobinfo.errors}
+<br/>
+<br/>In most cases, these errors will need to be addressed before the job will run successfully.
+<br/>If you're unsure of how to fix the errors or the errors are beyond your control,
+<br/>then copy the errors, resultcode and the job id from this email and paste them into a problem
+<br/>report using the <a href="https://nanomine.org/nm#/contact" target="_blank">NanoMine contact page</a> so we can help resolve the problem.
+<br/>
+
+
+<br/>
+Regards,
+<br/>The NanoMine team
+<br/> *** DO NOT REPLY TO THIS EMAIL ***
