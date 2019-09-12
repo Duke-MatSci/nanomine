@@ -58,10 +58,9 @@
 
         <!-- Intelligent Characterization -->
           <v-flex class="title cap heavy skip">Intelligent Characterization</v-flex>
-          <v-flex class="body">Every characterization method has limitations. Some characterization techniques work
-            better for one type of material while others work well for a different material. If the user is unsure of
-            which characterization method is applicable to the material system then this tool automatically selects
-            the more suitable characterization method between descriptors and SDF.
+          <v-flex class="body">The intelligent characterization tool selects the most suitable characterization
+            method between the “physical descriptors” and the “spectral density function (SDF)”
+            approaches based on analyzing the user uploaded image(s). Results generated can be easily passed to the NanoMine Database.
 
 
           </v-flex>
