@@ -19,8 +19,15 @@
         <v-flex xs12>
           <h3>Description</h3>
           <br>
-          <p>Upload an image (or .mat) / ZIP file containing set of images (Supported file formats: .jpg, .tif, .png) and click "Characterize".
-            Universal descriptors are calculated; specific characterization method is selected and results are generated based on suitability.</p>
+          <p>This tool assesses the uploaded image of microstructure and performs certain checks to decide which characterization method would work best. The process
+            consists of three steps: </p>
+          <p>(1) Calculate universal descriptors</p>
+          <p>(2) Check whether Spheroidal descriptors or Spectral Density Function(SDF) is applicable</p>
+          <p>(3) Based on the decision in previous step calculate either SDF or Spheroidal Descriptors. If SDF is selected, then it is also parameterized.</p>
+            <p>In step (1) universal descriptors include void fraction, isotropy index, and interfacial area.
+            For step (2) stated above the decision is based upon the connectivity and isotropy index. If the material is too connected it becomes unfit for spheroidal descriptors. And if the material is not isotropic
+            it becomes unfit for SDF characterization.
+            For step (3) if SDF is selected, a curve fitting is done based on five different forms. The one which has the best fit is outputted along with the goodness of fit value.</p>
         </v-flex>
         <v-flex xs12 justify-start>
           <h4> Input Options:</h4>
