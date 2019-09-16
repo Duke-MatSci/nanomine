@@ -32,7 +32,6 @@
               All Characterization and Reconstruction algorithms work with binarized images only.
           </v-flex>
           <router-link to="/binarization_homepage">Binarize Image</router-link>
-
           <!-- Characterization -->
             <v-flex class="title cap heavy skip">Microstructure Characterization</v-flex>
             <v-flex class="body"> Microstructure Characterization refes to a statistical quantification of morphology.
@@ -44,7 +43,6 @@
               Upload a binarized microstructure image / set of images and obtain characterization data of your choice.
             </v-flex>
             <router-link to="/characterization_homepage">Characterize Microstructure</router-link>
-
           <!-- Reconstruction -->
             <v-flex class="title cap heavy skip">Microstructure Reconstruction</v-flex>
             <v-flex class="body">Reconstruction involves constructing a statistically equivalent microstructure image
@@ -55,18 +53,14 @@
               reconstructions using method of your choice.
             </v-flex>
             <router-link to="/reconstruction_homepage">Reconstruct Microstructure</router-link>
-
         <!-- Intelligent Characterization -->
           <v-flex class="title cap heavy skip">Intelligent Characterization</v-flex>
           <v-flex class="body">The intelligent characterization tool selects the most suitable characterization
             method between the “physical descriptors” and the “spectral density function (SDF)”
             approaches based on analyzing the user uploaded image(s). Results generated can be easily passed to the NanoMine Database.
-
-
           </v-flex>
           <router-link to="/IntelligentCharacterize">Intelligent Characterization</router-link>
         </v-flex>
-
         <!-- references -->
         <v-flex xs12>
             <v-flex class="body cap heavy skip">References</v-flex>

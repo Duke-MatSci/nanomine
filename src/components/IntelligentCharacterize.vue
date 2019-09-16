@@ -29,7 +29,17 @@
             Cluster Area, Cluster Radius, Elongation Ratio, Orientation Angle, and Rectangularity will be provided.
             If the SDF method is chosen, the following five different forms of SDF will be tested and the best fitted
             form will be chosen with output of the fitted parameters and the goodness of fit value.</p>
-            <p><math>List the title and form of the five SDF function.</math>
+          <p>Chi-square fit: <math>y = a * f<sub>k</sub>(b * x, n)</math>, where <math>f<sub>k</sub></math> is the probability density function of chi-square distribution.
+          </p>
+          <p>Gamma fit: <math>y = a * f<sub>g</sub>(x - x<sub>0</sub>, b, c)</math>, where <math>f<sub>g</sub></math> is the probability density function of gamma distribution.
+          </p>
+          <p>Gaussian fit: <math>y = a * exp[-b * (x - x<sub>0</sub>)<sup>2</sup>]</math>
+          </p>
+          <p>Step function fit: <math>y = a * [h(x-x<sub>1</sub>) - h(x-x<sub>2</sub>)]</math>, where <math>h</math> is Heaviside function.
+          </p>
+          <p>Exponential fit: <math>y = a * exp[-b * (x - x<sub>0</sub>)]</math>
+          </p>
+          <p>Double peak fit: <math>y = a<sub>1</sub> * exp[-b<sub>1</sub> * (x - x<sub>1</sub>)<sup>2</sup>] +  a<sub>2</sub> * exp[-b<sub>2</sub> * (x - x<sub>2</sub>)<sup>2</sup>]</math>
           </p>
                   </v-flex>
         <v-flex xs12 justify-start>
