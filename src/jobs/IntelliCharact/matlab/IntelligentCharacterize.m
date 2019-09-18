@@ -7,12 +7,11 @@ function IntelligentCharacterize(userID, jobID, jobType, jobSrcDir, jobDir, webB
 
 rc = 0;
 try
-    
+
     path_to_read = [jobSrcDir, '/'];
     path_to_write = [jobSrcDir, '/output'];
     mkdir(path_to_write);
     writeError([path_to_write, '/errors.txt'], '');
-    
     %% Specify import function according to input option
     try
         switch str2num(input_type)
@@ -45,7 +44,7 @@ try
         exit(rc);
     end
     % Otsu binarize
-    
+
     try
         if str2double(input_type) ~= 2
             if length(size(img)) > 2
@@ -59,7 +58,7 @@ try
             end
             imwrite(256*img, [path_to_write, '/', 'Input1.jpg']);
         end
-        
+
         % Deal with odd shaped images
         md = min(size(img));
         img = img(1:md,1:md);
@@ -71,20 +70,21 @@ try
         writeError([path_to_write, '/errors.txt'], newline);
         exit(rc);
     end
-    
-    
+
+
     %% Image read done, now work on output
     try
         SDFsize = 200;
-        
+
         vol_frac = mean(img(:));  % Volume fraction
         perim = bwperim(img);
         intf_area = sum(perim(:));  % Interfacial area
-        
+
+
         [connectivity, concavity] = check_shape(img);
         sdf2d = fftshift(abs(fft2(img-vol_frac)).^2);
         [isotropy, ~] = check_isotropy(sdf2d);
-        
+
         csvtarget = [path_to_write, '/output.csv'];
         fid = fopen(csvtarget,'w');
         fprintf(fid, '%s%s%s\n', 'Sample name', ',', file_name);
@@ -102,6 +102,7 @@ try
     if all(connectivity == [1, 0]) || all(connectivity == [0, 1]) && (concavity < 1.2)
         try
             % Use descriptors
+            charac="Descriptors"
             fprintf(fid, '%s%s%s\n', 'Characterization method selected', ',', 'Speroidal descriptors');
             fprintf(fid, '\n');
             fprintf(fid, '%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s\n', 'Spheroidal descriptors', ',', ...
@@ -125,14 +126,15 @@ try
             writeError([path_to_write, '/errors.txt'], newline);
             exit(rc);
         end
-        
+
     else  % Isotropy check is not included yet
         % Use SDF
         try
+        charac="SDF"
             fprintf(fid, '%s%s%s\n', 'Characterization method selected', ',', 'SDF');
             fprintf(fid, '\n');
             fprintf(fid, '%s\n', 'SDF');
-            
+
             sdf1d = FFT2oneD(sdf2d);
             fit_result = SDFFit(sdf1d, SDFsize, true, path_to_write);  % true - show fitting image
             fprintf(fid, '%s%s%s\n', 'Fitting function', ',', fit_result('func_type'));
@@ -166,10 +168,19 @@ try
             exit(rc);
         end
     end
-    
+
     % Zip files
     fclose(fid);
     zip([path_to_write, '/Results.zip'], {'*'}, [path_to_write, '/']);
+    universal.vf=vol_frac;
+    universal.intf_area=intf_area;
+    universal.isotropy=isotropy;
+    root.universal=universal;
+    root.charac=charac;
+    rez = jsonencode(root);
+    fi=fopen([path_to_write,'result_json.json'],'w');
+    fprintf(fi,'%s',rez);
+    fclose(fi);
 catch ex
     rc = 99;
     exit(rc);

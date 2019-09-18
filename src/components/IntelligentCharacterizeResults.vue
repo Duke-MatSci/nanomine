@@ -16,6 +16,14 @@
           {{inputImage}}
           <p></p>
         </v-flex>
+        <v-flex xs6>
+          <h4>Intelligent Characterizaion Results</h4> <!-- comment -->
+           volume fraction: {{vf}}<br/>
+          Interfacial Area: {{intf_area}}<br/>
+          Characterization Method: {{charac}}<br/>
+          Isotropy: {{isotropy}}<br/>
+          <p></p>
+        </v-flex>
       </v-layout>
       <v-layout>
         <v-flex xs12>
@@ -52,6 +60,12 @@ export default {
   },
   mounted: function () {
     this.getJobOutputParams()
+      .then(function () {
+        this.getOutputResultJson() // added *************************************
+      })
+      .catch(function (err) {
+        console.log(err)
+      })
   },
   methods: {
     setLoading: function () {
@@ -69,15 +83,40 @@ export default {
       return vm.$route.query.refuri + '/' + vm.zipFileName
     },
     getJobOutputParams: function () {
+      return new Promise(function (resolve, reject) {
+        let vm = this
+        let url = vm.$route.query.refuri + '/job_output_parameters.json'
+        vm.setLoading()
+        return Axios.get(url)
+          .then(function (response) {
+            console.log(response.data)
+            let myOutputParams = response.data // Axios did the JSON parse for us
+            vm.inputFileName = myOutputParams.inputFileName
+            vm.zipFileName = myOutputParams.zipFileName
+            vm.resetLoading()
+            resolve()
+          })
+          .catch(function (err) {
+            console.log(err)
+            vm.resultsrErrorMsg = err
+            vm.resultsError = true
+            vm.resetLoading()
+            reject(new Error('Error getting Job Output Parameters'))
+          })
+      })
+    },
+    getOutputResultJson: function () { // *************************************
       let vm = this
-      let url = vm.$route.query.refuri + '/job_output_parameters.json'
+      let url = vm.$route.query.refuri + '/outputresult_json.json'
       vm.setLoading()
       return Axios.get(url)
         .then(function (response) {
           console.log(response.data)
-          let myOutputParams = response.data // Axios did the JSON parse for us
-          vm.inputFileName = myOutputParams.inputFileName
-          vm.zipFileName = myOutputParams.zipFileName
+          let myOutputResult = response.data // Axios did the JSON parse for us
+          vm.vf = myOutputResult.universal.vf // should i have two dots ? or directly call myOutputResult.vf?
+          vm.intf_area = myOutputResult.universal.intf_area
+          vm.isotropy = myOutputResult.universal.isotropy
+          vm.charac = myOutputResult.charac
           vm.resetLoading()
         })
         .catch(function (err) {
@@ -86,7 +125,7 @@ export default {
           vm.resultsError = true
           vm.resetLoading()
         })
-    }
+    } // ********************************************************************************
   }
 }
 </script>
