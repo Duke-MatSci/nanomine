@@ -9,7 +9,7 @@
       "active": false
     },
     "rest": {
-      "dataSizeLimit": "10mb"
+      "dataSizeLimit": "200mb"
     },
     "jobtypes": [
       {
@@ -17,6 +17,12 @@
         "lang": "js",
         "pgmdir": "../src/jobs/curator",
         "pgmname": "curator.js"
+      },
+      {
+        "jobtype": "curateDatasetUpload",
+        "lang": "js",
+        "pgmdir": "../src/jobs/curator",
+        "pgmname": "curateDatasetUpload.js"
       },
       {
         "jobtype": "IntelligentCharacterize",
