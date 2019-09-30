@@ -37,7 +37,7 @@ import DynamfitExample from '@/components/DynamfitExample'
 import DynamfitExampleInput from '@/components/DynamfitExampleInput'
 import DynamfitResult from '@/components/DynamfitResult'
 import IntelligentCharacterizeResults from '@/components/IntelligentCharacterizeResults'
-import XmlUploader from '@/components/XmlUploader'
+// DISABLED FOR NOW import XmlUploader from '@/components/XmlUploader'
 
 Vue.use(Router)
 
@@ -238,11 +238,11 @@ export default new Router({
       path: '/DynamfitResult',
       name: 'DynamfitResult',
       component: DynamfitResult
-    },
-    {
-      path: '/XmlUploader',
-      name: 'XmlUploader',
-      component: XmlUploader
-    }
+    } // ,
+    // DISABLED FOR NOW {
+    //   path: '/XmlUploader',
+    //   name: 'XmlUploader',
+    //   component: XmlUploader
+    // }
   ]
 })

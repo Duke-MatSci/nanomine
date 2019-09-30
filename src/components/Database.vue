@@ -53,7 +53,7 @@
           </a>
           <p>Nanocomposite data insights.</p>
         </v-flex>
-        <v-flex xs4 v-if="isAdmin()">
+        <!-- DISABLED FOR NOW v-flex xs4 v-if="isAdmin()">
           <router-link to='/xmluploader'>
             <img src="/nmstatic/img/admin-icon.jpg"/>
             <h4>
@@ -61,7 +61,7 @@
             </h4>
           </router-link>
           <p>Upload XML files directly</p>
-        </v-flex>
+        </v-flex-->
       </v-layout>
     </v-container>
   </div>
