@@ -23,8 +23,6 @@
     "jsonwebtoken": "^8.4.0",
     "lodash": "^4.17.11",
     "moment": "^2.23.0",
-    "mongodb": "^3.1.4",
-    "mongoose": "^5.2.9",
     "short-uuid": "^3.1.0",
     "vkbeautify": "^0.99.3",
     "vue": "^2.5.21",
