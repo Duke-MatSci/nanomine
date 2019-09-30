@@ -533,6 +533,7 @@ export default {
           console.log('Error: ' + err)
           vm.myPageError = true
           vm.myPageErrorMsg = 'loading samples: ' + err
+          vm.sampleList = []
           vm.resetLoading()
         })
     },

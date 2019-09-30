@@ -1,8 +1,23 @@
 const moment = require('moment')
 const {createLogger, format, transports} = require('winston')
-
+const libxmljs = require('libxmljs2')
+const he = require('he') // for encoding text element named character entities into decimal encoding (rdf requires this downstream for ingest)
+const util = require('util')
 const { combine, label, printf, prettyPrint } = format
-
+// const datasetsSchema = require('./modules/mongo/schema/datasets')(mongoose)
+// const Datasets = mongoose.model('datasets', datasetsSchema)
+let trace = false
+function setTrace (_trace) {
+  trace = _trace
+}
+function logTrace (msg) {
+  if (trace) {
+    console.log(msg)
+  }
+}
+function inspect (theObj) {
+  return util.inspect(theObj, {showHidden: true, depth: 5})
+}
 const logFormat = printf(({ level, message, label}) => {
   let now = moment().format('YYYYMMDDHHmmssSSS')
   return `${now} [${label}] ${level}: ${message}`
@@ -31,8 +46,6 @@ let configureLogger = function (config, logLabel) {
   })
   return logger
 }
-
-
 
 let getEnv = function () {
   return {
@@ -123,6 +136,127 @@ function getDatasetXmlFileList (mongoose, logger, xmlTitle) {
     }
   })
 }
+function updateOrCreateXmlData (xmlData, logger, creatorId, xmlDoc, schemaId) {
+  // XMlData is the mongoose model instance
+  // xmlDoc is an xml document parsed by libxmljs
+  let func = 'utils.updateOrCreateXmlData'
+  return new Promise(function (resolve, reject) {
+    // let err = new Error(func + ' - wow! This didn\'t work!. How could that be? schemaId: ' + schemaId + ' xml: ' + xmlDoc.find('//ID')[0].text())
+    // logger.error(err)
+    // reject(err)
+    let id = xmlDoc.find('//ID')[0].text()
+    let doi = xmlDoc.find('//DOI')[0].text()
+    let published = true
+    if (doi.indexOf('unpublished') !== -1) {
+      published = false
+    }
+    let xml = xmlDoc.toString(false) // false 'should' turn off pretty printing, but it doesn't seem to work
+    let dsSeq = -1
+    let m = matchValidXmlTitle(id)
+    if (m) {
+      dsSeq = parseInt(m[1])
+    }
+    let filename = id + '.xml'
+    let msg = ' id: ' + id + ' using xml of length: ' + xml.length
+    xmlData.findOneAndUpdate({$and: [{'title': {$eq: filename}}, {'schemaId': {$eq: schemaId}}]},
+      {
+        $set: {
+          'xml_str': xml, // write xml
+          'schemaId': schemaId, // create schemaId field using schema (note: field was schema in MDCS, but name is incompatible with Mongoose)
+          'dsSeq': dsSeq, // Sequence of the associated dataset
+          'entityState': 'EditedValid', // initial entity state shows validated by prior processing NOTE: 'Valid' would kick off rdf upload
+          'curateState': 'Edit',
+          'isPublic': false, // all of the original data is intended to be public
+          'ispublished': published, // all of the original data came from published papers
+          'iduser': creatorId,
+          'title': filename
+          // 'content': null
+        }
+      }, function (err, doc) {
+        if (err) {
+          logger.error(func + ' - Update failed: ' + msg + ' error: ' + err)
+          reject(err)
+        } else {
+          if (doc !== null) {
+            logger.info(func + ' - Update successful: ' + msg)
+            logger.debug(func + ' doc found: ' + doc)
+            resolve()
+          } else {
+            let newDoc = {
+              'xml_str': xml, // write xml
+              'schemaId': schemaId, // create schemaId field using schema (note: field was schema in MDCS, but name is incompatible with Mongoose)
+              'dsSeq': dsSeq, // Sequence of the associated dataset
+              'entityState': 'EditedValid', // initial entity state shows validated by prior processing NOTE: 'Valid' would kick off rdf upload
+              'curateState': 'Edit',
+              'isPublic': false, // all of the original data is intended to be public
+              'ispublished': published, // all of the original data came from published papers
+              'iduser': creatorId,
+              'title': filename,
+              'content': null // not used anymore - MDCS used this for BSON representation of XML
+            }
+            xmlData.create(newDoc, function (err, doc) {
+              if (err) {
+                logger.error(func + ' - create failed: ' + msg + ' error: ' + err)
+                reject(err)
+              } else {
+                logger.info(func + ' - new xml created: ' + msg)
+                resolve()
+              }
+            })
+          }
+        }
+      })
+  })
+}
+function createDataset (Datasets, logger, dsInfo) { // creates the dataset using the dsInfo, new seq is returned with updated dsInfo in result.data
+  let func = 'utils.createDataset'
+  // NOTE: if clustered, there's a race condition on setting the sequence number - should use some kind of db auto increment sequence
+  return new Promise(function (resolve, reject) {
+    let status = {'statusCode': 201, 'error': null, 'data': null}
+    Datasets.find({}).sort({'seq': 1}).exec(function (err, docs) {
+      if (err) {
+        logger.error(func + ' - datasets find error: ' + err)
+        status.error = err
+        status.statusCode = 500
+        status.data = null
+        reject(status)
+      } else {
+        let last = -1
+        let newSeq = -1
+        let done = false
+        docs.forEach(function (v) {
+          if (!done) {
+            if (v.seq > (last + 1) && last >= 101) {
+              newSeq = last + 1
+              done = true
+            }
+            last = v.seq
+          }
+        })
+        if (!done) {
+          newSeq = last + 1
+        }
+        dsInfo.seq = newSeq
+        logger.debug(func + ' - newSeq: ' + newSeq + ' dsInfo: ' + inspect(dsInfo))
+        Datasets.create(dsInfo, function (err, doc) {
+          if (err) {
+            logger.error(func + ' - datasets create error: ' + err)
+            status.error = err
+            status.data = null
+            status.statusCode = 500
+            reject(status)
+          } else {
+            status.error = null
+            status.data = doc
+            status.statusCode = 201
+            logger.debug(func + ' - dataset created successfully. Sequence is: ' + dsInfo.seq)
+            resolve(status)
+          }
+        })
+      }
+    })
+  })
+}
 
 function sortSchemas (allActive) { // sort by date descending and choose first
   allActive.sort((a, b) => { // Sort in reverse order
@@ -154,28 +288,237 @@ function sortSchemas (allActive) { // sort by date descending and choose first
   })
 }
 
-
-function getLatestSchemas (xsdVersionSchema, logger) { // duplicate of getCurrentSchemas!! TODO
+function getLatestSchemas (xsdVersionSchema, xsdSchema, logger) { // duplicate of getCurrentSchemas!! TODO
   let func = 'getLatestSchemas'
+  let msg = func + ' - entry'
+  logTrace(msg)
   return new Promise(function (resolve, reject) {
-    xsdVersionSchema.find({isDeleted: {$eq: false}}).populate('currentRef').exec(function (err, versions) {
-      if (err) {
-        reject(err)
-      } else if (versions == null || versions.length <= 0) {
-        resolve(null) // not found
-      } else {
-        try {
-          sortSchemas(versions) /* In-place sort by title i.e. 081218 will date sort to top relative to 060717 (reverse sort) so that
+    msg = func + ' - just before call to xsdVersionSchema.find'
+    logTrace(msg)
+    debugger
+    try {
+      xsdVersionSchema.find({isDeleted: {$eq: false}}).populate('currentRef').exec(function (err, versions) {
+        if (err) {
+          msg = func + ' - rejecting with error ' + err
+          logger.error(msg)
+          logTrace(msg)
+          reject(err)
+        } else if (versions == null || versions.length <= 0) {
+          msg = func + ' - resolving with null - no versions.'
+          logTrace(msg)
+          resolve(null) // not found
+        } else {
+          try {
+            sortSchemas(versions) /* In-place sort by title i.e. 081218 will date sort to top relative to 060717 (reverse sort) so that
                                  client can assume latest schema is first
                                  */
-          resolve(versions)
-        } catch (err) {
-          logger.error(func + ' - schema sort reverse by date failed :( - error' + err)
-          reject(err)
+            msg = func + ' - resolving with ' + versions.length + ' versions.'
+            logTrace(msg)
+            resolve(versions)
+          } catch (err) {
+            msg = func + ' - schema sort reverse by date failed :( - error' + err
+            logTrace(msg)
+            logger.error(msg)
+            reject(err)
+          }
+        }
+      })
+    } catch (err) {
+      msg = func + ' - caught error attempting to call xsdVersionSchema.find. Error: ' + err
+      logTrace(msg)
+      logger.error(msg)
+      reject(err)
+    }
+  })
+}
+function mergeDatasetInfoFromXml (logger, datasetInfo, xmlDocument) {
+  // NOTE: this code does not yet pull out all the fields of the XMLs needed.  It's specific to one set of
+  //    data for which upload was needed quickly and the data was unpublished.
+  //    TODO fix this code so that it pull out all the needed dataset information
+  // checks xml for dataset information in DATA_SOURCE and merges into datasetInfo provided if the source field
+  // exists and is not empty/null
+  // 'citationType': ds.CitationType,
+  //   'publication': ds.Publication,
+  //   'title': ds.Title,
+  //   'author': [],
+  //   'keyword': [],
+  //   'publisher': ds.Publisher,
+  //   'publicationYear': ds.PublicationYear,
+  //   'doi': ds.DOI,
+  //   'relatedDoi': ds.relatedDOI
+  //   'volume': ds.Volume,
+  //   'url': ds.URL,
+  //   'language': ds.Language,
+  //   'dateOfCitation': ds.DateOfCitation,
+  //   'location': ds.Location,
+  //   'issue': issue,
+  //   'issn': issn,
+  //   'userid': nanomineUser.userid,
+  //   'isPublic': true, // all of the original datasets are public
+  //   'ispublished': true // all of the original datasets came from published papers
+  // Caller should parse the XML document before calling this function
+
+  // get authors and location if available
+  let commonFields = xmlDocument.get('//CommonFields')
+  let authors = []
+  let location = null
+  let keyword = []
+  // NOTE: TODO - all of the fields are initialized, but not all are actually set from the XML yet
+  if (!datasetInfo.author) {
+    datasetInfo.author = []
+  }
+  if (!datasetInfo.citationType) {
+    datasetInfo.citationType = null
+  }
+  if (!datasetInfo.dateOfCitation) {
+    datasetInfo.dateOfCitation = null
+  }
+  if (!datasetInfo.doi) {
+    datasetInfo.doi = null
+  }
+  if (!datasetInfo.issn) {
+    datasetInfo.issn = null
+  }
+  if (!datasetInfo.issue) {
+    datasetInfo.issue = null
+  }
+  if (!datasetInfo.language) {
+    datasetInfo.language = null
+  }
+  if (!datasetInfo.location) {
+    datasetInfo.location = null
+  }
+  if (!datasetInfo.publication) {
+    datasetInfo.publication = null
+  }
+  if (!datasetInfo.publicationYear) {
+    datasetInfo.publicationYear = null
+  }
+  if (!datasetInfo.relatedDoi) {
+    datasetInfo.relatedDoi = []
+  }
+  if (!datasetInfo.title) {
+    datasetInfo.title = null
+  }
+  if (!datasetInfo.volume) {
+    datasetInfo.volume = null
+  }
+  if (!datasetInfo.url) {
+    datasetInfo.url = null
+  }
+
+  if (commonFields) {
+    // authors = commonFields.find('Author', {})
+    authors = xmlDocument.find('//Author')
+    logger.debug('authors: ' + JSON.stringify(authors))
+    if (authors && authors.length > 0) {
+      if (Array.isArray(authors)) {
+        authors.forEach((v, idx) => {
+          let author = v.text()
+          if (!datasetInfo.author.includes(author)) {
+            datasetInfo.author.push(author)
+          }
+        })
+      } else { // simple string
+        if (!datasetInfo.author.includes(authors)) {
+          datasetInfo.author.push(authors)
         }
       }
+    }
+    location = commonFields.get('//Location')
+    if (location) {
+      if (!datasetInfo.location || datasetInfo.location.length < 1) {
+        let locText = location.text()
+        if (locText && locText.length > 0) {
+          datasetInfo.location = locText
+        }
+      }
+    }
+  }
+  let relatedDOI = xmlDocument.find('//relatedDOI')
+  if (relatedDOI) {
+    relatedDOI.forEach(function (v, idx) {
+      let rdoi = v.text()
+      if (!datasetInfo.relatedDoi.includes(rdoi)) {
+        datasetInfo.relatedDoi.push(rdoi)
+      }
     })
+  }
+  let doi = xmlDocument.find('/PolymerNanocomposite/DATA_SOURCE/Citation/CommonFields/DOI')
+  if (doi) {
+    datasetInfo.doi = doi[0].text()
+  }
+  return false
+}
+function replaceDatasetId (logger, id, newDsid) {
+  // given an id of the regex form .[0-9]{n}_S[0-9]{n}_AUTHOR_YYYY replace the dsid component (first set of number)
+  let newId = null
+  let m = matchValidXmlTitle(id)
+  if (m) {
+    let oldDsid = m[1]
+    newId = id[0] + newDsid + '_S' + m[2] + '_' + m[3] + '_' + m[4]
+    logger.debug('oldId: ' + id + ' old dsid: ' + oldDsid + ' new id: ' + newId)
+  }
+  return newId
+}
+
+function updateMicrostructureImageFileLocations (logger, xmlDoc, restServerBaseUri) {
+  let func = 'updateMicrostructureImageFileLocations'
+  let blobs = xmlDoc.find('//MICROSTRUCTURE/ImageFile/File')
+  blobs.forEach((v, idx) => {
+    let blob = v.text()
+    let m = blob.match(/blob\?id=([A-Fa-f0-9]*)/)
+    if (m) {
+      let blobId = m[1]
+      let newBlob = restServerBaseUri + '/blob?id=' + blobId
+      v.text(newBlob)
+      logger.debug(func + ' - updated blob location from: ' + blob + ' to: ' + newBlob)
+    }
   })
+}
+
+function xmlEnsurePathExists (xmlDoc, path) {
+  // ensure path exists and create nodes if necessary.
+  // returns new document containing path
+  let rv = null
+  let nodes = path.replace(/^\/*/, '').split('/') // strip leading slashes and split by path separator
+  let subPath = ''
+  let goodSubNode = null
+  let newDoc = null
+  nodes.forEach(function (v, idx) {
+    subPath += '/' + v
+    let subNode = xmlDoc.find(subPath)
+    if (subNode && subNode.length > 0) {
+      // console.log('found subPath: ' + subPath)
+      goodSubNode = subNode
+    } else {
+      // console.log('subPath: ' + subPath + ' NOT FOUND')
+      if (goodSubNode && goodSubNode.length > 0) {
+        // create new element node at subPath + nodes[idx]
+        // console.log('goodSubNode: ' + dump(goodSubNode))
+        // console.log('goodSubNode: ' + goodSubNode.toString())
+        // console.log('goodSubNode[0]: ' + goodSubNode[0].toString())
+        // console.log('goodSubNode.type(): ' + goodSubNode[0].type())
+        let newNode = goodSubNode[0].node(v, null)
+        // console.log('newNode: ' + newNode.toString())
+        newDoc = newNode.doc()
+        goodSubNode = newNode
+      } else if (goodSubNode) {
+        // console.log('goodSubNode is not null, but length <= 0')
+        // console.log('goodSubNode.toString() = ' + goodSubNode.toString())
+        // console.log('goodSubNode.type() = ' + goodSubNode.type())
+        let newNode = goodSubNode.node(v, null)
+        goodSubNode = newNode
+        newDoc = newNode.doc()
+        // console.log('added child: ' + newNode.toString())
+        // console.log('new doc string: ' + newDoc.toString())
+      } else {
+        console.log('goodSubNode is null')
+      }
+    }
+  })
+  rv = newDoc
+  return rv
 }
 
 module.exports = {
@@ -185,5 +528,14 @@ module.exports = {
   'datasetBucketName': datasetBucketName,
   'getDatasetXmlFileList': getDatasetXmlFileList,
   'getLatestSchemas': getLatestSchemas,
-  'sortSchemas': sortSchemas
+  'createDataset': createDataset,
+  'sortSchemas': sortSchemas,
+  'mergeDatasetInfoFromXml': mergeDatasetInfoFromXml,
+  'xmlEnsurePathExists': xmlEnsurePathExists,
+  'replaceDatasetId': replaceDatasetId,
+  'updateMicrostructureImageFileLocations': updateMicrostructureImageFileLocations,
+  'updateOrCreateXmlData': updateOrCreateXmlData,
+  'logTrace': logTrace,
+  'setTrace': setTrace,
+  'inspect': inspect
 }
