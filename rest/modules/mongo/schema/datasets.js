@@ -9,6 +9,7 @@ module.exports = function (mongoose) {
     publisher: String, /* publisher */
     publicationYear: Number, /* 2005, etc. */
     doi: String, /* DOI or other unique assigned handle -- must be unique */
+    relatedDoi: [String], /* dois that this dataset is related to */
     volume: Number, /* 1-12 for monthly, could be others for weekly, semi-monthly, etc */
     url: String, /* Best url to access paper, book, etc */
     language: String, /* English, etc */

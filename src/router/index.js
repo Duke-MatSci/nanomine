@@ -38,6 +38,7 @@ import ViewData from '@/components/ViewData'
 import IntelligentCharacterizeResults from '@/components/IntelligentCharacterizeResults'
 // import NmEditor from '@/components/Editor'
 // import Visualization from '@/components/Visualization'
+// DISABLED FOR NOW import XmlUploader from '@/components/XmlUploader'
 
 Vue.use(Router)
 
@@ -243,6 +244,11 @@ export default new Router({
       path: '/DynamfitResult',
       name: 'DynamfitResult',
       component: DynamfitResult
-    }
+    } // ,
+    // DISABLED FOR NOW {
+    //   path: '/XmlUploader',
+    //   name: 'XmlUploader',
+    //   component: XmlUploader
+    // }
   ]
 })
