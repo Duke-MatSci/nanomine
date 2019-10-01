@@ -11,16 +11,18 @@
           <p>Visualize nanocomposite data.</p>
         </v-flex-->
         <v-flex xs4>
-          <img src="/nmstatic/img/excel.png" />
-          <h4>
-            <router-link to="/XMLCONV">Curate Using Uploader</router-link>
-          </h4>
+          <router-link to="/XMLCONV">
+            <img src="/nmstatic/img/excel.png"/>
+            <h4>
+              Curate Using Uploader
+            </h4>
+          </router-link>
           <p>
             Download an Excel template, enter nanocomposite sample or simulation data into the template and upload.
           </p>
         </v-flex>
         <v-flex xs4 v-if="false">
-          <img src="/nmstatic/img/edit-big.png" />
+          <img src="/nmstatic/img/edit-big.png"/>
           <h4>
             <router-link to="/editor">Curate online</router-link>
           </h4>
@@ -29,7 +31,7 @@
           </p>
         </v-flex>
         <v-flex xs4 v-if="false">
-          <img src="/nmstatic/img/search-big.png" />
+          <img src="/nmstatic/img/search-big.png"/>
           <h4>
             <router-link href="/home">Explore the repository</router-link>
           </h4>
@@ -43,23 +45,46 @@
           <p>Compose your own schema.</p>
         </v-flex>
         <v-flex xs4 v-if="true">
-          <img src="/nmstatic/img/visualize_data.png"/>
-          <h4>
-            <a href="/home">Visualization and Search</a>
-          </h4>
+          <a href="/home">
+            <img src="/nmstatic/img/visualize_data.png"/>
+            <h4>
+              Visualization and Search
+            </h4>
+          </a>
           <p>Nanocomposite data insights.</p>
         </v-flex>
+        <!-- DISABLED FOR NOW v-flex xs4 v-if="isAdmin()">
+          <router-link to='/xmluploader'>
+            <img src="/nmstatic/img/admin-icon.jpg"/>
+            <h4>
+              <span class="link">Xml Uploader</span>
+            </h4>
+          </router-link>
+          <p>Upload XML files directly</p>
+        </v-flex-->
       </v-layout>
     </v-container>
   </div>
 </template>
 
 <script>
+import {Auth} from '@/modules/Auth.js'
+
 export default {
   name: 'Database',
   data () {
     return {
       msg: 'Database Options'
+    }
+  },
+  beforeMount: function () {
+    let vm = this
+    vm.auth = new Auth()
+  },
+  methods: {
+    isAdmin: function () {
+      let vm = this
+      return vm.auth.isAdmin()
     }
   }
 }
@@ -71,13 +96,20 @@ export default {
     width: 50px;
     height: auto;
   }
+
   h4 {
     text-transform: uppercase;
   }
+
   h1 {
     margin-top: 10px;
     background-color: black;
     color: white;
+  }
+
+  a, .link {
+    color: blue;
+    text-decoration: underline;
   }
 
 </style>

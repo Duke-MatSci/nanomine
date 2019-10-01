@@ -13,6 +13,3 @@ if [[ -x /apps/n/bin/node ]] ; then # pre-global install of node
 else
   node -r esm index.js $*
 fi
-
-
-

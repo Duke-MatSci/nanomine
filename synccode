@@ -1,8 +1,12 @@
 #!/bin/bash
-echo "Started: $(date)"
+echo "synccode started: $(date)"
 rsync -avz  -e "ssh " --exclude="venv/*" --exclude="static/*" --exclude="dist/*" --exclude=".git/*" --exclude="node_modules/*" . whyis:/apps/nanomine/
 ssh whyis "cd nanomine;npm run build"
-ssh whyisroot "systemctl restart apache2"
-ssh whyisroot "systemctl restart nm-rest"
-echo "Completed: $(date)"
+ssh whyisroot "systemctl stop apache2"
+ssh whyisroot "systemctl stop nm-rest"
+ssh whyis "rm nanomine/rest/nanomine.log"
+ssh whyisroot "systemctl start nm-rest"
+ssh whyisroot "systemctl start apache2"
+echo "synccode ended: $(date)"
+>>>>>>> origin/dev
 
