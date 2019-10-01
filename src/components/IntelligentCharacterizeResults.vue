@@ -10,16 +10,16 @@
     <h1>{{msg}}</h1>
     <v-container>
       <v-layout>
-        <v-flex xs6>
+        <v-flex xs12 sm6>
           <h4>Uploaded Image</h4>
           <img :src="getInputImage()"/>
           {{inputImage}}
           <p></p>
         </v-flex>
-        <v-flex xs6>
+        <v-flex xs12 sm6>
           <h4>Intelligent Characterization Results</h4> <!-- comment -->
-          <v-flex d-inline-block xs2></v-flex>
-          <v-flex d-inline-block xs4>
+          <v-flex d-inline-block xs2 sm1></v-flex>
+          <v-flex d-inline-block xs8 sm5>
             <p></p>
             <v-list two-line subheader>
               <!--v-subheader>Details</v-subheader-->
