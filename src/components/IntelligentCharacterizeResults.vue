@@ -17,12 +17,38 @@
           <p></p>
         </v-flex>
         <v-flex xs6>
-          <h4>Intelligent Characterizaion Results</h4> <!-- comment -->
-           volume fraction: {{vf}}<br/>
-          Interfacial Area: {{intf_area}}<br/>
-          Characterization Method: {{charac}}<br/>
-          Isotropy: {{isotropy}}<br/>
-          <p></p>
+          <h4>Intelligent Characterization Results</h4> <!-- comment -->
+          <v-flex d-inline-block xs2></v-flex>
+          <v-flex d-inline-block xs4>
+            <p></p>
+            <v-list two-line subheader>
+              <!--v-subheader>Details</v-subheader-->
+              <v-list-tile avatar>
+                <v-list-tile-content>
+                  <v-list-tile-title>Volume fraction</v-list-tile-title>
+                  <v-list-tile-sub-title>{{vf}}</v-list-tile-sub-title>
+                </v-list-tile-content>
+              </v-list-tile>
+              <v-list-tile avatar>
+                <v-list-tile-content>
+                  <v-list-tile-title>Interfacial Area</v-list-tile-title>
+                  <v-list-tile-sub-title>{{intf_area}}</v-list-tile-sub-title>
+                </v-list-tile-content>
+              </v-list-tile>
+              <v-list-tile avatar>
+                <v-list-tile-content>
+                  <v-list-tile-title>Characterization Method</v-list-tile-title>
+                  <v-list-tile-sub-title> {{charac}}</v-list-tile-sub-title>
+                </v-list-tile-content>
+              </v-list-tile>
+              <v-list-tile avatar>
+                <v-list-tile-content>
+                  <v-list-tile-title>Isotropy</v-list-tile-title>
+                  <v-list-tile-sub-title>{{isotropy}}</v-list-tile-sub-title>
+                </v-list-tile-content>
+              </v-list-tile>
+            </v-list>
+          </v-flex>
         </v-flex>
       </v-layout>
       <v-layout>
@@ -45,7 +71,7 @@
 /* eslint-disable indent */
 
 import Axios from 'axios'
-  import {} from 'vuex'
+import {} from 'vuex'
 
 export default {
   name: 'IntelligentCharacterizeResults',
@@ -55,13 +81,18 @@ export default {
       resultsError: false,
       resultsErrorMsg: '',
       inputFileName: '',
-      zipFileName: ''
+      zipFileName: '',
+      vf: '',
+      intf_area: '',
+      isotropy: '',
+      charac: ''
     })
   },
   mounted: function () {
-    this.getJobOutputParams()
+    let vm = this
+    vm.getJobOutputParams()
       .then(function () {
-        this.getOutputResultJson() // added *************************************
+        vm.getOutputResultJson() // added *************************************
       })
       .catch(function (err) {
         console.log(err)
@@ -83,8 +114,8 @@ export default {
       return vm.$route.query.refuri + '/' + vm.zipFileName
     },
     getJobOutputParams: function () {
+      let vm = this
       return new Promise(function (resolve, reject) {
-        let vm = this
         let url = vm.$route.query.refuri + '/job_output_parameters.json'
         vm.setLoading()
         return Axios.get(url)
@@ -98,7 +129,7 @@ export default {
           })
           .catch(function (err) {
             console.log(err)
-            vm.resultsrErrorMsg = err
+            vm.resultsrErrorMsg = err.message
             vm.resultsError = true
             vm.resetLoading()
             reject(new Error('Error getting Job Output Parameters'))
@@ -107,12 +138,13 @@ export default {
     },
     getOutputResultJson: function () { // *************************************
       let vm = this
-      let url = vm.$route.query.refuri + '/outputresult_json.json'
+      let url = vm.$route.query.refuri + '/output/result_json.json'
       vm.setLoading()
       return Axios.get(url)
         .then(function (response) {
           console.log(response.data)
           let myOutputResult = response.data // Axios did the JSON parse for us
+          console.log(myOutputResult)
           vm.vf = myOutputResult.universal.vf // should i have two dots ? or directly call myOutputResult.vf?
           vm.intf_area = myOutputResult.universal.intf_area
           vm.isotropy = myOutputResult.universal.isotropy
@@ -121,7 +153,7 @@ export default {
         })
         .catch(function (err) {
           console.log(err)
-          vm.resultsrErrorMsg = err
+          vm.resultsErrorMsg = 'Error loading result_json.json. ' + err
           vm.resultsError = true
           vm.resetLoading()
         })
