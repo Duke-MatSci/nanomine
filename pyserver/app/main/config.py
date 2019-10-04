@@ -1,5 +1,8 @@
 import os
 
+#
+#
+
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 class Config:
@@ -7,7 +10,7 @@ class Config:
   DEBUG = False
 
 
-class DevConfig(Config):
+class DevelopmentConfig(Config):
   DEBUG = True
 
 
@@ -22,7 +25,7 @@ class ProductionConfig(Config):
 
 
 config_by_name = dict(
-  dev=DevConfig,
+  dev=DevelopmentConfig,
   test=TestingConfig,
   prod=ProductionConfig
 )

@@ -114,37 +114,40 @@ export default {
         return
       }
       // TODO need to configure after nmcp API done
-      // Axios.get('/nmcp//TODO....', {
-      //   params: {
-      //       polfil: vm.pfRadios,
-      //       ChemicalName: vm.chemicalname,
-      //       Abbreviation: vm.abbreviation,
-      //       TradeName: vm.tradename,
-      //       uSMILES: vm.SMILES
-      //   }
-      // })
-      Axios.get('/nmr//explore/select', {
+      vm.setLoading()
+      Axios.get('/api/v1/chemprops', {
         params: {
-          title: 'L148_S1_Virtanen_2014.xml'
+          polfil: vm.pfRadios,
+          ChemicalName: vm.chemicalname,
+          Abbreviation: vm.abbreviation,
+          TradeName: vm.tradename,
+          uSMILES: vm.SMILES
         }
       })
+      // Axios.get('/nmr//explore/select', {
+      //   params: {
+      //     title: 'L148_S1_Virtanen_2014.xml'
+      //   }
+      // })
         .then(function (response) {
-          console.log(JSON.stringify(response.data.data[0].schema))
+          console.log(JSON.stringify(response.data.stdname))
           console.log('get response from ChemProps!')
-          vm.stdname = response.data.data[0].schema
-          vm.density = response.data.data[0].schema
+          vm.stdname = response.data.StandardName
+          vm.density = response.data.density
           // check if stdname is found
           if (vm.stdname === '') {
             vm.searchError = true
             vm.searchErrorMsg = 'No results found. Admin will update the database soon. Please try again in a week.'
             vm.resetOutput()
           }
+          vm.resetLoading()
         })
         .catch(function (error) {
           console.log(error)
           vm.resetOutput()
           vm.searchError = true
           vm.searchErrorMsg = 'Exception occured during calling ChemProps API service.'
+          vm.resetLoading()
         })
         .then(function () {
           // always executed
