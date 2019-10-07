@@ -1,7 +1,7 @@
 
 function isGroupMember (logger, groupName, remoteUser) {
   let groups = [
-    {'admins': ['9999999999']}
+    {'admins': ['9999999999', 'testuser']}
   ]
   return new Promise(function (resolve, reject) {
     setTimeout(function () {

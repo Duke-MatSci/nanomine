@@ -102,7 +102,7 @@ try
     if all(connectivity == [1, 0]) || all(connectivity == [0, 1]) && (concavity < 1.2)
         try
             % Use descriptors
-            charac="Descriptors"
+            charac='Descriptors'
             fprintf(fid, '%s%s%s\n', 'Characterization method selected', ',', 'Speroidal descriptors');
             fprintf(fid, '\n');
             fprintf(fid, '%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s\n', 'Spheroidal descriptors', ',', ...
@@ -130,7 +130,7 @@ try
     else  % Isotropy check is not included yet
         % Use SDF
         try
-        charac="SDF"
+        charac='SDF'
             fprintf(fid, '%s%s%s\n', 'Characterization method selected', ',', 'SDF');
             fprintf(fid, '\n');
             fprintf(fid, '%s\n', 'SDF');
@@ -172,16 +172,20 @@ try
     % Zip files
     fclose(fid);
     zip([path_to_write, '/Results.zip'], {'*'}, [path_to_write, '/']);
-    universal.vf=vol_frac;
-    universal.intf_area=intf_area;
-    universal.isotropy=isotropy;
-    root.universal=universal;
-    root.charac=charac;
-    rez = jsonencode(root);
-    fi=fopen([path_to_write,'result_json.json'],'w');
+    %% universal.vf=vol_frac;
+    %% universal.intf_area=intf_area;
+    %% universal.isotropy=isotropy;
+    %% root.universal=universal;
+    %% root.charac=charac;
+    %% rez = jsonencode(root);
+    rez = ['{"universal":{"vf":',num2str(vol_frac),',"intf_area":',num2str(intf_area),',"isotropy":',num2str(isotropy),'},"charac":"',charac,'"}']
+    fi=fopen([path_to_write,'/result_json.json'],'w');
     fprintf(fi,'%s',rez);
     fclose(fi);
 catch ex
+    msg = getReport(ex)
+    writeError([path_to_write, '/errors.txt'], 'Unexpected general error. Technical details are below:');
+    writeError([path_to_write, '/errors.txt'], msg);
     rc = 99;
     exit(rc);
 end
