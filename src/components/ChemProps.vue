@@ -37,7 +37,7 @@
         {{searchErrorMsg}}
       </v-alert>
       <v-btn v-on:click="search()" color="primary">Search</v-btn>
-      <v-flex xs12 sm6 md3 class="text-xs-left" v-if="stdname !== ''">
+      <v-flex xs12 sm6 md5 class="text-xs-left" v-if="stdname !== ''">
         <p class="text-xs-left">Standardized chemical name and density information:</p>
         <v-text-field v-model="stdname" label='Standardized Name' outlined></v-text-field>
         <v-text-field v-model="density" label='Density (g/cm3)' outlined></v-text-field>
@@ -133,7 +133,7 @@ export default {
           console.log(JSON.stringify(response.data.stdname))
           console.log('get response from ChemProps!')
           vm.stdname = response.data.StandardName
-          vm.density = response.data.density
+          vm.density = parseFloat(response.data.density)
           // check if stdname is found
           if (vm.stdname === '') {
             vm.searchError = true
@@ -146,7 +146,7 @@ export default {
           console.log(error)
           vm.resetOutput()
           vm.searchError = true
-          vm.searchErrorMsg = 'Exception occured during calling ChemProps API service.'
+          vm.searchErrorMsg = 'An exception occurred when calling the ChemProps API service. Detail: ' + error
           vm.resetLoading()
         })
         .then(function () {

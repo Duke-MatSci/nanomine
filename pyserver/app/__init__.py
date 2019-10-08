@@ -1,19 +1,21 @@
 # app/__init__.py
 
-from flask_restplus import Api
-from flask import Blueprint
+from flask import Flask
+from .apiv1 import blueprint as apiv1
+# add new api version imports here and blueprint_register them below in create_app
 
-from .main.controller.chemprops import api as chemprops_ns
+from flask_bcrypt import Bcrypt
 
-blueprint = Blueprint('api', __name__)
+from .config import config_by_name, Config
 
-# wsgi path to this is /api, so the /api is implied and not configured in flask/restplus
-api = Api(blueprint,
-          # prefix='/api', # implied because of wsgi
-          doc='/doc',
-          title='MaterialsMine REST API',
-          version='1.0',
-          description='REST Services for MaterialsMine'
-          )
+flask_bcrypt = Bcrypt()
 
-api.add_namespace(chemprops_ns, path='/v1/chemprops')
+def create_app(config_name):
+  app = Flask(__name__)
+  app.register_blueprint(apiv1)
+  # register new api versions with blueprint like statement above
+
+  app.config.from_object(config_by_name[config_name])
+  flask_bcrypt.init_app(app)
+  Config.setApp(app)
+  return app
