@@ -7,6 +7,7 @@ from .apiv1 import blueprint as apiv1
 from flask_bcrypt import Bcrypt
 
 from .config import config_by_name, Config
+import sys
 
 flask_bcrypt = Bcrypt()
 

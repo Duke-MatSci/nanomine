@@ -1,7 +1,7 @@
 from flask import request
 from flask_restplus import Resource, Namespace, fields, marshal
 from flask_restplus import reqparse
-from nmChemPropsAPI import nmChemPropsAPI
+import nmChemPropsAPI
 from app.util.decorators import token_required
 from app.config import Config
 import traceback
@@ -81,7 +81,7 @@ class ChemProps(Resource):
           marshal(data, ChemPropsDto.chemprops)
       else :
         return None, 400 # pol or fil required
-      
+
       if data is not None:
         return data, 200
       else:
