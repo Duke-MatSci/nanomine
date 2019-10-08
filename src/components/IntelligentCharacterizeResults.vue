@@ -37,17 +37,21 @@
               </v-list-tile>
               <v-list-tile avatar>
                 <v-list-tile-content>
-                  <v-list-tile-title>Characterization Method</v-list-tile-title>
+                  <v-list-tile-title>Selected Characterization Method</v-list-tile-title>
                   <v-list-tile-sub-title> {{charac}}</v-list-tile-sub-title>
                 </v-list-tile-content>
               </v-list-tile>
               <v-list-tile avatar>
                 <v-list-tile-content>
-                  <v-list-tile-title>Isotropy</v-list-tile-title>
+                  <v-list-tile-title>Isotropy Index (1 is perfect isotropy)</v-list-tile-title>
                   <v-list-tile-sub-title>{{isotropy}}</v-list-tile-sub-title>
                 </v-list-tile-content>
               </v-list-tile>
             </v-list>
+            <v-list-tile avatar>
+              <v-list-tile-content>
+                <v-list-tile-title>More details of microstructure characterization parameters can be found in the downloadable file below.</v-list-tile-title>
+              </v-list-tile-content>
           </v-flex>
         </v-flex>
       </v-layout>

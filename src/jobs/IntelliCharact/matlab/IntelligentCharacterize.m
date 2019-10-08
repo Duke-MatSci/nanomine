@@ -138,7 +138,7 @@ try
             sdf1d = FFT2oneD(sdf2d);
             fit_result = SDFFit(sdf1d, SDFsize, true, path_to_write);  % true - show fitting image
             fprintf(fid, '%s%s%s\n', 'Fitting function', ',', fit_result('func_type'));
-            fprintf(fid, '%s', 'Fitting parameters');
+            fprintf(fid, '%s', 'PARAM (i)');
             fprintf(fid, ', %f', fit_result('parameters'));
             fprintf(fid, '\n');
             fprintf(fid, '%s%s%s%s%s\n', 'Fitting goodness', ',', 'R^2', ',', 'rmse');
