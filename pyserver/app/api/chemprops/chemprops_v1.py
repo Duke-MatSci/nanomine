@@ -1,7 +1,7 @@
 from flask import request
 from flask_restplus import Resource, Namespace, fields, marshal
 from flask_restplus import reqparse
-import nmChemPropsAPI
+from nmChemPropsAPI import nmChemPropsAPI
 from app.util.decorators import token_required
 from app.config import Config
 import traceback
