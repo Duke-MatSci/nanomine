@@ -82,7 +82,7 @@ export default {
   data () {
     return {
       msg: 'Database Options',
-      chemPropsActive: true
+      chemPropsActive: false
     }
   },
   beforeMount: function () {
