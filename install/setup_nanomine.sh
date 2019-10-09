@@ -42,7 +42,9 @@ echo cloning nanomine-graph fork ${NG_FORK}
 git clone https://github.com/"${NG_FORK}"/nanomine-graph.git # to use the original, use FORKNAME of 'tetherless-world'
 cd nanomine-graph
 echo checking out ${NG_BRANCH}
-git checkout ${NG_BRANCH}
+if [[ ${NG_BRANCH} != 'master' ]]; then
+  git checkout ${NG_BRANCH}
+fi
 pip install -e . #install nanomine-graph app
 
 cd /apps/whyis
