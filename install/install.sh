@@ -127,7 +127,7 @@ systemctl daemon-reload
 systemctl start nm-rest  # NOTE: can also 'restart' or 'stop' as necessary
 systemctl enable nm-rest # ensure that rest server runs after reboot
 
-echo 'export CHEMPROPS_GS_CONFIG_DOWNLOAD_LOCATION='"${CHEMPROPS_GS_CONFIG_DOWNLOAD_LOCATION}" >> nanomine_env
+echo 'export CHEMPROPS_GS_CONFIG_DOWNLOAD_LOCATION='"${CHEMPROPS_GS_CONFIG_DOWNLOAD_LOCATION}" >> /apps/nanomine_env
 (su - whyis -c '/apps/install/setup_chemprops.sh')
 cp /apps/nanomine/install/chemprops_caretaker /etc/cron.hourly
 
