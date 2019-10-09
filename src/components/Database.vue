@@ -53,7 +53,7 @@
           </a>
           <p>Nanocomposite data insights.</p>
         </v-flex>
-        <v-flex xs4 v-if="true">
+        <v-flex xs4 v-if="chemPropsActive">
           <img src="/nmstatic/img/Icon_verified_chemical_structure.svg"/>
           <h4>
             <router-link to="/ChemProps">ChemProps</router-link>
@@ -81,7 +81,8 @@ export default {
   name: 'Database',
   data () {
     return {
-      msg: 'Database Options'
+      msg: 'Database Options',
+      chemPropsActive: true
     }
   },
   beforeMount: function () {
