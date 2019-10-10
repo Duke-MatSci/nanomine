@@ -12,7 +12,7 @@ itsdangerous==1.1.0
 Jinja2==2.10.1
 jsonschema==3.0.2
 MarkupSafe==1.1.1
-marshmallow=3.2.1
+marshmallow==3.2.1
 pkg-resources==0.0.0
 pycparser==2.19
 PyJWT==1.7.1
