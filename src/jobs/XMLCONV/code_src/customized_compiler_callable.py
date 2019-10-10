@@ -746,14 +746,18 @@ def sheetMatType(sheet, DATA, myXSDtree, jobDir):
             mcc = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             if type(myRow[2]) == float or len(myRow[2]) > 0:
-                mcc['mass'] = myRow[2]
+                if hasLen(myRow[1]):
+                    mcc['Constituent'] = myRow[1]
+                mcc['Fraction'] = {'mass':myRow[2]}
             if len(mcc) > 0:
                 MatrixComponent.append({'MatrixComponentComposition':mcc})
         if match(sheet.cell_value(row, 0), 'Matrix Component Composition volume fraction'):
             vcc = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             if type(myRow[2]) == float or len(myRow[2]) > 0:
-                vcc['volume'] = myRow[2]
+                if hasLen(myRow[1]):
+                    vcc['Constituent'] = myRow[1]
+                vcc['Fraction'] = {'volume':myRow[2]}
             if len(vcc) > 0:
                 MatrixComponent.append({'MatrixComponentComposition':vcc})
         # Filler
@@ -833,7 +837,9 @@ def sheetMatType(sheet, DATA, myXSDtree, jobDir):
             mcc = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             if type(myRow[2]) == float or len(myRow[2]) > 0:
-                mcc['mass'] = myRow[2]
+                if hasLen(myRow[1]):
+                    mcc['Constituent'] = myRow[1]
+                mcc['Fraction'] = {'mass':myRow[2]}
             if len(mcc) > 0:
                 FillerComponent.append({'FillerComponentComposition':mcc})
             # FillerComponent/FillerComponentComposition/volume
@@ -841,7 +847,9 @@ def sheetMatType(sheet, DATA, myXSDtree, jobDir):
             vcc = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             if type(myRow[2]) == float or len(myRow[2]) > 0:
-                vcc['volume'] = myRow[2]
+                if hasLen(myRow[1]):
+                    vcc['Constituent'] = myRow[1]
+                vcc['Fraction'] = {'volume':myRow[2]}
             if len(vcc) > 0:
                 FillerComponent.append({'FillerComponentComposition':vcc})
             # FillerComposition/mass(volume)
