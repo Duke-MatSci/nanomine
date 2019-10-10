@@ -1,5 +1,5 @@
 <template>
-  <div class="CorrelationCharacterizeResult">
+  <div class="CorrelationCharacterizeResults">
     <v-alert
       v-model="resultsError"
       type="error"
@@ -43,10 +43,10 @@ import Axios from 'axios'
 import {} from 'vuex'
 
 export default {
-  name: 'CorrelationCharacterizeResult',
+  name: 'CorrelationCharacterizeResults',
   data: () => {
     return ({
-      msg: 'Correlation Functions - Characterization Results',
+      msg: 'Correlation Function - Characterization Results',
       resultsError: false,
       resultsErrorMsg: '',
       inputFileName: '',
