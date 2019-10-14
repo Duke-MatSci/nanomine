@@ -56,6 +56,7 @@ python manage.py createuser -e testuser@example.com -p none -f test -l user -u t
 # python manage.py load -i /apps/nanomine/setl/ontology.setl.ttl -f turtle  ## Apparently no longer needed
 python manage.py load -i /apps/nanomine-graph/setl/nanomine.ttl -f turtle
 python manage.py load -i /apps/nanomine-graph/setl/xml_ingest.setl.ttl -f turtle
+python manage.py load -i 'http://semanticscience.org/ontology/sio-subset-labels.owl' -f xml
 
 # If the mgi.tgz download fails, the last three steps can be re-run to build the db
 # Obtain dump, restore and migrate mongo dump from production for new version
