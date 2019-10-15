@@ -55,6 +55,7 @@ fi
 sed -e 's/tetherless-world\/whyis\/\${WHYIS_BRANCH}/\${WHYIS_FORK}\/whyis\/\${WHYIS_BRANCH}/g' < whyis-install.tmp > whyis-install.sh
 bash whyis-install.sh
 
+# shellcheck disable=SC2154
 if [[ ! -z ${whyispw} ]]; then
   echo setting whyis user password
   echo whyis:${whyispw} | sudo chpasswd # system owner can add whyis password manually if desired
@@ -111,12 +112,12 @@ if [[ $? -gt 0 ]] ; then
 fi
 
 # add this line near the top of /etc/init.d/celeryd after the first set of comments (use sudo vi /etc/init.d/celeryd or sudo nano /etc/init.d/celeryd)
-export dttm=$(date +%Y%m%d%H%M%S)
+dttm=$(date +%Y%m%d%H%M%S)
 grep nanomine_env /etc/init.d/celeryd 2>/dev/null
 if [[ $? -gt 0 ]] ; then
   cp /etc/init.d/celeryd /etc/init.d/celeryd.backup-${dttm}
-  export tmpFile=$(mktemp)
-  $(sed -e 's/\. \/lib\/lsb\/init-functions/\. \/apps\/nanomine_env\n\. \/lib\/lsb\/init-functions/' /etc/init.d/celeryd > ${tmpFile})
+  tmpFile=$(mktemp)
+  sed -e 's/\. \/lib\/lsb\/init-functions/\. \/apps\/nanomine_env\n\. \/lib\/lsb\/init-functions/' /etc/init.d/celeryd > ${tmpFile}
   cp ${tmpFile} /etc/init.d/celeryd
   ## rm ${tmpFile}
 fi
