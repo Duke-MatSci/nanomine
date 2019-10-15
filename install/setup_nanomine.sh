@@ -30,9 +30,6 @@ echo 'export NM_NEO4J_IMAGE="http://path.to.neo4j.tgz"' >> /apps/nanomine_env  #
 # pick up the variable changes before the next script runs
 source /apps/nanomine_env
 
-# variables changed by update_api_tokens, so pick those up as well
-source /apps/nanomine_env
-
 #install nanomine_graph
 export NG_FORK='bluedevil-oit'
 export NG_BRANCH='master'
