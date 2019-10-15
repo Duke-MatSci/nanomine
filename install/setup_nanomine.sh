@@ -30,9 +30,6 @@ echo 'export NM_NEO4J_IMAGE="http://path.to.neo4j.tgz"' >> /apps/nanomine_env  #
 # pick up the variable changes before the next script runs
 source /apps/nanomine_env
 
-# variables changed by update_api_tokens, so pick those up as well
-source /apps/nanomine_env
-
 #install nanomine_graph
 export NG_FORK='bluedevil-oit'
 export NG_BRANCH='master'
@@ -56,6 +53,7 @@ python manage.py createuser -e testuser@example.com -p none -f test -l user -u t
 # python manage.py load -i /apps/nanomine/setl/ontology.setl.ttl -f turtle  ## Apparently no longer needed
 python manage.py load -i /apps/nanomine-graph/setl/nanomine.ttl -f turtle
 python manage.py load -i /apps/nanomine-graph/setl/xml_ingest.setl.ttl -f turtle
+python manage.py load -i 'http://semanticscience.org/ontology/sio-subset-labels.owl' -f xml
 
 # If the mgi.tgz download fails, the last three steps can be re-run to build the db
 # Obtain dump, restore and migrate mongo dump from production for new version
