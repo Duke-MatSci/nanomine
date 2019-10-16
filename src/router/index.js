@@ -11,6 +11,7 @@ import ModuleTools from '@/components/ModuleTools'
 import MyPage from '@/components/MyPage'
 import MaterialsMine from '@/components/MaterialsMine'
 import MetaMine from '@/components/metamine/MetaMine'
+import MetaMineTools from '@/components/metamine/MetaMineTools'
 import NanoMine from '@/components/NanoMine'
 import PixelUnit from '@/components/metamine/PixelUnit'
 import SimTools from '@/components/SimTools'
@@ -36,6 +37,7 @@ import CorrelationReconstructResults from '@/components/CorrelationReconstructRe
 import DescriptorReconstructResults from '@/components/DescriptorReconstructResults'
 import ViewData from '@/components/ViewData'
 import IntelligentCharacterizeResults from '@/components/IntelligentCharacterizeResults'
+import ThreeDModelViewer from '@/components/metamine/ThreeDModelViewer'
 // import NmEditor from '@/components/Editor'
 // import Visualization from '@/components/Visualization'
 // DISABLED FOR NOW import XmlUploader from '@/components/XmlUploader'
@@ -61,6 +63,11 @@ export default new Router({
       path: '/meta',
       name: 'MetaMine',
       component: MetaMine
+    },
+    {
+      path: '/meta/tools',
+      name: 'MetaMineTools',
+      component: MetaMineTools
     },
     {
       path: '/db',
@@ -244,6 +251,11 @@ export default new Router({
       path: '/DynamfitResult',
       name: 'DynamfitResult',
       component: DynamfitResult
+    },
+    {
+      path: '/meta/threedmodelviewer',
+      name: 'ThreeDModelViewer',
+      component: ThreeDModelViewer
     } // ,
     // DISABLED FOR NOW {
     //   path: '/XmlUploader',
