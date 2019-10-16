@@ -11,6 +11,7 @@ import ModuleTools from '@/components/ModuleTools'
 import MyPage from '@/components/MyPage'
 import MaterialsMine from '@/components/MaterialsMine'
 import MetaMine from '@/components/metamine/MetaMine'
+import MetaMineTools from '@/components/metamine/MetaMineTools'
 import NanoMine from '@/components/NanoMine'
 import PixelUnit from '@/components/metamine/PixelUnit'
 import SimTools from '@/components/SimTools'
@@ -28,6 +29,8 @@ import CorrelationReconstruct from '@/components/CorrelationReconstruct'
 import SDFReconstruct from '@/components/SDFReconstruct'
 import DescriptorReconstruct from '@/components/DescriptorReconstruct'
 import IntelligentCharacterize from '@/components/IntelligentCharacterize'
+import IntelligentCharacterizeResults from '@/components/IntelligentCharacterizeResults'
+// import Visualization from '@/components/Visualization'
 import SDFCharacterizeResults from '@/components/SDFCharacterizeResults'
 import DescriptorCharacterizeResults from '@/components/DescriptorCharacterizeResults'
 import CorrelationCharacterizeResults from '@/components/CorrelationCharacterizeResults'
@@ -35,9 +38,10 @@ import SDFReconstructResults from '@/components/SDFReconstructResults'
 import CorrelationReconstructResults from '@/components/CorrelationReconstructResults'
 import DescriptorReconstructResults from '@/components/DescriptorReconstructResults'
 import ViewData from '@/components/ViewData'
-import IntelligentCharacterizeResults from '@/components/IntelligentCharacterizeResults'
+import ThreeDModelViewer from '@/components/metamine/ThreeDModelViewer'
 // import NmEditor from '@/components/Editor'
 // import Visualization from '@/components/Visualization'
+import ChemProps from '@/components/ChemProps'
 // DISABLED FOR NOW import XmlUploader from '@/components/XmlUploader'
 
 Vue.use(Router)
@@ -61,6 +65,11 @@ export default new Router({
       path: '/meta',
       name: 'MetaMine',
       component: MetaMine
+    },
+    {
+      path: '/meta/tools',
+      name: 'MetaMineTools',
+      component: MetaMineTools
     },
     {
       path: '/db',
@@ -244,6 +253,16 @@ export default new Router({
       path: '/DynamfitResult',
       name: 'DynamfitResult',
       component: DynamfitResult
+    },
+    {
+      path: '/meta/threedmodelviewer',
+      name: 'ThreeDModelViewer',
+      component: ThreeDModelViewer
+    },
+    {
+      path: '/ChemProps',
+      name: 'ChemProps',
+      component: ChemProps
     } // ,
     // DISABLED FOR NOW {
     //   path: '/XmlUploader',
