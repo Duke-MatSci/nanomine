@@ -44,7 +44,7 @@ if [[ ! -d /apps ]]; then
 fi
 echo installing whyis ...
 export WHYIS_FORK='bluedevil-oit'
-export WHYIS_BRANCH='v1.2'
+export WHYIS_BRANCH='b1.3'
 ## bash < <(curl -skL https://raw.githubusercontent.com/tetherless-world/whyis/master/install.sh)
 curl -skL --output whyis-install.tmp https://raw.githubusercontent.com/${WHYIS_FORK}/whyis/${WHYIS_BRANCH}/install.sh
 if [[ $? -ne 0 ]]; then
@@ -55,6 +55,7 @@ fi
 sed -e 's/tetherless-world\/whyis\/\${WHYIS_BRANCH}/\${WHYIS_FORK}\/whyis\/\${WHYIS_BRANCH}/g' < whyis-install.tmp > whyis-install.sh
 bash whyis-install.sh
 
+# shellcheck disable=SC2154
 if [[ ! -z ${whyispw} ]]; then
   echo setting whyis user password
   echo whyis:${whyispw} | sudo chpasswd # system owner can add whyis password manually if desired
@@ -64,12 +65,13 @@ fi
 (su whyis -c "curl -skL https://raw.githubusercontent.com/${NM_INSTALL_FORK}/nanomine/${NM_INSTALL_BRANCH}/install/install_rest.sh > /apps/install/install_rest.sh; chmod a+x /apps/install/install_rest.sh")
 (su whyis -c "curl -skL https://raw.githubusercontent.com/${NM_INSTALL_FORK}/nanomine/${NM_INSTALL_BRANCH}/install/setup_mongo.sh > /apps/install/setup_mongo.sh; chmod a+x /apps/install/setup_mongo.sh")
 (su whyis -c "curl -skL https://raw.githubusercontent.com/${NM_INSTALL_FORK}/nanomine/${NM_INSTALL_BRANCH}/install/setup_nanomine.sh > /apps/install/setup_nanomine.sh; chmod a+x /apps/install/setup_nanomine.sh")
+(su whyis -c "curl -skL https://raw.githubusercontent.com/${NM_INSTALL_FORK}/nanomine/${NM_INSTALL_BRANCH}/install/setup_chemprops.sh > /apps/install/setup_chemprops.sh; chmod a+x /apps/install/setup_chemprops.sh")
 
 echo executing rest server install as whyis...
 (su - whyis -c "/apps/install/install_rest.sh ${MONGO_DUMP_DOWNLOAD_LOCATION} ${NM_INSTALL_FORK} ${NM_INSTALL_BRANCH}")
 
 # Note: mongo is installed with defaults for localhost/27017
-echo 'installing mongo (NOTE: installing 3.6 since 4.x does not work well)'
+echo 'installing mongo (NOTE: installing 3.6)'
 sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 2930ADAE8CAF5059EE73BB4B58712A2291FA4AD5
 echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.6 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.6.list
 apt-get update
@@ -110,12 +112,12 @@ if [[ $? -gt 0 ]] ; then
 fi
 
 # add this line near the top of /etc/init.d/celeryd after the first set of comments (use sudo vi /etc/init.d/celeryd or sudo nano /etc/init.d/celeryd)
-export dttm=$(date +%Y%m%d%H%M%S)
+dttm=$(date +%Y%m%d%H%M%S)
 grep nanomine_env /etc/init.d/celeryd 2>/dev/null
 if [[ $? -gt 0 ]] ; then
   cp /etc/init.d/celeryd /etc/init.d/celeryd.backup-${dttm}
-  export tmpFile=$(mktemp)
-  $(sed -e 's/\. \/lib\/lsb\/init-functions/\. \/apps\/nanomine_env\n\. \/lib\/lsb\/init-functions/' /etc/init.d/celeryd > ${tmpFile})
+  tmpFile=$(mktemp)
+  sed -e 's/\. \/lib\/lsb\/init-functions/\. \/apps\/nanomine_env\n\. \/lib\/lsb\/init-functions/' /etc/init.d/celeryd > ${tmpFile}
   cp ${tmpFile} /etc/init.d/celeryd
   ## rm ${tmpFile}
 fi
@@ -126,13 +128,15 @@ systemctl daemon-reload
 systemctl start nm-rest  # NOTE: can also 'restart' or 'stop' as necessary
 systemctl enable nm-rest # ensure that rest server runs after reboot
 
+echo install python modules for python server
+(su - whyis -c 'pip install -r /apps/nanomine/pyserver/requirements.txt')
+echo 'export CHEMPROPS_GS_CONFIG_DOWNLOAD_LOCATION='"${CHEMPROPS_GS_CONFIG_DOWNLOAD_LOCATION}" >> /apps/nanomine_env
+(su - whyis -c '/apps/install/setup_chemprops.sh')
+cp /apps/nanomine/install/chemprops_caretaker /etc/cron.hourly
+
 (su - whyis -c "/apps/install/setup_nanomine.sh")
 systemctl restart nm-rest # since the db was re-created by setup_nanomine.sh
 systemctl restart apache2
 systemctl restart celeryd
 
 echo "if you would like to login as whyis from the ubuntu login, execute 'sudo passwd whyis' and set a password to use from the login page"
-
-
-
-

@@ -29,6 +29,11 @@ import CorrelationReconstruct from '@/components/CorrelationReconstruct'
 import SDFReconstruct from '@/components/SDFReconstruct'
 import DescriptorReconstruct from '@/components/DescriptorReconstruct'
 import IntelligentCharacterize from '@/components/IntelligentCharacterize'
+<<<<<<< HEAD
+=======
+import IntelligentCharacterizeResults from '@/components/IntelligentCharacterizeResults'
+// import Visualization from '@/components/Visualization'
+>>>>>>> origin/dev
 import SDFCharacterizeResults from '@/components/SDFCharacterizeResults'
 import DescriptorCharacterizeResults from '@/components/DescriptorCharacterizeResults'
 import CorrelationCharacterizeResults from '@/components/CorrelationCharacterizeResults'
@@ -36,10 +41,19 @@ import SDFReconstructResults from '@/components/SDFReconstructResults'
 import CorrelationReconstructResults from '@/components/CorrelationReconstructResults'
 import DescriptorReconstructResults from '@/components/DescriptorReconstructResults'
 import ViewData from '@/components/ViewData'
+<<<<<<< HEAD
 import IntelligentCharacterizeResults from '@/components/IntelligentCharacterizeResults'
 import ThreeDModelViewer from '@/components/metamine/ThreeDModelViewer'
 // import NmEditor from '@/components/Editor'
 // import Visualization from '@/components/Visualization'
+=======
+import Contact from '@/components/Contact'
+import Dynamfit from '@/components/Dynamfit'
+import DynamfitExample from '@/components/DynamfitExample'
+import DynamfitExampleInput from '@/components/DynamfitExampleInput'
+import DynamfitResult from '@/components/DynamfitResult'
+import ChemProps from '@/components/ChemProps'
+>>>>>>> origin/dev
 // DISABLED FOR NOW import XmlUploader from '@/components/XmlUploader'
 
 Vue.use(Router)
@@ -256,6 +270,11 @@ export default new Router({
       path: '/meta/threedmodelviewer',
       name: 'ThreeDModelViewer',
       component: ThreeDModelViewer
+    },
+    {
+      path: '/ChemProps',
+      name: 'ChemProps',
+      component: ChemProps
     } // ,
     // DISABLED FOR NOW {
     //   path: '/XmlUploader',
