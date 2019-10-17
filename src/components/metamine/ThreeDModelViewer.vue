@@ -149,7 +149,7 @@ export default {
       loadPromise.then(function () {
         vm.modelName = file.fileName
         vm.modelData = file.model
-        console.log('model data: ' + vm.modelData)
+        // console.log('model data: ' + vm.modelData)
         vm.resetLoading()
         vm.errorAlert = false
       })
