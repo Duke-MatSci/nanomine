@@ -4,6 +4,7 @@
     <v-alert
       v-model="errorAlert"
       type="error"
+      dismissible
     >
       {{errorMsg}}
     </v-alert>
@@ -40,7 +41,7 @@
               Model Name: {{modelName}}
             </v-flex>
             <v-flex d-flex xs12>
-              <model-stl width="400" height="400" :src="modelData"></model-stl>
+              <model-stl width="400" height="400" :src="modelData" @on-load="modelLoaded" @on-error="modelLoadError"></model-stl>
             </v-flex>
           </v-layout>
         </v-flex>
@@ -62,11 +63,26 @@ export default {
       errorMsg: '',
       modelData: null,
       modelName: '',
+      currentExample: -1,
       exampleModelData: [null, null],
       exampleModels: ['latTrunCube_4921.stl', 'tpbsDD1_20.stl']
     }
   },
   methods: {
+    modelLoaded (ev) {
+      this.resetLoading()
+    },
+    modelLoadError (ev) {
+      let vm = this
+      vm.resetLoading()
+      vm.errorAlert = true
+      vm.errorMsg = 'Error loading image.'
+      vm.modelData = null
+      vm.modelName = ''
+      if (vm.currentExample >= 0) {
+        vm.exampleModelData[vm.currentExample] = null
+      }
+    },
     getModelData () {
       return this.modelData
     },
@@ -78,12 +94,16 @@ export default {
     },
     selectExample (exampleIdx) {
       let vm = this
+      vm.currentExample = exampleIdx
       console.log('exampleIdx: ' + exampleIdx)
       let fileNm = vm.exampleModels[exampleIdx]
       let fullNm = 'https://materialsmine.org/nmf/' + fileNm + '.base64'
       if (vm.exampleModelData[exampleIdx] === null) {
+        vm.setLoading()
         vm.loadData(fullNm)
           .then(function (modelData) {
+            // NOTE: let the model on error or on load handler reset the loading spinner
+            //    vm.resetLoading()
             console.log(modelData.slice(0, 20))
             vm.exampleModelData[exampleIdx] = modelData
             vm.errorMsg = ''
@@ -93,9 +113,13 @@ export default {
           })
           .catch(function (err) {
             vm.errorMsg = 'Error loading example: ' + vm.exampleModels[exampleIdx] + ' - ' + err
-            vm.errorAlert = false
+            vm.errorAlert = true
+            vm.modelData = null
+            vm.modelName = ''
+            vm.resetLoading()
           })
       } else {
+        vm.setLoading()
         vm.modelData = vm.exampleModelData[exampleIdx]
         vm.modelName = 'Example model: ' + vm.exampleModels[exampleIdx]
       }
@@ -118,6 +142,7 @@ export default {
     onFileSelected (e) {
       let vm = this
       vm.setLoading()
+      vm.currentExample = -1 // not an example
       console.log('on file selected')
       vm.modelData = null
       vm.modelName = ''
@@ -150,7 +175,8 @@ export default {
         vm.modelName = file.fileName
         vm.modelData = file.model
         // console.log('model data: ' + vm.modelData)
-        vm.resetLoading()
+        // let model viewer load handler resetLoading
+        //     vm.resetLoading()
         vm.errorAlert = false
       })
         .catch(function (err) {
@@ -181,6 +207,7 @@ export default {
     margin-top: 10px;
     background-color: black;
     color: white;
+    margin-bottom: -4px;
   }
 
 </style>
