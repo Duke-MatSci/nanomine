@@ -16,10 +16,10 @@
           {{inputImage}}
           <p></p>
         </v-flex>
-        <v-flex xs12 sm6>
+        <v-flex xs12 sm9>
           <h4>Intelligent Characterization Results</h4> <!-- comment -->
           <v-flex d-inline-block xs2 sm1></v-flex>
-          <v-flex d-inline-block xs8 sm5>
+          <v-flex d-inline-block xs8 sm8>
             <p></p>
             <v-list two-line subheader>
               <!--v-subheader>Details</v-subheader-->
@@ -37,17 +37,22 @@
               </v-list-tile>
               <v-list-tile avatar>
                 <v-list-tile-content>
-                  <v-list-tile-title>Characterization Method</v-list-tile-title>
+                  <v-list-tile-title>Selected Characterization Method</v-list-tile-title>
                   <v-list-tile-sub-title> {{charac}}</v-list-tile-sub-title>
                 </v-list-tile-content>
               </v-list-tile>
               <v-list-tile avatar>
                 <v-list-tile-content>
-                  <v-list-tile-title>Isotropy</v-list-tile-title>
+                  <v-list-tile-title>Isotropy Index (1 is perfect isotropy)</v-list-tile-title>
                   <v-list-tile-sub-title>{{isotropy}}</v-list-tile-sub-title>
                 </v-list-tile-content>
               </v-list-tile>
             </v-list>
+            <v-list-tile avatar>
+              <v-list-tile-content>
+                <v-list-tile-title>More details of microstructure characterization parameters</v-list-tile-title>
+                <v-list-tile-title>can be found in the downloadable file below.</v-list-tile-title>
+              </v-list-tile-content>
           </v-flex>
         </v-flex>
       </v-layout>
