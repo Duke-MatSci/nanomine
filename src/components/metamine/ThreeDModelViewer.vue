@@ -70,7 +70,10 @@ export default {
   },
   methods: {
     modelLoaded (ev) {
-      this.resetLoading()
+      let vm = this
+      setTimeout(function () {
+        vm.resetLoading()
+      }, 250)
     },
     modelLoadError (ev) {
       let vm = this
@@ -122,6 +125,9 @@ export default {
         vm.setLoading()
         vm.modelData = vm.exampleModelData[exampleIdx]
         vm.modelName = 'Example model: ' + vm.exampleModels[exampleIdx]
+        setTimeout(function () {
+          vm.resetLoading()
+        }, 250)
       }
     },
     loadData (url) {
