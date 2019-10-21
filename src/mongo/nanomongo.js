@@ -35,8 +35,7 @@ function resetOneIngestFailed() {
 }
 function resetIngestSuccessForDataset(dsSeq) {
   db = db.getSiblingDB('mgi')
-  print(JSON.stringify(db.xmldata.updateMany({'and':[{'entityState': {'$eq': 'IngestSuccess'},{'dsSeq': {'$eq': dsSeq}}]}, { '$set': {'entityState': 'EditedValid'}})))
-}
+  print(JSON.stringify(db.xmldata.updateMany({'$and':[{'entityState': {'$eq': 'IngestSuccess'}},{'dsSeq': {'$eq': dsSeq}}]}, { '$set': {'entityState': 'EditedValid'}})))}
 function countIngesting() {
   db = db.getSiblingDB('mgi')
   print(JSON.stringify(db.xmldata.count({'entityState':{'$eq':'Ingesting'}})))
