@@ -27,7 +27,7 @@
     "v-playback": "^1.0.2",
     "vkbeautify": "^0.99.3",
     "vue": "^2.5.21",
-    "vue-3d-model": "^1.1.1",
+    "vue-3d-model": "1.1.1",
     "vue-google-charts": "^0.3.2",
     "vue-json-tree-view": "^2.1.4",
     "vue-router": "^3.0.2",
