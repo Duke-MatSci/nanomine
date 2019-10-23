@@ -525,6 +525,7 @@ function handleLogin (req, res) {
               // TODO - Users.findOneAndUpdate({'userid': remoteUser},{'upsert': true}, function (err, )
               logger.error('WARNING: user email address or given name has changed!')
             }
+            ensureRdfUser(userDoc, userAndAdminInfo.isAdmin)
             userExists = true
             resolve()
           } else {
@@ -698,7 +699,7 @@ function ensureRdfUser (userInfo, isAdmin) {
       'method': 'get',
       'url': nmLocalRestBase + '/ensure',
       // 'params': {ID: 12345},
-      'httpsAgent': httpsAgent,
+      'httpsAgent': new https.Agent(httpsAgent),
       'headers': {'Content-Type': 'text/html', 'Cookie': cookieValue}
     })
       .then(function (response) {

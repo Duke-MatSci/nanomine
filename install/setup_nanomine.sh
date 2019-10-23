@@ -61,5 +61,7 @@ python manage.py load -i 'http://semanticscience.org/ontology/sio-subset-labels.
 
 # now do the migration -- this will take a few minutes to run
 /apps/nanomine/rest/restore_and_migrate.sh FORCE ## force overrides protection that prevents dropping database!! use wisely!
+
+# whenever the dataabse is replaced, the api tokens will be overwritten, so re-create them and update nanomine_env
 /apps/nanomine/rest/update_api_tokens.sh
 

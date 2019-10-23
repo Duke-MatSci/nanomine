@@ -12,6 +12,7 @@ import XMLCONV from '@/components/XMLCONV'
 import McrHomepage from '@/components/McrHomepage'
 import BinarizeHomepage from '@/components/BinarizeHomepage'
 import Otsu from '@/components/Otsu'
+import NanoTutorials from '@/components/nanomine/NanoTutorials'
 import OtsuResult from '@/components/OtsuResult'
 import Niblack from '@/components/Niblack'
 import CharacterizeHomepage from '@/components/CharacterizeHomepage'
@@ -106,6 +107,11 @@ export default new Router({
       path: '/binarization_homepage',
       name: 'BinarizeHomepage',
       component: BinarizeHomepage
+    },
+    {
+      path: '/nanomine/tutorials',
+      name: 'NanoTutorials',
+      component: NanoTutorials
     },
     {
       path: '/Otsu',

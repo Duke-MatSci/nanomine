@@ -15,8 +15,10 @@ import Analytics from '@/components/Analytics'
 import store from './store'
 import VueGoogleCharts from 'vue-google-charts'
 import TreeView from 'vue-json-tree-view'
+import vPlayBack from 'v-playback'
 
 Vue.use(TreeView)
+Vue.use(vPlayBack)
 
 Vue.use(VueGoogleCharts)
 
