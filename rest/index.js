@@ -1595,31 +1595,87 @@ function validQueryParam (p) {
 }
 
 app.get('/geometry/image', function (req, res) {
+  let func = '/geometry/image'
   // parameters:
-  //   geometry_type=C4v (only type supported at this time
-  //   geometry_dimensions="10,10,1" (only type supported at this time
-  //   geometry_data="15 bit pattern" (only type supported at this time)
+  //   geometry_type="C4v "or "ns"
+  //   geometry_dimensions="10,10,1" or another 3D designation
+  //   geometry_data="15 character pattern" or a url
   //   geometry_data_link_type="embedded" (only type supported at this time)
-  if (req.query.geometry_type !== 'C4v' || req.query.geometry_dimensions !== '10,10,1' ||
-      req.query.geometry_data_link_type !== 'embedded' ||
-      !req.query.geometry_data || (req.query.geometry_data.length !== 15) || !req.query.geometry_data.match(/[0-1]{15}/)) {
+  //       'embedded' simply means that the geometry is embedded in the geometry_data and not a url
+  //       'url' would mean that the link type is a url :)
+
+  const validTypes = [
+    {'name': 'C4v', 'dims': '10,10,1', 'size': 10, 'bits': 15, 'symmetric': true, 'canEmbed': true},
+    {'name': 'ns', 'dims': '6,6,1', 'size': 6, 'bits': 36, 'symmetric': false, 'canEmbed': true},
+    {'name': 'ns', 'dims': '50,50,1', 'size': 50, 'bits': 2500, 'symmetric': false, 'canEmbed': true}
+  ]
+  function geometryTypeInfo (geomType, dims) {
+    let rv = null
+    validTypes.forEach(function (v) {
+      if (geomType === v.name && dims === v.dims) {
+        rv = v
+      }
+    })
+    return rv
+  }
+  let geometryType = req.query.geometry_type
+  let geometryDimensions = req.query.geometry_dimensions
+  let geometryDataLinkType = req.query.geometry_data_link_type
+  let isEmbedded = geometryDataLinkType === 'embedded'
+  let geometryData = req.query.geometry_data // bit pattern if link type is embedded, url otherwise
+  let geometryDataLength = null
+  if (typeof geometryData === 'string') {
+    geometryDataLength = geometryData.length
+  }
+  let info = geometryTypeInfo(geometryType, geometryDimensions)
+
+  function isValidData (geometryInfo) { // NOTE: only embedded data supported at this time
+    let rv = true
+    if (info) {
+      if (rv && !info.canEmbed && isEmbedded) {
+        logger.debug(func + ' - failed canEmbed test')
+        rv = false
+      }
+      if (rv && isEmbedded && geometryDataLength !== info.bits) {
+        logger.debug(func + ' - failed embedded data length test')
+        rv = false
+      }
+      if (rv && !isEmbedded) { // unfortunately, we're only supporting embedded now, but will change soon, so don't remove can embded check above
+        logger.debug(func + ' - failed must use embedded data test')
+        rv = false
+      }
+      if (rv && isEmbedded) { // only two materials supported at this time for 2D images
+        let bits = info.bits
+        let re = new RegExp('[0-1]{' + bits + '}')
+        if (geometryDataLength !== bits || !re.test(geometryData)) {
+          logger.debug(func + ' - failed bit pattern test')
+          rv = false
+        }
+      }
+    } else {
+      logger.debug(func + ' - failed to find geometry type information')
+      rv = false
+    }
+    return rv
+  }
+  if (!isValidData()) {
     console.log('get geometry image invalid parameters: ' + JSON.stringify(req.query))
     return res.status(400).send('Invalid parameter(s)')
+  } else {
+    const {createCanvas} = require('canvas')
+    const canvas = createCanvas(300, 300)
+    const ctx = canvas.getContext('2d')
+    let pixelUnit = new PixelUnit(null, canvas, ctx, info.size,
+      2, 'rgb(0, 0, 0)',
+      'rgb(0, 0, 0)', 'rgb(255, 255, 255)', null, null, geometryType)
+    pixelUnit.drawGrid()
+    pixelUnit.resetPixels()
+    pixelUnit.setMatlabString(geometryData)
+    // let dataUrl = canvas.toDataURL('image/jpeg')
+    res.set('Content-Type', 'image/jpeg')
+    return res.send(canvas.toBuffer('image/jpeg', {quality: 0.75}))
+    // https://qa.materialsmine.org/nmr/geometry/image?geometry_type=C4v&geometry_dimensions=10,10,1&geometry_data_link_type=embedded&geometry_data=000000000000001
   }
-
-  const { createCanvas } = require('canvas')
-  const canvas = createCanvas(300, 300)
-  const ctx = canvas.getContext('2d')
-  let pixelUnit = new PixelUnit(null, canvas, ctx, 10,
-    4, 'rgb(0, 0, 0)',
-    'rgb(255, 0, 0)', 'rgb(192, 192, 192)', null, null)
-  pixelUnit.drawGrid()
-  pixelUnit.resetPixels()
-  pixelUnit.setMatlabString(req.query.geometry_data)
-  // let dataUrl = canvas.toDataURL('image/jpeg')
-  res.set('Content-Type', 'image/jpeg')
-  res.send(canvas.toBuffer('image/jpeg', { quality: 0.5 }))
-  // https://qa.materialsmine.org/nmr/geometry/image?geometry_type=C4v&geometry_dimensions=10,10,1&geometry_data_link_type=embedded&geometry_data=000000000000001
 })
 
 app.get('/templates/select/all', function (req, res) { // it's preferable to read only the current non deleted schemas rather than all
@@ -2485,7 +2541,6 @@ function updateJobStatus (statusFilePath, newStatus) {
   } catch (err) {
     logger.error('try/catch driven for updating job status: ' + statusFileName + ' err: ' + err)
   }
-
 }
 
 function jobCreate (jobType, jobParams) {
