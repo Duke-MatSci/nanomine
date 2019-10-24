@@ -5,9 +5,9 @@
       <v-layout row wrap>
         <v-flex d-flex xs12>
           <v-card-text>
-            <p class="text-xs-left">
+            <v-flex xs11 class="title bold text-xs-left">
               A set of Metamaterial tools
-            </p>
+            </v-flex>
           </v-card-text>
         </v-flex>
         <v-flex d-flex xs1>
@@ -19,7 +19,7 @@
           <v-card-text>
             <h4 class="text-xs-left">
               <span>
-                <router-link to="/meta/pixelunit">Pixel Unit 32K Results</router-link>
+                <router-link to="/meta/pixelunit">Pixel Unit 32K Results for a 10x10 cell</router-link>
               </span>
             </h4>
             <p class="text-xs-left">
@@ -46,6 +46,22 @@
         </v-flex>
         <v-flex d-flex xs1>
         </v-flex>
+        <v-flex d-flex xs12 sm5 md3>
+          <v-img :src="getPixelUnit50ImageUrl()" aspect-ratio="1.7" contain xs12 sm6></v-img>
+        </v-flex>
+        <v-flex d-flex xs12 sm6 md8>
+          <v-card-text>
+            <h4 class="text-xs-left">
+              <span>
+                <a >Unit Cell (50x50) Sample Results (not available yet)</a>
+                <!--router-link to="/meta/pixelunit50">Unit Cell (50x50) Sample Results (not available yet)</router-link-->
+              </span>
+            </h4>
+            <p class="text-xs-left">
+              A tool for viewing a sample subset of static simulation results for a 50x50 2D Unit Cell
+            </p>
+          </v-card-text>
+        </v-flex>
       </v-layout>
     </v-container>
   </div>
@@ -63,6 +79,16 @@ export default {
     getPixelUnitImageUrl () {
       let base = '/nmr/geometry/image?geometry_type=C4v&geometry_dimensions=10,10,1&geometry_data_link_type=embedded&geometry_data='
       let len = 15
+      let geometry = ''
+      for (let idx = 0; idx < len; ++idx) {
+        let val = Math.floor(Math.random() * 2)
+        geometry += val
+      }
+      return base + geometry
+    },
+    getPixelUnit50ImageUrl () {
+      let base = '/nmr/geometry/image?geometry_type=ns&geometry_dimensions=50,50,1&geometry_data_link_type=embedded&geometry_data='
+      let len = 2500
       let geometry = ''
       for (let idx = 0; idx < len; ++idx) {
         let val = Math.floor(Math.random() * 2)

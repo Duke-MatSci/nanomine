@@ -19,6 +19,7 @@ import XMLCONV from '@/components/XMLCONV'
 import McrHomepage from '@/components/McrHomepage'
 import Otsu from '@/components/Otsu'
 import NanoTutorials from '@/components/nanomine/NanoTutorials'
+import NuExampleUnitCell from '@/components/metamine/NuExampleUnitCell'
 import OtsuResult from '@/components/OtsuResult'
 import Niblack from '@/components/Niblack'
 import CharacterizeHomepage from '@/components/CharacterizeHomepage'
@@ -121,6 +122,11 @@ export default new Router({
       path: '/nanomine/tutorials',
       name: 'NanoTutorials',
       component: NanoTutorials
+    },
+    {
+      path: '/metamine/pixelunit50',
+      name: 'NuExampleUnitCell',
+      component: NuExampleUnitCell
     },
     {
       path: '/Otsu',

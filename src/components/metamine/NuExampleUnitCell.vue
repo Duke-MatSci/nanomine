@@ -1,5 +1,5 @@
 <template>
-  <div class="pixelunit">
+  <div class="nuexampleunitcell">
     <h1>{{ msg }}</h1>
     <v-container fluid grid-list-md>
       <v-layout row wrap>
@@ -7,17 +7,17 @@
           <v-layout row wrap>
             <v-flex d-flex xs12>
               <div class="title font-weight-thin text-xs-left">
-              Data from Caltech and Duke composed of 32K simulated results for static and dynamic analysis.
+              Data from Northwestern University composed randome sample (100) of 80K simulated results for static analysis.
               </div>
             </v-flex>
             <v-flex d-flex xs12>
               <div class="body-2 font-weight-thin text-xs-left">
-                Click pixels to create a geometry configuration and view the result for the selected geometry.
+                Click image to select the next geometry configuration and results from the subset of simulated results.
               </div>
             </v-flex>
             <v-flex d-flex xs12>
               <div class="body-2 font-weight-thin text-xs-left">
-              Default material is Stratasys Vero White (Poisson's Ratio 0.33, Young's Modulus 2e9 Pa) and selectable material
+              Default material is void and filled material
                 is Stratasys Tango Black (Poisson's Ratio 0.33, Young's Modulus 2e6 Pa).
               </div>
             </v-flex>
@@ -25,7 +25,7 @@
               <v-flex d-flex xs2>
                 <v-btn class="text-xs-left" color="primary" flat @click="handleReset()">Reset</v-btn>
               </v-flex>
-              <v-text-field v-if="1 === 0" xs5 @keyup.enter="onGeometryEntered"
+              <v-text-field v-if="1 === 1" xs5 @keyup.enter="onGeometryEntered"
                 v-model="geometry"
                 label="Custom geometry string"
                 required
@@ -129,19 +129,19 @@ import Axios from 'axios'
 import PixelUnit from '../../modules/metamine/PixelUnit'
 
 export default {
-  name: 'PixelUnit',
+  name: 'NuExampleUnitCell',
   data: () => ({
-    msg: 'C4v 10 x 10 Geometry Explorer',
+    msg: '50 x 50 Geometry Sample Explorer',
     c: null,
     ctx: null,
     borderColor: 'black',
     setColor: 'red',
     resetColor: '#c0c0c0',
     bgColor: 'rgb(192,192,192)',
-    lw: 4,
+    lw: 2,
     pixels: null,
     // pixelString: '',
-    size: 10, // default to 10x10 matrix
+    size: 50, // default to 50x50 matrix
     pixelStrElem: null,
     matlabStr: '',
     effYmStr: '',
@@ -189,18 +189,18 @@ export default {
       vm.pixelUnit.handleClick(pixel)
       vm.updateFields()
     })
-    Axios.get('/nmstatic/metamine/lin-bilal-liu-10x10-c4v-15bit-static-dynamic.txt')
-      .then(function (resp) {
-        vm.pixelUnit = new PixelUnit(resp.data, vm.c, vm.ctx, vm.size,
-          vm.lw, vm.borderColor,
-          vm.setColor, vm.resetColor, null, null)
-        vm.pixelUnit.drawGrid()
-        vm.updateFields()
-      })
-      .catch(function (err) {
-        let msg = 'error obtaining pixelunit data. Error: ' + err
-        console.trace(msg)
-      })
+    // Axios.get('/nmstatic/metamine/lin-bilal-liu-10x10-c4v-15bit-static-dynamic.txt')
+    //   .then(function (resp) {
+    //     vm.pixelUnit = new PixelUnit(resp.data, vm.c, vm.ctx, vm.size,
+    //       vm.lw, vm.borderColor,
+    //       vm.setColor, vm.resetColor, null, null)
+    //     vm.pixelUnit.drawGrid()
+    //     vm.updateFields()
+    //   })
+    //   .catch(function (err) {
+    //     let msg = 'error obtaining pixelunit data. Error: ' + err
+    //     console.trace(msg)
+    //   })
   },
   methods: {
     onGeometryEntered () {
@@ -234,13 +234,13 @@ export default {
     },
     updateBgPairs () {
       let vm = this
-      let psv = this.pixelUnit.getPsv()
-      let sh = this.pixelUnit.getSh()
-      vm.bgPairs = []
-      psv.forEach(function (v, idx) {
-        let p = {'id': idx, 'sh': sh[idx], 'psv': v}
-        vm.bgPairs.push(p)
-      })
+      // let psv = this.pixelUnit.getPsv()
+      // let sh = this.pixelUnit.getSh()
+      // vm.bgPairs = []
+      // psv.forEach(function (v, idx) {
+      //   let p = {'id': idx, 'sh': sh[idx], 'psv': v}
+      //   vm.bgPairs.push(p)
+      // })
     },
     showMatlabString () {
       let vm = this
@@ -250,21 +250,21 @@ export default {
     },
     showPSVString () {
       let vm = this
-      vm.psvStr = vm.pixelUnit.getPsvString()
+      // vm.psvStr = vm.pixelUnit.getPsvString()
     },
     showSHString () {
       let vm = this
-      vm.shStr = vm.pixelUnit.getShString()
+      // vm.shStr = vm.pixelUnit.getShString()
     },
     showYoungsModulusString () {
       let vm = this
-      vm.effYmStr = vm.pixelUnit.getYmString()
-      vm.geometryitems[1].value = vm.effYmStr
+      // vm.effYmStr = vm.pixelUnit.getYmString()
+      // vm.geometryitems[1].value = vm.effYmStr
     },
     showPoissonsRatioString () {
       let vm = this
-      vm.effPrStr = vm.pixelUnit.getPrString()
-      vm.geometryitems[2].value = vm.effPrStr
+      // vm.effPrStr = vm.pixelUnit.getPrString()
+      // vm.geometryitems[2].value = vm.effPrStr
     }
   }
 }
