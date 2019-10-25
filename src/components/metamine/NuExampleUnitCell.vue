@@ -125,8 +125,8 @@
 </template>
 
 <script>
-import Axios from 'axios'
-import PixelUnit from '../../modules/metamine/PixelUnit'
+// import Axios from 'axios'
+// import PixelUnit from '../../modules/metamine/PixelUnit'
 
 export default {
   name: 'NuExampleUnitCell',
@@ -233,7 +233,7 @@ export default {
       vm.updateFields()
     },
     updateBgPairs () {
-      let vm = this
+      // let vm = this
       // let psv = this.pixelUnit.getPsv()
       // let sh = this.pixelUnit.getSh()
       // vm.bgPairs = []
@@ -249,20 +249,20 @@ export default {
       vm.geometryitems[0].value = vm.matlabStr
     },
     showPSVString () {
-      let vm = this
+      // let vm = this
       // vm.psvStr = vm.pixelUnit.getPsvString()
     },
     showSHString () {
-      let vm = this
+      // let vm = this
       // vm.shStr = vm.pixelUnit.getShString()
     },
     showYoungsModulusString () {
-      let vm = this
+      // let vm = this
       // vm.effYmStr = vm.pixelUnit.getYmString()
       // vm.geometryitems[1].value = vm.effYmStr
     },
     showPoissonsRatioString () {
-      let vm = this
+      // let vm = this
       // vm.effPrStr = vm.pixelUnit.getPrString()
       // vm.geometryitems[2].value = vm.effPrStr
     }
