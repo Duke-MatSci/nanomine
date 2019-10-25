@@ -36,21 +36,21 @@ export default {
       videos: [
         {
           hide: true,
-          url: 'https://materialsmine.org/nmf/nanomine-vis.mov',
+          url: 'https://materialsmine.org/nmf/nanomine-vis.mp4',
           title: 'Visualization Tutorial',
-          text: 'This video tutorial show basic usage of the search and visualization tool.'
+          text: 'This video tutorial show basic usage of the search and visualization tool. (no audio)'
         },
         {
           hide: true,
           url: 'https://materialsmine.org/nmf/Intelligent_Characterization_Tutorial_by_Umar.mp4',
           title: 'Intelligent Characterization',
-          text: 'This video tutorial shows how to use the Intelligent Characterizattion tool.'
+          text: 'This narrated video tutorial shows how to use the Intelligent Characterizattion tool and view results.'
         },
         {
           hide: true,
           url: 'https://materialsmine.org/nmf/NanoMine_Demo_by_Akshay.mp4',
           title: 'Basic Module Characterization/Reconstruction Tool Usage',
-          text: 'This video tutorial shows overall Module Characterization and Reconstruction tool usage.'
+          text: 'This video tutorial shows overall Module Characterization and Reconstruction tool usage. (no audio)'
         }
       ]
     }
