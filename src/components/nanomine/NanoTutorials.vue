@@ -36,7 +36,7 @@ export default {
       videos: [
         {
           hide: true,
-          url: 'https://materialsmine.org/nmf/nanomine-vis.mov',
+          url: 'https://materialsmine.org/nmf/nanomine-vis.mp4',
           title: 'Visualization Tutorial',
           text: 'This video tutorial show basic usage of the search and visualization tool. (no audio)'
         },
