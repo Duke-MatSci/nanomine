@@ -23,12 +23,12 @@
           </div>
         </v-flex>
         <v-flex d-flex xs2>
-          <div class="text-xs-left">Select an STL file to view from your local file system
+          <div class="text-xs-left">Select an {{supportedTypes}} model file to view from your local file system
             <v-btn class="text-xs-left" small color="primary" @click='selectFile'>Browse</v-btn>
             <input
               type="file"
               style="display: none"
-              accept=".stl"
+              :accept="acceptedFileTypes()"
               ref="stlfilebrowser"
               @change="onFileSelected"
             >
@@ -41,7 +41,18 @@
               Model Name: {{modelName}}
             </v-flex>
             <v-flex d-flex xs12>
-              <model-stl width="400" height="400" :src="modelData" @on-load="modelLoaded" @on-error="modelLoadError"></model-stl>
+              <span v-if="modelName.toLowerCase().endsWith('.stl')">
+                <model-stl  width="400" height="400" :src="modelData" @on-load="modelLoaded" @on-error="modelLoadError"></model-stl>
+              </span>
+              <span v-if="modelName.toLowerCase().endsWith('.gltf') || modelName.toLowerCase().endsWith('.glb')">
+                <model-gltf  width="400" height="400" :src="modelData" @on-load="modelLoaded" @on-error="modelLoadError"></model-gltf>
+              </span>
+              <span v-if="modelName.toLowerCase().endsWith('.obj')">
+                <model-obj  width="400" height="400" :src="modelData" @on-load="modelLoaded" @on-error="modelLoadError"></model-obj>
+              </span>
+              <span v-if="modelName.toLowerCase().endsWith('.vtk') || modelName.toLowerCase().endsWith('.vtb')">
+                <model-vtk  width="400" height="400" :src="modelData" @on-load="modelLoaded" @on-error="modelLoadError"></model-vtk>
+              </span>
             </v-flex>
           </v-layout>
         </v-flex>
@@ -50,12 +61,12 @@
 </template>
 
 <script>
-import { ModelStl } from 'vue-3d-model'
+import { ModelStl, ModelGltf, ModelObj, ModelVtk } from 'vue-3d-model'
 import Axios from 'axios'
 
 export default {
   name: 'ThreeDModelViewer',
-  components: { ModelStl },
+  components: { ModelStl, ModelGltf, ModelObj, ModelVtk },
   data () {
     return {
       msg: '3D Model Viewer',
@@ -65,10 +76,53 @@ export default {
       modelName: '',
       currentExample: -1,
       exampleModelData: [null, null],
-      exampleModels: ['latTrunCube_4921.stl', 'tpbsDD1_20.stl']
+      exampleModels: ['latTrunCube_4921.stl', 'tpbsDD1_20.stl'],
+      loaders: [
+        {active: false, name: 'GLTF Model Viewer', type: 'GLTF/GLB', fileTypes: '.gltf,.glb'},
+        {active: false, name: 'OBJ Model Viewer', type: 'OBJ', fileTypes: '.obj'},
+        {active: true, name: 'STL Model Viewer', type: 'STL', fileTypes: '.stl'},
+        {active: false, name: 'VTK Model Viewer', type: 'VTK/VTB', fileTypes: '.vtk,.vtb'}
+      ]
+    }
+  },
+  computed: {
+    supportedTypes () {
+      let vm = this
+      let rv = ''
+      vm.loaders.forEach((v, idx) => {
+        if (v.active) {
+          if (idx >= (vm.supportedCount() - 1) && idx !== 0) {
+            rv += (' or ' + v.type)
+          } else {
+            rv += ((rv.length > 0) ? (', ' + v.type) : v.type)
+          }
+        }
+      })
+      return rv
     }
   },
   methods: {
+    supportedCount () {
+      let rv = 0
+      let vm = this
+      vm.loaders.forEach((v) => {
+        if (v.active) {
+          ++rv
+        }
+      })
+      return rv
+    },
+    acceptedFileTypes () {
+      let vm = this
+      let accepted = ''
+      vm.loaders.forEach((v, idx) => {
+        if (v.active) {
+          let value = v.fileTypes
+          accepted += ((accepted.length > 0) ? (',' + value) : value)
+        }
+      })
+      return accepted
+    },
     modelLoaded (ev) {
       let vm = this
       setTimeout(function () {
@@ -115,7 +169,9 @@ export default {
             vm.modelName = 'Example model: ' + vm.exampleModels[exampleIdx]
           })
           .catch(function (err) {
-            vm.errorMsg = 'Error loading example: ' + vm.exampleModels[exampleIdx] + ' - ' + err
+            let msg = 'Error loading example: ' + vm.exampleModels[exampleIdx] + ' - ' + err
+            console.log(msg)
+            vm.errorMsg = msg
             vm.errorAlert = true
             vm.modelData = null
             vm.modelName = ''
@@ -147,6 +203,7 @@ export default {
     },
     onFileSelected (e) {
       let vm = this
+      window.AppData = vm
       vm.setLoading()
       vm.currentExample = -1 // not an example
       console.log('on file selected')
@@ -191,9 +248,6 @@ export default {
           vm.errorAlert = true
           // Handle error
         })
-    },
-    loadExample (idx, fullNm) {
-
     }
   }
 }
