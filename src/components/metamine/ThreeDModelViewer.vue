@@ -23,7 +23,7 @@
           </div>
         </v-flex>
         <v-flex d-flex xs2>
-          <div class="text-xs-left">Select an {{supportedTypes}} model file to view from your local file system
+          <div class="text-xs-left">Select an {{supportedTypes}} model file to view from your local file system. {{objfileNote}}
             <v-btn class="text-xs-left" small color="primary" @click='selectFile'>Browse</v-btn>
             <input
               type="file"
@@ -96,6 +96,16 @@ export default {
           } else {
             rv += ((rv.length > 0) ? (', ' + v.type) : v.type)
           }
+        }
+      })
+      return rv
+    },
+    objfileNote () {
+      let rv = ''
+      let vm = this
+      vm.loaders.forEach((v) => {
+        if (v.active && v.type === 'OBJ') {
+          rv = 'NOTE: OBJ files do not quite display - a solution is forth-coming.'
         }
       })
       return rv
