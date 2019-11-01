@@ -36,11 +36,11 @@
           <v-card-text>
             <h4 class="text-xs-left">
               <span>
-                <router-link to="/meta/threedmodelviewer">3D STL Viewer</router-link>
+                <router-link to="/meta/threedmodelviewer">3D Model Viewer</router-link>
               </span>
             </h4>
             <p class="text-xs-left">
-              A viewer for STL files
+              3D Model File Viewer (supports only a limited set of model types)
             </p>
           </v-card-text>
         </v-flex>
