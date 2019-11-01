@@ -5,7 +5,7 @@
       <v-layout row wrap>
         <v-flex d-flex xs12>
           <v-card-text>
-            <v-flex xs11 class="title bold text-xs-left">
+            <v-flex xs11 class="title bold text-xs-left" @click="updateImageChanger()">
               A set of Metamaterial tools
             </v-flex>
           </v-card-text>
@@ -47,7 +47,7 @@
         <v-flex d-flex xs1>
         </v-flex>
         <v-flex d-flex xs12 sm5 md3>
-          <v-img :src="getPixelUnit50ImageUrl()" aspect-ratio="1.7" contain xs12 sm6></v-img>
+          <v-img :src="pixelUnit50ImageUrl" aspect-ratio="1.7" contain xs12 sm6></v-img>
         </v-flex>
         <v-flex d-flex xs12 sm6 md8>
           <v-card-text>
@@ -72,13 +72,35 @@ export default {
   name: 'MetaMineTools',
   data () {
     return {
-      msg: 'MetaMine Tools'
+      msg: 'MetaMine Tools',
+      imageChanger: false,
+      pixelUnit50ImageUrl: ''
     }
   },
+  beforeMount () {
+    let vm = this
+    vm.refreshPixelUnit50() // need to set url initially
+    setInterval(() => {
+      if (vm.imageChanger) {
+        vm.refreshPixelUnit50()
+      }
+    }, 500)
+  },
+  computed: {
+  },
   methods: {
-    getPixelUnitImageUrl () {
-      let base = '/nmr/geometry/image?geometry_type=C4v&geometry_dimensions=10,10,1&geometry_data_link_type=embedded&geometry_data='
-      let len = 15
+    updateImageChanger () {
+      let vm = this
+      vm.imageChanger = !vm.imageChanger
+    },
+    refreshPixelUnit50 () {
+      let vm = this
+      // cause pixelUnit50ImageUrl to be updated
+      vm.pixelUnit50ImageUrl = vm.getPixelUnit50ImageUrl()
+    },
+    getPixelUnit50ImageUrl () {
+      let base = '/nmr/geometry/image?geometry_type=ns&geometry_dimensions=50,50,1&geometry_data_link_type=embedded&geometry_data='
+      let len = 2500
       let geometry = ''
       for (let idx = 0; idx < len; ++idx) {
         let val = Math.floor(Math.random() * 2)
@@ -86,9 +108,9 @@ export default {
       }
       return base + geometry
     },
-    getPixelUnit50ImageUrl () {
-      let base = '/nmr/geometry/image?geometry_type=ns&geometry_dimensions=50,50,1&geometry_data_link_type=embedded&geometry_data='
-      let len = 2500
+    getPixelUnitImageUrl () {
+      let base = '/nmr/geometry/image?geometry_type=C4v&geometry_dimensions=10,10,1&geometry_data_link_type=embedded&geometry_data='
+      let len = 15
       let geometry = ''
       for (let idx = 0; idx < len; ++idx) {
         let val = Math.floor(Math.random() * 2)
