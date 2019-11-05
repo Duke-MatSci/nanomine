@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# Run with './polymernanocomposite-count-qa.curl 2>/dev/null |jq ".results.bindings[0].count.value"' to get count only
+curl --header  \
+  --header "Content-Type: application/x-www-form-urlencoded; charset=UTF-8" \
+  --header "Accept: application/sparql-results+json" \
+  --request POST \
+  --data 'query=prefix+sio%3A%3Chttp%3A%2F%2Fsemanticscience.org%2Fresource%2F%3E%0Aprefix+ns%3A%3Chttp%3A%2F%2Fnanomine.tw.rpi.edu%2Fns%2F%3E%0Aprefix+np%3A+%3Chttp%3A%2F%2Fwww.nanopub.org%2Fnschema%23%3E%0Aprefix+dcterms%3A+%3Chttp%3A%2F%2Fpurl.org%2Fdc%2Fterms%2F%3E%0Aselect+(count+(distinct+%3Fnanopub)+as+%3Fcount)%0Awhere+%7B%0A+++%3Fnanopub+a+%3Chttp%3A%2F%2Fnanomine.org%2Fns%2FPolymerNanocomposite%3E.%0A%7D++' \
+  https://qa.materialsmine.org/wi/sparql
