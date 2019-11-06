@@ -106,6 +106,9 @@ const store = new Vuex.Store({
     getCmsVideo: (state) => (id) => {
       return state.cms.videos[id]
     },
+    getCmsAllVideos: (state) => {
+      return state.cms.videos
+    },
     loginLogout: function (state) {
       return state.loginLogout
     },
