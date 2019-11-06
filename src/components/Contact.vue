@@ -49,7 +49,6 @@
           <v-textarea v-model="textData" solo name="bodytext" :label="getHelpText()" value="" rows="20" hint=""></v-textarea>
         </v-flex>
         <v-flex xs1>
-          Thank you for using NanoMine!
         </v-flex>
       </v-layout>
       <v-layout>
