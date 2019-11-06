@@ -44,7 +44,7 @@ export default {
           hide: true,
           url: 'https://materialsmine.org/nmf/Intelligent_Characterization_Tutorial_by_Umar.mp4',
           title: 'Intelligent Characterization',
-          text: 'This narrated video tutorial shows how to use the Intelligent Characterizattion tool and view results.'
+          text: 'This narrated video tutorial shows how to use the Intelligent Characterization tool and view results.'
         },
         {
           hide: true,
