@@ -16,6 +16,7 @@ import store from './store'
 import VueGoogleCharts from 'vue-google-charts'
 import TreeView from 'vue-json-tree-view'
 import vPlayBack from 'v-playback'
+import VideoLink from '@/components/VideoLink'
 
 Vue.use(TreeView)
 Vue.use(vPlayBack)
@@ -43,8 +44,9 @@ Vue.component('page-footer', Footer)
 Vue.component('LeftMenu', LeftMenu)
 Vue.component('waiting', Waiting)
 Vue.component('analytics', Analytics)
-/* eslint-disable no-new */
+Vue.component('video-link', VideoLink)
 
+/* eslint-disable no-new */
 export default new Vue({
   el: '#app',
   store,
