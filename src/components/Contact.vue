@@ -10,7 +10,7 @@
     <h1>{{ msg }}</h1>
     <v-container fluid grid-list-md>
       <v-layout row wrap>
-        <v-flex xs12>
+        <v-flex class="d-flex" xs12>
           <v-radio-group label="I want to ... " v-model="contactType" row>
             <div>&nbsp;&nbsp;</div>
             <v-radio label="Ask questions" value="questions"  v-on:change="setHelpText()"></v-radio>
