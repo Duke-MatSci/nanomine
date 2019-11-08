@@ -1,21 +1,22 @@
 <template>
   <!-- TO USE THIS COMPONENT, place it on the page using:
 
-    <video-link videoName="the_global_name_of_the_video" btnSize="x-small | small | normal | large | x-large"/>
+    <video-link videoName="the_global_name_of_the_video" btnColor="color spec" btnSize="x-small | small | normal | large | x-large"/>
 
     The component will place a floating action button with a video_library icon that when pressed,
     will open a modal dialog containing the specified video.
 
+    NOTE: Color spec can be: primary, secondary, a color like 'red' or an rgb/rgba value like '#ffeeoo' or 'rgba(255, 200, 200,0.3)'
   -->
   <div class="video-link">
     <v-tooltip bottom>
       <template v-slot:activator="{on}">
       <div @click.stop="toggleVisible()">
-        <v-btn color="primary" fab x-small v-on="on" v-if="btnSize === 'x-small'"><v-icon>video_library</v-icon></v-btn>
-        <v-btn v-else-if="btnSize === 'small'" small color="primary" fab v-on="on"><v-icon>video_library</v-icon></v-btn>
-        <v-btn v-else-if="btnSize === 'large'" large color="primary" fab v-on="on"><v-icon>video_library</v-icon></v-btn>
-        <v-btn v-else-if="btnSize === 'x-large'" x-large color="primary" fab v-on="on"><v-icon>video_library</v-icon></v-btn>
-        <v-btn v-else color="primary" fab normal="true" v-on="on"><v-icon>video_library</v-icon></v-btn>
+        <v-btn icon :color="btnColor" x-small v-on="on" v-if="btnSize === 'x-small'"><v-icon>video_library</v-icon></v-btn>
+        <v-btn icon v-else-if="btnSize === 'small'" small :color="btnColor" v-on="on"><v-icon>video_library</v-icon></v-btn>
+        <v-btn icon v-else-if="btnSize === 'large'" large :color="btnColor" v-on="on"><v-icon>video_library</v-icon></v-btn>
+        <v-btn icon v-else-if="btnSize === 'x-large'" x-large :color="btnColor" v-on="on"><v-icon>video_library</v-icon></v-btn>
+        <v-btn icon v-else :color="btnColor" normal="true" v-on="on"><v-icon>video_library</v-icon></v-btn>
       </div>
       </template>
       <span>{{title}}</span>
@@ -65,6 +66,11 @@ export default {
       validator: function (value) {
         return ['x-large', 'large', 'normal', 'small', 'x-small'].indexOf(value) !== -1
       }
+    },
+    btnColor: {
+      type: String,
+      required: true,
+      default: 'primary'
     }
   },
   beforeMount () {
