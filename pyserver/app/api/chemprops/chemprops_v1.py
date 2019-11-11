@@ -10,7 +10,8 @@ class ChemPropsDto:
   api = Namespace('chemprops', description='ChemProps REST operations')
   chemprops = api.model('chemprops', {
     'StandardName': fields.String(required=True, description='Standard Chemical Name'),
-    'density': fields.String(required=True, description='Polymer Density')
+    'density': fields.String(required=True, description='Chemical Density'),
+    'uSMILES': fields.String(required=False, description='Polymer unique SMILES')
   })
 
 api = ChemPropsDto.api
@@ -77,7 +78,7 @@ class ChemProps(Resource):
         rv = cp.searchPolymers(params)
         if rv is not None:
           Config.getApp().logger.debug(__name__ + ' chemprops.get(\'' + polfil + '\', ' + str(params) + '): returned - ' + str(rv))
-          data = {'StandardName': rv['_stdname'], 'density': rv['_density']}
+          data = {'StandardName': rv['_stdname'], 'density': rv['_density'], 'uSMILES': rv['_id']}
           marshal(data, ChemPropsDto.chemprops)
       else :
         return None, 400 # pol or fil required

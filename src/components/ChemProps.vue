@@ -41,6 +41,8 @@
         <p class="text-xs-left">Standardized chemical name and density information:</p>
         <v-text-field v-model="stdname" label='Standardized Name' outlined></v-text-field>
         <v-text-field v-model="density" label='Density (g/cm3)' outlined></v-text-field>
+        <v-text-field v-model="uSMILES" label='uSMILES' outlined v-if="pfRadios === 'pol'"></v-text-field>
+        <p v-if="pfRadios === 'pol'">Structure (coming soon)</p>
       </v-flex>
       <br>
       <h4 class="text-xs-left">Reference</h4>
@@ -67,6 +69,7 @@ export default {
       tradename: '',
       stdname: '',
       density: '',
+      uSMILES: '',
       searchError: false,
       searchErrorMsg: '',
       loginRequired: false,
@@ -134,6 +137,10 @@ export default {
           console.log('get response from ChemProps!')
           vm.stdname = response.data.StandardName
           vm.density = parseFloat(response.data.density)
+          // show uSMILES if it's polymer search
+          if (vm.pfRadios === 'pol') {
+            vm.uSMILES = response.data.uSMILES
+          }
           // check if stdname is found
           if (vm.stdname === '') {
             vm.searchError = true
