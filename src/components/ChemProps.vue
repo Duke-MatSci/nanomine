@@ -96,6 +96,7 @@ export default {
       let vm = this
       vm.stdname = ''
       vm.density = ''
+      vm.searchError = false // reset the error message on click
     },
     successDlgClicked: function () {
       let vm = this
@@ -124,7 +125,8 @@ export default {
           ChemicalName: vm.chemicalname,
           Abbreviation: vm.abbreviation,
           TradeName: vm.tradename,
-          uSMILES: vm.SMILES
+          uSMILES: vm.SMILES,
+          nmId: 'restNmId'
         }
       })
       // Axios.get('/nmr//explore/select', {

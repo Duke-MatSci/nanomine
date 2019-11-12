@@ -24,7 +24,8 @@ class ChemPropsApiDoc: # /api/doc
       'ChemicalName': 'Chemical name to locate',
       'Abbreviation': 'Optional abbreviation to locate',
       'TradeName': 'Optional trade name to locate',
-      'uSMILES': 'Optional specific SMILES value to locate'
+      'uSMILES': 'Optional specific SMILES value to locate',
+      'nmId': 'NanoMine id, required for XMLCONV calls'
       }
     }
   }
@@ -42,6 +43,7 @@ class ChemProps(Resource):
   @api.doc(params={'Abbreviation': ChemPropsApiDoc.getDoc('get','/','Abbreviation')})
   @api.doc(params={'TradeName': ChemPropsApiDoc.getDoc('get','/','TradeName')})
   @api.doc(params={'uSMILES': ChemPropsApiDoc.getDoc('get','/','uSMILES')})
+  @api.doc(params={'nmId': ChemPropsApiDoc.getDoc('get','/','nmId')})
   @api.response(400,'Incorrect request parameters')
   @api.response(401,'Authentication required')
   @api.response(403,'Not authorized')
@@ -52,12 +54,12 @@ class ChemProps(Resource):
     callParams = ('ChemicalName', 'Abbreviation', 'TradeName', 'uSMILES')
     parser = reqparse.RequestParser() # marshmallow is preferred parser, this is technically deprecated but supported long term
     parser.add_argument('polfil', required=True, help=ChemPropsApiDoc.getDoc('get','/','polfil'))
+    parser.add_argument('nmId', required=True, help=ChemPropsApiDoc.getDoc('get','/','nmId'))
     for p in callParams:
       parser.add_argument(p, required=(p == 'ChemicalName'), help=ChemPropsApiDoc.getDoc('get','/',p))
 
     args = parser.parse_args()
-    nmId = 'restNmId'
-    cp = nmChemPropsAPI(nmId)
+    cp = nmChemPropsAPI(args['nmId'])
     polfil = args['polfil']
     params = dict()
     for p in callParams:
