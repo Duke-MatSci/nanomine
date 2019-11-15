@@ -36,7 +36,7 @@
           <v-card-text>
             <h4 class="text-xs-left">
               <span>
-                <router-link to="/meta/threedmodelviewer">3D Model Viewer</router-link>
+                <router-link to="/meta/modelviewer">3D Model Viewer</router-link>
               </span>
             </h4>
             <p class="text-xs-left">
