@@ -12,6 +12,7 @@ import MyPage from '@/components/MyPage'
 import MaterialsMine from '@/components/MaterialsMine'
 import MetaMine from '@/components/metamine/MetaMine'
 import MetaMineTools from '@/components/metamine/MetaMineTools'
+import ModelViewer from '@/components/metamine/ModelViewer'
 import NanoMine from '@/components/NanoMine'
 import PixelUnit from '@/components/metamine/PixelUnit'
 import SimTools from '@/components/SimTools'
@@ -40,7 +41,7 @@ import SDFReconstructResults from '@/components/SDFReconstructResults'
 import CorrelationReconstructResults from '@/components/CorrelationReconstructResults'
 import DescriptorReconstructResults from '@/components/DescriptorReconstructResults'
 import ViewData from '@/components/ViewData'
-import ThreeDModelViewer from '@/components/metamine/ThreeDModelViewer'
+// import ThreeDModelViewer from '@/components/metamine/ThreeDModelViewer'
 // import NmEditor from '@/components/Editor'
 // import Visualization from '@/components/Visualization'
 import ChemProps from '@/components/ChemProps'
@@ -72,6 +73,11 @@ export default new Router({
       path: '/meta/tools',
       name: 'MetaMineTools',
       component: MetaMineTools
+    },
+    {
+      path: '/meta/modelviewer',
+      name: 'ModelViewer',
+      component: ModelViewer
     },
     {
       path: '/db',
@@ -266,11 +272,11 @@ export default new Router({
       name: 'DynamfitResult',
       component: DynamfitResult
     },
-    {
-      path: '/meta/threedmodelviewer',
-      name: 'ThreeDModelViewer',
-      component: ThreeDModelViewer
-    },
+    // Use ModelViewer instead {
+    //   path: '/meta/threedmodelviewer',
+    //   name: 'ThreeDModelViewer',
+    //   component: ThreeDModelViewer
+    // },
     {
       path: '/ChemProps',
       name: 'ChemProps',

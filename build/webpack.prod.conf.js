@@ -119,6 +119,11 @@ const webpackConfig = merge(baseWebpackConfig, {
         to: config.build.assetsSubDirectory,
         ignore: ['.*']
       },
+      {
+        from: path.resolve(__dirname, '../../mm-model-viewers/dist/'),
+        to: path.join(config.build.assetsSubDirectory, 'js/[name].js'),
+        test: /^mm-model-viewers.js$/
+      },
     //   { // No longer including codemirror editor
     //     from: path.resolve(__dirname, '../node_modules/codemirror/mode/*/*'),
     //     to: path.join(config.build.assetsSubDirectory, 'js/codemirror/mode/[name]/[name].js')
