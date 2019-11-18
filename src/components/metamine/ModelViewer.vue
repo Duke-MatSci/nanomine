@@ -1,6 +1,6 @@
 <template>
   <v-flex class="model-viewer" ref="pageContent">
-  <h1>{{ msg }}</h1>
+    <h1>{{ msg }}</h1>
     <v-alert
       v-model="errorAlert"
       type="error"
@@ -16,12 +16,13 @@
       {{infoMsg}}
     </v-alert>
     <v-container>
-    <v-layout
-      text-center
-      wrap
-    >
-      <v-flex d-flex xs12>
-        <span @click="selectFile" class="text-xs-center headline font-weight-bold">Drag an OBJ, STL or VTP model file here or <span class="font-italic link">click</span> to browse models on file system.
+      <v-layout
+        text-center
+        wrap
+      >
+        <v-flex d-flex xs12>
+        <span @click="selectFile" class="text-xs-center headline font-weight-bold">Drag an OBJ, STL or VTP model file here or <span
+          class="font-italic link">click</span> to browse models on file system.
           <input
             type="file"
             style="display: none"
@@ -30,26 +31,33 @@
             @change="onFileSelected"
           >
         </span>
-      </v-flex>
-      <v-flex xs12 class="text-xs-center headline" v-if="modelName.length > 0">Model: {{modelName}}</v-flex>
-      <v-flex d-flex xs12 class="examples subheading">
-        <v-flex xs2>
-          A few example models to download and try:
-          <span v-for="(item, idx) in exampleModels" v-bind:key="item">
+        </v-flex>
+        <v-flex xs12 class="text-xs-center headline" v-if="modelName.length > 0">Model: {{modelName}}</v-flex>
+        <v-flex d-flex xs12 class="examples subheading">
+          <v-flex xs2>
+            A few example models to download and try:
+            <span v-for="(item, idx) in exampleModels" v-bind:key="item">
             <br/><a :href="getExampleUrl(idx)">Example #{{idx+1}}</a>
           </span>
+          </v-flex>
+          <v-flex d-flex xs8 style="width:100%; height:100%;min-height: 300px; min-width:300px; background-color:#a0a0a0;" ref="modelView">
+              <v-layout row wrap align-center>
+                <v-flex justify-center style="font-size: 28px;" @click="selectFile">
+                  Use a tool like meshio (link below) to convert models to OBJ, STL or VTP format for viewing here.
+                </v-flex>
+              </v-layout>
+          </v-flex>
+          <v-flex d-flex xs2></v-flex>
         </v-flex>
-        <v-flex d-flex xs8 style="width:100%; height:100%;min-height: 300px" ref="modelView">
-          <div style="background-color: rgb(250, 250, 250)"></div>
-        </v-flex>
-        <v-flex d-flex xs2></v-flex>
-      </v-flex>
-      <v-hover>
-        <v-flex @click="meshio" d-flex xs12 slot-scope="{ hover }" :class="`${hover ? 'text-black link': 'text-primary'}`"><span class="text-xs-center  subheading font-weight-medium ">Convert from other model file types such as MSH or VTK using a conversion tool like meshio.</span></v-flex>
-      </v-hover>
-      <a style="display: none;" href="https://pypi.org/project/meshio/" target="_blank" ref="meshiolink"/>
-    </v-layout>
-  </v-container>
+        <v-hover>
+          <v-flex @click="meshio" d-flex xs12 slot-scope="{ hover }"
+                  :class="`${hover ? 'text-black link': 'text-primary'}`"><span
+            class="text-xs-center  subheading font-weight-medium ">Convert from other model file types such as MSH or VTK using a conversion tool like meshio.</span>
+          </v-flex>
+        </v-hover>
+        <a style="display: none;" href="https://pypi.org/project/meshio/" target="_blank" ref="meshiolink"/>
+      </v-layout>
+    </v-container>
   </v-flex>
 </template>
 
@@ -76,7 +84,7 @@ export default {
   mounted () {
     let vm = this
     /* eslint-disable-next-line */
-    console.log('ModelViewer mounted')
+      console.log('ModelViewer mounted')
     let events = ['drag', 'dragstart', 'dragend', 'dragover', 'dragenter', 'dragleave', 'drop']
     events.forEach(function (evt) {
       vm.$refs.pageContent.addEventListener(evt, function (e) {
@@ -150,24 +158,31 @@ export default {
   .text-black {
     color: #000000;
   }
+
   .text-primary {
     color: #1f68fc;
   }
+
   .link {
     text-decoration: underline;
   }
+
   .examples {
     margin-top: 15px;
   }
+
   img {
     width: 240px;
   }
+
   h3 {
     color: #096ff4;
   }
+
   h4 {
     text-transform: uppercase;
   }
+
   h1 {
     margin-top: 10px;
     background-color: black;
