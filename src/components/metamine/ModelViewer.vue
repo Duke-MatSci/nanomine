@@ -31,6 +31,7 @@
           >
         </span>
       </v-flex>
+      <v-flex xs12 class="text-xs-center headline" v-if="modelName.length > 0">Model: {{modelName}}</v-flex>
       <v-flex d-flex xs12 class="examples subheading">
         <v-flex xs2>
           A few example models to download and try:
@@ -43,7 +44,6 @@
         </v-flex>
         <v-flex d-flex xs2></v-flex>
       </v-flex>
-      <v-flex class="text-xs-center headline" v-if="modelName.length > 0">Model: {{modelName}}</v-flex>
       <v-hover>
         <v-flex @click="meshio" d-flex xs12 slot-scope="{ hover }" :class="`${hover ? 'text-black link': 'text-primary'}`"><span class="text-xs-center  subheading font-weight-medium ">Convert from other model file types such as MSH or VTK using a conversion tool like meshio.</span></v-flex>
       </v-hover>
