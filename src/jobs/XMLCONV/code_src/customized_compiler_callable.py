@@ -2626,12 +2626,21 @@ def sheetPropElec(sheet, DATA_PROP, myXSDtree, jobDir):
                'Dielectric breakdown strength': 'DielectricBreakdownStrength'}
     temp_list = [] # the highest level list for PROPERTIES/Electrical
     temp = [] # always save temp if not empty when we find a match in headers
+    dep = collections.OrderedDict() # dict for dependence condition
+    depend = '' # FrequencyDependence or TemperatureDependence
     prevTemp = '' # save the previous cleanTemp
     for row in range(sheet.nrows):
         cleanTemp = matchList(sheet.cell_value(row, 0), headers.keys())
         if cleanTemp:
             if len(prevTemp) == 0: # initialize prevTemp
                 prevTemp = cleanTemp
+            # if depend is not '', i.e. cleanTemp is AC dielectric dispersion
+            if len(depend) > 0:
+                # insert the dependence structure to temp, no need to sortSequence since we give it 
+                temp.append({'DielectricDispersionDependence':{depend:{'condition':dep}}})
+                # reset dep and depend after added to temp
+                dep = collections.OrderedDict()
+                depend = ''
             # save temp
             if len(temp) > 0: # update temp if it's not empty
                 # sort temp
@@ -2725,6 +2734,38 @@ def sheetPropElec(sheet, DATA_PROP, myXSDtree, jobDir):
         # AC_DielectricDispersion/Description
         if match(sheet.cell_value(row, 0), 'Description'):
             temp = insert('Description', sheet.cell_value(row, 1), temp)
+        # AC_DielectricDispersion/DielectricDispersionDependence
+        if match(sheet.cell_value(row, 0), 'Dependence'):
+            if hasLen(sheet.cell_value(row, 1)):
+                # 'Frequency dependence' or 'Temperature dependence'
+                if match(sheet.cell_value(row, 1), 'Frequency dependence'):
+                    depend = 'FrequencyDependence'
+                elif match(sheet.cell_value(row, 1), 'Temperature dependence'):
+                    depend = 'TemperatureDependence'
+        # AC_DielectricDispersion/DielectricDispersionDependence/.../condition/temperature
+        if match(sheet.cell_value(row, 0), 'Test Conditions - Temperature'):
+            myRow = sheet.row_values(row) # save the list of row_values
+            while len(myRow) < 7:
+                myRow.append('') # prevent IndexError
+            dep = addKVU('temperature', myRow[1], myRow[2], myRow[3], '', '', '', myRow[4], dep, jobDir, myXSDtree)
+            # sanity check
+            if 'temperature' in dep and not match(depend, 'FrequencyDependence'):
+                with open(jobDir + '/error_message.txt', 'a') as fid:
+                    fid.write('[Dielectric Dispersion Dependence Error] If you are to fill in "Test Conditions - Temperature", please select "Frequency dependence" for "Dependence"\n')
+                # reset dep
+                dep = collections.OrderedDict()
+        # AC_DielectricDispersion/DielectricDispersionDependence/.../condition/frequency
+        if match(sheet.cell_value(row, 0), 'Test Conditions - Frequency'):
+            myRow = sheet.row_values(row) # save the list of row_values
+            while len(myRow) < 7:
+                myRow.append('') # prevent IndexError
+            dep = addKVU('frequency', myRow[1], myRow[2], myRow[3], '', '', '', myRow[4], dep, jobDir, myXSDtree)
+            # sanity check
+            if 'frequency' in dep and not match(depend, 'TemperatureDependence'):
+                with open(jobDir + '/error_message.txt', 'a') as fid:
+                    fid.write('[Dielectric Dispersion Dependence Error] If you are to fill in "Test Conditions - Frequency", please select "Temperature dependence" for "Dependence"\n')
+                # reset dep
+                dep = collections.OrderedDict()
         # AC_DielectricDispersion/Dielectric_Real_Permittivity
         if match(sheet.cell_value(row, 0), 'Real permittivity'):
             reaP = collections.OrderedDict()
@@ -2781,6 +2822,13 @@ def sheetPropElec(sheet, DATA_PROP, myXSDtree, jobDir):
                 temp.append(weiP)
     # END OF THE LOOP
     # don't forget about the last temp
+    # if depend is not '', i.e. the last header is AC dielectric dispersion
+    if len(depend) > 0:
+        # insert the dependence structure to temp, no need to sortSequence since we give it 
+        temp.append({'DielectricDispersionDependence':{depend:{'condition':dep}}})
+        # reset dep and depend after added to temp
+        dep = collections.OrderedDict()
+        depend = ''
     # save temp
     if len(temp) > 0: # update temp if it's not empty
         # sort temp
