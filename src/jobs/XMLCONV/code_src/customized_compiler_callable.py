@@ -615,6 +615,7 @@ def sheetMatType(sheet, DATA, myXSDtree, jobDir):
     temp = [] # always save temp if not empty when we find a match in headers
     prevTemp = '' # save the previous cleanTemp
     prevTempPST = '' # save the previous cleanTempPST
+    frac = collections.OrderedDict() # for mass and volume fractions
     for row in range(sheet.nrows):
         # First deal with the ParticleSurfaceTreatment
         cleanTempPST = matchList(sheet.cell_value(row, 0), headers_PST.keys())
@@ -665,6 +666,13 @@ def sheetMatType(sheet, DATA, myXSDtree, jobDir):
                 temp.append({'FillerComponent': FillerComponent})
                 # initialize
                 FillerComponent = []
+            # special case FillerComposition
+            if len(frac) > 0:
+                # sort frac, always follow the order: mass, volume
+                if 'volume' in frac:
+                    frac.move_to_end('volume')
+                temp.append({'FillerComposition':{'Fraction':frac}})
+                frac = collections.OrderedDict()
             # save temp
             if len(temp) > 0: # update temp if it's not empty
                 # sort temp
@@ -848,9 +856,11 @@ def sheetMatType(sheet, DATA, myXSDtree, jobDir):
         if match(sheet.cell_value(row, 0), 'Fraction'):
             if type(sheet.cell_value(row, 2)) == float or len(sheet.cell_value(row, 2)) > 0:
                 if match(sheet.cell_value(row, 1), 'mass'):
-                    temp.append({'FillerComposition':{'Fraction':{'mass':sheet.cell_value(row, 2)}}})
+                    frac['mass'] = sheet.cell_value(row, 2)
+                    # temp.append({'FillerComposition':{'Fraction':{'mass':sheet.cell_value(row, 2)}}})
                 elif match(sheet.cell_value(row, 1), 'volume'):
-                    temp.append({'FillerComposition':{'Fraction':{'volume':sheet.cell_value(row, 2)}}})
+                    frac['volume'] = sheet.cell_value(row, 2)
+                    # temp.append({'FillerComposition':{'Fraction':{'volume':sheet.cell_value(row, 2)}}})
             # FillerComponent/ParticleSurfaceTreatment
                 #./ChemicalName
         if match(sheet.cell_value(row,0), 'PST chemical name'):
@@ -948,6 +958,13 @@ def sheetMatType(sheet, DATA, myXSDtree, jobDir):
         temp.append({'FillerComponent': FillerComponent})
         # initialize
         FillerComponent = []
+    # special case FillerComposition
+    if len(frac) > 0:
+        # sort frac, always follow the order: mass, volume
+        if 'volume' in frac:
+            frac.move_to_end('volume')
+        temp.append({'FillerComposition':{'Fraction':frac}})
+        frac = collections.OrderedDict()
     # don't forget about the last temp
     # save temp
     if len(temp) > 0: # update temp if it's not empty
