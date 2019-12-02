@@ -73,25 +73,19 @@ export default {
   data () {
     return {
       msg: 'MetaMine Tools',
-      imageChanger: false,
       pixelUnit50ImageUrl: ''
     }
   },
   beforeMount () {
     let vm = this
     vm.refreshPixelUnit50() // need to set url initially
-    setInterval(() => {
-      if (vm.imageChanger) {
-        vm.refreshPixelUnit50()
-      }
-    }, 500)
   },
   computed: {
   },
   methods: {
     updateImageChanger () {
       let vm = this
-      vm.imageChanger = !vm.imageChanger
+      vm.refreshPixelUnit50()
     },
     refreshPixelUnit50 () {
       let vm = this
