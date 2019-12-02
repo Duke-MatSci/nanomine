@@ -2818,8 +2818,11 @@ def sheetPropElec(sheet, DATA_PROP, myXSDtree, jobDir):
         if match(sheet.cell_value(row, 0), 'Dielectric breakdown strength'):
             temp = insert('Condition', sheet.cell_value(row, 1), temp)
             proF = collections.OrderedDict()
-            proF = addKVU('Profile', '', '', '', '', '', '',
-                          sheet.cell_value(row, 2), proF, jobDir, myXSDtree)
+            myRow = sheet.row_values(row) # save the list of row_values
+            while len(myRow) < 7:
+                myRow.append('') # prevent IndexError
+            proF = addKVU('Profile', '', myRow[2], myRow[3], '', '', '',
+                          myRow[4], proF, jobDir, myXSDtree)
             if len(proF) > 0:
                 temp.append(proF)
         # DielectricBreakdownStrength/WeibullPlot
@@ -2832,13 +2835,20 @@ def sheetPropElec(sheet, DATA_PROP, myXSDtree, jobDir):
             if len(wePl) > 0:
                 temp.append(wePl)
         # DielectricBreakdownStrength/WeibullParameter
-        if match(sheet.cell_value(row, 0), 'Weibull parameter'):
+        if match(sheet.cell_value(row, 0), 'Weibull parameter - scale'):
             weiP = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
                 myRow.append('') # prevent IndexError
-            weiP = addKVU('WeibullParameter', '',
-                          myRow[1], myRow[2], myRow[3], myRow[4], '', '', weiP, jobDir, myXSDtree)
+            weiP = addKVU('WeibullParameter', 'scale parameter', myRow[1], myRow[2], '', '', '', '', weiP, jobDir, myXSDtree)
+            if len(weiP) > 0:
+                temp.append(weiP)
+        if match(sheet.cell_value(row, 0), 'Weibull parameter - shape'):
+            weiP = collections.OrderedDict()
+            myRow = sheet.row_values(row) # save the list of row_values
+            while len(myRow) < 7:
+                myRow.append('') # prevent IndexError
+            weiP = addKVU('WeibullParameter', 'shape parameter', myRow[1], myRow[2], '', '', '', '', weiP, jobDir, myXSDtree)
             if len(weiP) > 0:
                 temp.append(weiP)
     # END OF THE LOOP
