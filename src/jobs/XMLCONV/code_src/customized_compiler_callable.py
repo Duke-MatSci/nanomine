@@ -1884,9 +1884,9 @@ def sheetCharMeth(sheet, DATA, myXSDtree, jobDir):
         # RheometerType
         if match(sheet.cell_value(row, 0), 'Rheometer type'):
             temp = insert('RheometerType', sheet.cell_value(row, 1), temp)
-        # CapillarSize
-        if match(sheet.cell_value(row, 0), 'Capillar size'):
-            temp = insert('CapillarSize', sheet.cell_value(row, 1), temp)
+        # CapillarySize
+        if match(sheet.cell_value(row, 0), 'Capillary size'):
+            temp = insert('CapillarySize', sheet.cell_value(row, 1), temp)
     # END OF THE LOOP
     # don't forget about the last temp
     # save temp
