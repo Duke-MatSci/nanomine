@@ -30,9 +30,6 @@ echo 'export NM_NEO4J_IMAGE="http://path.to.neo4j.tgz"' >> /apps/nanomine_env  #
 # pick up the variable changes before the next script runs
 source /apps/nanomine_env
 
-# variables changed by update_api_tokens, so pick those up as well
-source /apps/nanomine_env
-
 #install nanomine_graph
 export NG_FORK='bluedevil-oit'
 export NG_BRANCH='master'
@@ -42,7 +39,9 @@ echo cloning nanomine-graph fork ${NG_FORK}
 git clone https://github.com/"${NG_FORK}"/nanomine-graph.git # to use the original, use FORKNAME of 'tetherless-world'
 cd nanomine-graph
 echo checking out ${NG_BRANCH}
-git checkout ${NG_BRANCH}
+if [[ ${NG_BRANCH} != 'master' ]]; then
+  git checkout ${NG_BRANCH}
+fi
 pip install -e . #install nanomine-graph app
 
 cd /apps/whyis
@@ -54,6 +53,7 @@ python manage.py createuser -e testuser@example.com -p none -f test -l user -u t
 # python manage.py load -i /apps/nanomine/setl/ontology.setl.ttl -f turtle  ## Apparently no longer needed
 python manage.py load -i /apps/nanomine-graph/setl/nanomine.ttl -f turtle
 python manage.py load -i /apps/nanomine-graph/setl/xml_ingest.setl.ttl -f turtle
+python manage.py load -i 'http://semanticscience.org/ontology/sio-subset-labels.owl' -f xml
 
 # If the mgi.tgz download fails, the last three steps can be re-run to build the db
 # Obtain dump, restore and migrate mongo dump from production for new version
@@ -61,5 +61,7 @@ python manage.py load -i /apps/nanomine-graph/setl/xml_ingest.setl.ttl -f turtle
 
 # now do the migration -- this will take a few minutes to run
 /apps/nanomine/rest/restore_and_migrate.sh FORCE ## force overrides protection that prevents dropping database!! use wisely!
+
+# whenever the dataabse is replaced, the api tokens will be overwritten, so re-create them and update nanomine_env
 /apps/nanomine/rest/update_api_tokens.sh
 

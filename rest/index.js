@@ -41,15 +41,13 @@ const shortUUID = require('short-uuid')() // https://github.com/oculus42/short-u
 const groupMgr = require('./modules/groupMgr').groupmgr
 const s2a = require('stream-to-array')
 const libxml = require('libxmljs')
-
 const nanomineUtils = require('./modules/utils')
 let matchValidXmlTitle = nanomineUtils.matchValidXmlTitle
 let env = nanomineUtils.getEnv()
 const getDatasetXmlFileList = nanomineUtils.getDatasetXmlFileList
+const createDataset = nanomineUtils.createDataset
 const getLatestSchemas = nanomineUtils.getLatestSchemas
 const sortSchemas = nanomineUtils.sortSchemas
-
-// const session = require('cookie-session')
 
 // TODO calling next(err) results in error page rather than error code in json
 
@@ -61,7 +59,7 @@ const sortSchemas = nanomineUtils.sortSchemas
 //      Will need to keep the latestSchema updated when schemas are added and xml_data records are converted which will
 //      require that dataset evaluation occur as each record is converted to the new schema and invalidation of latestSchema
 //      occurs across the board for all xml_data records until they're converted. This probably means that all records being brought
-//      forward should probably be done offline and done enmasse.
+//      forward should probably be done offline and done en mass.
 
 // const ObjectId = mongoose.Types.ObjectId
 
@@ -231,7 +229,7 @@ let authOptions = {
     // NOTE: need to add applicable methods for a path and associate different rules for a path with multiple method filters
     //    If a method is not listed, then the path is NOT protected for that method
     //    The set of all path+methodlist entries should cover all possible combinations for which security is required
-    //    The methods field is NOT currently being used but it will be needed
+    //    !!!! The methods field is NOT currently being used but it will be needed
     // not yet    { path: '/dataset/create', loginAuth: false, membership: [], apiAuth: true, apiGroup: 'curate' },
     {path: '/curate', methods: allMethods, loginAuth: false, membership: [], apiAuth: true, apiGroup: 'curate'},
     {path: '/datasets', loginAuth: true, membership: [], apiAuth: true, apiGroup: 'curate'},
@@ -532,6 +530,7 @@ function handleLogin (req, res) {
               // TODO - Users.findOneAndUpdate({'userid': remoteUser},{'upsert': true}, function (err, )
               logger.error('WARNING: user email address or given name has changed!')
             }
+            ensureRdfUser(userDoc, userAndAdminInfo.isAdmin)
             userExists = true
             resolve()
           } else {
@@ -705,7 +704,7 @@ function ensureRdfUser (userInfo, isAdmin) {
       'method': 'get',
       'url': nmLocalRestBase + '/ensure',
       // 'params': {ID: 12345},
-      'httpsAgent': httpsAgent,
+      'httpsAgent': new https.Agent(httpsAgent),
       'headers': {'Content-Type': 'text/html', 'Cookie': cookieValue}
     })
       .then(function (response) {
@@ -747,7 +746,7 @@ function updateDatasetLatestSchema () { // Mark datasets denoting whether each h
       let schemaId = versions[0].currentRef[0]._id
       // logger.debug(func + ' -- ' + JSON.stringify(versions[0]))
       // logger.debug(func + ' - latest schemaId is: ' + schemaId)
-      new Promise(function (resolve, reject) {
+      new Promise(function (resolve, reject) { // now requires index on dsSeq for the sort or sort fails
         XmlData.find({'schemaId': {'$eq': schemaId}}, null, {'sort': {'dsSeq': 1}}).cursor()
           .on('data', function (data) {
             // logger.debug(func + ' - dataset: ' + data.dsSeq + ' latestSchema hash updated to true for data: ' + data.title + ' ' + data.schemaId)
@@ -1040,7 +1039,7 @@ function publishFiles (userid, xmlTitle, cb) { // xmlText, schemaName, filesInfo
     //   Add each file's name to the section in the JsonLD that lists the file as related to the dataset (fileListLD)
 
     // get latest schema/schemaId
-    getLatestSchemas(XsdVersionSchema, logger)
+    getLatestSchemas(XsdVersionSchema, XsdSchema, logger)
       .then(function (schemas) {
         if (schemas && schemas.length > 0) {
           // logger.error('xmlText: ' + xmlText)
@@ -1275,7 +1274,7 @@ function publishXml (userid, xmlTitle, xmlText, schemaName, cb) {
               "@id" : "${nmRdfLodPrefix}/nmr/dataset/${dsSeq}",
               "@type" : "schema:Dataset",
               "schema:distribution" : [ {"@id" : "${nmRdfLodPrefix}/nmr/xml/${xmlTitle}"} ]
-            }            
+            }
           ]
         }
       }
@@ -1814,7 +1813,7 @@ app.get('/templates/versions/select/all', function (req, res) {
 
 app.get('/templates/versions/select/allactive', function (req, res) {
   let jsonResp = {'error': null, 'data': null}
-  getLatestSchemas(XsdVersionSchema, logger)
+  getLatestSchemas(XsdVersionSchema, XsdSchema, logger)
     .then(function (schemas) { // schemas[0].currentRef[0] is latest schema
       if (schemas && schemas.length > 0) {
         jsonResp.data = schemas
@@ -2392,40 +2391,17 @@ app.post('/dataset/create', function (req, res) {
   // TODO dataset also needs a unique index on DOI to ensure that DOIs are not dup'd
   let jsonResp = {'error': null, 'data': null}
   let dsInfo = req.body.dsInfo
-  Datasets.find({}).sort({'seq': 1}).exec(function (err, docs) {
-    if (err) {
-      jsonResp.error = err
-      return res.status(500).json(jsonResp)
-    } else {
-      let last = -1
-      let newSeq = -1
-      let done = false
-      docs.forEach(function (v) {
-        if (!done) {
-          if (v.seq > (last + 1) && last >= 101) {
-            newSeq = last + 1
-            done = true
-          }
-          last = v.seq
-        }
-      })
-      if (!done) {
-        newSeq = last + 1
-      }
-      console.log('newSeq: ' + newSeq)
-      jsonResp.data = {'seq': newSeq}
-      dsInfo.seq = newSeq
-      Datasets.create(dsInfo, function (err, doc) {
-        if (err) {
-          jsonResp.error = err
-          return res.status(500).json(jsonResp)
-        } else {
-          jsonResp.data = doc
-          return res.status(201).json(jsonResp)
-        }
-      })
-    }
-  })
+  createDataset(Datasets, logger, dsInfo)
+    .then(function (result) {
+      jsonResp.error = null
+      jsonResp.data = result.data
+      return res.status(result.statusCode).json(jsonResp)
+    })
+    .catch(function (err) {
+      jsonResp.error = err.error
+      jsonResp.data = err.data
+      return res.status(err.statusCode).json(jsonResp)
+    })
 })
 /* END -- rest services related to XMLs, Schemas and datasets */
 
@@ -2656,16 +2632,23 @@ function updateJobStatus (statusFilePath, newStatus) {
     'update_dttm': Date()
   }
   try {
-    fs.writeFile(statusFileName, JSON.stringify(statusObj), {'encoding': 'utf8'}, function (err) {
+    fs.truncate(statusFileName, function (err) {
       if (err) {
-        logger.error('error creating job_status file: ' + statusFileName + ' err: ' + err)
-      } else {
-        logger.info('updated job status file: ' + statusFileName + ' new status: ' + JSON.stringify(statusObj))
+        logger.error('unable to truncate job status file: ' + statusFileName)
       }
-    }) // if it fails, it's OK
+      // even if truncate fails, write the file
+      fs.writeFile(statusFileName, JSON.stringify(statusObj), {'encoding': 'utf8'}, function (err) {
+        if (err) {
+          logger.error('error creating job_status file: ' + statusFileName + ' err: ' + err)
+        } else {
+          logger.info('updated job status file: ' + statusFileName + ' new status: ' + JSON.stringify(statusObj))
+        }
+      }) // if it fails, it's OK
+    })
   } catch (err) {
     logger.error('try/catch driven for updating job status: ' + statusFileName + ' err: ' + err)
   }
+
 }
 
 function jobCreate (jobType, jobParams) {
@@ -2899,9 +2882,11 @@ function jobSubmit (jobId, jobType, userToken) {
                   let pgmpath = pathModule.join(cwd, pgmdir)
                   pgm = pathModule.join(pgmpath, pgm)
                   logger.info('executing: ' + pgm + ' in: ' + pgmpath)
-                  let localEnv = {'PYTHONPATH': pathModule.join(cwd, '../src/jobs/lib')}
-                  localEnv = _.merge(localEnv, process.env)
-                  logger.debug(func + ' - running job ' + jobId + ' with env path = ' + localEnv['PATH'])
+                  let path = process.env['PATH'] + ':/apps/n/bin'
+                  let localEnv = {'PYTHONPATH': pathModule.join(cwd, '../src/jobs/lib'), 'NODE_PATH': '/apps/nanomine/rest/node_modules', 'PATH': path}
+                  localEnv = _.merge(process.env, localEnv)
+                  logger.debug(func + ' - running job ' + jobId + ' with env path = ' + localEnv['PATH'] +
+                      ' PYTHONPATH = ' + localEnv['PYTHONPATH'] + '' + ' NODE_PATH: ' + localEnv['NODE_PATH'])
                   let child = require('child_process').spawn(pgm, [jobType, jobId, jobDir], {
                     'cwd': pgmpath,
                     'env': localEnv
@@ -2914,8 +2899,17 @@ function jobSubmit (jobId, jobType, userToken) {
                   child.stderr.on('data', (data) => {
                     logger.error('job ' + jobId + ' e: ' + data)
                   })
+                  child.on('error', (err) => {
+                    logger.error('failed to start job' + jobId + ' Error: ' + err)
+                    updateJobStatus(jobDir, {'status': 'failed to execute', 'error': err})
+                  })
                   child.on('close', (data) => {
                     logger.info('job ' + jobId + ' exited with code: ' + data)
+                    updateJobStatus(jobDir, {'status': 'completed', 'rc': data})
+                  })
+                  child.on('exit', (data) => {
+                    logger.info('job ' + jobId + ' exited with code: ' + data)
+                    updateJobStatus(jobDir, {'status': 'completed', 'rc': data})
                   })
                   resolve({'jobPid': jobPid})
                 } else {
@@ -2949,6 +2943,7 @@ function jobSubmit (jobId, jobType, userToken) {
 }
 
 app.post('/jobsubmit', function (req, res) {
+  let func = '/jobsubmit'
   let jsonResp = {'error': null, 'data': null}
   let jobId = req.body.jobId
   let jobType = req.body.jobType
@@ -2963,6 +2958,7 @@ app.post('/jobsubmit', function (req, res) {
     })
     .catch(function (err) {
       jsonResp.error = err
+      logger.error(func + ' - returning error: ' + jsonResp.error)
       return res.status(500).json(jsonResp)
     })
 })
@@ -3126,7 +3122,7 @@ app.post('/contact', function (req, res, next) { // bearer auth
       \nuser surName: ${userSurName}
       \nuser fullName: ${userDisplayName}
       \ncontact type: ${contactType}
-      \ntext: ${contactText} 
+      \ntext: ${contactText}
       `
   let emailHtml = emailText.replace(/[\n]/g, '<br/>')
   if (sendEmails) {

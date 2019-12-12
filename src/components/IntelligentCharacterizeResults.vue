@@ -10,11 +10,50 @@
     <h1>{{msg}}</h1>
     <v-container>
       <v-layout>
-        <v-flex xs6>
+        <v-flex xs12 sm6>
           <h4>Uploaded Image</h4>
           <img :src="getInputImage()"/>
           {{inputImage}}
           <p></p>
+        </v-flex>
+        <v-flex xs12 sm9>
+          <h4>Intelligent Characterization Results</h4> <!-- comment -->
+          <v-flex d-inline-block xs2 sm1></v-flex>
+          <v-flex d-inline-block xs8 sm8>
+            <p></p>
+            <v-list two-line subheader>
+              <!--v-subheader>Details</v-subheader-->
+              <v-list-tile avatar>
+                <v-list-tile-content>
+                  <v-list-tile-title>Volume fraction</v-list-tile-title>
+                  <v-list-tile-sub-title>{{vf}}</v-list-tile-sub-title>
+                </v-list-tile-content>
+              </v-list-tile>
+              <v-list-tile avatar>
+                <v-list-tile-content>
+                  <v-list-tile-title>Interfacial Area</v-list-tile-title>
+                  <v-list-tile-sub-title>{{intf_area}}</v-list-tile-sub-title>
+                </v-list-tile-content>
+              </v-list-tile>
+              <v-list-tile avatar>
+                <v-list-tile-content>
+                  <v-list-tile-title>Selected Characterization Method</v-list-tile-title>
+                  <v-list-tile-sub-title> {{charac}}</v-list-tile-sub-title>
+                </v-list-tile-content>
+              </v-list-tile>
+              <v-list-tile avatar>
+                <v-list-tile-content>
+                  <v-list-tile-title>Isotropy Index (1 is perfect isotropy)</v-list-tile-title>
+                  <v-list-tile-sub-title>{{isotropy}}</v-list-tile-sub-title>
+                </v-list-tile-content>
+              </v-list-tile>
+            </v-list>
+            <v-list-tile avatar>
+              <v-list-tile-content>
+                <v-list-tile-title>More details of microstructure characterization parameters</v-list-tile-title>
+                <v-list-tile-title>can be found in the downloadable file below.</v-list-tile-title>
+              </v-list-tile-content>
+          </v-flex>
         </v-flex>
       </v-layout>
       <v-layout>
@@ -37,7 +76,7 @@
 /* eslint-disable indent */
 
 import Axios from 'axios'
-  import {} from 'vuex'
+import {} from 'vuex'
 
 export default {
   name: 'IntelligentCharacterizeResults',
@@ -47,11 +86,22 @@ export default {
       resultsError: false,
       resultsErrorMsg: '',
       inputFileName: '',
-      zipFileName: ''
+      zipFileName: '',
+      vf: '',
+      intf_area: '',
+      isotropy: '',
+      charac: ''
     })
   },
   mounted: function () {
-    this.getJobOutputParams()
+    let vm = this
+    vm.getJobOutputParams()
+      .then(function () {
+        vm.getOutputResultJson() // added *************************************
+      })
+      .catch(function (err) {
+        console.log(err)
+      })
   },
   methods: {
     setLoading: function () {
@@ -70,23 +120,49 @@ export default {
     },
     getJobOutputParams: function () {
       let vm = this
-      let url = vm.$route.query.refuri + '/job_output_parameters.json'
+      return new Promise(function (resolve, reject) {
+        let url = vm.$route.query.refuri + '/job_output_parameters.json'
+        vm.setLoading()
+        return Axios.get(url)
+          .then(function (response) {
+            console.log(response.data)
+            let myOutputParams = response.data // Axios did the JSON parse for us
+            vm.inputFileName = myOutputParams.inputFileName
+            vm.zipFileName = myOutputParams.zipFileName
+            vm.resetLoading()
+            resolve()
+          })
+          .catch(function (err) {
+            console.log(err)
+            vm.resultsrErrorMsg = err.message
+            vm.resultsError = true
+            vm.resetLoading()
+            reject(new Error('Error getting Job Output Parameters'))
+          })
+      })
+    },
+    getOutputResultJson: function () { // *************************************
+      let vm = this
+      let url = vm.$route.query.refuri + '/output/result_json.json'
       vm.setLoading()
       return Axios.get(url)
         .then(function (response) {
           console.log(response.data)
-          let myOutputParams = response.data // Axios did the JSON parse for us
-          vm.inputFileName = myOutputParams.inputFileName
-          vm.zipFileName = myOutputParams.zipFileName
+          let myOutputResult = response.data // Axios did the JSON parse for us
+          console.log(myOutputResult)
+          vm.vf = myOutputResult.universal.vf // should i have two dots ? or directly call myOutputResult.vf?
+          vm.intf_area = myOutputResult.universal.intf_area
+          vm.isotropy = myOutputResult.universal.isotropy
+          vm.charac = myOutputResult.charac
           vm.resetLoading()
         })
         .catch(function (err) {
           console.log(err)
-          vm.resultsrErrorMsg = err
+          vm.resultsErrorMsg = 'Error loading result_json.json. ' + err
           vm.resultsError = true
           vm.resetLoading()
         })
-    }
+    } // ********************************************************************************
   }
 }
 </script>

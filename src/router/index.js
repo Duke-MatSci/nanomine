@@ -12,6 +12,7 @@ import XMLCONV from '@/components/XMLCONV'
 import McrHomepage from '@/components/McrHomepage'
 import BinarizeHomepage from '@/components/BinarizeHomepage'
 import Otsu from '@/components/Otsu'
+import NanoTutorials from '@/components/nanomine/NanoTutorials'
 import OtsuResult from '@/components/OtsuResult'
 import Niblack from '@/components/Niblack'
 import CharacterizeHomepage from '@/components/CharacterizeHomepage'
@@ -23,6 +24,7 @@ import CorrelationReconstruct from '@/components/CorrelationReconstruct'
 import SDFReconstruct from '@/components/SDFReconstruct'
 import DescriptorReconstruct from '@/components/DescriptorReconstruct'
 import IntelligentCharacterize from '@/components/IntelligentCharacterize'
+import IntelligentCharacterizeResults from '@/components/IntelligentCharacterizeResults'
 // import Visualization from '@/components/Visualization'
 import SDFCharacterizeResults from '@/components/SDFCharacterizeResults'
 import DescriptorCharacterizeResults from '@/components/DescriptorCharacterizeResults'
@@ -36,7 +38,8 @@ import Dynamfit from '@/components/Dynamfit'
 import DynamfitExample from '@/components/DynamfitExample'
 import DynamfitExampleInput from '@/components/DynamfitExampleInput'
 import DynamfitResult from '@/components/DynamfitResult'
-import IntelligentCharacterizeResults from '@/components/IntelligentCharacterizeResults'
+import ChemProps from '@/components/ChemProps'
+// DISABLED FOR NOW import XmlUploader from '@/components/XmlUploader'
 
 Vue.use(Router)
 
@@ -104,6 +107,11 @@ export default new Router({
       path: '/binarization_homepage',
       name: 'BinarizeHomepage',
       component: BinarizeHomepage
+    },
+    {
+      path: '/nanomine/tutorials',
+      name: 'NanoTutorials',
+      component: NanoTutorials
     },
     {
       path: '/Otsu',
@@ -237,6 +245,16 @@ export default new Router({
       path: '/DynamfitResult',
       name: 'DynamfitResult',
       component: DynamfitResult
-    }
+    },
+    {
+      path: '/ChemProps',
+      name: 'ChemProps',
+      component: ChemProps
+    } // ,
+    // DISABLED FOR NOW {
+    //   path: '/XmlUploader',
+    //   name: 'XmlUploader',
+    //   component: XmlUploader
+    // }
   ]
 })

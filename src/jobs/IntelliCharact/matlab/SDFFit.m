@@ -43,8 +43,8 @@ switch best_method
     case 1
         fit_result('func_type') = 'Chi2';
         fit_result('parameters') = [chi2fit.a, chi2fit.b, chi2fit.n];
-        fit_result('func_def') = 'PARAM1 * chi2pdf(PARAM2 * X, PARAM3)';
-        fit_result('remarks') = 'PARAM 1 - peak height; 2,3 - curve shape';
+        fit_result('func_def') = '"PARAM1 * chi2pdf(PARAM2 * X, PARAM3)"';
+        fit_result('remarks') = '"PARAM 1 - peak height; 2,3 - curve shape"';
         if show
             plot(xdata, func_chi2(chi2fit.a, chi2fit.b, chi2fit.n, xdata), '--', 'LineWidth', 1.5)
             title('\chi^2 distribution fit', 'FontSize', 18)
@@ -52,8 +52,8 @@ switch best_method
     case 2
         fit_result('func_type') = 'Gamma';
         fit_result('parameters') = [gamfit.a, gamfit.b, gamfit.c, gamfit.d];
-        fit_result('func_def') = 'PARAM3 * gampdf(X - PARAM4, PARAM1, PARAM2)';
-        fit_result('remarks') = 'PARAM 3 - peak height; 4 - peak shift; 1,2 - curve shape';
+        fit_result('func_def') = '"PARAM3 * gampdf(X - PARAM4, PARAM1, PARAM2)"';
+        fit_result('remarks') = '"PARAM 3 - peak height; 4 - peak shift; 1,2 - curve shape"';
         if show
             plot(xdata, func_gam(gamfit.a, gamfit.b, gamfit.c, gamfit.d, xdata), '--', 'LineWidth', 1.5)
             title('\Gamma distribution fit', 'FontSize', 18)
@@ -90,7 +90,7 @@ switch best_method
         fit_result('parameters') = [twopkfit.a1, twopkfit.a2, twopkfit.b1, twopkfit.b2, ...
             twopkfit.c1, twopkfit.c2];
         fit_result('func_def') = 'PARAM1 * exp(-PARAM3 * (X - PARAM5) ^ 2) + PARAM2 * exp(-PARAM4 * (X - PARAM6) ^ 2)';
-        fit_result('remarks') = 'PARAM 1,2 - peak height; 3,4 - peak width; 5,6 - peak shift';
+        fit_result('remarks') = '"PARAM 1,2 - peak height; 3,4 - peak width; 5,6 - peak shift"';
         if show
             plot(xdata, func_2peaks(twopkfit.a1, twopkfit.a2, twopkfit.b1, twopkfit.b2, twopkfit.c1, twopkfit.c2, xdata),...
                 '--', 'LineWidth', 1.5)
