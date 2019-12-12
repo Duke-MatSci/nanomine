@@ -33,8 +33,60 @@
           </v-card-title>
           <span v-show="showAdmin">
           <div class="sect-divider"></div>
-          <h5>Become User...</h5>
-          <v-data-table
+          <h5 class="text-xs-left">
+           <v-btn
+             small left flat light
+             color="primary"
+             class="white--text"
+             @click="toggleShowSchemaMgt()"
+           >
+           <v-icon light v-if="showSchemaMgt">expand_more</v-icon>
+           <v-icon light v-else>expand_less</v-icon>
+           </v-btn>Schema Management ...</h5>
+            <v-alert
+              v-model="schemaSuccess"
+              type="success"
+              dismissible
+            >
+            {{schemaSuccessMsg}}
+            </v-alert>
+            <v-alert
+              v-model="schemaError"
+              type="error"
+              dismissible
+            >
+            {{schemaErrorMsg}}
+            </v-alert>
+            <v-layout row wrap justify-center v-if="showSchemaMgt">
+              <v-card flat>
+                <v-card-text class="title font-weight-light">Upload Schema</v-card-text>
+                <v-divider/>
+                <v-btn class="text-xs-left" small color="primary" @click='selectSchemaFile'>Browse</v-btn>
+                <input
+                  type="file"
+                  style="display: none"
+                  accept=".xsd"
+                  ref="schemaFileRef"
+                  @change="onSchemaSelected"
+                >
+                <v-btn v-if="schemaFileName && schemaFileName.length > 0" class="text-xs-left" small color="primary"
+                       @click="doSchemaUpload()">Upload</v-btn>
+
+                <v-card-text v-if="schemaFileName && schemaFileName.length > 0" class="body">Selected: {{schemaFileName}}</v-card-text>
+              </v-card>
+            </v-layout>
+          <div class="sect-divider"></div>
+          <h5 class="text-xs-left">
+            <v-btn
+              small left flat light
+              color="primary"
+              class="white--text"
+              @click="toggleShowBecomeUser()"
+            >
+           <v-icon light v-if="showBecomeUser">expand_more</v-icon>
+           <v-icon light v-else>expand_less</v-icon>
+           </v-btn>Become User ...</h5>
+          <v-data-table v-if="showBecomeUser"
             v-model="userselected"
             :headers="userheaders"
             :items="users"
@@ -88,6 +140,21 @@
           </p>
         </v-card>
         <div class="sect-divider"></div>
+        <!--
+           Select schema
+        -->
+        <v-card style="width:100%">
+          <v-card-title class="dataset-header"><span style="width:40%;" class="text-xs-left">
+          <v-combobox single-line dense
+            v-model="selectedSchemaTitle"
+            @change="onSchemaComboChanged()"
+            :items="schemaTitles"
+            label="Using latest schema - click to change"
+            default="{{firstSchemaTitle}}"
+          ></v-combobox>
+          </span>
+          </v-card-title>
+        </v-card>
         <!--
 
            Dataset Selection
@@ -156,21 +223,21 @@
         <v-card style="width:100%;" v-show="datasetSelected !== null">
           <v-card-title class="samples-header"><span style="width:50%;" class="text-xs-left">
             <v-btn
-            fab small
-            color="primary"
-            class="white--text"
-            @click="toggleSamplesHide"
-          >
+              fab small
+              color="primary"
+              class="white--text"
+              @click="toggleSamplesHide"
+            >
             <v-icon light v-if="!samplesHideSelector">expand_more</v-icon>
             <v-icon light v-else>expand_less</v-icon>
 
            </v-btn>Samples</span>
-           <span class="text-xs-right" style="width:50%;" v-show="sampleSelected !== null">
-             <v-btn  v-if="sampleFileinfo.length > 0"
-               fab small
-               color="primary"
-               class="white--text"
-               @click="sampleFilesDialogActive = true"
+            <span class="text-xs-right" style="width:50%;" v-show="sampleSelected !== null">
+             <v-btn v-if="sampleFileinfo.length > 0"
+                    fab small
+                    color="primary"
+                    class="white--text"
+                    @click="sampleFilesDialogActive = true"
              >
              <v-icon light>cloud_download</v-icon>
              </v-btn>
@@ -217,7 +284,7 @@
             </v-alert>
           </v-data-table>
         </v-card>
-        <v-card  style="width:100%;" v-show="sampleSelected !== null">
+        <v-card style="width:100%;" v-show="sampleSelected !== null">
           <v-container v-bind:style="{'display': formInView}" fluid justify-start fill-height>
             <v-layout row wrap align-start fill-height>
               <v-flex fill-height xs12 align-start justify-start>
@@ -312,7 +379,21 @@ export default {
       showAdmin: false,
       myPageError: false,
       myPageErrorMsg: '',
+      // Schema mgt
+      showSchemaMgt: false,
+      schemaFileText: '',
+      schemaFileName: '',
+      schemaError: false,
+      schemaErrorMsg: '',
+      schemaSuccess: false,
+      schemaSuccessMsg: '',
+      // schemas
+      firstSchemaTitle: 'first',
+      selectedSchemaId: '',
+      selectedSchemaTitle: '',
+      schemas: [],
       // Users
+      showBecomeUser: false,
       userall: true,
       userpagination: {
         sortBy: 'userid'
@@ -394,6 +475,20 @@ export default {
           vm.myPageErrorMsg = 'fetching users: ' + err
         })
     }
+    Axios.get('/nmr/templates/versions/select/allactive')
+      .then(function (resp) {
+        resp.data.data.forEach(function (v) {
+          let schemaId = v.currentRef[0]._id
+          let title = v.currentRef[0].title
+          vm.schemas.push({'schemaId': schemaId, 'title': title})
+          console.log('schemaId: ' + schemaId + ' title: ' + title)
+        })
+        vm.SelectedSchemaTitle = vm.schemas[0].title
+        vm.SelectedSchemaId = vm.schemas[0].schemaId
+      })
+      .catch(function (err) {
+        console.log('error getting schemas: ' + err)
+      })
     Axios.get('/nmr/dataset')
       .then(function (resp) {
         resp.data.data.forEach(function (v) {
@@ -408,6 +503,15 @@ export default {
       })
   },
   computed: {
+    // schemas
+    schemaTitles () {
+      let titles = []
+      let vm = this
+      vm.schemas.forEach((v) => {
+        titles.push(v.title)
+      })
+      return titles
+    },
     // datasets
     headerDOI: function () {
       let rv = null
@@ -443,6 +547,94 @@ export default {
     }
   },
   methods: {
+    setSchemaError (msg) {
+      let vm = this
+      vm.schemaError = true
+      vm.schemaErrorMsg = msg
+    },
+    resetSchemaError () {
+      let vm = this
+      vm.schemaError = false
+      vm.schemErrorMsg = ''
+    },
+    setSchemaSuccess (msg) {
+      let vm = this
+      vm.schemaSuccess = true
+      vm.schemaSuccessMsg = msg
+    },
+    resetSchemaSuccess () {
+      let vm = this
+      vm.schemaSuccessMsg = ''
+      vm.schemaSuccess = false
+    },
+    doSchemaUpload () {
+      let vm = this
+      let data = {
+        filename: vm.schemaFileName,
+        xsd: vm.schemaFileText
+      }
+      Axios.post('/nmr/schema', data)
+        .then(function (resp) {
+          console.log(resp.data)
+          vm.resetSchemaError()
+          vm.setSchemaSuccess(vm.schemaFileName + ' uploaded successfully.')
+          vm.schemaFileName = ''
+          vm.schemaFileText = ''
+        })
+        .catch(function (err) {
+          vm.resetSchemaSuccess()
+          vm.setSchemaError('' + err + ' : ' + err.response.data.error)
+          vm.schemaSuccess = false
+        })
+    },
+    selectSchemaFile () {
+      let vm = this
+      vm.resetSelectedSchema()
+      vm.resetSchemaError()
+      vm.resetSchemaSuccess()
+      vm.$refs.schemaFileRef.click()
+    },
+    resetSelectedSchema: function () {
+      let vm = this
+      vm.schemaFileText = ''
+      vm.schemaFileName = ''
+    },
+    onSchemaComboChanged (evdata) { // select current schema changed
+      let vm = this
+      vm.selectedSchemaId = vm.schemas[0].schemaId
+      if (!vm.selectedSchemaTitle || vm.selectedSchemaTitle === '') {
+        vm.selectedSchemaTitle = vm.schemas[0].title
+      }
+      let selected = -1
+      vm.schemas.forEach((v, idx) => {
+        if (v.title === vm.selectedSchemaTitle) {
+          selected = idx
+          vm.selectedSchemaId = v.schemaId
+        }
+      })
+      if (selected === -1) {
+        vm.selectedSchemaTitle = vm.schemas[0].title
+        vm.selectedSchemaId = vm.schemas[0].schemaId
+      }
+      console.log('selected schema schemaId: ' + vm.selectedSchemaId + ' title: ' + vm.selectedSchemaTitle)
+    },
+    onSchemaSelected (e) { // schema upload
+      let vm = this
+      vm.resetSelectedSchema()
+      const files = e.target.files
+      let f = files[0]
+      if (f !== undefined) {
+        vm.schemaFileName = f.name
+        const fr = new FileReader()
+        fr.readAsText(f)
+        fr.addEventListener('load', () => {
+          vm.schemaFileText = fr.result
+          console.log(vm.schemaFileText)
+        })
+      } else {
+        this.resetSelectedSchema()
+      }
+    },
     isLoggedIn: function () {
       let vm = this
       return vm.auth.isLoggedIn()
@@ -454,6 +646,14 @@ export default {
     toggleShowAdmin: function () {
       let vm = this
       vm.showAdmin = !vm.showAdmin
+    },
+    toggleShowSchemaMgt: function () {
+      let vm = this
+      vm.showSchemaMgt = !vm.showSchemaMgt
+    },
+    toggleShowBecomeUser: function () {
+      let vm = this
+      vm.showBecomeUser = !vm.showBecomeUser
     },
     isAdmin: function () {
       let vm = this
@@ -522,8 +722,11 @@ export default {
       vm.samplesHideSelector = false
       vm.sampleSelected = null
       vm.sampleFileinfo = []
+      vm.sampleList = []
       vm.setLoading()
-      Axios.get('/nmr/xml?dataset=' + entry.seq)
+      vm.myPageError = false
+      vm.myPageErrorMsg = ''
+      Axios.get('/nmr/xml?dataset=' + entry.seq + '&schemaid=' + vm.selectedSchemaId)
         .then(function (data) {
           // console.log(data.data.data)
           vm.sampleList = data.data.data // Just had to...
@@ -706,9 +909,11 @@ export default {
     background-color: black;
     color: white;
   }
+
   p {
     margin-bottom: 2px;
   }
+
   .warn-red {
     background-color: red;
     color: white;
@@ -718,13 +923,20 @@ export default {
   .sect-divider {
     height: 5px;
     background-color: #2ff2ff;
-    padding-top:2px;
-    padding-bottom:2px;
-    width:100%;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    width: 100%;
   }
 
   .admin-header {
     background-color: #03A9F4;
+    color: #ffffff;
+    font-size: 22px;
+    font-weight: bold;
+  }
+  .select-schema-header {
+    background-color: #03A9F4;
+    height: 30px;
     color: #ffffff;
     font-size: 22px;
     font-weight: bold;
@@ -743,12 +955,14 @@ export default {
     font-size: 22px;
     font-weight: bold;
   }
+
   .sample-file-download-header {
     background-color: #03A9F4;
     color: #ffffff;
     font-size: 22px;
     font-weight: bold;
   }
+
   .download-footer {
     background-color: #03A9F4;
     color: #000000;

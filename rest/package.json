@@ -23,6 +23,7 @@
     "express-jwt-permissions": "^1.2.3",
     "express-unless": "^0.5.0",
     "form-data": "^2.3.2",
+    "hasha": "^5.0.0",
     "he": "^1.2.0",
     "image-data-uri": "^2.0.0",
     "jsonfile": "^4.0.0",
