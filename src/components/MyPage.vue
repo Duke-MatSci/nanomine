@@ -299,7 +299,7 @@
       </v-layout>
       <!--
 
-         Sample Files Dialog
+         Result Files Dialog
 
       -->
       <v-layout row justify-center>
@@ -475,31 +475,24 @@ export default {
           vm.myPageErrorMsg = 'fetching users: ' + err
         })
     }
-    Axios.get('/nmr/templates/versions/select/allactive')
-      .then(function (resp) {
-        resp.data.data.forEach(function (v) {
-          let schemaId = v.currentRef[0]._id
-          let title = v.currentRef[0].title
-          vm.schemas.push({'schemaId': schemaId, 'title': title})
-          console.log('schemaId: ' + schemaId + ' title: ' + title)
-        })
-        vm.SelectedSchemaTitle = vm.schemas[0].title
-        vm.SelectedSchemaId = vm.schemas[0].schemaId
-      })
-      .catch(function (err) {
-        console.log('error getting schemas: ' + err)
-      })
-    Axios.get('/nmr/dataset')
-      .then(function (resp) {
-        resp.data.data.forEach(function (v) {
-          if (v.latestSchema) {
-            vm.datasetList.push(v)
-          }
-        })
+    vm.getActiveSchemas()
+      .then(function () {
+        Axios.get('/nmr/dataset')
+          .then(function (resp) {
+            resp.data.data.forEach(function (v) {
+              if (v.latestSchema) {
+                vm.datasetList.push(v)
+              }
+            })
+          })
+          .catch(function (err) {
+            vm.myPageError = true
+            vm.myPageErrorMsg = 'fetching datasets: ' + err
+          })
       })
       .catch(function (err) {
         vm.myPageError = true
-        vm.myPageErrorMsg = 'fetching datasets: ' + err
+        vm.myPageErrorMsg = 'fetching schemas: ' + err
       })
   },
   computed: {
@@ -567,6 +560,28 @@ export default {
       vm.schemaSuccessMsg = ''
       vm.schemaSuccess = false
     },
+    getActiveSchemas () {
+      let vm = this
+      return new Promise(function (resolve, reject) {
+        Axios.get('/nmr/templates/versions/select/allactive')
+          .then(function (resp) {
+            vm.schemas = []
+            resp.data.data.forEach(function (v) {
+              let schemaId = v.currentRef[0]._id
+              let title = v.currentRef[0].title
+              vm.schemas.push({'schemaId': schemaId, 'title': title})
+              console.log('schemaId: ' + schemaId + ' title: ' + title)
+            })
+            vm.SelectedSchemaTitle = vm.schemas[0].title
+            vm.SelectedSchemaId = vm.schemas[0].schemaId
+            resolve()
+          })
+          .catch(function (err) {
+            console.log('error getting schemas: ' + err)
+            reject(err)
+          })
+      })
+    },
     doSchemaUpload () {
       let vm = this
       let data = {
@@ -580,6 +595,14 @@ export default {
           vm.setSchemaSuccess(vm.schemaFileName + ' uploaded successfully.')
           vm.schemaFileName = ''
           vm.schemaFileText = ''
+          vm.getActiveSchemas()
+            .then(function () {
+              console.log('re-read schemas successfully.')
+            })
+            .catch(function (err) {
+              vm.myPageError = true
+              vm.myPageErrorMsg = 'loading schemas: ' + err
+            })
         })
         .catch(function (err) {
           vm.resetSchemaSuccess()
