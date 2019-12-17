@@ -1,6 +1,7 @@
 
 module.exports = function (mongoose) {
   let datasetsSchema = new mongoose.Schema({
+    schemaId: String, /* differentiate datasets by schema id as well as sequence */
     citationType: String, /* study, book, article, paper -- fixed set -- required field */
     publication: String, /* Journal name, book name, etc */
     title: String, /* Name of study, book, article, paper, etc -- required field */

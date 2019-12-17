@@ -97,8 +97,14 @@ function matchValidXmlTitle (title) {
   return rv
 }
 
-function getDatasetXmlFileList (mongoose, logger, xmlTitle) {
-  let func = 'getDatasetXmlFileList'
+function getDatasetXmlFileList (mongoose, logger, xmlTitle, schemaId) {
+  let func = getDatasetXmlFileList
+  logger.info(func + ' is deprecated.')
+  return getXmlFileList(mongoose, logger, xmlTitle, schemaId)
+}
+
+function getXmlFileList (mongoose, logger, xmlTitle, schemaId) {
+  let func = 'getXmlFileList'
   let bucketName = datasetBucketName
   let validTitle = matchValidXmlTitle(xmlTitle)
   let options = {
@@ -108,8 +114,8 @@ function getDatasetXmlFileList (mongoose, logger, xmlTitle) {
     const bucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, options)
     let files = []
     if (validTitle) {
-      let dsId = validTitle[1]
-      let findParam = {filename: {$regex: dsId + '[/]' + xmlTitle.replace(/\.xml$/, '') + '[/].*'}}
+      // let dsId = validTitle[1]
+      let findParam = {filename: {$regex: schemaId + '[/]' + xmlTitle.replace(/\.xml$/, '') + '[/].*'}}
       logger.debug(func + ' looking for files like: ' + JSON.stringify(findParam))
       bucket.find(findParam).sort({uploadDate: -1, filename: 1})
         .on('data', (data) => {
@@ -208,53 +214,98 @@ function updateOrCreateXmlData (xmlData, logger, creatorId, xmlDoc, schemaId) {
       })
   })
 }
+
+function updateOrCreateDatasetById (Datasets, logger, dsInfo) {
+  // NOTE: requires schemaId and seq for update and create
+  //   If the record exists, it will be updated. If it does not, it will be created as
+  //   opposed to createDataset which always selects a non-used sequence (still requires schemaId).
+  let func = 'utils.updateOrCreateDatasetById'
+  let status = {'statusCode': 201, 'error': null, 'data': null}
+  return new Promise(function (resolve, reject) {
+    Datasets.findOneAndUpdate(
+      {'schemaId': dsInfo.schemaId, 'seq': dsInfo.seq},
+      {$set: dsInfo},
+      {upsert: true}, function (err, result) {
+        if (err) {
+          console.log(func + ' : error - ' + err)
+          status.error = err
+          status.statusCode = 500
+          status.data = null
+          reject(status)
+        } else {
+          console.log('datataset/update: success - old document is: ' + JSON.stringify(result))
+          let doc = result // promise based result only returns old document and for create it's null
+          if (doc) {
+            status.statusCode = 200
+          } else {
+            status.statusCode = 201
+          }
+          status.error = null
+          status.data = dsInfo // return input doc to be compatible with return from createDataset
+          resolve(status)
+        }
+      })
+  })
+}
 function createDataset (Datasets, logger, dsInfo) { // creates the dataset using the dsInfo, new seq is returned with updated dsInfo in result.data
   let func = 'utils.createDataset'
-  // NOTE: if clustered, there's a race condition on setting the sequence number - should use some kind of db auto increment sequence
+  // todo : if clustered, there's a race condition on setting the sequence number - should use some kind of db auto increment sequence
   return new Promise(function (resolve, reject) {
     let status = {'statusCode': 201, 'error': null, 'data': null}
-    Datasets.find({}).sort({'seq': 1}).exec(function (err, docs) {
-      if (err) {
-        logger.error(func + ' - datasets find error: ' + err)
-        status.error = err
-        status.statusCode = 500
-        status.data = null
-        reject(status)
-      } else {
-        let last = -1
-        let newSeq = -1
-        let done = false
-        docs.forEach(function (v) {
-          if (!done) {
-            if (v.seq > (last + 1) && last >= 101) {
-              newSeq = last + 1
-              done = true
+    if (dsInfo && dsInfo.schemaId) {
+      Datasets.find({'schemaId': {$eq: dsInfo.schemaId}}).sort({'seq': 1}).exec(function (err, docs) {
+        if (err) {
+          logger.error(func + ' - datasets find error: ' + err)
+          status.error = err
+          status.statusCode = 500
+          status.data = null
+          reject(status)
+        } else {
+          let last = -1
+          let newSeq = -1
+          let done = false
+          docs.forEach(function (v) {
+            if (!done) {
+              if (v.seq > (last + 1) && last >= 101) {
+                newSeq = last + 1
+                done = true
+              }
+              last = v.seq
             }
-            last = v.seq
+          })
+          if (!done) {
+            newSeq = last + 1
+            if (newSeq <= 0) {
+              newSeq = 101
+            }
           }
-        })
-        if (!done) {
-          newSeq = last + 1
+          dsInfo.seq = newSeq
+          logger.debug(func + ' - newSeq: ' + newSeq + ' dsInfo: ' + inspect(dsInfo))
+          Datasets.create(dsInfo, function (err, doc) {
+            if (err) {
+              logger.error(func + ' - datasets create error: ' + err)
+              status.error = err
+              status.data = null
+              status.statusCode = 500
+              reject(status)
+            } else {
+              status.error = null
+              status.data = doc
+              status.statusCode = 201
+              logger.debug(func + ' - dataset created successfully. Sequence is: ' + dsInfo.seq)
+              resolve(status)
+            }
+          })
         }
-        dsInfo.seq = newSeq
-        logger.debug(func + ' - newSeq: ' + newSeq + ' dsInfo: ' + inspect(dsInfo))
-        Datasets.create(dsInfo, function (err, doc) {
-          if (err) {
-            logger.error(func + ' - datasets create error: ' + err)
-            status.error = err
-            status.data = null
-            status.statusCode = 500
-            reject(status)
-          } else {
-            status.error = null
-            status.data = doc
-            status.statusCode = 201
-            logger.debug(func + ' - dataset created successfully. Sequence is: ' + dsInfo.seq)
-            resolve(status)
-          }
-        })
-      }
-    })
+      })
+    } else {
+      let err = 'schemaId must be supplied as part of dataset structure.'
+      logger.error(func + ' - datasets create error: ' + err)
+      status.error = err
+      status.data = null
+      status.statusCode = 400
+      reject(status)
+    }
   })
 }
 
@@ -332,38 +383,40 @@ function getLatestSchemas (xsdVersionSchema, xsdSchema, logger) { // duplicate o
   })
 }
 function mergeDatasetInfoFromXml (logger, datasetInfo, xmlDocument) {
+  // Caller should parse the XML into a document before calling this function
+
   // NOTE: this code does not yet pull out all the fields of the XMLs needed.  It's specific to one set of
   //    data for which upload was needed quickly and the data was unpublished.
   //    TODO fix this code so that it pull out all the needed dataset information
   // checks xml for dataset information in DATA_SOURCE and merges into datasetInfo provided if the source field
   // exists and is not empty/null
-  // 'citationType': ds.CitationType,
-  //   'publication': ds.Publication,
-  //   'title': ds.Title,
+  // currently 21 fields + _id
+  //   'schemaId: ds.schemaId, NOTE: schemaId should already be in datasetInfo when called !!!!!
   //   'author': [],
-  //   'keyword': [],
-  //   'publisher': ds.Publisher,
-  //   'publicationYear': ds.PublicationYear,
-  //   'doi': ds.DOI,
-  //   'relatedDoi': ds.relatedDOI
-  //   'volume': ds.Volume,
-  //   'url': ds.URL,
-  //   'language': ds.Language,
+  //   'citationType': ds.CitationType,
   //   'dateOfCitation': ds.DateOfCitation,
-  //   'location': ds.Location,
-  //   'issue': issue,
-  //   'issn': issn,
-  //   'userid': nanomineUser.userid,
+  //   'doi': ds.DOI,
   //   'isPublic': true, // all of the original datasets are public
   //   'ispublished': true // all of the original datasets came from published papers
-  // Caller should parse the XML document before calling this function
+  //   'issue': issue,
+  //   'issn': issn,
+  //   'keyword': [],
+  //   'language': ds.Language,
+  //   'location': ds.Location,
+  //   'publication': ds.Publication,
+  //   'publisher': ds.Publisher,
+  //   'publicationYear': ds.PublicationYear,
+  //   'relatedDoi': ds.relatedDOI,  // array of related DOIs
+  //   'seq': ds.seq, NOTE: seq should already be in datasetInfo when called or will be assigned
+  //   'title': ds.Title,
+  //   'volume': ds.Volume,
+  //   'url': ds.URL,
+  //   'userid': nanomineUser.userid,
 
-  // get authors and location if available
   let commonFields = xmlDocument.get('//CommonFields')
-  let authors = []
-  let location = null
-  let keyword = []
-  // NOTE: TODO - all of the fields are initialized, but not all are actually set from the XML yet
+  if (!datasetInfo.schemaId) {
+    datasetInfo.schemaId = null
+  }
   if (!datasetInfo.author) {
     datasetInfo.author = []
   }
@@ -376,11 +429,32 @@ function mergeDatasetInfoFromXml (logger, datasetInfo, xmlDocument) {
   if (!datasetInfo.doi) {
     datasetInfo.doi = null
   }
-  if (!datasetInfo.issn) {
-    datasetInfo.issn = null
+  if (!datasetInfo.isPublic) {
+    datasetInfo.isPublic = false
+  }
+  if (!datasetInfo.ispublished) {
+    datasetInfo.ispublished = false
   }
   if (!datasetInfo.issue) {
     datasetInfo.issue = null
+  }
+  if (!datasetInfo.issn) {
+    datasetInfo.issn = null
+  }
+  if (!datasetInfo.chapter) {
+    datasetInfo.chapter = null
+  }
+  if (!datasetInfo.edition) {
+    datasetInfo.edition = null
+  }
+  if (!datasetInfo.editor) {
+    datasetInfo.editor = null
+  }
+  if (!datasetInfo.isbn) {
+    datasetInfo.isbn = null
+  }
+  if (!datasetInfo.keyword) {
+    datasetInfo.keyword = []
   }
   if (!datasetInfo.language) {
     datasetInfo.language = null
@@ -391,12 +465,20 @@ function mergeDatasetInfoFromXml (logger, datasetInfo, xmlDocument) {
   if (!datasetInfo.publication) {
     datasetInfo.publication = null
   }
+  if (!datasetInfo.publisher) {
+    datasetInfo.publisher = null
+  }
   if (!datasetInfo.publicationYear) {
     datasetInfo.publicationYear = null
   }
   if (!datasetInfo.relatedDoi) {
     datasetInfo.relatedDoi = []
   }
+
+  // if (!datasetInfo.seq) { // incoming should always have seq
+  //   datasetInfo.seq = -1
+  // }
+
   if (!datasetInfo.title) {
     datasetInfo.title = null
   }
@@ -406,36 +488,60 @@ function mergeDatasetInfoFromXml (logger, datasetInfo, xmlDocument) {
   if (!datasetInfo.url) {
     datasetInfo.url = null
   }
+  if (!datasetInfo.userid) {
+    datasetInfo.userid = null
+  }
 
-  if (commonFields) {
-    // authors = commonFields.find('Author', {})
-    authors = xmlDocument.find('//Author')
-    logger.debug('authors: ' + JSON.stringify(authors))
-    if (authors && authors.length > 0) {
-      if (Array.isArray(authors)) {
-        authors.forEach((v, idx) => {
-          let author = v.text()
-          if (!datasetInfo.author.includes(author)) {
-            datasetInfo.author.push(author)
-          }
-        })
-      } else { // simple string
-        if (!datasetInfo.author.includes(authors)) {
-          datasetInfo.author.push(authors)
-        }
-      }
-    }
-    location = commonFields.get('//Location')
-    if (location) {
-      if (!datasetInfo.location || datasetInfo.location.length < 1) {
-        let locText = location.text()
-        if (locText && locText.length > 0) {
-          datasetInfo.location = locText
+  function setDsInfoCommonFieldTxt (dsInfo, commonFields, xmlPath, dsFldName) {
+    let fld = commonFields.get(xmlPath)
+    let fldNm = dsFldName
+    if (fld) {
+      if (!dsInfo[fldNm] || dsInfo[fldNm].length < 1) {
+        let txt = fld.text()
+        if (txt && txt.length > 0) {
+          dsInfo[fldNm] = txt
         }
       }
     }
   }
-  let relatedDOI = xmlDocument.find('//relatedDOI')
+  function setDsInfoCommonFieldArray (dsInfo, commonFields, xmlPath, dsFldName) {
+    let fld = commonFields.find(xmlPath)
+    if (fld && fld.length > 0) { // find always returns array
+      fld.forEach((v, idx) => {
+        let txt = v.text()
+        if (!dsInfo[dsFldName].includes(txt)) {
+          dsInfo[dsFldName].push(txt)
+        }
+      })
+    }
+  }
+
+  if (commonFields) {
+    setDsInfoCommonFieldArray(datasetInfo, commonFields, '//Author', 'author')
+
+    setDsInfoCommonFieldTxt(datasetInfo, commonFields, '//CitationType', 'citationType')
+    setDsInfoCommonFieldTxt(datasetInfo, commonFields, '//DateOfCitation', 'dateOfCitation')
+    setDsInfoCommonFieldTxt(datasetInfo, commonFields, '//CitationType/Journal/ISSN', 'issn')
+    setDsInfoCommonFieldTxt(datasetInfo, commonFields, '//CitationType/Journal/Issue', 'issue')
+
+    setDsInfoCommonFieldTxt(datasetInfo, commonFields, '//CitationType/Book/Chapter', 'chapter')
+    setDsInfoCommonFieldTxt(datasetInfo, commonFields, '//CitationType/Book/Edition', 'edition')
+    setDsInfoCommonFieldTxt(datasetInfo, commonFields, '//CitationType/Book/Editor', 'editor')
+    setDsInfoCommonFieldTxt(datasetInfo, commonFields, '//CitationType/Book/ISBN', 'isbn')
+
+    setDsInfoCommonFieldArray(datasetInfo, commonFields, '//Keyword', 'keyword')
+
+    setDsInfoCommonFieldTxt(datasetInfo, commonFields, '//Language', 'language')
+    setDsInfoCommonFieldTxt(datasetInfo, commonFields, '//Location', 'location')
+    setDsInfoCommonFieldTxt(datasetInfo, commonFields, '//Publication', 'publication')
+    setDsInfoCommonFieldTxt(datasetInfo, commonFields, '//PublicationYear', 'publicationYear')
+    setDsInfoCommonFieldTxt(datasetInfo, commonFields, '//Publisher', 'publisher')
+    setDsInfoCommonFieldTxt(datasetInfo, commonFields, '//Title', 'title')
+    setDsInfoCommonFieldTxt(datasetInfo, commonFields, '//Volume', 'volume')
+    setDsInfoCommonFieldTxt(datasetInfo, commonFields, '//URL', 'url')
+  }
+
+  let relatedDOI = xmlDocument.find('//DATA_SOURCE/LabGenerated/relatedDOI')
   if (relatedDOI) {
     relatedDOI.forEach(function (v, idx) {
       let rdoi = v.text()
@@ -444,12 +550,14 @@ function mergeDatasetInfoFromXml (logger, datasetInfo, xmlDocument) {
       }
     })
   }
+
   let doi = xmlDocument.find('/PolymerNanocomposite/DATA_SOURCE/Citation/CommonFields/DOI')
   if (doi) {
     datasetInfo.doi = doi[0].text()
   }
   return false
 }
+
 function replaceDatasetId (logger, id, newDsid) {
   // given an id of the regex form .[0-9]{n}_S[0-9]{n}_AUTHOR_YYYY replace the dsid component (first set of number)
   let newId = null
@@ -526,8 +634,10 @@ module.exports = {
   'matchValidXmlTitle': matchValidXmlTitle,
   'getEnv': getEnv,
   'datasetBucketName': datasetBucketName,
-  'getDatasetXmlFileList': getDatasetXmlFileList,
+  'getDatasetXmlFileList': getDatasetXmlFileList, // deprecated
+  'getXmlFileList': getXmlFileList, // replacement for getDatasetXmlFileList
   'getLatestSchemas': getLatestSchemas,
+  'updateOrCreateDatasetById': updateOrCreateDatasetById,
   'createDataset': createDataset,
   'sortSchemas': sortSchemas,
   'mergeDatasetInfoFromXml': mergeDatasetInfoFromXml,

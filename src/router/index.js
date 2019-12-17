@@ -39,7 +39,7 @@ import DynamfitExample from '@/components/DynamfitExample'
 import DynamfitExampleInput from '@/components/DynamfitExampleInput'
 import DynamfitResult from '@/components/DynamfitResult'
 import ChemProps from '@/components/ChemProps'
-// DISABLED FOR NOW import XmlUploader from '@/components/XmlUploader'
+import XmlUploader from '@/components/XmlUploader'
 
 Vue.use(Router)
 
@@ -250,11 +250,11 @@ export default new Router({
       path: '/ChemProps',
       name: 'ChemProps',
       component: ChemProps
-    } // ,
-    // DISABLED FOR NOW {
-    //   path: '/XmlUploader',
-    //   name: 'XmlUploader',
-    //   component: XmlUploader
-    // }
+    },
+    {
+      path: '/XmlUploader',
+      name: 'XmlUploader',
+      component: XmlUploader
+    }
   ]
 })

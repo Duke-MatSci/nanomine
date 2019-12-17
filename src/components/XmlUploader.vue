@@ -47,10 +47,12 @@
                 <v-subheader>
                   Dataset {{ dsInfo(idx)['dsid'] }}
                 </v-subheader>
-                <v-btn color="primary" @click="reassign(idx)" v-if="!isReassigned(idx)">Reassign new DS</v-btn>
-                <v-list-tile-title v-else-if="!uploaded(idx)">Will Reassign New DS</v-list-tile-title>
+                <v-btn color="primary" @click="selectUseIdForDs(idx)" v-if="!isReassigned(idx)&&!isUseIdForDs(idx)">Use ID for Dataset</v-btn>
+                <v-btn color="primary" @click="reassign(idx)" v-if="!isReassigned(idx)&&!isUseIdForDs(idx)">Assign new Dataset ID</v-btn>
+                <v-list-tile-title v-else-if="!uploaded(idx) && isUseIdForDs(idx)">Will use ID for DS {{ dsInfo(idx)['dsid'] }}</v-list-tile-title>
+                <v-list-tile-title v-else-if="!uploaded(idx) && reassign(idx)">Will Reassign New DS ID</v-list-tile-title>
                 <v-list-tile-title v-else>DS reassigned to {{ getNewDsid(idx) }}</v-list-tile-title>
-                <v-btn @click="upload(idx)" v-if="isReassigned(idx) && !uploaded(idx)">Upload</v-btn>
+                <v-btn @click="upload(idx)" v-if="(isReassigned(idx) || isUseIdForDs(idx)) && !uploaded(idx)">Upload</v-btn>
               </v-list-tile>
               <v-divider
                 v-if="dsInfo(idx)['isFirst']"
@@ -143,10 +145,12 @@ export default {
       if (idx > 0) {
         isFirst = !(vm.xmlFiles[idx - 1].dsid === dsid)
       }
-      return {
+      let cuType = vm.xmlFiles[idx].cuType
+      return ({
         dsid: dsid,
-        isFirst: isFirst
-      }
+        isFirst: isFirst,
+        createOrUpdateType: cuType
+      })
     },
     matchValidXmlTitle (title) {
       // console.log('matchValidXmlTitle: ' + title)
@@ -242,6 +246,18 @@ export default {
         }
       })
     },
+    setAllUseIdForDs (dsid) {
+      let vm = this
+      vm.xmlFiles.forEach(function (v, idx) {
+        if (v.dsid === dsid) {
+          vm.$set(vm.xmlFiles[idx], 'createDsType', 'useId') // ensure that Vue know about the new property to trigger GUI update
+        }
+      })
+    },
+    isUseIdForDs (idx) {
+      let vm = this
+      return vm.xmlFiles[idx].createDsType === 'useId'
+    },
     isReassigned (idx) {
       let vm = this
       return vm.xmlFiles[idx].reassign
@@ -274,8 +290,9 @@ export default {
       // let data = {}
       // data.remap = true
       // data.xmls = []
+      //
       let jobParameters = {
-        remapdataset: true,
+        datasetCreateOrUpdateType: vm.xmlFiles[idx]['createDsType'], // remap or useId
         files: [
         ]
       }
@@ -298,6 +315,11 @@ export default {
         console.log('Success! JobId is: ' + jobId)
         vm.submittedJobAlert = true
         vm.submittedJobMsg = 'CurateDatasetUpload job submitted.  JobID: ' + jobId
+        vm.xmlFiles.forEach(function (v, i) {
+          if (v.dsid === dsid) {
+            vm.$set(vm.xmlFiles[i], 'uploaded', true) // ensure GUI reacts to change
+          }
+        })
         vm.resetLoading()
       }, function (errCode, errMsg) {
         console.log('error: ' + errCode + ' msg: ' + errMsg)
@@ -305,32 +327,15 @@ export default {
         vm.uploadErrorMsg = 'Error submitting files for upload: errCode: ' + errCode + ' msg: ' + errMsg
         vm.resetLoading()
       })
-
-      // Axios.post('/nmr/curate/dsupload', data)
-      //   .then(function (resp) {
-      //     console.log(resp)
-      //     let newDsid = resp.data.data.seq // dataset info is sent back
-      //     console.log('New dataset id: ' + newDsid)
-      //     vm.xmlFiles.forEach(function (v, idx) {
-      //       if (v.dsid === dsid) {
-      //         vm.$set(vm.xmlFiles[idx], 'uploaded', true)
-      //         let newFilename = vm.replaceDatasetId(v.fileName, newDsid)
-      //         vm.$set(vm.xmlFiles[idx], 'newFileName', newFilename)
-      //         vm.$set(vm.xmlFiles[idx], 'newDsid', newDsid)
-      //       }
-      //     })
-      //     vm.resetLoading()
-      //   })
-      //   .catch(function (err) {
-      //     let msg = 'upload error: ' + err
-      //     if (err.response.data.error && typeof err.response.data.error === 'string') {
-      //       msg += ' msg:' + err.response.data.error
-      //     }
-      //     console.log(msg)
-      //     vm.uploadErrorMsg = msg
-      //     vm.uploadError = true
-      //     vm.resetLoading()
-      //   })
+    },
+    selectUseIdForDs (idx) {
+      let vm = this
+      vm.setLoading()
+      console.log('select Create Dataset files for dataset: ' + vm.xmlFiles[idx].dsid + ' to create ds using id.')
+      vm.$nextTick(function () {
+        vm.setAllUseIdForDs(vm.xmlFiles[idx].dsid)
+        vm.resetLoading()
+      })
     },
     reassign (idx) {
       let vm = this
@@ -338,24 +343,6 @@ export default {
       console.log('reassign files for dataset: ' + vm.xmlFiles[idx].dsid + ' to new dataset id.')
       vm.$nextTick(function () {
         vm.setAllReassign(vm.xmlFiles[idx].dsid)
-        // let oldDsid = vm.xmlFiles[idx].dsid
-
-        // get indexes of records to reassign
-        // let indexes = vm.getIndexes(oldDsid)
-        // console.log('Count of files to re-assign: ' + indexes.length)
-
-        // create new dataset id for use in filenames, IDs and Control_IDs
-        // let newDsid = Math.floor(Math.random() * 250) + 300
-        // run this synchronous operation asynchronously to leverage loader spinner (otherwise it doesn't show)
-        // vm.xmlFiles.forEach(function (v, idx) { // cannot do this with data urls
-        //   if (v.dsid === oldDsid) {
-        //     let json = xmljs.xml2js(v.xml)
-        //     console.log('  old ID: ' + vm.getID(json))
-        //     console.log('  old Control ID: ' + vm.getControlID(json))
-        //     console.log('  old DOI:  ' + vm.getDOI(json))
-        //     console.log('  relatedDOI: ' + vm.getRelatedDOI(json))
-        //   }
-        // })
         vm.resetLoading()
       })
     },

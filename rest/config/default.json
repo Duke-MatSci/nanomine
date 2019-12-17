@@ -19,7 +19,7 @@
         "pgmname": "curator.js"
       },
       {
-        "jobtype": "zz-disabled-curateDatasetUpload",
+        "jobtype": "curateDatasetUpload",
         "lang": "js",
         "pgmdir": "../src/jobs/curator",
         "pgmname": "curateDatasetUpload.js"

@@ -477,12 +477,12 @@ export default {
     }
     vm.getActiveSchemas()
       .then(function () {
-        Axios.get('/nmr/dataset')
+        Axios.get('/nmr/dataset', {
+          params: {schemaId: vm.selectedSchemaId}
+        })
           .then(function (resp) {
             resp.data.data.forEach(function (v) {
-              if (v.latestSchema) {
-                vm.datasetList.push(v)
-              }
+              vm.datasetList.push(v)
             })
           })
           .catch(function (err) {
@@ -572,8 +572,8 @@ export default {
               vm.schemas.push({'schemaId': schemaId, 'title': title})
               console.log('schemaId: ' + schemaId + ' title: ' + title)
             })
-            vm.SelectedSchemaTitle = vm.schemas[0].title
-            vm.SelectedSchemaId = vm.schemas[0].schemaId
+            vm.selectedSchemaTitle = vm.schemas[0].title
+            vm.selectedSchemaId = vm.schemas[0].schemaId
             resolve()
           })
           .catch(function (err) {
@@ -786,7 +786,9 @@ export default {
     getFilesList: function (sample) {
       let vm = this
       return new Promise(function (resolve, reject) {
-        Axios.get('/nmr/dataset/filenames/' + sample.title)
+        Axios.get('/nmr/dataset/filenames/' + sample.title, {
+          params: {schemaId: vm.selectedSchemaId}
+        })
           .then(function (data) {
             vm.sampleFileinfo = data.data.data.files
             if (!vm.sampleFileinfo) {

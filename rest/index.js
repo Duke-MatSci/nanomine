@@ -44,7 +44,8 @@ const libxml = require('libxmljs2')
 const nanomineUtils = require('./modules/utils')
 let matchValidXmlTitle = nanomineUtils.matchValidXmlTitle
 let env = nanomineUtils.getEnv()
-const getDatasetXmlFileList = nanomineUtils.getDatasetXmlFileList
+// const getDatasetXmlFileList = nanomineUtils.getDatasetXmlFileList
+const getXmlFileList = nanomineUtils.getDatasetXmlFileList
 const createDataset = nanomineUtils.createDataset
 const getLatestSchemas = nanomineUtils.getLatestSchemas
 const sortSchemas = nanomineUtils.sortSchemas
@@ -53,6 +54,7 @@ const sortSchemas = nanomineUtils.sortSchemas
 
 // TODO runAsUser in jwt if possible
 
+// TODO - Revisit the following TODO after upload of renumbered data
 // TODO datasets with xml_data records where no xml_data records have been converted to latest schema creates an issue that searching by
 //    dataset id can result in a query with no records for xml_data if only looking for those with latest schemaid.
 //    Work-around is to mark datasets with a flag - 'latestSchema' and use that to filter dataset lists.
@@ -718,88 +720,89 @@ function ensureRdfUser (userInfo, isAdmin) {
   })
 }
 
-function setDatasetLatestSchemaFlag (dsSeq, bv) {
-  let func = 'setDatasetLatestSchemaFlag'
-  // Datasets.updateOne({'seq': +(dsSeq)}, {'$set': {'latestSchema': bv}}, {'upsert': true}).cursor()
-  Datasets.updateOne({'seq': {'$eq': +(dsSeq)}}, {$set: {'latestSchema': bv}}, function (err, raw) {
-    if (err) {
-      logger.debug(func + ' - updated datasets: done. Error: ' + err)
-    } else {
-      if (raw) {
-        logger.debug(func + ' - updated dataset: ' + dsSeq + ' latestSchema:' + bv + ' raw: ' + JSON.stringify(raw))
-      } else {
-        logger.debug(func + ' - updated dataset: ' + dsSeq + ' latestSchema:' + bv + ' NO RESPONSE FROM MONGO via MONGOOSE?')
-      }
-    }
-  })
-}
-
-function updateDatasetLatestSchema () { // Mark datasets denoting whether each has associated xml_data records for the latest schema
-  // find all the xmls for the latest schema ordered by dataset sequence and build list of sequence numbers
-  // update all the datasets to reset the latestSchema flag
-  // loop through the sequence number list and for each set the associated dataset's latestSchema flag to true
-  // NOTE: this is probably a HACK and not too well thought out at the last minute.
-  let func = 'updateDatasetLatestSchema'
-  let validDatasets = {}
-  getCurrentSchemas()
-    .then(function (versions) {
-      let schemaId = versions[0].currentRef[0]._id
-      // logger.debug(func + ' -- ' + JSON.stringify(versions[0]))
-      // logger.debug(func + ' - latest schemaId is: ' + schemaId)
-      new Promise(function (resolve, reject) { // now requires index on dsSeq for the sort or sort fails
-        XmlData.find({'schemaId': {'$eq': schemaId}}, null, {'sort': {'dsSeq': 1}}).cursor()
-          .on('data', function (data) {
-            // logger.debug(func + ' - dataset: ' + data.dsSeq + ' latestSchema hash updated to true for data: ' + data.title + ' ' + data.schemaId)
-            validDatasets[data.dsSeq] = true // they'll all wind up as true, but it prevents searching (let js do it)
-          })
-          .on('end', function () {
-            // logger.debug(func + ' - on end called for XmlData.find')
-            let len = Object.keys(validDatasets).length
-            if (len > 0) {
-              logger.debug(func + ' - valid dataset count: ' + len)
-              resolve(validDatasets)
-            } else {
-              reject(new Error('no valid datasets'))
-            }
-          })
-      })
-        .then(function (validDatasets) {
-          new Promise(function (resolve, reject) {
-            Datasets.update({}, {'$set': {'latestSchema': false}}, {'multi': true}, function (err, raw) {
-              if (err) {
-                logger.error(func + ' - update (multi) failed. Error: ' + err)
-                reject(err)
-              } else {
-                resolve(validDatasets)
-                logger.debug(func + ' - dataset update (multi) done:  ' + JSON.stringify(raw))
-              }
-            })
-          })
-            .then(function (validDatasets) {
-              let keys = Object.keys(validDatasets)
-              keys.forEach(function (v) {
-                // logger.debug(func + ' - will update dataset key ' + v + ' latestSchema to true.')
-                setDatasetLatestSchemaFlag(+(v), true)
-              })
-            })
-            .catch(function (err) {
-              logger.error(func + ' - XmlData.find error: ' + err)
-            })
-        })
-        .catch(function (err) {
-          logger.error(func + ' - XmlData.find error: ' + err)
-        })
-    })
-    .catch(function (err) {
-      logger.error(func + ' - getCurrentSchemas: ' + err)
-    })
-}
-
-// ... and run at startup
-dbPromise.then(function () {
-  console.log('db opened successfully. Updating datasets.')
-  updateDatasetLatestSchema()
-})
+// The following code *should* no longer be needed since we now have datasets by schemaid
+// function setDatasetLatestSchemaFlag (dsSeq, bv) {
+//   let func = 'setDatasetLatestSchemaFlag'
+//   // Datasets.updateOne({'seq': +(dsSeq)}, {'$set': {'latestSchema': bv}}, {'upsert': true}).cursor()
+//   Datasets.updateOne({'seq': {'$eq': +(dsSeq)}}, {$set: {'latestSchema': bv}}, function (err, raw) {
+//     if (err) {
+//       logger.debug(func + ' - updated datasets: done. Error: ' + err)
+//     } else {
+//       if (raw) {
+//         logger.debug(func + ' - updated dataset: ' + dsSeq + ' latestSchema:' + bv + ' raw: ' + JSON.stringify(raw))
+//       } else {
+//         logger.debug(func + ' - updated dataset: ' + dsSeq + ' latestSchema:' + bv + ' NO RESPONSE FROM MONGO via MONGOOSE?')
+//       }
+//     }
+//   })
+// }
+//
+// function updateDatasetLatestSchema () { // Mark datasets denoting whether each has associated xml_data records for the latest schema
+//   // find all the xmls for the latest schema ordered by dataset sequence and build list of sequence numbers
+//   // update all the datasets to reset the latestSchema flag
+//   // loop through the sequence number list and for each set the associated dataset's latestSchema flag to true
+//   // NOTE: this is probably a HACK and not too well thought out at the last minute.
+//   let func = 'updateDatasetLatestSchema'
+//   let validDatasets = {}
+//   getCurrentSchemas()
+//     .then(function (versions) {
+//       let schemaId = versions[0].currentRef[0]._id
+//       // logger.debug(func + ' -- ' + JSON.stringify(versions[0]))
+//       // logger.debug(func + ' - latest schemaId is: ' + schemaId)
+//       new Promise(function (resolve, reject) { // now requires index on dsSeq for the sort or sort fails
+//         XmlData.find({'schemaId': {'$eq': schemaId}}, null, {'sort': {'dsSeq': 1}}).cursor()
+//           .on('data', function (data) {
+//             // logger.debug(func + ' - dataset: ' + data.dsSeq + ' latestSchema hash updated to true for data: ' + data.title + ' ' + data.schemaId)
+//             validDatasets[data.dsSeq] = true // they'll all wind up as true, but it prevents searching (let js do it)
+//           })
+//           .on('end', function () {
+//             // logger.debug(func + ' - on end called for XmlData.find')
+//             let len = Object.keys(validDatasets).length
+//             if (len > 0) {
+//               logger.debug(func + ' - valid dataset count: ' + len)
+//               resolve(validDatasets)
+//             } else {
+//               reject(new Error('no valid datasets'))
+//             }
+//           })
+//       })
+//         .then(function (validDatasets) {
+//           new Promise(function (resolve, reject) {
+//             Datasets.update({}, {'$set': {'latestSchema': false}}, {'multi': true}, function (err, raw) {
+//               if (err) {
+//                 logger.error(func + ' - update (multi) failed. Error: ' + err)
+//                 reject(err)
+//               } else {
+//                 resolve(validDatasets)
+//                 logger.debug(func + ' - dataset update (multi) done:  ' + JSON.stringify(raw))
+//               }
+//             })
+//           })
+//             .then(function (validDatasets) {
+//               let keys = Object.keys(validDatasets)
+//               keys.forEach(function (v) {
+//                 // logger.debug(func + ' - will update dataset key ' + v + ' latestSchema to true.')
+//                 setDatasetLatestSchemaFlag(+(v), true)
+//               })
+//             })
+//             .catch(function (err) {
+//               logger.error(func + ' - XmlData.find error: ' + err)
+//             })
+//         })
+//         .catch(function (err) {
+//           logger.error(func + ' - XmlData.find error: ' + err)
+//         })
+//     })
+//     .catch(function (err) {
+//       logger.error(func + ' - getCurrentSchemas: ' + err)
+//     })
+// }
+//
+// // ... and run at startup
+// dbPromise.then(function () {
+//   console.log('db opened successfully. Updating datasets.')
+//   updateDatasetLatestSchema()
+// })
 
 function getUserInfo (userid) {
   let func = 'getUserInfo'
@@ -941,8 +944,8 @@ function createOutboundJwt (userAndAdminInfo) {
   return `token=${jwToken}`
 }
 
-function datasetXmlFileList (xmlTitle) { // returns promise that when fulfilled contains list of file info objects related to XML
-  return getDatasetXmlFileList(mongoose, logger, xmlTitle) // post refactor, but client not changed
+function datasetXmlFileList (xmlTitle, schemaId) { // returns promise that when fulfilled contains list of file info objects related to XML
+  return getXmlFileList(mongoose, logger, xmlTitle, schemaId) // post refactor, but client not changed
 }
 
 function getMongoFileData (bucketName, id, fileName) {
@@ -1614,62 +1617,64 @@ function saveSchema (filename, xsd) {
             // spin through list to see if filename is already used
             let isUsed = -1
             let newHash = hasha(xsd, {'algorithm': 'sha1'})
-            versions.forEach(function (v, idx) {
-              if (v.currentRef[0].filename === filename) {
-                let curHash = v.currentRef[0].hash
-                isUsed = idx
-                if (curHash !== newHash) {
-                  //   if the filename is used by a template version, then
-                  //     x check the md5 hash against the current version to ensure that it has not already been uploaded
-                  //     use the template version id to create a new schema (template) record using the template version id in the schema rec
-                  //     add the new schema id to the versions array of the template version
-                  //     set the schema version field to the array position in the template record + 1
-                  //     update the template version current id string to the stringified object id of the schema
-                  //     set the template version currentRef to the ObjectId of the new schema
-                  //     update number of versions in template version record
-                  let templateVerId = v._id.toHexString()
-                  let xsdDoc = {
-                    'title': schemaTitle,
-                    'filename': filename,
-                    'content': xsd,
-                    'templateVersion': templateVerId,
-                    'version': v.nbVersions + 1,
-                    'hash': hasha(xsd, {'algorithm': 'sha1'}),
-                    'dependencies': [],
-                    'exporters': [],
-                    'XSLTFiles': []
+            if (versions) { // if there are no versions, then handle as new
+              versions.forEach(function (v, idx) {
+                if (v.currentRef[0].filename === filename) {
+                  let curHash = v.currentRef[0].hash
+                  isUsed = idx
+                  if (curHash !== newHash) {
+                    //   if the filename is used by a template version, then
+                    //     x check the md5 hash against the current version to ensure that it has not already been uploaded
+                    //     use the template version id to create a new schema (template) record using the template version id in the schema rec
+                    //     add the new schema id to the versions array of the template version
+                    //     set the schema version field to the array position in the template record + 1
+                    //     update the template version current id string to the stringified object id of the schema
+                    //     set the template version currentRef to the ObjectId of the new schema
+                    //     update number of versions in template version record
+                    let templateVerId = v._id.toHexString()
+                    let xsdDoc = {
+                      'title': schemaTitle,
+                      'filename': filename,
+                      'content': xsd,
+                      'templateVersion': templateVerId,
+                      'version': v.nbVersions + 1,
+                      'hash': hasha(xsd, {'algorithm': 'sha1'}),
+                      'dependencies': [],
+                      'exporters': [],
+                      'XSLTFiles': []
+                    }
+                    logger.debug(func + '- schema create for existing version record')
+                    XsdSchema.create(xsdDoc)
+                      .then(function (newXsdDoc) {
+                        logger.debug(func + '- create isArray: ' + Array.isArray(newXsdDoc))
+                        let xsdId = newXsdDoc._id
+                        v.nbVersions += 1
+                        v.versions.push(xsdId.toHexString())
+                        v.current = xsdId.toHexString()
+                        logger.debug(func + ' - about to set objectid')
+                        v.currentRef = xsdId // mongoose populate reference
+                        logger.debug(func + ' - got past setting objectid')
+                        XsdVersionSchema.findByIdAndUpdate(v._id, v).exec()
+                          .then(function (opResult) {
+                            logger.debug(func + ' - opResult: ' + inspect(opResult))
+                            resolve('added schema id: ' + xsdId + ' for version: ' + v.nbVersions + ' to versions id: ' + templateVerId)
+                          })
+                          .catch(function (err) {
+                            let msg = func + ' - find and update - ' + err
+                            reject(new Error(msg))
+                          })
+                      })
+                      .catch(function (err) {
+                        let msg = func + ' - create schema - ' + err
+                        reject(new Error(msg))
+                      })
+                  } else {
+                    let msg = func + ' - create schema - duplicates current version'
+                    reject(new Error(msg))
                   }
-                  logger.debug(func + '- schema create for existing version record')
-                  XsdSchema.create(xsdDoc)
-                    .then(function (newXsdDoc) {
-                      logger.debug(func + '- create isArray: ' + Array.isArray(newXsdDoc))
-                      let xsdId = newXsdDoc._id
-                      v.nbVersions += 1
-                      v.versions.push(xsdId.toHexString())
-                      v.current = xsdId.toHexString()
-                      logger.debug(func + ' - about to set objectid')
-                      v.currentRef = xsdId // mongoose populate reference
-                      logger.debug(func + ' - got past setting objectid')
-                      XsdVersionSchema.findByIdAndUpdate(v._id, v).exec()
-                        .then(function (opResult) {
-                          logger.debug(func + ' - opResult: ' + inspect(opResult))
-                          resolve('added schema id: ' + xsdId + ' for version: ' + v.nbVersions + ' to versions id: ' + templateVerId)
-                        })
-                        .catch(function (err) {
-                          let msg = func + ' - find and update - ' + err
-                          reject(new Error(msg))
-                        })
-                    })
-                    .catch(function (err) {
-                      let msg = func + ' - create schema - ' + err
-                      reject(new Error(msg))
-                    })
-                } else {
-                  let msg = func + ' - create schema - duplicates current version'
-                  reject(new Error(msg))
                 }
-              }
-            })
+              })
+            }
             if (isUsed === -1) {
               //   if the filename is not used
               //     create a new template version record with 0 versions and save the id
@@ -2218,13 +2223,13 @@ app.post('/blob', function (req, res) {
 })
 
 app.get('/dataset/filenames/:xmlId', function (req, res) {
-  // TODO handle authorization
   // return list of fully qualified filenames for blobs associated with sample
   let jsonResp = {'error': null, 'data': null}
   let xmlId = req.params.xmlId
+  let schemaId = req.query.schemaId
   let validTitle = matchValidXmlTitle(xmlId)
   if (validTitle) {
-    datasetXmlFileList(xmlId)
+    datasetXmlFileList(xmlId, schemaId)
       .then(function (files) {
         jsonResp.data = {'files': files}
         return res.status(200).json(jsonResp)
@@ -2245,7 +2250,7 @@ app.get('/dataset/filenames/:xmlId', function (req, res) {
 //   let bucketName = datasetBucketName
 //   // Probably needs to look into default bucketname as well -- or ...
 //   //  1 - put all data into default bucket
-//   //  2 - put images into the default bucket as well as the curateinput bucket (might work best)
+//   //  2 - put images into the default bucket as well as the curate input bucket (might work best)
 //   // TODO ...
 // })
 
@@ -2322,6 +2327,7 @@ app.get('/blob', function (req, res) { // MDCS only supports get by id (since th
 
 app.get('/dataset', function (req, res) {
   let jsonResp = {'error': null, 'data': null}
+  let schemaId = req.query.schemaId
   let id = req.query.id
   let seq = req.query.seq
   let doi = req.query.doi
@@ -2335,8 +2341,8 @@ app.get('/dataset', function (req, res) {
         return res.json(jsonResp)
       }
     })
-  } else if (validQueryParam(seq)) {
-    Datasets.find({'seq': {'$eq': seq}}, function (err, doc) {
+  } else if (validQueryParam(seq) && validQueryParam(schemaId)) {
+    Datasets.find({$and: [{'schemaId': {$eq: schemaId}}, {'seq': {'$eq': seq}}]}, function (err, doc) {
       if (err) {
         jsonResp.error = err
         return res.status(500).json(jsonResp)
@@ -2345,7 +2351,7 @@ app.get('/dataset', function (req, res) {
         return res.json(jsonResp)
       }
     })
-  } else if (validQueryParam(doi)) {
+  } else if (validQueryParam(doi) && validQueryParam(schemaId)) {
     Datasets.find({'doi': {'$eq': doi}}, function (err, doc) {
       if (err) {
         jsonResp.error = err
@@ -2356,8 +2362,8 @@ app.get('/dataset', function (req, res) {
       }
     })
   } else {
-    // return all datasets for now
-    Datasets.find({}).sort({'seq': 1}).exec(function (err, docs) {
+    // return all datasets for schema now
+    Datasets.find({schemaId: {'$eq': schemaId}}).sort({'seq': 1}).exec(function (err, docs) {
       if (err) {
         jsonResp.error = err
         return res.status(500).json(jsonResp)
@@ -2373,8 +2379,9 @@ app.post('/dataset/update', function (req, res) {
   let jsonResp = {'error': null, 'data': null}
   let dsUpdate = req.body.dsUpdate
   let dsSeq = req.body.dsSeq
+  let schemaId = req.body.schemaid
   console.log('datataset/update: doing update...' + JSON.stringify(dsUpdate))
-  Datasets.findOneAndUpdate({'seq': dsSeq}, {$set: dsUpdate}, {}, function (err, oldDoc) {
+  Datasets.findOneAndUpdate({'$and': [{'schemaId': {'$eq': schemaId}}, {'seq': dsSeq}]}, {$set: dsUpdate}, {}, function (err, oldDoc) {
     if (err) {
       jsonResp.error = err
       console.log('datataset/update: error - ' + err)
@@ -2387,10 +2394,8 @@ app.post('/dataset/update', function (req, res) {
   })
 })
 app.post('/dataset/create', function (req, res) {
-  // TODO dataset needs a unique index on seq to ensure there are no dups
-  // TODO dataset also needs a unique index on DOI to ensure that DOIs are not dup'd
   let jsonResp = {'error': null, 'data': null}
-  let dsInfo = req.body.dsInfo
+  let dsInfo = req.body.dsInfo // requires schemaId now
   createDataset(Datasets, logger, dsInfo)
     .then(function (result) {
       jsonResp.error = null
