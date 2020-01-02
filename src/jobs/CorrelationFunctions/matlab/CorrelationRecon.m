@@ -249,13 +249,17 @@ try
     
 catch ex
     rc = 99;
+    msg = getReport(ex);
+    writeError([path_to_write, '/errors.txt'], 'A non-specific error occurred. Exception report: ');
+    writeError([path_to_write, '/errors.txt'], msg);
+    writeError([path_to_write, '/errors.txt'], sprintf('\n'));
     exit(rc);
 end
-    function writeError(file, msg)
-        f = fopen(file,'a+');
-        fprintf(f, '%s\n', msg);
-        fclose(f);
-    end
+function writeError(file, msg)
+   f = fopen(file,'a+');
+   fprintf(f, '%s\n', msg);
+   fclose(f);
+end
 function Corr=calc_Corr(img,correlation_choice)
         switch (correlation_choice)
             case 1
