@@ -24,6 +24,7 @@
     "lodash": "^4.17.11",
     "moment": "^2.23.0",
     "short-uuid": "^3.1.0",
+    "v-playback": "^1.0.2",
     "vkbeautify": "^0.99.3",
     "vue": "^2.5.21",
     "vue-google-charts": "^0.3.2",
@@ -95,7 +96,7 @@
     "vue-style-loader": "^3.0.1",
     "vue-template-compiler": "^2.5.22",
     "webpack": "^3.6.0",
-    "webpack-bundle-analyzer": "^2.9.0",
+    "webpack-bundle-analyzer": "^3.6.0",
     "webpack-dev-server": "^2.11.3",
     "webpack-merge": "^4.2.1"
   },

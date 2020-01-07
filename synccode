@@ -1,6 +1,8 @@
 #!/bin/bash
 echo "synccode started: $(date)"
 rsync -avz  -e "ssh " --exclude="venv/*" --exclude="static/*" --exclude="dist/*" --exclude=".git/*" --exclude="node_modules/*" . whyis:/apps/nanomine/
+echo "For testing package.json changes, uncomment the line that re-creates all node_modules."
+#ssh whyis "cd nanomine;rm -rf node_modules; npm i"
 ssh whyis "cd nanomine;npm run build"
 ssh whyisroot "systemctl stop apache2"
 ssh whyisroot "systemctl stop nm-rest"

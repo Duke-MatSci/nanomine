@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+#Run the ChemProps DB update
+pushd /apps/chemprops
+
+if expr ${NM_AUTOSTART_CHEMPROPS} : [Yy][Ee][Ss] ; then
+  echo "Running ChemProps update.  NM_AUTOSTART_CHEMPROPS is ${NM_AUTOSTART_CHEMPROPS}"
+  python -c 'from nmChemPropsPrepare import nmChemPropsPrepare; nm = nmChemPropsPrepare(); nm.updateMongoDB()'
+else
+  echo "ChemProps update is disabled. NM_AUTOSTART_CHEMPROPS is ${NM_AUTOSTART_CHEMPROPS}"
+fi
+
+popd

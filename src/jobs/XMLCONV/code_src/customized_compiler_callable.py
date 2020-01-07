@@ -615,6 +615,7 @@ def sheetMatType(sheet, DATA, myXSDtree, jobDir):
     temp = [] # always save temp if not empty when we find a match in headers
     prevTemp = '' # save the previous cleanTemp
     prevTempPST = '' # save the previous cleanTempPST
+    frac = collections.OrderedDict() # for mass and volume fractions
     for row in range(sheet.nrows):
         # First deal with the ParticleSurfaceTreatment
         cleanTempPST = matchList(sheet.cell_value(row, 0), headers_PST.keys())
@@ -665,6 +666,13 @@ def sheetMatType(sheet, DATA, myXSDtree, jobDir):
                 temp.append({'FillerComponent': FillerComponent})
                 # initialize
                 FillerComponent = []
+            # special case FillerComposition
+            if len(frac) > 0:
+                # sort frac, always follow the order: mass, volume
+                if 'volume' in frac:
+                    frac.move_to_end('volume')
+                temp.append({'FillerComposition':{'Fraction':frac}})
+                frac = collections.OrderedDict()
             # save temp
             if len(temp) > 0: # update temp if it's not empty
                 # sort temp
@@ -746,14 +754,18 @@ def sheetMatType(sheet, DATA, myXSDtree, jobDir):
             mcc = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             if type(myRow[2]) == float or len(myRow[2]) > 0:
-                mcc['mass'] = myRow[2]
+                if hasLen(myRow[1]):
+                    mcc['Constituent'] = myRow[1]
+                mcc['Fraction'] = {'mass':myRow[2]}
             if len(mcc) > 0:
                 MatrixComponent.append({'MatrixComponentComposition':mcc})
         if match(sheet.cell_value(row, 0), 'Matrix Component Composition volume fraction'):
             vcc = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             if type(myRow[2]) == float or len(myRow[2]) > 0:
-                vcc['volume'] = myRow[2]
+                if hasLen(myRow[1]):
+                    vcc['Constituent'] = myRow[1]
+                vcc['Fraction'] = {'volume':myRow[2]}
             if len(vcc) > 0:
                 MatrixComponent.append({'MatrixComponentComposition':vcc})
         # Filler
@@ -848,9 +860,11 @@ def sheetMatType(sheet, DATA, myXSDtree, jobDir):
         if match(sheet.cell_value(row, 0), 'Fraction'):
             if type(sheet.cell_value(row, 2)) == float or len(sheet.cell_value(row, 2)) > 0:
                 if match(sheet.cell_value(row, 1), 'mass'):
-                    temp.append({'FillerComposition':{'Fraction':{'mass':sheet.cell_value(row, 2)}}})
+                    frac['mass'] = sheet.cell_value(row, 2)
+                    # temp.append({'FillerComposition':{'Fraction':{'mass':sheet.cell_value(row, 2)}}})
                 elif match(sheet.cell_value(row, 1), 'volume'):
-                    temp.append({'FillerComposition':{'Fraction':{'volume':sheet.cell_value(row, 2)}}})
+                    frac['volume'] = sheet.cell_value(row, 2)
+                    # temp.append({'FillerComposition':{'Fraction':{'volume':sheet.cell_value(row, 2)}}})
             # FillerComponent/ParticleSurfaceTreatment
                 #./ChemicalName
         if match(sheet.cell_value(row,0), 'PST chemical name'):
@@ -948,6 +962,13 @@ def sheetMatType(sheet, DATA, myXSDtree, jobDir):
         temp.append({'FillerComponent': FillerComponent})
         # initialize
         FillerComponent = []
+    # special case FillerComposition
+    if len(frac) > 0:
+        # sort frac, always follow the order: mass, volume
+        if 'volume' in frac:
+            frac.move_to_end('volume')
+        temp.append({'FillerComposition':{'Fraction':frac}})
+        frac = collections.OrderedDict()
     # don't forget about the last temp
     # save temp
     if len(temp) > 0: # update temp if it's not empty
@@ -1863,9 +1884,9 @@ def sheetCharMeth(sheet, DATA, myXSDtree, jobDir):
         # RheometerType
         if match(sheet.cell_value(row, 0), 'Rheometer type'):
             temp = insert('RheometerType', sheet.cell_value(row, 1), temp)
-        # CapillarSize
-        if match(sheet.cell_value(row, 0), 'Capillar size'):
-            temp = insert('CapillarSize', sheet.cell_value(row, 1), temp)
+        # CapillarySize
+        if match(sheet.cell_value(row, 0), 'Capillary size'):
+            temp = insert('CapillarySize', sheet.cell_value(row, 1), temp)
     # END OF THE LOOP
     # don't forget about the last temp
     # save temp
@@ -1981,6 +2002,31 @@ def sheetPropMech(sheet, DATA_PROP, myXSDtree, jobDir):
             tenY = addKVU('TensileStressAtYield', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], tenY, jobDir, myXSDtree)
             if len(tenY) > 0:
                 temp.append(tenY)
+            # TensileStrength
+        if match(sheet.cell_value(row, 0), 'Tensile strength'):
+            tenS = collections.OrderedDict()
+            myRow = sheet.row_values(row) # save the list of row_values
+            while len(myRow) < 7:
+                myRow.append('') # prevent IndexError
+            tenS = addKVU('TensileStrength', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], tenS, jobDir, myXSDtree)
+            if len(tenS) > 0:
+                temp.append(tenS)
+            # StressRelaxation
+        if match(sheet.cell_value(row, 0), 'Stress relaxation (filename.xlsx)'):
+            if hasLen(sheet.cell_value(row, 1)):
+                strR = collections.OrderedDict()
+                strR = addKVU('StressRelaxation', '', '', '', '', '', '', sheet.cell_value(row, 1), strR, jobDir, myXSDtree)
+            if len(strR) > 0:
+                temp.append(strR)
+            # StrainAtBreak
+        if match(sheet.cell_value(row, 0), 'Strain at break'):
+            strB = collections.OrderedDict()
+            myRow = sheet.row_values(row) # save the list of row_values
+            while len(myRow) < 7:
+                myRow.append('') # prevent IndexError
+            strB = addKVU('StrainAtBreak', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], strB, jobDir, myXSDtree)
+            if len(strB) > 0:
+                temp.append(strB)
             # TensileToughness
         if match(sheet.cell_value(row, 0), 'Tensile toughness'):
             tenT = collections.OrderedDict()
@@ -2153,6 +2199,15 @@ def sheetPropMech(sheet, DATA_PROP, myXSDtree, jobDir):
             strR = addKVU('strainRate', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], strR, jobDir, myXSDtree)
             if len(strR) > 0:
                 tempFracture.append(strR)
+            # FractureEnergy
+        if match(sheet.cell_value(row, 0), 'Fracture energy'):
+            fraE = collections.OrderedDict()
+            myRow = sheet.row_values(row) # save the list of row_values
+            while len(myRow) < 7:
+                myRow.append('') # prevent IndexError
+            fraE = addKVU('FractureEnergy', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], fraE, jobDir, myXSDtree)
+            if len(fraE) > 0:
+                tempFracture.append(fraE)
             # sampleShape
         if match(sheet.cell_value(row, 0), 'Sample shape'):
             tempFracture = insert('sampleShape', sheet.cell_value(row, 1), tempFracture) 
@@ -2592,12 +2647,21 @@ def sheetPropElec(sheet, DATA_PROP, myXSDtree, jobDir):
                'Dielectric breakdown strength': 'DielectricBreakdownStrength'}
     temp_list = [] # the highest level list for PROPERTIES/Electrical
     temp = [] # always save temp if not empty when we find a match in headers
+    dep = collections.OrderedDict() # dict for dependence condition
+    depend = '' # FrequencyDependence or TemperatureDependence
     prevTemp = '' # save the previous cleanTemp
     for row in range(sheet.nrows):
         cleanTemp = matchList(sheet.cell_value(row, 0), headers.keys())
         if cleanTemp:
             if len(prevTemp) == 0: # initialize prevTemp
                 prevTemp = cleanTemp
+            # if depend is not '', i.e. cleanTemp is AC dielectric dispersion
+            if len(depend) > 0:
+                # insert the dependence structure to temp, no need to sortSequence since we give it 
+                temp.append({'DielectricDispersionDependence':{depend:{'condition':dep}}})
+                # reset dep and depend after added to temp
+                dep = collections.OrderedDict()
+                depend = ''
             # save temp
             if len(temp) > 0: # update temp if it's not empty
                 # sort temp
@@ -2691,6 +2755,38 @@ def sheetPropElec(sheet, DATA_PROP, myXSDtree, jobDir):
         # AC_DielectricDispersion/Description
         if match(sheet.cell_value(row, 0), 'Description'):
             temp = insert('Description', sheet.cell_value(row, 1), temp)
+        # AC_DielectricDispersion/DielectricDispersionDependence
+        if match(sheet.cell_value(row, 0), 'Dependence'):
+            if hasLen(sheet.cell_value(row, 1)):
+                # 'Frequency dependence' or 'Temperature dependence'
+                if match(sheet.cell_value(row, 1), 'Frequency dependence'):
+                    depend = 'FrequencyDependence'
+                elif match(sheet.cell_value(row, 1), 'Temperature dependence'):
+                    depend = 'TemperatureDependence'
+        # AC_DielectricDispersion/DielectricDispersionDependence/.../condition/temperature
+        if match(sheet.cell_value(row, 0), 'Test Conditions - Temperature'):
+            myRow = sheet.row_values(row) # save the list of row_values
+            while len(myRow) < 7:
+                myRow.append('') # prevent IndexError
+            dep = addKVU('temperature', myRow[1], myRow[2], myRow[3], '', '', '', myRow[4], dep, jobDir, myXSDtree)
+            # sanity check
+            if 'temperature' in dep and not match(depend, 'FrequencyDependence'):
+                with open(jobDir + '/error_message.txt', 'a') as fid:
+                    fid.write('[Dielectric Dispersion Dependence Error] If you are to fill in "Test Conditions - Temperature", please select "Frequency dependence" for "Dependence"\n')
+                # reset dep
+                dep = collections.OrderedDict()
+        # AC_DielectricDispersion/DielectricDispersionDependence/.../condition/frequency
+        if match(sheet.cell_value(row, 0), 'Test Conditions - Frequency'):
+            myRow = sheet.row_values(row) # save the list of row_values
+            while len(myRow) < 7:
+                myRow.append('') # prevent IndexError
+            dep = addKVU('frequency', myRow[1], myRow[2], myRow[3], '', '', '', myRow[4], dep, jobDir, myXSDtree)
+            # sanity check
+            if 'frequency' in dep and not match(depend, 'TemperatureDependence'):
+                with open(jobDir + '/error_message.txt', 'a') as fid:
+                    fid.write('[Dielectric Dispersion Dependence Error] If you are to fill in "Test Conditions - Frequency", please select "Temperature dependence" for "Dependence"\n')
+                # reset dep
+                dep = collections.OrderedDict()
         # AC_DielectricDispersion/Dielectric_Real_Permittivity
         if match(sheet.cell_value(row, 0), 'Real permittivity'):
             reaP = collections.OrderedDict()
@@ -2722,8 +2818,11 @@ def sheetPropElec(sheet, DATA_PROP, myXSDtree, jobDir):
         if match(sheet.cell_value(row, 0), 'Dielectric breakdown strength'):
             temp = insert('Condition', sheet.cell_value(row, 1), temp)
             proF = collections.OrderedDict()
-            proF = addKVU('Profile', '', '', '', '', '', '',
-                          sheet.cell_value(row, 2), proF, jobDir, myXSDtree)
+            myRow = sheet.row_values(row) # save the list of row_values
+            while len(myRow) < 7:
+                myRow.append('') # prevent IndexError
+            proF = addKVU('Profile', '', myRow[2], myRow[3], '', '', '',
+                          myRow[4], proF, jobDir, myXSDtree)
             if len(proF) > 0:
                 temp.append(proF)
         # DielectricBreakdownStrength/WeibullPlot
@@ -2736,17 +2835,31 @@ def sheetPropElec(sheet, DATA_PROP, myXSDtree, jobDir):
             if len(wePl) > 0:
                 temp.append(wePl)
         # DielectricBreakdownStrength/WeibullParameter
-        if match(sheet.cell_value(row, 0), 'Weibull parameter'):
+        if match(sheet.cell_value(row, 0), 'Weibull parameter - scale'):
             weiP = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
                 myRow.append('') # prevent IndexError
-            weiP = addKVU('WeibullParameter', '',
-                          myRow[1], myRow[2], myRow[3], myRow[4], '', '', weiP, jobDir, myXSDtree)
+            weiP = addKVU('WeibullParameter', 'scale parameter', myRow[1], myRow[2], '', '', '', '', weiP, jobDir, myXSDtree)
+            if len(weiP) > 0:
+                temp.append(weiP)
+        if match(sheet.cell_value(row, 0), 'Weibull parameter - shape'):
+            weiP = collections.OrderedDict()
+            myRow = sheet.row_values(row) # save the list of row_values
+            while len(myRow) < 7:
+                myRow.append('') # prevent IndexError
+            weiP = addKVU('WeibullParameter', 'shape parameter', myRow[1], myRow[2], '', '', '', '', weiP, jobDir, myXSDtree)
             if len(weiP) > 0:
                 temp.append(weiP)
     # END OF THE LOOP
     # don't forget about the last temp
+    # if depend is not '', i.e. the last header is AC dielectric dispersion
+    if len(depend) > 0:
+        # insert the dependence structure to temp, no need to sortSequence since we give it 
+        temp.append({'DielectricDispersionDependence':{depend:{'condition':dep}}})
+        # reset dep and depend after added to temp
+        dep = collections.OrderedDict()
+        depend = ''
     # save temp
     if len(temp) > 0: # update temp if it's not empty
         # sort temp
