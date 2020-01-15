@@ -1269,7 +1269,7 @@ function publishXml (userid, xmlTitle, xmlText, schemaName, cb) {
               "@id" : "${nmRdfLodPrefix}/nmr/dataset/${dsSeq}",
               "@type" : "schema:Dataset",
               "schema:distribution" : [ {"@id" : "${nmRdfLodPrefix}/nmr/xml/${xmlTitle}"} ]
-            }            
+            }
           ]
         }
       }
@@ -2564,6 +2564,50 @@ app.post('/jobpostfile', function (req, res, next) {
     }
   })
 })
+function submitGenerateSeoFiles (userid) {
+  let func = 'submitGenerateSeoFiles'
+  let jobParams = {'user': userid}
+  return new Promise(function (resolve, reject) {
+    jobCreate('generateseofiles', jobParams)
+      .then(function (jobInfo) {
+        getUserAndAdminInfo(userid)
+          .then(function (userAndAdminInfo) {
+            // NOTE: overridding isAdmin for now since nanomine system user may not officially be admin in groups
+            //  ALSO: ensure that the nanomine nmAuthSystemUserId exists in the nm DB before calling!
+            if (userAndAdminInfo.userInfo) {
+              if (userAndAdminInfo.isAdmin !== true) {
+                let msg = func + ' - WARNING - overriding isAdmin to true for user: ' + userid + ' to submit curator.'
+                logger.error(msg)
+                userAndAdminInfo.isAdmin = true
+              }
+              let userToken = createOutboundJwt(userAndAdminInfo)
+              jobSubmit(jobInfo.jobId, 'generateseofiles', userToken)
+                .then(function (jobInfo) {
+                  logger.info('successfully submitted generate seo files job. Pid: ' + jobInfo.jobPid)
+                  resolve()
+                })
+                .catch(function (err) {
+                  logger.error('error submitting generate seo files job. Error: ' + err)
+                  reject(err)
+                })
+            } else {
+              // user Not defined!
+              let msg = func + ' - cannot submit generate seo files job for non-existent user: ' + userid
+              logger.error(msg)
+              reject(new Error(msg))
+            }
+          })
+          .catch(function (err) {
+            let msg = func + ' - getUserAndAdminInfo for userid: ' + userid + '. Unable to submit job. Error: ' + err
+            logger.error(msg)
+            reject(err)
+          })
+      })
+      .catch(function (err) {
+        logger.error('error creating curator job. Error: ' + err)
+      })
+  })
+}
 
 function submitCurator (userid) {
   let func = 'submitCurator'
@@ -2623,6 +2667,17 @@ dbPromise.then(function () {
     })
     .catch(function (err) {
       let msg = 'submission of curator job failed. Error: ' + err
+      logger.error(msg)
+      console.log(msg)
+    })
+  submitGenerateSeoFiles(nmAuthSystemUserId) // run the curator job (long running job) TODO: monitor generateSeoFiles
+    .then(function () {
+      let msg = 'successfully submitted generate seo files job.'
+      logger.info(msg)
+      console.log(msg) // for convenience
+    })
+    .catch(function (err) {
+      let msg = 'submission of generate seo files job failed. Error: ' + err
       logger.error(msg)
       console.log(msg)
     })
@@ -2726,7 +2781,7 @@ function jobSubmit (jobId, jobType, userToken) {
                   let msg = 'job type has no program defined'
                   // jsonResp.error = 'job type has program not defined'
                   // return res.status(400).json(jsonResp)
-                  logger.error(msg)
+                  logger.error(msg + ' pgm: ' + pgm + ' pgmdir: ' + pgmdir)
                   reject(new Error(msg))
                 }
               }
@@ -2931,7 +2986,7 @@ app.post('/contact', function (req, res, next) { // bearer auth
       \nuser surName: ${userSurName}
       \nuser fullName: ${userDisplayName}
       \ncontact type: ${contactType}
-      \ntext: ${contactText} 
+      \ntext: ${contactText}
       `
   let emailHtml = emailText.replace(/[\n]/g, '<br/>')
   if (sendEmails) {
