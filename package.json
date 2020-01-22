@@ -24,6 +24,7 @@
     "lodash": "^4.17.11",
     "moment": "^2.23.0",
     "short-uuid": "^3.1.0",
+    "smiles-drawer": "1.1.22",
     "v-playback": "^1.0.2",
     "vkbeautify": "^0.99.3",
     "vue": "^2.5.21",

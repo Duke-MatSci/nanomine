@@ -25,6 +25,12 @@
         "pgmname": "curateDatasetUpload.js"
       },
       {
+        "jobtype": "generateseofiles",
+        "lang": "js",
+        "pgmdir": "../src/jobs/metadata",
+        "pgmname": "generateSeoFiles.js"
+      },
+      {
         "jobtype": "IntelligentCharacterize",
         "lang": "python",
         "pgmdir": "../src/jobs/IntelliCharact",
