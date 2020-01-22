@@ -39,6 +39,7 @@ import DynamfitExample from '@/components/DynamfitExample'
 import DynamfitExampleInput from '@/components/DynamfitExampleInput'
 import DynamfitResult from '@/components/DynamfitResult'
 import ChemProps from '@/components/ChemProps'
+import SmilesTest from '@/components/nanomine/SmilesTest'
 // DISABLED FOR NOW import XmlUploader from '@/components/XmlUploader'
 
 Vue.use(Router)
@@ -245,6 +246,11 @@ export default new Router({
       path: '/DynamfitResult',
       name: 'DynamfitResult',
       component: DynamfitResult
+    },
+    {
+      path: '/SmilesTest',
+      name: 'SmilesTest',
+      component: SmilesTest
     },
     {
       path: '/ChemProps',
