@@ -37,6 +37,10 @@ export default {
   methods: {
     getCanvas () {
       return this.$refs['wrapped-canvas']
+    },
+    clearCanvas () {
+      let c = this.$refs['wrapped-canvas']
+      this.provider.context.clearRect(0, 0, c.width, c.height)
     }
   }
 }
