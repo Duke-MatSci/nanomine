@@ -13,7 +13,10 @@
         <v-text-field v-model="inputStr" size="30" label="Smiles" placeholder="Enter smiles" single-line></v-text-field>
        </v-flex>
        <v-flex d-flex xs6>
-        <smiles :smilesOptions="smilesOptions" :smilesInput="inputStr" :onSuccessHandler="onSuccess" :onErrorHandler="onError" height="100%" width="100%"></smiles>
+        <smiles :smilesOptions="smilesOptions" :smilesInput="inputStr" :formulaHandler="formulaUpdated" :onSuccessHandler="onSuccess" :onErrorHandler="onError" height="100%" width="100%"></smiles>
+       </v-flex>
+       <v-flex d-flex xs6>
+         Formula: {{molecularFormula}}
        </v-flex>
      </v-layout>
    </v-container>
@@ -34,6 +37,8 @@ export default {
       theme: 'dark', // 'light',
       smilesError: false,
       smilesMessage: '',
+      molecularFormula: '',
+      // https://github.com/reymond-group/smilesDrawer#options
       smilesOptions: {
         Padding: 0.0,
         atomVisualization: 'default', // 'balls',
@@ -49,6 +54,9 @@ export default {
   methods: {
     onSuccess () {
       this.smilesError = false
+    },
+    formulaUpdated (formula) {
+      this.molecularFormula = formula
     },
     onError (err) {
       console.trace('Error handler called: ')

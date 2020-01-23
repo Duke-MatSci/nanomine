@@ -28,6 +28,10 @@ export default {
       type: String,
       default: ''
     },
+    formulaHandler: {
+      type: Function,
+      default: null
+    },
     theme: {
       type: String,
       default: 'light'
@@ -80,20 +84,34 @@ export default {
     },
     setInput (inputStr) {
       let vm = this
-      if (inputStr && inputStr.length > 0) {
+      if (inputStr) {
         vm.inputStr = inputStr
         SmilesDrawer.parse(vm.smilesValue, function (tree) {
           vm.smilesDrawer.draw(tree, vm.canvasId)
           if (vm.onSuccessHandler) {
             vm.onSuccessHandler()
           }
+          if (vm.formulaHandler) {
+            vm.formulaHandler(vm.getMolecularFormula())
+          }
         }, function (err) {
+          if (vm.formulaHandler) {
+            vm.formulaHandler('*Error*')
+          }
           if (vm.onErrorHandler) {
             vm.onErrorHandler(err)
           } else {
             console.log('smilesDrawer error: ' + err)
           }
         })
+      } else { // clear values on empty input
+        if (vm.onSuccessHandler) {
+          vm.onSuccessHandler()
+        }
+        if (vm.formulaHandler) {
+          vm.formulaHandler('')
+        }
+        vm.$refs['canvas-wrapper'].clearCanvas() // clear the smiles image
       }
     }
   }
