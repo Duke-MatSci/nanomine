@@ -12,7 +12,7 @@
        <v-flex d-flex xs6>
         <v-text-field v-model="inputStr" size="30" label="Smiles" placeholder="Enter smiles" single-line></v-text-field>
        </v-flex>
-       <v-flex d-flex xs6>
+       <v-flex d-flex xs3>
         <smiles :smilesOptions="smilesOptions" :smilesInput="inputStr" :formulaHandler="formulaUpdated" :onSuccessHandler="onSuccess" :onErrorHandler="onError" height="100%" width="100%"></smiles>
        </v-flex>
        <v-flex d-flex xs6>
