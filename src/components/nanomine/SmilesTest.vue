@@ -38,6 +38,7 @@ export default {
       smilesError: false,
       smilesMessage: '',
       molecularFormula: '',
+      // https://github.com/reymond-group/smilesDrawer#options
       smilesOptions: {
         Padding: 0.0,
         atomVisualization: 'default', // 'balls',
