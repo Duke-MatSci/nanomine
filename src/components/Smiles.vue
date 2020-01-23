@@ -11,6 +11,8 @@
 import CanvasWrapper from './CanvasWrapper'
 // eslint-disable-next-line no-unused-vars
 import * as SmilesDrawer from 'smiles-drawer'
+import _ from 'lodash'
+
 export default {
   components: {
     CanvasWrapper
@@ -52,7 +54,8 @@ export default {
   data () {
     return {
       canvasId: null,
-      smilesDrawer: new SmilesDrawer.Drawer(this.smilesOptions),
+      smilesOptionsAdjusted: null,
+      smilesDrawer: null,
       smilesValue: '',
       smilesTheme: this.theme,
       smilesComputeOnly: this.computeOnly
@@ -60,6 +63,10 @@ export default {
   },
 
   watch: {
+    smilesOptions: function (v) {
+      let vm = this
+      vm.overrideOptions(vm.smilesOptions)
+    },
     smilesInput: function (v) {
       let vm = this
       console.log('smiles input: ' + v)
@@ -73,14 +80,26 @@ export default {
       this.smilesComputeOnly = v
     }
   },
-
   mounted () {
     this.canvasId = this.$refs['canvas-wrapper'].canvasId
     console.log('canvas-id: ' + this.canvasId)
+    this.overrideOptions(this.smilesOptions)
+    this.smilesDrawer = new SmilesDrawer.Drawer(this.smilesOptionsAdjusted)
   },
   methods: {
     getMolecularFormula () {
       return this.smilesDrawer.getMolecularFormula()
+    },
+    overrideOptions (opts) {
+      let vm = this
+      let parentDims = this.$refs['canvas-wrapper'].getParentDimensions()
+      if (opts) {
+        vm.smilesOptionsAdjusted = _.clone(opts)
+      } else {
+        vm.smilesOptionsAdjusted = {}
+      }
+      vm.smilesOptionsAdjusted.height = parentDims.height
+      vm.smilesOptionsAdjusted.width = parentDims.width
     },
     setInput (inputStr) {
       let vm = this

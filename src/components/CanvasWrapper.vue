@@ -30,11 +30,21 @@ export default {
 
   mounted () {
     this.provider.context = this.$refs['wrapped-canvas'].getContext('2d')
-    this.$refs['wrapped-canvas'].width = this.$refs['wrapped-canvas'].parentElement.clientWidth
-    this.$refs['wrapped-canvas'].height = this.$refs['wrapped-canvas'].parentElement.clientHeight
+    this.adjustDimensions()
   },
 
   methods: {
+    getParentDimensions () {
+      return {
+        width: this.$refs['wrapped-canvas'].parentElement.clientWidth,
+        height: this.$refs['wrapped-canvas'].parentElement.clientHeight
+      }
+    },
+    adjustDimensions () {
+      let dim = this.getParentDimensions()
+      this.$refs['wrapped-canvas'].width = dim.width
+      this.$refs['wrapped-canvas'].height = dim.height
+    },
     getCanvas () {
       return this.$refs['wrapped-canvas']
     },
