@@ -28,6 +28,10 @@ export default {
       type: String,
       default: ''
     },
+    formulaHandler: {
+      type: Function,
+      default: null
+    },
     theme: {
       type: String,
       default: 'light'
@@ -87,7 +91,13 @@ export default {
           if (vm.onSuccessHandler) {
             vm.onSuccessHandler()
           }
+          if (vm.formulaHandler) {
+            vm.formulaHandler(vm.getMolecularFormula())
+          }
         }, function (err) {
+          if (vm.formulaHandler) {
+            vm.formulaHandler('*Error*')
+          }
           if (vm.onErrorHandler) {
             vm.onErrorHandler(err)
           } else {
