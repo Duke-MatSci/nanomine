@@ -700,7 +700,7 @@ function updateDatasetsObject (seq, ds, dsExt) {
 //  The reasons are:
 //    1 - The assumption is that new xmls  and schema will be uploaded and new datasets created for those since xmls are being renumbered
 //    2 - Once the db is updated to spdev3 with new xmls, the db will be made available for dev so that migrations do not need to be run
-function migrateToNmSpDev3 (fromVer, toVer) {
+function migrateToNmSpDev3_NOTUSED (fromVer, toVer) { // Dev3 is no longer just delete schemas
   // requires that new versions of the xml files exist in /apps/xmlupdates
   // NOTE: this is less of a migration than it is a mass update
   let func = 'migrateToNmSpDev3'
