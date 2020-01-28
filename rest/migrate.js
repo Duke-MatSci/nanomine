@@ -700,7 +700,7 @@ function updateDatasetsObject (seq, ds, dsExt) {
 //  The reasons are:
 //    1 - The assumption is that new xmls  and schema will be uploaded and new datasets created for those since xmls are being renumbered
 //    2 - Once the db is updated to spdev3 with new xmls, the db will be made available for dev so that migrations do not need to be run
-function migrateToNmSpDev3_NOTUSED (fromVer, toVer) { // Dev3 is no longer just delete schemas
+function migrateToNmSpDev3 (fromVer, toVer) { // Dev3 is no longer just delete schemas
   // requires that new versions of the xml files exist in /apps/xmlupdates
   // NOTE: this is less of a migration than it is a mass update
   let func = 'migrateToNmSpDev3'
@@ -745,36 +745,24 @@ function migrateToNmSpDev3_NOTUSED (fromVer, toVer) { // Dev3 is no longer just 
                   } else {
                     msg = 'Successfully dropped all datasets indexes. Results: ' + JSON.stringify(result)
                     logInfo(msg)
-                    // create xmldata index on schemaId+dsid (non-unique)
-                    xmldata.createIndex({schemaId: 1, dsSeq: 1}, function (err, result) {
+                    // create xmldata index on datasetId (non-unique)
+                    xmldata.createIndex({datasetId: 1}, function (err, result) {
                       if (err) {
-                        msg = 'Failed to create xmldata schemaId+dsSeq index. Error: ' + err
+                        msg = 'Failed to create xmldata datasetId index. Error: ' + err
                         logInfo(msg)
                         reject(err)
                       } else {
-                        msg = 'Successfully created xmldata schemaId+dsSeq index. Result: ' + JSON.stringify(result)
+                        msg = 'Successfully created xmldata datasetId index. Result: ' + JSON.stringify(result)
                         logInfo(msg)
-                        // create datasets index on schemaid+(seq)dsid (unique)
-                        ds.createIndex({schemaId: 1, seq: 1}, {unique: true}, function (err, result) {
+                        ds.createIndex({seq: 1}, function (err, result) {
                           if (err) {
-                            msg = 'Failed to create datasets schemaId+dsSeq unique index. Error: ' + err
+                            msg = 'Failed to create datasets seq index. Error: ' + err
                             logInfo(msg)
                             reject(err)
                           } else {
-                            msg = 'Successfully created xmldata schemaId+dsSeq index. Result: ' + JSON.stringify(result)
+                            msg = 'Successfully created datasets seq index. Result: ' + JSON.stringify(result)
                             logInfo(msg)
-                            // create datasets unique index on doi
-                            ds.createIndex({doi: 1}, {unique: true}, function (err, result) {
-                              if (err) {
-                                msg = 'Failed to create datasets schemaId+dsSeq unique index. Error: ' + err
-                                logInfo(msg)
-                                reject(err)
-                              } else {
-                                msg = 'Successfully created xmldata schemaId+dsSeq index. Result: ' + JSON.stringify(result)
-                                logInfo(msg)
-                                return resolve()
-                              }
-                            })
+                            return resolve()
                           }
                         })
                       }

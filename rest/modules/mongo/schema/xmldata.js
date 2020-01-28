@@ -5,6 +5,9 @@ module.exports = function (mongoose) {
                        OLD INFO: To convert the field after restore from MDCS, use mongocli which loads nanomongo.js. At the mongo command line
                        type 'swizzleForMongoose()' to change all the xmldata document fields named schema to schemaId.
                     */
+    datasetId: String,
+    dttm_created: Number,
+    dttm_updated: Number,
     title: String,
     content: mongoose.Schema.Types.Mixed, /* !!! NOTE: MDCS stores the XML content as a BSON object parsed into the individual fields.
                       Moving forward NanoMine will not use this approach, so the data was downloaded as text via the MDCS rest interface
@@ -20,7 +23,8 @@ module.exports = function (mongoose) {
     isPublic: Boolean, /* Set this to true to make available to everyone */
     curateState: String, /* currently values are Edit, Review, Curated */
     entityState: String, /* currently values are EditedNotValid, EditedValid, Valid, NotValid, Ingesting, IngestFailed, IngestSuccess */
-    dsSeq: Number /* Sequence number of the associated dataset (datasetSchema) */
+    dsSeq: Number, /* Sequence number of the associated dataset (datasetSchema) */
+    resultSeq: Number /* 0 is the control sample */
   }, {collection: 'xmldata'})
   return xmlDataSchema
 }

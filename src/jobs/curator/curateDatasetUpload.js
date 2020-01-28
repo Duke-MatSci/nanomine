@@ -27,11 +27,11 @@ const inspect = nmutils.inspect
 const matchValidXmlTitle = nmutils.matchValidXmlTitle
 const xmlEnsurePathExists = nmutils.xmlEnsurePathExists
 const mergeDatasetInfoFromXml = nmutils.mergeDatasetInfoFromXml
-const createDataset = nmutils.createDataset
+// const createDataset = nmutils.createDataset
 const updateOrCreateXmlData = nmutils.updateOrCreateXmlData
-const updateOrCreateDatasetById = nmutils.updateOrCreateDatasetById
+const updateDataset = nmutils.updateDataset
 const updateMicrostructureImageFileLocations = nmutils.updateMicrostructureImageFileLocations
-const replaceDatasetId = nmutils.replaceDatasetId
+// const replaceXmlSeqInTitle = nmutils.replaceXmlSeqInTitle
 const setTrace = nmutils.setTrace
 const logTrace = nmutils.logTrace
 
@@ -180,15 +180,12 @@ function fmtLogMsg (status, msg) {
 
 function curateDatasetUpload (jobType, jobId, jobDir) {
   let func = 'curateDatasetUpload'
-  // Added schemaId to dataset records to make unique (composite key)
   // similar to curate, but takes multiple XMLs of the same dataset to process
-  // if the remap flag is set, a new dataset definition will be created to link samples and all the data remapped to the
-  //   new dataset id
   // All of the XMLs uploaded must be for the same dataset
   // NOTE: Microstructure images are assumed to exist on the system already and their URL will be adjusted to the
   //   correct value for the environment being uploaded using the blobid included in the microstructure definition
 
-  // Read job parameters to get remapdataset flag value and files
+  // Read job parameters to get dataset id of the dataset created/selected by the user that ran the job
   // do the updates
   // write status to job_output_parameters.json
   // send email to submitter
@@ -203,28 +200,34 @@ function curateDatasetUpload (jobType, jobId, jobDir) {
     let validParameters = true
     let remap = false
     let useId = false
-    switch (parameters.datasetCreateOrUpdateType.toLowerCase()) {
-      case 'remap': // Forces new dataset creation for the set of XMLs and remaps id/control id to new number
-        remap = true
-        break
-      case 'useid': // uses id of xml to create/update dataset
-        useId = true
-        break
-      default:
-        validParameters = false
+    let datasetId = null
+    if (parameters.datasetCreateOrUpdateType && parameters.datasetId) {
+      switch (parameters.datasetCreateOrUpdateType.toLowerCase()) {
+        // case 'remap': // Forces new dataset creation for the set of XMLs and remaps id/control id to new number
+        //  remap = true // DEPRECATED
+        //  break
+        case 'useid': // uses id of xml to create and update dataset
+          useId = true
+          break
+        default:
+          validParameters = false
+      }
+      datasetId = parameters.datasetId
+    } else {
+      validParameters = false
     }
     let xmls = parameters.files
     logger.info(func + ' - parameters: ' + paramsStr)
     let validXmlNames = true
-    let dsid = -1
+    let dsSeq = -1
     xmls.forEach((v, i) => {
       let rv = matchValidXmlTitle(v)
       if (rv) {
         let xmlds = +(rv[1]) // dataset seq is first slot of name
-        if (dsid === -1) {
-          dsid = xmlds
+        if (dsSeq === -1) {
+          dsSeq = xmlds
         }
-        if (dsid !== xmlds) {
+        if (dsSeq !== xmlds) {
           validXmlNames = false
         }
       }
@@ -242,7 +245,7 @@ function curateDatasetUpload (jobType, jobId, jobDir) {
       let rc = 97
       let errors = []
       if (!validParameters) {
-        errors.push('datasetCreateOrUpdate query parameter must be either "remap" or "useid"')
+        errors.push('datasetCreateOrUpdate query parameter must be either "remap" or "useid" and datasetId must be set')
       }
       if (!validXmlNames) {
         errors.push('all XMLs must be for same dataset.')
@@ -290,6 +293,27 @@ function curateDatasetUpload (jobType, jobId, jobDir) {
                     } else {
                       let docId = xmlDoc.find('//ID')[0].text()
                       let controlId = xmlDoc.find('//Control_ID')[0].text()
+                      let schemaVersionPath = '/PolymerNanocomposite/SchemaVersion'
+                      let schemaIdPath = '/PolymerNanocomposite/SchemaID'
+                      let datasetIdPath = '/PolymerNanocomposite/DatasetID'
+                      let after = ['ID', 'ControlID']
+                      xmlDoc = xmlEnsurePathExists(xmlDoc, schemaVersionPath, after)
+                      after.push('SchemaVersion')
+                      xmlDoc = xmlEnsurePathExists(xmlDoc, schemaIdPath, after)
+                      after.push('SchemaId')
+                      xmlDoc = xmlEnsurePathExists(xmlDoc, datasetIdPath, after)
+                      let n = xmlDoc.find(schemaVersionPath)
+                      if (n && n[0]) { // find returns an array, which in this case is always length 1 based on the schema
+                        n[0].text(schemaName)
+                      } else { logger.debug(func + ' - ' + 'Unable to set schemaName into XML') }
+                      n = xmlDoc.find(schemaIdPath)
+                      if (n && n[0]) {
+                        n[0].text(schemaId)
+                      } else { logger.debug(func + ' - ' + 'Unable to set schemaId into XML') }
+                      n = xmlDoc.find(datasetIdPath)
+                      if (n && n[0]) {
+                        n[0].text(datasetId)
+                      } else { logger.debug(func + ' - ' + 'Unable to set datasetId into XML') }
                       if (docId && controlId && docId.length > 0 && controlId.length > 0 && matchValidXmlTitle(docId) && matchValidXmlTitle(controlId)) {
                         // TODO do some basic XML doc verification like same dataset for all incoming XMLs (requires ID which should ALWAYS be there)
                         let doiPath = '/PolymerNanocomposite/DATA_SOURCE/Citation/CommonFields/DOI'
@@ -321,9 +345,12 @@ function curateDatasetUpload (jobType, jobId, jobDir) {
                   }
                 }
               })
+              datasetInfo.datasetId = datasetId
+              datasetInfo.seq = dsSeq
               datasetInfo.userid = user // obtained from job parameters
+              datasetInfo.datasetComment = 'created for upload of xmls - seq: ' + dsSeq
               // deprecated datasetInfo.latestSchema = true // just validated all the XMLs against the latest schema
-              datasetInfo.schemaId = schemaId
+              // datasetInfo.schemaId = schemaId -- abandoned this idea
               logger.debug('datasetInfo after merging ' + pct + ' of ' + xmls.length + ' xmls: ' + inspect(datasetInfo))
               if (resStatus !== 0) {
                 let rc = resStatus
@@ -335,68 +362,60 @@ function curateDatasetUpload (jobType, jobId, jobDir) {
               }
               // create/update the dataset
               let xmlPromises = []
-              let p = null
-              if (remap) {
-                p = createDataset(Datasets, logger, datasetInfo)
-              } else {
-                p = updateOrCreateDatasetById(Datasets, logger, datasetInfo)
-              }
-              p
-                .then(function (result) {
-                  // loop through the xmls and update the ID, Control_ID and create the xml entry using the current schema
-                  let dsid = result.data.seq
-                  logger.debug(func + ' - dataset id is: ' + dsid + ' remap: ' + remap)
-                  xmlDocs.forEach((v, idx) => {
-                    let xmlDoc = v
-                    if (remap) {
-                      let docId = xmlDoc.get('//ID')
-                      let docIdText = docId.text()
-                      let controlId = xmlDoc.get('//Control_ID')
-                      let controlIdText = controlId.text()
-                      docIdText = replaceDatasetId(logger, docIdText, dsid)
-                      controlIdText = replaceDatasetId(logger, controlIdText, dsid)
-                      docId.text(docIdText)
-                      controlId.text(controlIdText)
-                    }
-                    updateMicrostructureImageFileLocations(logger, xmlDoc, nmWebBaseUri + '/nmr')
-                    // TODO take care of named character encodings in text elements
-                    // logger.debug(func + ' - updated xml: ' + xmlDoc.toString())
-                    xmlPromises.push(updateOrCreateXmlData(XmlData, logger, user, xmlDoc, schemaId))
-                  })
-                  jsonResp.error = null // TODO
-                  jsonResp.data = result.data // from dataset create
-                  Promise.all(xmlPromises)
-                    .then(function (values) {
-                      let rc = 0
-                      let msg = 'Updated or created ' + xmlPromises.length + ' xml records. rc=' + rc
-                      jsonResp.data.info_msg = msg
-                      jsonResp.error = null
-                      writeOutputParameters(jobId, jobDir, jsonResp)
-                      logger.info(msg)
-                      console.log(3)
+              // loop through the xmls and update the ID, Control_ID and create the xml entry using the current schema
+              // let newDsSeq = result.data.seq (was needed for remap scenario)
+              logger.debug(func + ' - dataset id is: ' + datasetInfo.seq + ' remap: ' + remap)
+              xmlDocs.forEach((v, idx) => {
+                let xmlDoc = v
+                // if (remap) {
+                //   let docId = xmlDoc.get('//ID')
+                //   let docIdText = docId.text()
+                //   let controlId = xmlDoc.get('//Control_ID')
+                //   let controlIdText = controlId.text()
+                //   docIdText = replaceDatasetId(logger, docIdText, dsid)
+                //   controlIdText = replaceDatasetId(logger, controlIdText, dsid)
+                //   docId.text(docIdText)
+                //   controlId.text(controlIdText)
+                // }
+                updateMicrostructureImageFileLocations(logger, xmlDoc, nmWebBaseUri + '/nmr')
+                // TODO take care of named character encodings in text elements
+                // logger.debug(func + ' - updated xml: ' + xmlDoc.toString())
+                xmlPromises.push(updateOrCreateXmlData(XmlData, logger, user, xmlDoc, schemaId, datasetId))
+              })
+              Promise.all(xmlPromises)
+                .then(function (values) {
+                  let rc = 0
+                  let msg = 'Updated or created ' + xmlPromises.length + ' xml records. rc=' + rc
+                  jsonResp.data.info_msg = msg
+                  jsonResp.error = null
+                  writeOutputParameters(jobId, jobDir, jsonResp)
+                  logger.info(msg)
+                  console.log(3)
+                  updateDataset(Datasets, logger, datasetInfo)
+                    .then(function (result) {
                       resolve(rc)
                     })
-                    .catch(function (err) {
-                      jsonResp.error = err.message
-                      let msg = jsonResp.error + '  **WARNING**: dataset ' + result.data.seq + ' created and XML create/update failed after possibly updating/creating xmlData records'
-                      jsonResp.data = null
+                    .catch(function (status) {
+                      let rc = 99
+                      let msg = 'upload error: ' + JSON.stringify(status)
+                      msg += ' rc: ' + rc
+                      logger.error(msg)
                       jsonResp.error = msg
-                      let restStatus = 99
-                      logger.error(fmtLogMsg(restStatus, msg))
+                      jsonResp.data = null
                       writeOutputParameters(jobId, jobDir, jsonResp)
-                      console.log(4)
-                      reject(new Error(restStatus))
+                      reject(new Error(rc))
                     })
                 })
-                .catch(function (status) {
-                  let rc = 99
-                  let msg = 'upload error: ' + JSON.stringify(status)
-                  msg += ' rc: ' + rc
-                  logger.error(msg)
-                  jsonResp.error = msg
+                .catch(function (err) {
+                  jsonResp.error = err.message
+                  let msg = jsonResp.error + '  **WARNING**: dataset ' + result.data.seq + ' created and XML create/update failed after possibly updating/creating xmlData records'
                   jsonResp.data = null
+                  jsonResp.error = msg
+                  let restStatus = 99
+                  logger.error(fmtLogMsg(restStatus, msg))
                   writeOutputParameters(jobId, jobDir, jsonResp)
-                  reject(new Error(rc))
+                  console.log(4)
+                  reject(new Error(restStatus))
                 })
             } else {
               let status = 98

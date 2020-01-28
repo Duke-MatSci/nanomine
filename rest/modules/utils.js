@@ -3,6 +3,7 @@ const {createLogger, format, transports} = require('winston')
 const libxmljs = require('libxmljs2')
 const he = require('he') // for encoding text element named character entities into decimal encoding (rdf requires this downstream for ingest)
 const util = require('util')
+const ObjectId = require('mongodb').ObjectId
 const { combine, label, printf, prettyPrint } = format
 // const datasetsSchema = require('./modules/mongo/schema/datasets')(mongoose)
 // const Datasets = mongoose.model('datasets', datasetsSchema)
@@ -97,20 +98,21 @@ function matchValidXmlTitle (title) {
   return rv
 }
 
-function getDatasetXmlFileList (mongoose, logger, xmlTitle, schemaId) {
+function getDatasetXmlFileList (mongoose, logger, xmlTitle) { // XML should contain DatasetID and SchemaID
   let func = getDatasetXmlFileList
   logger.info(func + ' is deprecated.')
-  return getXmlFileList(mongoose, logger, xmlTitle, schemaId)
+  return getXmlFileList(mongoose, logger, xmlTitle)
 }
 
-function getXmlFileList (mongoose, logger, xmlTitle, schemaId) {
+function getXmlFileList (mongoose, logger, xmlTitle) {
   let func = 'getXmlFileList'
   let bucketName = datasetBucketName
   let validTitle = matchValidXmlTitle(xmlTitle)
+  // TODO obtain schemaId and dataset_id from xml
   let options = {
-    'bucketName': bucketName
+    'bucketName': bucketName // TODO change use standard blob approach and list in dataset results BSON record
   }
-  return new Promise(function (resolve, reject) {
+  return new Promise(function (resolve, reject) { // TODO this code needs rework based on above TODOs
     const bucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, options)
     let files = []
     if (validTitle) {
@@ -142,7 +144,7 @@ function getXmlFileList (mongoose, logger, xmlTitle, schemaId) {
     }
   })
 }
-function updateOrCreateXmlData (xmlData, logger, creatorId, xmlDoc, schemaId) {
+function updateOrCreateXmlData (xmlData, logger, creatorId, xmlDoc, schemaId, datasetId) {
   // XMlData is the mongoose model instance
   // xmlDoc is an xml document parsed by libxmljs
   let func = 'utils.updateOrCreateXmlData'
@@ -164,10 +166,13 @@ function updateOrCreateXmlData (xmlData, logger, creatorId, xmlDoc, schemaId) {
     }
     let filename = id + '.xml'
     let msg = ' id: ' + id + ' using xml of length: ' + xml.length
-    xmlData.findOneAndUpdate({$and: [{'title': {$eq: filename}}, {'schemaId': {$eq: schemaId}}]},
+    let dttmNow = Date.now()
+    xmlData.findOneAndUpdate({$and: [{'title': {$eq: filename}}, {'schemaId': {$eq: schemaId}}, {'datasetId': {$eq: datasetId}}]},
       {
         $set: {
           'xml_str': xml, // write xml
+          'dttm_updated': dttmNow,
+          'datasetId': datasetId,
           'schemaId': schemaId, // create schemaId field using schema (note: field was schema in MDCS, but name is incompatible with Mongoose)
           'dsSeq': dsSeq, // Sequence of the associated dataset
           'entityState': 'EditedValid', // initial entity state shows validated by prior processing NOTE: 'Valid' would kick off rdf upload
@@ -190,6 +195,9 @@ function updateOrCreateXmlData (xmlData, logger, creatorId, xmlDoc, schemaId) {
           } else {
             let newDoc = {
               'xml_str': xml, // write xml
+              'dttm_created': dttmNow,
+              'dttm_updated': dttmNow,
+              'datasetId': datasetId,
               'schemaId': schemaId, // create schemaId field using schema (note: field was schema in MDCS, but name is incompatible with Mongoose)
               'dsSeq': dsSeq, // Sequence of the associated dataset
               'entityState': 'EditedValid', // initial entity state shows validated by prior processing NOTE: 'Valid' would kick off rdf upload
@@ -215,15 +223,16 @@ function updateOrCreateXmlData (xmlData, logger, creatorId, xmlDoc, schemaId) {
   })
 }
 
-function updateOrCreateDatasetById (Datasets, logger, dsInfo) {
+function updateDataset (Datasets, logger, dsInfo) {
   // NOTE: requires schemaId and seq for update and create
   //   If the record exists, it will be updated. If it does not, it will be created as
   //   opposed to createDataset which always selects a non-used sequence (still requires schemaId).
-  let func = 'utils.updateOrCreateDatasetById'
+  let func = 'utils.updateDataset'
   let status = {'statusCode': 201, 'error': null, 'data': null}
   return new Promise(function (resolve, reject) {
-    Datasets.findOneAndUpdate(
-      {'schemaId': dsInfo.schemaId, 'seq': dsInfo.seq},
+    dsInfo.dttm_updated = Date.now()
+    Datasets.findByIdAndUpdate(
+      dsInfo.datasetId,
       {$set: dsInfo},
       {upsert: true}, function (err, result) {
         if (err) {
@@ -249,41 +258,28 @@ function updateOrCreateDatasetById (Datasets, logger, dsInfo) {
 }
 function createDataset (Datasets, logger, dsInfo) { // creates the dataset using the dsInfo, new seq is returned with updated dsInfo in result.data
   let func = 'utils.createDataset'
-  // todo : if clustered, there's a race condition on setting the sequence number - should use some kind of db auto increment sequence
   return new Promise(function (resolve, reject) {
     let status = {'statusCode': 201, 'error': null, 'data': null}
-    if (dsInfo && dsInfo.schemaId) {
-      Datasets.find({'schemaId': {$eq: dsInfo.schemaId}}).sort({'seq': 1}).exec(function (err, docs) {
+    // 1. create a new dataset, get the _id and set it into the dsInfo.datasetId field
+    // 2. If the seq of the dsInfo is set, use it. TODO - Otherwise initialize it to one more than the greatest seq of all the datasets
+    //      datasets.findOne().sort('-seq').exec(function err, item){}) - if there are none, set to 101
+    if (dsInfo && dsInfo.seq && dsInfo.seq > 0) {
+      logger.debug(func + ' - Seq: ' + dsInfo.seq + ' dsInfo: ' + inspect(dsInfo))
+      dsInfo.dttm_create = Date.now()
+      dsInfo.dttm_updated = Date.now()
+      Datasets.create(dsInfo, function (err, doc) {
         if (err) {
-          logger.error(func + ' - datasets find error: ' + err)
+          logger.error(func + ' - datasets create error: ' + err)
           status.error = err
-          status.statusCode = 500
           status.data = null
+          status.statusCode = 500
           reject(status)
         } else {
-          let last = -1
-          let newSeq = -1
-          let done = false
-          docs.forEach(function (v) {
-            if (!done) {
-              if (v.seq > (last + 1) && last >= 101) {
-                newSeq = last + 1
-                done = true
-              }
-              last = v.seq
-            }
-          })
-          if (!done) {
-            newSeq = last + 1
-            if (newSeq <= 0) {
-              newSeq = 101
-            }
-          }
-          dsInfo.seq = newSeq
-          logger.debug(func + ' - newSeq: ' + newSeq + ' dsInfo: ' + inspect(dsInfo))
-          Datasets.create(dsInfo, function (err, doc) {
+          doc.datasetId = doc._id.toString()
+          doc.dttm_udpated = Date.now()
+          Datasets.findByIdAndUpdate(doc._id, doc, function (err, olddoc) {
             if (err) {
-              logger.error(func + ' - datasets create error: ' + err)
+              logger.error(func + ' - dataset created, but could not update datasetId: ' + err)
               status.error = err
               status.data = null
               status.statusCode = 500
@@ -292,14 +288,14 @@ function createDataset (Datasets, logger, dsInfo) { // creates the dataset using
               status.error = null
               status.data = doc
               status.statusCode = 201
-              logger.debug(func + ' - dataset created successfully. Sequence is: ' + dsInfo.seq)
+              logger.debug(func + ' - dataset created successfully. _id is: ' + doc._id.toString() + ' datasetId is: ' + doc.datasetId + ' Sequence is: ' + dsInfo.seq)
               resolve(status)
             }
           })
         }
       })
     } else {
-      let err = 'schemaId must be supplied as part of dataset structure.'
+      let err = 'Dataset information not supplied or seq field not set'
       logger.error(func + ' - datasets create error: ' + err)
       status.error = err
       status.data = null
@@ -382,6 +378,39 @@ function getLatestSchemas (xsdVersionSchema, xsdSchema, logger) { // duplicate o
     }
   })
 }
+// function initialzeDatasetInfo(logger, datasetComment, userid) {
+//   let datasetInfo = {}
+//   datasetInfo.author = []
+//   datasetInfo.chapter = null
+//   datasetInfo.citationType = null
+//   datasetInfo.datasetComment = datasetComment
+//   datasetInfo.dateOfCitation = null
+//   datasetInfo.doi = null
+//   datasetInfo.edition = null
+//   datasetInfo.editor = null
+//   datasetInfo.isDeleted = false
+//   datasetInfo.isPublic = false
+//   datasetInfo.ispublished = false
+//   datasetInfo.isbn = null
+//   datasetInfo.issn = null
+//   datasetInfo.issue = null
+//   datasetInfo.keyword = []
+//   datasetInfo.language = null
+//   datasetInfo.location = null
+//   datasetInfo.publication = null
+//   datasetInfo.publicationYear = null
+//   datasetInfo.publisher = null
+//   datasetInfo.relatedDoi = []
+//   datasetInfo.results = []
+//   datasetInfo.seq = -1
+//   datasetInfo.title = null
+//   datasetInfo.url = null
+//   datasetInfo.userid = userid
+//   datasetInfo.volume = null
+//
+//   return datasetInfo
+// }
+
 function mergeDatasetInfoFromXml (logger, datasetInfo, xmlDocument) {
   // Caller should parse the XML into a document before calling this function
 
@@ -391,7 +420,7 @@ function mergeDatasetInfoFromXml (logger, datasetInfo, xmlDocument) {
   // checks xml for dataset information in DATA_SOURCE and merges into datasetInfo provided if the source field
   // exists and is not empty/null
   // currently 21 fields + _id
-  //   'schemaId: ds.schemaId, NOTE: schemaId should already be in datasetInfo when called !!!!!
+  //   isDeleted: boolean
   //   'author': [],
   //   'citationType': ds.CitationType,
   //   'dateOfCitation': ds.DateOfCitation,
@@ -412,11 +441,9 @@ function mergeDatasetInfoFromXml (logger, datasetInfo, xmlDocument) {
   //   'volume': ds.Volume,
   //   'url': ds.URL,
   //   'userid': nanomineUser.userid,
+  //   'results': [ bson ] - an array of BSON records one for each result associated with the dataset
 
   let commonFields = xmlDocument.get('//CommonFields')
-  if (!datasetInfo.schemaId) {
-    datasetInfo.schemaId = null
-  }
   if (!datasetInfo.author) {
     datasetInfo.author = []
   }
@@ -558,7 +585,7 @@ function mergeDatasetInfoFromXml (logger, datasetInfo, xmlDocument) {
   return false
 }
 
-function replaceDatasetId (logger, id, newDsid) {
+function replaceXmlSeqIdInTitle (logger, id, newDsid) {
   // given an id of the regex form .[0-9]{n}_S[0-9]{n}_AUTHOR_YYYY replace the dsid component (first set of number)
   let newId = null
   let m = matchValidXmlTitle(id)
@@ -585,9 +612,10 @@ function updateMicrostructureImageFileLocations (logger, xmlDoc, restServerBaseU
   })
 }
 
-function xmlEnsurePathExists (xmlDoc, path) {
+function xmlEnsurePathExists (xmlDoc, path, after) { // after may be undefined but is a list of element names (in order, same level) that this new path must come after
   // ensure path exists and create nodes if necessary.
   // returns new document containing path
+  // Expects root node and at least one node to ensure exists as path i.e. /PolymerNanocomposite/ID
   let rv = null
   let nodes = path.replace(/^\/*/, '').split('/') // strip leading slashes and split by path separator
   let subPath = ''
@@ -607,7 +635,18 @@ function xmlEnsurePathExists (xmlDoc, path) {
         // console.log('goodSubNode: ' + goodSubNode.toString())
         // console.log('goodSubNode[0]: ' + goodSubNode[0].toString())
         // console.log('goodSubNode.type(): ' + goodSubNode[0].type())
-        let newNode = goodSubNode[0].node(v, null)
+        let newNode = null
+        if (after) {
+          let children = goodSubNode[0].childNodes()
+          children.forEach((v1, idx) => {
+            let nm = v1.name()
+            if (nm === after.slice(-1)) {
+              newNode = v1.addNextSibling(new libxmljs.Element(xmlDoc, v))
+            }
+          })
+        } else {
+          newNode = goodSubNode[0].node(v, null)
+        }
         // console.log('newNode: ' + newNode.toString())
         newDoc = newNode.doc()
         goodSubNode = newNode
@@ -637,12 +676,12 @@ module.exports = {
   'getDatasetXmlFileList': getDatasetXmlFileList, // deprecated
   'getXmlFileList': getXmlFileList, // replacement for getDatasetXmlFileList
   'getLatestSchemas': getLatestSchemas,
-  'updateOrCreateDatasetById': updateOrCreateDatasetById,
+  'updateDataset': updateDataset,
   'createDataset': createDataset,
   'sortSchemas': sortSchemas,
   'mergeDatasetInfoFromXml': mergeDatasetInfoFromXml,
   'xmlEnsurePathExists': xmlEnsurePathExists,
-  'replaceDatasetId': replaceDatasetId,
+  'replaceXmlSeqIdInTitle': replaceXmlSeqIdInTitle,
   'updateMicrostructureImageFileLocations': updateMicrostructureImageFileLocations,
   'updateOrCreateXmlData': updateOrCreateXmlData,
   'logTrace': logTrace,

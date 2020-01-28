@@ -233,8 +233,11 @@ let authOptions = {
     //    The set of all path+methodlist entries should cover all possible combinations for which security is required
     //    !!!! The methods field is NOT currently being used but it will be needed
     // not yet    { path: '/dataset/create', loginAuth: false, membership: [], apiAuth: true, apiGroup: 'curate' },
+    {path: '/blob/create', loginAuth: true, membership: [], apiAuth: true, apiGroup: 'curate'},
     {path: '/curate', methods: allMethods, loginAuth: false, membership: [], apiAuth: true, apiGroup: 'curate'},
-    {path: '/datasets', loginAuth: true, membership: [], apiAuth: true, apiGroup: 'curate'},
+    {path: '/dataset', loginAuth: true, membership: [], apiAuth: true, apiGroup: 'curate'},
+    {path: '/dataset/create', loginAuth: true, membership: [], apiAuth: true, apiGroup: 'curate'},
+    {path: '/dataset/update', loginAuth: true, membership: [], apiAuth: true, apiGroup: 'curate'},
     {path: '/jobemail', loginAuth: false, membership: [], apiAuth: true, apiGroup: 'email'},
     {path: '/jobcreate', loginAuth: true, membership: [], apiAuth: true, apiGroup: 'jobs'},
     {path: '/jobpostfile', loginAuth: true, membership: [], apiAuth: true, apiGroup: 'jobs'},
@@ -2184,7 +2187,7 @@ app.post('/curate', function (req, res) {
   }
 })
 
-app.post('/blob', function (req, res) {
+app.post('/blob/create', function (req, res) {
   // save blob to gridfs
   let jsonResp = {'error': null, 'data': null}
   let bucketName = req.body.bucketName
