@@ -3420,7 +3420,7 @@ def sheetMicrostructure(sheet, DATA, myXSDtree, jobDir):
         if match(sheet.cell_value(row, 0), 'Microstructure filename'): #(!!!!!!!!!!!!!!!!!)
             if hasLen(sheet.cell_value(row, 1)):
                 filename = str(sheet.cell_value(row, 1)).strip()
-                if filename.split('.')[-1].lower() not in ['png', 'jpg', 'tif', 'tiff', 'gif']:
+                if filename.split('.')[-1].lower() not in ['png', 'bmp', 'jpeg', 'jpg', 'tif', 'tiff', 'gif']:
                     # write the message in ./error_message.txt
                     with open(jobDir + '/error_message.txt', 'a') as fid:
                         fid.write('[File Error] "%s" is not an acceptable image file. Please check the file extension.\n' % (filename))
