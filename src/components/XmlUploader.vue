@@ -265,14 +265,15 @@ export default {
         seq: dsid,
         datasetComment: 'XmlUploader create dataset for: ' + dsid
       }
-      Axios.post('/nmr/dataset/create', dsInfo)
-        .then(function (data) {
+      Axios.post('/nmr/dataset/create', {dsInfo: dsInfo})
+        .then(function (result) {
         // let data = {}
         // data.remap = true
         // data.xmls = []
         //
+          // console.log(result)
           let jobParameters = {
-            datasetId: data.data.datasetId,
+            datasetId: result.data.data.datasetId,
             datasetCreateOrUpdateType: vm.xmlFiles[idx]['createDsType'], // remap or useId
             files: []
           }

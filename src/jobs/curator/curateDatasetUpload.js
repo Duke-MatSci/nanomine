@@ -95,7 +95,14 @@ process.on('uncaughtException', (err, origin) => {
 })
 
 let connected = new Promise(function (resolve, reject) {
-  mongoose.connect(dbUri, {keepAlive: true, keepAliveInitialDelay: 300000})
+  mongoose.connect(dbUri, {
+    poolSize: 10,
+    bufferMaxEntries: 0,
+    reconnectTries: 5000,
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    keepAlive: true,
+    keepAliveInitialDelay: 30000})
   db.on('error', function (err) {
     logger.error('db error: ' + err)
     reject(err)
@@ -143,8 +150,8 @@ connected
           db.close()
         })
         .catch(function (err) {
-          logger.error('unexpected error: ' + err)
-          logger.error(err.stack)
+          logger.error('unexpected error: ' + inspect(err))
+          logger.error(inspect(err.stack))
           writeOutputParameters(jobId, jobDir, {error: err, data: null})
           db.close()
         })
@@ -296,7 +303,7 @@ function curateDatasetUpload (jobType, jobId, jobDir) {
                       let schemaVersionPath = '/PolymerNanocomposite/SchemaVersion'
                       let schemaIdPath = '/PolymerNanocomposite/SchemaID'
                       let datasetIdPath = '/PolymerNanocomposite/DatasetID'
-                      let after = ['ID', 'ControlID']
+                      let after = ['ID', 'Control_ID']
                       xmlDoc = xmlEnsurePathExists(xmlDoc, schemaVersionPath, after)
                       after.push('SchemaVersion')
                       xmlDoc = xmlEnsurePathExists(xmlDoc, schemaIdPath, after)
@@ -386,7 +393,7 @@ function curateDatasetUpload (jobType, jobId, jobDir) {
                 .then(function (values) {
                   let rc = 0
                   let msg = 'Updated or created ' + xmlPromises.length + ' xml records. rc=' + rc
-                  jsonResp.data.info_msg = msg
+                  jsonResp.data = { info_msg: msg }
                   jsonResp.error = null
                   writeOutputParameters(jobId, jobDir, jsonResp)
                   logger.info(msg)
@@ -395,27 +402,27 @@ function curateDatasetUpload (jobType, jobId, jobDir) {
                     .then(function (result) {
                       resolve(rc)
                     })
-                    .catch(function (status) {
-                      let rc = 99
-                      let msg = 'upload error: ' + JSON.stringify(status)
-                      msg += ' rc: ' + rc
-                      logger.error(msg)
-                      jsonResp.error = msg
+                    .catch(function (err) {
+                      jsonResp.error = err.message
+                      let msg = jsonResp.error + '  **WARNING**: dataset ' + datasetId + ' created, but update failed. After XML create/update possibly updating/creating xmlData records'
                       jsonResp.data = null
+                      jsonResp.error = msg
+                      let restStatus = 99
+                      logger.error(fmtLogMsg(restStatus, msg))
                       writeOutputParameters(jobId, jobDir, jsonResp)
-                      reject(new Error(rc))
+                      console.log(4)
+                      reject(new Error(restStatus))
                     })
                 })
                 .catch(function (err) {
-                  jsonResp.error = err.message
-                  let msg = jsonResp.error + '  **WARNING**: dataset ' + result.data.seq + ' created and XML create/update failed after possibly updating/creating xmlData records'
-                  jsonResp.data = null
+                  let rc = 99
+                  let msg = 'upload error: ' + err.message
+                  msg += ' rc: ' + rc
+                  logger.error(msg)
                   jsonResp.error = msg
-                  let restStatus = 99
-                  logger.error(fmtLogMsg(restStatus, msg))
+                  jsonResp.data = null
                   writeOutputParameters(jobId, jobDir, jsonResp)
-                  console.log(4)
-                  reject(new Error(restStatus))
+                  reject(new Error(rc))
                 })
             } else {
               let status = 98

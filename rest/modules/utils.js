@@ -4,6 +4,7 @@ const libxmljs = require('libxmljs2')
 const he = require('he') // for encoding text element named character entities into decimal encoding (rdf requires this downstream for ingest)
 const util = require('util')
 const ObjectId = require('mongodb').ObjectId
+const _ = require('lodash')
 const { combine, label, printf, prettyPrint } = format
 // const datasetsSchema = require('./modules/mongo/schema/datasets')(mongoose)
 // const Datasets = mongoose.model('datasets', datasetsSchema)
@@ -99,7 +100,7 @@ function matchValidXmlTitle (title) {
 }
 
 function getDatasetXmlFileList (mongoose, logger, xmlTitle) { // XML should contain DatasetID and SchemaID
-  let func = getDatasetXmlFileList
+  let func = 'getDatasetXmlFileList'
   logger.info(func + ' is deprecated.')
   return getXmlFileList(mongoose, logger, xmlTitle)
 }
@@ -166,7 +167,7 @@ function updateOrCreateXmlData (xmlData, logger, creatorId, xmlDoc, schemaId, da
     }
     let filename = id + '.xml'
     let msg = ' id: ' + id + ' using xml of length: ' + xml.length
-    let dttmNow = Date.now()
+    let dttmNow = Math.floor(Date.now() / 1000)
     xmlData.findOneAndUpdate({$and: [{'title': {$eq: filename}}, {'schemaId': {$eq: schemaId}}, {'datasetId': {$eq: datasetId}}]},
       {
         $set: {
@@ -230,7 +231,7 @@ function updateDataset (Datasets, logger, dsInfo) {
   let func = 'utils.updateDataset'
   let status = {'statusCode': 201, 'error': null, 'data': null}
   return new Promise(function (resolve, reject) {
-    dsInfo.dttm_updated = Date.now()
+    dsInfo.dttm_updated = Math.floor(Date.now() / 1000)
     Datasets.findByIdAndUpdate(
       dsInfo.datasetId,
       {$set: dsInfo},
@@ -265,8 +266,8 @@ function createDataset (Datasets, logger, dsInfo) { // creates the dataset using
     //      datasets.findOne().sort('-seq').exec(function err, item){}) - if there are none, set to 101
     if (dsInfo && dsInfo.seq && dsInfo.seq > 0) {
       logger.debug(func + ' - Seq: ' + dsInfo.seq + ' dsInfo: ' + inspect(dsInfo))
-      dsInfo.dttm_create = Date.now()
-      dsInfo.dttm_updated = Date.now()
+      dsInfo.dttm_created = Math.floor(Date.now() / 1000)
+      dsInfo.dttm_updated = Math.floor(Date.now() / 1000)
       Datasets.create(dsInfo, function (err, doc) {
         if (err) {
           logger.error(func + ' - datasets create error: ' + err)
@@ -276,7 +277,7 @@ function createDataset (Datasets, logger, dsInfo) { // creates the dataset using
           reject(status)
         } else {
           doc.datasetId = doc._id.toString()
-          doc.dttm_udpated = Date.now()
+          doc.dttm_updated = Math.floor(Date.now() / 1000)
           Datasets.findByIdAndUpdate(doc._id, doc, function (err, olddoc) {
             if (err) {
               logger.error(func + ' - dataset created, but could not update datasetId: ' + err)
@@ -617,50 +618,93 @@ function xmlEnsurePathExists (xmlDoc, path, after) { // after may be undefined b
   // returns new document containing path
   // Expects root node and at least one node to ensure exists as path i.e. /PolymerNanocomposite/ID
   let rv = null
+  let func = 'xmlEnsurePathExists'
   let nodes = path.replace(/^\/*/, '').split('/') // strip leading slashes and split by path separator
   let subPath = ''
   let goodSubNode = null
   let newDoc = null
-  nodes.forEach(function (v, idx) {
+  console.log(func + ' - ' + 'Path: ' + path + ' After: ' + JSON.stringify(after))
+  nodes.forEach(function (v) {
     subPath += '/' + v
     let subNode = xmlDoc.find(subPath)
     if (subNode && subNode.length > 0) {
-      // console.log('found subPath: ' + subPath)
+      // console.log(func + ' - ' + 'found subPath: ' + subPath)
       goodSubNode = subNode
     } else {
       // console.log('subPath: ' + subPath + ' NOT FOUND')
       if (goodSubNode && goodSubNode.length > 0) {
         // create new element node at subPath + nodes[idx]
-        // console.log('goodSubNode: ' + dump(goodSubNode))
-        // console.log('goodSubNode: ' + goodSubNode.toString())
-        // console.log('goodSubNode[0]: ' + goodSubNode[0].toString())
-        // console.log('goodSubNode.type(): ' + goodSubNode[0].type())
+        // console.log(func + ' - ' + 'goodSubNode: ' + dump(goodSubNode))
+        // console.log(func + ' - ' + 'goodSubNode: ' + goodSubNode.toString())
+        // console.log(func + ' - ' + 'goodSubNode[0]: ' + goodSubNode[0].toString())
+        // console.log(func + ' - ' + 'goodSubNode.type(): ' + goodSubNode[0].type())
         let newNode = null
         if (after) {
+          let _after = _.clone(after)
+          let possibles = []
           let children = goodSubNode[0].childNodes()
-          children.forEach((v1, idx) => {
+          let idx = 0
+          children.forEach((v1) => {
             let nm = v1.name()
-            if (nm === after.slice(-1)) {
-              newNode = v1.addNextSibling(new libxmljs.Element(xmlDoc, v))
+            console.log('Looking for possible spot for new node: ' + v + ' Cur: ' + nm + ' target after is: ' + after.slice(-1))
+            if (_after && _after.length > 0 && nm === _after[0]) {
+              possibles.push({nm: nm, idx: idx})
+              _after.shift()
+              console.log(func + ' - ' + 'found possible: ' + JSON.stringify(possibles))
             }
+            // if (nm === after.slice(-1)) {
+            //   newNode = v1.addNextSibling(new libxmljs.Element(xmlDoc, v))
+            // }
+            ++idx
           })
+          try {
+            if (possibles.length > 0) {
+              let afterChild = null // children[possibles.slice(-1).idx]
+              idx = 0
+              goodSubNode[0].childNodes().forEach((c) => {
+                let possible = possibles.slice(-1)[0]
+                let pidx = possible['idx']
+                console.log('possible at end of array: ' + JSON.stringify(possible))
+                if (idx === pidx) {
+                  afterChild = c
+                  console.log(func + ' - ' + 'adding node: ' + v + ' under: ' + afterChild.name())
+                } else {
+                  console.log(func + ' - ' + 'checked child at index: ' + idx + ' vs. possible idx: ' + pidx)
+                }
+                ++idx
+              })
+              newNode = afterChild.addNextSibling(new libxmljs.Element(xmlDoc, v))
+            }
+          } catch (err) {
+            console.log(func + ' - ' + 'error searching for possibles: ' + err.message)
+            console.log(err.stack)
+            throw (err)
+          }
+          if (newNode === null) {
+            let afterChild = goodSubNode[0].child(0)
+            if (afterChild) {
+              newNode = afterChild.addNextSibling(new libxmljs.Element(xmlDoc, v))
+            } else {
+              newNode = goodSubNode[0].addChild(new libxmljs.Element(xmlDoc, v))
+            }
+          }
         } else {
           newNode = goodSubNode[0].node(v, null)
         }
-        // console.log('newNode: ' + newNode.toString())
+        // console.log(func + ' - ' + 'newNode: ' + newNode.toString())
         newDoc = newNode.doc()
         goodSubNode = newNode
       } else if (goodSubNode) {
-        // console.log('goodSubNode is not null, but length <= 0')
-        // console.log('goodSubNode.toString() = ' + goodSubNode.toString())
-        // console.log('goodSubNode.type() = ' + goodSubNode.type())
+        // console.log(func + ' - ' + 'goodSubNode is not null, but length <= 0')
+        // console.log(func + ' - ' + 'goodSubNode.toString() = ' + goodSubNode.toString())
+        // console.log(func + ' - ' + 'goodSubNode.type() = ' + goodSubNode.type())
         let newNode = goodSubNode.node(v, null)
         goodSubNode = newNode
         newDoc = newNode.doc()
-        // console.log('added child: ' + newNode.toString())
-        // console.log('new doc string: ' + newDoc.toString())
+        // console.log(func + ' - ' + 'added child: ' + newNode.toString())
+        // console.log(func + ' - ' + 'new doc string: ' + newDoc.toString())
       } else {
-        console.log('goodSubNode is null')
+        console.log(func + ' - ' + 'goodSubNode is null')
       }
     }
   })
