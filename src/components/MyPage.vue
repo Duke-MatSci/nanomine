@@ -478,7 +478,7 @@ export default {
     vm.getActiveSchemas()
       .then(function () {
         Axios.get('/nmr/dataset', {
-          params: {schemaId: vm.selectedSchemaId}
+          params: {}
         })
           .then(function (resp) {
             resp.data.data.forEach(function (v) {
@@ -863,35 +863,36 @@ export default {
         vm.samplesHideSelector = true
         console.log('sampleClick - title: ' + sample.title + ' ' + sample.schemaId)
         vm.sampleSelected = sample
-        vm.getFilesList(sample)
-          .then(function () {
-            try {
-              vm.sampleObj = xmljs.xml2js(sample.xml_str, {
-                'compact': true,
-                ignoreDeclaration: true,
-                ignoreAttributes: true
-              })
-              if (vm.sampleObj['PolymerNanocomposite']) {
-                vm.sampleObj = vm.sampleObj.PolymerNanocomposite
-              }
-            } catch (err) { // L138_S1
-              console.log('error occurred attempting to xml to json convert sample: ' + sample.title + ' ' + sample.schemaId + ' err: ' + err)
-              vm.sampleObj = {'Error': 'Unable to display: ' + sample.title}
-            }
-            console.log(vm.sampleObj)
-            // delete vm.sampleObj['_declaration']
-            window.sampleObj = vm.sampleObj
-            // let indent = 2
-            // vm.sample2Tree(vm.sampleObj, vm.sampleTree, indent)
-            vm.resetLoading()
+        // vm.getFilesList(sample)
+        //   .then(function () {
+        try {
+          vm.sampleObj = xmljs.xml2js(sample.xml_str, {
+            'compact': true,
+            ignoreDeclaration: true,
+            ignoreAttributes: true
           })
-          .catch(function (err) {
-            let msg = func + ' - error loading sample files.' + err
-            console.log(msg)
-            vm.myPageError = true
-            vm.myPageErrorMsg = msg
-            vm.resetLoading()
-          })
+          if (vm.sampleObj['PolymerNanocomposite']) {
+            vm.sampleObj = vm.sampleObj.PolymerNanocomposite
+          }
+        } catch (err) { // L138_S1
+          console.log(func + ' error occurred attempting to xml to json convert sample: ' + sample.title + ' ' + sample.schemaId + ' err: ' + err)
+          vm.sampleObj = {'Error': 'Unable to display: ' + sample.title}
+        }
+        console.log(func)
+        console.log(vm.sampleObj)
+        // delete vm.sampleObj['_declaration']
+        // window.sampleObj = vm.sampleObj
+        // let indent = 2
+        // vm.sample2Tree(vm.sampleObj, vm.sampleTree, indent)
+        vm.resetLoading()
+        // })
+        // .catch(function (err) {
+        //   let msg = 'Error loading sample file: ' + err
+        //   console.log(msg)
+        //   vm.myPageError = true
+        //   vm.myPageErrorMsg = msg
+        //   vm.resetLoading()
+        // })
       }, 20)
     },
     // sample2Tree: function (node, sampleTree, indent) {

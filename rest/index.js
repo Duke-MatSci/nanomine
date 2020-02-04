@@ -2330,10 +2330,10 @@ app.get('/blob', function (req, res) { // MDCS only supports get by id (since th
 
 app.get('/dataset', function (req, res) {
   let jsonResp = {'error': null, 'data': null}
-  let schemaId = req.query.schemaId
   let id = req.query.id
   let seq = req.query.seq
   let doi = req.query.doi
+  // TODO - check user id and if not admin, only return public data and non-public data for the user
   if (validQueryParam(id)) {
     Datasets.findById(id, function (err, ds) {
       if (err) {
@@ -2344,8 +2344,8 @@ app.get('/dataset', function (req, res) {
         return res.json(jsonResp)
       }
     })
-  } else if (validQueryParam(seq) && validQueryParam(schemaId)) {
-    Datasets.find({$and: [{'schemaId': {$eq: schemaId}}, {'seq': {'$eq': seq}}]}, function (err, doc) {
+  } else if (validQueryParam(seq)) {
+    Datasets.find({'seq': {'$eq': seq}}, function (err, doc) {
       if (err) {
         jsonResp.error = err
         return res.status(500).json(jsonResp)
@@ -2354,7 +2354,7 @@ app.get('/dataset', function (req, res) {
         return res.json(jsonResp)
       }
     })
-  } else if (validQueryParam(doi) && validQueryParam(schemaId)) {
+  } else if (validQueryParam(doi)) {
     Datasets.find({'doi': {'$eq': doi}}, function (err, doc) {
       if (err) {
         jsonResp.error = err
@@ -2365,8 +2365,9 @@ app.get('/dataset', function (req, res) {
       }
     })
   } else {
-    // return all datasets for schema now
-    Datasets.find({schemaId: {'$eq': schemaId}}).sort({'seq': 1}).exec(function (err, docs) {
+    // return all datasets
+    // Datasets.find({'$and': [{isDeleted: {'$eq': false}}, {isPublic: {$eq: true}}]}).sort({'seq': 1}).exec(function (err, docs) {
+    Datasets.find({isDeleted: {'$eq': false}}).sort({'seq': 1}).exec(function (err, docs) {
       if (err) {
         jsonResp.error = err
         return res.status(500).json(jsonResp)
@@ -2656,7 +2657,6 @@ function updateJobStatus (statusFilePath, newStatus) {
   } catch (err) {
     logger.error('try/catch driven for updating job status: ' + statusFileName + ' err: ' + err)
   }
-
 }
 
 function jobCreate (jobType, jobParams) {

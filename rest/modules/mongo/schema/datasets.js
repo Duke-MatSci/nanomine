@@ -47,6 +47,7 @@ function datasets (mongoose) {
 }
 
 function addFiles (Datasets, logger, datasetId, filesetName, files) {
+  // DO NOT USE!!! This code needs to be re-worked since
   // - Datasets is a caller supplied datasets model
   // - will create filesetName if it does not exist
   // - Files should be an array of at least one { type: 'blob'|'xmldata', id: blobid | xmldata._id }

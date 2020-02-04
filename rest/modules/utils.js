@@ -266,6 +266,7 @@ function createDataset (Datasets, logger, dsInfo) { // creates the dataset using
     //      datasets.findOne().sort('-seq').exec(function err, item){}) - if there are none, set to 101
     if (dsInfo && dsInfo.seq && dsInfo.seq > 0) {
       logger.debug(func + ' - Seq: ' + dsInfo.seq + ' dsInfo: ' + inspect(dsInfo))
+      dsInfo.isDeleted = false
       dsInfo.dttm_created = Math.floor(Date.now() / 1000)
       dsInfo.dttm_updated = Math.floor(Date.now() / 1000)
       Datasets.create(dsInfo, function (err, doc) {
