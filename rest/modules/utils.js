@@ -192,7 +192,7 @@ function updateOrCreateXmlData (xmlData, logger, creatorId, xmlDoc, schemaId, da
           if (doc !== null) {
             logger.info(func + ' - Update successful: ' + msg)
             logger.debug(func + ' doc found: ' + doc)
-            resolve()
+            resolve(doc)
           } else {
             let newDoc = {
               'xml_str': xml, // write xml
@@ -215,7 +215,7 @@ function updateOrCreateXmlData (xmlData, logger, creatorId, xmlDoc, schemaId, da
                 reject(err)
               } else {
                 logger.info(func + ' - new xml created: ' + msg)
-                resolve()
+                resolve(doc)
               }
             })
           }
@@ -601,16 +601,19 @@ function replaceXmlSeqIdInTitle (logger, id, newDsid) {
 function updateMicrostructureImageFileLocations (logger, xmlDoc, restServerBaseUri) {
   let func = 'updateMicrostructureImageFileLocations'
   let blobs = xmlDoc.find('//MICROSTRUCTURE/ImageFile/File')
+  let blobArray = []
   blobs.forEach((v, idx) => {
     let blob = v.text()
     let m = blob.match(/blob\?id=([A-Fa-f0-9]*)/)
     if (m) {
       let blobId = m[1]
+      blobArray.push({'type': 'blob', 'id': blobId})
       let newBlob = restServerBaseUri + '/blob?id=' + blobId
       v.text(newBlob)
       logger.debug(func + ' - updated blob location from: ' + blob + ' to: ' + newBlob)
     }
   })
+  return blobArray
 }
 
 function xmlEnsurePathExists (xmlDoc, path, after) { // after may be undefined but is a list of element names (in order, same level) that this new path must come after

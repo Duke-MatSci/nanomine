@@ -160,7 +160,7 @@ mongoose.connect(dbUri, {keepAlive: true, keepAliveInitialDelay: 300000})
 // let mgiVersionSchema = require('./modules/mongo/schema/mgiVersion')(mongoose)
 // let MgiVersion = mongoose.model('mgiversion', mgiVersionSchema)
 
-let datasetsSchema = require('./modules/mongo/schema/datasets')(mongoose)
+let datasetsSchema = require('./modules/mongo/schema/datasets').datasets(mongoose)
 let Datasets = mongoose.model('datasets', datasetsSchema)
 
 let usersSchema = require('./modules/mongo/schema/users')(mongoose)

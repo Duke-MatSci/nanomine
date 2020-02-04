@@ -143,7 +143,7 @@
         <!--
            Select schema
         -->
-        <v-card style="width:100%">
+        <!--v-card style="width:100%">
           <v-card-title class="dataset-header"><span style="width:40%;" class="text-xs-left">
           <v-combobox single-line dense
             v-model="selectedSchemaTitle"
@@ -154,7 +154,7 @@
           ></v-combobox>
           </span>
           </v-card-title>
-        </v-card>
+        </v-card-->
         <!--
 
            Dataset Selection

@@ -77,6 +77,7 @@ let dbUri = process.env['NM_MONGO_URI']
 // let MgiVersion = null
 let datasetsSchema = null
 let Datasets = null
+let datasetsAddFiles = null
 // let Users = null
 // let Api = null
 let xmlDataSchema = null
@@ -120,9 +121,9 @@ connected
     // let mgiVersionSchema = require(schemaPath + '/mgiVersion')(mongoose)
     // MgiVersion = mongoose.model('mgiversion', mgiVersionSchema)
 
-    datasetsSchema = require(schemaPath + '/datasets')(mongoose)
+    datasetsSchema = require(schemaPath + '/datasets').datasets(mongoose)
     Datasets = mongoose.model('datasets', datasetsSchema)
-
+    datasetsAddFiles = require(schemaPath + '/datasets').datasetsAddFiles
     // let usersSchema = require(schemaPath + '/users')(mongoose)
     // Users = mongoose.model('users', usersSchema)
 
@@ -369,13 +370,14 @@ function curateDatasetUpload (jobType, jobId, jobDir) {
               }
               // create/update the dataset
               let xmlPromises = []
+              let datasetFiles = []
               // loop through the xmls and update the ID, Control_ID and create the xml entry using the current schema
               // let newDsSeq = result.data.seq (was needed for remap scenario)
               logger.debug(func + ' - dataset id is: ' + datasetInfo.seq + ' remap: ' + remap)
               xmlDocs.forEach((v, idx) => {
                 let xmlDoc = v
+                let docId = xmlDoc.find('//ID')[0].text()
                 // if (remap) {
-                //   let docId = xmlDoc.get('//ID')
                 //   let docIdText = docId.text()
                 //   let controlId = xmlDoc.get('//Control_ID')
                 //   let controlIdText = controlId.text()
@@ -384,20 +386,52 @@ function curateDatasetUpload (jobType, jobId, jobDir) {
                 //   docId.text(docIdText)
                 //   controlId.text(controlIdText)
                 // }
-                updateMicrostructureImageFileLocations(logger, xmlDoc, nmWebBaseUri + '/nmr')
-                // TODO take care of named character encodings in text elements
-                // logger.debug(func + ' - updated xml: ' + xmlDoc.toString())
+                let files = updateMicrostructureImageFileLocations(logger, xmlDoc, nmWebBaseUri + '/nmr')
+                // create a fileset for this sample in the dataset and add the microstructure files to the fileset as blobs
+                let filesetName = (docId || 'result_' + (Math.floor(Math.random() * 1000)))
+                if (files && files.length > 0) {
+                  datasetFiles.push({fileset: filesetName, files: files})
+                }
                 xmlPromises.push(updateOrCreateXmlData(XmlData, logger, user, xmlDoc, schemaId, datasetId))
+                // TODO take care of named character encodings in text elements
               })
+              // Promise.all(datasetFilesPromises)
+              //   .then(function (dfpValues) {
+              //     logger.debug('count of xmls in create list: ' + xmlUpdateList.length)
+              //     xmlUpdateList.forEach((v, idx) => {
+              //       xmlPromises.push(updateOrCreateXmlData.apply(this, v))
+              //     })
               Promise.all(xmlPromises)
                 .then(function (values) {
                   let rc = 0
                   let msg = 'Updated or created ' + xmlPromises.length + ' xml records. rc=' + rc
-                  jsonResp.data = { info_msg: msg }
+                  jsonResp.data = {info_msg: msg}
                   jsonResp.error = null
                   writeOutputParameters(jobId, jobDir, jsonResp)
                   logger.info(msg)
                   console.log(3)
+                  // add xml record ids to file list(s) TODO
+                  values.forEach((v, idx) => {
+                    let filesetName = v.title.replace(/\.[Xx][Mm][Ll]$/, '') // same as docId, but could have .xml appended
+                    let files = [{'type': 'xmldata', 'id': v._id.toString()}] // TODO improve the flow above so that this update is not required
+                    // let p = datasetsAddFiles(Datasets, logger, datasetId, filesetName, files)
+                    let dsfFound = false
+                    datasetFiles.forEach((dsf, idx) => {
+                      if (dsf.fileset === filesetName) {
+                        logger.debug(func + ' - ' + 'found filesetName: ' + filesetName + ' in datasetFiles list. files: ' + JSON.stringify(datasetFiles[idx].files))
+                        files.forEach((f, fx) => {
+                          datasetFiles[idx].files.push(f)
+                        })
+                        logger.debug(func + ' - ' + 'after appending xmldata info: ' + JSON.stringify(datasetFiles[idx]))
+                        dsfFound = true
+                      }
+                    })
+                    if (!dsfFound) {
+                      datasetFiles.push({fileset: filesetName, files: files})
+                    }
+                  })
+                  datasetInfo.filesets = datasetFiles
+                  logger.debug(func + ' - ' + 'Dataset update for: ' + datasetId + ' datasetInfo: ' + JSON.stringify(datasetInfo))
                   updateDataset(Datasets, logger, datasetInfo)
                     .then(function (result) {
                       resolve(rc)

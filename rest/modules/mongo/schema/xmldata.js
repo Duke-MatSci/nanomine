@@ -1,9 +1,6 @@
 module.exports = function (mongoose) {
   let xmlDataSchema = new mongoose.Schema({ // maps the mongo xmldata collection
     schemaId: String, /* !!! NOTE: had to rename 'schema' field name in restored data from MDCS to schemaId because of mongoose name conflict.
-                       The change is being made in the migration script -- migrate.js.
-                       OLD INFO: To convert the field after restore from MDCS, use mongocli which loads nanomongo.js. At the mongo command line
-                       type 'swizzleForMongoose()' to change all the xmldata document fields named schema to schemaId.
                     */
     datasetId: String,
     dttm_created: Number,
