@@ -263,6 +263,7 @@ export default {
       let dsid = vm.xmlFiles[idx].dsid
       let dsInfo = {
         seq: dsid,
+        isPublic: true, // SPECIAL CASE for now
         datasetComment: 'XmlUploader create dataset for: ' + dsid
       }
       Axios.post('/nmr/dataset/create', {dsInfo: dsInfo})
