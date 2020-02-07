@@ -235,7 +235,7 @@ let authOptions = {
     // not yet    { path: '/dataset/create', loginAuth: false, membership: [], apiAuth: true, apiGroup: 'curate' },
     {path: '/blob/create', loginAuth: true, membership: [], apiAuth: true, apiGroup: 'curate'},
     {path: '/curate', methods: allMethods, loginAuth: false, membership: [], apiAuth: true, apiGroup: 'curate'},
-    {path: '/dataset', loginAuth: true, membership: [], apiAuth: true, apiGroup: 'curate'},
+    // {path: '/dataset', loginAuth: true, membership: [], apiAuth: true, apiGroup: 'curate'},
     {path: '/dataset/create', loginAuth: true, membership: [], apiAuth: true, apiGroup: 'curate'},
     {path: '/dataset/update', loginAuth: true, membership: [], apiAuth: true, apiGroup: 'curate'},
     {path: '/jobemail', loginAuth: false, membership: [], apiAuth: true, apiGroup: 'email'},
