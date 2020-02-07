@@ -1,6 +1,6 @@
 const moment = require('moment')
 const {createLogger, format, transports} = require('winston')
-const libxmljs = require('libxmljs2')
+const libxmljs = require('libxmljs')
 const he = require('he') // for encoding text element named character entities into decimal encoding (rdf requires this downstream for ingest)
 const util = require('util')
 const ObjectId = require('mongodb').ObjectId
@@ -160,6 +160,7 @@ function updateOrCreateXmlData (xmlData, logger, creatorId, xmlDoc, schemaId, da
       published = false
     }
     let xml = xmlDoc.toString(false) // false 'should' turn off pretty printing, but it doesn't seem to work
+    xml = xml.replace(/>\s*</g, '><')
     let dsSeq = -1
     let m = matchValidXmlTitle(id)
     if (m) {
@@ -627,7 +628,7 @@ function xmlEnsurePathExists (xmlDoc, path, after) { // after may be undefined b
   let subPath = ''
   let goodSubNode = null
   let newDoc = null
-  console.log(func + ' - ' + 'Path: ' + path + ' After: ' + JSON.stringify(after))
+  console.log(func + ' - ' + 'Path: ' + path + ' After: ' + JSON.stringify(after) + ' nodes is: ' + JSON.stringify(nodes))
   nodes.forEach(function (v) {
     subPath += '/' + v
     let subNode = xmlDoc.find(subPath)
@@ -670,8 +671,17 @@ function xmlEnsurePathExists (xmlDoc, path, after) { // after may be undefined b
                 let pidx = possible['idx']
                 console.log('possible at end of array: ' + JSON.stringify(possible))
                 if (idx === pidx) {
-                  afterChild = c
-                  console.log(func + ' - ' + 'adding node: ' + v + ' under: ' + afterChild.name())
+                  if (c) {
+                    afterChild = c
+                    console.log(func + ' - ' + 'adding node: ' + v + ' under: ' + afterChild.name())
+                  } else {
+                    console.log(func + ' - ' + 'Error - invalid node in childNodes() of goodSubNode[0].')
+                    try {
+                      console.log(func + ' - ' + goodSubNode[0].toString())
+                    } catch (err) {
+                      console.log(func + ' - ' + 'unable to capture value of goodSubNode[0] using toString. Error: ' + err.message)
+                    }
+                  }
                 } else {
                   console.log(func + ' - ' + 'checked child at index: ' + idx + ' vs. possible idx: ' + pidx)
                 }
@@ -713,6 +723,7 @@ function xmlEnsurePathExists (xmlDoc, path, after) { // after may be undefined b
     }
   })
   rv = newDoc
+  console.log(func + ' - ' + 'is returning.')
   return rv
 }
 

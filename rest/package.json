@@ -27,7 +27,7 @@
     "he": "^1.2.0",
     "image-data-uri": "^2.0.0",
     "jsonfile": "^4.0.0",
-    "libxmljs2": "^0.21.6",
+    "libxmljs": "^0.19.7",
     "lodash": "^4.17.11",
     "mime-types": "^2.1.21",
     "moment": "^2.22.2",

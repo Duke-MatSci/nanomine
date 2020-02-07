@@ -32,7 +32,10 @@ function datasets (mongoose) {
       { 'filesetName': 'fileset name',
         'files': [{
             type: 'blob' | 'xmldata',
-            id: blobid | xmldata._id // must be ObjectId or convertable to one
+            id: blobid | xmldata._id, // must be ObjectId or convertable to one
+            metadata: [ // Optional
+               {key, value}, ...
+            ]
           } ... ]
       }
       */
@@ -47,7 +50,7 @@ function datasets (mongoose) {
 }
 
 function addFiles (Datasets, logger, datasetId, filesetName, files) {
-  // DO NOT USE!!! This code needs to be re-worked since
+  // DO NOT USE!!! This code needs to be re-worked!!!!
   // - Datasets is a caller supplied datasets model
   // - will create filesetName if it does not exist
   // - Files should be an array of at least one { type: 'blob'|'xmldata', id: blobid | xmldata._id }

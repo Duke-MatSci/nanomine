@@ -13,7 +13,7 @@ const mongoose = require('mongoose')
 const moment = require('moment')
 const nmutils = require('../../../rest/modules/utils')
 const shortUUID = require('short-uuid')()
-const libxmljs = require('libxmljs2')
+const libxmljs = require('libxmljs')
 const fs = require('fs')
 const env = nmutils.getEnv()
 const nmWebBaseUri = env.nmWebBaseUri
@@ -77,7 +77,6 @@ let dbUri = process.env['NM_MONGO_URI']
 // let MgiVersion = null
 let datasetsSchema = null
 let Datasets = null
-let datasetsAddFiles = null
 // let Users = null
 // let Api = null
 let xmlDataSchema = null
@@ -123,7 +122,6 @@ connected
 
     datasetsSchema = require(schemaPath + '/datasets').datasets(mongoose)
     Datasets = mongoose.model('datasets', datasetsSchema)
-    datasetsAddFiles = require(schemaPath + '/datasets').datasetsAddFiles
     // let usersSchema = require(schemaPath + '/users')(mongoose)
     // Users = mongoose.model('users', usersSchema)
 
@@ -168,12 +166,16 @@ connected
   })
 
 function readXmlFile (jobId, jobDir, filename) {
+  let func = 'readXmlFile'
   let xmlData = null
   let fullname = path.join(jobDir, filename)
+  // logger.debug(func + ' - ' + 'reading xml: ' + fullname)
   try {
     xmlData = fs.readFileSync(fullname, 'utf8')
+    xmlData = xmlData.replace(/>\s*</g, '><')
+    // logger.debug(func + ' - ' + 'read xml: ' + fullname + ' length: ' + xmlData.length)
   } catch (err) {
-    logger.error('job: ' + jobId + ' unable to read: ' + fullname)
+    logger.error(func + ' - job: ' + jobId + ' unable to read: ' + fullname)
   }
   return xmlData
 }
@@ -281,8 +283,10 @@ function curateDatasetUpload (jobType, jobId, jobDir) {
             let xmlDocs = []
             if (xmls && xmls.length > 0) {
               xmls.forEach((v, idx) => {
-                logger.debug(func + ' - processing xml ' + (pct + 1) + ' of ' + xmls.length)
                 let xml = readXmlFile(jobId, jobDir, v)
+                logger.debug(func + ' - processing xml - filename: ' + v + ' number: ' + (pct + 1) + ' of ' + xmls.length)
+                // logger.debug('filename: ' + v + ' xml: ' + xml + ' xml len: ' + xml.length)
+                // logger.debug('---')
                 let xmlDoc = null
                 if (resError === null) {
                   try {
@@ -300,7 +304,16 @@ function curateDatasetUpload (jobType, jobId, jobDir) {
                       resStatus = 98
                     } else {
                       let docId = xmlDoc.find('//ID')[0].text()
-                      let controlId = xmlDoc.find('//Control_ID')[0].text()
+                      let controlId = xmlDoc.find('//Control_ID')
+                      if (controlId && controlId.length > 0) {
+                        controlId = controlId[0]
+                        if (controlId) {
+                          controlId = controlId.text()
+                        } else {
+                          controlId = null
+                        }
+                      }
+                      logger.debug(func + ' - ' + 'Processing xml ID: ' + docId + ' control ID: ' + controlId)
                       let schemaVersionPath = '/PolymerNanocomposite/SchemaVersion'
                       let schemaIdPath = '/PolymerNanocomposite/SchemaID'
                       let datasetIdPath = '/PolymerNanocomposite/DatasetID'
@@ -322,19 +335,30 @@ function curateDatasetUpload (jobType, jobId, jobDir) {
                       if (n && n[0]) {
                         n[0].text(datasetId)
                       } else { logger.debug(func + ' - ' + 'Unable to set datasetId into XML') }
-                      if (docId && controlId && docId.length > 0 && controlId.length > 0 && matchValidXmlTitle(docId) && matchValidXmlTitle(controlId)) {
+                      if (docId && docId.length > 0/* && controlId && controlId.length > 0 */ && matchValidXmlTitle(docId)/* && matchValidXmlTitle(controlId) */) {
                         // TODO do some basic XML doc verification like same dataset for all incoming XMLs (requires ID which should ALWAYS be there)
                         let doiPath = '/PolymerNanocomposite/DATA_SOURCE/Citation/CommonFields/DOI'
-                        let doi = xmlDoc.find(doiPath)
+                        let doi = xmlDoc.get(doiPath)
+                        if (doi) {
+                          doi = doi.text()
+                        }
                         if (doi && doi.length > 0) {
                           logger.debug(func + ' - ' + docId + ' doi is ' + doi)
                         } else {
                           logger.debug(func + ' - ' + docId + ' no DOI found. Using unpublished temp id: ' + tempDoi)
                           xmlDoc = xmlEnsurePathExists(xmlDoc, doiPath) // NOTE: this resets the xmlDoc to the new xmlDoc with the possibly new path
-                          let elem = xmlDoc.find(doiPath)
-                          elem[0].text(tempDoi)
+                          if (xmlDoc) {
+                            let elem = xmlDoc.find(doiPath)
+                            elem[0].text(tempDoi)
+                          } else {
+                            resStatus = 95
+                            resError = func + ' - xmlEnsurePathExists(xmlDoc, ' + doiPath + ') returned a null document. Status: ' + resStatus
+                            logger.error(resError)
+                            throw new Error(resError)
+                          }
                         }
                         mergeDatasetInfoFromXml(logger, datasetInfo, xmlDoc)
+                        logger.debug(func + ' - ' + 'merged incoming xml info into dataset info.')
                         if (useId) {
                           datasetInfo.seq = +(matchValidXmlTitle(docId)[1])
                         }
@@ -367,97 +391,98 @@ function curateDatasetUpload (jobType, jobId, jobDir) {
                 logger.error(jsonResp.error)
                 console.log(2)
                 reject(new Error(rc))
-              }
-              // create/update the dataset
-              let xmlPromises = []
-              let datasetFiles = []
-              // loop through the xmls and update the ID, Control_ID and create the xml entry using the current schema
-              // let newDsSeq = result.data.seq (was needed for remap scenario)
-              logger.debug(func + ' - dataset id is: ' + datasetInfo.seq + ' remap: ' + remap)
-              xmlDocs.forEach((v, idx) => {
-                let xmlDoc = v
-                let docId = xmlDoc.find('//ID')[0].text()
-                // if (remap) {
-                //   let docIdText = docId.text()
-                //   let controlId = xmlDoc.get('//Control_ID')
-                //   let controlIdText = controlId.text()
-                //   docIdText = replaceDatasetId(logger, docIdText, dsid)
-                //   controlIdText = replaceDatasetId(logger, controlIdText, dsid)
-                //   docId.text(docIdText)
-                //   controlId.text(controlIdText)
-                // }
-                let files = updateMicrostructureImageFileLocations(logger, xmlDoc, nmWebBaseUri + '/nmr')
-                // create a fileset for this sample in the dataset and add the microstructure files to the fileset as blobs
-                let filesetName = (docId || 'result_' + (Math.floor(Math.random() * 1000)))
-                if (files && files.length > 0) {
-                  datasetFiles.push({fileset: filesetName, files: files})
-                }
-                xmlPromises.push(updateOrCreateXmlData(XmlData, logger, user, xmlDoc, schemaId, datasetId))
-                // TODO take care of named character encodings in text elements
-              })
-              // Promise.all(datasetFilesPromises)
-              //   .then(function (dfpValues) {
-              //     logger.debug('count of xmls in create list: ' + xmlUpdateList.length)
-              //     xmlUpdateList.forEach((v, idx) => {
-              //       xmlPromises.push(updateOrCreateXmlData.apply(this, v))
-              //     })
-              Promise.all(xmlPromises)
-                .then(function (values) {
-                  let rc = 0
-                  let msg = 'Updated or created ' + xmlPromises.length + ' xml records. rc=' + rc
-                  jsonResp.data = {info_msg: msg}
-                  jsonResp.error = null
-                  writeOutputParameters(jobId, jobDir, jsonResp)
-                  logger.info(msg)
-                  console.log(3)
-                  // add xml record ids to file list(s) TODO
-                  values.forEach((v, idx) => {
-                    let filesetName = v.title.replace(/\.[Xx][Mm][Ll]$/, '') // same as docId, but could have .xml appended
-                    let files = [{'type': 'xmldata', 'id': v._id.toString()}] // TODO improve the flow above so that this update is not required
-                    // let p = datasetsAddFiles(Datasets, logger, datasetId, filesetName, files)
-                    let dsfFound = false
-                    datasetFiles.forEach((dsf, idx) => {
-                      if (dsf.fileset === filesetName) {
-                        logger.debug(func + ' - ' + 'found filesetName: ' + filesetName + ' in datasetFiles list. files: ' + JSON.stringify(datasetFiles[idx].files))
-                        files.forEach((f, fx) => {
-                          datasetFiles[idx].files.push(f)
-                        })
-                        logger.debug(func + ' - ' + 'after appending xmldata info: ' + JSON.stringify(datasetFiles[idx]))
-                        dsfFound = true
+              } else {
+                // create/update the dataset
+                let xmlPromises = []
+                let datasetFiles = []
+                // loop through the xmls and update the ID, Control_ID and create the xml entry using the current schema
+                // let newDsSeq = result.data.seq (was needed for remap scenario)
+                logger.debug(func + ' - dataset id is: ' + datasetInfo.seq + ' remap: ' + remap)
+                xmlDocs.forEach((v, idx) => {
+                  let xmlDoc = v
+                  let docId = xmlDoc.find('//ID')[0].text()
+                  // if (remap) {
+                  //   let docIdText = docId.text()
+                  //   let controlId = xmlDoc.get('//Control_ID')
+                  //   let controlIdText = controlId.text()
+                  //   docIdText = replaceDatasetId(logger, docIdText, dsid)
+                  //   controlIdText = replaceDatasetId(logger, controlIdText, dsid)
+                  //   docId.text(docIdText)
+                  //   controlId.text(controlIdText)
+                  // }
+                  let files = updateMicrostructureImageFileLocations(logger, xmlDoc, nmWebBaseUri + '/nmr')
+                  // create a fileset for this sample in the dataset and add the microstructure files to the fileset as blobs
+                  let filesetName = (docId || 'result_' + (Math.floor(Math.random() * 1000)))
+                  if (files && files.length > 0) {
+                    datasetFiles.push({fileset: filesetName, files: files})
+                  }
+                  xmlPromises.push(updateOrCreateXmlData(XmlData, logger, user, xmlDoc, schemaId, datasetId))
+                  // TODO take care of named character encodings in text elements
+                })
+                // Promise.all(datasetFilesPromises)
+                //   .then(function (dfpValues) {
+                //     logger.debug('count of xmls in create list: ' + xmlUpdateList.length)
+                //     xmlUpdateList.forEach((v, idx) => {
+                //       xmlPromises.push(updateOrCreateXmlData.apply(this, v))
+                //     })
+                Promise.all(xmlPromises)
+                  .then(function (values) {
+                    let rc = 0
+                    let msg = 'Updated or created ' + xmlPromises.length + ' xml records. rc=' + rc
+                    jsonResp.data = {info_msg: msg}
+                    jsonResp.error = null
+                    writeOutputParameters(jobId, jobDir, jsonResp)
+                    logger.info(msg)
+                    console.log(3)
+                    // add xml record ids to file list(s) TODO
+                    values.forEach((v, idx) => {
+                      let filesetName = v.title.replace(/\.[Xx][Mm][Ll]$/, '') // same as docId, but could have .xml appended
+                      let files = [{'type': 'xmldata', 'id': v._id.toString()}] // TODO improve the flow above so that this update is not required
+                      // let p = datasetsAddFiles(Datasets, logger, datasetId, filesetName, files)
+                      let dsfFound = false
+                      datasetFiles.forEach((dsf, idx) => {
+                        if (dsf.fileset === filesetName) {
+                          logger.debug(func + ' - ' + 'found filesetName: ' + filesetName + ' in datasetFiles list. files: ' + JSON.stringify(datasetFiles[idx].files))
+                          files.forEach((f, fx) => {
+                            datasetFiles[idx].files.push(f)
+                          })
+                          logger.debug(func + ' - ' + 'after appending xmldata info: ' + JSON.stringify(datasetFiles[idx]))
+                          dsfFound = true
+                        }
+                      })
+                      if (!dsfFound) {
+                        datasetFiles.push({fileset: filesetName, files: files})
                       }
                     })
-                    if (!dsfFound) {
-                      datasetFiles.push({fileset: filesetName, files: files})
-                    }
+                    datasetInfo.filesets = datasetFiles
+                    logger.debug(func + ' - ' + 'Dataset update for: ' + datasetId + ' datasetInfo: ' + JSON.stringify(datasetInfo))
+                    updateDataset(Datasets, logger, datasetInfo)
+                      .then(function (result) {
+                        resolve(rc)
+                      })
+                      .catch(function (err) {
+                        jsonResp.error = err.message
+                        let msg = jsonResp.error + '  **WARNING**: dataset ' + datasetId + ' created, but update failed. After XML create/update possibly updating/creating xmlData records'
+                        jsonResp.data = null
+                        jsonResp.error = msg
+                        let restStatus = 99
+                        logger.error(fmtLogMsg(restStatus, msg))
+                        writeOutputParameters(jobId, jobDir, jsonResp)
+                        console.log(4)
+                        reject(new Error(restStatus))
+                      })
                   })
-                  datasetInfo.filesets = datasetFiles
-                  logger.debug(func + ' - ' + 'Dataset update for: ' + datasetId + ' datasetInfo: ' + JSON.stringify(datasetInfo))
-                  updateDataset(Datasets, logger, datasetInfo)
-                    .then(function (result) {
-                      resolve(rc)
-                    })
-                    .catch(function (err) {
-                      jsonResp.error = err.message
-                      let msg = jsonResp.error + '  **WARNING**: dataset ' + datasetId + ' created, but update failed. After XML create/update possibly updating/creating xmlData records'
-                      jsonResp.data = null
-                      jsonResp.error = msg
-                      let restStatus = 99
-                      logger.error(fmtLogMsg(restStatus, msg))
-                      writeOutputParameters(jobId, jobDir, jsonResp)
-                      console.log(4)
-                      reject(new Error(restStatus))
-                    })
-                })
-                .catch(function (err) {
-                  let rc = 99
-                  let msg = 'upload error: ' + err.message
-                  msg += ' rc: ' + rc
-                  logger.error(msg)
-                  jsonResp.error = msg
-                  jsonResp.data = null
-                  writeOutputParameters(jobId, jobDir, jsonResp)
-                  reject(new Error(rc))
-                })
+                  .catch(function (err) {
+                    let rc = 99
+                    let msg = 'upload error: ' + err.message
+                    msg += ' rc: ' + rc
+                    logger.error(msg)
+                    jsonResp.error = msg
+                    jsonResp.data = null
+                    writeOutputParameters(jobId, jobDir, jsonResp)
+                    reject(new Error(rc))
+                  })
+              }
             } else {
               let status = 98
               let msg = fmtLogMsg(status, 'No XMLs specified to process.')
