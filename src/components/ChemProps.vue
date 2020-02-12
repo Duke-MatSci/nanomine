@@ -15,7 +15,7 @@
       </p>
       <br>
       <h3 class="text-xs-left">Instructions</h3>
-      <p class="text-xs-left"><b>1. Select the collection.
+      <p class="text-xs-left"><b>1. Select the collection.</b></p>
       <v-flex xs12 sm6 md3>
         <v-radio-group v-model="pfRadios">
           <v-radio label="Polymer" value="pol"></v-radio>

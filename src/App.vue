@@ -15,6 +15,12 @@ import {} from 'vuex'
 
 export default {
   name: 'App',
+  data () {
+    return {}
+  },
+  beforeMount: function () {
+    console.log('beforeMount of App.vue')
+  },
   methods: {
     showLeftMenu: function () {
       return this.$store.state.leftMenuActive

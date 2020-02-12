@@ -19,6 +19,9 @@ const store = new Vuex.Store({
     sampleList: [], // editor still has dependency -- need to remove when samples get read
 
     editorActive: false, // move to editor object
+    config: {
+      baseServicesUrl: ''
+    },
     cms: { // CMS object contains references to urls by name that can be loaded. At some point, this will be dyn loaded.
       images: {},
       videos: {
@@ -45,6 +48,10 @@ const store = new Vuex.Store({
     addSchemas: function (state, toAdd) {
       // console.log('state.addSchemas: ' + JSON.stringify(toAdd))
       state.editor.schemas = toAdd // Overwrite since call is made that returns all data to client at once
+    },
+    baseServicesUrl: function (state, value) {
+      state.config.baseServicesUrl = value
+      console.log('set state.config.baseServicesUrl: ' + value)
     },
     isLoading: function (state) {
       state.isWaiting = true
@@ -103,6 +110,10 @@ const store = new Vuex.Store({
     }
   },
   getters: {
+    baseServicesUrl: (state) => {
+      console.log('state returning baseServicesUrl: ' + state.config.baseServicesUrl)
+      return state.config.baseServicesUrl
+    },
     getCmsVideo: (state) => (id) => {
       return state.cms.videos[id]
     },

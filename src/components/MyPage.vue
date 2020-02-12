@@ -170,7 +170,15 @@
             >
              <v-icon light v-if="!datasetHideSelector">expand_more</v-icon>
              <v-icon light v-else>expand_less</v-icon>
-            </v-btn>Datasets</span>
+            </v-btn>
+            <v-btn
+              v-if="isLoggedIn()"
+              fab small
+              color="primary"
+              class="white--text"
+              @click="addDataset"
+              ><v-icon>library_add</v-icon></v-btn>
+            {{datasetsHeaderTitle}}</span>
             <span class="text-xs-right" style="width:50%;"
                   v-show="datasetSelected !== null">{{headerDOI}}</span>
           </v-card-title>
@@ -208,6 +216,10 @@
                   v-on:click="datasetClick(props.item)">
                 {{props.item.title}}
               </td>
+              <td class="text-xs-left"
+                  v-on:click="datasetClick(props.item)">
+                {{props.item.datasetComment}}
+              </td>
             </template>
             <v-alert slot="no-results" :value="true" color="error" icon="warning">
               Your search for "{{ datasetSearch }}" found no results.
@@ -217,74 +229,112 @@
         <div class="sect-divider"></div>
         <!--
 
-           Sample Selection
+           Fileset Selection
 
         -->
         <v-card style="width:100%;" v-show="datasetSelected !== null">
-          <v-card-title class="samples-header"><span style="width:50%;" class="text-xs-left">
+          <v-card-title class="filesets-header"><span style="width:50%;" class="text-xs-left">
             <v-btn
               fab small
               color="primary"
               class="white--text"
-              @click="toggleSamplesHide"
+              @click="toggleFilesetsHide"
             >
-            <v-icon light v-if="!samplesHideSelector">expand_more</v-icon>
+            <v-icon light v-if="!filesetsHideSelector">expand_more</v-icon>
             <v-icon light v-else>expand_less</v-icon>
 
-           </v-btn>Samples</span>
-            <span class="text-xs-right" style="width:50%;" v-show="sampleSelected !== null">
-             <v-btn v-if="sampleFileinfo.length > 0"
+           </v-btn>Filesets</span>
+            <span class="text-xs-right" style="width:50%;" v-show="filesetSelected !== null">
+             <!--v-btn v-if="datasetSelected && datasetSelected.filesets.length > 0"
                     fab small
                     color="primary"
                     class="white--text"
                     @click="sampleFilesDialogActive = true"
              >
              <v-icon light>cloud_download</v-icon>
-             </v-btn>
-             {{headerSampleName}}
+             </v-btn-->
+             {{headerFilesetName}}
            </span>
           </v-card-title>
-          <v-card-title v-show="!samplesHideSelector">
+          <v-card-title v-show="!filesetsHideSelector">
             <v-spacer></v-spacer>
             <v-text-field
-              v-model="samplesSearch"
+              v-model="filesetsSearch"
               append-icon="search"
-              label="Filter samples"
+              label="Filter filesets"
               single-line
               hide-details
             ></v-text-field>
           </v-card-title>
-          <v-data-table v-show="!samplesHideSelector" :headers="sampleHeaders" :items="sampleList"
-                        :search="sampleSearch">
+          <v-data-table v-show="!filesetsHideSelector" :headers="filesetsHeaders" :items="filesetsList"
+                        :search="filesetsSearch">
             <v-divider></v-divider>
             <template slot="items" slot-scope="props" height="300">
               <td class="text-xs-left"
-                  v-on:click="sampleClick(props.item)">
-                {{props.item.title}}
-              </td>
-              <td class="text-xs-left"
-                  v-on:click="sampleClick(props.item)">
-                {{props.item.ispublished?'Yes':'No'}}
-              </td>
-              <td class="text-xs-left"
-                  v-on:click="sampleClick(props.item)">
-                {{props.item.isPublic?'Yes':'No'}}
-              </td>
-              <td class="text-xs-left"
-                  v-on:click="sampleClick(props.item)">
-                {{props.item.entityState}}
-              </td>
-              <td class="text-xs-left"
-                  v-on:click="sampleClick(props.item)">
-                {{props.item.curateState}}
+                  v-on:click="filesetClick(props.item)"
+              >
+                {{props.item.fileset}}
               </td>
             </template>
             <v-alert slot="no-results" :value="true" color="error" icon="warning">
-              Your search for "{{ samplesSearch }}" found no results.
+              Your search for "{{ filesetsSearch }}" found no results.
             </v-alert>
           </v-data-table>
         </v-card>
-        <v-card style="width:100%;" v-show="sampleSelected !== null">
+        <!--
+
+           Files Selection
+
+        -->
+        <v-card style="width:100%;" v-show="datasetSelected !== null">
+          <v-card-title class="files-header"><span style="width:50%;" class="text-xs-left">
+            <v-btn
+              fab small
+              color="primary"
+              class="white--text"
+              @click="toggleFilesHide"
+            >
+            <v-icon light v-if="!filesHideSelector">expand_more</v-icon>
+            <v-icon light v-else>expand_less</v-icon>
+
+           </v-btn>{{filesHeaderTitle}}</span>
+            <span class="text-xs-right" style="width:50%;" v-show="fileSelected !== null">
+             <!--v-btn v-if="sampleFileinfo.length > 0"
+                    fab small
+                    color="primary"
+                    class="white--text"
+                    @click="sampleFilesDialogActive = true"
+             >
+             <v-icon light>cloud_download</v-icon>
+             </v-btn-->
+             {{headerFileName}}
+           </span>
+          </v-card-title>
+          <v-card-title v-show="!filesHideSelector">
+            <v-spacer></v-spacer>
+            <v-text-field
+              v-model="filesSearch"
+              append-icon="search"
+              label="Filter list of files"
+              single-line
+              hide-details
+            ></v-text-field>
+          </v-card-title>
+          <v-data-table v-show="!filesHideSelector" :headers="filesHeaders" :items="filesList"
+                        :search="filesSearch">
+            <v-divider></v-divider>
+            <template slot="items" slot-scope="props" height="300">
+              <td class="text-xs-left"
+                  v-on:click="fileClick(props.item)">
+                {{props.item.type}}
+              </td>
+            </template>
+            <v-alert slot="no-results" :value="true" color="error" icon="warning">
+              Your search for "{{ filesSearch }}" found no results.
+            </v-alert>
+          </v-data-table>
+        </v-card>
+        <!--v-card style="width:100%;" v-show="fileSelected !== null">
           <v-container v-bind:style="{'display': formInView}" fluid justify-start fill-height>
             <v-layout row wrap align-start fill-height>
               <v-flex fill-height xs12 align-start justify-start>
@@ -295,14 +345,14 @@
               </v-flex>
             </v-layout>
           </v-container>
-        </v-card>
+        </v-card-->
       </v-layout>
       <!--
 
          Result Files Dialog
 
       -->
-      <v-layout row justify-center>
+      <!-- v-layout row justify-center>
         <v-dialog v-model="sampleFilesDialogActive" scrollable width="500">
           <v-card>
             <v-card-title class="sample-file-download-header">Download related files</v-card-title>
@@ -315,7 +365,7 @@
               :items="sampleFileinfo">
               <template slot="headers" slot-scope="props">
                 <tr>
-                  <!--th>
+                  <!- -th>
                     <v-checkbox
                       :input-value="props.all"
                       :indeterminate="props.indeterminate"
@@ -323,7 +373,7 @@
                       hide-details
                       @click.stop="sampleFileToggleAll()"
                     ></v-checkbox>
-                  </th-->
+                  </th- ->
                   <th
                     style="text-align:left;"
                     v-for="header in props.headers"
@@ -338,13 +388,13 @@
               </template>
               <v-divider></v-divider>
               <template slot="items" slot-scope="props" height="320">
-                <!--td :active="props.selected" @click="props.selected = !props.selected">
+                <!- -td :active="props.selected" @click="props.selected = !props.selected">
                   <v-checkbox
                     :input-value="props.selected"
                     primary
                     hide-details
                   ></v-checkbox>
-                </td-->
+                </td- ->
                 <td class="text-xs-left">
                   <a :href="getDownloadName(props.item.filename)">{{props.item.basename}}</a>
                 </td>
@@ -352,14 +402,14 @@
             </v-data-table>
             <v-divider></v-divider>
             <v-card-actions class="download-footer">
-              <!--v-btn color="primary" @click.native="sampleFileDownload()">Download</v-btn-->
+              <!- -v-btn color="primary" @click.native="sampleFileDownload()">Download</v-btn- ->
               <v-btn color="normal" @click.native="sampleFilesDialogActive = false">Close</v-btn>
             </v-card-actions>
           </v-card>
-          <!--/v-flex>
-        </v-layout-->
+          <!- -/v-flex>
+        </v-layout- ->
         </v-dialog>
-      </v-layout>
+      </v-layout -->
 
     </v-container>
   </div>
@@ -375,6 +425,7 @@ export default {
   name: 'MyPage',
   data () {
     return {
+      formInView: 'block',
       msg: 'My Page',
       showAdmin: false,
       myPageError: false,
@@ -416,30 +467,43 @@ export default {
       datasetHeaders: [
         {text: 'ID', align: 'left', value: 'seq'},
         {text: 'DOI', align: 'left', value: 'doi'},
-        {text: 'Title', align: 'left', value: 'title'}
+        {text: 'Title', align: 'left', value: 'title'},
+        {text: 'Comment', align: 'left', value: 'datasetComment'}
       ],
       datasetList: [],
       datasetHideSelector: false,
       datasetSelected: null,
-      // Samples
-      sampleSearch: '',
-      sampleHeaders: [
-        {text: 'Title', align: 'left', value: 'title'},
-        {text: 'Published', align: 'left', value: 'ispublished'},
-        {text: 'Public', align: 'left', value: 'isPublic'},
-        {text: 'Edit State', align: 'left', value: 'entityState'},
-        {text: 'Curate State', align: 'left', value: 'curateState'}
+      // Filesets
+      filesetsSearch: '',
+      headerFilesetName: '',
+      filesetsHeaders: [
+        {text: 'Fileset Name', align: 'left', value: 'datasetSelected.filesets'}
       ],
-      sampleList: [],
-      samplesHideSelector: false,
-      sampleFileAll: true,
-      samplefilepagination: {
+      filesetsList: [],
+      filesetsHideSelector: false,
+      filesetsPagination: {
+        sortBy: 'filesets'
+      },
+      filesetSelected: null,
+      // Samples
+      filesSearch: '',
+      filesHeaders: [
+        {text: 'Type', align: 'left', value: 'type'}
+        // {text: 'Published', align: 'left', value: 'ispublished'},
+        // {text: 'Public', align: 'left', value: 'isPublic'},
+        // {text: 'Edit State', align: 'left', value: 'entityState'},
+        // {text: 'Curate State', align: 'left', value: 'curateState'}
+      ],
+      filesList: [],
+      filesHideSelector: false,
+      // sampleFileAll: true,
+      filespagination: {
         sortBy: 'basename'
       },
       sampleFileIndeterminate: false,
 
-      sampleSelected: null,
-      sampleObj: '',
+      fileSelected: null,
+      fileObj: '',
       sampleFileinfo: [], // names/info of files associated with sample
       sampleFilesDialogActive: false,
       sampleFileDownloadSelected: [],
@@ -506,6 +570,19 @@ export default {
       return titles
     },
     // datasets
+    datasetsHeaderTitle: function () {
+      let vm = this
+      let rv = null
+      if (vm.datasetSelected) {
+        rv = 'Dataset:'
+      } else {
+        rv = 'Datasets'
+      }
+      return rv
+    },
+    filesHeaderTitle: function () {
+      return 'Filez'
+    },
     headerDOI: function () {
       let rv = null
       let vm = this
@@ -515,10 +592,10 @@ export default {
       return rv
     },
     // samples
-    headerSampleName: function () {
+    headerFileName: function () {
       let rv = null
       let vm = this
-      if (vm.sampleSelected) {
+      if (vm.fileSelected) {
         rv = vm.sampleSelected.title.replace(/\.xml$/, '')
       }
       return rv
@@ -731,6 +808,7 @@ export default {
     toggleDatasetHide: function () {
       let vm = this
       vm.datasetHideSelector = !vm.datasetHideSelector
+      vm.datasetSelected = null
     },
     mineOnly: function () {
       let vm = this
@@ -742,8 +820,10 @@ export default {
       console.log('dataset selected: ' + entry.seq)
       vm.datasetSelected = entry
       vm.datasetHideSelector = true
-      vm.samplesHideSelector = false
-      vm.sampleSelected = null
+      vm.filesetsHideSelector = false
+      vm.filesetsList = vm.datasetSelected.filesets
+      vm.filesetHideSelector = false
+      vm.Selected = null
       vm.sampleFileinfo = []
       vm.sampleList = []
       vm.setLoading()
@@ -763,6 +843,17 @@ export default {
           vm.resetLoading()
         })
     },
+    // filesets
+    filesetClick: function (fileset) {
+      let func = 'filesetClick'
+      let vm = this
+      console.log(func + ' - ' + JSON.stringify(fileset))
+      vm.filesetSelected = fileset
+      vm.headerFilesetName = fileset.fileset
+      vm.filesList = fileset.files
+      vm.filesetsHideSelector = true
+    },
+
     // samples
     sampleTreeviewOptions: function () {
       // let vm = this
@@ -775,10 +866,15 @@ export default {
     sampleIdFromTitle: function (title) {
       return title.replace(/\.xml$/, '')
     },
-    toggleSamplesHide: function () {
+    toggleFilesetsHide: function () {
       let vm = this
-      vm.samplesHideSelector = !vm.samplesHideSelector
-      console.log('samplesHideSelector: ' + vm.samplesHideSelector)
+      vm.filesetsHideSelector = !vm.filesetsHideSelector
+      console.log('filesetsHideSelector: ' + vm.filesetsHideSelector)
+    },
+    toggleFilesHide: function () {
+      let vm = this
+      vm.filesHideSelector = !vm.filesHideSelector
+      console.log('filesHideSelector: ' + vm.filesHideSelector)
     },
     getDownloadName: function (filename) {
       return '/nmr/blob?bucketname=curateinput&filename=' + filename
@@ -975,7 +1071,14 @@ export default {
     font-weight: bold;
   }
 
-  .samples-header {
+  .filesets-header {
+    background-color: #03A9F4;
+    color: #ffffff;
+    font-size: 22px;
+    font-weight: bold;
+  }
+
+  .files-header {
     background-color: #03A9F4;
     color: #ffffff;
     font-size: 22px;

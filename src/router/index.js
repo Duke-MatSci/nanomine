@@ -181,11 +181,6 @@ export default new Router({
     //   component: Visualization
     // },
     {
-      path: '/OtsuResult',
-      name: 'OtsuResult',
-      component: OtsuResult
-    },
-    {
       path: '/SDFCharacterizeResults',
       name: 'SDFCharacterizeResults',
       component: SDFCharacterizeResults
