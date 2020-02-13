@@ -1,5 +1,5 @@
 <template>
-  <div class="mypage">
+  <v-flex class="mypage">
     <v-alert
       v-model="myPageError"
       type="error"
@@ -87,13 +87,13 @@
            <v-icon light v-else>expand_less</v-icon>
            </v-btn>Become User ...</h5>
           <v-data-table v-if="showBecomeUser"
-            v-model="userselected"
-            :headers="userheaders"
-            :items="users"
-            :pagination.sync="userpagination"
-            select-all
-            item-key="userid"
-            class="elevation-1"
+                        v-model="userselected"
+                        :headers="userheaders"
+                        :items="users"
+                        :pagination.sync="userpagination"
+                        select-all
+                        item-key="userid"
+                        class="elevation-1"
           >
             <template slot="headers" slot-scope="props">
               <tr>
@@ -177,8 +177,17 @@
               color="primary"
               class="white--text"
               @click="addDataset"
-              ><v-icon>library_add</v-icon></v-btn>
+            ><v-icon>library_add</v-icon></v-btn>
             {{datasetsHeaderTitle}}</span>
+            <v-btn
+              v-if="datasetsHeaderInfoIcon"
+              fab small
+              color="primary"
+              class="white--text"
+              @click="datasetInfoDialogActive=true"
+            >
+              <v-icon>info</v-icon>
+            </v-btn>
             <span class="text-xs-right" style="width:50%;"
                   v-show="datasetSelected !== null">{{headerDOI}}</span>
           </v-card-title>
@@ -243,7 +252,7 @@
             <v-icon light v-if="!filesetsHideSelector">expand_more</v-icon>
             <v-icon light v-else>expand_less</v-icon>
 
-           </v-btn>Filesets</span>
+           </v-btn>{{filesetsHeaderTitle}}</span>
             <span class="text-xs-right" style="width:50%;" v-show="filesetSelected !== null">
              <!--v-btn v-if="datasetSelected && datasetSelected.filesets.length > 0"
                     fab small
@@ -286,7 +295,7 @@
            Files Selection
 
         -->
-        <v-card style="width:100%;" v-show="datasetSelected !== null">
+        <v-card style="width:100%;" v-show="filesetSelected !== null">
           <v-card-title class="files-header"><span style="width:50%;" class="text-xs-left">
             <v-btn
               fab small
@@ -347,6 +356,37 @@
           </v-container>
         </v-card-->
       </v-layout>
+      <!--
+
+        Dataset Info Dialog
+
+      -->
+      <v-layout row justify-center>
+        <v-dialog v-model="datasetInfoDialogActive" scrollable width="500">
+          <v-container fluid xs12 class="dataset-info-header">
+            <v-layout xs12 row justify-left>
+              <v-flex d-flex xs12 align-center>
+                <v-flex xs10 class="text-xs-left">
+                  {{headerDOI}}
+                </v-flex>
+                <v-flex xs2 class="justify-right">
+                  <v-btn fab small color="normal" @click.native="datasetInfoDialogActive = false">
+                    <v-icon>close</v-icon>
+                  </v-btn>
+                </v-flex>
+              </v-flex>
+            </v-layout>
+            <!--          <v-card>-->
+            <v-layout xs12 row justify-left>
+              <v-flex  d-flex v-for="(item, key) in datasetTransformed" v-bind:key="key">
+                {{key}}: {{item}}
+              </v-flex>
+            </v-layout>
+            <!--          </v-card>-->
+          </v-container>
+        </v-dialog>
+      </v-layout>
+
       <!--
 
          Result Files Dialog
@@ -412,14 +452,15 @@
       </v-layout -->
 
     </v-container>
-  </div>
+  </v-flex>
 </template>
 
 <script>
 import {Auth} from '@/modules/Auth.js'
 import {} from 'vuex'
 import Axios from 'axios'
-import * as xmljs from 'xml-js'
+// import * as xmljs from 'xml-js'
+import * as _ from 'lodash'
 
 export default {
   name: 'MyPage',
@@ -471,8 +512,10 @@ export default {
         {text: 'Comment', align: 'left', value: 'datasetComment'}
       ],
       datasetList: [],
+      datasetInfoDialogActive: false,
       datasetHideSelector: false,
       datasetSelected: null,
+      datasetTransformed: {},
       // Filesets
       filesetsSearch: '',
       headerFilesetName: '',
@@ -495,13 +538,13 @@ export default {
         // {text: 'Curate State', align: 'left', value: 'curateState'}
       ],
       filesList: [],
-      filesHideSelector: false,
+      filesHideSelector: true,
       // sampleFileAll: true,
       filespagination: {
         sortBy: 'basename'
       },
       sampleFileIndeterminate: false,
-
+      headerFileName: null,
       fileSelected: null,
       fileObj: '',
       sampleFileinfo: [], // names/info of files associated with sample
@@ -580,8 +623,34 @@ export default {
       }
       return rv
     },
+    datasetsHeaderInfoIcon: function () {
+      let vm = this
+      let rv = false
+      if (vm.datasetSelected) {
+        rv = true
+      }
+      return rv
+    },
+    filesetsHeaderTitle: function () {
+      let vm = this
+      let rv = null
+      if (vm.filesetSelected) {
+        rv = 'Fileset:'
+      } else {
+        rv = 'Filesets'
+      }
+      return rv
+    },
+
     filesHeaderTitle: function () {
-      return 'Filez'
+      let vm = this
+      let rv = null
+      if (vm.fileSelected) {
+        rv = 'File:'
+      } else {
+        rv = 'Files'
+      }
+      return rv
     },
     headerDOI: function () {
       let rv = null
@@ -592,14 +661,14 @@ export default {
       return rv
     },
     // samples
-    headerFileName: function () {
-      let rv = null
-      let vm = this
-      if (vm.fileSelected) {
-        rv = vm.sampleSelected.title.replace(/\.xml$/, '')
-      }
-      return rv
-    },
+    // headerFileName: function () {
+    //   let rv = null
+    //   let vm = this
+    //   if (vm.fileSelected) {
+    //     rv = vm.sampleSelected.title.replace(/\.xml$/, '')
+    //   }
+    //   return rv
+    // },
     datasetsFiltered: function () {
       let rv = true
       let vm = this
@@ -809,20 +878,44 @@ export default {
       let vm = this
       vm.datasetHideSelector = !vm.datasetHideSelector
       vm.datasetSelected = null
+      vm.filesHideSelector = true
     },
     mineOnly: function () {
       let vm = this
       vm.showMineOnly = !vm.showMineOnly
       console.log('showMineOnly is now: ' + vm.showMineOnly)
     },
+    transformDataset: function (entry) {
+      let transformed = {}
+      _.keys(entry).forEach((k) => {
+        if (k !== 'filesets' && k !== '__v' && k !== 'dttm_created' && k !== 'dttm_updated') {
+          if (Array.isArray(entry[k])) {
+            if (entry[k].length > 0) {
+              transformed[k] = entry[k].join(', ')
+            } else {
+              transformed[k] = 'N/A'
+            }
+          } else {
+            transformed[k] = entry[k]
+          }
+          if (transformed[k] === null) {
+            transformed[k] = 'N/A'
+          }
+        }
+      })
+      return transformed
+    },
     datasetClick: function (entry) {
       let vm = this
       console.log('dataset selected: ' + entry.seq)
       vm.datasetSelected = entry
+      vm.datasetTransformed = vm.transformDataset(entry)
+      console.log(JSON.stringify(vm.datasetTransformed))
       vm.datasetHideSelector = true
       vm.filesetsHideSelector = false
       vm.filesetsList = vm.datasetSelected.filesets
       vm.filesetHideSelector = false
+      vm.filesHideSelector = true
       vm.Selected = null
       vm.sampleFileinfo = []
       vm.sampleList = []
@@ -849,6 +942,7 @@ export default {
       let vm = this
       console.log(func + ' - ' + JSON.stringify(fileset))
       vm.filesetSelected = fileset
+      vm.filesHideSelector = false
       vm.headerFilesetName = fileset.fileset
       vm.filesList = fileset.files
       vm.filesetsHideSelector = true
@@ -869,11 +963,15 @@ export default {
     toggleFilesetsHide: function () {
       let vm = this
       vm.filesetsHideSelector = !vm.filesetsHideSelector
+      vm.filesetSelected = null
+      vm.fileSelected = null
       console.log('filesetsHideSelector: ' + vm.filesetsHideSelector)
     },
     toggleFilesHide: function () {
       let vm = this
       vm.filesHideSelector = !vm.filesHideSelector
+      vm.headerFileName = null
+      vm.fileSelected = null
       console.log('filesHideSelector: ' + vm.filesHideSelector)
     },
     getDownloadName: function (filename) {
@@ -901,96 +999,105 @@ export default {
           })
       })
     },
-    sampleFileDownload: function () {
+    // sampleFileDownload: function () {
+    //   let vm = this
+    //   console.log('--------')
+    //   vm.sampleFileDownloadSelected.forEach(function (v) {
+    //     console.log('download: ' + v.basename)
+    //     Axios.get('/nmr/blob?bucketname=curateinput&filename=' + v.filename)
+    //       .then(function (data) {
+    //         console.log('downloaded: ' + v.filename)
+    //       })
+    //       .catch(function (err) {
+    //         console.log('error downloading: ' + v.filename + ' error: ' + err)
+    //       })
+    //   })
+    // },
+    // sampleFileToggleAll: function () {
+    //   let vm = this
+    //   vm.sampleFileDownloadIndeterminate = false
+    //   if (vm.sampleFileDownloadSelected.length) {
+    //     vm.sampleFileDownloadSelected = []
+    //     vm.sampleFileinfo.forEach(function (v, idx) {
+    //       vm.sampleFileinfo[idx].selected = false
+    //     })
+    //   } else {
+    //     vm.sampleFileDownloadSelected = vm.sampleFileinfo.slice()
+    //     vm.sampleFileinfo.forEach(function (v, idx) {
+    //       vm.sampleFileinfo[idx].selected = true
+    //     })
+    //   }
+    //   console.log('sample files selected: ' + JSON.stringify(vm.sampleFileDownloadSelected))
+    // },
+    // sampleFileSelect: function (filename) {
+    //   let vm = this
+    //   vm.sampleFileDownloadIndeterminate = true
+    //   vm.sampleFileinfo.forEach(function (v, idx) {
+    //     if (v.filename === filename) {
+    //       vm.sampleFileinfo[idx].selected = !vm.sampleFileinfo[idx].selected
+    //       console.log('selected: ' + JSON.stringify(vm.sampleFileinfo[idx]))
+    //     }
+    //   })
+    // },
+    // sampleFileChangeSort: function (column) {
+    //   console.log('sampleFileChangeSort: ' + column)
+    //   if (this.samplefilepagination.sortBy === column) {
+    //     this.samplefilepagination.descending = !this.samplefilepagination.descending
+    //   } else {
+    //     this.samplefilepagination.sortBy = column
+    //     this.samplefilepagination.descending = false
+    //   }
+    // },
+    fileClick: function (file) {
+      let func = 'fileClick'
       let vm = this
-      console.log('--------')
-      vm.sampleFileDownloadSelected.forEach(function (v) {
-        console.log('download: ' + v.basename)
-        Axios.get('/nmr/blob?bucketname=curateinput&filename=' + v.filename)
-          .then(function (data) {
-            console.log('downloaded: ' + v.filename)
-          })
-          .catch(function (err) {
-            console.log('error downloading: ' + v.filename + ' error: ' + err)
-          })
-      })
+      console.log(func + ' - ' + JSON.stringify(file))
+      vm.fileSelected = file
+      vm.headerFileName = file.id
+      vm.filesHideSelector = true
     },
-    sampleFileToggleAll: function () {
-      let vm = this
-      vm.sampleFileDownloadIndeterminate = false
-      if (vm.sampleFileDownloadSelected.length) {
-        vm.sampleFileDownloadSelected = []
-        vm.sampleFileinfo.forEach(function (v, idx) {
-          vm.sampleFileinfo[idx].selected = false
-        })
-      } else {
-        vm.sampleFileDownloadSelected = vm.sampleFileinfo.slice()
-        vm.sampleFileinfo.forEach(function (v, idx) {
-          vm.sampleFileinfo[idx].selected = true
-        })
-      }
-      console.log('sample files selected: ' + JSON.stringify(vm.sampleFileDownloadSelected))
-    },
-    sampleFileSelect: function (filename) {
-      let vm = this
-      vm.sampleFileDownloadIndeterminate = true
-      vm.sampleFileinfo.forEach(function (v, idx) {
-        if (v.filename === filename) {
-          vm.sampleFileinfo[idx].selected = !vm.sampleFileinfo[idx].selected
-          console.log('selected: ' + JSON.stringify(vm.sampleFileinfo[idx]))
-        }
-      })
-    },
-    sampleFileChangeSort: function (column) {
-      console.log('sampleFileChangeSort: ' + column)
-      if (this.samplefilepagination.sortBy === column) {
-        this.samplefilepagination.descending = !this.samplefilepagination.descending
-      } else {
-        this.samplefilepagination.sortBy = column
-        this.samplefilepagination.descending = false
-      }
-    },
-    sampleClick: function (sample) {
-      let func = 'sampleClick'
-      let vm = this
-      vm.setLoading()
-      setTimeout(function () {
-        vm.sampleFileinfo = []
-        vm.samplesHideSelector = true
-        console.log('sampleClick - title: ' + sample.title + ' ' + sample.schemaId)
-        vm.sampleSelected = sample
-        // vm.getFilesList(sample)
-        //   .then(function () {
-        try {
-          vm.sampleObj = xmljs.xml2js(sample.xml_str, {
-            'compact': true,
-            ignoreDeclaration: true,
-            ignoreAttributes: true
-          })
-          if (vm.sampleObj['PolymerNanocomposite']) {
-            vm.sampleObj = vm.sampleObj.PolymerNanocomposite
-          }
-        } catch (err) { // L138_S1
-          console.log(func + ' error occurred attempting to xml to json convert sample: ' + sample.title + ' ' + sample.schemaId + ' err: ' + err)
-          vm.sampleObj = {'Error': 'Unable to display: ' + sample.title}
-        }
-        console.log(func)
-        console.log(vm.sampleObj)
-        // delete vm.sampleObj['_declaration']
-        // window.sampleObj = vm.sampleObj
-        // let indent = 2
-        // vm.sample2Tree(vm.sampleObj, vm.sampleTree, indent)
-        vm.resetLoading()
-        // })
-        // .catch(function (err) {
-        //   let msg = 'Error loading sample file: ' + err
-        //   console.log(msg)
-        //   vm.myPageError = true
-        //   vm.myPageErrorMsg = msg
-        //   vm.resetLoading()
-        // })
-      }, 20)
-    },
+
+    // sampleClick: function (sample) {
+    //   let func = 'sampleClick'
+    //   let vm = this
+    //   vm.setLoading()
+    //   setTimeout(function () {
+    //     vm.sampleFileinfo = []
+    //     vm.samplesHideSelector = true
+    //     console.log('sampleClick - title: ' + sample.title + ' ' + sample.schemaId)
+    //     vm.sampleSelected = sample
+    //     // vm.getFilesList(sample)
+    //     //   .then(function () {
+    //     try {
+    //       vm.sampleObj = xmljs.xml2js(sample.xml_str, {
+    //         'compact': true,
+    //         ignoreDeclaration: true,
+    //         ignoreAttributes: true
+    //       })
+    //       if (vm.sampleObj['PolymerNanocomposite']) {
+    //         vm.sampleObj = vm.sampleObj.PolymerNanocomposite
+    //       }
+    //     } catch (err) { // L138_S1
+    //       console.log(func + ' error occurred attempting to xml to json convert sample: ' + sample.title + ' ' + sample.schemaId + ' err: ' + err)
+    //       vm.sampleObj = {'Error': 'Unable to display: ' + sample.title}
+    //     }
+    //     console.log(func)
+    //     console.log(vm.sampleObj)
+    //     // delete vm.sampleObj['_declaration']
+    //     // window.sampleObj = vm.sampleObj
+    //     // let indent = 2
+    //     // vm.sample2Tree(vm.sampleObj, vm.sampleTree, indent)
+    //     vm.resetLoading()
+    //     // })
+    //     // .catch(function (err) {
+    //     //   let msg = 'Error loading sample file: ' + err
+    //     //   console.log(msg)
+    //     //   vm.myPageError = true
+    //     //   vm.myPageErrorMsg = msg
+    //     //   vm.resetLoading()
+    //     // })
+    //   }, 20)
+    // },
     // sample2Tree: function (node, sampleTree, indent) {
     //   let vm = this
     //   Object.keys(node).forEach(function (v) {
@@ -1056,6 +1163,7 @@ export default {
     font-size: 22px;
     font-weight: bold;
   }
+
   .select-schema-header {
     background-color: #03A9F4;
     height: 30px;
@@ -1085,14 +1193,17 @@ export default {
     font-weight: bold;
   }
 
-  .sample-file-download-header {
+  .dataset-info-header {
     background-color: #03A9F4;
     color: #ffffff;
     font-size: 22px;
     font-weight: bold;
+    width: 100%;
+    padding: 10px;
+    margin-right: 0px;
   }
 
-  .download-footer {
+  .dataset-info-footer {
     background-color: #03A9F4;
     color: #000000;
     font-size: 22px;
