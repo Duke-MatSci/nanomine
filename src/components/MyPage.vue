@@ -1,15 +1,15 @@
 <template>
   <v-flex class="mypage">
-    <v-alert
-      v-model="myPageError"
-      type="error"
-      dismissible
-    >
-      {{myPageErrorMsg}}
-    </v-alert>
 
     <h1>{{ msg }}</h1>
     <v-container grid-list-xl>
+      <v-alert
+        v-model="myPageError"
+        type="error"
+        dismissible
+      >
+        {{myPageErrorMsg}}
+      </v-alert>
       <!--
 
          Admin functions
@@ -343,18 +343,34 @@
             </v-alert>
           </v-data-table>
         </v-card>
-        <!--v-card style="width:100%;" v-show="fileSelected !== null">
+        <v-alert
+          v-model="fileError"
+          type="error"
+          dismissible
+        >
+          {{fileErrorMsg}}
+        </v-alert>
+        <v-card style="width:100%;" v-show="(fileSelected !== null && fileSelected.type === 'xmldata')">
           <v-container v-bind:style="{'display': formInView}" fluid justify-start fill-height>
             <v-layout row wrap align-start fill-height>
               <v-flex fill-height xs12 align-start justify-start>
                 <div>
-                  <tree-view ref="tree" style="text-align: left;" :data="sampleObj"
+                  <tree-view ref="tree" style="text-align: left;" :data="fileObj"
                              :options="sampleTreeviewOptions()"></tree-view>
                 </div>
               </v-flex>
             </v-layout>
           </v-container>
-        </v-card-->
+        </v-card>
+        <v-card style="width:100%;" v-show="(fileSelected !== null && fileSelected.type === 'blob')">
+          <v-container v-bind:style="{'display': formInView}" fluid justify-start fill-height>
+            <v-layout row wrap align-start fill-height>
+              <v-flex fill-height xs12 align-start justify-start>
+                <v-img ref="fileImageDisplay" :src="fileImageDataUri"></v-img>
+              </v-flex>
+            </v-layout>
+          </v-container>
+        </v-card>
       </v-layout>
       <!--
 
@@ -459,7 +475,7 @@
 import {Auth} from '@/modules/Auth.js'
 import {} from 'vuex'
 import Axios from 'axios'
-// import * as xmljs from 'xml-js'
+import * as xmljs from 'xml-js'
 import * as _ from 'lodash'
 
 export default {
@@ -471,6 +487,8 @@ export default {
       showAdmin: false,
       myPageError: false,
       myPageErrorMsg: '',
+      fileError: false,
+      fileErrorMsg: '',
       // Schema mgt
       showSchemaMgt: false,
       schemaFileText: '',
@@ -547,6 +565,7 @@ export default {
       headerFileName: null,
       fileSelected: null,
       fileObj: '',
+      fileImageDataUri: '',
       sampleFileinfo: [], // names/info of files associated with sample
       sampleFilesDialogActive: false,
       sampleFileDownloadSelected: [],
@@ -917,24 +936,8 @@ export default {
       vm.filesetHideSelector = false
       vm.filesHideSelector = true
       vm.Selected = null
-      vm.sampleFileinfo = []
-      vm.sampleList = []
-      vm.setLoading()
       vm.myPageError = false
       vm.myPageErrorMsg = ''
-      Axios.get('/nmr/xml?dataset=' + entry.seq + '&schemaid=' + vm.selectedSchemaId)
-        .then(function (data) {
-          // console.log(data.data.data)
-          vm.sampleList = data.data.data // Just had to...
-          vm.resetLoading()
-        })
-        .catch(function (err) {
-          console.log('Error: ' + err)
-          vm.myPageError = true
-          vm.myPageErrorMsg = 'loading samples: ' + err
-          vm.sampleList = []
-          vm.resetLoading()
-        })
     },
     // filesets
     filesetClick: function (fileset) {
@@ -957,9 +960,6 @@ export default {
       // }
       return {maxDepth: 99, rootObjectKey: 'PolymerNanocomposite', modifiable: false}
     },
-    sampleIdFromTitle: function (title) {
-      return title.replace(/\.xml$/, '')
-    },
     toggleFilesetsHide: function () {
       let vm = this
       vm.filesetsHideSelector = !vm.filesetsHideSelector
@@ -972,33 +972,83 @@ export default {
       vm.filesHideSelector = !vm.filesHideSelector
       vm.headerFileName = null
       vm.fileSelected = null
+      vm.fileObj = null
+      vm.fileError = null
+      vm.fileErrorMsg = ''
       console.log('filesHideSelector: ' + vm.filesHideSelector)
     },
-    getDownloadName: function (filename) {
-      return '/nmr/blob?bucketname=curateinput&filename=' + filename
-    },
-    getFilesList: function (sample) {
-      let vm = this
+    getXmlData: function (fileInfo) {
+      // file info is assumed to be the fileset/file info from the dataset
+      let func = 'getXmlData'
       return new Promise(function (resolve, reject) {
-        Axios.get('/nmr/dataset/filenames/' + sample.title, {
-          params: {schemaId: vm.selectedSchemaId}
-        })
-          .then(function (data) {
-            vm.sampleFileinfo = data.data.data.files
-            if (!vm.sampleFileinfo) {
-              vm.sampleFileinfo = []
+        let id = fileInfo.id
+        if (fileInfo.xmldata) {
+          resolve(fileInfo)
+        } else {
+          Axios.get('/nmr/xml', {
+            params: {
+              id: id
             }
-            vm.sampleFileinfo.forEach(function (v, idx) {
-              vm.sampleFileinfo[idx].selected = false // add the field and set it to false
+          })
+            .then(function (resp) {
+              fileInfo.xmldata = resp.data.data[0] // looking up by id returns at most 1 in an array
+              resolve(fileInfo)
             })
-            resolve()
+            .catch(function (err) {
+              let msg = func + ' - ' + 'Error: ' + err.message
+              console.log(msg)
+              reject(err)
+            })
+        }
+      })
+    },
+    getBlobData: function (fileInfo) {
+      // fileInfo is assumed to be the fileset/file info from the dataset
+      let id = fileInfo.id
+      return new Promise(function (resolve, reject) {
+        Axios.get('/nmr/blob', {
+          responseType: 'arraybuffer',
+          params: {
+            id: id
+          }
+        })
+          .then(function (resp) {
+            fileInfo.fileData = resp.data // standard http response, not json
+            // name and length are in response header
+            fileInfo.nameFromHeader = resp.headers['content-disposition'].split(';')[1].trim().split('=')[1].replace(/"/g, '')
+            fileInfo.contentTypeFromHeader = resp.headers['content-type']
+            console.log('name: ' + fileInfo.nameFromHeader + ' content-type ' + fileInfo.contentTypeFromHeader)
+            resolve(fileInfo)
           })
           .catch(function (err) {
-            console.log('unable to obtain sample\'s file list. Error: ' + err)
+            let msg = 'unable to retrieve blob id: ' + id + ' error: ' + err.message
+            console.log(msg)
             reject(err)
           })
       })
     },
+    // getFilesList: function (sample) {
+    //   let vm = this
+    //   return new Promise(function (resolve, reject) {
+    //     Axios.get('/nmr/dataset/filenames/' + sample.title, {
+    //       params: {schemaId: vm.selectedSchemaId}
+    //     })
+    //       .then(function (resp) {
+    //         vm.sampleFileinfo = resp.data.data.files
+    //         if (!vm.sampleFileinfo) {
+    //           vm.sampleFileinfo = []
+    //         }
+    //         vm.sampleFileinfo.forEach(function (v, idx) {
+    //           vm.sampleFileinfo[idx].selected = false // add the field and set it to false
+    //         })
+    //         resolve(resp.data.data)
+    //       })
+    //       .catch(function (err) {
+    //         console.log('unable to obtain sample\'s file list. Error: ' + err)
+    //         reject(err)
+    //       })
+    //   })
+    // },
     // sampleFileDownload: function () {
     //   let vm = this
     //   console.log('--------')
@@ -1055,6 +1105,91 @@ export default {
       vm.fileSelected = file
       vm.headerFileName = file.id
       vm.filesHideSelector = true
+      let p = null
+      switch (file.type) {
+        case 'blob':
+          console.log('file is blob')
+          vm.setLoading()
+          p = vm.getBlobData(file)
+          break
+        case 'xmldata':
+          console.log('file is xmldata')
+          vm.setLoading()
+          p = vm.getXmlData(file)
+          break
+        default:
+          console.log('file is unknown type')
+          vm.fileError = true
+          vm.fileErrorMsg = 'Unknown file type'
+      }
+      if (p) {
+        p.then(function (fileInfo) {
+          switch (fileInfo.type) {
+            case 'blob':
+              let contentType = fileInfo.contentTypeFromHeader
+              let b64 = ''
+              try {
+                let ab = fileInfo.fileData
+                b64 = btoa(String.fromCharCode.apply(null, new Uint8Array(ab)))
+                console.log('new b64: ' + b64)
+              } catch (err) {
+                console.log('data: ' + fileInfo.fileData)
+                let msg = 'Error viewing file. Error: ' + err.message
+                vm.fileError = true
+                vm.fileErrorMsg = msg
+              }
+              vm.fileImageDataUri = 'data:' + contentType + ';base64,' + b64
+              console.log('dataUri: ' + vm.fileImageDataUri)
+              break
+            case 'xmldata':
+              //   setTimeout(function () {
+              //     vm.sampleFileinfo = []
+              //     vm.samplesHideSelector = true
+              //     console.log('sampleClick - title: ' + sample.title + ' ' + sample.schemaId)
+              //     vm.sampleSelected = sample
+              //     // vm.getFilesList(sample)
+              //     //   .then(function () {
+              let sample = fileInfo.xmldata
+              console.log(JSON.stringify(sample))
+              try {
+                vm.fileObj = xmljs.xml2js(sample.xml_str, {
+                  'compact': true,
+                  ignoreDeclaration: true,
+                  ignoreAttributes: true
+                })
+                if (vm.fileObj['PolymerNanocomposite']) {
+                  vm.fileObj = vm.fileObj.PolymerNanocomposite
+                }
+              } catch (err) { // L138_S1
+                console.log(func + ' error occurred attempting to xml to json convert sample: ' + sample.title + ' ' + sample.schemaId + ' err: ' + err)
+                vm.fileObj = {'Error': 'Unable to display: ' + sample.title}
+              }
+              //     console.log(func)
+              //     console.log(vm.sampleObj)
+              //     // delete vm.sampleObj['_declaration']
+              //     // window.sampleObj = vm.sampleObj
+              //     // let indent = 2
+              //     // vm.sample2Tree(vm.sampleObj, vm.sampleTree, indent)
+              //     vm.resetLoading()
+              //     // })
+              //     // .catch(function (err) {
+              //     //   let msg = 'Error loading sample file: ' + err
+              //     //   console.log(msg)
+              //     //   vm.myPageError = true
+              //     //   vm.myPageErrorMsg = msg
+              //     //   vm.resetLoading()
+              //     // })
+              //   }, 20)
+              break
+          }
+          vm.resetLoading()
+        })
+        p.catch(function (err) {
+          vm.fileErrorMsg = `Error occurred fetching file: ${err.message}`
+          vm.fileError = true
+          vm.resetLoading()
+        })
+      }
     },
 
     // sampleClick: function (sample) {

@@ -1913,13 +1913,14 @@ app.get('/templates/select', function (req, res) {
 
 // NOTE: similar to /explore/select (actually started as a copy/modify) -- HOWEVER, it works differently and returns different data
 // Data is returned for current schema only
-app.get('/xml/:id?', function (req, res) { // currently only supports JWT style login (need to add a authRequired field to config for bearer support
+app.get('/xml/:title?', function (req, res) { // currently only supports JWT style login (need to add a authRequired field to config for bearer support
   // checks to make sure:
   //   XML is public
   //   or user is owner/creator
   //   or user is admin
   let jsonResp = {'error': null, 'data': null}
-  let id = req.params.id // may be null
+  let title = req.params.title // may be null
+  let id = req.query.id
   let fmt = req.query.format
   let dsSeq = req.query.dataset // may be null -- to get all xmls for a dataset (mutually exclusive of id)
   let schemaId = req.query.schemaid
@@ -1943,9 +1944,9 @@ app.get('/xml/:id?', function (req, res) { // currently only supports JWT style 
       secQuery = publicQuery
     }
   }
-  if (id && dsSeq) {
+  if (title && dsSeq) {
     // error
-    jsonResp.error = 'dataset and id are mutually exclusive parameters'
+    jsonResp.error = 'dataset and title are mutually exclusive parameters'
     return res.status(400).json(jsonResp)
   }
   getCurrentSchemas()
@@ -1954,11 +1955,11 @@ app.get('/xml/:id?', function (req, res) { // currently only supports JWT style 
         schemaId = versions[0].currentRef[0]._id
       }
       let schemaQuery = {'schemaId': {'$eq': schemaId}}
-      if (id) {
-        if (id.match(/.*\.xml$/) === null) {
-          id += '.xml' // actual title field of xml data record has .xml appended. Lookup will fail if it's not there.
+      if (title) {
+        if (title.match(/.*\.xml$/) === null) {
+          title += '.xml' // actual title field of xml data record has .xml appended. Lookup will fail if it's not there.
         }
-        dataQuery = {'title': {'$eq': id}}
+        dataQuery = {'title': {'$eq': title}}
       } else if (dsSeq) {
         dataQuery = {'dsSeq': {$eq: dsSeq}}
       }
@@ -1969,6 +1970,16 @@ app.get('/xml/:id?', function (req, res) { // currently only supports JWT style 
       } else if (dataQuery) {
         theQuery = {'$and': [dataQuery, schemaQuery]}
       }
+      let idQuery = null // the id query does not depend on schema, so it should be outside/separate TODO find time to fix this
+      if (id) { // OVERRIDES Query already set if ID=id is used
+        idQuery = {'_id': {'$eq': ObjectId(id)}}
+        if (secQuery) {
+          theQuery = {'$and': [secQuery, idQuery]}
+        } else {
+          theQuery = idQuery
+        }
+      }
+      // TODO - Security related reasons for the file not to be found should be reflected as 403, not 404 as they are now!! i.e. not public & not admin & not owner
       // TODO iduser should not be returned raw! Right now it's needed for client-side filtering. The returned value should be modified
       //   to something like, (iduser if (iduser === loginUser || iduser === runAsUser || iduser isAdmin) else return 0 to prevent leakage of userids
       XmlData.find(theQuery, '_id iduser schemaId title ispublished isPublic entityState curateState xml_str').exec(function (err, xmlRecs) {
@@ -2311,7 +2322,7 @@ app.get('/blob', function (req, res) { // MDCS only supports get by id (since th
         res.attachment(fnc.slice(-1)[0])
       })
       dlStream.on('error', function (err) {
-        res.status(404).send('NOT FOUND: ' + id)
+        res.status(404).send('NOT FOUND: ' + id + ' err: ' + err.message)
       })
       dlStream.on('data', function (data) {
         res.write(data)
