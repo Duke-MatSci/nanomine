@@ -898,6 +898,9 @@ export default {
       vm.datasetHideSelector = !vm.datasetHideSelector
       vm.datasetSelected = null
       vm.filesHideSelector = true
+      vm.filesetsHideSelector = true
+      vm.selectedFile = null
+      vm.hideFilesets()
     },
     mineOnly: function () {
       let vm = this
@@ -940,6 +943,12 @@ export default {
       vm.myPageErrorMsg = ''
     },
     // filesets
+    hideFilesets: function () {
+      let vm = this
+      vm.filesetsHideSelector = true
+      vm.filesetSelected = null
+      vm.hideFiles()
+    },
     filesetClick: function (fileset) {
       let func = 'filesetClick'
       let vm = this
@@ -967,13 +976,21 @@ export default {
       vm.fileSelected = null
       console.log('filesetsHideSelector: ' + vm.filesetsHideSelector)
     },
+    hideFiles: function () {
+      let vm = this
+      vm.filesHideSelector = true
+      vm.filesetSelected = null
+      vm.fileSelected = null
+      vm.fileObj = null
+      vm.fileError = false
+    },
     toggleFilesHide: function () {
       let vm = this
       vm.filesHideSelector = !vm.filesHideSelector
       vm.headerFileName = null
       vm.fileSelected = null
       vm.fileObj = null
-      vm.fileError = null
+      vm.fileError = false
       vm.fileErrorMsg = ''
       console.log('filesHideSelector: ' + vm.filesHideSelector)
     },
