@@ -49,125 +49,84 @@ function datasets (mongoose) {
   return datasetsSchema
 }
 
-function addFiles (Datasets, logger, datasetId, filesetName, files) {
-  // DO NOT USE!!! This code needs to be re-worked!!!!
-  // - Datasets is a caller supplied datasets model
-  // - will create filesetName if it does not exist
-  // - Files should be an array of at least one { type: 'blob'|'xmldata', id: blobid | xmldata._id }
-  // If filesetName exists, the files will be merged into the existing list (added if not already existing)
-  let func = 'datasetsAddFiles'
-  return new Promise(function (resolve, reject) {
-    // verify files array objects format looks correct and contains entries
-    //   Also, convert any ObjectIds to strings
-    let filesOk = true
-    if (files && files.length > 0) {
-      files.forEach((v, idx) => {
-        if (!((v.type === 'blob' || v.type === 'xmldata') && (v.id instanceof ObjectId || typeof v.id === 'string'))) {
-          filesOk = false
-        } else if (typeof v.id === 'string') { // test if the string is possibly a valid ObjectId
-          let isValid = false
-          try {
-            isValid = ObjectId.isValid(v.id)
-          } catch (err) {
-            // Nothing to do
-          }
-          logger.debug(func + ' - ' + 'files entry has valid potential objectid as string: ' + isValid + ' value: ' + v.id)
-          if (filesOk) { // Do not change filesOk if it's already false
-            filesOk = isValid
-          }
-        } else if (v.id instanceof ObjectId) { // it is valid, but prefer strings over objectid objects in the list
-          files[idx].id = v.id.toString()
+function isValidFileInfo (logger, fileInfo) { // checks fileInfo to see if it's valid AND also converts id to string if it's an ObjectId
+  let func = 'isValidFileInfo'
+  let rv = true
+  let v = fileInfo
+  if (!((v.type === 'blob' || v.type === 'xmldata') && (v.id instanceof ObjectId || typeof v.id === 'string'))) {
+    rv = false
+  } else if (typeof v.id === 'string') { // test if the string is possibly a valid ObjectId
+    let isValid = false
+    try {
+      isValid = ObjectId.isValid(v.id)
+    } catch (err) {
+      // Nothing to do
+    }
+    logger.debug(func + ' - ' + 'files entry has valid potential objectid as string: ' + isValid + ' value: ' + v.id)
+    if (rv) { // Do not change rv if it's already false
+      rv = isValid
+    }
+  } else if (v.id instanceof ObjectId) { // it is valid, but prefer strings over objectid objects in the list
+    fileInfo.id = v.id.toString()
+  }
+
+  return rv
+}
+
+function datasetAddOrOverwriteFileInfo (datasetInfo, logger, filesetName, fileInfo) {
+  let rv = -1
+  let func = 'datasetAddOrUpdateFileInfo'
+  // This code only adds tracking information about files to the dataset
+  // Updates the datasetInfo in memory only. It's up to the client to read/create the original data and subsequently save the dataset record.
+  // If the filesetName does not exist, the filesetName will be created and the fileInfo added
+  // If the filesetName exists and the fileInfo does not exist, the fileInfo will be added to the filesetName
+  // If the filesetName exists and the fileInfo already exists, it will be OVERWRITTEN
+  // The filesetName is simply a string like 'result 1' or 'sample 1'
+  // The fileInfo is an object consisting of:
+  //   type, id, and metadata keys at the top level
+  //      type: 'blob' or 'xmldata'
+  //      id: a mongo ObjectId or a string representing an ObjectId
+  //         for blobs, the objectid is the id of the blob in the fs.files collection
+  //         for xmldata, the objectid is the id of the xmldata collection record
+  //      metadata: an object consisting of metadata information about the file
+  //         filename: the base filename
+  //         isCompletedExcelTemplate: (optional) true or false
+  //         contentType: application/xml, image/jpeg, image/png, image/tif or other valid content type representing the data
+  let filesets = datasetInfo.filesets
+  let filesetIdx = -1
+  let fileIdx = -1
+  if (isValidFileInfo(fileInfo) && filesetName && typeof filesetName === 'string' && filesetName.length > 0) {
+    filesets.forEach((v, idx) => {
+      if (v.fileset === filesetName) {
+        filesetIdx = idx
+      }
+    })
+    if (filesetIdx !== -1) { // fileset already exists
+      let files = filesets[filesetIdx].files
+      files.forEach((f, fidx) => {
+        if (f.id === fileInfo.id) {
+          fileIdx = fidx
         }
       })
+      if (fileIdx !== -1) {
+        // overwrite the fileinfo
+        files[fileIdx] = fileInfo
+      } else {
+        files.push(fileInfo)
+      }
+    } else { // fileset does not exist
+      filesets.push({'fileset': filesetName, 'files': [fileInfo]})
     }
-    if (filesOk) {
-      Datasets.findById(datasetId, function (err, doc) {
-        if (err) {
-          logger.error(func + ' - ' + ' error looking for datasetId: ' + datasetId + ' error: ' + err.message)
-          reject(err)
-        } else { // if the fileset does not exist, add it. If it does, merge the new file list with the old file list
-          if (doc) {
-            if (doc.filesets) {
-              let found = false
-              doc.filesets.forEach((fs, idx) => {
-                if (fs.fileset === filesetName) {
-                  found = true
-                  logger.debug(func + ' - ' + ' performing union operation. doc.fileset[' + idx + ']: ' + JSON.stringify(fs) + ' merge from: ' + JSON.stringify(files))
-                  doc.filesets[idx] = {'fileset': filesetName, 'files': _.unionWith(fs.files, files, _.isEqual)}
-                  // doc.markModified('filesets')
-                  logger.debug(func + ' - ' + ' union operation result:  doc.fileset[' + idx + ']: ' + JSON.stringify(doc.filesets[idx]))
-                }
-              })
-              if (found) {
-                // update the dataset
-                // Datasets.replaceOne({'_id': datasetId}, doc, (err, updateInfo) => {
-                // doc.markModified('filesets')
-                logger.debug(func + ' - ' + 'marked modified: ' + doc.modifiedPaths())
-                Datasets.replaceOne({_id: datasetId}, doc, (err, modInfo) => {
-                  if (err) {
-                    let msg = 'failed to update (1) dataset: ' + datasetId + ' with new fileset info: ' + filesetName + ' files: ' + JSON.stringify(files) + ' filesets: ' + JSON.stringify(doc.filesets) + ' Error: ' + err.message
-                    logger.error(func + ' - ' + msg)
-                    reject(err)
-                  } else {
-                    logger.debug('Updated (1) dataset: ' + datasetId + ' with new fileset info for: ' + filesetName + ' files: ' + JSON.stringify(files) + ' filesets: ' + JSON.stringify(doc.filesets) + ' modInfo:' + JSON.stringify(modInfo))
-                    resolve(doc)
-                  }
-                })
-              } else {
-                // add the fileset and the files
-                // update the dataset
-                let fsInfo = {fileset: filesetName, files: files}
-                logger.debug(func + ' - ' + 'before adding new fileset dataset.filesets is: ' + JSON.stringify(doc.filesets))
-                doc.filesets.push(fsInfo)
-                logger.debug(func + ' - ' + 'after adding new fileset dataset.filesets is: ' + JSON.stringify(doc.filesets) + ' new info: ' + JSON.stringify(files))
-                // doc.markModified('filesets')
-                Datasets.replaceOne({_id: datasetId}, doc, (err, modInfo) => {
-                  if (err) {
-                    let msg = 'failed to update (2) dataset: ' + datasetId + ' with new fileset info for: ' + filesetName + ' files: ' + JSON.stringify(files) + ' Error: ' + err.message
-                    logger.error(func + ' - ' + msg)
-                    reject(err)
-                  } else {
-                    logger.debug('Updated (2) dataset: ' + datasetId + ' with new fileset info: ' + JSON.stringify(fsInfo) + ' modInfo:' + JSON.stringify(modInfo) + ' filesets: ' + JSON.stringify(doc.filesets))
-                    resolve(doc)
-                  }
-                })
-              }
-            } else {
-              // add a filesets array, add the fileset and the files to the new filesets array
-              // update the dataset
-              let fsInfo = {fileset: filesetName, files: files}
-              doc.filesets = []
-              doc.filesets.push(fsInfo)
-              // doc.markModified('filesets')
-              Datasets.replaceOne({_id: datasetId}, doc, (err, modInfo) => {
-                if (err) {
-                  let msg = 'failed to update (3) dataset: ' + datasetId + ' with new fileset info for: ' + filesetName + ' files: ' + JSON.stringify(files) + ' Error: ' + err.message
-                  logger.error(func + ' - ' + msg)
-                  reject(err)
-                } else {
-                  logger.debug('Updated (3) dataset: ' + datasetId + ' with new fileset info: ' + JSON.stringify(fsInfo) + ' modInfo:' + JSON.stringify(modInfo) + ' filesets: ' + JSON.stringify(doc.filesets))
-                  resolve(doc)
-                }
-              })
-            }
-          } else {
-            // dataset does not exist
-            let err = new Error('Cannot add filesetName: ' + filesetName + '  to non-existant dataset: ' + datasetId)
-            logger.error(func + ' - ' + err.message)
-            reject(err)
-          }
-        }
-      })
-    } else {
-      // files parameter is not acceptable
-      let err = new Error('Cannot add files to filesetName: ' + filesetName + '  the files are not properly described by type and id.')
-      logger.error(func + ' - ' + err.message)
-      reject(err)
-    }
-  })
+  } else {
+    // Invalid input parameters
+    let msg = func + ' - invalid input parameters.'
+    logger.error(msg)
+    rv = null
+  }
+  return rv // returns -1=error, 0=fileset updated, 1=fileset added
 }
 
 module.exports = {
   datasets: datasets,
-  datasetsAddFiles: addFiles
+  datasetAddOrOverwriteFileInfo: datasetAddOrOverwriteFileInfo
 }

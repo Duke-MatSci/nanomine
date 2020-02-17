@@ -599,6 +599,18 @@ function replaceXmlSeqIdInTitle (logger, id, newDsid) {
   }
   return newId
 }
+function replaceXmlSampleNumberInTitle (logger, id, newSampleNumber) {
+  // given an id of the regex form .[0-9]{n}_S[0-9]{n}_AUTHOR_YYYY replace the sample number component (second set of number)
+  let newId = null
+  newSampleNumber = ''+newSampleNumber // force to string
+  let m = matchValidXmlTitle(id)
+  if (m) {
+    let oldSampleNumber = m[2]
+    newId = id[0] + m[1] + '_S' + newSampleNumber + '_' + m[3] + '_' + m[4]
+    logger.debug('oldId: ' + id + ' old sample number: ' + oldSampleNumber + ' new id: ' + newId)
+  }
+  return newId
+}
 
 function updateMicrostructureImageFileLocations (logger, xmlDoc, restServerBaseUri) {
   let func = 'updateMicrostructureImageFileLocations'
@@ -627,11 +639,11 @@ function xmlEnsurePathExists (xmlDoc, path, after) { // after may be undefined b
   let nodes = path.replace(/^\/*/, '').split('/') // strip leading slashes and split by path separator
   let subPath = ''
   let goodSubNode = null
-  let newDoc = null
+  let newDoc = xmlDoc
   console.log(func + ' - ' + 'Path: ' + path + ' After: ' + JSON.stringify(after) + ' nodes is: ' + JSON.stringify(nodes))
   nodes.forEach(function (v) {
     subPath += '/' + v
-    let subNode = xmlDoc.find(subPath)
+    let subNode = newDoc.find(subPath) // xmlDoc.find(subPath)
     if (subNode && subNode.length > 0) {
       // console.log(func + ' - ' + 'found subPath: ' + subPath)
       goodSubNode = subNode
@@ -741,6 +753,7 @@ module.exports = {
   'mergeDatasetInfoFromXml': mergeDatasetInfoFromXml,
   'xmlEnsurePathExists': xmlEnsurePathExists,
   'replaceXmlSeqIdInTitle': replaceXmlSeqIdInTitle,
+  'replaceXmlSampleNumberInTitle': replaceXmlSampleNumberInTitle,
   'updateMicrostructureImageFileLocations': updateMicrostructureImageFileLocations,
   'updateOrCreateXmlData': updateOrCreateXmlData,
   'logTrace': logTrace,

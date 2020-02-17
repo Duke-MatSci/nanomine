@@ -296,7 +296,7 @@
 
         -->
         <v-card style="width:100%;" v-show="filesetSelected !== null">
-          <v-card-title class="files-header"><span style="width:50%;" class="text-xs-left">
+          <v-card-title class="files-header"><span style="width:40%;" class="text-xs-left">
             <v-btn
               fab small
               color="primary"
@@ -307,7 +307,7 @@
             <v-icon light v-else>expand_less</v-icon>
 
            </v-btn>{{filesHeaderTitle}}</span>
-            <span class="text-xs-right" style="width:50%;" v-show="fileSelected !== null">
+            <span class="text-xs-right" style="width:60%;" v-show="fileSelected !== null">
              <!--v-btn v-if="sampleFileinfo.length > 0"
                     fab small
                     color="primary"
@@ -1144,19 +1144,25 @@ export default {
           switch (fileInfo.type) {
             case 'blob':
               let contentType = fileInfo.contentTypeFromHeader
-              let b64 = ''
-              try {
-                let ab = fileInfo.fileData
-                b64 = btoa(String.fromCharCode.apply(null, new Uint8Array(ab)))
-                console.log('new b64: ' + b64)
-              } catch (err) {
-                console.log('data: ' + fileInfo.fileData)
-                let msg = 'Error viewing file. Error: ' + err.message
-                vm.fileError = true
-                vm.fileErrorMsg = msg
+              if (contentType.indexOf('tif') === -1) {
+                let b64 = ''
+                try {
+                  let ab = new Uint8Array(fileInfo.fileData)
+                  // console.log('ab = ' + ab)
+                  b64 = btoa(String.fromCharCode.apply(null, ab))
+                  // b64 = btoa(ab)
+                  // console.log('new b64: ' + b64)
+                } catch (err) {
+                  // console.log('data: ' + fileInfo.fileData.toString() + ' length: ' + fileInfo.fileData.byteLength)
+                  let msg = 'Error viewing file. Error: ' + err.message
+                  vm.fileError = true
+                  vm.fileErrorMsg = msg
+                }
+                vm.fileImageDataUri = 'data:' + contentType + ';base64,' + b64
+                // console.log('dataUri: ' + vm.fileImageDataUri)
+              } else {
+                console.log('cannot display contentType: ' + contentType)
               }
-              vm.fileImageDataUri = 'data:' + contentType + ';base64,' + b64
-              console.log('dataUri: ' + vm.fileImageDataUri)
               break
             case 'xmldata':
               //   setTimeout(function () {

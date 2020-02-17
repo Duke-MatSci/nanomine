@@ -174,6 +174,7 @@ export default {
               if (m) {
                 file.dsid = +(m[1])
               } else {
+                console.log('there is an issue with file: ' + file.fileName + '. The title is invalid.')
                 file.error = true
                 file.dsid = -1
               }
