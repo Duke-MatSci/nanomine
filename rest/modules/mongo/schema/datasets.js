@@ -43,7 +43,7 @@ function datasets (mongoose) {
     title: String, /* Name of study, book, article, paper, etc -- required field */
     url: String, /* Best url to access paper, book, etc */
     userid: String, /* creator's user id */
-    volume: Number /* 1-12 for monthly, could be others for weekly, semi-monthly, etc */
+    volume: String /* 1-12 for monthly, could be others for weekly, semi-monthly, etc */
     // latestSchema: Boolean, /* Has associated xml_data recs for latest schema. If not, then lookups of xmls for latest schema using this dsSeq will fail */
   }, {collection: 'datasets'})
   return datasetsSchema

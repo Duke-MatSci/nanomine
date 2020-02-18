@@ -201,15 +201,22 @@ function updateFileInfoMetadataFromBlob (fileInfo) {
   let func = 'updateFileInfoFromBlob'
   return new Promise(function (resolve, reject) {
     if (fileInfo.type === 'blob') {
-      FsFiles.findOne(fileInfo.id, function (err, fsFilesDoc) {
+      FsFiles.findOne({_id: fileInfo.id}, function (err, fsFilesDoc) {
         if (err) {
           logger.error(func + ' - error reading fs.info for blob id: ' + fileInfo.id + ' Error: ' + err.message)
+          reject(err)
         } else {
-          let metadata = {
-            'filename': fsFilesDoc.filename,
-            'contentType': mimetypes.lookup(fsFilesDoc.filename)
+          if (fsFilesDoc) {
+            let metadata = {
+              'filename': fsFilesDoc.filename,
+              'contentType': mimetypes.lookup(fsFilesDoc.filename)
+            }
+            fileInfo.metadata = metadata
+            resolve(fileInfo)
+          } else {
+            logger.error(func + ' - oops blob not found: ' + fileInfo.id + ' invalid blob id.')
+            resolve(null)
           }
-          fileInfo.metadata = metadata
         }
       })
     } else {
@@ -514,7 +521,12 @@ function curateDatasetUpload (jobType, jobId, jobDir) {
                     })
                     logger.debug(func + ' - ' + 'Dataset update for: ' + datasetId + ' datasetInfo: ' + JSON.stringify(datasetInfo))
                     Promise.all(blobPromises)
-                      .then(function () {
+                      .then(function (bvalues) {
+                        blobPromises.forEach((bv) => {
+                          if (bv === null) {
+                            logger.error(func + ' - WARNING (non-fatal error): blob not found for an xml in dataset: ' + datasetId + ' filename in metadata was not updated.')
+                          }
+                        })
                         updateDataset(Datasets, logger, datasetInfo)
                           .then(function (result) {
                             resolve(rc)

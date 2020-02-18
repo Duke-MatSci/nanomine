@@ -2958,7 +2958,7 @@ function jobSubmit (jobId, jobType, userToken) {
                   logger.info('executing: ' + pgm + ' in: ' + pgmpath)
                   let path = process.env['PATH'] + ':/apps/n/bin'
                   let localEnv = {'PYTHONPATH': pathModule.join(cwd, '../src/jobs/lib'), 'NODE_PATH': '/apps/nanomine/rest/node_modules', 'PATH': path}
-                  localEnv = _.merge(process.env, localEnv)
+                  _.merge(localEnv, process.env)
                   logger.debug(func + ' - running job ' + jobId + ' with env path = ' + localEnv['PATH'] +
                       ' PYTHONPATH = ' + localEnv['PYTHONPATH'] + '' + ' NODE_PATH: ' + localEnv['NODE_PATH'])
                   let child = require('child_process').spawn(pgm, [jobType, jobId, jobDir], {
