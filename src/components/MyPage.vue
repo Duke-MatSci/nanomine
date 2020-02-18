@@ -335,7 +335,15 @@
             <template slot="items" slot-scope="props" height="300">
               <td class="text-xs-left"
                   v-on:click="fileClick(props.item)">
-                {{props.item.type}}
+                {{props.item.id}}
+              </td>
+              <td class="text-xs-left"
+                  v-on:click="fileClick(props.item)">
+                {{getFileFilename(props.item)}}
+              </td>
+              <td class="text-xs-left"
+                  v-on:click="fileClick(props.item)">
+                {{getFileContentType(props.item)}}
               </td>
             </template>
             <v-alert slot="no-results" :value="true" color="error" icon="warning">
@@ -366,7 +374,7 @@
           <v-container v-bind:style="{'display': formInView}" fluid justify-start fill-height>
             <v-layout row wrap align-start fill-height>
               <v-flex fill-height xs12 align-start justify-start>
-                <v-img ref="fileImageDisplay" :src="fileImageDataUri"></v-img>
+                <v-img v-if="fileImageDataUri !== null" ref="fileImageDisplay" :src="fileImageDataUri"></v-img>
               </v-flex>
             </v-layout>
           </v-container>
@@ -549,7 +557,9 @@ export default {
       // Samples
       filesSearch: '',
       filesHeaders: [
-        {text: 'Type', align: 'left', value: 'type'}
+        {text: 'ID', align: 'left', value: 'id'},
+        {text: 'File Name', align: 'left', value: 'metadata.filename'},
+        {text: 'Type', align: 'left', value: 'metadata.contentType'}
         // {text: 'Published', align: 'left', value: 'ispublished'},
         // {text: 'Public', align: 'left', value: 'isPublic'},
         // {text: 'Edit State', align: 'left', value: 'entityState'},
@@ -960,7 +970,25 @@ export default {
       vm.filesetsHideSelector = true
     },
 
-    // samples
+    // samples / files
+    getFileFilename: function (item) {
+      let rv = 'N/A'
+      console.log('getFileFilename item: ' + JSON.stringify(item) + ' type of item: ' + typeof item)
+      if (item.metadata && item.metadata.filename) {
+        rv = item.metadata.filename
+      }
+      console.log('getFileFilename rv: ' + rv)
+      return rv
+    },
+    getFileContentType: function (item) {
+      let rv = 'N/A'
+      console.log('getFileContentType item: ' + JSON.stringify(item) + ' type of item: ' + typeof item)
+      if (item.metadata && item.metadata.contentType) {
+        rv = item.metadata.contentType
+      }
+      console.log('getFileContentType rv: ' + rv)
+      return rv
+    },
     sampleTreeviewOptions: function () {
       // let vm = this
       // let id = 'Sample Information'
@@ -1161,7 +1189,10 @@ export default {
                 vm.fileImageDataUri = 'data:' + contentType + ';base64,' + b64
                 // console.log('dataUri: ' + vm.fileImageDataUri)
               } else {
-                console.log('cannot display contentType: ' + contentType)
+                let msg = 'cannot display images of contentType: ' + contentType + '. Please download instead.'
+                vm.fileError = true
+                vm.fileErrorMsg = msg
+                console.log(msg)
               }
               break
             case 'xmldata':
@@ -1208,6 +1239,8 @@ export default {
           vm.resetLoading()
         })
         p.catch(function (err) {
+          vm.fileImageDataUri = null
+          vm.fileObj = null
           vm.fileErrorMsg = `Error occurred fetching file: ${err.message}`
           vm.fileError = true
           vm.resetLoading()
