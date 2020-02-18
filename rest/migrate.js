@@ -164,12 +164,12 @@ const versionSpDev3 = { // NanoMine SP rewrite dev version 3
   patchVer: 0,
   labelVer: 'nm-sp-dev-3'
 }
-const versionSpDev4 = { // NanoMine SP rewrite dev version 4
-  majorVer: 1,
-  minorVer: 3,
-  patchVer: 0,
-  labelVer: 'nm-sp-dev-4'
-}
+// const versionSpDev4 = { // NanoMine SP rewrite dev version 4
+//   majorVer: 1,
+//   minorVer: 3,
+//   patchVer: 0,
+//   labelVer: 'nm-sp-dev-4'
+// }
 
 let dbVer = versionOriginal
 let versionColNm = 'mgi_version'
@@ -701,33 +701,7 @@ function updateDatasetsObject (seq, ds, dsExt) {
     // no dataset info passed
   }
 }
-function migrateToNmSpDev4 (fromVer, toVer) {
-  // 1- Mark all XMLs for the single dataset defined isPublic=true, ispublished=true, and change the user to the NanoMine user
-  // 2- Mark all XMLs with DOIs that start with 'unpublished' to ispublished:false
-  // 3- Mark the datasets defined as public and change the user to the NanoMine user
-  // 4- Mark the datasets with unpublished dois as ispublished=false
-  // 5- Update all metadata (add new metadata field) in filesets within the dataset to set the filename and content type for blobs (not xmldata)
-  let func = 'migrateToNmSpDev4'
-  let now = Math.floor(Date.now() / 1000)
-  let p = new Promise(function (resolve, reject) {
-    let msg = func + ' - migrating from ' + JSON.stringify(fromVer) + ' to ' + JSON.stringify(toVer)
-    logInfo(msg)
-    let xmls = db.collection('xmldata')
-    xmls.updateMany({datasetId: {$ne: null}}, {$set: {isPublic: true, ispublished: true, userid: nanomineUser.userid}}, function (err, result) { // #1
-      if (err) {
-        msg = 'Error occurred setting all template_versions isDeleted = true. Error: ' + err
-        logInfo(msg)
-        reject(err)
-      } else {
-        msg = 'Successfully updated all template_versions isDeleted = true. result: ' + JSON.stringify(result)
-        logInfo(msg)
-        // delete all datasets - loading a new set of data via GUI after migration runs
-        let ds = db.collection('datasets')
-      }
-    })
-  })
-  return p
-}
+
 // NOTE: All this migration does is mark all schemas deleted (template_versions.isDeleted = true)
 //  The reasons are:
 //    1 - The assumption is that new xmls  and schema will be uploaded and new datasets created for those since xmls are being renumbered
