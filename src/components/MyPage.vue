@@ -161,7 +161,8 @@
 
         -->
         <v-card style="width:100%;">
-          <v-card-title class="dataset-header"><span style="width:50%;" class="text-xs-left">
+          <v-card-title class="dataset-header">
+            <span class="text-xs-left">
             <v-btn
               fab small
               color="primary"
@@ -178,16 +179,17 @@
               class="white--text"
               @click="addDataset"
             ><v-icon>library_add</v-icon></v-btn>
-            {{datasetsHeaderTitle}}</span>
             <v-btn
               v-if="datasetsHeaderInfoIcon"
               fab small
               color="primary"
               class="white--text"
-              @click="datasetInfoDialogActive=true"
+              @click="datasetInfoDialog()"
             >
               <v-icon>info</v-icon>
             </v-btn>
+            {{datasetsHeaderTitle}}</span>
+            <v-spacer></v-spacer>
             <span class="text-xs-right" style="width:50%;"
                   v-show="datasetSelected !== null">{{headerDOI}}</span>
           </v-card-title>
@@ -335,15 +337,15 @@
             <template slot="items" slot-scope="props" height="300">
               <td class="text-xs-left"
                   v-on:click="fileClick(props.item)">
-                {{props.item.id}}
-              </td>
-              <td class="text-xs-left"
-                  v-on:click="fileClick(props.item)">
                 {{getFileFilename(props.item)}}
               </td>
               <td class="text-xs-left"
                   v-on:click="fileClick(props.item)">
                 {{getFileContentType(props.item)}}
+              </td>
+              <td class="text-xs-left"
+                  v-on:click="fileClick(props.item)">
+                {{props.item.id}}
               </td>
             </template>
             <v-alert slot="no-results" :value="true" color="error" icon="warning">
@@ -385,31 +387,56 @@
         Dataset Info Dialog
 
       -->
-      <v-layout row justify-center>
-        <v-dialog v-model="datasetInfoDialogActive" scrollable width="500">
-          <v-container fluid xs12 class="dataset-info-header">
-            <v-layout xs12 row justify-left>
-              <v-flex d-flex xs12 align-center>
-                <v-flex xs10 class="text-xs-left">
-                  {{headerDOI}}
-                </v-flex>
-                <v-flex xs2 class="justify-right">
-                  <v-btn fab small color="normal" @click.native="datasetInfoDialogActive = false">
-                    <v-icon>close</v-icon>
-                  </v-btn>
-                </v-flex>
-              </v-flex>
-            </v-layout>
-            <!--          <v-card>-->
-            <v-layout xs12 row justify-left>
-              <v-flex  d-flex v-for="(item, key) in datasetTransformed" v-bind:key="key">
-                {{key}}: {{item}}
-              </v-flex>
-            </v-layout>
-            <!--          </v-card>-->
-          </v-container>
-        </v-dialog>
-      </v-layout>
+      <!--v-layout row justify-center-->
+      <v-dialog v-model="datasetInfoDialogActive">
+        <v-layout row>
+          <v-flex xs12 sm6 offset-sm3>
+            <v-card>
+              <v-toolbar color="cyan" dark>
+                <!--v-toolbar-side-icon></v-toolbar-side-icon-->
+
+                <v-toolbar-title>Dataset Information</v-toolbar-title>
+
+                <v-spacer></v-spacer>
+
+                <v-btn icon @click="datasetInfoDialogActive=false">
+                  <v-icon>close</v-icon>
+                </v-btn>
+              </v-toolbar>
+
+              <v-list two-line>
+                <template v-for="(item, index) in datasetDialogInfo.items">
+                  <v-subheader
+                    v-if="item.header"
+                    :key="item.header"
+                  >
+                    {{ item.header }}
+                  </v-subheader>
+
+                  <v-divider
+                    v-else-if="item.divider"
+                    :key="index"
+                    :inset="item.inset"
+                  ></v-divider>
+
+                  <!--@click=""-->
+                  <v-list-tile
+                    v-else
+                    :key="item.title"
+                    avatar
+                  >
+                    <v-list-tile-content>
+                      <v-list-tile-title v-html="item.title"></v-list-tile-title>
+                      <v-list-tile-sub-title v-html="item.subtitle"></v-list-tile-sub-title>
+                    </v-list-tile-content>
+                  </v-list-tile>
+                </template>
+              </v-list>
+            </v-card>
+          </v-flex>
+        </v-layout>
+      </v-dialog>
+      <!--/v-layout-->
 
       <!--
 
@@ -481,6 +508,7 @@
 
 <script>
 import {Auth} from '@/modules/Auth.js'
+import * as base64js from 'base64-js'
 import {} from 'vuex'
 import Axios from 'axios'
 import * as xmljs from 'xml-js'
@@ -539,6 +567,7 @@ export default {
       ],
       datasetList: [],
       datasetInfoDialogActive: false,
+      datasetDialogInfo: {}, // re-structured information from dataset
       datasetHideSelector: false,
       datasetSelected: null,
       datasetTransformed: {},
@@ -557,9 +586,9 @@ export default {
       // Samples
       filesSearch: '',
       filesHeaders: [
-        {text: 'ID', align: 'left', value: 'id'},
         {text: 'File Name', align: 'left', value: 'metadata.filename'},
-        {text: 'Type', align: 'left', value: 'metadata.contentType'}
+        {text: 'Type', align: 'left', value: 'metadata.contentType'},
+        {text: 'ID', align: 'left', value: 'id'}
         // {text: 'Published', align: 'left', value: 'ispublished'},
         // {text: 'Public', align: 'left', value: 'isPublic'},
         // {text: 'Edit State', align: 'left', value: 'entityState'},
@@ -903,6 +932,10 @@ export default {
       vm.userselected = []
     },
     // datasets
+    datasetInfoDialog: function () {
+      let vm = this
+      vm.datasetInfoDialogActive = true
+    },
     toggleDatasetHide: function () {
       let vm = this
       vm.datasetHideSelector = !vm.datasetHideSelector
@@ -918,12 +951,13 @@ export default {
       console.log('showMineOnly is now: ' + vm.showMineOnly)
     },
     transformDataset: function (entry) {
+      let vm = this
       let transformed = {}
       _.keys(entry).forEach((k) => {
         if (k !== 'filesets' && k !== '__v' && k !== 'dttm_created' && k !== 'dttm_updated') {
           if (Array.isArray(entry[k])) {
             if (entry[k].length > 0) {
-              transformed[k] = entry[k].join(', ')
+              transformed[k] = entry[k].join('; ')
             } else {
               transformed[k] = 'N/A'
             }
@@ -935,8 +969,24 @@ export default {
           }
         }
       })
+      vm.datasetDialogInfo = {
+        items: [
+          {header: transformed['doi']}
+        ]
+      }
+      _.keys(transformed).forEach((k) => {
+        vm.datasetDialogInfo.items.push({
+          title: k,
+          subtitle: transformed[k]
+        })
+        vm.datasetDialogInfo.items.push({
+          divider: true,
+          inset: true
+        })
+      })
       return transformed
     },
+
     datasetClick: function (entry) {
       let vm = this
       console.log('dataset selected: ' + entry.seq)
@@ -1177,9 +1227,10 @@ export default {
                 try {
                   let ab = new Uint8Array(fileInfo.fileData)
                   // console.log('ab = ' + ab)
-                  b64 = btoa(String.fromCharCode.apply(null, ab))
+                  // --b64 = btoa(String.fromCharCode.apply(null, ab))
                   // b64 = btoa(ab)
                   // console.log('new b64: ' + b64)
+                  b64 = base64js.fromByteArray(ab)
                 } catch (err) {
                   // console.log('data: ' + fileInfo.fileData.toString() + ' length: ' + fileInfo.fileData.byteLength)
                   let msg = 'Error viewing file. Error: ' + err.message
@@ -1190,6 +1241,7 @@ export default {
                 // console.log('dataUri: ' + vm.fileImageDataUri)
               } else {
                 let msg = 'cannot display images of contentType: ' + contentType + '. Please download instead.'
+                vm.fileImageDataUri = null
                 vm.fileError = true
                 vm.fileErrorMsg = msg
                 console.log(msg)
