@@ -73,7 +73,7 @@ function isValidFileInfo (logger, fileInfo) { // checks fileInfo to see if it's 
   return rv
 }
 
-function datasetAddOrOverwriteFileInfo (datasetInfo, logger, filesetName, fileInfo) {
+function datasetAddOrOverwriteFileInfo (datasetInfo, logger, filesetName, fileInfo) { // TODO needs testing
   let rv = -1
   let func = 'datasetAddOrUpdateFileInfo'
   // This code only adds tracking information about files to the dataset
@@ -81,7 +81,7 @@ function datasetAddOrOverwriteFileInfo (datasetInfo, logger, filesetName, fileIn
   // If the filesetName does not exist, the filesetName will be created and the fileInfo added
   // If the filesetName exists and the fileInfo does not exist, the fileInfo will be added to the filesetName
   // If the filesetName exists and the fileInfo already exists, it will be OVERWRITTEN
-  // The filesetName is simply a string like 'result 1' or 'sample 1'
+  // The filesetName is simply a string like 'result 1',  'sample 1' or can be like 'L999_S1_JONES_2008' (hopefully move away from that structure)
   // The fileInfo is an object consisting of:
   //   type, id, and metadata keys at the top level
   //      type: 'blob' or 'xmldata'

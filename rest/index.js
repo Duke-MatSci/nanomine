@@ -47,6 +47,7 @@ let env = nanomineUtils.getEnv()
 // const getDatasetXmlFileList = nanomineUtils.getDatasetXmlFileList
 const getXmlFileList = nanomineUtils.getDatasetXmlFileList
 const createDataset = nanomineUtils.createDataset
+const updateDataset = nanomineUtils.updateDataset
 const getLatestSchemas = nanomineUtils.getLatestSchemas
 const sortSchemas = nanomineUtils.sortSchemas
 
@@ -168,6 +169,9 @@ let Users = mongoose.model('users', usersSchema)
 
 let apiSchema = require('./modules/mongo/schema/api')(mongoose)
 let Api = mongoose.model('api', apiSchema)
+
+let sequencesSchema = require('./modules/mongo/schema/sequences').sequences(mongoose)
+let Sequences = mongoose.model('sequences', sequencesSchema)
 
 let xmlDataSchema = require('./modules/mongo/schema/xmldata')(mongoose)
 let XmlData = mongoose.model('xmlData', xmlDataSchema)
@@ -658,7 +662,17 @@ function handleLocalUserIfNecessary (req, res) {
     })
   }
 }
-
+app.get('/nmdevlogin', function (req, res) {
+  handleLocalUserIfNecessary(req, res)
+    .then(function (res) {
+      logger.debug('/nmdevlogin - cookie: ' + inspect(res))
+      res.redirect('/nm')
+    })
+    .catch(function (err) {
+      logger.error('/nmdev handleLocalUserIfNecessary returned an error. Error: ' + err.message)
+      res.status(500).send('local login error occurred')
+    })
+})
 app.get('/nm', function (req, res) {
   let idx = '../dist/index.html'
   logger.debug('cookies: ' + inspect(req.cookies))
@@ -2390,28 +2404,26 @@ app.get('/dataset', function (req, res) {
   }
 })
 
-app.post('/dataset/update', function (req, res) {
-  let jsonResp = {'error': null, 'data': null}
+app.post('/dataset/update', function (req, res) { // TODO check user, admin, and public flag SECU
   let dsUpdate = req.body.dsUpdate
-  let dsSeq = req.body.dsSeq
-  let schemaId = req.body.schemaid
+  // let dsSeq = req.body.dsSeq
+  // let schemaId = req.body.schemaid
   console.log('datataset/update: doing update...' + JSON.stringify(dsUpdate))
-  Datasets.findOneAndUpdate({'$and': [{'schemaId': {'$eq': schemaId}}, {'seq': dsSeq}]}, {$set: dsUpdate}, {}, function (err, oldDoc) {
-    if (err) {
-      jsonResp.error = err
-      console.log('datataset/update: error - ' + err)
-      return res.status(500).json(jsonResp)
-    } else {
-      jsonResp.data = oldDoc
-      console.log('datataset/update: success - ' + oldDoc)
-      return res.status(200).json(jsonResp)
-    }
-  })
+  updateDataset(Datasets, logger, dsUpdate)
+    .then(function (status) {
+      console.log('datataset/update: success - ' + JSON.stringify(status))
+      return res.status(status.statusCode).json(status)
+    })
+    .catch(function (err) {
+      console.log('datataset/update: error - ' + JSON.stringify(status))
+      return res.status(err.statusCode).json(status)
+    })
 })
-app.post('/dataset/create', function (req, res) {
+
+app.post('/dataset/create', function (req, res) { // auth middleware verifies user
   let jsonResp = {'error': null, 'data': null}
   let dsInfo = req.body.dsInfo // requires schemaId now
-  createDataset(Datasets, logger, dsInfo)
+  createDataset(Datasets, Sequences, logger, dsInfo)
     .then(function (result) {
       jsonResp.error = null
       jsonResp.data = result.data

@@ -13,15 +13,20 @@
       </p>
       <br>
       <h3 class="text-xs-left">Steps</h3>
-      <p class="text-xs-left">Step 1: Click <a href="/nmstatic/xmlconv/master_template.zip" download>here</a> to download the
+      <p class="text-xs-left">
+        <span class="font-weight-black">NOTE:</span>  Filesets for samples are grouped into datasets. The files for a sample (images, auxiliary spreadsheet data, completed Excel template, etc)
+           are uploaded as a set called a fileset.  Uploading multiple samples requires multiple fileset uploads.<br/>
+        <span class="font-weight-black">Step 1:</span> Create a new dataset for the control sample and its related files, <span class="font-weight-black">then when uploading each additional sample be
+        sure to select the same dataset</span> that was used for the control sample of the sample group.<br/>
+        <span class="font-weight-black">Step 2:</span> Click <a href="/nmstatic/xmlconv/master_template.zip" download>here</a> to download the
         blank MS Excel template (137 kB).
         (Click <a href="/nmstatic/xmlconv/example.zip" download>here</a> to see an example, 263 kB)<br>
-        Step 2: Fill in the parameters for all applicable cells in the Excel template file. Prepare the supplementary
+        <span class="font-weight-black">Step 3:</span> Fill in the parameters for all applicable cells in the Excel template file. Prepare the supplementary
         images and raw data files.<br>
-        Step 3: Select the completed Excel template file in the first uploading box.<br>
-        Step 4: Select the supplementary images and other raw data files in the second uploading box (press "Ctrl" or
+        <span class="font-weight-black">Step 4:</span> Select the completed Excel template file in the first uploading box.<br>
+        <span class="font-weight-black">Step 5:</span> Select the supplementary images and other raw data files in the second uploading box (press "Ctrl" or
         "Command" when selecting multiple files), then click Submit to upload your data.<br>
-        Step 5: Wait for the feedback message. Please read the message and follow the instructions if an error message
+        <span class="font-weight-black">Step 6:</span> Wait for the feedback message. Please read the message and follow the instructions if an error message
         is displayed.</p>
       <h3 class="text-xs-left">Note</h3>
       <p class="text-xs-left">1. We recommend you to upload your control sample first and remember its sample ID.<br>
@@ -60,6 +65,7 @@
           </v-card-actions>
         </v-card>
       </v-dialog>
+      <dataset-create-or-select></dataset-create-or-select>
       <v-flex xs12 class="text-xs-center text-sm-center text-md-center text-lg-center">
         <p class="text-xs-left">Select a completed Excel Template File
           <v-btn class="text-xs-left" small color="primary" @click='pickTemplate'>Browse</v-btn>
@@ -71,7 +77,7 @@
             @change="onTemplatePicked"
           >
         </p>
-        <v-list v-model="templateName" subheader="true" v-if="templateUploaded">
+        <v-list v-model="templateName" subheader v-if="templateUploaded">
           <v-list-tile
             :key="templateName"
           >
@@ -95,7 +101,7 @@
             @change="onFilePicked"
           >
         </p>
-        <v-list v-model="filesDisplay" subheader="true">
+        <v-list v-model="filesDisplay" subheader>
           <v-list-tile
             v-for="file in filesDisplay"
             :key="file.fileName"

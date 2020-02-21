@@ -8,6 +8,7 @@ const _ = require('lodash')
 const { combine, label, printf, prettyPrint } = format
 // const datasetsSchema = require('./modules/mongo/schema/datasets')(mongoose)
 // const Datasets = mongoose.model('datasets', datasetsSchema)
+const getNextDatasetsSequenceNumber = require('../modules/mongo/schema/sequences').getNextDatasetsSequenceNumber
 let trace = false
 function setTrace (_trace) {
   trace = _trace
@@ -228,7 +229,7 @@ function updateOrCreateXmlData (xmlData, logger, creatorId, xmlDoc, schemaId, da
 function updateDataset (Datasets, logger, dsInfo) {
   // NOTE: requires schemaId and seq for update and create
   //   If the record exists, it will be updated. If it does not, it will be created as
-  //   opposed to createDataset which always selects a non-used sequence (still requires schemaId).
+  //   opposed to createDataset which always selects a non-used sequence.
   let func = 'utils.updateDataset'
   let status = {'statusCode': 201, 'error': null, 'data': null}
   return new Promise(function (resolve, reject) {
@@ -265,47 +266,55 @@ function createDataset (Datasets, logger, dsInfo) { // creates the dataset using
     // 1. create a new dataset, get the _id and set it into the dsInfo.datasetId field
     // 2. If the seq of the dsInfo is set, use it. TODO - Otherwise initialize it to one more than the greatest seq of all the datasets
     //      datasets.findOne().sort('-seq').exec(function err, item){}) - if there are none, set to 101
-    if (dsInfo && dsInfo.seq && dsInfo.seq > 0) {
-      logger.debug(func + ' - Seq: ' + dsInfo.seq + ' dsInfo: ' + inspect(dsInfo))
-      dsInfo.isDeleted = false
-      dsInfo.dttm_created = Math.floor(Date.now() / 1000)
-      dsInfo.dttm_updated = Math.floor(Date.now() / 1000)
-      Datasets.create(dsInfo, function (err, doc) {
-        if (err) {
-          logger.error(func + ' - datasets create error: ' + err)
-          status.error = err
-          status.data = null
-          status.statusCode = 500
-          reject(status)
-        } else {
-          doc.datasetId = doc._id.toString()
-          doc.dttm_updated = Math.floor(Date.now() / 1000)
-          Datasets.findByIdAndUpdate(doc._id, doc, function (err, olddoc) {
+    getNextDatasetsSequenceNumber(Sequences, logger)
+      .then(function (dsSeq) {
+        if (dsInfo && dsInfo.seq && dsInfo.seq > 0) {
+          logger.debug(func + ' - Seq: ' + dsInfo.seq + ' dsInfo: ' + inspect(dsInfo))
+          dsInfo.isDeleted = false
+          dsInfo.dttm_created = Math.floor(Date.now() / 1000)
+          dsInfo.dttm_updated = Math.floor(Date.now() / 1000)
+          Datasets.create(dsInfo, function (err, doc) {
             if (err) {
-              logger.error(func + ' - dataset created, but could not update datasetId: ' + err)
+              logger.error(func + ' - datasets create error: ' + err)
               status.error = err
               status.data = null
               status.statusCode = 500
               reject(status)
             } else {
-              status.error = null
-              status.data = doc
-              status.statusCode = 201
-              logger.debug(func + ' - dataset created successfully. _id is: ' + doc._id.toString() + ' datasetId is: ' + doc.datasetId + ' Sequence is: ' + dsInfo.seq)
-              resolve(status)
+              doc.datasetId = doc._id.toString()
+              doc.dttm_updated = Math.floor(Date.now() / 1000)
+              Datasets.findByIdAndUpdate(doc._id, doc, function (err, olddoc) {
+                if (err) {
+                  logger.error(func + ' - dataset created, but could not update datasetId: ' + err)
+                  status.error = err
+                  status.data = null
+                  status.statusCode = 500
+                  reject(status)
+                } else {
+                  status.error = null
+                  status.data = doc
+                  status.statusCode = 201
+                  logger.debug(func + ' - dataset created successfully. _id is: ' + doc._id.toString() + ' datasetId is: ' + doc.datasetId + ' Sequence is: ' + dsInfo.seq)
+                  resolve(status)
+                }
+              })
             }
           })
+        } else {
+          let err = 'Dataset information not supplied or seq field not set'
+          logger.error(func + ' - datasets create error: ' + err)
+          status.error = err
+          status.data = null
+          status.statusCode = 400
+          reject(status)
         }
       })
-    } else {
-      let err = 'Dataset information not supplied or seq field not set'
-      logger.error(func + ' - datasets create error: ' + err)
+  })
+    .catch(function (err) {
       status.error = err
       status.data = null
-      status.statusCode = 400
-      reject(status)
-    }
-  })
+      status.statusCode = 500
+    })
 }
 
 function sortSchemas (allActive) { // sort by date descending and choose first

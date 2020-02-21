@@ -58,6 +58,5 @@ export default {
   }
 
   .container {
-    max-width: 600px;
   }
 </style>

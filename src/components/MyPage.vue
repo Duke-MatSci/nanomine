@@ -172,13 +172,14 @@
              <v-icon light v-if="!datasetHideSelector">expand_more</v-icon>
              <v-icon light v-else>expand_less</v-icon>
             </v-btn>
-            <v-btn
+            <!-- Removing add datasets -->
+            <!--v-btn
               v-if="isLoggedIn()"
               fab small
               color="primary"
               class="white--text"
               @click="addDataset"
-            ><v-icon>library_add</v-icon></v-btn>
+            ><v-icon>library_add</v-icon></v-btn-->
             <v-btn
               v-if="datasetsHeaderInfoIcon"
               fab small
