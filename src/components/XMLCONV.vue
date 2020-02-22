@@ -5,7 +5,8 @@
       <h3 class="text-xs-left">Description</h3>
       <br>
       <p class="text-xs-left">The simplest method to curate your sample into the database is by uploading an MS Excel
-        spreadsheet. For each sample, upload a completed Excel template file using the first uploading box and other supplementary image and
+        spreadsheet. For each sample, select or create a dataset for your sample group, upload a completed Excel template
+        file using the first uploading box and other supplementary image and
         raw data files using the second uploading box. The master Excel template contains all possible fields for
         nanocomposite sample data and therefore many fields will remain blank for your sample. Fill in only the
         parameters applicable to your sample. Customized templates are available upon request, please contact

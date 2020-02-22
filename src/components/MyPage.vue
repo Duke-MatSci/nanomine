@@ -731,7 +731,6 @@ export default {
     datasetsFiltered: function () {
       let rv = true
       let vm = this
-      // TODO back-end should only provide data visible to this user
       let userid = vm.auth.getUserId()
       let runAsUser = vm.auth.getRunAsUser()
       return vm.datasetList.filter((i) => {

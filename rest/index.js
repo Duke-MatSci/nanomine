@@ -320,6 +320,25 @@ function getTokenDataFromReq (req) {
   return decoded
 }
 
+function setNmLoginUserIdHeaderValue (req, userid) {
+  let func = 'setNmLoginUserIdHeaderValue'
+  // used by middleware to set the userid from the jwt token into the req for use in the request handler
+  logger.debug(func + ' -  setting userid into nmLoginUserId header. Userid: ' + userid)
+  req.headers['nmLoginUserId'] = userid
+}
+
+function getNmLoginUserIdHeaderValue (req) {
+  // will return null if the header is not set i.e. the user is not logged in via shibboleth
+  let func = 'getNmLoginUserIdFromHeader'
+  let rv = req.headers['nmLoginUserId']
+  logger.debug(func + ' -  initial value: ' + rv)
+  if (!(rv && typeof rv === 'string' && rv.length > 0)) {
+    rv = null
+  }
+  logger.debug(func + ' - final return value: ' + rv)
+  return rv
+}
+
 function authMiddleware (authOptions) {
   // TODO review this code
   return function (req, res, next) {
@@ -352,7 +371,7 @@ function authMiddleware (authOptions) {
           loginUserId = decoded.sub // subject
           isAdmin = decoded.isAdmin
           logger.debug(func + ' - user: ' + loginUserId + ' accessing: ' + req.path)
-          req.headers['nmLoginUserId'] = decoded.sub
+          setNmLoginUserIdHeaderValue(req, decoded.sub)
         } catch (err) {
           logger.error(func + ' - check jwt token failed. err: ' + err)
         }
@@ -440,7 +459,7 @@ function authMiddleware (authOptions) {
           apiAuthPromise
             .then(function (tokenInfo) {
               if (tokenInfo) {
-                req.headers['nmLoginUserId'] = tokenInfo.userId
+                setNmLoginUserIdHeaderValue(req, tokenInfo.userId)
                 next()
               } else {
                 jsonResp.error = 'invalid token'
@@ -662,6 +681,7 @@ function handleLocalUserIfNecessary (req, res) {
     })
   }
 }
+
 app.get('/nmdevlogin', function (req, res) {
   handleLocalUserIfNecessary(req, res)
     .then(function (res) {
@@ -673,6 +693,7 @@ app.get('/nmdevlogin', function (req, res) {
       res.status(500).send('local login error occurred')
     })
 })
+
 app.get('/nm', function (req, res) {
   let idx = '../dist/index.html'
   logger.debug('cookies: ' + inspect(req.cookies))
@@ -694,6 +715,7 @@ app.get('/nm', function (req, res) {
       return res.status(404).send(err)
     })
 })
+
 app.get('/logout', function (req, res) {
   return res.status(200).json({error: null, data: {logoutUrl: nmAuthLogoutUrl}})
 })
@@ -701,7 +723,11 @@ app.get('/logout', function (req, res) {
 app.get('/doLogout', function (req, res) {
   res.clearCookie('session', {'httpOnly': true, 'path': '/'})
   res.clearCookie('token', {})
-  res.redirect(nmAuthLogoutUrl)
+  if (nmAuthType === 'local') {
+    res.redirect('/nm')
+  } else {
+    res.redirect(nmAuthLogoutUrl) // This redirects to the shibboleth logout url to ensure that the session is cleaned up.
+  }
 })
 
 /* BEGIN general utility functions */
@@ -2158,7 +2184,7 @@ app.post('/curate', function (req, res) {
   let ispublished = req.body.ispublished || false // no camelcase
   let isPublic = req.body.isPublic || false
   if (!userid) {
-    userid = req.headers['nmLoginUserId'] // set by auth middleware
+    userid = getNmLoginUserIdHeaderValue(req) // set by auth middleware
   } else {
     // TODO verify that overriding user is admin and that the specified user exists (should be done in middleware)
   }
@@ -2354,54 +2380,146 @@ app.get('/blob', function (req, res) { // MDCS only supports get by id (since th
 })
 
 app.get('/dataset', function (req, res) {
+  let func = 'get /dataset'
   let jsonResp = {'error': null, 'data': null}
   let id = req.query.id
   let seq = req.query.seq
   let doi = req.query.doi
-  // TODO - check user id and if not admin, only return public data and non-public data for the user
-  if (validQueryParam(id)) {
-    Datasets.findById(id, function (err, ds) {
-      if (err) {
-        jsonResp.error = err
-        return res.status(500).json(jsonResp)
+  let onlyPublic = false
+  let allowedAll = false
+  // if no user is logged in, then only return public data
+  // if the user is logged in, but not admin return public data and data owned by user
+  // if the user is logged in and admin, return all
+  let userid = getNmLoginUserIdHeaderValue(req)
+  let p = new Promise(function (resolve, reject) {
+    if (!userid) {
+      onlyPublic = true
+      allowedAll = false
+      resolve()
+    } else {
+      onlyPublic = false
+      getUserAndAdminInfo(userid)
+        .then(function (userAndAdminInfo) {
+          if (userAndAdminInfo.userInfo) {
+            if (userAndAdminInfo.isAdmin === true) {
+              allowedAll = true
+            }
+          }
+          let msg = func + ' - getUserAndAdminInfo successful. onlyPublic: ' + onlyPublic + ' allowedAll: ' + allowedAll + ' userInfo: ' + inspect(userAndAdminInfo)
+          logger.debug(msg)
+          resolve()
+        })
+        .catch(function (err) {
+          let msg = func + ' - error obtaining user info for userid: ' + userid + ' error: ' + err.message
+          logger.error(msg)
+          reject(err)
+        })
+    }
+  })
+  p.then(function () {
+    if (validQueryParam(id)) {
+      let idFilter = {_id: {'$eq': id}}
+      let filter = null
+      let userFilter = {userid: {'$eq': userid}}
+      let publicFilter = {isPublic: {'$eq': true}}
+      if (allowedAll) {
+        filter = idFilter
+      } else if (onlyPublic) {
+        filter = {'$and': [idFilter, publicFilter]}
       } else {
-        jsonResp.data = ds
-        return res.json(jsonResp)
+        filter = {'$and': [idFilter, {'$or': [userFilter, publicFilter]}]}
       }
-    })
-  } else if (validQueryParam(seq)) {
-    Datasets.find({'seq': {'$eq': seq}}, function (err, doc) {
-      if (err) {
-        jsonResp.error = err
-        return res.status(500).json(jsonResp)
+      let msg = func + ' - applying filter: ' + inspect(filter)
+      logger.debug(msg)
+      Datasets.find(filter, function (err, ds) {
+        if (err) {
+          jsonResp.error = err
+          return res.status(500).json(jsonResp)
+        } else {
+          jsonResp.data = ds
+          return res.json(jsonResp)
+        }
+      })
+    } else if (validQueryParam(seq)) {
+      let seqFilter = {'seq': {'$eq': seq}}
+      let filter = null
+      let userFilter = {userid: {'$eq': userid}}
+      let publicFilter = {isPublic: {'$eq': true}}
+      if (allowedAll) {
+        filter = seqFilter
+      } else if (onlyPublic) {
+        filter = {'$and': [seqFilter, publicFilter]}
       } else {
-        jsonResp.data = doc
-        return res.json(jsonResp)
+        filter = {'$and': [seqFilter, {'$or': [userFilter, publicFilter]}]}
       }
-    })
-  } else if (validQueryParam(doi)) {
-    Datasets.find({'doi': {'$eq': doi}}, function (err, doc) {
-      if (err) {
-        jsonResp.error = err
-        return res.status(500).json(jsonResp)
+      let msg = func + ' - applying filter: ' + inspect(filter)
+      logger.debug(msg)
+      Datasets.find(filter, function (err, doc) {
+        if (err) {
+          jsonResp.error = err
+          return res.status(500).json(jsonResp)
+        } else {
+          jsonResp.data = doc
+          return res.json(jsonResp)
+        }
+      })
+    } else if (validQueryParam(doi)) {
+      let doiFilter = {'doi': {'$eq': doi}}
+      let filter = null
+      let userFilter = {userid: {'$eq': userid}}
+      let publicFilter = {isPublic: {'$eq': true}}
+      if (allowedAll) {
+        filter = doiFilter
+      } else if (onlyPublic) {
+        filter = {'$and': [doiFilter, publicFilter]}
       } else {
-        jsonResp.data = doc
-        return res.json(jsonResp)
+        filter = {'$and': [doiFilter, {'$or': [userFilter, publicFilter]}]}
       }
-    })
-  } else {
-    // return all datasets
-    // Datasets.find({'$and': [{isDeleted: {'$eq': false}}, {isPublic: {$eq: true}}]}).sort({'seq': 1}).exec(function (err, docs) {
-    Datasets.find({isDeleted: {'$eq': false}}).sort({'seq': 1}).exec(function (err, docs) {
-      if (err) {
-        jsonResp.error = err
-        return res.status(500).json(jsonResp)
+      let msg = func + ' - applying filter: ' + inspect(filter)
+      logger.debug(msg)
+      Datasets.find(filter, function (err, doc) {
+        if (err) {
+          jsonResp.error = err
+          return res.status(500).json(jsonResp)
+        } else {
+          jsonResp.data = doc
+          return res.json(jsonResp)
+        }
+      })
+    } else {
+      // return all datasets
+      // Datasets.find({'$and': [{isDeleted: {'$eq': false}}, {isPublic: {$eq: true}}]}).sort({'seq': 1}).exec(function (err, docs) {
+      let delFilter = {isDeleted: {'$eq': false}}
+      let filter = null
+      let userFilter = {userid: {'$eq': userid}}
+      let publicFilter = {isPublic: {'$eq': true}}
+      if (allowedAll) {
+        filter = delFilter
+      } else if (onlyPublic) {
+        filter = {'$and': [delFilter, publicFilter]}
       } else {
-        jsonResp.data = docs
-        return res.json(jsonResp)
+        filter = {'$and': [delFilter, {'$or': [userFilter, publicFilter]}]}
       }
+      let msg = func + ' - applying filter: ' + inspect(filter)
+      logger.debug(msg)
+      Datasets.find(filter).sort({'seq': 1}).exec(function (err, docs) {
+        if (err) {
+          jsonResp.error = err
+          return res.status(500).json(jsonResp)
+        } else {
+          jsonResp.data = docs
+          return res.json(jsonResp)
+        }
+      })
+    }
+  })
+    .catch(function (err) {
+      let msg = func + ' - error occurred: ' + err.message
+      logger.error(msg)
+      jsonResp.error = err
+      jsonResp.data = null
+      return res.status(500).json(jsonResp)
     })
-  }
 })
 
 app.post('/dataset/update', function (req, res) { // TODO check user, admin, and public flag SECU
@@ -3033,7 +3151,7 @@ app.post('/jobsubmit', function (req, res) {
   let jsonResp = {'error': null, 'data': null}
   let jobId = req.body.jobId
   let jobType = req.body.jobType
-  let userToken = getTokenDataFromReq(req)
+  let userToken = getTokenDataFromReq(req) // TODO: normalize this with the 'nmLoginUserId' added to the req header by the middleware - note that if the header is not set, the user did not come in through shibboleth
   // let jobDir = nmJobDataDir + '/' + jobId
   // let paramFileName = jobDir + '/' + 'job_parameters.json'
 
