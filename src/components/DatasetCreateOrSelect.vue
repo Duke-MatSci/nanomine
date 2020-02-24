@@ -8,7 +8,7 @@
       {{datasetsErrorMsg}}
     </v-alert>
     <v-card style="width:100%;">
-    <v-card-title class="dataset-header">
+      <v-card-title class="dataset-header">
             <span class="text-xs-left">
             <v-btn
               fab small
@@ -36,59 +36,63 @@
               <v-icon>info</v-icon>
             </v-btn>
             {{datasetsHeaderTitle}}</span>
-      <v-spacer></v-spacer>
-      <span class="text-xs-right" style="width:50%;"
-            v-show="datasetSelected !== null">{{headerDOI}}</span>
-    </v-card-title>
-    <v-card-title v-show="!datasetHideSelector">
-      <!--v-btn v-on:click="mineOnly()"><span v-show="showMineOnly">Show All</span><span v-show="!showMineOnly">Mine Only</span></v-btn-->
-      <!--v-checkbox
-        v-if="isLoggedIn()"
-        v-model="showMineOnly"
-        primary
-        hide-details
-        label="Show mine only"
-      ></v-checkbox-->
-      <v-spacer></v-spacer>
-      <v-text-field
-        v-model="datasetSearch"
-        append-icon="search"
-        label="Filter datasets"
-        single-line
-        hide-details
-      ></v-text-field>
-    </v-card-title>
-    <v-data-table v-show="!datasetHideSelector" :headers="datasetHeaders" :items="datasetsFiltered"
-                  :search="datasetSearch">
-      <v-divider></v-divider>
-      <template slot="items" slot-scope="props" height="300">
-        <td class="text-xs-left"
-            v-on:click="datasetClick(props.item)">
-          {{props.item.seq}}
-        </td>
-        <td class="text-xs-left"
-            v-on:click="datasetClick(props.item)">
-          {{props.item.doi}}
-        </td>
-        <td class="text-xs-left"
-            v-on:click="datasetClick(props.item)">
-          {{props.item.title}}
-        </td>
-        <td class="text-xs-left"
-            v-on:click="datasetClick(props.item)">
-          {{props.item.datasetComment}}
-        </td>
-      </template>
-      <v-alert slot="no-results" :value="true" color="error" icon="warning">
-        Your search for "{{ datasetSearch }}" found no results.
-      </v-alert>
-    </v-data-table>
-  </v-card>
+        <v-spacer></v-spacer>
+        <span class="text-xs-right" style="width:50%;"
+              v-show="datasetSelected !== null">{{headerDOI}}</span>
+      </v-card-title>
+      <v-card xs6 v-if="addDatasetDialogActive">
+        <v-text-field v-model="addDatasetComment" label="Enter a comment to describe this dataset as uniquely as possible"></v-text-field>
+        <v-btn @click="addDatasetDialogActive=false; addDatasetComment=''" small>Cancel</v-btn>
+        <v-btn @click="addDatasetSave()" small color="primary" class="white--text">Save</v-btn>
+      </v-card>
+      <v-card-title v-show="!datasetHideSelector">
+        <span v-if="mineOnlyAlways" class="font-weight-black">Datasets you've created</span>
+        <v-checkbox
+          v-if="isLoggedIn() && !mineOnlyAlways"
+          v-model="showMineOnly"
+          primary
+          hide-details
+          label="Show mine only"
+        ></v-checkbox>
+        <v-spacer></v-spacer>
+        <v-text-field
+          v-model="datasetSearch"
+          append-icon="search"
+          label="Filter datasets"
+          single-line
+          hide-details
+        ></v-text-field>
+      </v-card-title>
+      <v-data-table v-show="!datasetHideSelector" :headers="datasetHeaders" :items="datasetsFiltered" :search="datasetSearch">
+        <v-divider></v-divider>
+        <template slot="items" slot-scope="props" height="300">
+          <td class="text-xs-left"
+              v-on:click="datasetClick(props.item)">
+            {{props.item.seq}}
+          </td>
+          <td class="text-xs-left"
+              v-on:click="datasetClick(props.item)">
+            {{props.item.doi}}
+          </td>
+          <td class="text-xs-left"
+              v-on:click="datasetClick(props.item)">
+            {{props.item.title}}
+          </td>
+          <td class="text-xs-left"
+              v-on:click="datasetClick(props.item)">
+            {{props.item.datasetComment}}
+          </td>
+        </template>
+        <v-alert slot="no-results" :value="true" color="error" icon="warning">
+          Your search for "{{ datasetSearch }}" found no results.
+        </v-alert>
+      </v-data-table>
+    </v-card>
     <!--
 
-  Dataset Info Dialog
+    Dataset Info Dialog
 
--->
+    -->
     <!--v-layout row justify-center-->
     <v-dialog v-model="datasetInfoDialogActive">
       <v-layout row>
@@ -150,9 +154,29 @@ import * as _ from 'lodash'
 
 export default {
   name: 'DatasetCreateOrSelect',
+  props: {
+    datasetOptions: { // Valid options: {mineOnly: 'true'|'false'|'always'}
+      type: Object,
+      default: () => {
+        return {}
+      }
+    },
+    selectHeader: {
+      type: String,
+      default: 'Choose a dataset'
+    },
+    selectedHandler: {
+      type: Function,
+      default: null
+    }
+  },
   data () {
     return {
       msg: 'Hi',
+      showMineOnly: true,
+      mineOnlyAlways: false,
+      addDatasetDialogActive: false,
+      addDatasetComment: '',
       datasetsError: false,
       datasetsErrorMsg: '',
       datasetTransformed: {},
@@ -169,6 +193,16 @@ export default {
       datasetSelected: null,
       datasetInfoDialogActive: false,
       datasetDialogInfo: {}
+    }
+  },
+  watch: {
+    datasetOptions: function (options) {
+      let vm = this
+      if (options) {
+        vm.overrideOptions(vm.datasetOptions)
+      } else {
+        vm.datasetOptions = {}
+      }
     }
   },
   computed: {
@@ -190,9 +224,9 @@ export default {
       let vm = this
       let rv = null
       if (vm.datasetSelected) {
-        rv = 'Dataset:'
+        rv = 'Selected Dataset:'
       } else {
-        rv = 'Datasets'
+        rv = vm.selectHeader
       }
       return rv
     },
@@ -209,6 +243,9 @@ export default {
       let vm = this
       if (vm.datasetSelected) {
         rv = vm.datasetSelected.doi
+        if (!rv || rv.length < 1) {
+          rv = vm.datasetSelected.datasetComment
+        }
       }
       return rv
     }
@@ -217,8 +254,22 @@ export default {
     let vm = this
     vm.auth = new Auth()
     vm.getDatasets()
+    vm.overrideOptions(vm.datasetOptions)
   },
   methods: {
+    overrideOptions (datasetOptions) {
+      let vm = this
+      console.log('overriding datasetOptions: ' + JSON.stringify(datasetOptions))
+      vm.mineOnlyAlways = false
+      if (datasetOptions.mineOnly === 'always') {
+        vm.mineOnlyAlways = true
+        vm.mineOnly = true
+      } else if (datasetOptions.mineOnly === 'true') {
+        vm.mineOnly = true
+      } else {
+        vm.mineOnly = false
+      }
+    },
     isLoggedIn () {
       let vm = this
       return vm.auth.isLoggedIn()
@@ -241,10 +292,12 @@ export default {
           resp.data.data.forEach(function (v) {
             vm.datasetList.push(v)
           })
+          vm.resetLoading()
         })
         .catch(function (err) {
           vm.datasetsError = true
           vm.datasetsErrorMsg = 'fetching datasets: ' + err
+          vm.resetLoading()
         })
     },
     transformDataset (entry) {
@@ -294,11 +347,42 @@ export default {
       vm.Selected = null
       vm.datasetsError = false
       vm.datasetsErrorMsg = ''
+      if (vm.selectedHandler && typeof vm.selectedHandler === 'function') {
+        vm.selectedHandler(vm.datasetSelected)
+      }
     },
     addDataset () {
       let vm = this
-      vm.xxx = 1
+      vm.addDatasetDialogActive = !vm.addDatasetDialogActive
+    },
+    addDatasetSave () {
+      let vm = this
+      let comment = vm.addDatasetComment
+      vm.setLoading()
+      Axios.post('/nmr/dataset/create', {dsInfo: {datasetComment: comment}})
+        .then(function (resp) {
+          console.log(resp.data)
+          vm.addDatasetComment = ''
+          vm.datasetsError = false
+          vm.datasetsErrorMsg = ''
+          vm.addDatasetDialogActive = false
+          vm.getDatasets()
+        })
+        .catch(function (err) {
+          console.log(err.message)
+          vm.datasetsError = true
+          vm.datasetsErrorMsg = err.message
+          vm.resetLoading()
+        })
+    },
+    // utils
+    setLoading () {
+      this.$store.commit('isLoading')
+    },
+    resetLoading () {
+      this.$store.commit('notLoading')
     }
+
   }
 
 }
@@ -307,6 +391,7 @@ export default {
 <style scoped>
   .datasets {
   }
+
   .dataset-header {
     background-color: #03A9F4;
     color: #ffffff;

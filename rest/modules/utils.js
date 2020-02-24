@@ -259,7 +259,7 @@ function updateDataset (Datasets, logger, dsInfo) {
       })
   })
 }
-function createDataset (Datasets, logger, dsInfo) { // creates the dataset using the dsInfo, new seq is returned with updated dsInfo in result.data
+function createDataset (Datasets, Sequences, logger, dsInfo) { // creates the dataset using the dsInfo, new seq is returned with updated dsInfo in result.data
   let func = 'utils.createDataset'
   return new Promise(function (resolve, reject) {
     let status = {'statusCode': 201, 'error': null, 'data': null}
@@ -268,8 +268,9 @@ function createDataset (Datasets, logger, dsInfo) { // creates the dataset using
     //      datasets.findOne().sort('-seq').exec(function err, item){}) - if there are none, set to 101
     getNextDatasetsSequenceNumber(Sequences, logger)
       .then(function (dsSeq) {
-        if (dsInfo && dsInfo.seq && dsInfo.seq > 0) {
-          logger.debug(func + ' - Seq: ' + dsInfo.seq + ' dsInfo: ' + inspect(dsInfo))
+        if (dsInfo && dsSeq && dsSeq > 0) {
+          logger.debug(func + ' - Seq: ' + dsSeq + ' dsInfo: ' + inspect(dsInfo))
+          dsInfo.seq = dsSeq
           dsInfo.isDeleted = false
           dsInfo.dttm_created = Math.floor(Date.now() / 1000)
           dsInfo.dttm_updated = Math.floor(Date.now() / 1000)
@@ -301,7 +302,7 @@ function createDataset (Datasets, logger, dsInfo) { // creates the dataset using
             }
           })
         } else {
-          let err = 'Dataset information not supplied or seq field not set'
+          let err = 'Dataset information not supplied or automatic seq field generation failed'
           logger.error(func + ' - datasets create error: ' + err)
           status.error = err
           status.data = null

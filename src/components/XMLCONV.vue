@@ -15,10 +15,12 @@
       <br>
       <h3 class="text-xs-left">Steps</h3>
       <p class="text-xs-left">
-        <span class="font-weight-black">NOTE:</span>  Filesets for samples are grouped into datasets. The files for a sample (images, auxiliary spreadsheet data, completed Excel template, etc)
+        <span class="font-weight-black">NOTE:</span>  Filesets for samples are grouped into datasets.
+           The files for a sample (images, auxiliary spreadsheet data, completed Excel template, etc)
            are uploaded as a set called a fileset.  Uploading multiple samples requires multiple fileset uploads.<br/>
-        <span class="font-weight-black">Step 1:</span> Create a new dataset for the control sample and its related files, <span class="font-weight-black">then when uploading each additional sample be
-        sure to select the same dataset</span> that was used for the control sample of the sample group.<br/>
+        <span class="font-weight-black">Step 1:</span> Create a new dataset for the control sample and its related files,
+           <span class="font-weight-black">then when uploading each additional sample be
+           sure to select the same dataset</span> that was used for the control sample of the sample group.<br/>
         <span class="font-weight-black">Step 2:</span> Click <a href="/nmstatic/xmlconv/master_template.zip" download>here</a> to download the
         blank MS Excel template (137 kB).
         (Click <a href="/nmstatic/xmlconv/example.zip" download>here</a> to see an example, 263 kB)<br>
@@ -66,7 +68,7 @@
           </v-card-actions>
         </v-card>
       </v-dialog>
-      <dataset-create-or-select></dataset-create-or-select>
+      <dataset-create-or-select selectHeader="Choose or create a dataset" :selectedHandler="datasetSelectedHandler"  :datasetOptions="datasetOptions"></dataset-create-or-select>
       <v-flex xs12 class="text-xs-center text-sm-center text-md-center text-lg-center">
         <p class="text-xs-left">Select a completed Excel Template File
           <v-btn class="text-xs-left" small color="primary" @click='pickTemplate'>Browse</v-btn>
@@ -116,7 +118,7 @@
           </v-list-tile>
         </v-list>
       </v-flex>
-      <v-btn v-on:click="submit()" color="primary">Submit</v-btn>
+      <v-btn v-on:click="submit()" :disabled="templateName.length < 1 || datasetSelected===null || files.length < 1" color="primary">Submit</v-btn>
       <br>
       <h4 class="text-xs-left">Reference</h4>
       <p class="text-xs-left">Zhao, H., Li, X., Zhang, Y., Schadler, L. S., Chen, W., &amp; Brinson, L. C. (2016). <i><a href="https://aip.scitation.org/doi/abs/10.1063/1.4943679">Perspective: NanoMine: A material genome approach for polymer nanocomposites analysis and design</a></i>. APL Materials, 4(5), 053204.</p>
@@ -146,7 +148,9 @@ export default {
     loginRequiredMsg: '',
     templateUploaded: false,
     successDlg: false,
-    jobId: ''
+    jobId: '',
+    datasetOptions: {mineOnly: 'always'},
+    datasetSelected: null
   }),
   beforeMount: function () {
     let vm = this
@@ -157,6 +161,11 @@ export default {
     }
   },
   methods: {
+    datasetSelectedHandler (dataset) {
+      let vm = this
+      console.log('Selected dataset: ' + dataset._id)
+      vm.datasetSelected = dataset
+    },
     setLoading: function () {
       this.$store.commit('isLoading')
     },
@@ -254,7 +263,7 @@ export default {
       vm.setLoading()
       let jm = new JobMgr()
       jm.setJobType('xmlconv')
-      jm.setJobParameters({'templateName': vm.templateName})
+      jm.setJobParameters({'datasetId': vm.datasetSelected._id, 'templateName': vm.templateName})
       vm.files.forEach(function (v) {
         jm.addInputFile(v.fileName, v.fileUrl)
       })

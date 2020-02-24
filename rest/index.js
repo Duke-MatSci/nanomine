@@ -717,15 +717,22 @@ app.get('/nm', function (req, res) {
 })
 
 app.get('/logout', function (req, res) {
-  return res.status(200).json({error: null, data: {logoutUrl: nmAuthLogoutUrl}})
+  let func = '/logout'
+  let jsonResp = {error: null, data: {logoutUrl: nmAuthLogoutUrl}}
+  logger.debug(func + ' returning status 200 with data: ' + JSON.stringify(jsonResp))
+  return res.status(200).json(jsonResp)
 })
 
 app.get('/doLogout', function (req, res) {
+  let func = '/doLogout'
   res.clearCookie('session', {'httpOnly': true, 'path': '/'})
   res.clearCookie('token', {})
   if (nmAuthType === 'local') {
+    res.clearCookie('token', null)
+    logger.debug(func + ' - (local auth) redirecting to: /nm')
     res.redirect('/nm')
   } else {
+    logger.debug(func + ' - (non-local auth) redirecting to loguout url: ' + nmAuthLogoutUrl)
     res.redirect(nmAuthLogoutUrl) // This redirects to the shibboleth logout url to ensure that the session is cleaned up.
   }
 })
@@ -2522,7 +2529,9 @@ app.get('/dataset', function (req, res) {
     })
 })
 
-app.post('/dataset/update', function (req, res) { // TODO check user, admin, and public flag SECU
+app.post('/dataset/update', function (req, res) {
+  // TODO check user, admin, and public flag SECU
+  //   User can only update their datasets unless they're an admin
   let dsUpdate = req.body.dsUpdate
   // let dsSeq = req.body.dsSeq
   // let schemaId = req.body.schemaid
@@ -2539,18 +2548,21 @@ app.post('/dataset/update', function (req, res) { // TODO check user, admin, and
 })
 
 app.post('/dataset/create', function (req, res) { // auth middleware verifies user
+  let func = '/dataset/create'
   let jsonResp = {'error': null, 'data': null}
   let dsInfo = req.body.dsInfo // requires schemaId now
+  dsInfo.userid = getNmLoginUserIdHeaderValue(req)
   createDataset(Datasets, Sequences, logger, dsInfo)
     .then(function (result) {
       jsonResp.error = null
       jsonResp.data = result.data
       return res.status(result.statusCode).json(jsonResp)
     })
-    .catch(function (err) {
-      jsonResp.error = err.error
-      jsonResp.data = err.data
-      return res.status(err.statusCode).json(jsonResp)
+    .catch(function (status) {
+      logger.error(func + ' - Error creating dataset: ' + JSON.stringify(status))
+      jsonResp.error = status.error.message
+      jsonResp.data = null
+      return res.status(500).json(jsonResp)
     })
 })
 /* END -- rest services related to XMLs, Schemas and datasets */

@@ -162,7 +162,7 @@ export default {
     getLoginLink: function () {
       let vm = this
       let rv = '/secure'
-      if (vm.auth.tokenValues === null) {
+      if (vm.auth.tokenValues === null || vm.auth.isTestUser() === true) {
         rv = '/nmr/nmdevlogin'
       }
       return rv
