@@ -2016,8 +2016,8 @@ def sheetPropMech(sheet, DATA_PROP, myXSDtree, jobDir):
             if hasLen(sheet.cell_value(row, 1)):
                 strR = collections.OrderedDict()
                 strR = addKVU('StressRelaxation', '', '', '', '', '', '', sheet.cell_value(row, 1), strR, jobDir, myXSDtree)
-            if len(strR) > 0:
-                temp.append(strR)
+                if len(strR) > 0:
+                    temp.append(strR)
             # StrainAtBreak
         if match(sheet.cell_value(row, 0), 'Strain at break'):
             strB = collections.OrderedDict()
