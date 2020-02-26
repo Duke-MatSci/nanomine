@@ -53,14 +53,14 @@
           </a>
           <p>Nanocomposite data insights.</p>
         </v-flex>
-        <v-flex xs4 v-if="chemPropsActive">
+        <v-flex xs4 v-if="true">
           <img src="/nmstatic/img/Icon_verified_chemical_structure.svg"/>
           <h4>
             <router-link to="/ChemProps">ChemProps</router-link>
           </h4>
           <p>Standardized Polymer Name and Filler Search</p>
         </v-flex>
-        <v-flex xs4 v-if="isAdmin()">
+        <v-flex xs4 v-if="false && isAdmin()">
           <router-link to='/xmluploader'>
             <img src="/nmstatic/img/admin-icon.jpg"/>
             <h4>
@@ -81,8 +81,7 @@ export default {
   name: 'Database',
   data () {
     return {
-      msg: 'Database Options',
-      chemPropsActive: true
+      msg: 'Database Options'
     }
   },
   beforeMount: function () {
