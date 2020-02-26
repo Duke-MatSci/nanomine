@@ -80,10 +80,11 @@ export default {
   beforeMount: function () {
     let vm = this
     vm.auth = new Auth()
-    if (!vm.auth.isLoggedIn()) {
-      vm.loginRequired = true
-      vm.loginRequiredMsg = 'Login is required.'
-    }
+    // No longer requiring login
+    // if (!vm.auth.isLoggedIn()) {
+    //   vm.loginRequired = true
+    //   vm.loginRequiredMsg = 'Login is required.'
+    // }
   },
   methods: {
     setLoading: function () {
