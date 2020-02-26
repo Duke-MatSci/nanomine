@@ -1738,7 +1738,7 @@ def sheetProcType(sheet, DATA, myXSDtree, jobDir):
                     # dump the temp_list as a dict into Process_list
                     Process_list.append(collections.OrderedDict({'In-SituPolymerization': temp_list}))
             # OtherProcessing
-            if match(prcMtd, 'OtherProcessing'):
+            if match(prcMtd, 'Other_Processing'):
                 temp_list = [] # initialize
                 temp_list = sheetProcTypeHelper(sheet, row, temp_list, 'Processing method', myXSDtree, jobDir) # helper
                 if len(temp_list) > 0:
