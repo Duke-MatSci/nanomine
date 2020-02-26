@@ -50,8 +50,8 @@ python manage.py createuser -e nouser@nodomain.edu -p none -f nanomine -l test -
 python manage.py createuser -e testuser@example.com -p none -f test -l user -u testuser # dev systems need this
 
 # python manage.py load -i /apps/nanomine/nm.ttl -f turtle  ## Apparently no longer needed
-# python manage.py load -i /apps/nanomine/setl/ontology.setl.ttl -f turtle  ## Apparently no longer needed
-python manage.py load -i /apps/nanomine-graph/setl/nanomine.ttl -f turtle
+python manage.py load -i /apps/nanomine/setl/ontology.setl.ttl -f turtle
+# python manage.py load -i /apps/nanomine-graph/setl/nanomine.ttl -f turtle ## Aparently no longer needed
 python manage.py load -i /apps/nanomine-graph/setl/xml_ingest.setl.ttl -f turtle
 python manage.py load -i 'http://semanticscience.org/ontology/sio-subset-labels.owl' -f xml
 

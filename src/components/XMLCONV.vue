@@ -163,7 +163,11 @@ export default {
   methods: {
     datasetSelectedHandler (dataset) {
       let vm = this
-      console.log('Selected dataset: ' + dataset._id)
+      if (dataset) {
+        console.log('Selected dataset: ' + dataset._id)
+      } else {
+        console.log('Selected dataset is null.')
+      }
       vm.datasetSelected = dataset
     },
     setLoading: function () {

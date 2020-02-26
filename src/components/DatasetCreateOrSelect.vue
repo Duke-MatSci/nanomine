@@ -282,6 +282,9 @@ export default {
       let vm = this
       vm.datasetHideSelector = !vm.datasetHideSelector
       vm.datasetSelected = null
+      if (vm.selectedHandler && typeof vm.selectedHandler === 'function') {
+        vm.selectedHandler(vm.datasetSelected)
+      }
     },
     getDatasets () {
       let vm = this
