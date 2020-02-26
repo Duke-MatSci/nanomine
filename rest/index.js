@@ -236,12 +236,14 @@ let authOptions = {
     //    If a method is not listed, then the path is NOT protected for that method
     //    The set of all path+methodlist entries should cover all possible combinations for which security is required
     //    !!!! The methods field is NOT currently being used but it will be needed
-    // not yet    { path: '/dataset/create', loginAuth: false, membership: [], apiAuth: true, apiGroup: 'curate' },
     {path: '/blob/create', loginAuth: true, membership: [], apiAuth: true, apiGroup: 'curate'},
     {path: '/curate', methods: allMethods, loginAuth: false, membership: [], apiAuth: true, apiGroup: 'curate'},
     // {path: '/dataset', loginAuth: true, membership: [], apiAuth: true, apiGroup: 'curate'},
     {path: '/dataset/create', loginAuth: true, membership: [], apiAuth: true, apiGroup: 'curate'},
-    {path: '/dataset/update', loginAuth: true, membership: [], apiAuth: true, apiGroup: 'curate'},
+    /* Don't allow apiAuth for this version of update */
+    {path: '/dataset/update', loginAuth: true, membership: [], apiAuth: false, apiGroup: 'curate'},
+    /* Don't allow login auth and also ensure user is admin for this version of update (updateEx) */
+    {path: '/dataset/updateEx', loginAuth: false, membership: ['admin'], apiAuth: true, apiGroup: 'curate'},
     {path: '/jobemail', loginAuth: false, membership: [], apiAuth: true, apiGroup: 'email'},
     {path: '/jobcreate', loginAuth: true, membership: [], apiAuth: true, apiGroup: 'jobs'},
     {path: '/jobpostfile', loginAuth: true, membership: [], apiAuth: true, apiGroup: 'jobs'},
@@ -460,7 +462,37 @@ function authMiddleware (authOptions) {
             .then(function (tokenInfo) {
               if (tokenInfo) {
                 setNmLoginUserIdHeaderValue(req, tokenInfo.userId)
-                next()
+                getUserAndAdminInfo(tokenInfo.userId)
+                  .then(function (userAndAdminInfo) {
+                    if (userAndAdminInfo) {
+                      let hasRequiredGroupAccess = true // in case there are no groups
+                      loginMembership.forEach(function (v) { // TODO update for memberships other than admin i.e. make dynamic
+                        if (v === 'admin') {
+                          if (userAndAdminInfo.admin === true) {
+                            hasRequiredGroupAccess = true
+                          } else {
+                            hasRequiredGroupAccess = false
+                          }
+                        }
+                      })
+                      if (hasRequiredGroupAccess === true) {
+                        next()
+                      } else {
+                        jsonResp.error = 'invalid token'
+                        logger.error(func + ' - access requires group access for: ' + tokenInfo.userid + '. Required group access not found.')
+                        return res.status(403).json(jsonResp)
+                      }
+                    } else {
+                      jsonResp.error = 'invalid token'
+                      logger.error(func + ' - Error getting user and group info for: ' + tokenInfo.userid + ' returned info is null.')
+                      return res.status(403).json(jsonResp)
+                    }
+                  })
+                  .catch(function (err) {
+                    jsonResp.error = 'failed user lookup'
+                    logger.error(func + ' - Failed to getUserAndAdminInfo for: ' + tokenInfo.userId + '. Error: ' + err.message)
+                    return res.status(500).json(jsonResp)
+                  })
               } else {
                 jsonResp.error = 'invalid token'
                 return res.status(403).json(jsonResp)
@@ -880,6 +912,9 @@ function getUserAndAdminInfo (userid) { // convenience version that sets isAdmin
     // NOTE: a user can be an admin, but not in the user database yet since our db is not directly coupled to IDM or group mgr
     groupMgr.isGroupMember(logger, nmAuthAdminGroupName, userid)
       .then(function (isAdmin) {
+        if (userid === '9999999999') { // Override for grouper (prodQA) scenario, since this user cannot be assigned system, but is used internally
+          isAdmin = true
+        }
         getUserInfo(userid)
           .then(function (userDoc) {
             if (userDoc) {
@@ -2248,7 +2283,7 @@ app.post('/curate', function (req, res) {
 app.post('/blob/create', function (req, res) {
   // save blob to gridfs
   let jsonResp = {'error': null, 'data': null}
-  let bucketName = req.body.bucketName
+  let bucketName = null // req.body.bucketName -- no longer used for now
   let filename = req.body.filename
   let dataUri = req.body.dataUri
   if (filename && typeof filename === 'string' && dataUri && typeof dataUri === 'string') {
@@ -2322,7 +2357,7 @@ app.get('/blob', function (req, res) { // MDCS only supports get by id (since th
   // get blob and send to client
   let jsonResp = {'error': null, 'data': null}
   let id = req.query.id // may be empty
-  let bucketName = req.query.bucketname // may be empty
+  let bucketName = null // req.query.bucketname no longer used for now (it could be empty when it was)
   let fileName = req.query.filename // may be empty
   let options = {}
   if (bucketName && typeof bucketName === 'string') {
@@ -2387,6 +2422,9 @@ app.get('/blob', function (req, res) { // MDCS only supports get by id (since th
 })
 
 app.get('/dataset', function (req, res) {
+  // this endpoint is not currently checked by the auth middleware
+  // Access to public data is granted to everyone
+  // Access to non-public datasets is granted to the owner and administrators
   let func = 'get /dataset'
   let jsonResp = {'error': null, 'data': null}
   let id = req.query.id
@@ -2530,19 +2568,46 @@ app.get('/dataset', function (req, res) {
 })
 
 app.post('/dataset/update', function (req, res) {
-  // TODO check user, admin, and public flag SECU
-  //   User can only update their datasets unless they're an admin
+  // NOTE: sets verify owner flag. The userid of the dataset owner must match the login user
+  //    Also, this version of update should not be used from the API approach using bearer tokens
+  let func = '/dataset/update'
   let dsUpdate = req.body.dsUpdate
   // let dsSeq = req.body.dsSeq
   // let schemaId = req.body.schemaid
-  console.log('datataset/update: doing update...' + JSON.stringify(dsUpdate))
-  updateDataset(Datasets, logger, dsUpdate)
+  let userid = getNmLoginUserIdHeaderValue(req)
+  let verifyOwner = true
+  logger.debug(func + ' - datataset/update: doing update... userid: ' + userid + ' ' + JSON.stringify(dsUpdate) + ' verifyOwner: ' + verifyOwner)
+  updateDataset(Datasets, logger, dsUpdate, verifyOwner)
     .then(function (status) {
-      console.log('datataset/update: success - ' + JSON.stringify(status))
+      logger.debug(func + ' - datataset/update: success - ' + JSON.stringify(status))
+      return res.status(status.statusCode).json(status)
+    })
+    .catch(function (status) { // Here, status is not just an error object
+      logger.error(func + ' - datataset/update: error - ' + status.error.err.message)
+      return res.status(status.statusCode).json(status)
+    })
+})
+
+app.post('/dataset/updateEx', function (req, res) { // NOT A GUI FUNCTION in its current state. Do not call from GUI (will return 403)
+  // NOTE: DOES NOT SET verify owner flag, so the update info can contain a userid
+  //    This version should not be called from the GUI. Admins may use the runAs capability to runas a user
+  //    in the GUI which calls /dataset/update on behalf of the user.  Otherwise, the admin may only update
+  //    datasets belonging to themselves using the GUI.
+  // NOTE: these restrictions are subject to change in the future ....
+  let func = '/dataset/updateEx'
+  let dsUpdate = req.body.dsUpdate
+  // let dsSeq = req.body.dsSeq
+  // let schemaId = req.body.schemaid
+  let userid = getNmLoginUserIdHeaderValue(req)
+  let verifyOwner = false
+  logger.debug(func + ' - datataset/updateEx: doing update... userid: ' + userid + ' ' + JSON.stringify(dsUpdate))
+  updateDataset(Datasets, logger, dsUpdate, verifyOwner)
+    .then(function (status) {
+      logger.debug(func + ' - datataset/update: success - ' + JSON.stringify(status))
       return res.status(status.statusCode).json(status)
     })
     .catch(function (err) {
-      console.log('datataset/update: error - ' + JSON.stringify(status))
+      logger.error(func + ' - datataset/update: error - ' + JSON.stringify(status))
       return res.status(err.statusCode).json(status)
     })
 })

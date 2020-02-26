@@ -226,18 +226,32 @@ function updateOrCreateXmlData (xmlData, logger, creatorId, xmlDoc, schemaId, da
   })
 }
 
-function updateDataset (Datasets, logger, dsInfo) {
+function updateDataset (Datasets, logger, dsInfo, verifyOwner) {
   // NOTE: requires schemaId and seq for update and create
   //   If the record exists, it will be updated. If it does not, it will be created as
   //   opposed to createDataset which always selects a non-used sequence.
+  // If verifyOwner is truthy, the dsInfo.userid will be verified against the record before update (upsert will not work)
+  // IMPORTANT! verifyOwner only works if the userid is set in the input dsInfo. It does not actually verify the caller, so the assumption
+  //  here is that an administrative function is calling updateDataset and knows to set the dsInfo.userid and set verifyOwner truthy before
+  //  the update.
+  //  An online function using verifyOwner i.e. rest service, etc would need to verify that the user is either an admin or the actual
+  //    owner before using this function.
+  //    Also, note that if an admin is using the function to update fields and is NOT the owner, care must be taken to ensure that
+  //       the userid field is either set correctly in the dsInfo or NOT specified to prevent overwrite. DATA LOSS MAY OCCUR in some
+  //       circumstances if a user is allowed to select a dataset and the ownership is not properly handled and dataset information
+  //       is overwriten with non-related information from another paper, etc.
   let func = 'utils.updateDataset'
   let status = {'statusCode': 201, 'error': null, 'data': null}
   return new Promise(function (resolve, reject) {
     dsInfo.dttm_updated = Math.floor(Date.now() / 1000)
-    Datasets.findByIdAndUpdate(
-      dsInfo.datasetId,
+    let query = {'_id': {$eq: dsInfo.datasetId}}
+    if (verifyOwner) {
+      query = {$and: [query, {userid: {$eq: dsInfo.userid}}]}
+    }
+    Datasets.updateOne(
+      query,
       {$set: dsInfo},
-      {upsert: true}, function (err, result) {
+      {upsert: false}, function (err, result) {
         if (err) {
           console.log(func + ' : error - ' + err)
           status.error = err
