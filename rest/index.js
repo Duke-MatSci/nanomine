@@ -479,12 +479,12 @@ function authMiddleware (authOptions) {
                         next()
                       } else {
                         jsonResp.error = 'invalid token'
-                        logger.error(func + ' - access requires group access for: ' + tokenInfo.userid + '. Required group access not found.')
+                        logger.error(func + ' - access requires group access for: ' + tokenInfo.userId + '. Required group access not found.')
                         return res.status(403).json(jsonResp)
                       }
                     } else {
                       jsonResp.error = 'invalid token'
-                      logger.error(func + ' - Error getting user and group info for: ' + tokenInfo.userid + ' returned info is null.')
+                      logger.error(func + ' - Error getting user and group info for: ' + tokenInfo.userId + ' returned info is null.')
                       return res.status(403).json(jsonResp)
                     }
                   })
