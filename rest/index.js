@@ -468,7 +468,7 @@ function authMiddleware (authOptions) {
                       let hasRequiredGroupAccess = true // in case there are no groups
                       loginMembership.forEach(function (v) { // TODO update for memberships other than admin i.e. make dynamic
                         if (v === 'admin') {
-                          if (userAndAdminInfo.admin === true) {
+                          if (userAndAdminInfo.isAdmin === true) {
                             hasRequiredGroupAccess = true
                           } else {
                             hasRequiredGroupAccess = false
