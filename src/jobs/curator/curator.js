@@ -114,7 +114,7 @@ function inspect (theObj) {
 function getLatestSchema () {
   let func = 'getLatestSchema'
   return new Promise(function (resolve, reject) {
-    getLatestSchemas(XsdVersionSchema, logger)
+    getLatestSchemas(XsdVersionSchema, XsdSchema, logger)
       .then(function (data) {
         // logger.error(inspect(response))
         let latestVersions = data
