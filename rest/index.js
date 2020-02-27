@@ -1697,7 +1697,7 @@ function saveSchema (filename, xsd) {
       let dt = filename.match(/(\d{2})(\d{2})(\d{2})/) // MM DD YY
       if (dt && dt[1] && dt[2] && dt[3] && (+(dt[1]) <= 12) && (+(dt[1]) >= 1) && (+(dt[2]) <= 31) && (+(dt[2]) >= 1) && (+(dt[3]) <= 99) && (+(dt[3]) >= 15)) {
         // save new version of schema and mark this version as the latest
-        getLatestSchemas(XsdVersionSchema, logger)
+        getLatestSchemas(XsdVersionSchema, XsdSchema, logger)
           .then(function (versions) {
             // spin through list to see if filename is already used
             let isUsed = -1
