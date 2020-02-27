@@ -311,7 +311,7 @@ function curateDatasetUpload (jobType, jobId, jobDir) {
       let tempDoi = 'unpublished/doi-' + shortUUID.new() // EXPECTING TO DO ONE DATASET ONLY! DOI should apply to all XMLs to process
       getLatestSchemas(XsdVersionSchema, XsdSchema, logger)
         .then(function (schemas) {
-          let latestSchema = schemas[0].currentRef[0] // getLatestSchemas
+          let latestSchema = schemas[0].currentRef // getLatestSchemas
           let schemaId = latestSchema._id
           let schemaName = latestSchema.title
           let xsd = latestSchema.content

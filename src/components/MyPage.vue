@@ -771,13 +771,13 @@ export default {
           .then(function (resp) {
             vm.schemas = []
             resp.data.data.forEach(function (v) {
-              let schemaId = v.currentRef[0]._id
-              let title = v.currentRef[0].title
+              let schemaId = v.currentRef._id
+              let title = v.currentRef.title
               vm.schemas.push({'schemaId': schemaId, 'title': title})
               console.log('schemaId: ' + schemaId + ' title: ' + title)
             })
-            vm.selectedSchemaTitle = vm.schemas[0].title
-            vm.selectedSchemaId = vm.schemas[0].schemaId
+            vm.selectedSchemaTitle = vm.schemas.title
+            vm.selectedSchemaId = vm.schemas.schemaId
             resolve()
           })
           .catch(function (err) {

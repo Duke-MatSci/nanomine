@@ -828,7 +828,7 @@ function ensureRdfUser (userInfo, isAdmin) {
 //   let validDatasets = {}
 //   getCurrentSchemas()
 //     .then(function (versions) {
-//       let schemaId = versions[0].currentRef[0]._id
+//       let schemaId = versions[0].currentRef._id
 //       // logger.debug(func + ' -- ' + JSON.stringify(versions[0]))
 //       // logger.debug(func + ' - latest schemaId is: ' + schemaId)
 //       new Promise(function (resolve, reject) { // now requires index on dsSeq for the sort or sort fails
@@ -991,7 +991,7 @@ function getCurrentSchemas () { // returns promise resolved with sorted list of 
         } catch (err) {
           logger.error('schema sort reverse by date failed :( - error' + err)
         }
-        resolve(versions) // NOTE: to get the latest schemaId it's versions[0].currentRef[0]._id -- _id is the schemaId (content is the xsd, filename is the name.xsd, title recently is name, but older ones have 'polymer nanocomposite')
+        resolve(versions) // NOTE: to get the latest schemaId it's versions[0].currentRef._id -- _id is the schemaId (content is the xsd, filename is the name.xsd, title recently is name, but older ones have 'polymer nanocomposite')
       }
     })
   })
@@ -1131,7 +1131,7 @@ function publishFiles (userid, xmlTitle, cb) { // xmlText, schemaName, filesInfo
       .then(function (schemas) {
         if (schemas && schemas.length > 0) {
           // logger.error('xmlText: ' + xmlText)
-          let latestSchema = schemas[0].currentRef[0] // getLatestSchemas
+          let latestSchema = schemas[0].currentRef // getLatestSchemas
           let schemaId = latestSchema._id
           let schemaName = latestSchema.title
           logger.debug(func + ' - latest schemaId: ' + schemaId + ' name: ' + schemaName)
@@ -1416,8 +1416,8 @@ function publishLatestSchema (userid, cb) {
     .then(function (schemasArray) {
       if (schemasArray && schemasArray.length > 0) {
         let whyisId = shortUUID.new()
-        let schemaName = schemasArray[0].currentRef[0].title // .replace(/[_]/g, '.')
-        let schemaText = schemasArray[0].currentRef[0].content.replace(/[\n]/g, '')
+        let schemaName = schemasArray[0].currentRef.title // .replace(/[_]/g, '.')
+        let schemaText = schemasArray[0].currentRef.content.replace(/[\n]/g, '')
         // logger.error('schemaText: ' + schemaText)
         let b64SchemaData = str2b64(schemaText)
         // logger.error('schema-b64: ' + b64SchemaData)
@@ -1704,8 +1704,8 @@ function saveSchema (filename, xsd) {
             let newHash = hasha(xsd, {'algorithm': 'sha1'})
             if (versions) { // if there are no versions, then handle as new
               versions.forEach(function (v, idx) {
-                if (v.currentRef[0].filename === filename) {
-                  let curHash = v.currentRef[0].hash
+                if (v.currentRef.filename === filename) {
+                  let curHash = v.currentRef.hash
                   isUsed = idx
                   if (curHash !== newHash) {
                     //   if the filename is used by a template version, then
@@ -1904,7 +1904,7 @@ app.get('/templates/versions/select/all', function (req, res) {
 app.get('/templates/versions/select/allactive', function (req, res) {
   let jsonResp = {'error': null, 'data': null}
   getLatestSchemas(XsdVersionSchema, XsdSchema, logger)
-    .then(function (schemas) { // schemas[0].currentRef[0] is latest schema
+    .then(function (schemas) { // schemas[0].currentRef is latest schema
       if (schemas && schemas.length > 0) {
         jsonResp.data = schemas
         res.json(jsonResp)
@@ -2034,7 +2034,7 @@ app.get('/xml/:title?', function (req, res) { // currently only supports JWT sty
   getCurrentSchemas()
     .then(function (versions) {
       if (!validQueryParam(schemaId)) {
-        schemaId = versions[0].currentRef[0]._id
+        schemaId = versions[0].currentRef._id
       }
       let schemaQuery = {'schemaId': {'$eq': schemaId}}
       if (title) {

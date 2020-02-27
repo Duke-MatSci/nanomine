@@ -1,9 +1,9 @@
 const moment = require('moment')
 const {createLogger, format, transports} = require('winston')
 const libxmljs = require('libxmljs')
-const he = require('he') // for encoding text element named character entities into decimal encoding (rdf requires this downstream for ingest)
+// const he = require('he') // for encoding text element named character entities into decimal encoding (rdf requires this downstream for ingest)
 const util = require('util')
-const ObjectId = require('mongodb').ObjectId
+// const ObjectId = require('mongodb').ObjectId
 const _ = require('lodash')
 const { combine, label, printf, prettyPrint } = format
 // const datasetsSchema = require('./modules/mongo/schema/datasets')(mongoose)
@@ -21,7 +21,7 @@ function logTrace (msg) {
 function inspect (theObj) {
   return util.inspect(theObj, {showHidden: true, depth: 5})
 }
-const logFormat = printf(({ level, message, label}) => {
+const logFormat = printf(({level, message, label}) => {
   let now = moment().format('YYYYMMDDHHmmssSSS')
   return `${now} [${label}] ${level}: ${message}`
 })
@@ -30,7 +30,7 @@ let configureLogger = function (config, logLabel) {
   if (!loggerLabel) {
     loggerLabel = 'default'
   }
-  let logger = createLogger({
+  return createLogger({
     levels: {error: 0, warn: 1, info: 2, verbose: 3, debug: 4, trace: 5},
     format: combine(
       label({label: loggerLabel}),
@@ -47,7 +47,6 @@ let configureLogger = function (config, logLabel) {
       })
     ]
   })
-  return logger
 }
 
 let getEnv = function () {
@@ -335,8 +334,8 @@ function createDataset (Datasets, Sequences, logger, dsInfo) { // creates the da
 function sortSchemas (allActive) { // sort by date descending and choose first
   allActive.sort((a, b) => { // Sort in reverse order
     let rv = 0
-    let rea = a.currentRef[0].title.match(/(\d{2})(\d{2})(\d{2})/)
-    let reb = b.currentRef[0].title.match(/(\d{2})(\d{2})(\d{2})/)
+    let rea = a.currentRef.title.match(/(\d{2})(\d{2})(\d{2})/)
+    let reb = b.currentRef.title.match(/(\d{2})(\d{2})(\d{2})/)
     let yra = parseInt(rea[3])
     let yrb = parseInt(reb[3])
     let moa = parseInt(rea[1])
@@ -378,7 +377,7 @@ function getLatestSchemas (xsdVersionSchema, xsdSchema, logger) { // duplicate o
           reject(err)
         } else if (versions == null || versions.length <= 0) {
           msg = func + ' - resolving with null - no versions.'
-          logTrace(msg)
+          logger.debug(msg)
           resolve(null) // not found
         } else {
           try {

@@ -149,10 +149,10 @@ const store = new Vuex.Store({
         let schemaId = state.editor.tab[state.editor.currentTab].schemaId
         state.editor.schemas.forEach(function (v) {
           if (v.current === schemaId) {
-            rv = v.currentRef[0].title
+            rv = v.currentRef.title
             console.log('$store.getters.editorSchemaName - set rv:' + rv)
           } else {
-            console.log('$store.getters.editorSchemaName - skipped: ' + v.currentRef[0].title)
+            console.log('$store.getters.editorSchemaName - skipped: ' + v.currentRef.title)
           }
         })
       } else {
@@ -167,10 +167,10 @@ const store = new Vuex.Store({
         let schemaId = state.editor.tab[state.editor.currentTab].schemaId
         state.editor.schemas.forEach(function (v) {
           if (v.current === schemaId) {
-            rv = v.currentRef[0].contentJson
+            rv = v.currentRef.contentJson
             console.log('$store.getters.editorSchemaJson - set rv:' + rv)
           } else {
-            console.log('$store.getters.editorSchemaJson - skipped: ' + v.currentRef[0].title)
+            console.log('$store.getters.editorSchemaJson - skipped: ' + v.currentRef.title)
           }
         })
       } else {
@@ -195,10 +195,10 @@ const store = new Vuex.Store({
         let schemaId = state.editor.tab[state.editor.currentTab].schemaId
         state.editor.schemas.forEach(function (v) {
           if (v.current === schemaId) {
-            rv = v.currentRef[0].content
+            rv = v.currentRef.content
             console.log('$store.getters.editorSchemaText - set rv:' + rv)
           } else {
-            console.log('$store.getters.editorSchemaText - skipped: ' + v.currentRef[0].title)
+            console.log('$store.getters.editorSchemaText - skipped: ' + v.currentRef.title)
           }
         })
       } else {
@@ -223,14 +223,14 @@ const store = new Vuex.Store({
       let rv = null
       // console.log(state.editor.schemas)
       if (state.editor.schemas.length > 0) {
-        rv = state.editor.schemas[0].currentRef[0]._id // TODO NOTE: if sort failed for /nmr/templates/versions/select/allactive this will NOT be the latest schema-- REST needs to indicate this
+        rv = state.editor.schemas[0].currentRef._id // TODO NOTE: if sort failed for /nmr/templates/versions/select/allactive this will NOT be the latest schema-- REST needs to indicate this
       }
       return rv
     },
     editorSchemaIds: function (state) {
       let rv = []
       state.editor.schemas.forEach(function (v) {
-        rv.push(v.currentRef[0]._id)
+        rv.push(v.currentRef._id)
       })
       return rv
     },
