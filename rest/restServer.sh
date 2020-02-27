@@ -11,8 +11,4 @@ if [ -f /etc/profile.d/matlab.sh ]; then
   source /etc/profile.d/matlab.sh
 fi
 source /apps/nanomine_env
-if [[ -x /apps/n/bin/node ]] ; then # pre-global install of node
-  /apps/n/bin/node -r esm index.js $*
-else
-  node -r esm index.js $*
-fi
+node -r esm index.js $*
