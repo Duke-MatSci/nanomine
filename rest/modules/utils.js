@@ -369,7 +369,6 @@ function getLatestSchemas (xsdVersionSchema, xsdSchema, logger) { // duplicate o
   return new Promise(function (resolve, reject) {
     msg = func + ' - just before call to xsdVersionSchema.find'
     logTrace(msg)
-    debugger
     try {
       xsdVersionSchema.find({isDeleted: {$eq: false}}).populate('currentRef').exec(function (err, versions) {
         if (err) {
