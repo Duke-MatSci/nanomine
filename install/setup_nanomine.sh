@@ -53,6 +53,7 @@ python manage.py createuser -e testuser@example.com -p none -f test -l user -u t
 
 # python manage.py load -i /apps/nanomine/nm.ttl -f turtle  ## Apparently no longer needed
 ## python manage.py load -i /apps/nanomine-graph/setl/ontology.setl.ttl -f turtle # run setlr on this file directly to get the output
+##  then ingest output
 setlr /apps/nanomine-graph/setl/ontology.setl.ttl /apps/nanomine-graph/setl/nanomine.ttl
 python manage.py load -i /apps/nanomine-graph/setl/nanomine.ttl -f turtle
 python manage.py load -i /apps/nanomine-graph/setl/xml_ingest.setl.ttl -f turtle
