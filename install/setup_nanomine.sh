@@ -52,8 +52,9 @@ python manage.py createuser -e testuser@example.com -p none -f test -l user -u t
 # NOTE: caller of this script should ensure that /data/loaded exists and is owned by whyis
 
 # python manage.py load -i /apps/nanomine/nm.ttl -f turtle  ## Apparently no longer needed
-python manage.py load -i /apps/nanomine-graph/setl/ontology.setl.ttl -f turtle
-## python manage.py load -i /apps/nanomine-graph/setl/nanomine.ttl -f turtle ## Aparently no longer needed
+## python manage.py load -i /apps/nanomine-graph/setl/ontology.setl.ttl -f turtle # run setlr on this file directly to get the output
+setlr /apps/nanomine-graph/setl/ontology.setl.ttl /apps/nanomine-graph/setl/nanomine.ttl
+python manage.py load -i /apps/nanomine-graph/setl/nanomine.ttl -f turtle
 python manage.py load -i /apps/nanomine-graph/setl/xml_ingest.setl.ttl -f turtle
 python manage.py load -i 'http://semanticscience.org/ontology/sio-subset-labels.owl' -f xml
 
