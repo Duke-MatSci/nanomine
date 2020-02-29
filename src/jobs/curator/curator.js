@@ -228,7 +228,7 @@ function curator () {
         getNextXmlDataRecordWithEntityStates(schemaRec._id, [entityStates[valid], entityStates[editedValid]])
           .then(function (xmlData) {
             if (xmlData) {
-              logger.info(func + ' - processsing schema id: ' + xmlData.schemaId + ' title: ' + xmlData.title + ' entityState: ' + xmlData.entityState)
+              logger.info(func + ' - processing schema id: ' + xmlData.schemaId + ' title: ' + xmlData.title + ' entityState: ' + xmlData.entityState)
               // 2. Update state to ingesting
               let httpsAgentOptions = { // allow localhost https without knowledge of CA TODO - install ca cert on node - low priority
                 host: 'localhost',
