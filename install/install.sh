@@ -44,7 +44,7 @@ if [[ ! -d /apps ]]; then
 fi
 echo installing whyis ...
 export WHYIS_FORK='bluedevil-oit'
-export WHYIS_BRANCH='b1.3'
+export WHYIS_BRANCH='more_efficient_nanopublication_retirement'
 ## bash < <(curl -skL https://raw.githubusercontent.com/tetherless-world/whyis/master/install.sh)
 curl -skL --output whyis-install.tmp https://raw.githubusercontent.com/${WHYIS_FORK}/whyis/${WHYIS_BRANCH}/install.sh
 if [[ $? -ne 0 ]]; then
