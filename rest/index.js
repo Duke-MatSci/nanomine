@@ -78,6 +78,7 @@ let emailUser = env.emailUser
 let emailPwd = env.emailPwd
 let emailTestAddr = env.emailTestAddr
 let emailAdminAddr = env.emailAdminAddr
+let nmDatasetInitialDoi = env.nmDatasetInitialDoi
 let nmWebFilesRoot = env.nmWebFilesRoot
 // let nmWebBaseUri = env.nmWebBaseUri
 let nmRdfLodPrefix = env.nmRdfLodPrefix
@@ -2616,6 +2617,9 @@ app.post('/dataset/create', function (req, res) { // auth middleware verifies us
   let func = '/dataset/create'
   let jsonResp = {'error': null, 'data': null}
   let dsInfo = req.body.dsInfo // requires schemaId now
+  if (!dsInfo.doi || dsInfo.doi.length === 0) {
+    dsInfo.doi = nmDatasetInitialDoi
+  }
   dsInfo.userid = getNmLoginUserIdHeaderValue(req)
   createDataset(Datasets, Sequences, logger, dsInfo)
     .then(function (result) {

@@ -94,7 +94,7 @@ def uploadFilesAndAdjustXMLImageRefs(jobDir, schemaId, xmlId):
 
 
 
-def conversion(jobDir, code_srcDir, xsdDir, templateName, user):
+def conversion(jobDir, code_srcDir, xsdDir, templateName, user, datasetId):
     restbase = os.environ['NM_LOCAL_REST_BASE']
     xsdFilename = xsdDir.split("/")[-1]
     # initialize messages
@@ -104,7 +104,7 @@ def conversion(jobDir, code_srcDir, xsdDir, templateName, user):
         messages = ['[Upload Error] The Excel template file should have extensions like ".xlsx" or ".xls".']
         return ('failure', messages)
     # get the ID
-    runEVI(jobDir, code_srcDir, templateName, restbase, user)
+    runEVI(jobDir, code_srcDir, templateName, restbase, user, datasetId)
     # check #2: see if ID conversion is successful
     if not os.path.exists(jobDir + '/ID.txt'):
         if os.path.exists(jobDir + '/error_message.txt'):
@@ -114,7 +114,7 @@ def conversion(jobDir, code_srcDir, xsdDir, templateName, user):
             messages_raw = error_message.split('\n')
             for message in messages_raw:
                 if len(message.strip()) > 0:
-                    messages.append(message.strip())    
+                    messages.append(message.strip())
             return ('failure', messages)
         messages += ['[Conversion Error] Failed to assemble the ID. Please check or contact the administrator!']
         return ('failure', messages)
@@ -131,7 +131,7 @@ def conversion(jobDir, code_srcDir, xsdDir, templateName, user):
         messages_raw = error_message.split('\n')
         for message in messages_raw:
             if len(message.strip()) > 0:
-                messages.append(message.strip())    
+                messages.append(message.strip())
     # check #4: check the schema validation results
     with open(logName, 'r', encoding='utf-8') as f:
         vld_log = csv.DictReader(f)

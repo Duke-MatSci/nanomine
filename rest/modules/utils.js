@@ -58,6 +58,7 @@ let getEnv = function () {
     emailPwd: process.env['NM_SMTP_AUTH_PWD'],
     emailTestAddr: process.env['NM_SMTP_TEST_ADDR'],
     emailAdminAddr: process.env['NM_SMTP_ADMIN_ADDR'],
+    nmDatasetInitialDoi: process.env['NM_DATASET_INITIAL_DOI'],
     nmWebFilesRoot: process.env['NM_WEBFILES_ROOT'],
     nmWebBaseUri: process.env['NM_WEB_BASE_URI'],
     nmRdfLodPrefix: process.env['NM_RDF_LOD_PREFIX'],

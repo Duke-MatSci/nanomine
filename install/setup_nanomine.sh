@@ -3,6 +3,7 @@ export REST_DIR="/apps/nanomine/rest"
 
 source /apps/nanomine_env
 
+echo 'export NM_DATASET_INITIAL_DOI="unpublished-initial-create"' >> /apps/nanomine_env
 echo 'export NM_WEBFILES_ROOT="/apps/nanomine-webfiles"' >> /apps/nanomine_env
 echo 'export NM_WEB_BASE_URI="http://localhost"' >> /apps/nanomine_env # external apache uri. May need to tweak this for your local machine/vm depending on external access location -- external uri to apache
 echo 'export NM_RDF_LOD_PREFIX="http://localhost"' >> /apps/nanomine_env

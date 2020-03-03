@@ -243,7 +243,7 @@ export default {
       let vm = this
       if (vm.datasetSelected) {
         rv = vm.datasetSelected.doi
-        if (!rv || rv.length < 1) {
+        if (!rv || rv.length < 1 || rv === 'unpublished-initial-create') { // TODO need a remote config call to get values like this from server
           rv = vm.datasetSelected.datasetComment
         }
       }

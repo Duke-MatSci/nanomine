@@ -41,7 +41,7 @@ def verifyID(ID_raw):
 
 
 # the method to extract ID
-def extractID(xlsxName, jobDir, code_srcDir, restbase, user):
+def extractID(xlsxName, jobDir, code_srcDir, restbase, user, datasetId):
     # open xlsx
     # xlrd is the library used to read xlsx file
     # https://secure.simplistix.co.uk/svn/xlrd/trunk/xlrd/doc/xlrd.html?p=4966
@@ -98,7 +98,7 @@ def extractID(xlsxName, jobDir, code_srcDir, restbase, user):
     # if no error detected
     if message == '':
         # call restDOI here
-        response, message = restDOI(DOI, code_srcDir, restbase, sheet_sample, user)
+        response, message = restDOI(DOI, code_srcDir, restbase, sheet_sample, user, datasetId)
         # if doi is not valid
         if response is None:
             with open(jobDir + '/error_message.txt', 'a') as fid:
@@ -121,29 +121,38 @@ def extractID(xlsxName, jobDir, code_srcDir, restbase, user):
 
 
 # make rest call for doi info
-def restDOI(DOI, code_srcDir, restbase, sheet_sample, user):
+def restDOI(DOI, code_srcDir, restbase, sheet_sample, user, datasetId):
     message = ''
-    exist = False
+    new_dataset = False
     response = None
+    nm_dataset_initial_doi = os.environ['NM_DATASET_INITIAL_DOI']
     # check existence
     try:
-        dsurl = restbase + '/nmr/dataset?doi='+DOI
+        # dsurl = restbase + '/nmr/dataset?doi='+DOI
+        dsurl = restbase + '/nmr/dataset?id=' + datasetId
         rq = urllib.request.Request(dsurl)
         j = json.loads(urllib.request.urlopen(rq, context=ssl._create_unverified_context()).read().decode('utf-8'))
         if len(j["data"]) > 0:
-            exist = True
+            if j["data"][0]['DOI'] == nm_dataset_initial_doi:
+              new_dataset = True
             response = j["data"][0]
     except:
-        message += 'exception occurred during dataset GET by doi\n'
+        message += 'exception occurred during dataset GET by datasetId: ' + datasetId + '\n'
+        # message += 'exception occurred during dataset GET by doi\n'
         message += 'exception: ' + str(traceback.format_exc()) + '\n'
         ## print('exception: '  + str(traceback.format_exc()))
 
     if message != '':
         return (None, message)
     # if doi doesn't exist, ds-create
-    if not exist:
+
+    ## NOTE: should not create datasets anymore. The datasetId in the job_parameters should already exist
+    ## However, initially, the dataset is mostly empty, so the data must still be set up
+
+    if new_dataset:
         # special case, special issue madeup DOI
         if 'ma-SI' in DOI:
+            DOI = 'unpublished-' + DOI
             # generate ds_data for special issue by reading the Excel
             ds_data = specialIssueRest(sheet_sample, DOI)
         else:
@@ -157,15 +166,15 @@ def restDOI(DOI, code_srcDir, restbase, sheet_sample, user):
         response = None # initialize response of the request
         # POST ds-create
         try:
-            ds_create_url = restbase + '/nmr/dataset/create'
-            rq = urllib.request.Request(ds_create_url)
+            ds_update_url = restbase + '/nmr/dataset/update'
+            rq = urllib.request.Request(ds_update_url)
             # logging.info('request created using ds_create_url')
             rq.add_header('Content-Type','application/json')
 
             # NOTE: TODO this may not be the best place for this but, default for create is false and need to set userid ...
             dsInfo = ds_data['dsInfo']
-            dsInfo['isPublic'] = 'false'
-            dsInfo['ispublished'] = 'false' # no camel case on this one
+            # dsInfo['isPublic'] = 'false'
+            # dsInfo['ispublished'] = 'false' # no camel case on this one
             dsInfo['userid'] = user
             # NOTE END
 
@@ -173,16 +182,16 @@ def restDOI(DOI, code_srcDir, restbase, sheet_sample, user):
             # logging.info('dataset create request posted: ' + str(r.getcode()))
             response = json.loads(r.read().decode("utf-8"))['data']
         except:
-            message += 'exception occurred during dataset-create\n'
+            message += 'exception occurred during dataset-update\n'
             message += 'exception: ' + str(traceback.format_exc()) + '\n'
         # assemble the PID
         if response is None:
-            message += 'exception occurred during getting the response of dataset-create\n'
+            message += 'exception occurred during getting the response of dataset-update\n'
         if message != '':
             return (None, message)
     # return response at the end, if response is not None, message will be ''
     return (response, message)
-    
+
 
 # generate ID with format PID_SID_LastName_PubYear for users with DOI
 def generateID(response, SID, SI_flag):
@@ -327,6 +336,6 @@ def specialIssueRest(sheet, DOI):
     restDict = {'dsInfo': restDict}
     return restDict
 
-def runEVI(jobDir, code_srcDir, templateName, restbase, user):
+def runEVI(jobDir, code_srcDir, templateName, restbase, user, datasetId):
     xlsxName = jobDir + '/' + templateName
-    extractID(xlsxName, jobDir, code_srcDir, restbase, user)
+    extractID(xlsxName, jobDir, code_srcDir, restbase, user, datasetId)
