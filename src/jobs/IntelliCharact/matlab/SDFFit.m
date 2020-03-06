@@ -2,7 +2,7 @@
 % input sdf curve -> fitting func. & parameters
 function fit_result = SDFFit(raw_sdf, ImageSize, show, path_to_write)
 raw_sdf = raw_sdf / trapz(raw_sdf);
-sdf = raw_sdf(1:ImageSize/2);
+sdf = raw_sdf(1:(ImageSize/2-1));
 xdata = (linspace(1, length(sdf), length(sdf)))';
 %% Various fitting methods for "rise-decay"
     % Chi-square dist. func.
