@@ -61,7 +61,7 @@ for f in myfiles:
   elif f.endswith(".mat"):
     input_type = '3'
     input_name = f
-  elif f.endswith((".jpg",".png",".tif")):
+  elif f.lower().endswith((".jpg",".png",".tif")):
     input_type = '1'
     input_name = f
 
