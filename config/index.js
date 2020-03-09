@@ -10,7 +10,9 @@ module.exports = {
     // Paths
     assetsSubDirectory: 'nmstatic',
     assetsPublicPath: '/',
-    proxyTable: {},
+    proxyTable: {
+      'localhost:8080/nmr': 'http://ubuntu.local/'
+    },
 
     // Various Dev Server settings
     host: 'localhost', // can be overwritten by process.env.HOST
