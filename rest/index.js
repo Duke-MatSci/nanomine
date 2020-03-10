@@ -2340,7 +2340,7 @@ app.post('/blob/create', function (req, res) {
     let bufferStream = new stream.PassThrough()
     // bufferStream.write(buffer)
     bufferStream.end(buffer)
-    let uploadStream = bucket.openUploadStream(filename)
+    let uploadStream = bucket.openUploadStream(filename, options)
     bufferStream
       .pipe(uploadStream)
       .on('error', function (err) {

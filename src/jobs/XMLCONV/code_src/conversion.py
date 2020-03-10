@@ -24,7 +24,7 @@ def uploadFilesAndAdjustXMLImageRefs(jobDir, schemaId, xmlId, runCtx):
     webbase = runCtx['webbase']
     curateFilesUrl = restbase + '/nmr/blob/create'
     blobs = []
-    datasetId = runCtx.datasetId
+    datasetId = runCtx['datasetId']
 
     # get a list of all files in jobDir and upload them
     dataFiles = os.listdir(jobDir)
@@ -38,7 +38,7 @@ def uploadFilesAndAdjustXMLImageRefs(jobDir, schemaId, xmlId, runCtx):
         ## objFN = datasetId + '/' + xmlId + '/' + f
         objFN = f
         # curatefiledata = '{"filename":"'+ objFN + '","bucketName":"curateinput", "dataUri":"' + dataUri + '"}'
-        curatefiledata = '{"filename":"'+ objFN + ',"dataUri":"' + dataUri + ',"originalDatasetId":"' + datasetId + '"}'
+        curatefiledata = '{"filename":"'+ objFN + '","dataUri":"' + dataUri + '","originalDatasetId":"' + datasetId + '"}'
         # logging.debug(curatefiledata + ' len is: ' + str(len(curatefiledata)))
         curatefiledata = json.loads(curatefiledata)
         rq = urllib.request.Request(curateFilesUrl)
@@ -51,7 +51,7 @@ def uploadFilesAndAdjustXMLImageRefs(jobDir, schemaId, xmlId, runCtx):
           logging.debug('uploaded file ID: ' + uploadId)
           content_type = mime.Types.of(objFN)[0].content_type
           blob_info = {'type': 'blob', 'id': uploadId, 'metadata': {'filename': objFN, 'contentType': content_type}}
-          if runCtx.excelTemplateName == objFN:
+          if runCtx['excelTemplateName'] == objFN:
             blob_info['metadata']['is_completed_pnc_template'] = True
           blobs.append(blob_info)
           ## testing - raise ValueError('Upload of input successful. returned id: ' + uploadId) ## for testing
@@ -72,13 +72,13 @@ def uploadFilesAndAdjustXMLImageRefs(jobDir, schemaId, xmlId, runCtx):
       fn = f.text.split('/')[-1]
       blob = None
       for b in blobs:
-        bfn = b['filename']
+        bfn = b['metadata']['filename']
         if bfn == fn:
           blob = b
-      if not blob == None:
+      if blob == None:
         raise ValueError('Unable to match xml: ' + xmlId + ' MICROSTRUCTURE image filename: ' + fn + ' with an uploaded image name.')
       else:
-        imageRef = webbase + '/nmr/blob?id=' + blob.blobid
+        imageRef = webbase + '/nmr/blob?id=' + blob['id']
         logging.debug('new image value for XML: ' + imageRef)
         f.text = imageRef # update XML node with new image reference
         ## testing -- raise ValueError('Upload successful. returned id: ' + uploadId) ## for testing
@@ -133,7 +133,7 @@ def conversion(jobDir, code_srcDir, xsdDir, templateName, user, datasetId):
       'schemaId': '',
       'restbase': restbase,
       'webbase': webbase,
-      'systToken': sysToken,
+      'sysToken': sysToken,
       'curateApiToken': curateApiToken,
       'curateRefreshToken': curateRefreshToken,
       'excelTemplateName': templateName,
@@ -234,17 +234,17 @@ def conversion(jobDir, code_srcDir, xsdDir, templateName, user, datasetId):
     except:
           messages.append('exception occurred during curate-insert')
           messages.append('exception: '  + str(traceback.format_exc()))
-        if len(messages) > 0:
-          return ('failure', messages)
-    xmlMongoId = response._id
+    if len(messages) > 0:
+      return ('failure', messages)
+    # logging.debug('Xml curate Response: ' + str(response))
+    xmlMongoId = response['_id']
 
     blobs.append({'type': 'xmldata', 'id': xmlMongoId, 'metadata': {'contentType': 'application/xml', 'filename': ID+'.xml'}})
     fileset = {'fileset': ID, 'files': blobs}
     filesets = dsInfo.get('filesets')
     if filesets == None:
-      dsInfo.filesets = []
-    dsInfo.filesets.append(fileset)
-
+      dsInfo['filesets'] = []
+    dsInfo['filesets'].append(fileset)
 
     response = None # initialize response of the request
     # POST ds-create
