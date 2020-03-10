@@ -362,7 +362,7 @@ export default {
       let vm = this
       let comment = vm.addDatasetComment
       vm.setLoading()
-      Axios.post('/nmr/dataset/create', {dsInfo: {datasetComment: comment}})
+      Axios.post('/nmr/dataset/create', {dsInfo: {datasetComment: comment, isPublic: false, ispublished: false}})
         .then(function (resp) {
           console.log(resp.data)
           vm.addDatasetComment = ''

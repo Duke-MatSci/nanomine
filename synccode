@@ -18,10 +18,11 @@ ssh whyisroot "systemctl stop apache2"
 ssh whyisroot "systemctl stop nm-rest"
 
 echo Cleaning server log
-ssh whyis "rm nanomine/rest/nanomine.log"
+ssh whyis "rm /apps/nanomine/rest/nanomine*.log"
 
 echo Starting nm-rest and apache2
 ssh whyisroot "systemctl start nm-rest"
 ssh whyisroot "systemctl start apache2"
 
 echo "synccode ended: $(date)"
+

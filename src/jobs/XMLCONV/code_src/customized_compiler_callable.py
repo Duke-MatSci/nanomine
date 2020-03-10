@@ -26,7 +26,9 @@ from xml_update_validator import runValidation
 # -------------------------------------------- REST service
 import urllib.request
 import json
-import logging
+# import logging
+from nm.common import *
+from nm.common.nm_rest import nm_rest
 
 
 ## Helper Methods
@@ -451,7 +453,8 @@ def doiAdd(doiKVPair, CommonFields):
 ## Sheet by sheet data extraction
 # Sheet 1. Data Origin (Sample Info)
 # neglecting issue for now
-def sheetSampleInfo(sheet, DATA, myXSDtree, jobDir, restbase):
+def sheetSampleInfo(sheet, DATA, myXSDtree, jobDir, restbase, runCtx):
+
     CurrentTime = strftime("%Y-%m-%d %H:%M:%S", gmtime())
     CommonFields = []
     Journal = []
@@ -465,14 +468,17 @@ def sheetSampleInfo(sheet, DATA, myXSDtree, jobDir, restbase):
     # GET dsInfo by seq
     response = {}
     try:
-        dsurl = restbase + '/nmr/dataset?seq='+seq
+        dsurl = restbase + '/nmr/dataset?id=' + runCtx['datasetId']
         rq = urllib.request.Request(dsurl)
-        j = json.loads(urllib.request.urlopen(rq, context=ssl._create_unverified_context()).read().decode("utf-8"))
+        nmCurate = nm_rest(logging, runCtx['sysToken'], runCtx['curateApiToken'], runCtx['curateRefreshToken'], rq)
+        rv = nmCurate.urlopen(None)
+        j = json.loads(rv.read().decode('utf8')) # no data for GET request
         response = j["data"][0]
     except:
-        print('exception occurred during dataset GET by doi')
+        logging.error('exception occurred during dataset GET by datasetId')
         #print 'exception: ' + str(sys.exc_info()[0])
-        print('exception: '  + str(traceback.format_exc()))
+        logging.error('exception: '  + str(traceback.format_exc()))
+
 
 # special case author and keyword, which are saved as list
     authorREST = 'author' in response
@@ -589,6 +595,9 @@ def sheetSampleInfo(sheet, DATA, myXSDtree, jobDir, restbase):
         _f.write(CurrentTime + '\t' + str(ID) + '\t' + '(' + str(UploaderName) +  ')' + '\t' + str(UploaderEmail) + '\n')
     # write ID into DATA
     DATA.append({'ID': ID})
+    DATA.append({'SchemaVersion': runCtx['schemaName']})
+    DATA.append({'SchemaID': runCtx['schemaId']})
+    DATA.append({'DatasetID': runCtx['datasetId']})
     # sort CommonFields, Journal, and LabGenerated
     CommonFields = sortSequence(CommonFields, 'CommonFields', myXSDtree)
     Journal = sortSequence(Journal, 'Journal', myXSDtree)
@@ -2016,8 +2025,8 @@ def sheetPropMech(sheet, DATA_PROP, myXSDtree, jobDir):
             if hasLen(sheet.cell_value(row, 1)):
                 strR = collections.OrderedDict()
                 strR = addKVU('StressRelaxation', '', '', '', '', '', '', sheet.cell_value(row, 1), strR, jobDir, myXSDtree)
-            if len(strR) > 0:
-                temp.append(strR)
+                if len(strR) > 0:
+                    temp.append(strR)
             # StrainAtBreak
         if match(sheet.cell_value(row, 0), 'Strain at break'):
             strB = collections.OrderedDict()
@@ -3496,7 +3505,7 @@ def sheetMicrostructure(sheet, DATA, myXSDtree, jobDir):
     return DATA
 
 ## main
-def compiler(jobDir, code_srcDir, xsdDir, templateName, restbase):
+def compiler(jobDir, code_srcDir, xsdDir, templateName, restbase, datasetId):
     ## Global variable myXSDtree
     # read the xsd tree
     myXSDtree = etree.parse(xsdDir)
@@ -3522,7 +3531,7 @@ def compiler(jobDir, code_srcDir, xsdDir, templateName, restbase):
         # check the header of the sheet to determine what it has inside
         if (sheet.row_values(0)[0].strip().lower() == "sample info"):
             # sample info sheet
-            (ID, DATA) = sheetSampleInfo(sheet, DATA, myXSDtree, jobDir, restbase)
+            (ID, DATA) = sheetSampleInfo(sheet, DATA, myXSDtree, jobDir, restbase, datasetId)
         elif (sheet.row_values(0)[0].strip().lower() == "material types"):
             # material types sheet
             DATA = sheetMatType(sheet, DATA, myXSDtree, jobDir)

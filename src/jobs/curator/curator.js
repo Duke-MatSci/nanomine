@@ -129,7 +129,7 @@ function getLatestSchema () {
   })
 }
 
-function getNextXmlDataRecordWithEntityStates (schemaId, queryStatesArray) {
+function getNextXmlDataRecordWithEntityStates (schemaId, queryStatesArray) { // TODO ensure publicly available
   let func = 'getNextXmlDataRecordWithEntityStates'
   return new Promise(function (resolve, reject) {
     let query = {}

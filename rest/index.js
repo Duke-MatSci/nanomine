@@ -236,14 +236,15 @@ let authOptions = {
     // NOTE: need to add applicable methods for a path and associate different rules for a path with multiple method filters
     //    If a method is not listed, then the path is NOT protected for that method
     //    The set of all path+methodlist entries should cover all possible combinations for which security is required
-    //    !!!! The methods field is NOT currently being used but it will be needed
+    // NOTE: endpoints with 'usesAcls: true' are protected by query code in the handler and require login information if available
+    //    but are not required to be authenticated (at this time)
     {path: '/blob/create', loginAuth: true, membership: [], apiAuth: true, apiGroup: 'curate'},
-    {path: '/curate', methods: allMethods, loginAuth: false, membership: [], apiAuth: true, apiGroup: 'curate'},
-    // {path: '/dataset', loginAuth: true, membership: [], apiAuth: true, apiGroup: 'curate'},
+    {path: '/curate', loginAuth: false, membership: [], apiAuth: true, apiGroup: 'curate'},
+    {path: '/dataset', usesAcls: true, loginAuth: true, membership: [], apiAuth: true, apiGroup: 'curate'},
     {path: '/dataset/create', loginAuth: true, membership: [], apiAuth: true, apiGroup: 'curate'},
-    /* Don't allow apiAuth for this version of update */
+    // /dataset/update sets the verifyOwner flag to true, so it can be called from the GUI (not from the API)
     {path: '/dataset/update', loginAuth: true, membership: [], apiAuth: false, apiGroup: 'curate'},
-    /* Don't allow login auth and also ensure user is admin for this version of update (updateEx) */
+    // /dataset/updateEx does not set the verifyOwner flag and cannot be called from the GUI. It requires admin group access when called from API
     {path: '/dataset/updateEx', loginAuth: false, membership: ['admin'], apiAuth: true, apiGroup: 'curate'},
     {path: '/jobemail', loginAuth: false, membership: [], apiAuth: true, apiGroup: 'email'},
     {path: '/jobcreate', loginAuth: true, membership: [], apiAuth: true, apiGroup: 'jobs'},
@@ -289,7 +290,7 @@ function getBearerTokenInfo (bearerToken) {
             tokenInfo.refreshToken = refreshToken
             tokenInfo.expiration = expiration
             ++found
-            logger.debug(func + ' - found bearer token information for (access token): ' + bearerToken + ' occurrences: ' + found)
+            logger.debug(func + ' - found bearer token information for (access token): ' + bearerToken + ' occurrences: ' + found + ' tokenInfo: ' + inspect(tokenInfo))
             resolve(tokenInfo)
           }
         })
@@ -339,6 +340,12 @@ function getNmLoginUserIdHeaderValue (req) {
     rv = null
   }
   logger.debug(func + ' - final return value: ' + rv)
+  if (rv === null) {
+    let msg = func + ' returning null value.'
+    logger.error(msg)
+    // let err = new Error(msg)
+    // logger.error(err.message + ' - trace: ' + err.stack)
+  }
   return rv
 }
 
@@ -350,6 +357,7 @@ function authMiddleware (authOptions) {
     try {
       logger.debug(func + ' - function entry')
       let pathProtected = false
+      let usesAcls = false // end point uses acl type controls with custom queries
       let loginAuth = false
       let loginMembership = []
       let apiAuth = false
@@ -360,6 +368,9 @@ function authMiddleware (authOptions) {
       // let apiUserId = null
       authOptions.protect.forEach(function (v) {
         if (v.path === req.path) {
+          if (v.usesAcls && v.usesAcls === true) {
+            usesAcls = true
+          }
           pathProtected = true
           loginAuth = v.loginAuth
           loginMembership = v.membership
@@ -383,7 +394,7 @@ function authMiddleware (authOptions) {
       }
 
       if (pathProtected) {
-        logger.error('protected path: ' + req.path)
+        // logger.error('protected path: ' + req.path)
         let authFailed = true
         let groupCheckFailed = false // TODO recheck this logic related to loginUserId
         if (loginAuth) {
@@ -455,8 +466,12 @@ function authMiddleware (authOptions) {
           if (!authFailed) {
             next()
           } else {
-            jsonResp.error = 'not authorized'
-            return res.status(403).json(jsonResp)
+            if (usesAcls) {
+              next() // let endpoint code handle returned data even though login verification may have failed
+            } else {
+              jsonResp.error = 'not authorized'
+              return res.status(403).json(jsonResp)
+            }
           }
         } else {
           apiAuthPromise
@@ -479,29 +494,49 @@ function authMiddleware (authOptions) {
                       if (hasRequiredGroupAccess === true) {
                         next()
                       } else {
-                        jsonResp.error = 'invalid token'
-                        logger.error(func + ' - access requires group access for: ' + tokenInfo.userId + '. Required group access not found.')
-                        return res.status(403).json(jsonResp)
+                        if (usesAcls) {
+                          next()
+                        } else {
+                          jsonResp.error = 'invalid token'
+                          logger.error(func + ' - access requires group access for: ' + tokenInfo.userId + '. Required group access not found.')
+                          return res.status(403).json(jsonResp)
+                        }
                       }
                     } else {
-                      jsonResp.error = 'invalid token'
-                      logger.error(func + ' - Error getting user and group info for: ' + tokenInfo.userId + ' returned info is null.')
-                      return res.status(403).json(jsonResp)
+                      if (usesAcls) {
+                        next()
+                      } else {
+                        jsonResp.error = 'invalid token'
+                        logger.error(func + ' - Error getting user and group info for: ' + tokenInfo.userId + ' returned info is null.')
+                        return res.status(403).json(jsonResp)
+                      }
                     }
                   })
                   .catch(function (err) {
-                    jsonResp.error = 'failed user lookup'
-                    logger.error(func + ' - Failed to getUserAndAdminInfo for: ' + tokenInfo.userId + '. Error: ' + err.message)
-                    return res.status(500).json(jsonResp)
+                    if (usesAcls) {
+                      next()
+                    } else {
+                      jsonResp.error = 'failed user lookup'
+                      logger.error(func + ' - Failed to getUserAndAdminInfo for: ' + tokenInfo.userId + '. Error: ' + err.message)
+                      return res.status(500).json(jsonResp)
+                    }
                   })
               } else {
-                jsonResp.error = 'invalid token'
-                return res.status(403).json(jsonResp)
+                if (usesAcls) {
+                  next()
+                } else {
+                  jsonResp.error = 'invalid token'
+                  return res.status(403).json(jsonResp)
+                }
               }
             })
             .catch(function (err) {
-              jsonResp.error = err
-              return res.status(403).json(jsonResp)
+              if (usesAcls) {
+                next()
+              } else {
+                jsonResp.error = err
+                return res.status(403).json(jsonResp)
+              }
             })
         }
       } else {
@@ -509,7 +544,7 @@ function authMiddleware (authOptions) {
         next()
       }
     } catch (err) {
-      let msg = func + ' - exception in authMiddleware. Error: ' + err
+      let msg = func + ' - exception in authMiddleware. Unable to process user request for ' + req.path + 'Error: ' + err
       logger.error(msg)
       jsonResp.error = err
       return res.status(401).json(jsonResp)
@@ -572,6 +607,8 @@ function handleLogin (req, res) {
     } catch (err) {
       let decoded = jwtBase.decode(token) // timed out or improperly signed version -- possible fake
       logger.error('unable to verify token. Possible forgery or token timeout. data: ' + JSON.stringify(decoded))
+      res.clearCookie('session', {'httpOnly': true, 'path': '/'})
+      res.clearCookie('token', {})
     }
   }
   // TODO enforce forged token check - logout should remove cookie
@@ -1354,7 +1391,7 @@ function publishXml (userid, xmlTitle, xmlText, schemaName, cb) {
           "@type": "np:Assertion",
           "@graph": [
             {
-              "@id" : "${nmRdfLodPrefix}/nmr/xml/${xmlTitle}",
+              "@id" : "${nmRdfLodPrefix}/nmr/xml/${xmlTitle}?format=xml",
               "@type": [ "schema:DataDownload", "mt:text/xml", "http://nanomine.org/ns/NanomineXMLFile"],
               "whyis:hasContent" : "data:text/xml;charset=UTF-8;base64,${b64XmlData}",
               "dc:conformsTo" : {"@id" : "${nmRdfLodPrefix}/nmr/schema/${schemaName}"}
@@ -2267,6 +2304,7 @@ app.post('/curate', function (req, res) {
               jsonResp.error = err
               return res.status(500).json(jsonResp)
             }
+            jsonResp.data = doc
             return res.status(201).json(jsonResp)
           })
         }
@@ -2287,8 +2325,12 @@ app.post('/blob/create', function (req, res) {
   let bucketName = null // req.body.bucketName -- no longer used for now
   let filename = req.body.filename
   let dataUri = req.body.dataUri
+  let originalDatasetId = req.body.originalDatasetId
+  let options = {}
+  if (originalDatasetId) {
+    options.metadata = { 'originalDatasetId': originalDatasetId }
+  }
   if (filename && typeof filename === 'string' && dataUri && typeof dataUri === 'string') {
-    let options = {}
     if (bucketName && typeof bucketName === 'string') {
       options.bucketName = bucketName
     }
@@ -2437,6 +2479,8 @@ app.get('/dataset', function (req, res) {
   // if the user is logged in, but not admin return public data and data owned by user
   // if the user is logged in and admin, return all
   let userid = getNmLoginUserIdHeaderValue(req)
+  let msg = func + ' - dataset lookup for userid: ' + userid
+  logger.debug(msg)
   let p = new Promise(function (resolve, reject) {
     if (!userid) {
       onlyPublic = true
@@ -2580,18 +2624,18 @@ app.post('/dataset/update', function (req, res) {
   logger.debug(func + ' - datataset/update: doing update... userid: ' + userid + ' ' + JSON.stringify(dsUpdate) + ' verifyOwner: ' + verifyOwner)
   updateDataset(Datasets, logger, dsUpdate, verifyOwner)
     .then(function (status) {
-      logger.debug(func + ' - datataset/update: success - ' + JSON.stringify(status))
+      logger.debug(func + ' - datataset/update: success - ' + inspect(status))
       return res.status(status.statusCode).json(status)
     })
     .catch(function (status) { // Here, status is not just an error object
-      logger.error(func + ' - datataset/update: error - ' + status.error.err.message)
+      logger.error(func + ' - datataset/update: error - ' + inspect(status))
       return res.status(status.statusCode).json(status)
     })
 })
 
 app.post('/dataset/updateEx', function (req, res) { // NOT A GUI FUNCTION in its current state. Do not call from GUI (will return 403)
   // NOTE: DOES NOT SET verify owner flag, so the update info can contain a userid
-  //    This version should not be called from the GUI. Admins may use the runAs capability to runas a user
+  //    This version SHOULD NOT BE called from the GUI. Admins may use the runAs capability to runas a user
   //    in the GUI which calls /dataset/update on behalf of the user.  Otherwise, the admin may only update
   //    datasets belonging to themselves using the GUI.
   // NOTE: these restrictions are subject to change in the future ....
@@ -2601,14 +2645,14 @@ app.post('/dataset/updateEx', function (req, res) { // NOT A GUI FUNCTION in its
   // let schemaId = req.body.schemaid
   let userid = getNmLoginUserIdHeaderValue(req)
   let verifyOwner = false
-  logger.debug(func + ' - datataset/updateEx: doing update... userid: ' + userid + ' ' + JSON.stringify(dsUpdate))
+  logger.debug(func + ' - datataset/updateEx: doing update... userid: ' + userid + ' ' + inspect(dsUpdate))
   updateDataset(Datasets, logger, dsUpdate, verifyOwner)
     .then(function (status) {
-      logger.debug(func + ' - datataset/update: success - ' + JSON.stringify(status))
+      logger.debug(func + ' - datataset/update: success - ' + inspect(status))
       return res.status(status.statusCode).json(status)
     })
     .catch(function (err) {
-      logger.error(func + ' - datataset/update: error - ' + JSON.stringify(status))
+      logger.error(func + ' - datataset/update: error - ' + inspect(status))
       return res.status(err.statusCode).json(status)
     })
 })

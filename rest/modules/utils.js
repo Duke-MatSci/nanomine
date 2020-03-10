@@ -248,18 +248,19 @@ function updateDataset (Datasets, logger, dsInfo, verifyOwner) {
     if (verifyOwner) {
       query = {$and: [query, {userid: {$eq: dsInfo.userid}}]}
     }
+    logger.debug(func + ' - ' + ' query: ' + inspect(query))
     Datasets.updateOne(
       query,
       {$set: dsInfo},
       {upsert: false}, function (err, result) {
         if (err) {
-          console.log(func + ' : error - ' + err)
+          logger.error(func + ' : error - ' + err)
           status.error = err
           status.statusCode = 500
           status.data = null
           reject(status)
         } else {
-          console.log('datataset/update: success - old document is: ' + JSON.stringify(result))
+          logger.debug(func + ' - success - old document is: ' + JSON.stringify(result))
           let doc = result // promise based result only returns old document and for create it's null
           if (doc) {
             status.statusCode = 200
