@@ -1,6 +1,7 @@
 
 from extract_verify_ID_callable import runEVI
 from customized_compiler_callable import compiler
+from xsdTraverse import xsdTraverse
 from nm.common import *
 from nm.common.nm_rest import nm_rest
 import os
@@ -96,6 +97,9 @@ def uploadFilesAndAdjustXMLImageRefs(jobDir, schemaId, xmlId):
 
 def conversion(jobDir, code_srcDir, xsdDir, templateName, user):
     restbase = os.environ['NM_LOCAL_REST_BASE']
+    sysToken = os.environ['NM_AUTH_SYSTEM_TOKEN']
+    jobApiToken = os.environ['NM_AUTH_API_TOKEN_JOBS']
+    jobRefreshToken = os.environ['NM_AUTH_API_REFRESH_JOBS']
     xsdFilename = xsdDir.split("/")[-1]
     # initialize messages
     messages = []
@@ -144,6 +148,96 @@ def conversion(jobDir, code_srcDir, xsdDir, templateName, user):
                     messages.append('[XML Schema Validation Error] ' + row['error'].strip())
     if len(messages) > 0:
         return ('failure', messages)
+    # check #5: call the ChemProps API and add in the standardized chemical names, uSMILES and density
+    try:
+        xmlName = jobDir + "/xml/" + ID + ".xml"
+        xmlTree = etree.parse(xmlName)
+        # collect all MatrixComponent/ChemicalName and FillerComponent/ChemicalName packages
+        matcomps = xmlTree.findall('.//MatrixComponent')
+        filcomps = xmlTree.findall('.//FillerComponent')
+        # for each package, send to ChemProps API
+        chemprops_api_url = restbase + '/api/v1/chemprops'
+        # MatrixComponent
+        for matcomp in matcomps:
+            chemprops_data = {
+                "polfil": "pol",
+                "ChemicalName": matcomp.findtext('ChemicalName'),
+                "Abbreviation": '' if matcomp.findtext('Abbreviation') is None else matcomp.findtext('Abbreviation'),
+                "TradeName": '' if matcomp.findtext('TradeName') is None else matcomp.findtext('TradeName'),
+                "uSMILES":  '' if matcomp.findtext('uSMILES') is None else matcomp.findtext('uSMILES'),
+                "nmId": ID
+            }
+            chemprops_rq = urllib.request.Request(chemprops_api_url)
+            logging.debug('request created for ChemProps using chemprops_api_url')
+            logging.debug('Searching polymer package: ' + json.dumps(chemprops_data).encode("utf8"))
+            chemprops_rq.add_header('Content-Type','application/json')
+            chemprops_search = nm_rest(logging, sysToken, jobApiToken, jobRefreshToken, chemprops_rq)
+            r = chemprops_search.urlopen(json.dumps(chemprops_data).encode("utf8"))
+            if r.getcode() == 200:
+                result = json.loads(r.read().decode("utf-8"))
+                logging.debug('Searching result: ' + json.dumps(result).encode("utf8"))
+            ## testing - raise ValueError('Upload of input successful. returned id: ' + uploadId) ## for testing
+            else:
+                raise ValueError('Unexpected return code from ChemProps: ' + str(r.getcode()))
+            # now we modify xml with result
+            stdCN = matcomp.find('.//StdChemicalName')
+            if stdCN is None:
+                stdCN = etree.SubElement(matcomp, 'StdChemicalName')
+            stdCN.text = result['StandardName']
+            uSMILES = matcomp.find('.//uSMILES')
+            if uSMILES is None:
+                uSMILES = etree.SubElement(matcomp, 'uSMILES')
+            uSMILES.text = result['uSMILES']
+            if matcomp.find('Density') is None:
+                density = etree.SubElement(matcomp, 'Density')
+                dens_des = etree.SubElement(density, 'description')
+                dens_des.text = 'inserted from ChemProps, NanoMine'
+                dens_val = etree.SubElement(density, 'value')
+                dens_val.text = result['density']
+                dens_uni = etree.SubElement(density, 'unit')
+                dens_uni.text = 'g/cm3'
+        # FillerComponent
+        for filcomp in filcomps:
+            chemprops_data = {
+                "polfil": "fil",
+                "ChemicalName": filcomp.findtext('ChemicalName'),
+                "Abbreviation": '' if filcomp.findtext('Abbreviation') is None else filcomp.findtext('Abbreviation'),
+                "nmId": ID
+            }
+            chemprops_rq = urllib.request.Request(chemprops_api_url)
+            logging.debug('request created for ChemProps using chemprops_api_url')
+            logging.debug('Searching filler package: ' + json.dumps(chemprops_data).encode("utf8"))
+            chemprops_rq.add_header('Content-Type','application/json')
+            chemprops_search = nm_rest(logging, sysToken, jobApiToken, jobRefreshToken, chemprops_rq)
+            r = chemprops_search.urlopen(json.dumps(chemprops_data).encode("utf8"))
+            if r.getcode() == 200:
+                result = json.loads(r.read().decode("utf-8"))
+                logging.debug('Searching result: ' + json.dumps(result).encode("utf8"))
+            ## testing - raise ValueError('Upload of input successful. returned id: ' + uploadId) ## for testing
+            else:
+                raise ValueError('Unexpected return code from ChemProps: ' + str(r.getcode()))
+            # now we modify xml with result
+            stdCN = filcomp.find('.//StdChemicalName')
+            if stdCN is None:
+                stdCN = etree.SubElement(filcomp, 'StdChemicalName')
+            stdCN.text = result['StandardName']
+            if filcomp.find('Density') is None:
+                density = etree.SubElement(filcomp, 'Density')
+                dens_des = etree.SubElement(density, 'description')
+                dens_des.text = 'inserted from ChemProps, NanoMine'
+                dens_val = etree.SubElement(density, 'value')
+                dens_val.text = str(result['density'])
+                dens_uni = etree.SubElement(density, 'unit')
+                dens_uni.text = 'g/cm3'
+        # sort modified elements with xsdTraverse module
+        xsdt = xsdTraverse(xsdDir)
+        # sort MatrixComponent by xpath PolymerNanocomposite/MATERIALS/Matrix/MatrixComponent
+        xsdt.sortSubElementsByPath(xmlTree, 'PolymerNanocomposite/MATERIALS/Matrix/MatrixComponent')
+        # sort FillerComponent by xpath PolymerNanocomposite/MATERIALS/Filler/FillerComponent
+        xsdt.sortSubElementsByPath(xmlTree, 'PolymerNanocomposite/MATERIALS/Filler/FillerComponent')
+        xmlTree.write(xmlName, encoding="UTF-8", xml_declaration=True)
+    # check #6: call the mf-vf conversion agent and add in the calculated mf/vf
+
     # check #5: upload and check if the uploading is successful
     try:
         sysToken = os.environ['NM_AUTH_SYSTEM_TOKEN']
