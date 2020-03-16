@@ -252,7 +252,7 @@ def conversion(jobDir, code_srcDir, xsdDir, templateName, user):
         messages.append('exception: '  + str(traceback.format_exc()))
     if len(messages) > 0:
         return ('failure', messages)
-    # check #5: upload and check if the uploading is successful
+    # check #7: upload and check if the uploading is successful
     try:
         sysToken = os.environ['NM_AUTH_SYSTEM_TOKEN']
         curateApiToken = os.environ['NM_AUTH_API_TOKEN_CURATE']
