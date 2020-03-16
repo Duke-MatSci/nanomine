@@ -2,6 +2,7 @@
 from extract_verify_ID_callable import runEVI
 from customized_compiler_callable import compiler
 from xsdTraverse import xsdTraverse
+from mfvf import mfvfConvert
 from nm.common import *
 from nm.common.nm_rest import nm_rest
 import os
@@ -236,8 +237,21 @@ def conversion(jobDir, code_srcDir, xsdDir, templateName, user):
         # sort FillerComponent by xpath PolymerNanocomposite/MATERIALS/Filler/FillerComponent
         xsdt.sortSubElementsByPath(xmlTree, 'PolymerNanocomposite/MATERIALS/Filler/FillerComponent')
         xmlTree.write(xmlName, encoding="UTF-8", xml_declaration=True)
+    except:
+        messages.append('exception occurred during ChemProps-query')
+        messages.append('exception: '  + str(traceback.format_exc()))
+    if len(messages) > 0:
+        return ('failure', messages)
     # check #6: call the mf-vf conversion agent and add in the calculated mf/vf
-
+    try:
+        xmlName = jobDir + "/xml/" + ID + ".xml"
+        mvc = mfvfConvert(xmlName)
+        mvc.run()
+    except:
+        messages.append('exception occurred during mass fraction-volume fraction conversion')
+        messages.append('exception: '  + str(traceback.format_exc()))
+    if len(messages) > 0:
+        return ('failure', messages)
     # check #5: upload and check if the uploading is successful
     try:
         sysToken = os.environ['NM_AUTH_SYSTEM_TOKEN']
