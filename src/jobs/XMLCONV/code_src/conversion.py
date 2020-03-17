@@ -15,6 +15,7 @@ from lxml import etree
 from datauri import DataURI
 import traceback
 import ssl
+import requests
 
 
 def uploadFilesAndAdjustXMLImageRefs(jobDir, schemaId, xmlId):
@@ -168,14 +169,17 @@ def conversion(jobDir, code_srcDir, xsdDir, templateName, user):
                 "uSMILES":  '' if matcomp.findtext('uSMILES') is None else matcomp.findtext('uSMILES'),
                 "nmId": ID
             }
-            chemprops_rq = urllib.request.Request(chemprops_api_url)
+            # chemprops_rq = urllib.request.Request(chemprops_api_url)
             logging.debug('request created for ChemProps using chemprops_api_url')
             logging.debug('Searching polymer package: ' + json.dumps(chemprops_data).encode("utf8"))
-            chemprops_rq.add_header('Content-Type','application/json')
-            chemprops_search = nm_rest(logging, sysToken, jobApiToken, jobRefreshToken, chemprops_rq)
-            r = chemprops_search.urlopen(json.dumps(chemprops_data).encode("utf8"))
-            if r.getcode() == 200:
-                result = json.loads(r.read().decode("utf-8"))
+            # chemprops_rq.add_header('Content-Type','application/json')
+            # chemprops_search = nm_rest(logging, sysToken, jobApiToken, jobRefreshToken, chemprops_rq)
+            # r = chemprops_search.urlopen(json.dumps(chemprops_data).encode("utf8"))
+            r = requests.get(chemprops_api_url, params = chemprops_data) # requirement for auth removed for ChemProps for now
+            # if r.getcode() == 200:
+            if r.status_code == 200:
+                # result = json.loads(r.read().decode("utf-8"))
+                result = r.json()
                 logging.debug('Searching result: ' + json.dumps(result).encode("utf8"))
             ## testing - raise ValueError('Upload of input successful. returned id: ' + uploadId) ## for testing
             else:
@@ -205,14 +209,17 @@ def conversion(jobDir, code_srcDir, xsdDir, templateName, user):
                 "Abbreviation": '' if filcomp.findtext('Abbreviation') is None else filcomp.findtext('Abbreviation'),
                 "nmId": ID
             }
-            chemprops_rq = urllib.request.Request(chemprops_api_url)
+            # chemprops_rq = urllib.request.Request(chemprops_api_url)
             logging.debug('request created for ChemProps using chemprops_api_url')
             logging.debug('Searching filler package: ' + json.dumps(chemprops_data).encode("utf8"))
-            chemprops_rq.add_header('Content-Type','application/json')
-            chemprops_search = nm_rest(logging, sysToken, jobApiToken, jobRefreshToken, chemprops_rq)
-            r = chemprops_search.urlopen(json.dumps(chemprops_data).encode("utf8"))
-            if r.getcode() == 200:
-                result = json.loads(r.read().decode("utf-8"))
+            # chemprops_rq.add_header('Content-Type','application/json')
+            # chemprops_search = nm_rest(logging, sysToken, jobApiToken, jobRefreshToken, chemprops_rq)
+            # r = chemprops_search.urlopen(json.dumps(chemprops_data).encode("utf8"))
+            r = requests.get(chemprops_api_url, params = chemprops_data) # requirement for auth removed for ChemProps for now
+            # if r.getcode() == 200:
+            if r.status_code == 200:
+                # result = json.loads(r.read().decode("utf-8"))
+                result = r.json()
                 logging.debug('Searching result: ' + json.dumps(result).encode("utf8"))
             ## testing - raise ValueError('Upload of input successful. returned id: ' + uploadId) ## for testing
             else:
