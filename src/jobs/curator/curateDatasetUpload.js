@@ -13,7 +13,8 @@ const mongoose = require('mongoose')
 const moment = require('moment')
 const nmutils = require('../../../rest/modules/utils')
 const shortUUID = require('short-uuid')()
-const libxmljs = require('libxmljs2')
+const libxmljs = require('libxmljs')
+const mimetypes = require('mime-types')
 const fs = require('fs')
 const env = nmutils.getEnv()
 const nmWebBaseUri = env.nmWebBaseUri
@@ -25,12 +26,14 @@ const nmWebBaseUri = env.nmWebBaseUri
 const getLatestSchemas = nmutils.getLatestSchemas
 const inspect = nmutils.inspect
 const matchValidXmlTitle = nmutils.matchValidXmlTitle
+const replaceXmlSampleNumberInTitle = nmutils.replaceXmlSampleNumberInTitle
 const xmlEnsurePathExists = nmutils.xmlEnsurePathExists
 const mergeDatasetInfoFromXml = nmutils.mergeDatasetInfoFromXml
-const createDataset = nmutils.createDataset
+// const createDataset = nmutils.createDataset
 const updateOrCreateXmlData = nmutils.updateOrCreateXmlData
+const updateDataset = nmutils.updateDataset
 const updateMicrostructureImageFileLocations = nmutils.updateMicrostructureImageFileLocations
-const replaceDatasetId = nmutils.replaceDatasetId
+// const replaceXmlSeqInTitle = nmutils.replaceXmlSeqInTitle
 const setTrace = nmutils.setTrace
 const logTrace = nmutils.logTrace
 
@@ -74,8 +77,12 @@ let db = mongoose.connection
 
 let dbUri = process.env['NM_MONGO_URI']
 // let MgiVersion = null
+let schemaPath = '../../../rest/modules/mongo/schema'
+let datasetsModule = require(schemaPath + '/datasets')
 let datasetsSchema = null
+let FsFiles = null // fsfiles.js schema
 let Datasets = null
+// let datasetAddOrOverwriteFileInfo = datasetsModule.datasetAddOrOverwriteFileInfo
 // let Users = null
 // let Api = null
 let xmlDataSchema = null
@@ -94,7 +101,14 @@ process.on('uncaughtException', (err, origin) => {
 })
 
 let connected = new Promise(function (resolve, reject) {
-  mongoose.connect(dbUri, {keepAlive: true, keepAliveInitialDelay: 300000})
+  mongoose.connect(dbUri, {
+    poolSize: 10,
+    bufferMaxEntries: 0,
+    reconnectTries: 5000,
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    keepAlive: true,
+    keepAliveInitialDelay: 30000})
   db.on('error', function (err) {
     logger.error('db error: ' + err)
     reject(err)
@@ -107,19 +121,20 @@ let connected = new Promise(function (resolve, reject) {
 connected
   .then(function () {
     logger.info('connected handler.')
-    let schemaPath = '../../../rest/modules/mongo/schema'
 
     // let mgiVersionSchema = require(schemaPath + '/mgiVersion')(mongoose)
     // MgiVersion = mongoose.model('mgiversion', mgiVersionSchema)
 
-    datasetsSchema = require(schemaPath + '/datasets')(mongoose)
+    datasetsSchema = datasetsModule.datasets(mongoose)
     Datasets = mongoose.model('datasets', datasetsSchema)
-
     // let usersSchema = require(schemaPath + '/users')(mongoose)
     // Users = mongoose.model('users', usersSchema)
 
     // let apiSchema = require(schemaPath + '/api')(mongoose)
     // Api = mongoose.model('api', apiSchema)
+
+    let fsfilesSchema = require(schemaPath + '/fsfiles')(mongoose)
+    FsFiles = mongoose.model('api', fsfilesSchema)
 
     xmlDataSchema = require(schemaPath + '/xmldata')(mongoose)
     XmlData = mongoose.model('xmlData', xmlDataSchema)
@@ -142,8 +157,8 @@ connected
           db.close()
         })
         .catch(function (err) {
-          logger.error('unexpected error: ' + err)
-          logger.error(err.stack)
+          logger.error('unexpected error: ' + inspect(err))
+          logger.error(inspect(err.stack))
           writeOutputParameters(jobId, jobDir, {error: err, data: null})
           db.close()
         })
@@ -159,12 +174,16 @@ connected
   })
 
 function readXmlFile (jobId, jobDir, filename) {
+  let func = 'readXmlFile'
   let xmlData = null
   let fullname = path.join(jobDir, filename)
+  // logger.debug(func + ' - ' + 'reading xml: ' + fullname)
   try {
     xmlData = fs.readFileSync(fullname, 'utf8')
+    xmlData = xmlData.replace(/>\s*</g, '><')
+    // logger.debug(func + ' - ' + 'read xml: ' + fullname + ' length: ' + xmlData.length)
   } catch (err) {
-    logger.error('job: ' + jobId + ' unable to read: ' + fullname)
+    logger.error(func + ' - job: ' + jobId + ' unable to read: ' + fullname)
   }
   return xmlData
 }
@@ -172,21 +191,48 @@ function readXmlFile (jobId, jobDir, filename) {
 function writeOutputParameters (jobId, jobDir, data) {
   fs.writeFileSync(path.join(jobDir, '/job_output_parameters.json'), JSON.stringify(data), 'utf8')
 }
+
 function fmtLogMsg (status, msg) {
   let formatted = 'curateDatasetUpload - status: ' + status + ' msg: ' + msg
   return formatted
 }
 
+function updateFileInfoMetadataFromBlob (fileInfo) {
+  let func = 'updateFileInfoFromBlob'
+  return new Promise(function (resolve, reject) {
+    if (fileInfo.type === 'blob') {
+      FsFiles.findOne({_id: fileInfo.id}, function (err, fsFilesDoc) {
+        if (err) {
+          logger.error(func + ' - error reading fs.info for blob id: ' + fileInfo.id + ' Error: ' + err.message)
+          reject(err)
+        } else {
+          if (fsFilesDoc) {
+            let metadata = {
+              'filename': fsFilesDoc.filename,
+              'contentType': mimetypes.lookup(fsFilesDoc.filename)
+            }
+            fileInfo.metadata = metadata
+            resolve(fileInfo)
+          } else {
+            logger.error(func + ' - oops blob not found: ' + fileInfo.id + ' invalid blob id.')
+            resolve(null)
+          }
+        }
+      })
+    } else {
+      let err = new Error('fileInfo type is not "blob".')
+      reject(err)
+    }
+  })
+}
 function curateDatasetUpload (jobType, jobId, jobDir) {
   let func = 'curateDatasetUpload'
   // similar to curate, but takes multiple XMLs of the same dataset to process
-  // if the remap flag is set, a new dataset definition will be created to link samples and all the data remapped to the
-  //   new dataset id
   // All of the XMLs uploaded must be for the same dataset
   // NOTE: Microstructure images are assumed to exist on the system already and their URL will be adjusted to the
   //   correct value for the environment being uploaded using the blobid included in the microstructure definition
 
-  // Read job parameters to get remapdataset flag value and files
+  // Read job parameters to get dataset id of the dataset created/selected by the user that ran the job
   // do the updates
   // write status to job_output_parameters.json
   // send email to submitter
@@ -198,9 +244,41 @@ function curateDatasetUpload (jobType, jobId, jobDir) {
     // let originalUser = parameters.originalUser
     // let submittingUser = parameters.submittingUser // send mail to this user
     let jsonResp = {'error': null, 'data': null}
-    let remap = parameters.remapdataset
+    let validParameters = true
+    let remap = false
+    let useId = false
+    let datasetId = null
+    if (parameters.datasetCreateOrUpdateType && parameters.datasetId) {
+      switch (parameters.datasetCreateOrUpdateType.toLowerCase()) {
+        // case 'remap': // Forces new dataset creation for the set of XMLs and remaps id/control id to new number
+        //  remap = true // DEPRECATED
+        //  break
+        case 'useid': // uses id of xml to create and update dataset
+          useId = true
+          break
+        default:
+          validParameters = false
+      }
+      datasetId = parameters.datasetId
+    } else {
+      validParameters = false
+    }
     let xmls = parameters.files
-    logger.error(func + ' - parameters: ' + paramsStr)
+    logger.info(func + ' - parameters: ' + paramsStr)
+    let validXmlNames = true
+    let dsSeq = -1
+    xmls.forEach((v, i) => {
+      let rv = matchValidXmlTitle(v)
+      if (rv) {
+        let xmlds = +(rv[1]) // dataset seq is first slot of name
+        if (dsSeq === -1) {
+          dsSeq = xmlds
+        }
+        if (dsSeq !== xmlds) {
+          validXmlNames = false
+        }
+      }
+    })
     // let vm = this
     // verify that all the data is for the same dataset
     // if not, return 98 error - 'all data to upload should be from same dataset'
@@ -210,26 +288,43 @@ function curateDatasetUpload (jobType, jobId, jobDir) {
     //     Ensure that the DOI is reflected in the dataset
     // Create the dataset (remap = true)
     //   create new XML records in Mongo for each XML record
-    if (remap) {
+    if (!validParameters || !validXmlNames) {
+      let rc = 97
+      let errors = []
+      if (!validParameters) {
+        errors.push('datasetCreateOrUpdate query parameter must be either "remap" or "useid" and datasetId must be set')
+      }
+      if (!validXmlNames) {
+        errors.push('all XMLs must be for same dataset.')
+      }
+
+      jsonResp.error = 'rc: ' + rc + ' Error message(s): ' + errors.join(' and ')
+      writeOutputParameters(jobId, jobDir, jsonResp)
+      logger.error(jsonResp.error)
+      reject(new Error(jsonResp))
+    } else {
       let datasetInfo = {}
       let resStatus = 0
       let resError = null
       let pct = 0
+      let blobPromises = []
       let tempDoi = 'unpublished/doi-' + shortUUID.new() // EXPECTING TO DO ONE DATASET ONLY! DOI should apply to all XMLs to process
       getLatestSchemas(XsdVersionSchema, XsdSchema, logger)
         .then(function (schemas) {
-          let latestSchema = schemas[0].currentRef[0] // getLatestSchemas
+          let latestSchema = schemas[0].currentRef // getLatestSchemas
           let schemaId = latestSchema._id
           let schemaName = latestSchema.title
           let xsd = latestSchema.content
           let xsdDoc = null
-          try { // TODO this try block is way too big and the error printed is incorrect
+          try { // TODO this try block is way too big
             xsdDoc = libxmljs.parseXmlString(xsd)
             let xmlDocs = []
             if (xmls && xmls.length > 0) {
               xmls.forEach((v, idx) => {
-                logger.debug(func + ' - processing xml ' + (pct + 1) + ' of ' + xmls.length)
                 let xml = readXmlFile(jobId, jobDir, v)
+                logger.debug(func + ' - processing xml - filename: ' + v + ' number: ' + (pct + 1) + ' of ' + xmls.length)
+                // logger.debug('filename: ' + v + ' xml: ' + xml + ' xml len: ' + xml.length)
+                // logger.debug('---')
                 let xmlDoc = null
                 if (resError === null) {
                   try {
@@ -247,20 +342,80 @@ function curateDatasetUpload (jobType, jobId, jobDir) {
                       resStatus = 98
                     } else {
                       let docId = xmlDoc.find('//ID')[0].text()
-                      let controlId = xmlDoc.find('//Control_ID')[0].text()
-                      if (docId && controlId && docId.length > 0 && controlId.length > 0 && matchValidXmlTitle(docId) && matchValidXmlTitle(controlId)) {
+                      let controlIdPath = '/PolymerNanocomposite/Control_ID'
+                      let controlId = xmlDoc.find(controlIdPath)
+                      if (controlId && controlId.length > 0) {
+                        controlId = controlId[0]
+                        if (controlId) {
+                          controlId = controlId.text()
+                        } else {
+                          controlId = null
+                        }
+                      } else {
+                        // copy the docId as controlId and update the sample number to 1 and update the document
+                        controlId = replaceXmlSampleNumberInTitle(logger, docId, 1)
+                        let after = ['ID']
+                        xmlDoc = xmlEnsurePathExists(xmlDoc, controlIdPath, after)
+                        if (xmlDoc) {
+                          let cid = xmlDoc.find(controlIdPath)
+                          if (cid && cid.length > 0) {
+                            cid[0].text(controlId)
+                          } else {
+                            logger.debug(func + ' - ' + ' path for Control_ID is supposed to exist, but cannot be set. node is: ' + JSON.stringify(cid))
+                          }
+                        } else {
+                          logger.error('No ControlID was found for: ' + docId + ' and adding a control id failed. Attempted to set as: ' + controlId)
+                        }
+                      }
+                      logger.debug(func + ' - ' + 'Processing xml ID: ' + docId + ' control ID: ' + controlId)
+                      let schemaVersionPath = '/PolymerNanocomposite/SchemaVersion'
+                      let schemaIdPath = '/PolymerNanocomposite/SchemaID'
+                      let datasetIdPath = '/PolymerNanocomposite/DatasetID'
+                      let after = ['ID', 'Control_ID']
+                      xmlDoc = xmlEnsurePathExists(xmlDoc, schemaVersionPath, after)
+                      after.push('SchemaVersion')
+                      xmlDoc = xmlEnsurePathExists(xmlDoc, schemaIdPath, after)
+                      after.push('SchemaId')
+                      xmlDoc = xmlEnsurePathExists(xmlDoc, datasetIdPath, after)
+                      let n = xmlDoc.find(schemaVersionPath)
+                      if (n && n[0]) { // find returns an array, which in this case is always length 1 based on the schema
+                        n[0].text(schemaName)
+                      } else { logger.debug(func + ' - ' + 'Unable to set schemaName into XML') }
+                      n = xmlDoc.find(schemaIdPath)
+                      if (n && n[0]) {
+                        n[0].text(schemaId)
+                      } else { logger.debug(func + ' - ' + 'Unable to set schemaId into XML') }
+                      n = xmlDoc.find(datasetIdPath)
+                      if (n && n[0]) {
+                        n[0].text(datasetId)
+                      } else { logger.debug(func + ' - ' + 'Unable to set datasetId into XML') }
+                      if (docId && docId.length > 0/* && controlId && controlId.length > 0 */ && matchValidXmlTitle(docId)/* && matchValidXmlTitle(controlId) */) {
                         // TODO do some basic XML doc verification like same dataset for all incoming XMLs (requires ID which should ALWAYS be there)
                         let doiPath = '/PolymerNanocomposite/DATA_SOURCE/Citation/CommonFields/DOI'
-                        let doi = xmlDoc.find(doiPath)
+                        let doi = xmlDoc.get(doiPath)
+                        if (doi) {
+                          doi = doi.text()
+                        }
                         if (doi && doi.length > 0) {
                           logger.debug(func + ' - ' + docId + ' doi is ' + doi)
                         } else {
                           logger.debug(func + ' - ' + docId + ' no DOI found. Using unpublished temp id: ' + tempDoi)
                           xmlDoc = xmlEnsurePathExists(xmlDoc, doiPath) // NOTE: this resets the xmlDoc to the new xmlDoc with the possibly new path
-                          let elem = xmlDoc.find(doiPath)
-                          elem[0].text(tempDoi)
+                          if (xmlDoc) {
+                            let elem = xmlDoc.find(doiPath)
+                            elem[0].text(tempDoi)
+                          } else {
+                            resStatus = 95
+                            resError = func + ' - xmlEnsurePathExists(xmlDoc, ' + doiPath + ') returned a null document. Status: ' + resStatus
+                            logger.error(resError)
+                            throw new Error(resError)
+                          }
                         }
                         mergeDatasetInfoFromXml(logger, datasetInfo, xmlDoc)
+                        logger.debug(func + ' - ' + 'merged incoming xml info into dataset info.')
+                        if (useId) {
+                          datasetInfo.seq = +(matchValidXmlTitle(docId)[1])
+                        }
                         ++pct
                       } else {
                         resError = func + ' - error verifying ID and/or control ID. ID: ' + docId + ' Control_ID: ' + controlId
@@ -276,8 +431,12 @@ function curateDatasetUpload (jobType, jobId, jobDir) {
                   }
                 }
               })
+              datasetInfo.datasetId = datasetId
+              datasetInfo.seq = dsSeq
               datasetInfo.userid = user // obtained from job parameters
-              datasetInfo.latestSchema = true // just validated all the XMLs against the latest schema
+              datasetInfo.datasetComment = 'created for upload of xmls - seq: ' + dsSeq
+              // deprecated datasetInfo.latestSchema = true // just validated all the XMLs against the latest schema
+              // datasetInfo.schemaId = schemaId -- abandoned this idea
               logger.debug('datasetInfo after merging ' + pct + ' of ' + xmls.length + ' xmls: ' + inspect(datasetInfo))
               if (resStatus !== 0) {
                 let rc = resStatus
@@ -286,69 +445,125 @@ function curateDatasetUpload (jobType, jobId, jobDir) {
                 logger.error(jsonResp.error)
                 console.log(2)
                 reject(new Error(rc))
-              }
-              // create the dataset
-              let xmlPromises = []
-              createDataset(Datasets, logger, datasetInfo)
-                .then(function (result) {
-                  // loop through the xmls and update the ID, Control_ID and create the xml entry using the current schema
-                  let dsid = result.data.seq
-                  logger.debug(func + ' - new dataset id is: ' + dsid)
-                  xmlDocs.forEach((v, idx) => {
-                    let xmlDoc = v
-
-                    let docId = xmlDoc.get('//ID')
-                    let docIdText = docId.text()
-                    let controlId = xmlDoc.get('//Control_ID')
-                    let controlIdText = controlId.text()
-
-                    docIdText = replaceDatasetId(logger, docIdText, dsid)
-                    controlIdText = replaceDatasetId(logger, controlIdText, dsid)
-                    docId.text(docIdText)
-                    controlId.text(controlIdText)
-                    updateMicrostructureImageFileLocations(logger, xmlDoc, nmWebBaseUri + '/nmr')
-                    // TODO take care of named character encodings in text elements
-                    // logger.debug(func + ' - updated xml: ' + xmlDoc.toString())
-                    xmlPromises.push(updateOrCreateXmlData(XmlData, logger, user, xmlDoc, schemaId))
-                  })
-                  jsonResp.error = null // TODO
-                  jsonResp.data = result.data // from dataset create
-                  Promise.all(xmlPromises)
-                    .then(function (values) {
-                      let rc = 0
-                      let msg = 'Updated or created ' + xmlPromises.length + ' xml records. rc=' + rc
-                      jsonResp.data.info_msg = msg
-                      jsonResp.error = null
-                      writeOutputParameters(jobId, jobDir, jsonResp)
-                      logger.info(msg)
-                      console.log(3)
-                      resolve(rc)
-                    })
-                    .catch(function (err) {
-                      jsonResp.error = err.message
-                      let msg = jsonResp.error + '  **WARNING**: dataset ' + result.data.seq + ' created and XML create/update failed after possibly updating/creating xmlData records'
-                      jsonResp.data = null
-                      jsonResp.error = msg
-                      let restStatus = 99
-                      logger.error(fmtLogMsg(restStatus, msg))
-                      writeOutputParameters(jobId, jobDir, jsonResp)
-                      console.log(4)
-                      reject(new Error(restStatus))
-                    })
-                })
-                .catch(function (err) {
-                  let rc = 99
-                  let msg = 'upload error: ' + err.message
-                  if (err.stack) {
-                    msg += ' msg:' + err.stack
+              } else {
+                // create/update the dataset
+                let xmlPromises = []
+                let datasetFiles = []
+                // loop through the xmls and update the ID, Control_ID and create the xml entry using the current schema
+                // let newDsSeq = result.data.seq (was needed for remap scenario)
+                logger.debug(func + ' - dataset id is: ' + datasetInfo.seq + ' remap: ' + remap)
+                xmlDocs.forEach((v, idx) => {
+                  let xmlDoc = v
+                  let docId = xmlDoc.find('//ID')[0].text()
+                  // if (remap) {
+                  //   let docIdText = docId.text()
+                  //   let controlId = xmlDoc.get('//Control_ID')
+                  //   let controlIdText = controlId.text()
+                  //   docIdText = replaceDatasetId(logger, docIdText, dsid)
+                  //   controlIdText = replaceDatasetId(logger, controlIdText, dsid)
+                  //   docId.text(docIdText)
+                  //   controlId.text(controlIdText)
+                  // }
+                  let files = updateMicrostructureImageFileLocations(logger, xmlDoc, nmWebBaseUri + '/nmr')
+                  // create a fileset for this sample in the dataset and add the microstructure files to the fileset as blobs
+                  let filesetName = (docId || 'result_' + (Math.floor(Math.random() * 1000)))
+                  if (files && files.length > 0) {
+                    datasetFiles.push({fileset: filesetName, files: files})
                   }
-                  msg += ' rc: ' + rc
-                  logger.error(msg)
-                  jsonResp.error = msg
-                  jsonResp.data = null
-                  writeOutputParameters(jobId, jobDir, jsonResp)
-                  reject(new Error(rc))
+                  xmlPromises.push(updateOrCreateXmlData(XmlData, logger, user, xmlDoc, schemaId, datasetId))
+                  // TODO take care of named character encodings in text elements
                 })
+                // Promise.all(datasetFilesPromises)
+                //   .then(function (dfpValues) {
+                //     logger.debug('count of xmls in create list: ' + xmlUpdateList.length)
+                //     xmlUpdateList.forEach((v, idx) => {
+                //       xmlPromises.push(updateOrCreateXmlData.apply(this, v))
+                //     })
+                Promise.all(xmlPromises)
+                  .then(function (values) {
+                    let rc = 0
+                    let msg = 'Updated or created ' + xmlPromises.length + ' xml records. rc=' + rc
+                    jsonResp.data = {info_msg: msg}
+                    jsonResp.error = null
+                    writeOutputParameters(jobId, jobDir, jsonResp)
+                    logger.info(msg)
+                    console.log(3)
+                    // add xml record ids to file list(s) TODO
+                    values.forEach((v, idx) => {
+                      let filesetName = v.title.replace(/\.[Xx][Mm][Ll]$/, '') // same as docId, but could have .xml appended
+                      let files = [{'type': 'xmldata', 'id': v._id.toString(), 'metadata': {'contentType': 'application/xml', 'filename': v.title}}] // TODO improve the flow above so that this update is not required
+                      // let p = datasetsAddFiles(Datasets, logger, datasetId, filesetName, files)
+                      let dsfFound = false
+                      datasetFiles.forEach((dsf, idx) => {
+                        if (dsf.fileset === filesetName) {
+                          logger.debug(func + ' - ' + 'found filesetName: ' + filesetName + ' in datasetFiles list. files: ' + JSON.stringify(datasetFiles[idx].files))
+                          files.forEach((f, fx) => {
+                            datasetFiles[idx].files.push(f)
+                          })
+                          logger.debug(func + ' - ' + 'after appending xmldata info: ' + JSON.stringify(datasetFiles[idx]))
+                          dsfFound = true
+                        }
+                      })
+                      if (!dsfFound) {
+                        datasetFiles.push({fileset: filesetName, files: files})
+                      }
+                    })
+                    datasetInfo.filesets = datasetFiles
+                    let datasetFilesets = datasetFiles // really, it's filesets
+                    // loop through the filesets and update the file metadata for microstructure blobs within the dataset to set filename, contentType
+                    datasetFilesets.forEach((aFileset, fsIdx) => {
+                      // in this situation, if the type is a blob, then the metadata is filename and contentType
+                      aFileset.files.forEach((f, fIdx) => {
+                        if (f.type === 'blob') {
+                          blobPromises.push(updateFileInfoMetadataFromBlob(f))
+                        }
+                      })
+                    })
+                    logger.debug(func + ' - ' + 'Dataset update for: ' + datasetId + ' datasetInfo: ' + JSON.stringify(datasetInfo))
+                    Promise.all(blobPromises)
+                      .then(function (bvalues) {
+                        blobPromises.forEach((bv) => {
+                          if (bv === null) {
+                            logger.error(func + ' - WARNING (non-fatal error): blob not found for an xml in dataset: ' + datasetId + ' filename in metadata was not updated.')
+                          }
+                        })
+                        updateDataset(Datasets, logger, datasetInfo)
+                          .then(function (result) {
+                            resolve(rc)
+                          })
+                          .catch(function (err) {
+                            jsonResp.error = err.message
+                            let msg = jsonResp.error + '  **WARNING**: dataset ' + datasetId + ' created, but update failed. After XML create/update possibly updating/creating xmlData records'
+                            jsonResp.data = null
+                            jsonResp.error = msg
+                            let restStatus = 99
+                            logger.error(fmtLogMsg(restStatus, msg))
+                            writeOutputParameters(jobId, jobDir, jsonResp)
+                            console.log(4)
+                            reject(new Error(restStatus))
+                          })
+                      })
+                      .catch(function (err) {
+                        let msg = 'An error occurred updating dataset file metadata. Err: ' + err.message
+                        logger.error(msg)
+                        jsonResp.data = null
+                        jsonResp.error = msg
+                        writeOutputParameters(jobId, jobDir, jsonResp)
+                        let restStatus = 95
+                        reject(new Error(restStatus))
+                      })
+                  })
+                  .catch(function (err) {
+                    let rc = 99
+                    let msg = 'upload error: ' + err.message
+                    msg += ' rc: ' + rc
+                    logger.error(msg)
+                    jsonResp.error = msg
+                    jsonResp.data = null
+                    writeOutputParameters(jobId, jobDir, jsonResp)
+                    reject(new Error(rc))
+                  })
+              }
             } else {
               let status = 98
               let msg = fmtLogMsg(status, 'No XMLs specified to process.')
@@ -376,25 +591,6 @@ function curateDatasetUpload (jobType, jobId, jobDir) {
           console.log(7)
           reject(new Error(status))
         })
-    } else {
-      let status = 98
-      let msg = 'remap mode is required to be true a this time. rc=' + status
-      jsonResp.error = msg
-      logger.error(msg)
-      writeOutputParameters(jobId, jobDir, jsonResp)
-      console.log(8)
-      process.exit(status)
     }
-    //
-    // let status = 99
-    // let msg = 'Unexpected code execution point. rc=' + status
-    // jsonResp.error = msg
-    // logger.error(msg)
-    // let err = new Error(msg)
-    // console.log('unexpected error: ' + err)
-    // console.log(err.stack)
-    // writeOutputParameters(jobId, jobDir, jsonResp)
-    // console.log(9);
-    // process.exit(status)
   })
 }

@@ -65,9 +65,10 @@ Auth.prototype = {
   isTestUser: function () {
     let vm = this
     let rv = false
-    if (vm.tokenValues && vm.tokenValues.isTestUser) {
+    if (vm.tokenValues && vm.tokenValues && typeof vm.tokenValues.isTestUser === 'boolean' && vm.tokenValues.isTestUser === true) {
       rv = true
     }
+    console.log('Auth.isTestUser() returning: ' + rv + ' tokenValues is: ' + JSON.stringify(vm.tokenValues))
     return rv
   },
   isAdmin: function () {
