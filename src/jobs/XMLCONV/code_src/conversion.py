@@ -102,8 +102,6 @@ def conversion(jobDir, code_srcDir, xsdDir, templateName, user, datasetId):
     nm_dataset_initial_doi = os.environ['NM_DATASET_INITIAL_DOI']
     webbase = os.environ['NM_WEB_BASE_URI']
 
-#    jobApiToken = os.environ['NM_AUTH_API_TOKEN_JOBS']
-#    jobRefreshToken = os.environ['NM_AUTH_API_REFRESH_JOBS']
     xsdFilename = xsdDir.split("/")[-1]
 
     runCtx = {
@@ -205,7 +203,7 @@ def conversion(jobDir, code_srcDir, xsdDir, templateName, user, datasetId):
             }
             # chemprops_rq = urllib.request.Request(chemprops_api_url)
             logging.debug('request created for ChemProps using chemprops_api_url')
-            logging.debug('Searching polymer package: ' + json.dumps(chemprops_data).encode("utf8"))
+            logging.debug('Searching polymer package: ' + json.dumps(chemprops_data)) #.encode("utf8"))
             # chemprops_rq.add_header('Content-Type','application/json')
             # chemprops_search = nm_rest(logging, sysToken, jobApiToken, jobRefreshToken, chemprops_rq)
             # r = chemprops_search.urlopen(json.dumps(chemprops_data).encode("utf8"))
@@ -214,7 +212,7 @@ def conversion(jobDir, code_srcDir, xsdDir, templateName, user, datasetId):
             if r.status_code == 200:
                 # result = json.loads(r.read().decode("utf-8"))
                 result = r.json()
-                logging.debug('Searching result: ' + json.dumps(result).encode("utf8"))
+                logging.debug('Searching result: ' + json.dumps(result)) #.encode("utf8"))
             ## testing - raise ValueError('Upload of input successful. returned id: ' + uploadId) ## for testing
             else:
                 raise ValueError('Unexpected return code from ChemProps: ' + str(r.getcode()))
@@ -245,7 +243,7 @@ def conversion(jobDir, code_srcDir, xsdDir, templateName, user, datasetId):
             }
             # chemprops_rq = urllib.request.Request(chemprops_api_url)
             logging.debug('request created for ChemProps using chemprops_api_url')
-            logging.debug('Searching filler package: ' + json.dumps(chemprops_data).encode("utf8"))
+            logging.debug('Searching filler package: ' + json.dumps(chemprops_data)) #.encode("utf8"))
             # chemprops_rq.add_header('Content-Type','application/json')
             # chemprops_search = nm_rest(logging, sysToken, jobApiToken, jobRefreshToken, chemprops_rq)
             # r = chemprops_search.urlopen(json.dumps(chemprops_data).encode("utf8"))
@@ -254,7 +252,7 @@ def conversion(jobDir, code_srcDir, xsdDir, templateName, user, datasetId):
             if r.status_code == 200:
                 # result = json.loads(r.read().decode("utf-8"))
                 result = r.json()
-                logging.debug('Searching result: ' + json.dumps(result).encode("utf8"))
+                logging.debug('Searching result: ' + json.dumps(result)) #.encode("utf8"))
             ## testing - raise ValueError('Upload of input successful. returned id: ' + uploadId) ## for testing
             else:
                 raise ValueError('Unexpected return code from ChemProps: ' + str(r.getcode()))
