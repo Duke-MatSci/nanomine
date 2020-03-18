@@ -17,14 +17,13 @@ const mimetypes = require('mime-types')
 // was used for posting to rdf - const FormData = require('form-data')
 const config = require('config').get('nanomine')
 
-// const winston = require('winston')
 const {createLogger, format, transports} = require('winston')
 const { combine, label, printf, prettyPrint } = format
 const logFormat = printf(({level, message, label}) => {
   let now = moment().format('YYYYMMDDHHmmssSSS')
   return `${now} [${label}] ${level}: ${message}`
 })
-
+const hasha = require('hasha')
 const moment = require('moment')
 const datauri = require('data-uri-to-buffer')
 const stream = require('stream')
@@ -41,11 +40,14 @@ const jwt = require('express-jwt')
 const shortUUID = require('short-uuid')() // https://github.com/oculus42/short-uuid (npm i --save short-uuid)
 const groupMgr = require('./modules/groupMgr').groupmgr
 const s2a = require('stream-to-array')
+const libxml = require('libxmljs')
 const nanomineUtils = require('./modules/utils')
 let matchValidXmlTitle = nanomineUtils.matchValidXmlTitle
 let env = nanomineUtils.getEnv()
-const getDatasetXmlFileList = nanomineUtils.getDatasetXmlFileList
+// const getDatasetXmlFileList = nanomineUtils.getDatasetXmlFileList
+const getXmlFileList = nanomineUtils.getDatasetXmlFileList
 const createDataset = nanomineUtils.createDataset
+const updateDataset = nanomineUtils.updateDataset
 const getLatestSchemas = nanomineUtils.getLatestSchemas
 const sortSchemas = nanomineUtils.sortSchemas
 
@@ -53,6 +55,7 @@ const sortSchemas = nanomineUtils.sortSchemas
 
 // TODO runAsUser in jwt if possible
 
+// TODO - Revisit the following TODO after upload of renumbered data
 // TODO datasets with xml_data records where no xml_data records have been converted to latest schema creates an issue that searching by
 //    dataset id can result in a query with no records for xml_data if only looking for those with latest schemaid.
 //    Work-around is to mark datasets with a flag - 'latestSchema' and use that to filter dataset lists.
@@ -75,6 +78,7 @@ let emailUser = env.emailUser
 let emailPwd = env.emailPwd
 let emailTestAddr = env.emailTestAddr
 let emailAdminAddr = env.emailAdminAddr
+let nmDatasetInitialDoi = env.nmDatasetInitialDoi
 let nmWebFilesRoot = env.nmWebFilesRoot
 // let nmWebBaseUri = env.nmWebBaseUri
 let nmRdfLodPrefix = env.nmRdfLodPrefix
@@ -158,7 +162,7 @@ mongoose.connect(dbUri, {keepAlive: true, keepAliveInitialDelay: 300000})
 // let mgiVersionSchema = require('./modules/mongo/schema/mgiVersion')(mongoose)
 // let MgiVersion = mongoose.model('mgiversion', mgiVersionSchema)
 
-let datasetsSchema = require('./modules/mongo/schema/datasets')(mongoose)
+let datasetsSchema = require('./modules/mongo/schema/datasets').datasets(mongoose)
 let Datasets = mongoose.model('datasets', datasetsSchema)
 
 let usersSchema = require('./modules/mongo/schema/users')(mongoose)
@@ -166,6 +170,9 @@ let Users = mongoose.model('users', usersSchema)
 
 let apiSchema = require('./modules/mongo/schema/api')(mongoose)
 let Api = mongoose.model('api', apiSchema)
+
+let sequencesSchema = require('./modules/mongo/schema/sequences').sequences(mongoose)
+let Sequences = mongoose.model('sequences', sequencesSchema)
 
 let xmlDataSchema = require('./modules/mongo/schema/xmldata')(mongoose)
 let XmlData = mongoose.model('xmlData', xmlDataSchema)
@@ -182,14 +189,14 @@ try {
   fs.mkdirSync(nmWebFilesRoot) // Sync used during startup
 } catch (err) {
   logger.error('mkdir nmWebFilesRoot failed: ' + err)
-  logger.error('NOTE: if the error above is EXISTS, the error can be ignored.')
+  logger.error('NOTE: if the error above is EEXISTS, the error can be ignored.')
 }
 
 try {
   fs.mkdirSync(nmJobDataDir) // Sync used during startup
 } catch (err) {
   logger.error('mkdir nmJobDataDir failed: ' + err)
-  logger.error('NOTE: if the error above is EXISTS, the error can be ignored.')
+  logger.error('NOTE: if the error above is EEXISTS, the error can be ignored.')
 }
 
 let app = express()
@@ -221,14 +228,24 @@ app.use(jwt({
 }))
 
 /* BEGIN Api Authorization */
-
+let allMethods = ['connect', 'delete', 'get', 'head', 'options', 'patch', 'post', 'put', 'trace']
 let authOptions = {
   protect: [
     // path is req.path, loginAuth is whether logged in users(jwtToken via cookie) have access and apiAuth allows access using api tokens
     //   loginAuth also forces group membership check if membership is set - empty membership === any or no group OK
-    // not yet    { path: '/dataset/create', loginAuth: false, membership: [], apiAuth: true, apiGroup: 'curate' },
-    {path: '/curate', loginAuth: true, membership: ['admin'], apiAuth: true, apiGroup: 'curate'},
-    {path: '/datasets', loginAuth: true, membership: [], apiAuth: true, apiGroup: 'curate'},
+    // NOTE: need to add applicable methods for a path and associate different rules for a path with multiple method filters
+    //    If a method is not listed, then the path is NOT protected for that method
+    //    The set of all path+methodlist entries should cover all possible combinations for which security is required
+    // NOTE: endpoints with 'usesAcls: true' are protected by query code in the handler and require login information if available
+    //    but are not required to be authenticated (at this time)
+    {path: '/blob/create', loginAuth: true, membership: [], apiAuth: true, apiGroup: 'curate'},
+    {path: '/curate', loginAuth: false, membership: [], apiAuth: true, apiGroup: 'curate'},
+    {path: '/dataset', usesAcls: true, loginAuth: true, membership: [], apiAuth: true, apiGroup: 'curate'},
+    {path: '/dataset/create', loginAuth: true, membership: [], apiAuth: true, apiGroup: 'curate'},
+    // /dataset/update sets the verifyOwner flag to true, so it can be called from the GUI (not from the API)
+    {path: '/dataset/update', loginAuth: true, membership: [], apiAuth: false, apiGroup: 'curate'},
+    // /dataset/updateEx does not set the verifyOwner flag and cannot be called from the GUI. It requires admin group access when called from API
+    {path: '/dataset/updateEx', loginAuth: false, membership: ['admin'], apiAuth: true, apiGroup: 'curate'},
     {path: '/jobemail', loginAuth: false, membership: [], apiAuth: true, apiGroup: 'email'},
     {path: '/jobcreate', loginAuth: true, membership: [], apiAuth: true, apiGroup: 'jobs'},
     {path: '/jobpostfile', loginAuth: true, membership: [], apiAuth: true, apiGroup: 'jobs'},
@@ -236,6 +253,7 @@ let authOptions = {
     {path: '/publishfiles2rdf', loginAuth: false, membership: ['admin'], apiAuth: true, apiGroup: 'curate'},
     {path: '/publishxml2rdf', loginAuth: false, membership: ['admin'], apiAuth: true, apiGroup: 'curate'},
     {path: '/sessiontest', loginAuth: true, membership: [], apiAuth: false, apiGroup: 'none'},
+    {path: '/schema', loginAuth: true, membership: ['admin'], apiAuth: false, apiGroup: 'none'},
     {path: '/testpubfiles2rdf', loginAuth: true, membership: ['admin'], apiAuth: true, apiGroup: 'curate'},
     {path: '/testpubschema2rdf', loginAuth: true, membership: ['admin'], apiAuth: true, apiGroup: 'curate'},
     {path: '/testpubxml2rdf', loginAuth: true, membership: ['admin'], apiAuth: true, apiGroup: 'curate'},
@@ -272,7 +290,7 @@ function getBearerTokenInfo (bearerToken) {
             tokenInfo.refreshToken = refreshToken
             tokenInfo.expiration = expiration
             ++found
-            logger.debug(func + ' - found bearer token information for (access token): ' + bearerToken + ' occurrences: ' + found)
+            logger.debug(func + ' - found bearer token information for (access token): ' + bearerToken + ' occurrences: ' + found + ' tokenInfo: ' + inspect(tokenInfo))
             resolve(tokenInfo)
           }
         })
@@ -306,6 +324,31 @@ function getTokenDataFromReq (req) {
   return decoded
 }
 
+function setNmLoginUserIdHeaderValue (req, userid) {
+  let func = 'setNmLoginUserIdHeaderValue'
+  // used by middleware to set the userid from the jwt token into the req for use in the request handler
+  logger.debug(func + ' -  setting userid into nmLoginUserId header. Userid: ' + userid)
+  req.headers['nmLoginUserId'] = userid
+}
+
+function getNmLoginUserIdHeaderValue (req) {
+  // will return null if the header is not set i.e. the user is not logged in via shibboleth
+  let func = 'getNmLoginUserIdFromHeader'
+  let rv = req.headers['nmLoginUserId']
+  logger.debug(func + ' -  initial value: ' + rv)
+  if (!(rv && typeof rv === 'string' && rv.length > 0)) {
+    rv = null
+  }
+  logger.debug(func + ' - final return value: ' + rv)
+  if (rv === null) {
+    let msg = func + ' returning null value.'
+    logger.error(msg)
+    // let err = new Error(msg)
+    // logger.error(err.message + ' - trace: ' + err.stack)
+  }
+  return rv
+}
+
 function authMiddleware (authOptions) {
   // TODO review this code
   return function (req, res, next) {
@@ -314,6 +357,7 @@ function authMiddleware (authOptions) {
     try {
       logger.debug(func + ' - function entry')
       let pathProtected = false
+      let usesAcls = false // end point uses acl type controls with custom queries
       let loginAuth = false
       let loginMembership = []
       let apiAuth = false
@@ -324,6 +368,9 @@ function authMiddleware (authOptions) {
       // let apiUserId = null
       authOptions.protect.forEach(function (v) {
         if (v.path === req.path) {
+          if (v.usesAcls && v.usesAcls === true) {
+            usesAcls = true
+          }
           pathProtected = true
           loginAuth = v.loginAuth
           loginMembership = v.membership
@@ -338,7 +385,7 @@ function authMiddleware (authOptions) {
           loginUserId = decoded.sub // subject
           isAdmin = decoded.isAdmin
           logger.debug(func + ' - user: ' + loginUserId + ' accessing: ' + req.path)
-          req.headers['nmLoginUserId'] = decoded.sub
+          setNmLoginUserIdHeaderValue(req, decoded.sub)
         } catch (err) {
           logger.error(func + ' - check jwt token failed. err: ' + err)
         }
@@ -347,7 +394,7 @@ function authMiddleware (authOptions) {
       }
 
       if (pathProtected) {
-        logger.error('protected path: ' + req.path)
+        // logger.error('protected path: ' + req.path)
         let authFailed = true
         let groupCheckFailed = false // TODO recheck this logic related to loginUserId
         if (loginAuth) {
@@ -419,23 +466,77 @@ function authMiddleware (authOptions) {
           if (!authFailed) {
             next()
           } else {
-            jsonResp.error = 'not authorized'
-            return res.status(403).json(jsonResp)
+            if (usesAcls) {
+              next() // let endpoint code handle returned data even though login verification may have failed
+            } else {
+              jsonResp.error = 'not authorized'
+              return res.status(403).json(jsonResp)
+            }
           }
         } else {
           apiAuthPromise
             .then(function (tokenInfo) {
               if (tokenInfo) {
-                req.headers['nmLoginUserId'] = tokenInfo.userId
-                next()
+                setNmLoginUserIdHeaderValue(req, tokenInfo.userId)
+                getUserAndAdminInfo(tokenInfo.userId)
+                  .then(function (userAndAdminInfo) {
+                    if (userAndAdminInfo) {
+                      let hasRequiredGroupAccess = true // in case there are no groups
+                      loginMembership.forEach(function (v) { // TODO update for memberships other than admin i.e. make dynamic
+                        if (v === 'admin') {
+                          if (userAndAdminInfo.isAdmin === true) {
+                            hasRequiredGroupAccess = true
+                          } else {
+                            hasRequiredGroupAccess = false
+                          }
+                        }
+                      })
+                      if (hasRequiredGroupAccess === true) {
+                        next()
+                      } else {
+                        if (usesAcls) {
+                          next()
+                        } else {
+                          jsonResp.error = 'invalid token'
+                          logger.error(func + ' - access requires group access for: ' + tokenInfo.userId + '. Required group access not found.')
+                          return res.status(403).json(jsonResp)
+                        }
+                      }
+                    } else {
+                      if (usesAcls) {
+                        next()
+                      } else {
+                        jsonResp.error = 'invalid token'
+                        logger.error(func + ' - Error getting user and group info for: ' + tokenInfo.userId + ' returned info is null.')
+                        return res.status(403).json(jsonResp)
+                      }
+                    }
+                  })
+                  .catch(function (err) {
+                    if (usesAcls) {
+                      next()
+                    } else {
+                      jsonResp.error = 'failed user lookup'
+                      logger.error(func + ' - Failed to getUserAndAdminInfo for: ' + tokenInfo.userId + '. Error: ' + err.message)
+                      return res.status(500).json(jsonResp)
+                    }
+                  })
               } else {
-                jsonResp.error = 'invalid token'
-                return res.status(403).json(jsonResp)
+                if (usesAcls) {
+                  next()
+                } else {
+                  jsonResp.error = 'invalid token'
+                  return res.status(403).json(jsonResp)
+                }
               }
             })
             .catch(function (err) {
-              jsonResp.error = err
-              return res.status(403).json(jsonResp)
+              if (usesAcls) {
+                next()
+              } else {
+                jsonResp.error = err
+                return res.status(403).json(jsonResp)
+              }
             })
         }
       } else {
@@ -443,7 +544,7 @@ function authMiddleware (authOptions) {
         next()
       }
     } catch (err) {
-      let msg = func + ' - exception in authMiddleware. Error: ' + err
+      let msg = func + ' - exception in authMiddleware. Unable to process user request for ' + req.path + 'Error: ' + err
       logger.error(msg)
       jsonResp.error = err
       return res.status(401).json(jsonResp)
@@ -506,6 +607,8 @@ function handleLogin (req, res) {
     } catch (err) {
       let decoded = jwtBase.decode(token) // timed out or improperly signed version -- possible fake
       logger.error('unable to verify token. Possible forgery or token timeout. data: ' + JSON.stringify(decoded))
+      res.clearCookie('session', {'httpOnly': true, 'path': '/'})
+      res.clearCookie('token', {})
     }
   }
   // TODO enforce forged token check - logout should remove cookie
@@ -649,6 +752,18 @@ function handleLocalUserIfNecessary (req, res) {
   }
 }
 
+app.get('/nmdevlogin', function (req, res) {
+  handleLocalUserIfNecessary(req, res)
+    .then(function (res) {
+      logger.debug('/nmdevlogin - cookie: ' + inspect(res))
+      res.redirect('/nm')
+    })
+    .catch(function (err) {
+      logger.error('/nmdev handleLocalUserIfNecessary returned an error. Error: ' + err.message)
+      res.status(500).send('local login error occurred')
+    })
+})
+
 app.get('/nm', function (req, res) {
   let idx = '../dist/index.html'
   logger.debug('cookies: ' + inspect(req.cookies))
@@ -670,14 +785,26 @@ app.get('/nm', function (req, res) {
       return res.status(404).send(err)
     })
 })
+
 app.get('/logout', function (req, res) {
-  return res.status(200).json({error: null, data: {logoutUrl: nmAuthLogoutUrl}})
+  let func = '/logout'
+  let jsonResp = {error: null, data: {logoutUrl: nmAuthLogoutUrl}}
+  logger.debug(func + ' returning status 200 with data: ' + JSON.stringify(jsonResp))
+  return res.status(200).json(jsonResp)
 })
 
 app.get('/doLogout', function (req, res) {
+  let func = '/doLogout'
   res.clearCookie('session', {'httpOnly': true, 'path': '/'})
   res.clearCookie('token', {})
-  res.redirect(nmAuthLogoutUrl)
+  if (nmAuthType === 'local') {
+    res.clearCookie('token', null)
+    logger.debug(func + ' - (local auth) redirecting to: /nm')
+    res.redirect('/nm')
+  } else {
+    logger.debug(func + ' - (non-local auth) redirecting to loguout url: ' + nmAuthLogoutUrl)
+    res.redirect(nmAuthLogoutUrl) // This redirects to the shibboleth logout url to ensure that the session is cleaned up.
+  }
 })
 
 /* BEGIN general utility functions */
@@ -713,88 +840,89 @@ function ensureRdfUser (userInfo, isAdmin) {
   })
 }
 
-function setDatasetLatestSchemaFlag (dsSeq, bv) {
-  let func = 'setDatasetLatestSchemaFlag'
-  // Datasets.updateOne({'seq': +(dsSeq)}, {'$set': {'latestSchema': bv}}, {'upsert': true}).cursor()
-  Datasets.updateOne({'seq': {'$eq': +(dsSeq)}}, {$set: {'latestSchema': bv}}, function (err, raw) {
-    if (err) {
-      logger.debug(func + ' - updated datasets: done. Error: ' + err)
-    } else {
-      if (raw) {
-        logger.debug(func + ' - updated dataset: ' + dsSeq + ' latestSchema:' + bv + ' raw: ' + JSON.stringify(raw))
-      } else {
-        logger.debug(func + ' - updated dataset: ' + dsSeq + ' latestSchema:' + bv + ' NO RESPONSE FROM MONGO via MONGOOSE?')
-      }
-    }
-  })
-}
-
-function updateDatasetLatestSchema () { // Mark datasets denoting whether each has associated xml_data records for the latest schema
-  // find all the xmls for the latest schema ordered by dataset sequence and build list of sequence numbers
-  // update all the datasets to reset the latestSchema flag
-  // loop through the sequence number list and for each set the associated dataset's latestSchema flag to true
-  // NOTE: this is probably a HACK and not too well thought out at the last minute.
-  let func = 'updateDatasetLatestSchema'
-  let validDatasets = {}
-  getCurrentSchemas()
-    .then(function (versions) {
-      let schemaId = versions[0].currentRef[0]._id
-      // logger.debug(func + ' -- ' + JSON.stringify(versions[0]))
-      // logger.debug(func + ' - latest schemaId is: ' + schemaId)
-      new Promise(function (resolve, reject) { // now requires index on dsSeq for the sort or sort fails
-        XmlData.find({'schemaId': {'$eq': schemaId}}, null, {'sort': {'dsSeq': 1}}).cursor()
-          .on('data', function (data) {
-            // logger.debug(func + ' - dataset: ' + data.dsSeq + ' latestSchema hash updated to true for data: ' + data.title + ' ' + data.schemaId)
-            validDatasets[data.dsSeq] = true // they'll all wind up as true, but it prevents searching (let js do it)
-          })
-          .on('end', function () {
-            // logger.debug(func + ' - on end called for XmlData.find')
-            let len = Object.keys(validDatasets).length
-            if (len > 0) {
-              logger.debug(func + ' - valid dataset count: ' + len)
-              resolve(validDatasets)
-            } else {
-              reject(new Error('no valid datasets'))
-            }
-          })
-      })
-        .then(function (validDatasets) {
-          new Promise(function (resolve, reject) {
-            Datasets.update({}, {'$set': {'latestSchema': false}}, {'multi': true}, function (err, raw) {
-              if (err) {
-                logger.error(func + ' - update (multi) failed. Error: ' + err)
-                reject(err)
-              } else {
-                resolve(validDatasets)
-                logger.debug(func + ' - dataset update (multi) done:  ' + JSON.stringify(raw))
-              }
-            })
-          })
-            .then(function (validDatasets) {
-              let keys = Object.keys(validDatasets)
-              keys.forEach(function (v) {
-                // logger.debug(func + ' - will update dataset key ' + v + ' latestSchema to true.')
-                setDatasetLatestSchemaFlag(+(v), true)
-              })
-            })
-            .catch(function (err) {
-              logger.error(func + ' - XmlData.find error: ' + err)
-            })
-        })
-        .catch(function (err) {
-          logger.error(func + ' - XmlData.find error: ' + err)
-        })
-    })
-    .catch(function (err) {
-      logger.error(func + ' - getCurrentSchemas: ' + err)
-    })
-}
-
-// ... and run at startup
-dbPromise.then(function () {
-  console.log('db opened successfully. Updating datasets.')
-  updateDatasetLatestSchema()
-})
+// The following code *should* no longer be needed since we now have datasets by schemaid
+// function setDatasetLatestSchemaFlag (dsSeq, bv) {
+//   let func = 'setDatasetLatestSchemaFlag'
+//   // Datasets.updateOne({'seq': +(dsSeq)}, {'$set': {'latestSchema': bv}}, {'upsert': true}).cursor()
+//   Datasets.updateOne({'seq': {'$eq': +(dsSeq)}}, {$set: {'latestSchema': bv}}, function (err, raw) {
+//     if (err) {
+//       logger.debug(func + ' - updated datasets: done. Error: ' + err)
+//     } else {
+//       if (raw) {
+//         logger.debug(func + ' - updated dataset: ' + dsSeq + ' latestSchema:' + bv + ' raw: ' + JSON.stringify(raw))
+//       } else {
+//         logger.debug(func + ' - updated dataset: ' + dsSeq + ' latestSchema:' + bv + ' NO RESPONSE FROM MONGO via MONGOOSE?')
+//       }
+//     }
+//   })
+// }
+//
+// function updateDatasetLatestSchema () { // Mark datasets denoting whether each has associated xml_data records for the latest schema
+//   // find all the xmls for the latest schema ordered by dataset sequence and build list of sequence numbers
+//   // update all the datasets to reset the latestSchema flag
+//   // loop through the sequence number list and for each set the associated dataset's latestSchema flag to true
+//   // NOTE: this is probably a HACK and not too well thought out at the last minute.
+//   let func = 'updateDatasetLatestSchema'
+//   let validDatasets = {}
+//   getCurrentSchemas()
+//     .then(function (versions) {
+//       let schemaId = versions[0].currentRef._id
+//       // logger.debug(func + ' -- ' + JSON.stringify(versions[0]))
+//       // logger.debug(func + ' - latest schemaId is: ' + schemaId)
+//       new Promise(function (resolve, reject) { // now requires index on dsSeq for the sort or sort fails
+//         XmlData.find({'schemaId': {'$eq': schemaId}}, null, {'sort': {'dsSeq': 1}}).cursor()
+//           .on('data', function (data) {
+//             // logger.debug(func + ' - dataset: ' + data.dsSeq + ' latestSchema hash updated to true for data: ' + data.title + ' ' + data.schemaId)
+//             validDatasets[data.dsSeq] = true // they'll all wind up as true, but it prevents searching (let js do it)
+//           })
+//           .on('end', function () {
+//             // logger.debug(func + ' - on end called for XmlData.find')
+//             let len = Object.keys(validDatasets).length
+//             if (len > 0) {
+//               logger.debug(func + ' - valid dataset count: ' + len)
+//               resolve(validDatasets)
+//             } else {
+//               reject(new Error('no valid datasets'))
+//             }
+//           })
+//       })
+//         .then(function (validDatasets) {
+//           new Promise(function (resolve, reject) {
+//             Datasets.update({}, {'$set': {'latestSchema': false}}, {'multi': true}, function (err, raw) {
+//               if (err) {
+//                 logger.error(func + ' - update (multi) failed. Error: ' + err)
+//                 reject(err)
+//               } else {
+//                 resolve(validDatasets)
+//                 logger.debug(func + ' - dataset update (multi) done:  ' + JSON.stringify(raw))
+//               }
+//             })
+//           })
+//             .then(function (validDatasets) {
+//               let keys = Object.keys(validDatasets)
+//               keys.forEach(function (v) {
+//                 // logger.debug(func + ' - will update dataset key ' + v + ' latestSchema to true.')
+//                 setDatasetLatestSchemaFlag(+(v), true)
+//               })
+//             })
+//             .catch(function (err) {
+//               logger.error(func + ' - XmlData.find error: ' + err)
+//             })
+//         })
+//         .catch(function (err) {
+//           logger.error(func + ' - XmlData.find error: ' + err)
+//         })
+//     })
+//     .catch(function (err) {
+//       logger.error(func + ' - getCurrentSchemas: ' + err)
+//     })
+// }
+//
+// // ... and run at startup
+// dbPromise.then(function () {
+//   console.log('db opened successfully. Updating datasets.')
+//   updateDatasetLatestSchema()
+// })
 
 function getUserInfo (userid) {
   let func = 'getUserInfo'
@@ -822,6 +950,9 @@ function getUserAndAdminInfo (userid) { // convenience version that sets isAdmin
     // NOTE: a user can be an admin, but not in the user database yet since our db is not directly coupled to IDM or group mgr
     groupMgr.isGroupMember(logger, nmAuthAdminGroupName, userid)
       .then(function (isAdmin) {
+        if (userid === '9999999999') { // Override for grouper (prodQA) scenario, since this user cannot be assigned system, but is used internally
+          isAdmin = true
+        }
         getUserInfo(userid)
           .then(function (userDoc) {
             if (userDoc) {
@@ -898,7 +1029,7 @@ function getCurrentSchemas () { // returns promise resolved with sorted list of 
         } catch (err) {
           logger.error('schema sort reverse by date failed :( - error' + err)
         }
-        resolve(versions) // NOTE: to get the latest schemaId it's versions[0].currentRef[0]._id -- _id is the schemaId (content is the xsd, filename is the name.xsd, title recently is name, but older ones have 'polymer nanocomposite')
+        resolve(versions) // NOTE: to get the latest schemaId it's versions[0].currentRef._id -- _id is the schemaId (content is the xsd, filename is the name.xsd, title recently is name, but older ones have 'polymer nanocomposite')
       }
     })
   })
@@ -936,8 +1067,8 @@ function createOutboundJwt (userAndAdminInfo) {
   return `token=${jwToken}`
 }
 
-function datasetXmlFileList (xmlTitle) { // returns promise that when fulfilled contains list of file info objects related to XML
-  return getDatasetXmlFileList(mongoose, logger, xmlTitle) // post refactor, but client not changed
+function datasetXmlFileList (xmlTitle, schemaId) { // returns promise that when fulfilled contains list of file info objects related to XML
+  return getXmlFileList(mongoose, logger, xmlTitle, schemaId) // post refactor, but client not changed
 }
 
 function getMongoFileData (bucketName, id, fileName) {
@@ -1038,7 +1169,7 @@ function publishFiles (userid, xmlTitle, cb) { // xmlText, schemaName, filesInfo
       .then(function (schemas) {
         if (schemas && schemas.length > 0) {
           // logger.error('xmlText: ' + xmlText)
-          let latestSchema = schemas[0].currentRef[0] // getLatestSchemas
+          let latestSchema = schemas[0].currentRef // getLatestSchemas
           let schemaId = latestSchema._id
           let schemaName = latestSchema.title
           logger.debug(func + ' - latest schemaId: ' + schemaId + ' name: ' + schemaName)
@@ -1260,7 +1391,7 @@ function publishXml (userid, xmlTitle, xmlText, schemaName, cb) {
           "@type": "np:Assertion",
           "@graph": [
             {
-              "@id" : "${nmRdfLodPrefix}/nmr/xml/${xmlTitle}",
+              "@id" : "${nmRdfLodPrefix}/nmr/xml/${xmlTitle}?format=xml",
               "@type": [ "schema:DataDownload", "mt:text/xml", "http://nanomine.org/ns/NanomineXMLFile"],
               "whyis:hasContent" : "data:text/xml;charset=UTF-8;base64,${b64XmlData}",
               "dc:conformsTo" : {"@id" : "${nmRdfLodPrefix}/nmr/schema/${schemaName}"}
@@ -1323,8 +1454,8 @@ function publishLatestSchema (userid, cb) {
     .then(function (schemasArray) {
       if (schemasArray && schemasArray.length > 0) {
         let whyisId = shortUUID.new()
-        let schemaName = schemasArray[0].currentRef[0].title // .replace(/[_]/g, '.')
-        let schemaText = schemasArray[0].currentRef[0].content.replace(/[\n]/g, '')
+        let schemaName = schemasArray[0].currentRef.title // .replace(/[_]/g, '.')
+        let schemaText = schemasArray[0].currentRef.content.replace(/[\n]/g, '')
         // logger.error('schemaText: ' + schemaText)
         let b64SchemaData = str2b64(schemaText)
         // logger.error('schema-b64: ' + b64SchemaData)
@@ -1594,6 +1725,188 @@ function validQueryParam (p) {
   return rv
 }
 
+function saveSchema (filename, xsd) {
+  let func = 'saveSchema'
+  return new Promise(function (resolve, reject) {
+    let filenameErr = '' + filename + ' does not fit accepted format of alphanumeric characters followed by MMDDYY and .xsd e.g. PNC_schema_081218.xsd'
+    let m = filename.match(/(.*)(\.[Xx][Ss][Sd]$|\.[Xx][Mm][Ll]$)/)
+    if (m) {
+      let schemaTitle = (m !== null ? m[1] : filename) // m might be null if not .xsd or .xml - need to move this inside promise
+      let dt = filename.match(/(\d{2})(\d{2})(\d{2})/) // MM DD YY
+      if (dt && dt[1] && dt[2] && dt[3] && (+(dt[1]) <= 12) && (+(dt[1]) >= 1) && (+(dt[2]) <= 31) && (+(dt[2]) >= 1) && (+(dt[3]) <= 99) && (+(dt[3]) >= 15)) {
+        // save new version of schema and mark this version as the latest
+        getLatestSchemas(XsdVersionSchema, XsdSchema, logger)
+          .then(function (versions) {
+            // spin through list to see if filename is already used
+            let isUsed = -1
+            let newHash = hasha(xsd, {'algorithm': 'sha1'})
+            if (versions) { // if there are no versions, then handle as new
+              versions.forEach(function (v, idx) {
+                if (v.currentRef.filename === filename) {
+                  let curHash = v.currentRef.hash
+                  isUsed = idx
+                  if (curHash !== newHash) {
+                    //   if the filename is used by a template version, then
+                    //     x check the md5 hash against the current version to ensure that it has not already been uploaded
+                    //     use the template version id to create a new schema (template) record using the template version id in the schema rec
+                    //     add the new schema id to the versions array of the template version
+                    //     set the schema version field to the array position in the template record + 1
+                    //     update the template version current id string to the stringified object id of the schema
+                    //     set the template version currentRef to the ObjectId of the new schema
+                    //     update number of versions in template version record
+                    let templateVerId = v._id.toHexString()
+                    let xsdDoc = {
+                      'title': schemaTitle,
+                      'filename': filename,
+                      'content': xsd,
+                      'templateVersion': templateVerId,
+                      'version': v.nbVersions + 1,
+                      'hash': hasha(xsd, {'algorithm': 'sha1'}),
+                      'dependencies': [],
+                      'exporters': [],
+                      'XSLTFiles': []
+                    }
+                    logger.debug(func + '- schema create for existing version record')
+                    XsdSchema.create(xsdDoc)
+                      .then(function (newXsdDoc) {
+                        logger.debug(func + '- create isArray: ' + Array.isArray(newXsdDoc))
+                        let xsdId = newXsdDoc._id
+                        v.nbVersions += 1
+                        v.versions.push(xsdId.toHexString())
+                        v.current = xsdId.toHexString()
+                        logger.debug(func + ' - about to set objectid')
+                        v.currentRef = xsdId // mongoose populate reference
+                        logger.debug(func + ' - got past setting objectid')
+                        XsdVersionSchema.findByIdAndUpdate(v._id, v).exec()
+                          .then(function (opResult) {
+                            logger.debug(func + ' - opResult: ' + inspect(opResult))
+                            resolve('added schema id: ' + xsdId + ' for version: ' + v.nbVersions + ' to versions id: ' + templateVerId)
+                          })
+                          .catch(function (err) {
+                            let msg = func + ' - find and update - ' + err
+                            reject(new Error(msg))
+                          })
+                      })
+                      .catch(function (err) {
+                        let msg = func + ' - create schema - ' + err
+                        reject(new Error(msg))
+                      })
+                  } else {
+                    let msg = func + ' - create schema - duplicates current version'
+                    reject(new Error(msg))
+                  }
+                }
+              })
+            }
+            if (isUsed === -1) {
+              //   if the filename is not used
+              //     create a new template version record with 0 versions and save the id
+              //     create a new schema (template) record with the template version record id and the version field set to 1
+              //     add the new schema id to the array of versions
+              //     add the new schema id to the versions array of the template version
+              //     update the template version current id string to the stringified object id of the schema
+              //     set template versions record nbVersions field to 1
+              let versionDoc = {
+                'versions': [],
+                'deletedVersions': [],
+                'nbVersions': 0,
+                'isDeleted': false,
+                'current': '',
+                'currentRef': null
+              }
+
+              let xsdDoc = {
+                'title': schemaTitle,
+                'filename': filename,
+                'content': xsd,
+                'templateVersion': '',
+                'version': 1,
+                'hash': newHash,
+                'dependencies': [],
+                'exporters': [],
+                'XSLTFiles': []
+              }
+              logger.debug(func + '- schema create for new version record')
+              XsdSchema.create(xsdDoc)
+                .then(function (newXsdDoc) {
+                  logger.debug(func + '- create isArray: ' + Array.isArray(newXsdDoc))
+                  let xsdId = newXsdDoc._id
+                  versionDoc.nbVersions += 1
+                  versionDoc.versions.push(xsdId.toHexString())
+                  versionDoc.current = xsdId.toHexString()
+                  logger.debug(func + ' - about to set objectid')
+                  versionDoc.currentRef = xsdId // mongoose populate reference
+                  logger.debug(func + ' - got past setting objectid')
+                  XsdVersionSchema.create(versionDoc)
+                    .then(function (newVersion) {
+                      logger.debug(func + ' - create version result: ' + inspect(newVersion))
+                      let versionId = newVersion._id
+                      let versionIdStr = versionId.toHexString()
+                      newXsdDoc.templateVersion = versionIdStr
+                      XsdSchema.findByIdAndUpdate(newXsdDoc._id, newXsdDoc).exec()
+                        .then(function (oldDoc) {
+                          logger.debug(func + ' - update doc with new version result (old): ' + inspect(oldDoc) + ' (new):' + inspect(newXsdDoc))
+                          let msg = func + ' - Created new XsdVersionSchema (template version) id: ' + versionIdStr + ' for new schema filename ' + filename + ' new schemaId: ' + xsdId.toHexString()
+                          resolve(msg)
+                        })
+                        .catch(function (err) {
+                          let msg = func + ' - update version info failed: ' + err
+                          reject(new Error(msg))
+                        })
+                    })
+                    .catch(function (err) {
+                      let msg = func + ' - find and update - ' + err
+                      reject(new Error(msg))
+                    })
+                })
+                .catch(function (err) {
+                  let msg = func + ' - create new schema - ' + err
+                  reject(new Error(msg))
+                })
+            }
+          })
+          .catch(function (err) {
+            let msg = 'get latest schema - ' + err
+            reject(new Error(msg))
+          })
+      } else {
+        reject(new Error(filenameErr))
+      }
+    } else {
+      reject(new Error(filenameErr))
+    }
+  })
+}
+
+app.post('/schema', function (req, res, next) {
+  let jsonResp = {'error': null, 'data': null}
+  let filename = req.body.filename
+  let xsd = req.body.xsd
+  if (xsd && xsd.length > 0 && filename && filename.length > 0) {
+    // eslint-disable-next-line no-unused-vars
+    let xsdDoc = null
+    try {
+      xsdDoc = libxml.parseXml(xsd)
+      saveSchema(filename, xsd)
+        .then(function (resp) {
+          jsonResp.data = resp
+          return res.status(201).json(jsonResp)
+        })
+        .catch(function (err) {
+          jsonResp.error = '' + err
+          return res.status(500).json(jsonResp)
+        })
+    } catch (err) {
+      jsonResp.error = 'Unable to translate schema -- ' + err
+      return res.status(400).json(jsonResp)
+    }
+  } else {
+    let msg = 'both filename and text of schema are required.'
+    jsonResp.error = msg
+    return res.status(400).json(jsonResp)
+  }
+})
+
 app.get('/templates/select/all', function (req, res) { // it's preferable to read only the current non deleted schemas rather than all
   let jsonResp = {'error': null, 'data': null}
   XsdSchema.find().exec(function (err, schemas) {
@@ -1629,7 +1942,7 @@ app.get('/templates/versions/select/all', function (req, res) {
 app.get('/templates/versions/select/allactive', function (req, res) {
   let jsonResp = {'error': null, 'data': null}
   getLatestSchemas(XsdVersionSchema, XsdSchema, logger)
-    .then(function (schemas) { // schemas[0].currentRef[0] is latest schema
+    .then(function (schemas) { // schemas[0].currentRef is latest schema
       if (schemas && schemas.length > 0) {
         jsonResp.data = schemas
         res.json(jsonResp)
@@ -1645,6 +1958,10 @@ app.get('/templates/versions/select/allactive', function (req, res) {
 })
 
 app.get('/templates/select', function (req, res) {
+  // Hey, don't use quotes around qfield values in the browser query!
+  //  The line should look like http://ubuntu.local/nmr/templates/select?filename=/PNC_schema_081218.xsd/
+  //                                                                                ^^ RegEx /
+  //  This was built according to the way MDCS does it :(
   let jsonResp = {'error': null, 'data': null}
   let id = req.query.id
   // for all qfields except id - which is a single record query on its own,
@@ -1679,7 +1996,6 @@ app.get('/templates/select', function (req, res) {
         if (qval.slice(0, 1) === '/' && qval.slice(-1) === '/') {
           qval = qval.replace(/(^[/]|[/]$)/g, '')
           let re = new RegExp(qval, 'i')
-
           let tmp = {}
           tmp[qfld] = {'$regex': re} // TODO test this again with fields mix -- winds up being {'fieldnm': { '$regex': /PATTERN/ }}
           qcomponents.push(tmp)
@@ -1717,15 +2033,17 @@ app.get('/templates/select', function (req, res) {
 
 // NOTE: similar to /explore/select (actually started as a copy/modify) -- HOWEVER, it works differently and returns different data
 // Data is returned for current schema only
-app.get('/xml/:id?', function (req, res) { // currently only supports JWT style login (need to add a authRequired field to config for bearer support
+app.get('/xml/:title?', function (req, res) { // currently only supports JWT style login (need to add a authRequired field to config for bearer support
   // checks to make sure:
   //   XML is public
   //   or user is owner/creator
   //   or user is admin
   let jsonResp = {'error': null, 'data': null}
-  let id = req.params.id // may be null
+  let title = req.params.title // may be null
+  let id = req.query.id
   let fmt = req.query.format
   let dsSeq = req.query.dataset // may be null -- to get all xmls for a dataset (mutually exclusive of id)
+  let schemaId = req.query.schemaid
   let userid = null
   let isAdmin = false
   let theQuery = {} // default find query
@@ -1746,20 +2064,22 @@ app.get('/xml/:id?', function (req, res) { // currently only supports JWT style 
       secQuery = publicQuery
     }
   }
-  if (id && dsSeq) {
+  if (title && dsSeq) {
     // error
-    jsonResp.error = 'dataset and id are mutually exclusive parameters'
+    jsonResp.error = 'dataset and title are mutually exclusive parameters'
     return res.status(400).json(jsonResp)
   }
   getCurrentSchemas()
     .then(function (versions) {
-      let schemaId = versions[0].currentRef[0]._id
+      if (!validQueryParam(schemaId)) {
+        schemaId = versions[0].currentRef._id
+      }
       let schemaQuery = {'schemaId': {'$eq': schemaId}}
-      if (id) {
-        if (id.match(/.*\.xml$/) === null) {
-          id += '.xml' // actual title field of xml data record has .xml appended. Lookup will fail if it's not there.
+      if (title) {
+        if (title.match(/.*\.xml$/) === null) {
+          title += '.xml' // actual title field of xml data record has .xml appended. Lookup will fail if it's not there.
         }
-        dataQuery = {'title': {'$eq': id}}
+        dataQuery = {'title': {'$eq': title}}
       } else if (dsSeq) {
         dataQuery = {'dsSeq': {$eq: dsSeq}}
       }
@@ -1770,6 +2090,16 @@ app.get('/xml/:id?', function (req, res) { // currently only supports JWT style 
       } else if (dataQuery) {
         theQuery = {'$and': [dataQuery, schemaQuery]}
       }
+      let idQuery = null // the id query does not depend on schema, so it should be outside/separate TODO find time to fix this
+      if (id) { // OVERRIDES Query already set if ID=id is used
+        idQuery = {'_id': {'$eq': ObjectId(id)}}
+        if (secQuery) {
+          theQuery = {'$and': [secQuery, idQuery]}
+        } else {
+          theQuery = idQuery
+        }
+      }
+      // TODO - Security related reasons for the file not to be found should be reflected as 403, not 404 as they are now!! i.e. not public & not admin & not owner
       // TODO iduser should not be returned raw! Right now it's needed for client-side filtering. The returned value should be modified
       //   to something like, (iduser if (iduser === loginUser || iduser === runAsUser || iduser isAdmin) else return 0 to prevent leakage of userids
       XmlData.find(theQuery, '_id iduser schemaId title ispublished isPublic entityState curateState xml_str').exec(function (err, xmlRecs) {
@@ -1929,12 +2259,13 @@ app.post('/curate', function (req, res) {
   // TODO need to keep prior versions of XML by using a version number in the record
   let title = req.body.title
   let schemaId = req.body.schemaId
+  let datasetId = req.body.datasetId
   let content = req.body.content
   let userid = req.body.userid
   let ispublished = req.body.ispublished || false // no camelcase
   let isPublic = req.body.isPublic || false
   if (!userid) {
-    userid = req.headers['nmLoginUserId'] // set by auth middleware
+    userid = getNmLoginUserIdHeaderValue(req) // set by auth middleware
   } else {
     // TODO verify that overriding user is admin and that the specified user exists (should be done in middleware)
   }
@@ -1949,10 +2280,10 @@ app.post('/curate', function (req, res) {
     if (m) {
       let dsSeq = m[1]
       // look up the dataset to ensure that it exists
-      let dsQuery = {'seq': dsSeq}
+      let dsQuery = {'datasetId': datasetId}
       Datasets.find(dsQuery, function (err, docs) {
         if (err || docs.length === 0) {
-          jsonResp.err = 'unable to find associated dataset: ' + dsSeq + ' err: ' + err
+          jsonResp.err = 'unable to find associated datasetId: ' + datasetId + ' err: ' + err
           console.log(msg + ' ' + jsonResp.err)
           return res.status(400).json(jsonResp)
         } else {
@@ -1961,6 +2292,7 @@ app.post('/curate', function (req, res) {
           let theData = {
             'title': title,
             'schemaId': schemaId,
+            'datasetId': datasetId,
             'entityState': curatedDataState,
             'dsSeq': dsSeq,
             'ispublished': ispublished,
@@ -1969,12 +2301,15 @@ app.post('/curate', function (req, res) {
             'curateState': curateState,
             'xml_str': content
           }
-          XmlData.findOneAndUpdate(xmlQuery, theData, {'upsert': true}, function (err, doc) {
+          XmlData.findOneAndUpdate(xmlQuery, theData, {'upsert': true, new: true, rawResult: true}, function (err, findUpdateReturnValues) {
             if (err) {
               jsonResp.error = err
               return res.status(500).json(jsonResp)
             }
-            return res.status(201).json(jsonResp)
+            jsonResp.data = findUpdateReturnValues.value // updated document
+            logger.debug(func + ' - success. OK = ' + findUpdateReturnValues.ok + ' lastError: ' + inspect(findUpdateReturnValues.lastErrorObject))
+            logger.debug(func + ' - returning: ' + inspect(jsonResp))
+            return res.status(200).json(jsonResp)
           })
         }
       })
@@ -1988,14 +2323,18 @@ app.post('/curate', function (req, res) {
   }
 })
 
-app.post('/blob', function (req, res) {
+app.post('/blob/create', function (req, res) {
   // save blob to gridfs
   let jsonResp = {'error': null, 'data': null}
-  let bucketName = req.body.bucketName
+  let bucketName = null // req.body.bucketName -- no longer used for now
   let filename = req.body.filename
   let dataUri = req.body.dataUri
+  let originalDatasetId = req.body.originalDatasetId
+  let options = {}
+  if (originalDatasetId) {
+    options.metadata = { 'originalDatasetId': originalDatasetId }
+  }
   if (filename && typeof filename === 'string' && dataUri && typeof dataUri === 'string') {
-    let options = {}
     if (bucketName && typeof bucketName === 'string') {
       options.bucketName = bucketName
     }
@@ -2005,7 +2344,7 @@ app.post('/blob', function (req, res) {
     let bufferStream = new stream.PassThrough()
     // bufferStream.write(buffer)
     bufferStream.end(buffer)
-    let uploadStream = bucket.openUploadStream(filename)
+    let uploadStream = bucket.openUploadStream(filename, options)
     bufferStream
       .pipe(uploadStream)
       .on('error', function (err) {
@@ -2027,13 +2366,13 @@ app.post('/blob', function (req, res) {
 })
 
 app.get('/dataset/filenames/:xmlId', function (req, res) {
-  // TODO handle authorization
   // return list of fully qualified filenames for blobs associated with sample
   let jsonResp = {'error': null, 'data': null}
   let xmlId = req.params.xmlId
+  let schemaId = req.query.schemaId
   let validTitle = matchValidXmlTitle(xmlId)
   if (validTitle) {
-    datasetXmlFileList(xmlId)
+    datasetXmlFileList(xmlId, schemaId)
       .then(function (files) {
         jsonResp.data = {'files': files}
         return res.status(200).json(jsonResp)
@@ -2054,7 +2393,7 @@ app.get('/dataset/filenames/:xmlId', function (req, res) {
 //   let bucketName = datasetBucketName
 //   // Probably needs to look into default bucketname as well -- or ...
 //   //  1 - put all data into default bucket
-//   //  2 - put images into the default bucket as well as the curateinput bucket (might work best)
+//   //  2 - put images into the default bucket as well as the curate input bucket (might work best)
 //   // TODO ...
 // })
 
@@ -2065,7 +2404,7 @@ app.get('/blob', function (req, res) { // MDCS only supports get by id (since th
   // get blob and send to client
   let jsonResp = {'error': null, 'data': null}
   let id = req.query.id // may be empty
-  let bucketName = req.query.bucketname // may be empty
+  let bucketName = null // req.query.bucketname no longer used for now (it could be empty when it was)
   let fileName = req.query.filename // may be empty
   let options = {}
   if (bucketName && typeof bucketName === 'string') {
@@ -2112,7 +2451,7 @@ app.get('/blob', function (req, res) { // MDCS only supports get by id (since th
         res.attachment(fnc.slice(-1)[0])
       })
       dlStream.on('error', function (err) {
-        res.status(404).send('NOT FOUND: ' + id)
+        res.status(404).send('NOT FOUND: ' + id + ' err: ' + err.message)
       })
       dlStream.on('data', function (data) {
         res.write(data)
@@ -2130,86 +2469,217 @@ app.get('/blob', function (req, res) { // MDCS only supports get by id (since th
 })
 
 app.get('/dataset', function (req, res) {
+  // this endpoint is not currently checked by the auth middleware
+  // Access to public data is granted to everyone
+  // Access to non-public datasets is granted to the owner and administrators
+  let func = 'get /dataset'
   let jsonResp = {'error': null, 'data': null}
   let id = req.query.id
   let seq = req.query.seq
   let doi = req.query.doi
-  if (validQueryParam(id)) {
-    Datasets.findById(id, function (err, ds) {
-      if (err) {
-        jsonResp.error = err
-        return res.status(500).json(jsonResp)
+  let onlyPublic = false
+  let allowedAll = false
+  // if no user is logged in, then only return public data
+  // if the user is logged in, but not admin return public data and data owned by user
+  // if the user is logged in and admin, return all
+  let userid = getNmLoginUserIdHeaderValue(req)
+  let msg = func + ' - dataset lookup for userid: ' + userid
+  logger.debug(msg)
+  let p = new Promise(function (resolve, reject) {
+    if (!userid) {
+      onlyPublic = true
+      allowedAll = false
+      resolve()
+    } else {
+      onlyPublic = false
+      getUserAndAdminInfo(userid)
+        .then(function (userAndAdminInfo) {
+          if (userAndAdminInfo.userInfo) {
+            if (userAndAdminInfo.isAdmin === true) {
+              allowedAll = true
+            }
+          }
+          let msg = func + ' - getUserAndAdminInfo successful. onlyPublic: ' + onlyPublic + ' allowedAll: ' + allowedAll + ' userInfo: ' + inspect(userAndAdminInfo)
+          logger.debug(msg)
+          resolve()
+        })
+        .catch(function (err) {
+          let msg = func + ' - error obtaining user info for userid: ' + userid + ' error: ' + err.message
+          logger.error(msg)
+          reject(err)
+        })
+    }
+  })
+  p.then(function () {
+    if (validQueryParam(id)) {
+      let idFilter = {_id: {'$eq': id}}
+      let filter = null
+      let userFilter = {userid: {'$eq': userid}}
+      let publicFilter = {isPublic: {'$eq': true}}
+      if (allowedAll) {
+        filter = idFilter
+      } else if (onlyPublic) {
+        filter = {'$and': [idFilter, publicFilter]}
       } else {
-        jsonResp.data = ds
-        return res.json(jsonResp)
+        filter = {'$and': [idFilter, {'$or': [userFilter, publicFilter]}]}
       }
-    })
-  } else if (validQueryParam(seq)) {
-    Datasets.find({'seq': {'$eq': seq}}, function (err, doc) {
-      if (err) {
-        jsonResp.error = err
-        return res.status(500).json(jsonResp)
+      let msg = func + ' - applying filter: ' + inspect(filter)
+      logger.debug(msg)
+      Datasets.find(filter, function (err, ds) {
+        if (err) {
+          jsonResp.error = err
+          return res.status(500).json(jsonResp)
+        } else {
+          jsonResp.data = ds
+          return res.json(jsonResp)
+        }
+      })
+    } else if (validQueryParam(seq)) {
+      let seqFilter = {'seq': {'$eq': seq}}
+      let filter = null
+      let userFilter = {userid: {'$eq': userid}}
+      let publicFilter = {isPublic: {'$eq': true}}
+      if (allowedAll) {
+        filter = seqFilter
+      } else if (onlyPublic) {
+        filter = {'$and': [seqFilter, publicFilter]}
       } else {
-        jsonResp.data = doc
-        return res.json(jsonResp)
+        filter = {'$and': [seqFilter, {'$or': [userFilter, publicFilter]}]}
       }
-    })
-  } else if (validQueryParam(doi)) {
-    Datasets.find({'doi': {'$eq': doi}}, function (err, doc) {
-      if (err) {
-        jsonResp.error = err
-        return res.status(500).json(jsonResp)
+      let msg = func + ' - applying filter: ' + inspect(filter)
+      logger.debug(msg)
+      Datasets.find(filter, function (err, doc) {
+        if (err) {
+          jsonResp.error = err
+          return res.status(500).json(jsonResp)
+        } else {
+          jsonResp.data = doc
+          return res.json(jsonResp)
+        }
+      })
+    } else if (validQueryParam(doi)) {
+      let doiFilter = {'doi': {'$eq': doi}}
+      let filter = null
+      let userFilter = {userid: {'$eq': userid}}
+      let publicFilter = {isPublic: {'$eq': true}}
+      if (allowedAll) {
+        filter = doiFilter
+      } else if (onlyPublic) {
+        filter = {'$and': [doiFilter, publicFilter]}
       } else {
-        jsonResp.data = doc
-        return res.json(jsonResp)
+        filter = {'$and': [doiFilter, {'$or': [userFilter, publicFilter]}]}
       }
-    })
-  } else {
-    // return all datasets for now
-    Datasets.find({}).sort({'seq': 1}).exec(function (err, docs) {
-      if (err) {
-        jsonResp.error = err
-        return res.status(500).json(jsonResp)
+      let msg = func + ' - applying filter: ' + inspect(filter)
+      logger.debug(msg)
+      Datasets.find(filter, function (err, doc) {
+        if (err) {
+          jsonResp.error = err
+          return res.status(500).json(jsonResp)
+        } else {
+          jsonResp.data = doc
+          return res.json(jsonResp)
+        }
+      })
+    } else {
+      // return all datasets
+      // Datasets.find({'$and': [{isDeleted: {'$eq': false}}, {isPublic: {$eq: true}}]}).sort({'seq': 1}).exec(function (err, docs) {
+      let delFilter = {isDeleted: {'$eq': false}}
+      let filter = null
+      let userFilter = {userid: {'$eq': userid}}
+      let publicFilter = {isPublic: {'$eq': true}}
+      if (allowedAll) {
+        filter = delFilter
+      } else if (onlyPublic) {
+        filter = {'$and': [delFilter, publicFilter]}
       } else {
-        jsonResp.data = docs
-        return res.json(jsonResp)
+        filter = {'$and': [delFilter, {'$or': [userFilter, publicFilter]}]}
       }
+      let msg = func + ' - applying filter: ' + inspect(filter)
+      logger.debug(msg)
+      Datasets.find(filter).sort({'seq': 1}).exec(function (err, docs) {
+        if (err) {
+          jsonResp.error = err
+          return res.status(500).json(jsonResp)
+        } else {
+          jsonResp.data = docs
+          return res.json(jsonResp)
+        }
+      })
+    }
+  })
+    .catch(function (err) {
+      let msg = func + ' - error occurred: ' + err.message
+      logger.error(msg)
+      jsonResp.error = err
+      jsonResp.data = null
+      return res.status(500).json(jsonResp)
     })
-  }
 })
 
 app.post('/dataset/update', function (req, res) {
-  let jsonResp = {'error': null, 'data': null}
+  // NOTE: sets verify owner flag. The userid of the dataset owner must match the login user
+  //    Also, this version of update should not be used from the API approach using bearer tokens
+  let func = '/dataset/update'
   let dsUpdate = req.body.dsUpdate
-  let dsSeq = req.body.dsSeq
-  console.log('datataset/update: doing update...' + JSON.stringify(dsUpdate))
-  Datasets.findOneAndUpdate({'seq': dsSeq}, {$set: dsUpdate}, {}, function (err, oldDoc) {
-    if (err) {
-      jsonResp.error = err
-      console.log('datataset/update: error - ' + err)
-      return res.status(500).json(jsonResp)
-    } else {
-      jsonResp.data = oldDoc
-      console.log('datataset/update: success - ' + oldDoc)
-      return res.status(200).json(jsonResp)
-    }
-  })
+  // let dsSeq = req.body.dsSeq
+  // let schemaId = req.body.schemaid
+  let userid = getNmLoginUserIdHeaderValue(req)
+  let verifyOwner = true
+  logger.debug(func + ' - datataset/update: doing update... userid: ' + userid + ' ' + JSON.stringify(dsUpdate) + ' verifyOwner: ' + verifyOwner)
+  updateDataset(Datasets, logger, dsUpdate, verifyOwner)
+    .then(function (status) {
+      logger.debug(func + ' - datataset/update: success - ' + inspect(status))
+      return res.status(status.statusCode).json(status)
+    })
+    .catch(function (status) { // Here, status is not just an error object
+      logger.error(func + ' - datataset/update: error - ' + inspect(status))
+      return res.status(status.statusCode).json(status)
+    })
 })
-app.post('/dataset/create', function (req, res) {
-  // TODO dataset needs a unique index on seq to ensure there are no dups
-  // TODO dataset also needs a unique index on DOI to ensure that DOIs are not dup'd
+
+app.post('/dataset/updateEx', function (req, res) { // NOT A GUI FUNCTION in its current state. Do not call from GUI (will return 403)
+  // NOTE: DOES NOT SET verify owner flag, so the update info can contain a userid
+  //    This version SHOULD NOT BE called from the GUI. Admins may use the runAs capability to runas a user
+  //    in the GUI which calls /dataset/update on behalf of the user.  Otherwise, the admin may only update
+  //    datasets belonging to themselves using the GUI.
+  // NOTE: these restrictions are subject to change in the future ....
+  let func = '/dataset/updateEx'
+  let dsUpdate = req.body.dsUpdate
+  // let dsSeq = req.body.dsSeq
+  // let schemaId = req.body.schemaid
+  let userid = getNmLoginUserIdHeaderValue(req)
+  let verifyOwner = false
+  logger.debug(func + ' - datataset/updateEx: doing update... userid: ' + userid + ' ' + inspect(dsUpdate))
+  updateDataset(Datasets, logger, dsUpdate, verifyOwner)
+    .then(function (status) {
+      logger.debug(func + ' - datataset/update: success - ' + inspect(status))
+      return res.status(status.statusCode).json(status)
+    })
+    .catch(function (err) {
+      logger.error(func + ' - datataset/update: error - ' + inspect(status))
+      return res.status(err.statusCode).json(status)
+    })
+})
+
+app.post('/dataset/create', function (req, res) { // auth middleware verifies user
+  let func = '/dataset/create'
   let jsonResp = {'error': null, 'data': null}
-  let dsInfo = req.body.dsInfo
-  createDataset(Datasets, logger, dsInfo)
+  let dsInfo = req.body.dsInfo // requires schemaId now
+  if (!dsInfo.doi || dsInfo.doi.length === 0) {
+    dsInfo.doi = nmDatasetInitialDoi
+  }
+  dsInfo.userid = getNmLoginUserIdHeaderValue(req)
+  createDataset(Datasets, Sequences, logger, dsInfo)
     .then(function (result) {
       jsonResp.error = null
       jsonResp.data = result.data
       return res.status(result.statusCode).json(jsonResp)
     })
-    .catch(function (err) {
-      jsonResp.error = err.error
-      jsonResp.data = err.data
-      return res.status(err.statusCode).json(jsonResp)
+    .catch(function (status) {
+      logger.error(func + ' - Error creating dataset: ' + JSON.stringify(status))
+      jsonResp.error = status.error.message
+      jsonResp.data = null
+      return res.status(500).json(jsonResp)
     })
 })
 /* END -- rest services related to XMLs, Schemas and datasets */
@@ -2457,7 +2927,6 @@ function updateJobStatus (statusFilePath, newStatus) {
   } catch (err) {
     logger.error('try/catch driven for updating job status: ' + statusFileName + ' err: ' + err)
   }
-
 }
 
 function jobCreate (jobType, jobParams) {
@@ -2748,7 +3217,7 @@ function jobSubmit (jobId, jobType, userToken) {
                   logger.info('executing: ' + pgm + ' in: ' + pgmpath)
                   let path = process.env['PATH'] + ':/apps/n/bin'
                   let localEnv = {'PYTHONPATH': pathModule.join(cwd, '../src/jobs/lib'), 'NODE_PATH': '/apps/nanomine/rest/node_modules', 'PATH': path}
-                  localEnv = _.merge(process.env, localEnv)
+                  _.merge(localEnv, process.env)
                   logger.debug(func + ' - running job ' + jobId + ' with env path = ' + localEnv['PATH'] +
                       ' PYTHONPATH = ' + localEnv['PYTHONPATH'] + '' + ' NODE_PATH: ' + localEnv['NODE_PATH'])
                   let child = require('child_process').spawn(pgm, [jobType, jobId, jobDir], {
@@ -2811,7 +3280,7 @@ app.post('/jobsubmit', function (req, res) {
   let jsonResp = {'error': null, 'data': null}
   let jobId = req.body.jobId
   let jobType = req.body.jobType
-  let userToken = getTokenDataFromReq(req)
+  let userToken = getTokenDataFromReq(req) // TODO: normalize this with the 'nmLoginUserId' added to the req header by the middleware - note that if the header is not set, the user did not come in through shibboleth
   // let jobDir = nmJobDataDir + '/' + jobId
   // let paramFileName = jobDir + '/' + 'job_parameters.json'
 

@@ -113,7 +113,7 @@ function getLatestSchema () {
       .then(function (data) {
         // logger.error(inspect(response))
         let latestVersions = data
-        let latestSchema = latestVersions[0].currentRef[0]
+        let latestSchema = latestVersions[0].currentRef
         resolve(latestSchema)
       })
       .catch(function (err) {

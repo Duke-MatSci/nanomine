@@ -48,7 +48,7 @@ class ChemProps(Resource):
   @api.response(401,'Authentication required')
   @api.response(403,'Not authorized')
   @api.response(404,'Unable to locate based on parameters given')
-  @token_required
+  # @token_required # removed authentication requirement for now
   def get(self):
     """get chemprops info based on search criteria"""
     callParams = ('ChemicalName', 'Abbreviation', 'TradeName', 'uSMILES')

@@ -1,11 +1,14 @@
 const moment = require('moment')
 const {createLogger, format, transports} = require('winston')
-const libxmljs = require('libxmljs2')
-const he = require('he') // for encoding text element named character entities into decimal encoding (rdf requires this downstream for ingest)
+const libxmljs = require('libxmljs')
+// const he = require('he') // for encoding text element named character entities into decimal encoding (rdf requires this downstream for ingest)
 const util = require('util')
+// const ObjectId = require('mongodb').ObjectId
+const _ = require('lodash')
 const { combine, label, printf, prettyPrint } = format
 // const datasetsSchema = require('./modules/mongo/schema/datasets')(mongoose)
 // const Datasets = mongoose.model('datasets', datasetsSchema)
+const getNextDatasetsSequenceNumber = require('../modules/mongo/schema/sequences').getNextDatasetsSequenceNumber
 let trace = false
 function setTrace (_trace) {
   trace = _trace
@@ -18,7 +21,7 @@ function logTrace (msg) {
 function inspect (theObj) {
   return util.inspect(theObj, {showHidden: true, depth: 5})
 }
-const logFormat = printf(({ level, message, label}) => {
+const logFormat = printf(({level, message, label}) => {
   let now = moment().format('YYYYMMDDHHmmssSSS')
   return `${now} [${label}] ${level}: ${message}`
 })
@@ -27,7 +30,7 @@ let configureLogger = function (config, logLabel) {
   if (!loggerLabel) {
     loggerLabel = 'default'
   }
-  let logger = createLogger({
+  return createLogger({
     levels: {error: 0, warn: 1, info: 2, verbose: 3, debug: 4, trace: 5},
     format: combine(
       label({label: loggerLabel}),
@@ -44,7 +47,6 @@ let configureLogger = function (config, logLabel) {
       })
     ]
   })
-  return logger
 }
 
 let getEnv = function () {
@@ -56,6 +58,7 @@ let getEnv = function () {
     emailPwd: process.env['NM_SMTP_AUTH_PWD'],
     emailTestAddr: process.env['NM_SMTP_TEST_ADDR'],
     emailAdminAddr: process.env['NM_SMTP_ADMIN_ADDR'],
+    nmDatasetInitialDoi: process.env['NM_DATASET_INITIAL_DOI'],
     nmWebFilesRoot: process.env['NM_WEBFILES_ROOT'],
     nmWebBaseUri: process.env['NM_WEB_BASE_URI'],
     nmRdfLodPrefix: process.env['NM_RDF_LOD_PREFIX'],
@@ -97,19 +100,26 @@ function matchValidXmlTitle (title) {
   return rv
 }
 
-function getDatasetXmlFileList (mongoose, logger, xmlTitle) {
+function getDatasetXmlFileList (mongoose, logger, xmlTitle) { // XML should contain DatasetID and SchemaID
   let func = 'getDatasetXmlFileList'
+  logger.info(func + ' is deprecated.')
+  return getXmlFileList(mongoose, logger, xmlTitle)
+}
+
+function getXmlFileList (mongoose, logger, xmlTitle) {
+  let func = 'getXmlFileList'
   let bucketName = datasetBucketName
   let validTitle = matchValidXmlTitle(xmlTitle)
+  // TODO obtain schemaId and dataset_id from xml
   let options = {
-    'bucketName': bucketName
+    'bucketName': bucketName // TODO change use standard blob approach and list in dataset results BSON record
   }
-  return new Promise(function (resolve, reject) {
+  return new Promise(function (resolve, reject) { // TODO this code needs rework based on above TODOs
     const bucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, options)
     let files = []
     if (validTitle) {
-      let dsId = validTitle[1]
-      let findParam = {filename: {$regex: dsId + '[/]' + xmlTitle.replace(/\.xml$/, '') + '[/].*'}}
+      // let dsId = validTitle[1]
+      let findParam = {filename: {$regex: schemaId + '[/]' + xmlTitle.replace(/\.xml$/, '') + '[/].*'}}
       logger.debug(func + ' looking for files like: ' + JSON.stringify(findParam))
       bucket.find(findParam).sort({uploadDate: -1, filename: 1})
         .on('data', (data) => {
@@ -136,7 +146,7 @@ function getDatasetXmlFileList (mongoose, logger, xmlTitle) {
     }
   })
 }
-function updateOrCreateXmlData (xmlData, logger, creatorId, xmlDoc, schemaId) {
+function updateOrCreateXmlData (xmlData, logger, creatorId, xmlDoc, schemaId, datasetId) {
   // XMlData is the mongoose model instance
   // xmlDoc is an xml document parsed by libxmljs
   let func = 'utils.updateOrCreateXmlData'
@@ -151,6 +161,7 @@ function updateOrCreateXmlData (xmlData, logger, creatorId, xmlDoc, schemaId) {
       published = false
     }
     let xml = xmlDoc.toString(false) // false 'should' turn off pretty printing, but it doesn't seem to work
+    xml = xml.replace(/>\s*</g, '><')
     let dsSeq = -1
     let m = matchValidXmlTitle(id)
     if (m) {
@@ -158,10 +169,13 @@ function updateOrCreateXmlData (xmlData, logger, creatorId, xmlDoc, schemaId) {
     }
     let filename = id + '.xml'
     let msg = ' id: ' + id + ' using xml of length: ' + xml.length
-    xmlData.findOneAndUpdate({$and: [{'title': {$eq: filename}}, {'schemaId': {$eq: schemaId}}]},
+    let dttmNow = Math.floor(Date.now() / 1000)
+    xmlData.findOneAndUpdate({$and: [{'title': {$eq: filename}}, {'schemaId': {$eq: schemaId}}, {'datasetId': {$eq: datasetId}}]},
       {
         $set: {
           'xml_str': xml, // write xml
+          'dttm_updated': dttmNow,
+          'datasetId': datasetId,
           'schemaId': schemaId, // create schemaId field using schema (note: field was schema in MDCS, but name is incompatible with Mongoose)
           'dsSeq': dsSeq, // Sequence of the associated dataset
           'entityState': 'EditedValid', // initial entity state shows validated by prior processing NOTE: 'Valid' would kick off rdf upload
@@ -180,10 +194,13 @@ function updateOrCreateXmlData (xmlData, logger, creatorId, xmlDoc, schemaId) {
           if (doc !== null) {
             logger.info(func + ' - Update successful: ' + msg)
             logger.debug(func + ' doc found: ' + doc)
-            resolve()
+            resolve(doc)
           } else {
             let newDoc = {
               'xml_str': xml, // write xml
+              'dttm_created': dttmNow,
+              'dttm_updated': dttmNow,
+              'datasetId': datasetId,
               'schemaId': schemaId, // create schemaId field using schema (note: field was schema in MDCS, but name is incompatible with Mongoose)
               'dsSeq': dsSeq, // Sequence of the associated dataset
               'entityState': 'EditedValid', // initial entity state shows validated by prior processing NOTE: 'Valid' would kick off rdf upload
@@ -200,7 +217,7 @@ function updateOrCreateXmlData (xmlData, logger, creatorId, xmlDoc, schemaId) {
                 reject(err)
               } else {
                 logger.info(func + ' - new xml created: ' + msg)
-                resolve()
+                resolve(doc)
               }
             })
           }
@@ -208,61 +225,119 @@ function updateOrCreateXmlData (xmlData, logger, creatorId, xmlDoc, schemaId) {
       })
   })
 }
-function createDataset (Datasets, logger, dsInfo) { // creates the dataset using the dsInfo, new seq is returned with updated dsInfo in result.data
+
+function updateDataset (Datasets, logger, dsInfo, verifyOwner) {
+  // NOTE: requires schemaId and seq for update and create
+  //   If the record exists, it will be updated. If it does not, it will be created as
+  //   opposed to createDataset which always selects a non-used sequence.
+  // If verifyOwner is truthy, the dsInfo.userid will be verified against the record before update (upsert will not work)
+  // IMPORTANT! verifyOwner only works if the userid is set in the input dsInfo. It does not actually verify the caller, so the assumption
+  //  here is that an administrative function is calling updateDataset and knows to set the dsInfo.userid and set verifyOwner truthy before
+  //  the update.
+  //  An online function using verifyOwner i.e. rest service, etc would need to verify that the user is either an admin or the actual
+  //    owner before using this function.
+  //    Also, note that if an admin is using the function to update fields and is NOT the owner, care must be taken to ensure that
+  //       the userid field is either set correctly in the dsInfo or NOT specified to prevent overwrite. DATA LOSS MAY OCCUR in some
+  //       circumstances if a user is allowed to select a dataset and the ownership is not properly handled and dataset information
+  //       is overwriten with non-related information from another paper, etc.
+  let func = 'utils.updateDataset'
+  let status = {'statusCode': 201, 'error': null, 'data': null}
+  return new Promise(function (resolve, reject) {
+    dsInfo.dttm_updated = Math.floor(Date.now() / 1000)
+    let query = {'_id': {$eq: dsInfo.datasetId}}
+    if (verifyOwner) {
+      query = {$and: [query, {userid: {$eq: dsInfo.userid}}]}
+    }
+    logger.debug(func + ' - ' + ' query: ' + inspect(query))
+    Datasets.updateOne(
+      query,
+      {$set: dsInfo},
+      {upsert: false}, function (err, result) {
+        if (err) {
+          logger.error(func + ' : error - ' + err)
+          status.error = err
+          status.statusCode = 500
+          status.data = null
+          reject(status)
+        } else {
+          logger.debug(func + ' - success - old document is: ' + JSON.stringify(result))
+          let doc = result // promise based result only returns old document and for create it's null
+          if (doc) {
+            status.statusCode = 200
+          } else {
+            status.statusCode = 201
+          }
+          status.error = null
+          status.data = dsInfo // return input doc to be compatible with return from createDataset
+          resolve(status)
+        }
+      })
+  })
+}
+function createDataset (Datasets, Sequences, logger, dsInfo) { // creates the dataset using the dsInfo, new seq is returned with updated dsInfo in result.data
   let func = 'utils.createDataset'
-  // NOTE: if clustered, there's a race condition on setting the sequence number - should use some kind of db auto increment sequence
   return new Promise(function (resolve, reject) {
     let status = {'statusCode': 201, 'error': null, 'data': null}
-    Datasets.find({}).sort({'seq': 1}).exec(function (err, docs) {
-      if (err) {
-        logger.error(func + ' - datasets find error: ' + err)
-        status.error = err
-        status.statusCode = 500
-        status.data = null
-        reject(status)
-      } else {
-        let last = -1
-        let newSeq = -1
-        let done = false
-        docs.forEach(function (v) {
-          if (!done) {
-            if (v.seq > (last + 1) && last >= 101) {
-              newSeq = last + 1
-              done = true
+    // 1. create a new dataset, get the _id and set it into the dsInfo.datasetId field
+    // 2. If the seq of the dsInfo is set, use it. TODO - Otherwise initialize it to one more than the greatest seq of all the datasets
+    //      datasets.findOne().sort('-seq').exec(function err, item){}) - if there are none, set to 101
+    getNextDatasetsSequenceNumber(Sequences, logger)
+      .then(function (dsSeq) {
+        if (dsInfo && dsSeq && dsSeq > 0) {
+          logger.debug(func + ' - Seq: ' + dsSeq + ' dsInfo: ' + inspect(dsInfo))
+          dsInfo.seq = dsSeq
+          dsInfo.isDeleted = false
+          dsInfo.dttm_created = Math.floor(Date.now() / 1000)
+          dsInfo.dttm_updated = Math.floor(Date.now() / 1000)
+          Datasets.create(dsInfo, function (err, doc) {
+            if (err) {
+              logger.error(func + ' - datasets create error: ' + err)
+              status.error = err
+              status.data = null
+              status.statusCode = 500
+              reject(status)
+            } else {
+              doc.datasetId = doc._id.toString()
+              doc.dttm_updated = Math.floor(Date.now() / 1000)
+              Datasets.findByIdAndUpdate(doc._id, doc, function (err, olddoc) {
+                if (err) {
+                  logger.error(func + ' - dataset created, but could not update datasetId: ' + err)
+                  status.error = err
+                  status.data = null
+                  status.statusCode = 500
+                  reject(status)
+                } else {
+                  status.error = null
+                  status.data = doc
+                  status.statusCode = 201
+                  logger.debug(func + ' - dataset created successfully. _id is: ' + doc._id.toString() + ' datasetId is: ' + doc.datasetId + ' Sequence is: ' + dsInfo.seq)
+                  resolve(status)
+                }
+              })
             }
-            last = v.seq
-          }
-        })
-        if (!done) {
-          newSeq = last + 1
+          })
+        } else {
+          let err = 'Dataset information not supplied or automatic seq field generation failed'
+          logger.error(func + ' - datasets create error: ' + err)
+          status.error = err
+          status.data = null
+          status.statusCode = 400
+          reject(status)
         }
-        dsInfo.seq = newSeq
-        logger.debug(func + ' - newSeq: ' + newSeq + ' dsInfo: ' + inspect(dsInfo))
-        Datasets.create(dsInfo, function (err, doc) {
-          if (err) {
-            logger.error(func + ' - datasets create error: ' + err)
-            status.error = err
-            status.data = null
-            status.statusCode = 500
-            reject(status)
-          } else {
-            status.error = null
-            status.data = doc
-            status.statusCode = 201
-            logger.debug(func + ' - dataset created successfully. Sequence is: ' + dsInfo.seq)
-            resolve(status)
-          }
-        })
-      }
-    })
+      })
   })
+    .catch(function (err) {
+      status.error = err
+      status.data = null
+      status.statusCode = 500
+    })
 }
 
 function sortSchemas (allActive) { // sort by date descending and choose first
   allActive.sort((a, b) => { // Sort in reverse order
     let rv = 0
-    let rea = a.currentRef[0].title.match(/(\d{2})(\d{2})(\d{2})/)
-    let reb = b.currentRef[0].title.match(/(\d{2})(\d{2})(\d{2})/)
+    let rea = a.currentRef.title.match(/(\d{2})(\d{2})(\d{2})/)
+    let reb = b.currentRef.title.match(/(\d{2})(\d{2})(\d{2})/)
     let yra = parseInt(rea[3])
     let yrb = parseInt(reb[3])
     let moa = parseInt(rea[1])
@@ -295,7 +370,6 @@ function getLatestSchemas (xsdVersionSchema, xsdSchema, logger) { // duplicate o
   return new Promise(function (resolve, reject) {
     msg = func + ' - just before call to xsdVersionSchema.find'
     logTrace(msg)
-    debugger
     try {
       xsdVersionSchema.find({isDeleted: {$eq: false}}).populate('currentRef').exec(function (err, versions) {
         if (err) {
@@ -305,7 +379,7 @@ function getLatestSchemas (xsdVersionSchema, xsdSchema, logger) { // duplicate o
           reject(err)
         } else if (versions == null || versions.length <= 0) {
           msg = func + ' - resolving with null - no versions.'
-          logTrace(msg)
+          logger.debug(msg)
           resolve(null) // not found
         } else {
           try {
@@ -331,39 +405,72 @@ function getLatestSchemas (xsdVersionSchema, xsdSchema, logger) { // duplicate o
     }
   })
 }
+// function initialzeDatasetInfo(logger, datasetComment, userid) {
+//   let datasetInfo = {}
+//   datasetInfo.author = []
+//   datasetInfo.chapter = null
+//   datasetInfo.citationType = null
+//   datasetInfo.datasetComment = datasetComment
+//   datasetInfo.dateOfCitation = null
+//   datasetInfo.doi = null
+//   datasetInfo.edition = null
+//   datasetInfo.editor = null
+//   datasetInfo.isDeleted = false
+//   datasetInfo.isPublic = false
+//   datasetInfo.ispublished = false
+//   datasetInfo.isbn = null
+//   datasetInfo.issn = null
+//   datasetInfo.issue = null
+//   datasetInfo.keyword = []
+//   datasetInfo.language = null
+//   datasetInfo.location = null
+//   datasetInfo.publication = null
+//   datasetInfo.publicationYear = null
+//   datasetInfo.publisher = null
+//   datasetInfo.relatedDoi = []
+//   datasetInfo.results = []
+//   datasetInfo.seq = -1
+//   datasetInfo.title = null
+//   datasetInfo.url = null
+//   datasetInfo.userid = userid
+//   datasetInfo.volume = null
+//
+//   return datasetInfo
+// }
+
 function mergeDatasetInfoFromXml (logger, datasetInfo, xmlDocument) {
+  // Caller should parse the XML into a document before calling this function
+
   // NOTE: this code does not yet pull out all the fields of the XMLs needed.  It's specific to one set of
   //    data for which upload was needed quickly and the data was unpublished.
   //    TODO fix this code so that it pull out all the needed dataset information
   // checks xml for dataset information in DATA_SOURCE and merges into datasetInfo provided if the source field
   // exists and is not empty/null
-  // 'citationType': ds.CitationType,
-  //   'publication': ds.Publication,
-  //   'title': ds.Title,
+  // currently 21 fields + _id
+  //   isDeleted: boolean
   //   'author': [],
-  //   'keyword': [],
-  //   'publisher': ds.Publisher,
-  //   'publicationYear': ds.PublicationYear,
-  //   'doi': ds.DOI,
-  //   'relatedDoi': ds.relatedDOI
-  //   'volume': ds.Volume,
-  //   'url': ds.URL,
-  //   'language': ds.Language,
+  //   'citationType': ds.CitationType,
   //   'dateOfCitation': ds.DateOfCitation,
-  //   'location': ds.Location,
-  //   'issue': issue,
-  //   'issn': issn,
-  //   'userid': nanomineUser.userid,
+  //   'doi': ds.DOI,
   //   'isPublic': true, // all of the original datasets are public
   //   'ispublished': true // all of the original datasets came from published papers
-  // Caller should parse the XML document before calling this function
+  //   'issue': issue,
+  //   'issn': issn,
+  //   'keyword': [],
+  //   'language': ds.Language,
+  //   'location': ds.Location,
+  //   'publication': ds.Publication,
+  //   'publisher': ds.Publisher,
+  //   'publicationYear': ds.PublicationYear,
+  //   'relatedDoi': ds.relatedDOI,  // array of related DOIs
+  //   'seq': ds.seq, NOTE: seq should already be in datasetInfo when called or will be assigned
+  //   'title': ds.Title,
+  //   'volume': ds.Volume,
+  //   'url': ds.URL,
+  //   'userid': nanomineUser.userid,
+  //   'results': [ bson ] - an array of BSON records one for each result associated with the dataset
 
-  // get authors and location if available
   let commonFields = xmlDocument.get('//CommonFields')
-  let authors = []
-  let location = null
-  let keyword = []
-  // NOTE: TODO - all of the fields are initialized, but not all are actually set from the XML yet
   if (!datasetInfo.author) {
     datasetInfo.author = []
   }
@@ -376,11 +483,32 @@ function mergeDatasetInfoFromXml (logger, datasetInfo, xmlDocument) {
   if (!datasetInfo.doi) {
     datasetInfo.doi = null
   }
-  if (!datasetInfo.issn) {
-    datasetInfo.issn = null
+  if (!datasetInfo.isPublic) {
+    datasetInfo.isPublic = false
+  }
+  if (!datasetInfo.ispublished) {
+    datasetInfo.ispublished = false
   }
   if (!datasetInfo.issue) {
     datasetInfo.issue = null
+  }
+  if (!datasetInfo.issn) {
+    datasetInfo.issn = null
+  }
+  if (!datasetInfo.chapter) {
+    datasetInfo.chapter = null
+  }
+  if (!datasetInfo.edition) {
+    datasetInfo.edition = null
+  }
+  if (!datasetInfo.editor) {
+    datasetInfo.editor = null
+  }
+  if (!datasetInfo.isbn) {
+    datasetInfo.isbn = null
+  }
+  if (!datasetInfo.keyword) {
+    datasetInfo.keyword = []
   }
   if (!datasetInfo.language) {
     datasetInfo.language = null
@@ -391,12 +519,20 @@ function mergeDatasetInfoFromXml (logger, datasetInfo, xmlDocument) {
   if (!datasetInfo.publication) {
     datasetInfo.publication = null
   }
+  if (!datasetInfo.publisher) {
+    datasetInfo.publisher = null
+  }
   if (!datasetInfo.publicationYear) {
     datasetInfo.publicationYear = null
   }
   if (!datasetInfo.relatedDoi) {
     datasetInfo.relatedDoi = []
   }
+
+  // if (!datasetInfo.seq) { // incoming should always have seq
+  //   datasetInfo.seq = -1
+  // }
+
   if (!datasetInfo.title) {
     datasetInfo.title = null
   }
@@ -406,36 +542,60 @@ function mergeDatasetInfoFromXml (logger, datasetInfo, xmlDocument) {
   if (!datasetInfo.url) {
     datasetInfo.url = null
   }
+  if (!datasetInfo.userid) {
+    datasetInfo.userid = null
+  }
 
-  if (commonFields) {
-    // authors = commonFields.find('Author', {})
-    authors = xmlDocument.find('//Author')
-    logger.debug('authors: ' + JSON.stringify(authors))
-    if (authors && authors.length > 0) {
-      if (Array.isArray(authors)) {
-        authors.forEach((v, idx) => {
-          let author = v.text()
-          if (!datasetInfo.author.includes(author)) {
-            datasetInfo.author.push(author)
-          }
-        })
-      } else { // simple string
-        if (!datasetInfo.author.includes(authors)) {
-          datasetInfo.author.push(authors)
-        }
-      }
-    }
-    location = commonFields.get('//Location')
-    if (location) {
-      if (!datasetInfo.location || datasetInfo.location.length < 1) {
-        let locText = location.text()
-        if (locText && locText.length > 0) {
-          datasetInfo.location = locText
+  function setDsInfoCommonFieldTxt (dsInfo, commonFields, xmlPath, dsFldName) {
+    let fld = commonFields.get(xmlPath)
+    let fldNm = dsFldName
+    if (fld) {
+      if (!dsInfo[fldNm] || dsInfo[fldNm].length < 1) {
+        let txt = fld.text()
+        if (txt && txt.length > 0) {
+          dsInfo[fldNm] = txt
         }
       }
     }
   }
-  let relatedDOI = xmlDocument.find('//relatedDOI')
+  function setDsInfoCommonFieldArray (dsInfo, commonFields, xmlPath, dsFldName) {
+    let fld = commonFields.find(xmlPath)
+    if (fld && fld.length > 0) { // find always returns array
+      fld.forEach((v, idx) => {
+        let txt = v.text()
+        if (!dsInfo[dsFldName].includes(txt)) {
+          dsInfo[dsFldName].push(txt)
+        }
+      })
+    }
+  }
+
+  if (commonFields) {
+    setDsInfoCommonFieldArray(datasetInfo, commonFields, '//Author', 'author')
+
+    setDsInfoCommonFieldTxt(datasetInfo, commonFields, '//CitationType', 'citationType')
+    setDsInfoCommonFieldTxt(datasetInfo, commonFields, '//DateOfCitation', 'dateOfCitation')
+    setDsInfoCommonFieldTxt(datasetInfo, commonFields, '//CitationType/Journal/ISSN', 'issn')
+    setDsInfoCommonFieldTxt(datasetInfo, commonFields, '//CitationType/Journal/Issue', 'issue')
+
+    setDsInfoCommonFieldTxt(datasetInfo, commonFields, '//CitationType/Book/Chapter', 'chapter')
+    setDsInfoCommonFieldTxt(datasetInfo, commonFields, '//CitationType/Book/Edition', 'edition')
+    setDsInfoCommonFieldTxt(datasetInfo, commonFields, '//CitationType/Book/Editor', 'editor')
+    setDsInfoCommonFieldTxt(datasetInfo, commonFields, '//CitationType/Book/ISBN', 'isbn')
+
+    setDsInfoCommonFieldArray(datasetInfo, commonFields, '//Keyword', 'keyword')
+
+    setDsInfoCommonFieldTxt(datasetInfo, commonFields, '//Language', 'language')
+    setDsInfoCommonFieldTxt(datasetInfo, commonFields, '//Location', 'location')
+    setDsInfoCommonFieldTxt(datasetInfo, commonFields, '//Publication', 'publication')
+    setDsInfoCommonFieldTxt(datasetInfo, commonFields, '//PublicationYear', 'publicationYear')
+    setDsInfoCommonFieldTxt(datasetInfo, commonFields, '//Publisher', 'publisher')
+    setDsInfoCommonFieldTxt(datasetInfo, commonFields, '//Title', 'title')
+    setDsInfoCommonFieldTxt(datasetInfo, commonFields, '//Volume', 'volume')
+    setDsInfoCommonFieldTxt(datasetInfo, commonFields, '//URL', 'url')
+  }
+
+  let relatedDOI = xmlDocument.find('//DATA_SOURCE/LabGenerated/relatedDOI')
   if (relatedDOI) {
     relatedDOI.forEach(function (v, idx) {
       let rdoi = v.text()
@@ -444,13 +604,15 @@ function mergeDatasetInfoFromXml (logger, datasetInfo, xmlDocument) {
       }
     })
   }
+
   let doi = xmlDocument.find('/PolymerNanocomposite/DATA_SOURCE/Citation/CommonFields/DOI')
   if (doi) {
     datasetInfo.doi = doi[0].text()
   }
   return false
 }
-function replaceDatasetId (logger, id, newDsid) {
+
+function replaceXmlSeqIdInTitle (logger, id, newDsid) {
   // given an id of the regex form .[0-9]{n}_S[0-9]{n}_AUTHOR_YYYY replace the dsid component (first set of number)
   let newId = null
   let m = matchValidXmlTitle(id)
@@ -461,63 +623,143 @@ function replaceDatasetId (logger, id, newDsid) {
   }
   return newId
 }
+function replaceXmlSampleNumberInTitle (logger, id, newSampleNumber) {
+  // given an id of the regex form .[0-9]{n}_S[0-9]{n}_AUTHOR_YYYY replace the sample number component (second set of number)
+  let newId = null
+  newSampleNumber = ''+newSampleNumber // force to string
+  let m = matchValidXmlTitle(id)
+  if (m) {
+    let oldSampleNumber = m[2]
+    newId = id[0] + m[1] + '_S' + newSampleNumber + '_' + m[3] + '_' + m[4]
+    logger.debug('oldId: ' + id + ' old sample number: ' + oldSampleNumber + ' new id: ' + newId)
+  }
+  return newId
+}
 
 function updateMicrostructureImageFileLocations (logger, xmlDoc, restServerBaseUri) {
   let func = 'updateMicrostructureImageFileLocations'
   let blobs = xmlDoc.find('//MICROSTRUCTURE/ImageFile/File')
+  let blobArray = []
   blobs.forEach((v, idx) => {
     let blob = v.text()
     let m = blob.match(/blob\?id=([A-Fa-f0-9]*)/)
     if (m) {
       let blobId = m[1]
+      blobArray.push({'type': 'blob', 'id': blobId})
       let newBlob = restServerBaseUri + '/blob?id=' + blobId
       v.text(newBlob)
       logger.debug(func + ' - updated blob location from: ' + blob + ' to: ' + newBlob)
     }
   })
+  return blobArray
 }
 
-function xmlEnsurePathExists (xmlDoc, path) {
+function xmlEnsurePathExists (xmlDoc, path, after) { // after may be undefined but is a list of element names (in order, same level) that this new path must come after
   // ensure path exists and create nodes if necessary.
   // returns new document containing path
+  // Expects root node and at least one node to ensure exists as path i.e. /PolymerNanocomposite/ID
   let rv = null
+  let func = 'xmlEnsurePathExists'
   let nodes = path.replace(/^\/*/, '').split('/') // strip leading slashes and split by path separator
   let subPath = ''
   let goodSubNode = null
-  let newDoc = null
-  nodes.forEach(function (v, idx) {
+  let newDoc = xmlDoc
+  console.log(func + ' - ' + 'Path: ' + path + ' After: ' + JSON.stringify(after) + ' nodes is: ' + JSON.stringify(nodes))
+  nodes.forEach(function (v) {
     subPath += '/' + v
-    let subNode = xmlDoc.find(subPath)
+    let subNode = newDoc.find(subPath) // xmlDoc.find(subPath)
     if (subNode && subNode.length > 0) {
-      // console.log('found subPath: ' + subPath)
+      // console.log(func + ' - ' + 'found subPath: ' + subPath)
       goodSubNode = subNode
     } else {
       // console.log('subPath: ' + subPath + ' NOT FOUND')
       if (goodSubNode && goodSubNode.length > 0) {
         // create new element node at subPath + nodes[idx]
-        // console.log('goodSubNode: ' + dump(goodSubNode))
-        // console.log('goodSubNode: ' + goodSubNode.toString())
-        // console.log('goodSubNode[0]: ' + goodSubNode[0].toString())
-        // console.log('goodSubNode.type(): ' + goodSubNode[0].type())
-        let newNode = goodSubNode[0].node(v, null)
-        // console.log('newNode: ' + newNode.toString())
+        // console.log(func + ' - ' + 'goodSubNode: ' + dump(goodSubNode))
+        // console.log(func + ' - ' + 'goodSubNode: ' + goodSubNode.toString())
+        // console.log(func + ' - ' + 'goodSubNode[0]: ' + goodSubNode[0].toString())
+        // console.log(func + ' - ' + 'goodSubNode.type(): ' + goodSubNode[0].type())
+        let newNode = null
+        if (after) {
+          let _after = _.clone(after)
+          let possibles = []
+          let children = goodSubNode[0].childNodes()
+          let idx = 0
+          children.forEach((v1) => {
+            let nm = v1.name()
+            console.log('Looking for possible spot for new node: ' + v + ' Cur: ' + nm + ' target after is: ' + after.slice(-1))
+            if (_after && _after.length > 0 && nm === _after[0]) {
+              possibles.push({nm: nm, idx: idx})
+              _after.shift()
+              console.log(func + ' - ' + 'found possible: ' + JSON.stringify(possibles))
+            }
+            // if (nm === after.slice(-1)) {
+            //   newNode = v1.addNextSibling(new libxmljs.Element(xmlDoc, v))
+            // }
+            ++idx
+          })
+          try {
+            if (possibles.length > 0) {
+              let afterChild = null // children[possibles.slice(-1).idx]
+              idx = 0
+              goodSubNode[0].childNodes().forEach((c) => {
+                let possible = possibles.slice(-1)[0]
+                let pidx = possible['idx']
+                console.log('possible at end of array: ' + JSON.stringify(possible))
+                if (idx === pidx) {
+                  if (c) {
+                    afterChild = c
+                    console.log(func + ' - ' + 'adding node: ' + v + ' under: ' + afterChild.name())
+                  } else {
+                    console.log(func + ' - ' + 'Error - invalid node in childNodes() of goodSubNode[0].')
+                    try {
+                      console.log(func + ' - ' + goodSubNode[0].toString())
+                    } catch (err) {
+                      console.log(func + ' - ' + 'unable to capture value of goodSubNode[0] using toString. Error: ' + err.message)
+                    }
+                  }
+                } else {
+                  console.log(func + ' - ' + 'checked child at index: ' + idx + ' vs. possible idx: ' + pidx)
+                }
+                ++idx
+              })
+              newNode = afterChild.addNextSibling(new libxmljs.Element(xmlDoc, v))
+            }
+          } catch (err) {
+            console.log(func + ' - ' + 'error searching for possibles: ' + err.message)
+            console.log(err.stack)
+            throw (err)
+          }
+          if (newNode === null) {
+            let afterChild = goodSubNode[0].child(0)
+            if (afterChild) {
+              newNode = afterChild.addNextSibling(new libxmljs.Element(xmlDoc, v))
+            } else {
+              newNode = goodSubNode[0].addChild(new libxmljs.Element(xmlDoc, v))
+            }
+          }
+        } else {
+          newNode = goodSubNode[0].node(v, null)
+        }
+        // console.log(func + ' - ' + 'newNode: ' + newNode.toString())
         newDoc = newNode.doc()
         goodSubNode = newNode
       } else if (goodSubNode) {
-        // console.log('goodSubNode is not null, but length <= 0')
-        // console.log('goodSubNode.toString() = ' + goodSubNode.toString())
-        // console.log('goodSubNode.type() = ' + goodSubNode.type())
+        // console.log(func + ' - ' + 'goodSubNode is not null, but length <= 0')
+        // console.log(func + ' - ' + 'goodSubNode.toString() = ' + goodSubNode.toString())
+        // console.log(func + ' - ' + 'goodSubNode.type() = ' + goodSubNode.type())
         let newNode = goodSubNode.node(v, null)
         goodSubNode = newNode
         newDoc = newNode.doc()
-        // console.log('added child: ' + newNode.toString())
-        // console.log('new doc string: ' + newDoc.toString())
+        // console.log(func + ' - ' + 'added child: ' + newNode.toString())
+        // console.log(func + ' - ' + 'new doc string: ' + newDoc.toString())
       } else {
-        console.log('goodSubNode is null')
+        console.log(func + ' - ' + 'goodSubNode is null')
       }
     }
   })
   rv = newDoc
+  console.log(func + ' - ' + 'is returning.')
   return rv
 }
 
@@ -526,13 +768,16 @@ module.exports = {
   'matchValidXmlTitle': matchValidXmlTitle,
   'getEnv': getEnv,
   'datasetBucketName': datasetBucketName,
-  'getDatasetXmlFileList': getDatasetXmlFileList,
+  'getDatasetXmlFileList': getDatasetXmlFileList, // deprecated
+  'getXmlFileList': getXmlFileList, // replacement for getDatasetXmlFileList
   'getLatestSchemas': getLatestSchemas,
+  'updateDataset': updateDataset,
   'createDataset': createDataset,
   'sortSchemas': sortSchemas,
   'mergeDatasetInfoFromXml': mergeDatasetInfoFromXml,
   'xmlEnsurePathExists': xmlEnsurePathExists,
-  'replaceDatasetId': replaceDatasetId,
+  'replaceXmlSeqIdInTitle': replaceXmlSeqIdInTitle,
+  'replaceXmlSampleNumberInTitle': replaceXmlSampleNumberInTitle,
   'updateMicrostructureImageFileLocations': updateMicrostructureImageFileLocations,
   'updateOrCreateXmlData': updateOrCreateXmlData,
   'logTrace': logTrace,
