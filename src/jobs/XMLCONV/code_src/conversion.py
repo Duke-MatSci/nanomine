@@ -1,6 +1,8 @@
 
 from extract_verify_ID_callable import runEVI
 from customized_compiler_callable import compiler
+from xsdTraverse import xsdTraverse
+from mfvf import mfvfConvert
 from nm.common import *
 from nm.common.nm_rest import nm_rest
 import os
@@ -14,6 +16,8 @@ from datauri import DataURI
 import traceback
 import ssl
 import mime
+import requests
+
 
 
 def uploadFilesAndAdjustXMLImageRefs(jobDir, schemaId, xmlId, runCtx):
@@ -84,32 +88,6 @@ def uploadFilesAndAdjustXMLImageRefs(jobDir, schemaId, xmlId, runCtx):
         ## testing -- raise ValueError('Upload successful. returned id: ' + uploadId) ## for testing
         updatedXml = True
 
-      # TODO remove this block after testing
-      x = """
-      imageFiles.append(fn)
-      fullImageFileName = jobDir + '/' + fn
-      logging.debug('uploading: ' + fullImageFileName)
-      dataUri = DataURI.from_file(fullImageFileName)
-      dataUri = dataUri.replace("\n","") # remove line feeds
-      ## logging.debug('dataUri: ' + dataUri)
-      curatefiledata = '{"filename":"'+ fn + '","dataUri":"' + dataUri + '"}'
-      # logging.debug(curatefiledata + ' len is: ' + str(len(curatefiledata)))
-      curatefiledata = json.loads(curatefiledata)
-      rq = urllib.request.Request(curateFilesUrl)
-      logging.debug('request created using createFilesUrl')
-      rq.add_header('Content-Type','application/json')
-      nmCurateFiles = nm_rest(logging, runCtx['sysToken'], runCtx['curateApiToken'], runCtx['curateRefreshToken'], rq)
-      r = nmCurateFiles.urlopen(json.dumps(curatefiledata).encode("utf8"))
-      if r.getcode() == 201:
-        uploadId = json.loads(r.read().decode("utf-8"))['data']['id']
-        imageRef = webbase + '/nmr/blob?id=' + uploadId
-        logging.debug('new image value for XML: ' + imageRef)
-        f.text = imageRef # update XML node with new image reference
-        ## testing -- raise ValueError('Upload successful. returned id: ' + uploadId) ## for testing
-        updatedXml = True
-      else:
-        raise ValueError('Unexpected return code from image upload (' + fn + '): ' + str(r.getcode()))
-      """
     if updatedXml == True:
       # update the XML in the file
       xmlTree.write(xmlName)
@@ -124,6 +102,8 @@ def conversion(jobDir, code_srcDir, xsdDir, templateName, user, datasetId):
     nm_dataset_initial_doi = os.environ['NM_DATASET_INITIAL_DOI']
     webbase = os.environ['NM_WEB_BASE_URI']
 
+#    jobApiToken = os.environ['NM_AUTH_API_TOKEN_JOBS']
+#    jobRefreshToken = os.environ['NM_AUTH_API_REFRESH_JOBS']
     xsdFilename = xsdDir.split("/")[-1]
 
     runCtx = {
@@ -203,8 +183,117 @@ def conversion(jobDir, code_srcDir, xsdDir, templateName, user, datasetId):
                     messages.append('[XML Schema Validation Error] ' + row['error'].strip())
     if len(messages) > 0:
         return ('failure', messages)
-    # check #5: upload and check if the uploading is successful
 
+    # check #5: call the ChemProps API and add in the standardized chemical names, uSMILES and density
+    try:
+        xmlName = jobDir + "/xml/" + ID + ".xml"
+        xmlTree = etree.parse(xmlName)
+        # collect all MatrixComponent/ChemicalName and FillerComponent/ChemicalName packages
+        matcomps = xmlTree.findall('.//MatrixComponent')
+        filcomps = xmlTree.findall('.//FillerComponent')
+        # for each package, send to ChemProps API
+        chemprops_api_url = restbase + '/api/v1/chemprops'
+        # MatrixComponent
+        for matcomp in matcomps:
+            chemprops_data = {
+                "polfil": "pol",
+                "ChemicalName": matcomp.findtext('ChemicalName'),
+                "Abbreviation": '' if matcomp.findtext('Abbreviation') is None else matcomp.findtext('Abbreviation'),
+                "TradeName": '' if matcomp.findtext('TradeName') is None else matcomp.findtext('TradeName'),
+                "uSMILES":  '' if matcomp.findtext('uSMILES') is None else matcomp.findtext('uSMILES'),
+                "nmId": ID
+            }
+            # chemprops_rq = urllib.request.Request(chemprops_api_url)
+            logging.debug('request created for ChemProps using chemprops_api_url')
+            logging.debug('Searching polymer package: ' + json.dumps(chemprops_data).encode("utf8"))
+            # chemprops_rq.add_header('Content-Type','application/json')
+            # chemprops_search = nm_rest(logging, sysToken, jobApiToken, jobRefreshToken, chemprops_rq)
+            # r = chemprops_search.urlopen(json.dumps(chemprops_data).encode("utf8"))
+            r = requests.get(chemprops_api_url, params = chemprops_data) # requirement for auth removed for ChemProps for now
+            # if r.getcode() == 200:
+            if r.status_code == 200:
+                # result = json.loads(r.read().decode("utf-8"))
+                result = r.json()
+                logging.debug('Searching result: ' + json.dumps(result).encode("utf8"))
+            ## testing - raise ValueError('Upload of input successful. returned id: ' + uploadId) ## for testing
+            else:
+                raise ValueError('Unexpected return code from ChemProps: ' + str(r.getcode()))
+            # now we modify xml with result
+            stdCN = matcomp.find('.//StdChemicalName')
+            if stdCN is None:
+                stdCN = etree.SubElement(matcomp, 'StdChemicalName')
+            stdCN.text = result['StandardName']
+            uSMILES = matcomp.find('.//uSMILES')
+            if uSMILES is None:
+                uSMILES = etree.SubElement(matcomp, 'uSMILES')
+            uSMILES.text = result['uSMILES']
+            if matcomp.find('Density') is None:
+                density = etree.SubElement(matcomp, 'Density')
+                dens_des = etree.SubElement(density, 'description')
+                dens_des.text = 'inserted from ChemProps, NanoMine'
+                dens_val = etree.SubElement(density, 'value')
+                dens_val.text = result['density']
+                dens_uni = etree.SubElement(density, 'unit')
+                dens_uni.text = 'g/cm3'
+        # FillerComponent
+        for filcomp in filcomps:
+            chemprops_data = {
+                "polfil": "fil",
+                "ChemicalName": filcomp.findtext('ChemicalName'),
+                "Abbreviation": '' if filcomp.findtext('Abbreviation') is None else filcomp.findtext('Abbreviation'),
+                "nmId": ID
+            }
+            # chemprops_rq = urllib.request.Request(chemprops_api_url)
+            logging.debug('request created for ChemProps using chemprops_api_url')
+            logging.debug('Searching filler package: ' + json.dumps(chemprops_data).encode("utf8"))
+            # chemprops_rq.add_header('Content-Type','application/json')
+            # chemprops_search = nm_rest(logging, sysToken, jobApiToken, jobRefreshToken, chemprops_rq)
+            # r = chemprops_search.urlopen(json.dumps(chemprops_data).encode("utf8"))
+            r = requests.get(chemprops_api_url, params = chemprops_data) # requirement for auth removed for ChemProps for now
+            # if r.getcode() == 200:
+            if r.status_code == 200:
+                # result = json.loads(r.read().decode("utf-8"))
+                result = r.json()
+                logging.debug('Searching result: ' + json.dumps(result).encode("utf8"))
+            ## testing - raise ValueError('Upload of input successful. returned id: ' + uploadId) ## for testing
+            else:
+                raise ValueError('Unexpected return code from ChemProps: ' + str(r.getcode()))
+            # now we modify xml with result
+            stdCN = filcomp.find('.//StdChemicalName')
+            if stdCN is None:
+                stdCN = etree.SubElement(filcomp, 'StdChemicalName')
+            stdCN.text = result['StandardName']
+            if filcomp.find('Density') is None:
+                density = etree.SubElement(filcomp, 'Density')
+                dens_des = etree.SubElement(density, 'description')
+                dens_des.text = 'inserted from ChemProps, NanoMine'
+                dens_val = etree.SubElement(density, 'value')
+                dens_val.text = str(result['density'])
+                dens_uni = etree.SubElement(density, 'unit')
+                dens_uni.text = 'g/cm3'
+        # sort modified elements with xsdTraverse module
+        xsdt = xsdTraverse(xsdDir)
+        # sort MatrixComponent by xpath PolymerNanocomposite/MATERIALS/Matrix/MatrixComponent
+        xsdt.sortSubElementsByPath(xmlTree, 'PolymerNanocomposite/MATERIALS/Matrix/MatrixComponent')
+        # sort FillerComponent by xpath PolymerNanocomposite/MATERIALS/Filler/FillerComponent
+        xsdt.sortSubElementsByPath(xmlTree, 'PolymerNanocomposite/MATERIALS/Filler/FillerComponent')
+        xmlTree.write(xmlName, encoding="UTF-8", xml_declaration=True)
+    except:
+        messages.append('exception occurred during ChemProps-query')
+        messages.append('exception: '  + str(traceback.format_exc()))
+    if len(messages) > 0:
+        return ('failure', messages)
+    # check #6: call the mf-vf conversion agent and add in the calculated mf/vf
+    try:
+        xmlName = jobDir + "/xml/" + ID + ".xml"
+        mvc = mfvfConvert(xmlName)
+        mvc.run()
+    except:
+        messages.append('exception occurred during mass fraction-volume fraction conversion')
+        messages.append('exception: '  + str(traceback.format_exc()))
+    if len(messages) > 0:
+        return ('failure', messages)
+    # check #7: upload and check if the uploading is successful
     try:
 
         blobs = uploadFilesAndAdjustXMLImageRefs(jobDir, runCtx['schemaId'], ID, runCtx)
