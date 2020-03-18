@@ -213,26 +213,28 @@ def conversion(jobDir, code_srcDir, xsdDir, templateName, user, datasetId):
                 # result = json.loads(r.read().decode("utf-8"))
                 result = r.json()
                 logging.debug('Searching result: ' + json.dumps(result)) #.encode("utf8"))
+                # now we modify xml with result
+                stdCN = matcomp.find('.//StdChemicalName')
+                if stdCN is None:
+                  stdCN = etree.SubElement(matcomp, 'StdChemicalName')
+                stdCN.text = result['StandardName']
+                uSMILES = matcomp.find('.//uSMILES')
+                if uSMILES is None:
+                  uSMILES = etree.SubElement(matcomp, 'uSMILES')
+                uSMILES.text = result['uSMILES']
+                if matcomp.find('Density') is None:
+                  density = etree.SubElement(matcomp, 'Density')
+                  dens_des = etree.SubElement(density, 'description')
+                  dens_des.text = 'inserted from ChemProps, NanoMine'
+                  dens_val = etree.SubElement(density, 'value')
+                  dens_val.text = result['density']
+                  dens_uni = etree.SubElement(density, 'unit')
+                  dens_uni.text = 'g/cm3'
             ## testing - raise ValueError('Upload of input successful. returned id: ' + uploadId) ## for testing
+            elif r.status_code == 404:
+              logging.error('Matrix not found: ' + json.dumps(chemprops_data))
             else:
-                raise ValueError('Unexpected return code from ChemProps: ' + str(r.getcode()))
-            # now we modify xml with result
-            stdCN = matcomp.find('.//StdChemicalName')
-            if stdCN is None:
-                stdCN = etree.SubElement(matcomp, 'StdChemicalName')
-            stdCN.text = result['StandardName']
-            uSMILES = matcomp.find('.//uSMILES')
-            if uSMILES is None:
-                uSMILES = etree.SubElement(matcomp, 'uSMILES')
-            uSMILES.text = result['uSMILES']
-            if matcomp.find('Density') is None:
-                density = etree.SubElement(matcomp, 'Density')
-                dens_des = etree.SubElement(density, 'description')
-                dens_des.text = 'inserted from ChemProps, NanoMine'
-                dens_val = etree.SubElement(density, 'value')
-                dens_val.text = result['density']
-                dens_uni = etree.SubElement(density, 'unit')
-                dens_uni.text = 'g/cm3'
+                raise ValueError('Unexpected return code from ChemProps: ' + str(r.status_code))
         # FillerComponent
         for filcomp in filcomps:
             chemprops_data = {
@@ -253,22 +255,24 @@ def conversion(jobDir, code_srcDir, xsdDir, templateName, user, datasetId):
                 # result = json.loads(r.read().decode("utf-8"))
                 result = r.json()
                 logging.debug('Searching result: ' + json.dumps(result)) #.encode("utf8"))
+                # now we modify xml with result
+                stdCN = filcomp.find('.//StdChemicalName')
+                if stdCN is None:
+                  stdCN = etree.SubElement(filcomp, 'StdChemicalName')
+                stdCN.text = result['StandardName']
+                if filcomp.find('Density') is None:
+                  density = etree.SubElement(filcomp, 'Density')
+                  dens_des = etree.SubElement(density, 'description')
+                  dens_des.text = 'inserted from ChemProps, NanoMine'
+                  dens_val = etree.SubElement(density, 'value')
+                  dens_val.text = str(result['density'])
+                  dens_uni = etree.SubElement(density, 'unit')
+                  dens_uni.text = 'g/cm3'
             ## testing - raise ValueError('Upload of input successful. returned id: ' + uploadId) ## for testing
+            elif r.status_code == 404:
+              logging.error('Filler not found: ' + json.dumps(chemprops_data))
             else:
-                raise ValueError('Unexpected return code from ChemProps: ' + str(r.getcode()))
-            # now we modify xml with result
-            stdCN = filcomp.find('.//StdChemicalName')
-            if stdCN is None:
-                stdCN = etree.SubElement(filcomp, 'StdChemicalName')
-            stdCN.text = result['StandardName']
-            if filcomp.find('Density') is None:
-                density = etree.SubElement(filcomp, 'Density')
-                dens_des = etree.SubElement(density, 'description')
-                dens_des.text = 'inserted from ChemProps, NanoMine'
-                dens_val = etree.SubElement(density, 'value')
-                dens_val.text = str(result['density'])
-                dens_uni = etree.SubElement(density, 'unit')
-                dens_uni.text = 'g/cm3'
+              raise ValueError('Unexpected return code from ChemProps: ' + str(r.status_code))
         # sort modified elements with xsdTraverse module
         xsdt = xsdTraverse(xsdDir)
         # sort MatrixComponent by xpath PolymerNanocomposite/MATERIALS/Matrix/MatrixComponent
