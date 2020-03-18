@@ -2259,6 +2259,7 @@ app.post('/curate', function (req, res) {
   // TODO need to keep prior versions of XML by using a version number in the record
   let title = req.body.title
   let schemaId = req.body.schemaId
+  let datasetId = req.body.datasetId
   let content = req.body.content
   let userid = req.body.userid
   let ispublished = req.body.ispublished || false // no camelcase
@@ -2279,10 +2280,10 @@ app.post('/curate', function (req, res) {
     if (m) {
       let dsSeq = m[1]
       // look up the dataset to ensure that it exists
-      let dsQuery = {'seq': dsSeq}
+      let dsQuery = {'datasetId': datasetId}
       Datasets.find(dsQuery, function (err, docs) {
         if (err || docs.length === 0) {
-          jsonResp.err = 'unable to find associated dataset: ' + dsSeq + ' err: ' + err
+          jsonResp.err = 'unable to find associated datasetId: ' + datasetId + ' err: ' + err
           console.log(msg + ' ' + jsonResp.err)
           return res.status(400).json(jsonResp)
         } else {
@@ -2291,6 +2292,7 @@ app.post('/curate', function (req, res) {
           let theData = {
             'title': title,
             'schemaId': schemaId,
+            'datasetId': datasetId,
             'entityState': curatedDataState,
             'dsSeq': dsSeq,
             'ispublished': ispublished,
@@ -2299,13 +2301,15 @@ app.post('/curate', function (req, res) {
             'curateState': curateState,
             'xml_str': content
           }
-          XmlData.findOneAndUpdate(xmlQuery, theData, {'upsert': true}, function (err, doc) {
+          XmlData.findOneAndUpdate(xmlQuery, theData, {'upsert': true, new: true, rawResult: true}, function (err, findUpdateReturnValues) {
             if (err) {
               jsonResp.error = err
               return res.status(500).json(jsonResp)
             }
-            jsonResp.data = doc
-            return res.status(201).json(jsonResp)
+            jsonResp.data = findUpdateReturnValues.value // updated document
+            logger.debug(func + ' - success. OK = ' + findUpdateReturnValues.ok + ' lastError: ' + inspect(findUpdateReturnValues.lastErrorObject))
+            logger.debug(func + ' - returning: ' + inspect(jsonResp))
+            return res.status(200).json(jsonResp)
           })
         }
       })

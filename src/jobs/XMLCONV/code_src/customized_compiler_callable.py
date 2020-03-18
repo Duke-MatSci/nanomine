@@ -974,9 +974,11 @@ def sheetMatType(sheet, DATA, myXSDtree, jobDir):
     # special case FillerComposition
     if len(frac) > 0:
         # sort frac, always follow the order: mass, volume
+        fracType = 'mass'
         if 'volume' in frac:
             frac.move_to_end('volume')
-        temp.append({'FillerComposition':{'Fraction':frac}})
+            fracType = 'volume'
+        temp.append({'FillerComposition':{'Fraction':{ fracType: {'value':frac[fracType]}}}})
         frac = collections.OrderedDict()
     # don't forget about the last temp
     # save temp

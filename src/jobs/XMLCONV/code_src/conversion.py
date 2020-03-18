@@ -230,7 +230,8 @@ def conversion(jobDir, code_srcDir, xsdDir, templateName, user, datasetId):
         rv = nmCurateFiles.urlopen(json.dumps(curate_data).encode("utf8"))
         response = json.loads(rv.read().decode("utf-8"))['data']
 
-        # logging.info('curate insert request posted: ' + str(r.getcode()))
+        logging.info('curate insert for title: ' + ID + ' datasetId: ' + runCtx['datasetId'] +' request posted. Result: ' + str(rv.getcode()))
+
     except:
           messages.append('exception occurred during curate-insert')
           messages.append('exception: '  + str(traceback.format_exc()))
@@ -239,7 +240,7 @@ def conversion(jobDir, code_srcDir, xsdDir, templateName, user, datasetId):
     # logging.debug('Xml curate Response: ' + str(response))
     xmlMongoId = response['_id']
 
-    blobs.append({'type': 'xmldata', 'id': xmlMongoId, 'metadata': {'contentType': 'application/xml', 'filename': ID+'.xml'}})
+    blobs.append({'type': 'xmldata', 'id': xmlMongoId, 'metadata': {'contentType': 'application/xml', 'filename': ID + '.xml'}})
     fileset = {'fileset': ID, 'files': blobs}
     filesets = dsInfo.get('filesets')
     if filesets == None:

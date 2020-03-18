@@ -175,13 +175,14 @@ def restDOI(DOI, code_srcDir, restbase, sheet_sample, user, runCtx) :
             if len(crawlerDict) == 0:
                 message += '[DOI Error] Please check the reported DOI, it seems that DOI does not exist.\n'
                 return (None, message)
-            dsInfo = mapToRest(dsInfo, crawlerDict)
+            dsInfo = mapToRest(dsInfo, crawlerDict)['dsUpdate']
     # return response at the end, if response is not None, message will be ''
     return (dsInfo, message)
 
 
 # generate ID with format PID_SID_LastName_PubYear for users with DOI
 def generateID(response, SID, SI_flag):
+    logging.debug('Dataset Information: ' + str(response))
     seq = response['seq']
     PID = 'L' + str(seq)
     LastName = 'LastName'
