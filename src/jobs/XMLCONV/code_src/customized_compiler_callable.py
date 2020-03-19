@@ -869,10 +869,12 @@ def sheetMatType(sheet, DATA, myXSDtree, jobDir):
         if match(sheet.cell_value(row, 0), 'Fraction'):
             if type(sheet.cell_value(row, 2)) == float or len(sheet.cell_value(row, 2)) > 0:
                 if match(sheet.cell_value(row, 1), 'mass'):
-                    frac['mass'] = sheet.cell_value(row, 2)
+                    frac['mass'] = OrderedDict({'value':sheet.cell_value(row, 2),
+                                               'source':'reported'})
                     # temp.append({'FillerComposition':{'Fraction':{'mass':sheet.cell_value(row, 2)}}})
                 elif match(sheet.cell_value(row, 1), 'volume'):
-                    frac['volume'] = sheet.cell_value(row, 2)
+                    frac['volume'] = OrderedDict({'value':sheet.cell_value(row, 2),
+                                               'source':'reported'})
                     # temp.append({'FillerComposition':{'Fraction':{'volume':sheet.cell_value(row, 2)}}})
             # FillerComponent/ParticleSurfaceTreatment
                 #./ChemicalName
@@ -974,11 +976,9 @@ def sheetMatType(sheet, DATA, myXSDtree, jobDir):
     # special case FillerComposition
     if len(frac) > 0:
         # sort frac, always follow the order: mass, volume
-        fracType = 'mass'
         if 'volume' in frac:
             frac.move_to_end('volume')
-            fracType = 'volume'
-        temp.append({'FillerComposition':{'Fraction':{ fracType: {'value':frac[fracType]}}}})
+        temp.append({'FillerComposition':{'Fraction':frac}})
         frac = collections.OrderedDict()
     # don't forget about the last temp
     # save temp
