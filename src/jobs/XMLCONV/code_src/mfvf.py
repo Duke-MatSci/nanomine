@@ -29,13 +29,9 @@ class mfvfConvert:
         self.filMVs = [] # a list for labeling mass or volume FillerComposition for all fillers
         self.filComps = [] # a list for the actual values matching the filMVs list
 
-    # this function is for cases when the density if not reported
-    # we requires the density info to be stored in g/cm^3
+    # this function is moved to ChemProps, should no longer be called
     def getDensity(self, chemical):
-        # someDensityFunction crawler?(TODO)
-        # density = someDensityFunction(chemical)
-        # return density
-        pass
+        raise ValueError('[Density Error] No density value found!')
 
     # this function returns the most frequent items within a list
     def freq(self, myList):
@@ -274,6 +270,8 @@ class mfvfConvert:
             return # pure polymer
         if self.tree.find('.//FillerComposition/Fraction/mass/value') is not None and self.tree.find('.//FillerComposition/Fraction/volume/value') is not None:
             return # both mass and volume fraction already reported
+        if self.tree.find('.//FillerComponent/Density/value') is None or self.tree.find('.//MatrixComponent/Density/value') is None:
+            return # not all density info are provided, leave it untouched for now
         self.computeFiller()
         self.computeMatrix()
         self.computeComposite()
