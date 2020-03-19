@@ -15,58 +15,20 @@ from lxml import etree
 from datauri import DataURI
 import traceback
 import ssl
+import mime
 import requests
 
 
-def uploadFilesAndAdjustXMLImageRefs(jobDir, schemaId, xmlId):
+
+def uploadFilesAndAdjustXMLImageRefs(jobDir, schemaId, xmlId, runCtx):
     imageFiles = [] # track image files uploaded -- which go into default bucket (returned id is substituted back into XML)
     # all other files go into 'curateinput' bucket with filename {schemaId}/{xmlId}/filename (returned ID is not stored)
     # for now let exceptions bubble up to handler in caller
-
-    restbase = os.environ['NM_LOCAL_REST_BASE']
-    webbase = os.environ['NM_WEB_BASE_URI']
-    curateFilesUrl = restbase + '/nmr/blob'
-
-    sysToken = os.environ['NM_AUTH_SYSTEM_TOKEN']
-    curateApiToken = os.environ['NM_AUTH_API_TOKEN_CURATE']
-    curateRefreshToken = os.environ['NM_AUTH_API_REFRESH_CURATE']
-    xmlTitleRe = re.compile('^[A-Z]([0-9]+)[_][S]([0-9]+)[_][\S]+[_]\d{4}([.][Xx][Mm][Ll])?$')
-    reMatch = xmlTitleRe.match(xmlId) ## TODO handle invalid title i.e. reMatch == None
-    if reMatch == None:
-      logging.error('xmlId (title) does not match expected format: ' + xmlId + ' (match was None)')
-
-    datasetId = reMatch.group(1)
-    xmlName = jobDir + '/xml/' + xmlId + '.xml'
-    xmlTree = etree.parse(xmlName)
-    updatedXml = False
-    for f in xmlTree.findall('.//MICROSTRUCTURE/ImageFile/File'):
-      fn = f.text.split('/')[-1]
-      imageFiles.append(fn)
-      fullImageFileName = jobDir + '/' + fn
-      logging.debug('uploading: ' + fullImageFileName)
-      dataUri = DataURI.from_file(fullImageFileName)
-      dataUri = dataUri.replace("\n","") # remove line feeds
-      ## logging.debug('dataUri: ' + dataUri)
-      curatefiledata = '{"filename":"'+ fn + '","dataUri":"' + dataUri + '"}'
-      # logging.debug(curatefiledata + ' len is: ' + str(len(curatefiledata)))
-      curatefiledata = json.loads(curatefiledata)
-      rq = urllib.request.Request(curateFilesUrl)
-      logging.debug('request created using createFilesUrl')
-      rq.add_header('Content-Type','application/json')
-      nmCurateFiles = nm_rest(logging, sysToken, curateApiToken, curateRefreshToken, rq)
-      r = nmCurateFiles.urlopen(json.dumps(curatefiledata).encode("utf8"))
-      if r.getcode() == 201:
-        uploadId = json.loads(r.read().decode("utf-8"))['data']['id']
-        imageRef = webbase + '/nmr/blob?id=' + uploadId
-        logging.debug('new image value for XML: ' + imageRef)
-        f.text = imageRef # update XML node with new image reference
-        ## testing -- raise ValueError('Upload successful. returned id: ' + uploadId) ## for testing
-        updatedXml = True
-      else:
-        raise ValueError('Unexpected return code from image upload (' + fn + '): ' + str(r.getcode()))
-    if updatedXml == True:
-      # update the XML in the file
-      xmlTree.write(xmlName)
+    restbase = runCtx['restbase']
+    webbase = runCtx['webbase']
+    curateFilesUrl = restbase + '/nmr/blob/create'
+    blobs = []
+    datasetId = runCtx['datasetId']
 
     # get a list of all files in jobDir and upload them
     dataFiles = os.listdir(jobDir)
@@ -77,40 +39,109 @@ def uploadFilesAndAdjustXMLImageRefs(jobDir, schemaId, xmlId):
         dataUri = DataURI.from_file(fn)
         dataUri = dataUri.replace("\n","") # remove line feeds
         ## objFN = schemaId + '/' + xmlId + '/' + f # change to datasetid/xmlid/filename
-        objFN = datasetId + '/' + xmlId + '/' + f
-        curatefiledata = '{"filename":"'+ objFN + '","bucketName":"curateinput","dataUri":"' + dataUri + '"}'
+        ## objFN = datasetId + '/' + xmlId + '/' + f
+        objFN = f
+        # curatefiledata = '{"filename":"'+ objFN + '","bucketName":"curateinput", "dataUri":"' + dataUri + '"}'
+        curatefiledata = '{"filename":"'+ objFN + '","dataUri":"' + dataUri + '","originalDatasetId":"' + datasetId + '"}'
         # logging.debug(curatefiledata + ' len is: ' + str(len(curatefiledata)))
         curatefiledata = json.loads(curatefiledata)
         rq = urllib.request.Request(curateFilesUrl)
         logging.debug('request created using createFilesUrl')
         rq.add_header('Content-Type','application/json')
-        nmCurateFiles = nm_rest(logging, sysToken, curateApiToken, curateRefreshToken, rq)
+        nmCurateFiles = nm_rest(logging, runCtx['sysToken'], runCtx['curateApiToken'], runCtx['curateRefreshToken'], rq)
         r = nmCurateFiles.urlopen(json.dumps(curatefiledata).encode("utf8"))
         if r.getcode() == 201:
           uploadId = json.loads(r.read().decode("utf-8"))['data']['id']
           logging.debug('uploaded file ID: ' + uploadId)
+          content_type = mime.Types.of(objFN)[0].content_type
+          blob_info = {'type': 'blob', 'id': uploadId, 'metadata': {'filename': objFN, 'contentType': content_type}}
+          if runCtx['excelTemplateName'] == objFN:
+            blob_info['metadata']['is_completed_pnc_template'] = True
+          blobs.append(blob_info)
           ## testing - raise ValueError('Upload of input successful. returned id: ' + uploadId) ## for testing
         else:
           raise ValueError('Unexpected return code from file upload (' + objFN + '): ' + str(r.getcode()))
 
+    # TODO remove this block after testing
+    #xmlTitleRe = re.compile('^[A-Z]([0-9]+)[_][S]([0-9]+)[_][\S]+[_]\d{4}([.][Xx][Mm][Ll])?$')
+    #reMatch = xmlTitleRe.match(xmlId) ## TODO handle invalid title i.e. reMatch == None
+    #if reMatch == None:
+    #  logging.error('xmlId (title) does not match expected format: ' + xmlId + ' (match was None)')
+
+    #datasetId = reMatch.group(1)
+    xmlName = jobDir + '/xml/' + xmlId + '.xml'
+    xmlTree = etree.parse(xmlName)
+    updatedXml = False
+    for f in xmlTree.findall('.//MICROSTRUCTURE/ImageFile/File'):
+      fn = f.text.split('/')[-1]
+      blob = None
+      for b in blobs:
+        bfn = b['metadata']['filename']
+        if bfn == fn:
+          blob = b
+      if blob == None:
+        raise ValueError('Unable to match xml: ' + xmlId + ' MICROSTRUCTURE image filename: ' + fn + ' with an uploaded image name.')
+      else:
+        imageRef = webbase + '/nmr/blob?id=' + blob['id']
+        logging.debug('new image value for XML: ' + imageRef)
+        f.text = imageRef # update XML node with new image reference
+        ## testing -- raise ValueError('Upload successful. returned id: ' + uploadId) ## for testing
+        updatedXml = True
+
+    if updatedXml == True:
+      # update the XML in the file
+      xmlTree.write(xmlName)
+    return blobs
 
 
-
-
-def conversion(jobDir, code_srcDir, xsdDir, templateName, user):
+def conversion(jobDir, code_srcDir, xsdDir, templateName, user, datasetId):
     restbase = os.environ['NM_LOCAL_REST_BASE']
     sysToken = os.environ['NM_AUTH_SYSTEM_TOKEN']
-    jobApiToken = os.environ['NM_AUTH_API_TOKEN_JOBS']
-    jobRefreshToken = os.environ['NM_AUTH_API_REFRESH_JOBS']
+    curateApiToken = os.environ['NM_AUTH_API_TOKEN_CURATE']
+    curateRefreshToken = os.environ['NM_AUTH_API_REFRESH_CURATE']
+    nm_dataset_initial_doi = os.environ['NM_DATASET_INITIAL_DOI']
+    webbase = os.environ['NM_WEB_BASE_URI']
+
     xsdFilename = xsdDir.split("/")[-1]
+
+    runCtx = {
+      'nm_dataset_initial_doi': nm_dataset_initial_doi,
+      'datasetId': datasetId,
+      'schemaName': xsdFilename,
+      'schemaId': '',
+      'restbase': restbase,
+      'webbase': webbase,
+      'sysToken': sysToken,
+      'curateApiToken': curateApiToken,
+      'curateRefreshToken': curateRefreshToken,
+      'excelTemplateName': templateName,
+      'xmlID': '',
+      'user': user
+    }
     # initialize messages
     messages = []
+
+    try:
+      # rest call for schemaID
+      schemaurl = restbase + '/nmr/templates/select?filename='+xsdFilename
+      rq = urllib.request.Request(schemaurl)
+      j = json.loads(urllib.request.urlopen(rq, context=ssl._create_unverified_context()).read().decode("utf-8"))
+      schemaId = j["data"][0]["_id"]
+      runCtx['schemaId'] = schemaId
+    except:
+      messages.append('Exception looking up schema information')
+      return ('failure', messages)
+
     # check #1: extension of templateName
     if os.path.splitext(templateName)[1] not in {'.xlsx', '.xls'}:
         messages = ['[Upload Error] The Excel template file should have extensions like ".xlsx" or ".xls".']
         return ('failure', messages)
     # get the ID
-    runEVI(jobDir, code_srcDir, templateName, restbase, user)
+    (dsInfo, dsMessage) = runEVI(jobDir, code_srcDir, templateName, restbase, user, runCtx)
+    if dsInfo == None:
+      messages.append(dsMessage)
+      return ('failure', messages)
+
     # check #2: see if ID conversion is successful
     if not os.path.exists(jobDir + '/ID.txt'):
         if os.path.exists(jobDir + '/error_message.txt'):
@@ -120,7 +151,7 @@ def conversion(jobDir, code_srcDir, xsdDir, templateName, user):
             messages_raw = error_message.split('\n')
             for message in messages_raw:
                 if len(message.strip()) > 0:
-                    messages.append(message.strip())    
+                    messages.append(message.strip())
             return ('failure', messages)
         messages += ['[Conversion Error] Failed to assemble the ID. Please check or contact the administrator!']
         return ('failure', messages)
@@ -128,7 +159,7 @@ def conversion(jobDir, code_srcDir, xsdDir, templateName, user):
         with open(jobDir + '/ID.txt', 'r') as f:
             ID = f.read()
     # kickoff the conversion script
-    logName = compiler(jobDir, code_srcDir, xsdDir, templateName, restbase)
+    logName = compiler(jobDir, code_srcDir, xsdDir, templateName, restbase, runCtx)
     # check #3: see if there is an error_message.txt generated during conversion
     if os.path.exists(jobDir + '/error_message.txt'):
         with open(jobDir + '/error_message.txt', 'r+') as f:
@@ -137,7 +168,7 @@ def conversion(jobDir, code_srcDir, xsdDir, templateName, user):
         messages_raw = error_message.split('\n')
         for message in messages_raw:
             if len(message.strip()) > 0:
-                messages.append(message.strip())    
+                messages.append(message.strip())
     # check #4: check the schema validation results
     with open(logName, 'r', encoding='utf-8') as f:
         vld_log = csv.DictReader(f)
@@ -150,6 +181,7 @@ def conversion(jobDir, code_srcDir, xsdDir, templateName, user):
                     messages.append('[XML Schema Validation Error] ' + row['error'].strip())
     if len(messages) > 0:
         return ('failure', messages)
+
     # check #5: call the ChemProps API and add in the standardized chemical names, uSMILES and density
     try:
         xmlName = jobDir + "/xml/" + ID + ".xml"
@@ -171,7 +203,7 @@ def conversion(jobDir, code_srcDir, xsdDir, templateName, user):
             }
             # chemprops_rq = urllib.request.Request(chemprops_api_url)
             logging.debug('request created for ChemProps using chemprops_api_url')
-            logging.debug('Searching polymer package: ' + json.dumps(chemprops_data).encode("utf8"))
+            logging.debug('Searching polymer package: ' + json.dumps(chemprops_data)) #.encode("utf8"))
             # chemprops_rq.add_header('Content-Type','application/json')
             # chemprops_search = nm_rest(logging, sysToken, jobApiToken, jobRefreshToken, chemprops_rq)
             # r = chemprops_search.urlopen(json.dumps(chemprops_data).encode("utf8"))
@@ -180,27 +212,29 @@ def conversion(jobDir, code_srcDir, xsdDir, templateName, user):
             if r.status_code == 200:
                 # result = json.loads(r.read().decode("utf-8"))
                 result = r.json()
-                logging.debug('Searching result: ' + json.dumps(result).encode("utf8"))
+                logging.debug('Searching result: ' + json.dumps(result)) #.encode("utf8"))
+                # now we modify xml with result
+                stdCN = matcomp.find('.//StdChemicalName')
+                if stdCN is None:
+                  stdCN = etree.SubElement(matcomp, 'StdChemicalName')
+                stdCN.text = result['StandardName']
+                uSMILES = matcomp.find('.//uSMILES')
+                if uSMILES is None:
+                  uSMILES = etree.SubElement(matcomp, 'uSMILES')
+                uSMILES.text = result['uSMILES']
+                if matcomp.find('Density') is None:
+                  density = etree.SubElement(matcomp, 'Density')
+                  dens_des = etree.SubElement(density, 'description')
+                  dens_des.text = 'inserted from ChemProps, NanoMine'
+                  dens_val = etree.SubElement(density, 'value')
+                  dens_val.text = result['density']
+                  dens_uni = etree.SubElement(density, 'unit')
+                  dens_uni.text = 'g/cm3'
             ## testing - raise ValueError('Upload of input successful. returned id: ' + uploadId) ## for testing
+            elif r.status_code == 404:
+              logging.error('Matrix not found: ' + json.dumps(chemprops_data))
             else:
-                raise ValueError('Unexpected return code from ChemProps: ' + str(r.getcode()))
-            # now we modify xml with result
-            stdCN = matcomp.find('.//StdChemicalName')
-            if stdCN is None:
-                stdCN = etree.SubElement(matcomp, 'StdChemicalName')
-            stdCN.text = result['StandardName']
-            uSMILES = matcomp.find('.//uSMILES')
-            if uSMILES is None:
-                uSMILES = etree.SubElement(matcomp, 'uSMILES')
-            uSMILES.text = result['uSMILES']
-            if matcomp.find('Density') is None:
-                density = etree.SubElement(matcomp, 'Density')
-                dens_des = etree.SubElement(density, 'description')
-                dens_des.text = 'inserted from ChemProps, NanoMine'
-                dens_val = etree.SubElement(density, 'value')
-                dens_val.text = result['density']
-                dens_uni = etree.SubElement(density, 'unit')
-                dens_uni.text = 'g/cm3'
+                raise ValueError('Unexpected return code from ChemProps: ' + str(r.status_code))
         # FillerComponent
         for filcomp in filcomps:
             chemprops_data = {
@@ -211,7 +245,7 @@ def conversion(jobDir, code_srcDir, xsdDir, templateName, user):
             }
             # chemprops_rq = urllib.request.Request(chemprops_api_url)
             logging.debug('request created for ChemProps using chemprops_api_url')
-            logging.debug('Searching filler package: ' + json.dumps(chemprops_data).encode("utf8"))
+            logging.debug('Searching filler package: ' + json.dumps(chemprops_data)) #.encode("utf8"))
             # chemprops_rq.add_header('Content-Type','application/json')
             # chemprops_search = nm_rest(logging, sysToken, jobApiToken, jobRefreshToken, chemprops_rq)
             # r = chemprops_search.urlopen(json.dumps(chemprops_data).encode("utf8"))
@@ -220,23 +254,25 @@ def conversion(jobDir, code_srcDir, xsdDir, templateName, user):
             if r.status_code == 200:
                 # result = json.loads(r.read().decode("utf-8"))
                 result = r.json()
-                logging.debug('Searching result: ' + json.dumps(result).encode("utf8"))
+                logging.debug('Searching result: ' + json.dumps(result)) #.encode("utf8"))
+                # now we modify xml with result
+                stdCN = filcomp.find('.//StdChemicalName')
+                if stdCN is None:
+                  stdCN = etree.SubElement(filcomp, 'StdChemicalName')
+                stdCN.text = result['StandardName']
+                if filcomp.find('Density') is None:
+                  density = etree.SubElement(filcomp, 'Density')
+                  dens_des = etree.SubElement(density, 'description')
+                  dens_des.text = 'inserted from ChemProps, NanoMine'
+                  dens_val = etree.SubElement(density, 'value')
+                  dens_val.text = str(result['density'])
+                  dens_uni = etree.SubElement(density, 'unit')
+                  dens_uni.text = 'g/cm3'
             ## testing - raise ValueError('Upload of input successful. returned id: ' + uploadId) ## for testing
+            elif r.status_code == 404:
+              logging.error('Filler not found: ' + json.dumps(chemprops_data))
             else:
-                raise ValueError('Unexpected return code from ChemProps: ' + str(r.getcode()))
-            # now we modify xml with result
-            stdCN = filcomp.find('.//StdChemicalName')
-            if stdCN is None:
-                stdCN = etree.SubElement(filcomp, 'StdChemicalName')
-            stdCN.text = result['StandardName']
-            if filcomp.find('Density') is None:
-                density = etree.SubElement(filcomp, 'Density')
-                dens_des = etree.SubElement(density, 'description')
-                dens_des.text = 'inserted from ChemProps, NanoMine'
-                dens_val = etree.SubElement(density, 'value')
-                dens_val.text = str(result['density'])
-                dens_uni = etree.SubElement(density, 'unit')
-                dens_uni.text = 'g/cm3'
+              raise ValueError('Unexpected return code from ChemProps: ' + str(r.status_code))
         # sort modified elements with xsdTraverse module
         xsdt = xsdTraverse(xsdDir)
         # sort MatrixComponent by xpath PolymerNanocomposite/MATERIALS/Matrix/MatrixComponent
@@ -261,43 +297,70 @@ def conversion(jobDir, code_srcDir, xsdDir, templateName, user):
         return ('failure', messages)
     # check #7: upload and check if the uploading is successful
     try:
-        sysToken = os.environ['NM_AUTH_SYSTEM_TOKEN']
-        curateApiToken = os.environ['NM_AUTH_API_TOKEN_CURATE']
-        curateRefreshToken = os.environ['NM_AUTH_API_REFRESH_CURATE']
 
-        # rest call for schemaID
-        schemaurl = restbase + '/nmr/templates/select?filename='+xsdFilename
-        rq = urllib.request.Request(schemaurl)
-        j = json.loads(urllib.request.urlopen(rq, context=ssl._create_unverified_context()).read().decode("utf-8"))
-        schemaId = j["data"][0]["_id"]
-        # upload input files and image files referenced in xml
-        uploadFilesAndAdjustXMLImageRefs(jobDir, schemaId, ID)
+        blobs = uploadFilesAndAdjustXMLImageRefs(jobDir, runCtx['schemaId'], ID, runCtx)
+
         # curate-insert rest call
         with open(jobDir + "/xml/" + ID + ".xml", "r") as f:
-            content = f.read()
+          content = f.read()
 
         curate_insert_url = restbase + '/nmr/curate'
         curate_data = {
-            "userid": user,
-            "title": ID + ".xml",
-            "schemaId": schemaId,
-            "curatedDataState": "Valid", # Valid causes ingest to kick of next. Also, it has passed validation.
-            "ispublished": "false",
-            "isPublic": "false",
-            "content": content
+          "userid": user,
+          "title": ID + ".xml",
+          "schemaId": runCtx['schemaId'],
+          "datasetId": runCtx['datasetId'],
+          "curatedDataState": "Valid", # Valid causes ingest to kick of next. Also, it has passed validation.
+          "ispublished": "false",
+          "isPublic": "false",
+          "content": content
         }
         rq = urllib.request.Request(curate_insert_url)
-        # logging.info('request created using curate_insert_url')
         rq.add_header('Content-Type','application/json')
-        ## r = urllib.request.urlopen(rq, json.dumps(curate_data), context=ssl._create_unverified_context())
-        nmCurateFiles = nm_rest(logging, sysToken, curateApiToken, curateRefreshToken, rq)
-        r = nmCurateFiles.urlopen(json.dumps(curate_data).encode("utf8"))
+        nmCurateFiles = nm_rest(logging, runCtx['sysToken'], runCtx['curateApiToken'], runCtx['curateRefreshToken'], rq)
+        rv = nmCurateFiles.urlopen(json.dumps(curate_data).encode("utf8"))
+        response = json.loads(rv.read().decode("utf-8"))['data']
 
-    # logging.info('curate insert request posted: ' + str(r.getcode()))
+        logging.info('curate insert for title: ' + ID + ' datasetId: ' + runCtx['datasetId'] +' request posted. Result: ' + str(rv.getcode()))
+
     except:
-        messages.append('exception occurred during curate-insert')
-        messages.append('exception: '  + str(traceback.format_exc()))
+          messages.append('exception occurred during curate-insert')
+          messages.append('exception: '  + str(traceback.format_exc()))
     if len(messages) > 0:
-        return ('failure', messages)
+      return ('failure', messages)
+    # logging.debug('Xml curate Response: ' + str(response))
+    xmlMongoId = response['_id']
+
+    blobs.append({'type': 'xmldata', 'id': xmlMongoId, 'metadata': {'contentType': 'application/xml', 'filename': ID + '.xml'}})
+    fileset = {'fileset': ID, 'files': blobs}
+    filesets = dsInfo.get('filesets')
+    if filesets == None:
+      dsInfo['filesets'] = []
+    dsInfo['filesets'].append(fileset)
+
+    response = None # initialize response of the request
+    # POST ds-create
+    try:
+      if not dsInfo['userid'] == user: # do not bypass this since updateEx implies admin acccess and OVERWRITE of another user's dataset WOULD occur
+        raise messages.append('Update of dataset failed. Job user: ' + user + ' is not the owner: ' + dsInfo['userid'])
+        return('failure', messages)
+
+      ds_update_url = restbase + '/nmr/dataset/updateEx'
+      rq = urllib.request.Request(ds_update_url)
+      # logging.info('request created using ds_create_url')
+      rq.add_header('Content-Type','application/json')
+
+      nmCurate = nm_rest(logging, runCtx['sysToken'], runCtx['curateApiToken'], runCtx['curateRefreshToken'], rq)
+      rv = nmCurate.urlopen(json.dumps({'dsUpdate': dsInfo}).encode("utf-8"))
+      response = json.loads(rv.read().decode("utf-8"))['data']
+    except:
+      messages.append('exception occurred during dataset-update\n')
+      messages.append('exception: ' + str(traceback.format_exc()) + '\n')
+      # assemble the PID
+    if response is None:
+      messages.append('exception occurred during getting the response of dataset-update\n')
+    if len(messages) != 0:
+      return ('failure', messages)
+
     # pass all the checks
     return ('success', messages)

@@ -164,6 +164,12 @@ const versionSpDev3 = { // NanoMine SP rewrite dev version 3
   patchVer: 0,
   labelVer: 'nm-sp-dev-3'
 }
+// const versionSpDev4 = { // NanoMine SP rewrite dev version 4
+//   majorVer: 1,
+//   minorVer: 3,
+//   patchVer: 0,
+//   labelVer: 'nm-sp-dev-4'
+// }
 
 let dbVer = versionOriginal
 let versionColNm = 'mgi_version'
@@ -695,210 +701,86 @@ function updateDatasetsObject (seq, ds, dsExt) {
     // no dataset info passed
   }
 }
-// NOTE: this is a point in time migration for production data that's at SpDev2 that
-//   removes the old data for the current schema (after a backup to a mock schema),
-//   removes all datasets and re-creates the data from a set of data supplied on disk.
-//   The datasets are also re-created from the data.
-function migrateToNmSpDev3 (fromVer, toVer) {
+
+// NOTE: All this migration does is mark all schemas deleted (template_versions.isDeleted = true)
+//  The reasons are:
+//    1 - The assumption is that new xmls  and schema will be uploaded and new datasets created for those since xmls are being renumbered
+//    2 - Once the db is updated to spdev3 with new xmls, the db will be made available for dev so that migrations do not need to be run
+function migrateToNmSpDev3 (fromVer, toVer) { // Dev3 is no longer just delete schemas
   // requires that new versions of the xml files exist in /apps/xmlupdates
   // NOTE: this is less of a migration than it is a mass update
   let func = 'migrateToNmSpDev3'
   let p = new Promise(function (resolve, reject) {
     let msg = func + ' - Migrating from: ' + JSON.stringify(fromVer) + ' to: ' + JSON.stringify(toVer)
     logInfo(msg)
-    // get list of '.xml' files in /apps/xmlupdates
-    //   if directory does not exist or there are no files, fail migration step with reject(msg)
-    let xmlfiles = fs.readdirSync('/apps/xmlupdates')
-    //   Work-around to version current data:
-    //     read schema information for PNC_schema_081218.xsd and create new template and template version
-    //        for PNC_schema_081118.xsd and copy all current xml records for prior schemaid to entries
-    //        with new schemaid.
-    //   Copy all the xmldata records with prior schema id to new records with new schemaid.
-    // Now, read all the xmlupdates, adjust microstructure refs, update xml_str or if new create dataset and xml_data record
-    //
-    const num2Process = 1708
-    if (xmlfiles.length === num2Process) { // num2Process (sanity check)
-      // read schema record for filename PNC_schema_081218.xsd
-      // Create a new schema record for PNC_schema_081118.xsd and save object id
-      //   copy all fields from original to new except objectid
-      // Create a new template version record for new schema record
-      //   set isDeleted=false, nbVersions=1, current=new schema id, versions[0]=newschemaid, currentRef=ObjectId(newschemaid)
-      let tcol = db.collection('template')
-      logInfo(func + ' - Reading: template/schema record for PNC_schema_081218.xsd')
-      tcol.findOne({'filename': {$eq: 'PNC_schema_081218.xsd'}},
-        { // nada
-        }, {}, function (err, result) {
+    // Mark all schema versions as deleted
+    let tv = db.collection('template_version')
+    tv.updateMany({isDeleted: {$eq: false}}, {$set: {isDeleted: true}}, function (err, result) {
+      if (err) {
+        msg = 'Error occurred setting all template_versions isDeleted = true. Error: ' + err
+        logInfo(msg)
+        reject(err)
+      } else {
+        msg = 'Successfully updated all template_versions isDeleted = true. result: ' + JSON.stringify(result)
+        logInfo(msg)
+        // delete all datasets - loading a new set of data via GUI after migration runs
+        let ds = db.collection('datasets')
+        ds.deleteMany({}, function (err, result) {
           if (err) {
-            logInfo(func + ' - Find 081218 schema failed: ' + msg + ' error: ' + err)
+            msg = 'Failed to delete all datasets. Error: ' + err
+            logInfo(msg)
             reject(err)
           } else {
-            logInfo(func + ' - Find 081218 schema successful: ' + msg)
-            let schemaRec = null
-            if (Array.isArray(result)) {
-              schemaRec = result[0]
-            } else {
-              schemaRec = result
-            }
-            let fromSchemaId = schemaRec.schemaId
-            let toSchemaId = null
-            schemaRec.filename = 'PNC_schema_081118.xsd' // back date it so it isn't current
-            schemaRec.title = 'PNC_schema_081118'
-            schemaRec.templateVersion = 'templateversion id str'
-            tcol.insertOne(schemaRec)
-              .then(function (mongoError, result) {
-                if (result['ok'] === 1 && result['n'] === 1) {
-                  let schemaId = result['insertedId']
-                  toSchemaId = schemaId.toHexString()
-                  // create a template_version referencing the new schema
-                  let tcolv = db.collection('template_version')
-                  let tvrec = {
-                    versions: [schemaId.toHexString()],
-                    deletedVersions: [],
-                    nbVersions: 1,
-                    isDeleted: false,
-                    current: schemaId.toHexString(),
-                    currentRef: schemaId
-                  }
-                  tcolv.insertOne(tvrec)
-                    .then(function (mongoError, result) {
-                      // update the new schema rec with the version ref,
-                      if (result['ok'] === 1 && result['n'] === 1) {
-                        schemaRec.templateVersion = result.insertedId.toHexString()
-                        tcol.updateOne({filename: {$eq: schemaRec.filename}}, {
-                          $set: {
-                            'templateVersion': schemaRec.templateVersion
-                          }
-                        }, {})
-                          .then(function (result) {
-                            if (result['ok'] === 1 && result['n'] === 1) {
-                              // copy all the existing data for the original schemaid to recs
-                              //     ref'ing the new backup schemaid
-                              copyXmlData2Schema(fromSchemaId, toSchemaId)
-                                .then(function () {
-                                  // all data sets need to be removed and re-created from new data later
-                                  let datasets = db.collection('datasets')
-                                  datasets.deleteMany({}, {})
-                                    .then(function (mongoError, result) {
-                                      if (mongoError) {
-                                        let msg = func + ' - failed to remove all datasets  error: ' + mongoError
-                                        reject(msg)
-                                      } else {
-                                        let msg = func + ' - deleted ' + result['n'] + ' dataset records.'
-                                        logInfo(msg)
-                                        let xmldata = db.collection('xmldata')
-                                        // delete the xmldata records for the current schema
-                                        xmldata.deleteMany({'schemaId': {$eq: fromSchemaId}}, {})
-                                          .then(function (mongoError, result) {
-                                            if (mongoError) {
-                                              let msg = func + ' - failed to remove all xmldata records for current schema. Error: ' + mongoError
-                                              reject(msg)
-                                            } else {
-                                              let msg = func + ' - deleted ' + result['n'] + ' xmldata records for schemaId: ' + fromSchemaId
-                                              logInfo(msg)
-                                              // insert xmldata record for each of the xml files in /apps/xmlupdates
-                                              xmlfiles.forEach((f) => {
-                                                let fullname = '/apps/xmlupdates/' + f
-                                                let xml = fs.readFileSync(fullname, 'utf-8')
-                                                let js = xmljs.xml2js(xml, {compact: false})
-                                                let pnc = js.elements[0].elements
-                                                pnc.forEach(function (e) {
-                                                  if (e.name === 'MICROSTRUCTURE') {
-                                                    if (Array.isArray(e.elements)) {
-                                                      e.elements.forEach(function (me) {
-                                                        //          console.log('Array: ' + JSON.stringify(me))
-                                                        if (me.name === 'ImageFile') {
-                                                          if (Array.isArray(me.elements)) {
-                                                            me.elements.forEach((ie) => {
-                                                              if (ie.name === 'File') {
-                                                                // console.log(ie.elements[0].text)
-                                                                ie.elements[0].text = newImageFileValue(ie.elements[0].text)
-                                                              }
-                                                            })
-                                                          } else {
-                                                            // console.log('simple: ' + me.elements.name)
-                                                          }
-                                                        }
-                                                      })
-                                                    } else if (e.elements) {
-                                                      // console.log('non-Array: ' + JSON.stringify(e.elements))
-                                                    }
-                                                  }
-                                                })
-                                                xml = xmljs.js2xml(js, {})
-                                                writePromises.push(insertXmlData({
-                                                  schemaId: fromSchemaId,
-                                                  schema: fromSchemaId,
-                                                  title: f,
-                                                  iduser: nanomineUser.userId,
-                                                  ispublished: true,
-                                                  curateState: 'Edit',
-                                                  entityState: 'EditedValid',
-                                                  dsSeq: -1,
-                                                  isPublic: true,
-                                                  mdcsUpdateState: 'none',
-                                                  xml_str: xml
-                                                }))
-                                              })
-                                              Promise.all(writePromises)
-                                                .then(function () {
-                                                  logInfo(func + ' successful.')
-                                                  writePromises = []
-                                                  resolve() // ???? NEED to create datasets
-                                                })
-                                                .catch(function (err) {
-                                                  let msg = func + ' - failure waiting for all inserts. Error: ' + err
-                                                  reject(msg)
-                                                })
-                                            }
-                                          })
-                                          .catch(function (err) {
-                                            let msg = func + ' - failed to remove all xmldata records for current schema. Error: ' + err
-                                            reject(msg)
-                                          })
-                                      }
-                                    })
-                                    .catch(function (err) {
-                                      let msg = func + ' - failed to remove all datasets  error: ' + err
-                                      reject(msg)
-                                    })
-                                })
-                                .catch(function (err) {
-                                  let msg = func + ' - failed to copy xmldata recs to new backup schema record: ' + toSchemaId + ' from: ' + fromSchemaId + ' error: ' + err
-                                  reject(msg)
-                                })
-                            } else {
-                              let msg = func + ' - cannot update templateVersion for new backup schema record: ' + JSON.stringify(schemaRec) + ' error: ' + new Error('n or ok not correct')
-                              reject(msg)
-                            }
-                          })
-                          .catch(function (err) {
-                            let msg = func + ' - cannot update template version of new schema rec: ' + JSON.stringify(schemaRec) + ' error: ' + err
-                            reject(msg)
-                          })
+            msg = 'Successfully deleted all datasets. Results: ' + JSON.stringify(result)
+            logInfo(msg)
+            // drop all indexes on xmldata
+            let xmldata = db.collection('xmldata')
+            xmldata.dropIndexes(function (err, result) {
+              if (err) {
+                msg = 'Failed to drop all xmldata indexes. Error: ' + err
+                logInfo(msg)
+                reject(err)
+              } else {
+                msg = 'Successfully dropped all xmldata indexes. Results: ' + JSON.stringify(result)
+                logInfo(msg)
+                ds.dropIndexes(function (err, result) {
+                  if (err) {
+                    msg = 'Failed to drop all datasets indexes. Error: ' + err
+                    logInfo(msg)
+                    reject(err)
+                  } else {
+                    msg = 'Successfully dropped all datasets indexes. Results: ' + JSON.stringify(result)
+                    logInfo(msg)
+                    // create xmldata index on datasetId (non-unique)
+                    xmldata.createIndex({datasetId: 1}, function (err, result) {
+                      if (err) {
+                        msg = 'Failed to create xmldata datasetId index. Error: ' + err
+                        logInfo(msg)
+                        reject(err)
                       } else {
-                        let msg = func + ' - cannot insert new schema version record for backup schema: ' + JSON.stringify(tvrec) + ' error: ' + new Error('n or ok not correct - ' + mongoError)
-                        reject(msg)
+                        msg = 'Successfully created xmldata datasetId index. Result: ' + JSON.stringify(result)
+                        logInfo(msg)
+                        ds.createIndex({seq: 1}, function (err, result) {
+                          if (err) {
+                            msg = 'Failed to create datasets seq index. Error: ' + err
+                            logInfo(msg)
+                            reject(err)
+                          } else {
+                            msg = 'Successfully created datasets seq index. Result: ' + JSON.stringify(result)
+                            logInfo(msg)
+                            return resolve()
+                          }
+                        })
                       }
                     })
-                    .catch(function (err) {
-                      let msg = func + ' - cannot insert schema version record for backup schema: ' + JSON.stringify(tvrec) + ' error: ' + err
-                      reject(msg)
-                    })
-                } else {
-                  let msg = func + ' - cannot insert schema record for backup schema: ' + JSON.stringify(schemaRec) + ' error: ' + new Error('n or ok not correct - ' + mongoError)
-                  reject(msg)
-                }
-              })
-              .catch(function (err) {
-                let msg = func + ' - cannot insert schema record for backup schema: ' + JSON.stringify(schemaRec) + ' error: ' + err
-                reject(msg)
-              })
+                  }
+                })
+              }
+            })
           }
         })
-    } else {
-      let err = new Error(func + ' - invalid number of xml records to process. Expecting: ' + num2Process + ' found: ' + xmlfiles.length)
-      reject(err)
-    }
+      }
+    })
   })
   return p
 }
@@ -1113,8 +995,8 @@ function migrateToNmSpDev1 (fromVer, toVer) {
 
 const migrationTable = [ // Array of version to version conversion function mappings
   { 'from': versionOriginal, 'to': versionSpDev1, 'use': migrateToNmSpDev1 },
-  { 'from': versionSpDev1, 'to': versionSpDev2, 'use': migrateToNmSpDev2 }
-  // { 'from': versionSpDev2, 'to': versionSpDev3, 'use': migrateToNmSpDev3 }
+  { 'from': versionSpDev1, 'to': versionSpDev2, 'use': migrateToNmSpDev2 },
+  { 'from': versionSpDev2, 'to': versionSpDev3, 'use': migrateToNmSpDev3 }
 ]
 
 function dbConnectAndOpen () {
@@ -1322,4 +1204,10 @@ migrate()
         processing (validation, whyis ingest, etc)
   1.3.0-mn-sp-dev-1 -> 1.3.0-nm-sp-dev-2
      update xmls so that entity values do not contain invalid characters like & without encoding
+  1.3.0-mn-sp-dev-2 -> 1.3.0-nm-sp-dev-3
+     set all template_version records isDeleted = true (assumption is that all new data is being loaded)
+     delete all datasets (old xml records will not have datasets associated, but schema is deleted so xmls not accessible)
+     removes datasets indexes (dropIndexes)
+     -- (this is done when data is added later when xmls uploaded) adds field schemaId
+     creates schemaId+seq index
  */

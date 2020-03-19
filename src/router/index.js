@@ -39,6 +39,7 @@ import DynamfitExample from '@/components/DynamfitExample'
 import DynamfitExampleInput from '@/components/DynamfitExampleInput'
 import DynamfitResult from '@/components/DynamfitResult'
 import ChemProps from '@/components/ChemProps'
+import XmlUploader from '@/components/XmlUploader'
 import SmilesTest from '@/components/nanomine/SmilesTest'
 // DISABLED FOR NOW import XmlUploader from '@/components/XmlUploader'
 
@@ -180,11 +181,6 @@ export default new Router({
     //   component: Visualization
     // },
     {
-      path: '/OtsuResult',
-      name: 'OtsuResult',
-      component: OtsuResult
-    },
-    {
       path: '/SDFCharacterizeResults',
       name: 'SDFCharacterizeResults',
       component: SDFCharacterizeResults
@@ -256,11 +252,11 @@ export default new Router({
       path: '/ChemProps',
       name: 'ChemProps',
       component: ChemProps
-    } // ,
-    // DISABLED FOR NOW {
-    //   path: '/XmlUploader',
-    //   name: 'XmlUploader',
-    //   component: XmlUploader
-    // }
+    },
+    {
+      path: '/XmlUploader',
+      name: 'XmlUploader',
+      component: XmlUploader
+    }
   ]
 })

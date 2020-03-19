@@ -1,7 +1,7 @@
 # Common utilities and setup code
 import os
 import sys
-
+import datetime
 
 import logging
 sloglevel=os.environ['NM_LOGLEVEL']
@@ -17,8 +17,9 @@ class NmLogWriter: # https://stackoverflow.com/a/19438364
     self.logger = logger
     self.level = level
   def write(self, msg):
+    dt = datetime.datetime.now().isoformat()
     if msg != '\n':
-      self.logger.log(self.level, msg)
+      self.logger.log(self.level, dt + ' - ' + msg)
   def flush(self):
     pass
 
