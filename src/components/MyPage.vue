@@ -379,16 +379,13 @@
               <td class="text-xs-left"><a :href="getDownloadName(props.item)"><v-icon small>cloud_download</v-icon></a></td>
               <td class="text-xs-left" v-if="isFileViewable(props.item)" v-on:click="fileClick(props.item)"><v-icon small>visibility</v-icon></td>
               <td class="text-xs-left" v-else><span>&nbsp;</span><!--v-icon small>visibility_off</v-icon--></td>
-              <td class="text-xs-left"
-                  v-on:click="fileClick(props.item)">
+              <td class="text-xs-left">
                 {{getFileFilename(props.item)}}
               </td>
-              <td class="text-xs-left"
-                  v-on:click="fileClick(props.item)">
+              <td class="text-xs-left">
                 {{getFileDisplayType(props.item)}}
               </td>
-              <td class="text-xs-left"
-                  v-on:click="fileClick(props.item)">
+              <td class="text-xs-left">
                 {{props.item.id}}
               </td>
             </template>
@@ -627,8 +624,8 @@ export default {
       // Samples
       filesSearch: '',
       filesHeaders: [
-        {text: '', align: 'left',value: 'null'},
-        {text: '', align: 'left',value: 'null'},
+        {text: '', align: 'left', value: 'null'},
+        {text: '', align: 'left', value: 'null'},
         {text: 'File Name', align: 'left', value: 'metadata.filename'},
         {text: 'Type', align: 'left', value: 'metadata.contentType'},
         {text: 'ID', align: 'left', value: 'id'}
