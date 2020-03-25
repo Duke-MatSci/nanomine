@@ -257,14 +257,6 @@
 
            </v-btn>{{filesetsHeaderTitle}}</span>
             <span class="text-xs-right" style="width:50%;" v-show="filesetSelected !== null">
-             <!--v-btn v-if="datasetSelected && datasetSelected.filesets.length > 0"
-                    fab small
-                    color="primary"
-                    class="white--text"
-                    @click="sampleFilesDialogActive = true"
-             >
-             <v-icon light>cloud_download</v-icon>
-             </v-btn-->
              {{headerFilesetName}}
            </span>
           </v-card-title>
@@ -299,23 +291,33 @@
 
         -->
         <v-card style="width:100%;" v-show="filesetSelected !== null">
-          <v-card-title class="files-header"><span style="width:40%;" class="text-xs-left">
-            <v-btn
-              fab small
-              color="primary"
-              class="white--text"
-              @click="toggleFilesHide"
-            >
-            <v-icon light v-if="!filesHideSelector">expand_more</v-icon>
-            <v-icon light v-else>expand_less</v-icon>
-
-           </v-btn>{{filesHeaderTitle}}</span>
+          <v-card-title class="files-header">
+            <span style="width:40%;" class="text-xs-left">
+              <v-btn
+                fab small
+                color="primary"
+                class="white--text"
+                @click="toggleFilesHide"
+              >
+                 <v-icon light v-if="!filesHideSelector">expand_more</v-icon>
+                 <v-icon light v-else>expand_less</v-icon>
+              </v-btn>
+              <v-btn v-if="datasetSelected && datasetSelected.filesets.length > 0"
+                     fab small
+                     color="primary"
+                     class="white--text"
+                     @click="filesDialogActive = true"
+              >
+                <v-icon light>cloud_download</v-icon>
+              </v-btn>
+            {{filesHeaderTitle}}
+          </span>
             <span class="text-xs-right" style="width:60%;" v-show="fileSelected !== null">
              <!--v-btn v-if="sampleFileinfo.length > 0"
                     fab small
                     color="primary"
                     class="white--text"
-                    @click="sampleFilesDialogActive = true"
+                    @click="filesDialogActive = true"
              >
              <v-icon light>cloud_download</v-icon>
              </v-btn-->
@@ -332,17 +334,58 @@
               hide-details
             ></v-text-field>
           </v-card-title>
-          <v-data-table v-show="!filesHideSelector" :headers="filesHeaders" :items="filesList"
-                        :search="filesSearch">
+          <v-data-table
+            v-show="!filesHideSelector"
+            :headers="filesHeaders"
+            :items="filesList"
+            :search="filesSearch"
+            v-model="filesDownloadSelected"
+            select-all
+            item-key="id"
+            :pagination.sync="filespagination"
+          >
+            <template slot="headers" slot-scope="props">
+              <tr>
+                <!--th>
+                  <v-checkbox
+                    :input-value="props.all"
+                    zzindeterminate="props.indeterminate"
+                    primary
+                    hide-details
+                    @click.stop="sampleFileToggleAll()"
+                  ></v-checkbox>
+                </th-->
+                <th
+                  style="text-align:left;"
+                  v-for="header in props.headers"
+                  :key="header.text"
+                  :class="['column sortable', filespagination.descending ? 'desc' : 'asc', header.value === filespagination.sortBy ? 'active' : '']"
+                  @click="filesChangeSort(header.value)"
+                >
+                  <v-icon small>arrow_upward</v-icon>
+                  {{ header.text }}
+                </th>
+              </tr>
+            </template>
             <v-divider></v-divider>
             <template slot="items" slot-scope="props" height="300">
+              <!--td :active="props.selected" @click="props.selected = !props.selected">
+                <v-checkbox
+                  :input-value="props.selected"
+                  primary
+                  hide-details
+                ></v-checkbox>
+              </td-->
+              <td class="text-xs-left"><a :href="getDownloadName(props.item)"><v-icon small>cloud_download</v-icon></a></td>
+              <td class="text-xs-left" v-if="isFileViewable(props.item)" v-on:click="fileClick(props.item)"><v-icon small>visibility</v-icon></td>
+              <td class="text-xs-left" v-else><span>&nbsp;</span><!--v-icon small>visibility_off</v-icon--></td>
               <td class="text-xs-left"
                   v-on:click="fileClick(props.item)">
                 {{getFileFilename(props.item)}}
               </td>
               <td class="text-xs-left"
                   v-on:click="fileClick(props.item)">
-                {{getFileContentType(props.item)}}
+                {{getFileDisplayType(props.item)}}
               </td>
               <td class="text-xs-left"
                   v-on:click="fileClick(props.item)">
@@ -383,6 +426,68 @@
           </v-container>
         </v-card>
       </v-layout>
+      <!--
+
+         Result Files Dialog
+
+      -->
+      <v-layout row justify-center>
+        <v-dialog v-model="filesDialogActive" scrollable width="500">
+          <v-card>
+            <v-card-title class="sample-file-download-header">Download related files</v-card-title>
+            <v-data-table
+              v-model="filesDownloadSelected"
+              UNUSED4NOWselect-all
+              item-key="id"
+              :pagination.sync="filespagination"
+              :headers="filesHeaders"
+              :items="filesList">
+              <template slot="headers" slot-scope="props">
+                <tr>
+                  <th>
+                    <v-checkbox
+                      :input-value="props.all"
+                      :indeterminate="props.indeterminate"
+                      primary
+                      hide-details
+                      @click.stop="sampleFileToggleAll()"
+                    ></v-checkbox>
+                  </th>
+                  <th
+                    style="text-align:left;"
+                    v-for="header in props.headers"
+                    :key="header.text"
+                    :class="['column sortable', filespagination.descending ? 'desc' : 'asc', header.value === filespagination.sortBy ? 'active' : '']"
+                    @click="filesChangeSort(header.value)"
+                  >
+                    <v-icon small>arrow_upward</v-icon>
+                    {{ header.text }}
+                  </th>
+                </tr>
+              </template>
+              <v-divider></v-divider>
+              <template slot="items" slot-scope="props" height="320">
+                <td :active="props.selected" @click="props.selected = !props.selected">
+                  <v-checkbox
+                    :input-value="props.selected"
+                    primary
+                    hide-details
+                  ></v-checkbox>
+                </td>
+                <td class="text-xs-left">
+                  <a :href="getDownloadName(props.item)">{{props.item.metadata.filename}}</a>
+                </td>
+              </template>
+            </v-data-table>
+            <v-divider></v-divider>
+            <v-card-actions class="download-footer">
+              <v-btn color="primary" @click.native="sampleFileDownload()">Download</v-btn>
+              <v-btn color="normal" @click.native="filesDialogActive = false">Close</v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+      </v-layout>
+
       <!--
 
         Dataset Info Dialog
@@ -438,71 +543,6 @@
         </v-layout>
       </v-dialog>
       <!--/v-layout-->
-
-      <!--
-
-         Result Files Dialog
-
-      -->
-      <!-- v-layout row justify-center>
-        <v-dialog v-model="sampleFilesDialogActive" scrollable width="500">
-          <v-card>
-            <v-card-title class="sample-file-download-header">Download related files</v-card-title>
-            <v-data-table
-              v-model="sampleFileDownloadSelected"
-              UNUSED4NOWselect-all
-              item-key="basename"
-              :pagination.sync="samplefilepagination"
-              :headers="sampleFileHeaders"
-              :items="sampleFileinfo">
-              <template slot="headers" slot-scope="props">
-                <tr>
-                  <!- -th>
-                    <v-checkbox
-                      :input-value="props.all"
-                      :indeterminate="props.indeterminate"
-                      primary
-                      hide-details
-                      @click.stop="sampleFileToggleAll()"
-                    ></v-checkbox>
-                  </th- ->
-                  <th
-                    style="text-align:left;"
-                    v-for="header in props.headers"
-                    :key="header.text"
-                    :class="['column sortable', samplefilepagination.descending ? 'desc' : 'asc', header.value === samplefilepagination.sortBy ? 'active' : '']"
-                    @click="sampleFileChangeSort(header.value)"
-                  >
-                    <v-icon small>arrow_upward</v-icon>
-                    {{ header.text }}
-                  </th>
-                </tr>
-              </template>
-              <v-divider></v-divider>
-              <template slot="items" slot-scope="props" height="320">
-                <!- -td :active="props.selected" @click="props.selected = !props.selected">
-                  <v-checkbox
-                    :input-value="props.selected"
-                    primary
-                    hide-details
-                  ></v-checkbox>
-                </td- ->
-                <td class="text-xs-left">
-                  <a :href="getDownloadName(props.item.filename)">{{props.item.basename}}</a>
-                </td>
-              </template>
-            </v-data-table>
-            <v-divider></v-divider>
-            <v-card-actions class="download-footer">
-              <!- -v-btn color="primary" @click.native="sampleFileDownload()">Download</v-btn- ->
-              <v-btn color="normal" @click.native="sampleFilesDialogActive = false">Close</v-btn>
-            </v-card-actions>
-          </v-card>
-          <!- -/v-flex>
-        </v-layout- ->
-        </v-dialog>
-      </v-layout -->
-
     </v-container>
   </v-flex>
 </template>
@@ -587,6 +627,8 @@ export default {
       // Samples
       filesSearch: '',
       filesHeaders: [
+        {text: '', align: 'left',value: 'null'},
+        {text: '', align: 'left',value: 'null'},
         {text: 'File Name', align: 'left', value: 'metadata.filename'},
         {text: 'Type', align: 'left', value: 'metadata.contentType'},
         {text: 'ID', align: 'left', value: 'id'}
@@ -599,19 +641,15 @@ export default {
       filesHideSelector: true,
       // sampleFileAll: true,
       filespagination: {
-        sortBy: 'basename'
+        sortBy: 'metadata.filename'
       },
-      sampleFileIndeterminate: false,
       headerFileName: null,
       fileSelected: null,
       fileObj: '',
       fileImageDataUri: '',
-      sampleFileinfo: [], // names/info of files associated with sample
-      sampleFilesDialogActive: false,
-      sampleFileDownloadSelected: [],
-      sampleFileHeaders: [
-        {text: 'Filename', align: 'left', value: 'basename'}
-      ],
+      filesDialogActive: false,
+      filesDownloadIndeterminate: false,
+      filesDownloadSelected: [],
       sampleTree: {},
       sampleTreeModel: null
     }
@@ -744,6 +782,9 @@ export default {
     }
   },
   methods: {
+    logDebug (msg) {
+      console.log(msg)
+    },
     setSchemaError (msg) {
       let vm = this
       vm.schemaError = true
@@ -774,14 +815,14 @@ export default {
               let schemaId = v.currentRef._id
               let title = v.currentRef.title
               vm.schemas.push({'schemaId': schemaId, 'title': title})
-              console.log('schemaId: ' + schemaId + ' title: ' + title)
+              vm.logDebug('schemaId: ' + schemaId + ' title: ' + title)
             })
             vm.selectedSchemaTitle = vm.schemas.title
             vm.selectedSchemaId = vm.schemas.schemaId
             resolve()
           })
           .catch(function (err) {
-            console.log('error getting schemas: ' + err)
+            vm.logDebug('error getting schemas: ' + err)
             reject(err)
           })
       })
@@ -794,14 +835,14 @@ export default {
       }
       Axios.post('/nmr/schema', data)
         .then(function (resp) {
-          console.log(resp.data)
+          vm.logDebug(resp.data)
           vm.resetSchemaError()
           vm.setSchemaSuccess(vm.schemaFileName + ' uploaded successfully.')
           vm.schemaFileName = ''
           vm.schemaFileText = ''
           vm.getActiveSchemas()
             .then(function () {
-              console.log('re-read schemas successfully.')
+              vm.logDebug('re-read schemas successfully.')
             })
             .catch(function (err) {
               vm.myPageError = true
@@ -843,7 +884,7 @@ export default {
         vm.selectedSchemaTitle = vm.schemas[0].title
         vm.selectedSchemaId = vm.schemas[0].schemaId
       }
-      console.log('selected schema schemaId: ' + vm.selectedSchemaId + ' title: ' + vm.selectedSchemaTitle)
+      vm.logDebug('selected schema schemaId: ' + vm.selectedSchemaId + ' title: ' + vm.selectedSchemaTitle)
     },
     onSchemaSelected (e) { // schema upload
       let vm = this
@@ -856,7 +897,7 @@ export default {
         fr.readAsText(f)
         fr.addEventListener('load', () => {
           vm.schemaFileText = fr.result
-          console.log(vm.schemaFileText)
+          vm.logDebug(vm.schemaFileText)
         })
       } else {
         this.resetSelectedSchema()
@@ -895,7 +936,7 @@ export default {
     },
     usersToggle: function () {
       let vm = this
-      console.log('users selected: ' + JSON.stringify(vm.userselected))
+      vm.logDebug('users selected: ' + JSON.stringify(vm.userselected))
       vm.userselected = []
       vm.userindeterminate = false
       vm.users.forEach(function (v) {
@@ -904,7 +945,8 @@ export default {
       vm.auth.resetRunAsUser()
     },
     usersChangeSort: function (column) {
-      console.log('usersChangeSort: ' + column)
+      let vm = this
+      vm.logDebug('usersChangeSort: ' + column)
       if (this.userpagination.sortBy === column) {
         this.userpagination.descending = !this.userpagination.descending
       } else {
@@ -914,7 +956,7 @@ export default {
     },
     userSelect: function (userid) {
       let vm = this
-      console.log('selected: ' + userid)
+      vm.logDebug('selected: ' + userid)
       vm.users.forEach(function (v) {
         if (v.userid !== userid) {
           v.selected = false
@@ -948,7 +990,7 @@ export default {
     mineOnly: function () {
       let vm = this
       vm.showMineOnly = !vm.showMineOnly
-      console.log('showMineOnly is now: ' + vm.showMineOnly)
+      vm.logDebug('showMineOnly is now: ' + vm.showMineOnly)
     },
     transformDataset: function (entry) {
       let vm = this
@@ -989,10 +1031,10 @@ export default {
 
     datasetClick: function (entry) {
       let vm = this
-      console.log('dataset selected: ' + entry.seq)
+      vm.logDebug('dataset selected: ' + entry.seq)
       vm.datasetSelected = entry
       vm.datasetTransformed = vm.transformDataset(entry)
-      console.log(JSON.stringify(vm.datasetTransformed))
+      vm.logDebug(JSON.stringify(vm.datasetTransformed))
       vm.datasetHideSelector = true
       vm.filesetsHideSelector = false
       vm.filesetsList = vm.datasetSelected.filesets
@@ -1012,8 +1054,17 @@ export default {
     filesetClick: function (fileset) {
       let func = 'filesetClick'
       let vm = this
-      console.log(func + ' - ' + JSON.stringify(fileset))
+      vm.logDebug(func + ' - ' + JSON.stringify(fileset))
       vm.filesetSelected = fileset
+      if (fileset) {
+        vm.filesList = fileset.files
+      } else {
+        vm.filesList = []
+      }
+      vm.filesList.forEach(function (v, idx) {
+        vm.filesList[idx].selected = false // add the field and set it to false
+      })
+      vm.logDebug('filesList: ' + JSON.stringify(vm.filesList))
       vm.filesHideSelector = false
       vm.headerFilesetName = fileset.fileset
       vm.filesList = fileset.files
@@ -1022,21 +1073,79 @@ export default {
 
     // samples / files
     getFileFilename: function (item) {
+      let vm = this
       let rv = 'N/A'
-      console.log('getFileFilename item: ' + JSON.stringify(item) + ' type of item: ' + typeof item)
+      vm.logDebug('getFileFilename item: ' + JSON.stringify(item) + ' type of item: ' + typeof item)
       if (item.metadata && item.metadata.filename) {
         rv = item.metadata.filename
       }
-      console.log('getFileFilename rv: ' + rv)
+      vm.logDebug('getFileFilename rv: ' + rv)
+      return rv
+    },
+    isFileSampleXml (item) {
+      return item.type === 'xmldata'
+    },
+    isFileTemplateXls (item) {
+      return item.metadata && item.metadata.is_completed_pnc_template
+    },
+    isFileViewable (item) {
+      let vm = this
+      let rv = false
+      let viewable = ['PNG', 'JPG', 'XML']
+      let displayType = vm.getFileDisplayType(item)
+      let typeViewable = viewable.includes(displayType)
+      if (displayType === 'XML') {
+        rv = vm.isFileSampleXml(item)
+      } else {
+        rv = typeViewable
+      }
+      return rv
+    },
+    getFileDisplayType (item) {
+      let vm = this
+      let cv = vm.getFileContentType(item)
+      let rv = cv
+      if (cv.match(/[Tt][Ii][Ff]/)) {
+        rv = 'TIFF'
+      }
+      if (cv.match(/[Tt][Ee][Xx][Tt]/)) {
+        rv = 'TEXT'
+      }
+      if (cv.match(/[Cc][Ss][Vv]/)) {
+        rv = 'CSV'
+      }
+      if (cv.match(/[Xx][Mm][Ll]/)) { // needs to come before xls check
+        rv = 'XML'
+      }
+      if (cv.match(/[Xx][Ll][Ss]/)) {
+        rv = 'Spreadsheet'
+      }
+      if (cv.match(/spreadsheet/)) {
+        rv = 'Spreadsheet'
+      }
+      if (cv.match(/[Jj][Ss][Oo][Nn]/)) {
+        rv = 'JSON'
+      }
+      if (cv.match(/[Pp][Nn][Gg]/)) {
+        rv = 'PNG'
+      }
+      if (cv.match(/([Jj][Pp][Gg])|([Jj][Pp][Ee][Gg])/)) {
+        rv = 'JPG'
+      }
+      if (rv === 'Spreadsheet' && vm.isFileTemplateXls(item)) {
+        rv = 'Template Spreadsheet'
+      }
+      vm.logDebug('getFileDisplayType: ' + rv)
       return rv
     },
     getFileContentType: function (item) {
+      let vm = this
       let rv = 'N/A'
-      console.log('getFileContentType item: ' + JSON.stringify(item) + ' type of item: ' + typeof item)
+      vm.logDebug('getFileContentType item: ' + JSON.stringify(item) + ' type of item: ' + typeof item)
       if (item.metadata && item.metadata.contentType) {
         rv = item.metadata.contentType
       }
-      console.log('getFileContentType rv: ' + rv)
+      vm.logDebug('getFileContentType rv: ' + rv)
       return rv
     },
     sampleTreeviewOptions: function () {
@@ -1052,7 +1161,23 @@ export default {
       vm.filesetsHideSelector = !vm.filesetsHideSelector
       vm.filesetSelected = null
       vm.fileSelected = null
-      console.log('filesetsHideSelector: ' + vm.filesetsHideSelector)
+      vm.logDebug('filesetsHideSelector: ' + vm.filesetsHideSelector)
+    },
+    getDownloadName (fileInfo) {
+      let vm = this
+      let rv = ''
+      let func = 'getDownloadName'
+      vm.logDebug(func + ': ' + JSON.stringify(fileInfo))
+      if (fileInfo.type === 'blob') {
+        if (fileInfo.metadata.is_completed_pnc_template) {
+          vm.logDebug('Template!')
+        }
+        rv = '/nmr/blob?id=' + fileInfo.id
+      } else if (fileInfo.type === 'xmldata') {
+        rv = '/nmr/xml?id=' + fileInfo.id + '&format=xml'
+      }
+      vm.logDebug(func + ' - rv = ' + rv)
+      return rv
     },
     hideFiles: function () {
       let vm = this
@@ -1070,11 +1195,12 @@ export default {
       vm.fileObj = null
       vm.fileError = false
       vm.fileErrorMsg = ''
-      console.log('filesHideSelector: ' + vm.filesHideSelector)
+      vm.logDebug('filesHideSelector: ' + vm.filesHideSelector)
     },
     getXmlData: function (fileInfo) {
       // file info is assumed to be the fileset/file info from the dataset
       let func = 'getXmlData'
+      let vm = this
       return new Promise(function (resolve, reject) {
         let id = fileInfo.id
         if (fileInfo.xmldata) {
@@ -1091,7 +1217,7 @@ export default {
             })
             .catch(function (err) {
               let msg = func + ' - ' + 'Error: ' + err.message
-              console.log(msg)
+              vm.logDebug(msg)
               reject(err)
             })
         }
@@ -1099,6 +1225,7 @@ export default {
     },
     getBlobData: function (fileInfo) {
       // fileInfo is assumed to be the fileset/file info from the dataset
+      let vm = this
       let id = fileInfo.id
       return new Promise(function (resolve, reject) {
         Axios.get('/nmr/blob', {
@@ -1112,12 +1239,12 @@ export default {
             // name and length are in response header
             fileInfo.nameFromHeader = resp.headers['content-disposition'].split(';')[1].trim().split('=')[1].replace(/"/g, '')
             fileInfo.contentTypeFromHeader = resp.headers['content-type']
-            console.log('name: ' + fileInfo.nameFromHeader + ' content-type ' + fileInfo.contentTypeFromHeader)
+            vm.logDebug('name: ' + fileInfo.nameFromHeader + ' content-type ' + fileInfo.contentTypeFromHeader)
             resolve(fileInfo)
           })
           .catch(function (err) {
             let msg = 'unable to retrieve blob id: ' + id + ' error: ' + err.message
-            console.log(msg)
+            vm.logDebug(msg)
             reject(err)
           })
       })
@@ -1139,81 +1266,82 @@ export default {
     //         resolve(resp.data.data)
     //       })
     //       .catch(function (err) {
-    //         console.log('unable to obtain sample\'s file list. Error: ' + err)
+    //         vm.logDebug('unable to obtain sample\'s file list. Error: ' + err)
     //         reject(err)
     //       })
     //   })
     // },
     // sampleFileDownload: function () {
     //   let vm = this
-    //   console.log('--------')
-    //   vm.sampleFileDownloadSelected.forEach(function (v) {
-    //     console.log('download: ' + v.basename)
+    //   vm.logDebug('--------')
+    //   vm.filesDownloadSelected.forEach(function (v) {
+    //     vm.logDebug('download: ' + v.basename)
     //     Axios.get('/nmr/blob?bucketname=curateinput&filename=' + v.filename)
     //       .then(function (data) {
-    //         console.log('downloaded: ' + v.filename)
+    //         vm.logDebug('downloaded: ' + v.filename)
     //       })
     //       .catch(function (err) {
-    //         console.log('error downloading: ' + v.filename + ' error: ' + err)
+    //         vm.logDebug('error downloading: ' + v.filename + ' error: ' + err)
     //       })
     //   })
     // },
-    // sampleFileToggleAll: function () {
-    //   let vm = this
-    //   vm.sampleFileDownloadIndeterminate = false
-    //   if (vm.sampleFileDownloadSelected.length) {
-    //     vm.sampleFileDownloadSelected = []
-    //     vm.sampleFileinfo.forEach(function (v, idx) {
-    //       vm.sampleFileinfo[idx].selected = false
-    //     })
-    //   } else {
-    //     vm.sampleFileDownloadSelected = vm.sampleFileinfo.slice()
-    //     vm.sampleFileinfo.forEach(function (v, idx) {
-    //       vm.sampleFileinfo[idx].selected = true
-    //     })
-    //   }
-    //   console.log('sample files selected: ' + JSON.stringify(vm.sampleFileDownloadSelected))
-    // },
-    // sampleFileSelect: function (filename) {
-    //   let vm = this
-    //   vm.sampleFileDownloadIndeterminate = true
-    //   vm.sampleFileinfo.forEach(function (v, idx) {
-    //     if (v.filename === filename) {
-    //       vm.sampleFileinfo[idx].selected = !vm.sampleFileinfo[idx].selected
-    //       console.log('selected: ' + JSON.stringify(vm.sampleFileinfo[idx]))
-    //     }
-    //   })
-    // },
-    // sampleFileChangeSort: function (column) {
-    //   console.log('sampleFileChangeSort: ' + column)
-    //   if (this.samplefilepagination.sortBy === column) {
-    //     this.samplefilepagination.descending = !this.samplefilepagination.descending
-    //   } else {
-    //     this.samplefilepagination.sortBy = column
-    //     this.samplefilepagination.descending = false
-    //   }
-    // },
+    sampleFileToggleAll: function () {
+      let vm = this
+      vm.filesDownloadIndeterminate = false
+      if (vm.filesDownloadSelected.length) {
+        vm.filesDownloadSelected = []
+        vm.filesList.forEach(function (v, idx) {
+          vm.filesList[idx].selected = false
+        })
+      } else {
+        vm.filesDownloadSelected = vm.filesList.slice()
+        vm.filesList.forEach(function (v, idx) {
+          vm.filesList[idx].selected = true
+        })
+      }
+      vm.logDebug('sample files selected: ' + JSON.stringify(vm.filesDownloadSelected))
+    },
+    fileSelectForDownload: function (filename) {
+      let vm = this
+      vm.filesDownloadIndeterminate = true
+      vm.filesList.forEach(function (v, idx) {
+        if (v.metadata.filename === filename) {
+          vm.filesList[idx].selected = !vm.filesList[idx].selected
+          vm.logDebug('selected: ' + JSON.stringify(vm.filesList[idx]))
+        }
+      })
+    },
+    filesChangeSort: function (column) {
+      let vm = this
+      vm.logDebug('filesChangeSort: ' + column)
+      if (vm.filespagination.sortBy === column) {
+        vm.filespagination.descending = !vm.filespagination.descending
+      } else {
+        vm.filespagination.sortBy = column
+        vm.filespagination.descending = false
+      }
+    },
     fileClick: function (file) {
       let func = 'fileClick'
       let vm = this
-      console.log(func + ' - ' + JSON.stringify(file))
+      vm.logDebug(func + ' - ' + JSON.stringify(file))
       vm.fileSelected = file
-      vm.headerFileName = file.id
+      vm.headerFileName = file.metadata.filename
       vm.filesHideSelector = true
       let p = null
       switch (file.type) {
         case 'blob':
-          console.log('file is blob')
+          vm.logDebug('file is blob')
           vm.setLoading()
           p = vm.getBlobData(file)
           break
         case 'xmldata':
-          console.log('file is xmldata')
+          vm.logDebug('file is xmldata')
           vm.setLoading()
           p = vm.getXmlData(file)
           break
         default:
-          console.log('file is unknown type')
+          vm.logDebug('file is unknown type')
           vm.fileError = true
           vm.fileErrorMsg = 'Unknown file type'
       }
@@ -1226,37 +1354,37 @@ export default {
                 let b64 = ''
                 try {
                   let ab = new Uint8Array(fileInfo.fileData)
-                  // console.log('ab = ' + ab)
+                  // vm.logDebug('ab = ' + ab)
                   // --b64 = btoa(String.fromCharCode.apply(null, ab))
                   // b64 = btoa(ab)
-                  // console.log('new b64: ' + b64)
+                  // vm.logDebug('new b64: ' + b64)
                   b64 = base64js.fromByteArray(ab)
                 } catch (err) {
-                  // console.log('data: ' + fileInfo.fileData.toString() + ' length: ' + fileInfo.fileData.byteLength)
+                  // vm.logDebug('data: ' + fileInfo.fileData.toString() + ' length: ' + fileInfo.fileData.byteLength)
                   let msg = 'Error viewing file. Error: ' + err.message
                   vm.fileError = true
                   vm.fileErrorMsg = msg
                 }
                 vm.fileImageDataUri = 'data:' + contentType + ';base64,' + b64
-                // console.log('dataUri: ' + vm.fileImageDataUri)
+                // vm.logDebug('dataUri: ' + vm.fileImageDataUri)
               } else {
                 let msg = 'cannot display images of contentType: ' + contentType + '. Please download instead.'
                 vm.fileImageDataUri = null
                 vm.fileError = true
                 vm.fileErrorMsg = msg
-                console.log(msg)
+                vm.logDebug(msg)
               }
               break
             case 'xmldata':
               //   setTimeout(function () {
               //     vm.sampleFileinfo = []
               //     vm.samplesHideSelector = true
-              //     console.log('sampleClick - title: ' + sample.title + ' ' + sample.schemaId)
+              //     vm.logDebug('sampleClick - title: ' + sample.title + ' ' + sample.schemaId)
               //     vm.sampleSelected = sample
               //     // vm.getFilesList(sample)
               //     //   .then(function () {
               let sample = fileInfo.xmldata
-              console.log(JSON.stringify(sample))
+              vm.logDebug(JSON.stringify(sample))
               try {
                 vm.fileObj = xmljs.xml2js(sample.xml_str, {
                   'compact': true,
@@ -1267,11 +1395,11 @@ export default {
                   vm.fileObj = vm.fileObj.PolymerNanocomposite
                 }
               } catch (err) { // L138_S1
-                console.log(func + ' error occurred attempting to xml to json convert sample: ' + sample.title + ' ' + sample.schemaId + ' err: ' + err)
+                vm.logDebug(func + ' error occurred attempting to xml to json convert sample: ' + sample.title + ' ' + sample.schemaId + ' err: ' + err)
                 vm.fileObj = {'Error': 'Unable to display: ' + sample.title}
               }
-              //     console.log(func)
-              //     console.log(vm.sampleObj)
+              //     vm.logDebug(func)
+              //     vm.logDebug(vm.sampleObj)
               //     // delete vm.sampleObj['_declaration']
               //     // window.sampleObj = vm.sampleObj
               //     // let indent = 2
@@ -1280,7 +1408,7 @@ export default {
               //     // })
               //     // .catch(function (err) {
               //     //   let msg = 'Error loading sample file: ' + err
-              //     //   console.log(msg)
+              //     //   vm.logDebug(msg)
               //     //   vm.myPageError = true
               //     //   vm.myPageErrorMsg = msg
               //     //   vm.resetLoading()
@@ -1307,7 +1435,7 @@ export default {
     //   setTimeout(function () {
     //     vm.sampleFileinfo = []
     //     vm.samplesHideSelector = true
-    //     console.log('sampleClick - title: ' + sample.title + ' ' + sample.schemaId)
+    //     vm.logDebug('sampleClick - title: ' + sample.title + ' ' + sample.schemaId)
     //     vm.sampleSelected = sample
     //     // vm.getFilesList(sample)
     //     //   .then(function () {
@@ -1321,11 +1449,11 @@ export default {
     //         vm.sampleObj = vm.sampleObj.PolymerNanocomposite
     //       }
     //     } catch (err) { // L138_S1
-    //       console.log(func + ' error occurred attempting to xml to json convert sample: ' + sample.title + ' ' + sample.schemaId + ' err: ' + err)
+    //       vm.logDebug(func + ' error occurred attempting to xml to json convert sample: ' + sample.title + ' ' + sample.schemaId + ' err: ' + err)
     //       vm.sampleObj = {'Error': 'Unable to display: ' + sample.title}
     //     }
-    //     console.log(func)
-    //     console.log(vm.sampleObj)
+    //     vm.logDebug(func)
+    //     vm.logDebug(vm.sampleObj)
     //     // delete vm.sampleObj['_declaration']
     //     // window.sampleObj = vm.sampleObj
     //     // let indent = 2
@@ -1334,7 +1462,7 @@ export default {
     //     // })
     //     // .catch(function (err) {
     //     //   let msg = 'Error loading sample file: ' + err
-    //     //   console.log(msg)
+    //     //   vm.logDebug(msg)
     //     //   vm.myPageError = true
     //     //   vm.myPageErrorMsg = msg
     //     //   vm.resetLoading()
@@ -1344,7 +1472,7 @@ export default {
     // sample2Tree: function (node, sampleTree, indent) {
     //   let vm = this
     //   Object.keys(node).forEach(function (v) {
-    //     console.log( ' '.repeat(indent) + v)
+    //     vm.logDebug( ' '.repeat(indent) + v)
     //   })
     // },
     // utils
