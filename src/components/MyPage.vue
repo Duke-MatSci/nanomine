@@ -302,14 +302,14 @@
                  <v-icon light v-if="!filesHideSelector">expand_more</v-icon>
                  <v-icon light v-else>expand_less</v-icon>
               </v-btn>
-              <v-btn v-if="datasetSelected && datasetSelected.filesets.length > 0"
+              <!--v-btn v-if="datasetSelected && datasetSelected.filesets.length > 0"
                      fab small
                      color="primary"
                      class="white--text"
                      @click="filesDialogActive = true"
               >
                 <v-icon light>cloud_download</v-icon>
-              </v-btn>
+              </v-btn-->
             {{filesHeaderTitle}}
           </span>
             <span class="text-xs-right" style="width:60%;" v-show="fileSelected !== null">
