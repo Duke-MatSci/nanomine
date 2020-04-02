@@ -2,8 +2,8 @@
   <v-app id="app" app>
     <waiting/>
     <LeftMenu/>
-    <page-header v-if="['gallery'].indexOf($route.name) > -1" />
-    <page-subheader v-if="['gallery'].indexOf($route.name) > -1" />
+    <page-header/>
+    <page-subheader/>
     <router-view class="app-router"/>
     <page-footer v-if="['gallery'].indexOf($route.name) > -1" />
   </v-app>
