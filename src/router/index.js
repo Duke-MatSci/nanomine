@@ -41,6 +41,10 @@ import DynamfitResult from '@/components/DynamfitResult'
 import ChemProps from '@/components/ChemProps'
 import XmlUploader from '@/components/XmlUploader'
 import SmilesTest from '@/components/nanomine/SmilesTest'
+
+// For Nanomine Gallery of Interactive Chart (Req 04/01/2020)
+import GalleryApp from '../external-app/galleryapp/index.html'
+
 // DISABLED FOR NOW import XmlUploader from '@/components/XmlUploader'
 
 Vue.use(Router)
@@ -257,6 +261,13 @@ export default new Router({
       path: '/XmlUploader',
       name: 'XmlUploader',
       component: XmlUploader
+    },
+
+    // Newly Added Line for Visualization Gallery App (Req 04/01/2020)
+    {
+      path: '/gallery',
+      name: 'gallery',
+      component: { template: GalleryApp }
     }
   ]
 })

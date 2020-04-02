@@ -19,6 +19,15 @@ const createLintingRule = () => ({
   }
 })
 
+// External Applications Loader (Req 04/01/2020)
+let loadExternalApp = {
+  test: /\.(html)$/,
+  exclude: /(node_modules)/,
+  use: {
+    loader: "html-loader"
+  }
+};
+
 module.exports = {
   context: path.resolve(__dirname, '../'),
   entry: {
@@ -41,6 +50,7 @@ module.exports = {
   module: {
     rules: [
       ...(config.dev.useEslint ? [createLintingRule()] : []),
+      loadExternalApp,
       {
         test: /\.vue$/,
         loader: 'vue-loader',
