@@ -1740,7 +1740,8 @@ app.get('/geometry/image', function (req, res) {
     {'name': 'ns', 'dims': '6,6,1', 'size': 6, 'bits': 36, 'symmetric': false, 'canEmbed': true},
     {'name': 'ns', 'dims': '50,50,1', 'size': 50, 'bits': 2500, 'symmetric': false, 'canEmbed': true}
   ]
-  function geometryTypeInfo (geomType, dims) {
+
+  function geometryTypeInfo(geomType, dims) {
     let rv = null
     validTypes.forEach(function (v) {
       if (geomType === v.name && dims === v.dims) {
@@ -1749,6 +1750,7 @@ app.get('/geometry/image', function (req, res) {
     })
     return rv
   }
+
   let geometryType = req.query.geometry_type
   let geometryDimensions = req.query.geometry_dimensions
   let geometryDataLinkType = req.query.geometry_data_link_type
@@ -1760,7 +1762,7 @@ app.get('/geometry/image', function (req, res) {
   }
   let info = geometryTypeInfo(geometryType, geometryDimensions)
 
-  function isValidData (geometryInfo) { // NOTE: only embedded data supported at this time
+  function isValidData(geometryInfo) { // NOTE: only embedded data supported at this time
     let rv = true
     if (info) {
       if (rv && !info.canEmbed && isEmbedded) {
@@ -1789,6 +1791,7 @@ app.get('/geometry/image', function (req, res) {
     }
     return rv
   }
+
   if (!isValidData()) {
     console.log('get geometry image invalid parameters: ' + JSON.stringify(req.query))
     return res.status(400).send('Invalid parameter(s)')
@@ -1806,6 +1809,8 @@ app.get('/geometry/image', function (req, res) {
     res.set('Content-Type', 'image/jpeg')
     return res.send(canvas.toBuffer('image/jpeg', {quality: 0.75}))
     // https://qa.materialsmine.org/nmr/geometry/image?geometry_type=C4v&geometry_dimensions=10,10,1&geometry_data_link_type=embedded&geometry_data=000000000000001
+  }
+})
 
 function saveSchema (filename, xsd) {
   let func = 'saveSchema'
