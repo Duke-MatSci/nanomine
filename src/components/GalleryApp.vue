@@ -7,10 +7,7 @@
 
 <script>
 export default {
-  name: 'GalleryApp',
-  data () {
-    return {}
-  }
+  name: 'GalleryApp'
 }
 </script>
 
