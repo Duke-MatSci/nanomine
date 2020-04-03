@@ -26,9 +26,12 @@ try
     switch str2num(input_type)
         case 1
             img = imread([path_to_read,file_name]); % read the incming target and store pixel values
-            if max(img(:)) > 1
-                img = round(img/256);
-            end
+        if max(img(:))>1
+            Target = double(img);
+            Target = Target/256; %
+            level = graythresh(Target);
+            img = im2bw(Target,level);
+        end
             imwrite(256*img,[path_to_write,'/','Input1.jpg']);
         case 2
             img = unzip([path_to_read,file_name],[path_to_write,'/input']);

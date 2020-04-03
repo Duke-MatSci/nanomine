@@ -51,6 +51,7 @@ import glob
 # gather the parameters
 code_srcDir = os.getcwd() + '/code_src'
 templateName = inputParameters['templateName']
+datasetId = inputParameters['datasetId']
 logging.info(code_srcDir)
 xsdDir = glob.glob(code_srcDir + '/*.xsd')[0]
 logging.info(xsdDir)
@@ -65,7 +66,7 @@ except:
 
 logging.info("conversion begin")
 try:
-  status, messages = conversion(jobDir, code_srcDir, xsdDir, templateName, str(inputParameters['user']))
+  status, messages = conversion(jobDir, code_srcDir, xsdDir, templateName, str(inputParameters['user']), datasetId)
   logging.info("conversion finished")
 except:
   logging.error('exception occurred')

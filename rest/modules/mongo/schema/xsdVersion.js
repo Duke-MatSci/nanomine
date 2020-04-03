@@ -5,7 +5,7 @@ module.exports = function (mongoose) {
     nbVersions: Number, // current count of versions
     isDeleted: Boolean, // this schema is not to be shown/used at all and all xmls based on schema are deprecated
     current: String, // current schema version id
-    currentRef: [{type: mongoose.Schema.Types.ObjectId, ref: 'xsdData'}]
+    currentRef: {type: mongoose.Schema.Types.ObjectId, ref: 'xsdData'}
   }, {collection: 'template_version'})
   return xsdVersionSchema
 }

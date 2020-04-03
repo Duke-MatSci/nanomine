@@ -45,6 +45,8 @@ import ViewData from '@/components/ViewData'
 // import NmEditor from '@/components/Editor'
 // import Visualization from '@/components/Visualization'
 import ChemProps from '@/components/ChemProps'
+import XmlUploader from '@/components/XmlUploader'
+import SmilesTest from '@/components/nanomine/SmilesTest'
 // DISABLED FOR NOW import XmlUploader from '@/components/XmlUploader'
 
 Vue.use(Router)
@@ -205,11 +207,6 @@ export default new Router({
     //   component: Visualization
     // },
     {
-      path: '/OtsuResult',
-      name: 'OtsuResult',
-      component: OtsuResult
-    },
-    {
       path: '/SDFCharacterizeResults',
       name: 'SDFCharacterizeResults',
       component: SDFCharacterizeResults
@@ -278,14 +275,19 @@ export default new Router({
     //   component: ThreeDModelViewer
     // },
     {
+      path: '/SmilesTest',
+      name: 'SmilesTest',
+      component: SmilesTest
+    },
+    {
       path: '/ChemProps',
       name: 'ChemProps',
       component: ChemProps
-    } // ,
-    // DISABLED FOR NOW {
-    //   path: '/XmlUploader',
-    //   name: 'XmlUploader',
-    //   component: XmlUploader
-    // }
+    },
+    {
+      path: '/XmlUploader',
+      name: 'XmlUploader',
+      component: XmlUploader
+    }
   ]
 })

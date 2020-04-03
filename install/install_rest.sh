@@ -30,22 +30,32 @@ cd nanomine
 echo checking out ${myBranch}
 git checkout ${myBranch}
 
-echo NOT installing private nodejs
-# curl -L https://git.io/n-install | bash -s -- -y lts
+echo installing nodejs
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.2/install.sh | bash
 
-## export N_PREFIX="$HOME/n"; [[ :$PATH: == *":$N_PREFIX/bin:"* ]] || PATH+=":$N_PREFIX/bin"
 if [[ -f ~/.bash_profile ]] ; then
-#  grep N_PREFIX ~/.bash_profile 2>/dev/null
-#  if [[ $? -ne 0 ]] ; then
-#    echo 'export N_PREFIX="$HOME/n"; [[ :$PATH: == *":$N_PREFIX/bin:"* ]] || PATH+=":$N_PREFIX/bin"' >> ~/.bash_profile
-#  fi
+  grep NVM_DIR ~/.bash_profile 2>/dev/null
+  if [[ $? -ne 0 ]] ; then
+    echo 'export NVM_DIR="$HOME/.nvm"' >> ~/.bash_profile
+    echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm' >> ~/.bash_profile
+    echo '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion' >> ~/.bash_profile
+  fi
   grep nanomine_env ~/.bash_profile 2>/dev/null
   if [[ $? -ne 0 ]] ; then
     echo '. /apps/nanomine_env' >> ~/.bash_profile
   fi
 else
-#  echo 'export N_PREFIX="$HOME/n"; [[ :$PATH: == *":$N_PREFIX/bin:"* ]] || PATH+=":$N_PREFIX/bin"' > ~/.bash_profile
+  echo 'export NVM_DIR="$HOME/.nvm"' >> ~/.bash_profile
+  echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm' >> ~/.bash_profile
+  echo '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion' >> ~/.bash_profile
   echo '. /apps/nanomine_env' >> ~/.bash_profile
+fi
+
+grep NVM_DIR ~/.bashrc 2>/dev/null
+if [[ $? -ne 0 ]] ; then
+  echo 'export NVM_DIR="$HOME/.nvm"' >> ~/.bashrc
+  echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm' >> ~/.bashrc
+  echo '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion' >> ~/.bashrc
 fi
 
 grep activate ~/.bashrc
@@ -58,6 +68,8 @@ if [[ $? -ne 0 ]]; then
   echo '. /apps/nanomine_env' >> ~/.bashrc
 fi
 source /apps/.bashrc
+# Cannot use latest LTS of nodejs until libxmljs is fixed
+nvm install 11.10.1
 
 # install the VueJS command line processor
 # npm i -g vue-cli@2.9.6

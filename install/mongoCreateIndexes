@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 mongo --port $NM_MONGO_PORT -u $NM_MONGO_USER -p $NM_MONGO_PWD --authenticationDatabase admin <<EOF
 use mgi
+db.xmldata.createIndex({datasetId:1})
 db.datasets.createIndex({seq:1})
-db.xmldata.createIndex({dsSeq:1})
 EOF

@@ -98,7 +98,7 @@
           <v-btn
             color="blue darken-1"
             flat="flat"
-            href="/secure"
+            :href="getLoginLink()"
           >
             Login
           </v-btn>
@@ -168,6 +168,14 @@ export default {
       vm.logoutUrl = '/nmr/doLogout'
       vm.$refs.logoutLink.click()
       vm.logoutDialog = false
+    },
+    getLoginLink: function () {
+      let vm = this
+      let rv = '/secure'
+      if (vm.auth.isTestUser() === true) {
+        rv = '/nmr/nmdevlogin'
+      }
+      return rv
     },
     cancelLogout: function () {
       let vm = this

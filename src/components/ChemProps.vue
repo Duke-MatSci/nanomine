@@ -15,7 +15,7 @@
       </p>
       <br>
       <h3 class="text-xs-left">Instructions</h3>
-      <p class="text-xs-left"><b>1. Select the collection.
+      <p class="text-xs-left"><b>1. Select the collection.</b></p>
       <v-flex xs12 sm6 md3>
         <v-radio-group v-model="pfRadios">
           <v-radio label="Polymer" value="pol"></v-radio>
@@ -80,10 +80,11 @@ export default {
   beforeMount: function () {
     let vm = this
     vm.auth = new Auth()
-    if (!vm.auth.isLoggedIn()) {
-      vm.loginRequired = true
-      vm.loginRequiredMsg = 'Login is required.'
-    }
+    // No longer requiring login
+    // if (!vm.auth.isLoggedIn()) {
+    //   vm.loginRequired = true
+    //   vm.loginRequiredMsg = 'Login is required.'
+    // }
   },
   methods: {
     setLoading: function () {

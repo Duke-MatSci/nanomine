@@ -53,6 +53,7 @@
                 <v-list-tile-title>More details of microstructure characterization parameters</v-list-tile-title>
                 <v-list-tile-title>can be found in the downloadable file below.</v-list-tile-title>
               </v-list-tile-content>
+            </v-list-tile>
           </v-flex>
         </v-flex>
       </v-layout>
