@@ -65,7 +65,6 @@ export default {
       this.clicked() // turn off left menu
       this.$store.commit('setLoginLogout') // defer to pageheader to do login/logout
     },
-    computed: {},
     data () {
       return {
         msg: 'LeftMenu'

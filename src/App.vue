@@ -5,7 +5,7 @@
     <page-header/>
     <page-subheader/>
     <router-view class="app-router"/>
-    <page-footer/>
+    <page-footer v-if="['gallery'].indexOf($route.name) > -1" />
   </v-app>
 </template>
 
@@ -15,6 +15,12 @@ import {} from 'vuex'
 
 export default {
   name: 'App',
+  data () {
+    return {}
+  },
+  beforeMount: function () {
+    console.log('beforeMount of App.vue')
+  },
   methods: {
     showLeftMenu: function () {
       return this.$store.state.leftMenuActive
@@ -52,6 +58,5 @@ export default {
   }
 
   .container {
-    max-width: 600px;
   }
 </style>

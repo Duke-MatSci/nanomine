@@ -15,7 +15,7 @@
       </p>
       <br>
       <h3 class="text-xs-left">Instructions</h3>
-      <p class="text-xs-left"><b>1. Select the collection.
+      <p class="text-xs-left"><b>1. Select the collection.</b></p>
       <v-flex xs12 sm6 md3>
         <v-radio-group v-model="pfRadios">
           <v-radio label="Polymer" value="pol"></v-radio>
@@ -41,6 +41,8 @@
         <p class="text-xs-left">Standardized chemical name and density information:</p>
         <v-text-field v-model="stdname" label='Standardized Name' outlined></v-text-field>
         <v-text-field v-model="density" label='Density (g/cm3)' outlined></v-text-field>
+        <v-text-field v-model="uSMILES" label='uSMILES' outlined v-if="pfRadios === 'pol'"></v-text-field>
+        <p v-if="pfRadios === 'pol'">Structure (coming soon)</p>
       </v-flex>
       <br>
       <h4 class="text-xs-left">Reference</h4>
@@ -67,6 +69,7 @@ export default {
       tradename: '',
       stdname: '',
       density: '',
+      uSMILES: '',
       searchError: false,
       searchErrorMsg: '',
       loginRequired: false,
@@ -77,10 +80,11 @@ export default {
   beforeMount: function () {
     let vm = this
     vm.auth = new Auth()
-    if (!vm.auth.isLoggedIn()) {
-      vm.loginRequired = true
-      vm.loginRequiredMsg = 'Login is required.'
-    }
+    // No longer requiring login
+    // if (!vm.auth.isLoggedIn()) {
+    //   vm.loginRequired = true
+    //   vm.loginRequiredMsg = 'Login is required.'
+    // }
   },
   methods: {
     setLoading: function () {
@@ -93,6 +97,7 @@ export default {
       let vm = this
       vm.stdname = ''
       vm.density = ''
+      vm.searchError = false // reset the error message on click
     },
     successDlgClicked: function () {
       let vm = this
@@ -121,7 +126,8 @@ export default {
           ChemicalName: vm.chemicalname,
           Abbreviation: vm.abbreviation,
           TradeName: vm.tradename,
-          uSMILES: vm.SMILES
+          uSMILES: vm.SMILES,
+          nmId: 'restNmId'
         }
       })
       // Axios.get('/nmr//explore/select', {
@@ -134,6 +140,10 @@ export default {
           console.log('get response from ChemProps!')
           vm.stdname = response.data.StandardName
           vm.density = parseFloat(response.data.density)
+          // show uSMILES if it's polymer search
+          if (vm.pfRadios === 'pol') {
+            vm.uSMILES = response.data.uSMILES
+          }
           // check if stdname is found
           if (vm.stdname === '') {
             vm.searchError = true

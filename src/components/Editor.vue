@@ -518,9 +518,9 @@ export default {
             //   // tagValueProcessor : a => he.decode(a) //default is a=>a
             // }
             response.data.data.forEach(function (v, idx) {
-              // response.data.data[idx].currentRef[0].contentJson = jxParser.parse(response.data.data[idx].currentRef[0].content, j2xOptions)
-              response.data.data[idx].currentRef[0].contentJson = xmljs.xml2js(response.data.data[idx].currentRef[0].content, {})
-              console.log(JSON.stringify(response.data.data[idx].currentRef[0].contentJson))
+              // response.data.data[idx].currentRef.contentJson = jxParser.parse(response.data.data[idx].currentRef.content, j2xOptions)
+              response.data.data[idx].currentRef.contentJson = xmljs.xml2js(response.data.data[idx].currentRef.content, {})
+              console.log(JSON.stringify(response.data.data[idx].currentRef.contentJson))
             })
             vm.$store.commit('addSchemas', response.data.data) // could allow this to be cached, but for now just get it done
             // NOTE: store is not updated until next tick, so continue to use request.data.data in this method :(
@@ -533,13 +533,13 @@ export default {
               //   schemas.push(vm.$store.getters.editorLatestSchemaId)
               // }
               schemas.push({
-                'id': response.data.data[0].currentRef[0]._id,
-                'title': response.data.data[0].currentRef[0].title
+                'id': response.data.data[0].currentRef._id,
+                'title': response.data.data[0].currentRef.title
               })
             } else {
               // schemas = vm.$store.getters.editorSchemaIds
               response.data.data.forEach(function (v) {
-                schemas.push({'id': v.currentRef[0]._id, 'title': v.currentRef[0].title})
+                schemas.push({'id': v.currentRef._id, 'title': v.currentRef.title})
               })
             }
             let params = {'params': {'title': criteria}}
