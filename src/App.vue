@@ -5,7 +5,7 @@
     <page-header/>
     <page-subheader/>
     <router-view class="app-router"/>
-    <page-footer/>
+    <page-footer v-if="['gallery'].indexOf($route.name) > -1" />
   </v-app>
 </template>
 

@@ -47,6 +47,10 @@ import ViewData from '@/components/ViewData'
 import ChemProps from '@/components/ChemProps'
 import XmlUploader from '@/components/XmlUploader'
 import SmilesTest from '@/components/nanomine/SmilesTest'
+
+// For Nanomine Gallery of Interactive Chart (Req 04/01/2020)
+import GalleryApp from '@/components/GalleryApp'
+
 // DISABLED FOR NOW import XmlUploader from '@/components/XmlUploader'
 
 Vue.use(Router)
@@ -110,6 +114,12 @@ export default new Router({
       path: '/XMLCONV',
       name: 'XMLCONV',
       component: XMLCONV
+    },
+    // Newly Added Line for Visualization Gallery App (Req 04/01/2020)
+    {
+      path: '/Gallery',
+      name: 'Gallery',
+      component: GalleryApp
     },
     // {
     //   path: '/editor',
