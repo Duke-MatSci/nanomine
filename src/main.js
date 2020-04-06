@@ -21,7 +21,6 @@ import DatasetCreateOrSelect from '@/components/DatasetCreateOrSelect'
 
 Vue.use(TreeView)
 Vue.use(vPlayBack)
-
 Vue.use(VueGoogleCharts)
 
 Vue.config.productionTip = false
