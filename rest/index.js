@@ -930,6 +930,7 @@ function getUserInfo (userid) {
     let found = 0
     Users.find({'userid': {'$eq': userid}}).cursor()
       .on('data', function (userDoc) {
+        ++found
         resolve(userDoc)
       })
       .on('end', function () {
