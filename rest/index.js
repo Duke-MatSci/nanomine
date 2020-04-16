@@ -930,6 +930,7 @@ function getUserInfo (userid) {
     let found = 0
     Users.find({'userid': {'$eq': userid}}).cursor()
       .on('data', function (userDoc) {
+        ++found
         resolve(userDoc)
       })
       .on('end', function () {
@@ -950,7 +951,7 @@ function getUserAndAdminInfo (userid) { // convenience version that sets isAdmin
     // NOTE: a user can be an admin, but not in the user database yet since our db is not directly coupled to IDM or group mgr
     groupMgr.isGroupMember(logger, nmAuthAdminGroupName, userid)
       .then(function (isAdmin) {
-        if (userid === '9999999999') { // Override for grouper (prodQA) scenario, since this user cannot be assigned system, but is used internally
+        if (userid === nmAuthSystemUserId) { // Override for grouper (prodQA) scenario, since this user cannot be assigned system, but is used internally
           isAdmin = true
         }
         getUserInfo(userid)

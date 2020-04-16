@@ -400,7 +400,8 @@ function curateDatasetUpload (jobType, jobId, jobDir) {
                           logger.debug(func + ' - ' + docId + ' doi is ' + doi)
                         } else {
                           logger.debug(func + ' - ' + docId + ' no DOI found. Using unpublished temp id: ' + tempDoi)
-                          xmlDoc = xmlEnsurePathExists(xmlDoc, doiPath) // NOTE: this resets the xmlDoc to the new xmlDoc with the possibly new path
+                          let after = ['CitationType', 'Publication', 'Title', 'Author', 'Keyword', 'Publisher', 'PublicationYear']
+                          xmlDoc = xmlEnsurePathExists(xmlDoc, doiPath, after) // NOTE: this resets the xmlDoc to the new xmlDoc with the possibly new path
                           if (xmlDoc) {
                             let elem = xmlDoc.find(doiPath)
                             elem[0].text(tempDoi)
