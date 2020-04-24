@@ -63,3 +63,8 @@ EOF
 
 cd chemprops
 python -c 'from nmChemPropsPrepare import nmChemPropsPrepare; nm = nmChemPropsPrepare(); nm.updateMongoDB()'
+echo "If you ran this script (setup_chemprops.sh) manually (not necessary after full install), be sure to"
+echo "  install the chemprops caretaker as root or using sudo with the command: "
+echo "  cp /apps/nanomine/install/chemprops_caretaker /etc/cron.hourly"
+
+
