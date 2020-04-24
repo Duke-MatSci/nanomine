@@ -18,6 +18,7 @@
         <v-btn flat to="/gallery" v-if="site === 'nano'">Gallery</v-btn>
         <v-btn fab flat href="/home" v-if="site === 'nano'"><i class="material-icons nm-search-icon" v-if="searchEnabled()">search</i></v-btn>
         <v-btn v-if="site === 'meta'" flat to="/meta/tools" >Tools</v-btn>
+        <v-btn v-if="isLoggedIn()" flat to="/contact">Contact Us<!--i class="material-icons nm-search-icon">contact_support</i--></v-btn>
         <v-btn flat to="/contact" v-on="on">Contact Us<!--i class="material-icons nm-search-icon">contact_support</i--></v-btn>
         <v-btn v-if="site === 'nano'" flat to="/mypage" >My Page</v-btn>
         <v-btn v-if="loginStatus" flat v-on:click="$store.commit('setLoginLogout')">
