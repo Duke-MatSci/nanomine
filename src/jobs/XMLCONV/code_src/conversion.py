@@ -290,6 +290,10 @@ def conversion(jobDir, code_srcDir, xsdDir, templateName, user, datasetId):
         xmlName = jobDir + "/xml/" + ID + ".xml"
         mvc = mfvfConvert(xmlName)
         mvc.run()
+        xmlTree = etree.parse(xmlName)
+        # sort FillerComponent by xpath PolymerNanocomposite/MATERIALS/Filler/FillerComponent
+        xsdt.sortSubElementsByPath(xmlTree, 'PolymerNanocomposite/MATERIALS/Filler/FillerComponent')
+        xmlTree.write(xmlName, encoding="UTF-8", xml_declaration=True)
     except:
         messages.append('exception occurred during mass fraction-volume fraction conversion')
         messages.append('exception: '  + str(traceback.format_exc()))

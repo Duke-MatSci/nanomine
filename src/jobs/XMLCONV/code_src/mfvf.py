@@ -1,6 +1,7 @@
 # The prototype conversion script for NanoMine data vf-mf conversion
 # Bingyin Hu 10/04/2018
 # Bingyin Hu 02/05/2020 update for PNC_schema_010720
+# Bingyin Hu 05/08/2020 update for PNC_schema_041220
 
 from lxml import etree as ET
 import os
@@ -14,6 +15,7 @@ class mfvfConvert:
         # get the Matrix and the Filler elements
         self.mats = self.tree.findall('.//MatrixComponent')
         self.fils = self.tree.findall('.//Filler')
+        self.filCompTrees = dict() # to store filler component trees
         self.matConsNum = len(self.mats) # number of Matrix constituent
         self.filNum = len(self.fils) # number of Filler
         # intermediate parameters
@@ -105,11 +107,13 @@ class mfvfConvert:
                                                'Density': density,
                                                'absMass': cc,
                                                'absVolume': cc/density}
+                    self.filCompTrees[str(filCon)] = filCon
                 elif mv == 'volume':
                     filConInfo[str(filCon)] = {'ChemicalName': chemical,
                                                'Density': density,
                                                'absVolume': cc,
                                                'absMass': cc*density}
+                    self.filCompTrees[str(filCon)] = filCon
             # end of the loop thru the filler components
             # check total absMass or absVolume
             absMassSum = 0
@@ -259,7 +263,16 @@ class mfvfConvert:
                 vvalue.text = str(vf)
                 vsource = ET.SubElement(v_ele, 'source')
                 vsource.text = "computed by NanoMine"
-    
+            # added for FillerComponentInComposite (Need to be sorted by xsdTraverse if there is a PST subtree in the FillerComponent)
+            if 'components' in self.filInfo[fil]:
+                for component in self.filInfo[fil]['components']:
+                    ele = self.filCompTrees[component]
+                    filInComposite = ET.SubElement(ele, 'FillerComponentInComposite')
+                    filInCompositeMass = ET.SubElement(filInComposite, 'mass')
+                    filInCompositeMass.text = str(self.filInfo[fil]['components'][component]['absMass']/totalAbsMass)
+                    filInCompositeVol = ET.SubElement(filInComposite, 'volume')
+                    filInCompositeVol.text = str(self.filInfo[fil]['components'][component]['absVolume']/totalAbsVol)
+
     # this function writes the tree to the filename
     def writeTree(self):
         self.tree.write(self.filename, xml_declaration=True, encoding="utf-8")
@@ -304,10 +317,10 @@ class mfvfConvert:
 
 ## Test
 if __name__ == '__main__':
-    # mvc = mfvfConvert('L159_S2_Lu_2006.xml-5b71eb00e74a1d7c81bec6c7-5b72e790e74a1d68f48b2daa.xml')
+    mvc = mfvfConvert('L159_S2_Lu_2006.xml-5b71eb00e74a1d7c81bec6c7-5b72e790e74a1d68f48b2daa.xml')
     # mvc = mfvfConvert('L290_S20_Si_2006.xml')
     # mvc = mfvfConvert('corner7.xml')
-    mvc = mfvfConvert('L324_S1_Zhu_2017.xml')
+    # mvc = mfvfConvert('L324_S1_Zhu_2017.xml')
     mvc.run()
     # import glob
     # xmls = glob.glob("L129*.xml")
