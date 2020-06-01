@@ -3431,19 +3431,25 @@ def sheetMicrostructure(sheet, DATA, myXSDtree, jobDir):
         if match(sheet.cell_value(row, 0), 'Microstructure filename'): #(!!!!!!!!!!!!!!!!!)
             if hasLen(sheet.cell_value(row, 1)):
                 filename = str(sheet.cell_value(row, 1)).strip()
-                if filename.split('.')[-1].lower() not in ['png', 'bmp', 'jpeg', 'jpg', 'tif', 'tiff', 'gif']:
+                if os.path.splitext(filename)[-1].lower() not in ['.png', '.bmp', '.jpeg', '.jpg', '.tif', '.tiff', '.gif']:
                     # write the message in ./error_message.txt
                     with open(jobDir + '/error_message.txt', 'a') as fid:
                         fid.write('[File Error] "%s" is not an acceptable image file. Please check the file extension.\n' % (filename))
                         continue
                 # confirm whether the file exists
-                if not os.path.exists(jobDir + '/' + filename):
+                filename_up = os.path.splitext(filename)[0] + os.path.splitext(filename)[-1].upper()
+                filename_low = os.path.splitext(filename)[0] + os.path.splitext(filename)[-1].lower()
+                if os.path.exists(jobDir + '/' + filename_low):
+                    imageDir = jobDir + '/' + filename_low
+                    temp = insert('File', imageDir, temp)
+                elif os.path.exists(jobDir + '/' + filename_up):
+                    imageDir = jobDir + '/' + filename_up
+                    temp = insert('File', imageDir, temp)
+                else:
                     # write the message in ./error_message.txt
                     with open(jobDir + '/error_message.txt', 'a') as fid:
                         fid.write('[File Error] Missing file! Please include "%s" in your uploads. Could be the spelling of the file extension.\n' % (filename))
                         continue
-                imageDir = jobDir + '/' + filename
-                temp = insert('File', imageDir, temp)
         # ImageFile/Description
         if match(sheet.cell_value(row, 0), 'Description'):
             temp = insert('Description', sheet.cell_value(row, 1), temp)
