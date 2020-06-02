@@ -273,6 +273,32 @@ class mfvfConvert:
                     filInCompositeVol = ET.SubElement(filInComposite, 'volume')
                     filInCompositeVol.text = str(self.filInfo[fil]['components'][component]['absVolume']/totalAbsVol)
 
+    # this function computes FillerComponentInComposite when both mf and vf are known
+    def computeWithKnownMFVF(self):
+        for fil in range(self.filNum):
+            ele = self.fils[fil]
+            mf = float(ele.findtext('.//FillerComposition/Fraction/mass/value'))
+            vf = float(ele.findtext('.//FillerComposition/Fraction/volume/value'))
+            filCons = ele.findall('FillerComponent')
+            for filCon in filCons:
+                m_fcic = None
+                v_fcic = None
+                if filCon.find('FillerComponentComposition/mass') is not None:
+                    m_fcic = float(filCon.findtext('FillerComponentComposition/mass')) * mf
+                if filCon.find('FillerComponentComposition/volume') is not None:
+                    v_fcic = float(filCon.findtext('FillerComponentComposition/volume')) * vf
+                if len(filCons) == 1: # only one component, copy mf and vf
+                    m_fcic = mf
+                    v_fcic = vf
+                if m_fcic is not None or v_fcic is not None:
+                    filInComposite = ET.SubElement(filCon, 'FillerComponentInComposite')
+                    if m_fcic is not None:
+                        filInCompositeMass = ET.SubElement(filInComposite, 'mass')
+                        filInCompositeMass.text = str(m_fcic)
+                    if v_fcic is not None:
+                        filInCompositeVol = ET.SubElement(filInComposite, 'volume')
+                        filInCompositeVol.text = str(v_fcic)
+
     # this function writes the tree to the filename
     def writeTree(self):
         self.tree.write(self.filename, xml_declaration=True, encoding="utf-8")
@@ -282,6 +308,8 @@ class mfvfConvert:
         if self.tree.find('.//MATERIALS/Filler') is None:
             return # pure polymer
         if self.tree.find('.//FillerComposition/Fraction/mass/value') is not None and self.tree.find('.//FillerComposition/Fraction/volume/value') is not None:
+            self.computeWithKnownMFVF()
+            self.writeTree()
             return # both mass and volume fraction already reported
         if self.tree.find('.//FillerComponent/Density/value') is None or self.tree.find('.//MatrixComponent/Density/value') is None:
             return # not all density info are provided, leave it untouched for now
