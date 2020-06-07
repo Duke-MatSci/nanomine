@@ -118,7 +118,7 @@
           </v-list-tile>
         </v-list>
       </v-flex>
-      <v-btn v-on:click="submit()" :disabled="templateName.length < 1 || !datasetSelected || files.length < 1" color="primary">Submit</v-btn>
+      <v-btn v-on:click="submit()" :disabled="templateName.length < 1 || !datasetSelected" color="primary">Submit</v-btn>
       <br>
       <h4 class="text-xs-left">Reference</h4>
       <p class="text-xs-left">Zhao, H., Li, X., Zhang, Y., Schadler, L. S., Chen, W., &amp; Brinson, L. C. (2016). <i><a href="https://aip.scitation.org/doi/abs/10.1063/1.4943679">Perspective: NanoMine: A material genome approach for polymer nanocomposites analysis and design</a></i>. APL Materials, 4(5), 053204.</p>
