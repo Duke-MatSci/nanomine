@@ -143,8 +143,9 @@ function getNextXmlDataRecordWithEntityStates (schemaId, queryStatesArray) { // 
     } else {
       query = qsa[0]
     }
-    let idQuery = {'schemaId': {'$eq': schemaId}}
-    query = {'$and': [idQuery, query]}
+    // see comment in main processing section let idQuery = {'schemaId': {'$eq': schemaId}}
+    let isDeletedQuery = {'isDeleted': {'$ne': true}} // pick up non-deleted records (missing field or false is active)
+    query = {'$and': [isDeletedQuery, query]}
     XmlData.findOne(query, {}, function (err, xmlData) {
       if (err) {
         let msg = func + ' - error finding next xml data record for: ' + queryStatesArray + ' query: ' + inspect(query)
@@ -204,7 +205,7 @@ function handleCuratorRunComplete (failed) {
   if (failed) {
     logger.info('Curator run completed ' + (failed ? 'unsuccessfully.' : 'successfully.'))
   }
-  nextInterval = 5000
+  nextInterval = 30000 // caching takes extra time for each record now, so 5s (15s either) is not enough time to prevent issues
   if (consecutiveFailureCount < 5) {
     logger.trace(func + ' - rescheduling curator. Failure count is below threshold. FailureCount: ' + consecutiveFailureCount)
     curator() // re-schedule self after run
@@ -225,6 +226,9 @@ function curator () {
     getLatestSchema()
       .then(function (schemaRec) {
         // 1. find all xmldata records with entity states of Valid or EditedValid since there's no editor
+        // NOTE: TODO for now, the schemaId is disregarded in the getNextXmlDataRecordWithEntityStates function
+        //   in favor of selecting XMLs with isDeleted $ne true (really old recs have the flag set now) that
+        //   are in the correct entityState
         getNextXmlDataRecordWithEntityStates(schemaRec._id, [entityStates[valid], entityStates[editedValid]])
           .then(function (xmlData) {
             if (xmlData) {
