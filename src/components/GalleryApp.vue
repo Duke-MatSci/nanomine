@@ -8,7 +8,7 @@
 <script>
 export default {
   name: 'GalleryApp',
-  beforeMount(){
+  created: () =>{
     window.location = `${window.location.origin}/wi/about?view=gallery&uri=http://semanticscience.org/resource/Chart`
   }
 }
