@@ -7,7 +7,10 @@
 
 <script>
 export default {
-  name: 'GalleryApp'
+  name: 'GalleryApp',
+  beforeMount(){
+    window.location = `${window.location.origin}/wi/about?view=gallery&uri=http://semanticscience.org/resource/Chart`
+  }
 }
 </script>
 
