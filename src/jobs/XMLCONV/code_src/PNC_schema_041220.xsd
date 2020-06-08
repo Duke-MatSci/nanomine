@@ -734,8 +734,8 @@
                 maxOccurs="unbounded"/>
             <xsd:element maxOccurs="unbounded" minOccurs="0" name="NonSphericalShape"
                 type="IrregularShapeType"/>
-            <xsd:element minOccurs="0" name="FillerComponentComposition" type="Percentage"
-                maxOccurs="unbounded"/>
+            <xsd:element minOccurs="0" name="FillerComponentComposition" type="Percentage"/>
+            <xsd:element minOccurs="0" name="FillerComponentInComposite" type="Percentage"/>
             <xsd:element maxOccurs="unbounded" minOccurs="0" name="ParticleSurfaceTreatment"
                 type="ParticleSurfaceModificationType"/>
         </xsd:sequence>
@@ -1691,4 +1691,3 @@
         </xsd:choice>
     </xsd:complexType>
 </xsd:schema>
-

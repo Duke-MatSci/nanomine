@@ -15,6 +15,7 @@ import traceback
 # -------------------------------------------- convert .XLSX to .XML files
 import xlrd
 import dicttoxml
+import csv
 
 # -------------------------------------------- XML Schemas
 import collections                        # Python standard library
@@ -37,28 +38,48 @@ from nm.common.nm_rest import nm_rest
 def read_excel_profile(filename, jobDir):
     if len(str(filename).strip()) == 0:
        return ''
-    # append file extension if user does not put one
-    if len(filename.strip('.xlsx')) == len(filename):
-        filename += '.xlsx'
+    # # append file extension if user does not put one
+    # if len(filename.strip('.xlsx')) == len(filename):
+    #     filename += '.xlsx'
     # confirm whether the file exists
     if not os.path.exists(jobDir + '/' + filename):
         # write the message in ./error_message.txt
         with open(jobDir + '/error_message.txt', 'a') as fid:
             fid.write('[File Error] Missing file! Please include "%s" in your uploads.\n' % (filename))
             return ''
-    # open and read data
-    data_file = xlrd.open_workbook(jobDir + '/' + filename)
-    data_names = data_file.sheet_names()
-    data_content = data_file.sheet_by_name(data_names[0])
-    # read data from excel file
-    header = [{'column': data_content.row_values(0)[0]},
-              {'column': data_content.row_values(0)[1]}]
-    start_row = 1
-    end_row = data_content.nrows
-    profile_data = []
-    for i in range(start_row, end_row):
-        profile_data.append({'row':({'column':data_content.row_values(i)[0]},
-                                    {'column':data_content.row_values(i)[1]})})
+    if os.path.splitext(filename)[-1] == '.xlsx':
+        # open and read data
+        data_file = xlrd.open_workbook(jobDir + '/' + filename)
+        data_names = data_file.sheet_names()
+        data_content = data_file.sheet_by_name(data_names[0])
+        # read data from excel file
+        header = [{'column': data_content.row_values(0)[0]},
+                  {'column': data_content.row_values(0)[1]}]
+        start_row = 1
+        end_row = data_content.nrows
+        profile_data = []
+        for i in range(start_row, end_row):
+            profile_data.append({'row':({'column':data_content.row_values(i)[0]},
+                                        {'column':data_content.row_values(i)[1]})})
+    elif os.path.splitext(filename)[-1] == '.csv':
+        # open and read data
+        with open(jobDir + '/' + filename, newline='') as data_file:
+            data_reader = csv.reader(data_file)
+            first = True
+            profile_data = []
+            for row in data_reader:
+                if len(row) != 2:
+                    # write the message in ./error_message.txt
+                    with open(jobDir + '/error_message.txt', 'a') as fid:
+                        fid.write('[File Error] csv file "%s" has a row that is not occupied by exactly the first and the second column.\n' % (filename))
+                        return ''
+                if first:
+                    header = [{'column': row[0]}, {'column': row[1]}]
+                    first = False
+                else:
+                    profile_data.append({'row':({'column':row[0]},
+                                                {'column':row[1]})})
+    # return the package
     return {'headers': header, 'rows': profile_data}
 
 # a helper method to standardize the axis label and axis unit from headers
@@ -3431,19 +3452,25 @@ def sheetMicrostructure(sheet, DATA, myXSDtree, jobDir):
         if match(sheet.cell_value(row, 0), 'Microstructure filename'): #(!!!!!!!!!!!!!!!!!)
             if hasLen(sheet.cell_value(row, 1)):
                 filename = str(sheet.cell_value(row, 1)).strip()
-                if filename.split('.')[-1].lower() not in ['png', 'bmp', 'jpeg', 'jpg', 'tif', 'tiff', 'gif']:
+                if os.path.splitext(filename)[-1].lower() not in ['.png', '.bmp', '.jpeg', '.jpg', '.tif', '.tiff', '.gif']:
                     # write the message in ./error_message.txt
                     with open(jobDir + '/error_message.txt', 'a') as fid:
                         fid.write('[File Error] "%s" is not an acceptable image file. Please check the file extension.\n' % (filename))
                         continue
                 # confirm whether the file exists
-                if not os.path.exists(jobDir + '/' + filename):
+                filename_up = os.path.splitext(filename)[0] + os.path.splitext(filename)[-1].upper()
+                filename_low = os.path.splitext(filename)[0] + os.path.splitext(filename)[-1].lower()
+                if os.path.exists(jobDir + '/' + filename_low):
+                    imageDir = jobDir + '/' + filename_low
+                    temp = insert('File', imageDir, temp)
+                elif os.path.exists(jobDir + '/' + filename_up):
+                    imageDir = jobDir + '/' + filename_up
+                    temp = insert('File', imageDir, temp)
+                else:
                     # write the message in ./error_message.txt
                     with open(jobDir + '/error_message.txt', 'a') as fid:
                         fid.write('[File Error] Missing file! Please include "%s" in your uploads. Could be the spelling of the file extension.\n' % (filename))
                         continue
-                imageDir = jobDir + '/' + filename
-                temp = insert('File', imageDir, temp)
         # ImageFile/Description
         if match(sheet.cell_value(row, 0), 'Description'):
             temp = insert('Description', sheet.cell_value(row, 1), temp)
