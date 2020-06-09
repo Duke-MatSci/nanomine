@@ -15,7 +15,7 @@
         <v-btn flat to="/db" v-if="site === 'nano'">Database</v-btn>
         <v-btn flat to="/mtools" v-if="site === 'nano'">Module Tools</v-btn>
         <v-btn flat to="/simtools" v-if="site === 'nano'">Simulation Tools</v-btn>
-        <v-btn flat to="/gallery" v-if="site === 'nano'">Gallery</v-btn>
+        <v-btn flat @click="openGallery" v-if="site === 'nano'>Gallery</v-btn>
         <v-btn fab flat href="/home" v-if="site === 'nano'"><i class="material-icons nm-search-icon" v-if="searchEnabled()">search</i></v-btn>
         <v-btn v-if="site === 'meta'" flat to="/meta/tools" >Tools</v-btn>
         <v-btn v-if="isLoggedIn()" flat to="/contact">Contact Us<!--i class="material-icons nm-search-icon">contact_support</i--></v-btn>
@@ -222,6 +222,10 @@ export default {
     },
     isTestUser: function () {
       return this.auth.isTestUser()
+    },
+    openGallery: function () {
+      window.location = `${window.location.origin}/wi/about?view=gallery&uri=http://semanticscience.org/resource/Chart`;
+      return;
     }
   },
   computed: {
