@@ -11,7 +11,7 @@
         <v-btn flat to="/db">Database</v-btn>
         <v-btn flat to="/mtools">Module Tools</v-btn>
         <v-btn flat to="/simtools">Simulation Tools</v-btn>
-        <v-btn flat to="/gallery">Gallery</v-btn>
+        <v-btn flat @click="openGallery">Gallery</v-btn>
         <v-btn fab flat href="/home"><i class="material-icons nm-search-icon" v-if="searchEnabled()">search</i>
         </v-btn>
         <v-btn v-if="isLoggedIn()" flat to="/contact">Contact Us<!--i class="material-icons nm-search-icon">contact_support</i--></v-btn>
@@ -212,6 +212,10 @@ export default {
     },
     isTestUser: function () {
       return this.auth.isTestUser()
+    },
+    openGallery: function () {
+      window.location = `${window.location.origin}/wi/about?view=gallery&uri=http://semanticscience.org/resource/Chart`;
+      return;
     }
   },
   computed: {
