@@ -1,9 +1,15 @@
 <template>
-<!--
-  <div>
-    <h1 class="gheader">NanoMine Gallery of Interactive Charts</h1>
-    <iframe class="galleryapp" src="https://duke-matsci.github.io/nmcharts/"></iframe>
-  </div> -->
+  <div></div>
 </template>
+
+<script>
+  export default {
+    name: 'Gallery',
+    created: function() {
+      window.location = `${window.location.origin}/wi/about?view=gallery&uri=http://semanticscience.org/resource/Chart`;
+      return;
+    }
+  }
+</script>
 
 
