@@ -227,6 +227,12 @@ app.use(jwt({
   credentialsRequired: false
 }))
 
+app.use((error, req, res, next) => {
+  const status = error.statusCode || 500;
+  const message = error.message;
+  res.status(status).json({message:message})
+})
+
 /* BEGIN Api Authorization */
 let allMethods = ['connect', 'delete', 'get', 'head', 'options', 'patch', 'post', 'put', 'trace']
 let authOptions = {
