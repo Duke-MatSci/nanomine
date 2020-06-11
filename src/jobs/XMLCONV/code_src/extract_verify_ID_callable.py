@@ -12,6 +12,7 @@ from nm.common import *
 from nm.common.nm_rest import nm_rest
 import ssl
 import traceback
+from slugify import slugify
 
 # a helper method to find a blurry match regardless of # signs between two
 # strings, testant is the standard expression
@@ -189,13 +190,14 @@ def generateID(response, SID, SI_flag):
     if 'author' in response:
         Name = response['author'][0]
         LastName = Name.split(',')[0]
+
     PubYear = 'PubYear'
     if 'publicationYear' in response:
         PubYearRaw = response['publicationYear']
         PubYear = str(PubYearRaw)
     if SI_flag: # special issue uses current year
         PubYear = str(datetime.datetime.now().year)
-    return '_'.join([PID, SID, LastName, PubYear])
+    return '_'.join([PID, SID, slugify(LastName), PubYear])
 
 
 # a helper method to map crawlerDict to rest data format
