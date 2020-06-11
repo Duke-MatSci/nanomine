@@ -50,7 +50,8 @@ const createDataset = nanomineUtils.createDataset
 const updateDataset = nanomineUtils.updateDataset
 const getLatestSchemas = nanomineUtils.getLatestSchemas
 const sortSchemas = nanomineUtils.sortSchemas
-
+/** Import for Chart Visualization */
+const chartRoutes = require('./routes/chartBackup')
 // TODO calling next(err) results in error page rather than error code in json
 
 // TODO runAsUser in jwt if possible
@@ -209,23 +210,45 @@ let dataSizeLimit = config.rest.dataSizeLimit // probably needs to be at least 5
 app.use(bodyParser.raw({'limit': dataSizeLimit}))
 app.use(bodyParser.json({'limit': dataSizeLimit}))
 
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*')
+  res.setHeader(
+    'Access-Control-Allow-Methods',
+    'OPTIONS, GET, POST, PUT, PATCH, DELETE'
+  );
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+  if(req.method === 'OPTIONS') {
+    return res.sendStatus(200)
+  }
+  next()
+})
+
+app.use('/chart', chartRoutes)
+
 app.use('/files', express.static(nmWebFilesRoot, {
   dotfiles: 'ignore',
   index: false,
   redirect: false
 }))
 
-// app.use(session({
-//   name: 'session',
-//   secret: [ nmSessionSecret ],
-//   maxAge: 24 * 60 * 60 * 1000 // 24 hrs for now, but really gated by underlying shib/jwt
-// }
-// ))
 
-app.use(jwt({
-  secret: nmAuthSecret,
-  credentialsRequired: false
-}))
+// app.use(session({
+  //   name: 'session',
+  //   secret: [ nmSessionSecret ],
+  //   maxAge: 24 * 60 * 60 * 1000 // 24 hrs for now, but really gated by underlying shib/jwt
+  // }
+  // ))
+  
+  app.use(jwt({
+    secret: nmAuthSecret,
+    credentialsRequired: false
+  }))
+  
+  app.use((error, req, res, next) => {
+    const status = error.statusCode || 500;
+    const message = error.message;
+    res.status(status).json({error:message})
+  })
 
 /* BEGIN Api Authorization */
 let allMethods = ['connect', 'delete', 'get', 'head', 'options', 'patch', 'post', 'put', 'trace']
