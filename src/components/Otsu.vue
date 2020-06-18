@@ -82,6 +82,7 @@
             <v-list-tile-content>
               <v-list-tile-title v-text="file.fileName"></v-list-tile-title>
             </v-list-tile-content>
+            <v-btn>Edit image</v-btn>
           </v-list-tile>
         </v-list>
       </v-flex>
