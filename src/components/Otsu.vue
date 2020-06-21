@@ -83,7 +83,7 @@
               <v-list-tile-title v-text="file.fileName"></v-list-tile-title>
             </v-list-tile-content>
             <v-btn v-on:click="editImage()" color="primary">Edit image</v-btn>
-            <EditImage v-model='imageEditorOpen' image='file' v-on:croppedImage="croppedImage($event)"></EditImage>
+            <EditImage v-model='imageEditorOpen' v-bind:image='file' v-on:croppedImage="croppedImage($event)"></EditImage>
           </v-list-tile>
         </v-list>
       </v-flex>
