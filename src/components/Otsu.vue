@@ -83,12 +83,12 @@
               <v-list-tile-title v-text="file.fileName"></v-list-tile-title>
             </v-list-tile-content>
             <v-btn v-on:click="editImage()" color="primary">Edit image</v-btn>
-            <EditImage v-model='imageEditorOpen'></EditImage>
+            <EditImage v-model='imageEditorOpen' image='file' v-on:croppedImage="croppedImage($event)"></EditImage>
           </v-list-tile>
         </v-list>
       </v-flex>
       <v-flex class="text-xs-center">
-      <v-btn v-on:click="submit()" color="primary">Binarize</v-btn>
+      <v-btn id="binarize-button" v-on:click="submit()" color="primary">Binarize</v-btn>
       </v-flex>
       <h4>References</h4>
       <v-flex xs12>
@@ -141,6 +141,15 @@ export default {
     editImage: function () {
       this.imageEditorOpen = !this.imageEditorOpen // toggle the image editor modal being open and closed
     },
+
+    croppedImage: function (image, file) {
+      for (let i = 0; i < this.files.length; i++){
+        if (this.files[i].fileName == file.fileName){
+          this.files[i].fileUrl = image;
+          return;
+        }
+      }
+    }
 
     setLoading: function () {
       this.$store.commit('isLoading')
@@ -243,6 +252,10 @@ export default {
     margin-top: 10px;
     background-color: black;
     color: white;
+  }
+
+  #binarize-button {
+    z-index: 0; /* ensures that the binary button does not appear on top of the edit image modal */
   }
 
 </style>

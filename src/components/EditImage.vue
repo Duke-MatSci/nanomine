@@ -35,12 +35,13 @@
         props: {
             value: {
                 required: true
-            }
+            },
+            image
         },
         data:() => {
             return {
                 title: "Edit Image",
-                source_image: image,
+                source_image: image.fileUrl,
                 cropped_image: null
             }
         },
@@ -52,7 +53,7 @@
                 this.$emit("input", !this.value);
             },
             saveImage() {
-                this.source_image = this.cropped_image;
+                this.$emit('croppedImage', this.cropped_image, image)
                 this.closeModal()
             }
         }
@@ -71,7 +72,6 @@
         flex-direction: column;
         justify-content: center;
         align-items: center;
-
     }
     
     .modal-container {
@@ -86,6 +86,7 @@
         background-color: white;
         border: 2px solid black;
         border-radius: 8px;
+        z-index: 1; /* ensures that the modal appears on top of other elements */
     }
 
     .cropper {
