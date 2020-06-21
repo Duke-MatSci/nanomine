@@ -149,7 +149,7 @@ export default {
           return;
         }
       }
-    }
+    },
 
     setLoading: function () {
       this.$store.commit('isLoading')
