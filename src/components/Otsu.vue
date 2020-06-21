@@ -81,8 +81,9 @@
             </v-list-tile-avatar>
             <v-list-tile-content>
               <v-list-tile-title v-text="file.fileName"></v-list-tile-title>
-              <v-btn class='float-right'>Edit image</v-btn>
             </v-list-tile-content>
+            <v-btn v-on:click="editImage()" color="primary">Edit image</v-btn>
+            <EditImage v-model='imageEditorOpen'></EditImage>
           </v-list-tile>
         </v-list>
       </v-flex>
@@ -102,9 +103,13 @@
 import {} from 'vuex'
 import {JobMgr} from '@/modules/JobMgr.js'
 import {Auth} from '@/modules/Auth.js'
+import EditImage from './EditImage.vue'
 
 export default {
   name: 'Otsu',
+  components: {
+    EditImage
+  },
   data: () => {
     return ({
       title: 'Input Upload',
@@ -120,7 +125,8 @@ export default {
       loginRequiredMsg: '',
       fileUploaded: false,
       successDlg: false,
-      jobId: ''
+      jobId: '',
+      imageEditorOpen: false
     })
   },
   beforeMount: function () {
@@ -132,6 +138,10 @@ export default {
     }
   },
   methods: {
+    editImage: function () {
+      this.imageEditorOpen = !this.imageEditorOpen // toggle the image editor modal being open and closed
+    },
+
     setLoading: function () {
       this.$store.commit('isLoading')
     },
