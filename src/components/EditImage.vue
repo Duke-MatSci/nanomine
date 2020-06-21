@@ -36,12 +36,12 @@
             value: {
                 required: true
             },
-            image: File
+            img: File
         },
         data:() => {
             return {
                 title: "Edit Image",
-                source_image: image.fileUrl,
+                source_image: img.fileUrl,
                 cropped_image: null
             }
         },
