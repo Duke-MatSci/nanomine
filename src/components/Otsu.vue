@@ -103,7 +103,7 @@
 import {} from 'vuex'
 import {JobMgr} from '@/modules/JobMgr.js'
 import {Auth} from '@/modules/Auth.js'
-import EditImage from './EditImage.vue'
+import {EditImage} from '@/modules/EditImage.vue'
 
 export default {
   name: 'Otsu',
