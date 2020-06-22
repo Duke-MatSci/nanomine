@@ -53,7 +53,7 @@
                 this.$emit("input", !this.value);
             },
             saveImage() {
-                this.$emit('setCroppedImage', this.cropped_image, image)
+                this.$emit('setCroppedImage', this.cropped_image, this.img)
                 this.closeModal()
             }
         }
@@ -63,9 +63,12 @@
 <style scoped>
 
     h1 {
-        margin-top: 10px;
+        margin-top: 0px;
         background-color: black;
         color: white;
+        width: 100%;
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
     }
     .modal {
         position: fixed;
