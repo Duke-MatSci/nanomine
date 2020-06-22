@@ -38,7 +38,7 @@
             },
             img: Object,
         },
-        data:() => {
+        data() {
             return {
                 title: "Edit Image",
                 source_image: this.img.fileUrl,
