@@ -53,7 +53,7 @@
                 this.$emit("input", !this.value);
             },
             saveImage() {
-                this.$emit('croppedImage', this.cropped_image, image)
+                this.$emit('setCroppedImage', this.cropped_image, image)
                 this.closeModal()
             }
         }

@@ -82,8 +82,8 @@
             <v-list-tile-content>
               <v-list-tile-title v-text="file.fileName"></v-list-tile-title>
             </v-list-tile-content>
-            <v-btn v-on:click="editImage()" color="primary">Edit image</v-btn>
-            <EditImage v-model='imageEditorOpen' v-bind:img='file' v-on:croppedImage="croppedImage($event)"></EditImage>
+            <v-btn v-on:click="openImageEditor()" color="primary">Edit image</v-btn>
+            <EditImage v-model='imageEditorOpen' v-bind:img='file' v-on:setCroppedImage="setCroppedImage($event)"></EditImage>
           </v-list-tile>
         </v-list>
       </v-flex>
@@ -138,11 +138,11 @@ export default {
     }
   },
   methods: {
-    editImage: function () {
+    openImageEditor: function () {
       this.imageEditorOpen = !this.imageEditorOpen // toggle the image editor modal being open and closed
     },
 
-    croppedImage: function (image, file) {
+    setCroppedImage: function (image, file) {
       for (let i = 0; i < this.files.length; i++){
         if (this.files[i].fileName == file.fileName){
           this.files[i].fileUrl = image;
