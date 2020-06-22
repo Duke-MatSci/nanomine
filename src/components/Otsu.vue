@@ -142,10 +142,13 @@ export default {
       this.imageEditorOpen = !this.imageEditorOpen // toggle the image editor modal being open and closed
     },
 
-    setCroppedImage: function (image, file) {
+    setCroppedImage: function (args) {
+      image = args[0];
+      file = args[1];
       for (let i = 0; i < this.files.length; i++){
         if (this.files[i].fileName == file.fileName){
           this.files[i].fileUrl = image;
+          this.filesDisplay[i].fileUrl = image;
           return;
         }
       }

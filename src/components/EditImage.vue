@@ -86,8 +86,9 @@
     .modal-container {
         width: 700px;
         height: 700px;
+        margin-top: 48px;
         max-width: 90%;
-        max-height: 90%;
+        max-height: (90% - 48px);
         display: flex;
         flex-direction: column;
         justify-content: flex-start;
@@ -99,10 +100,8 @@
     }
 
     .cropper {
-        width: 500px;
-        height: 500px;
-        max-width: 90%;
-        max-height: 90%;
+        max-width: 80%;
+        max-height: 80%;
     }
 
     .modal-container-buttons {
