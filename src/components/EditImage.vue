@@ -81,6 +81,7 @@
         flex-direction: column;
         justify-content: center;
         align-items: center;
+        z-index: 1; /* ensures that the modal appears on top of other elements */
     }
     
     .modal-container {
@@ -96,7 +97,6 @@
         background-color: white;
         border: 2px solid black;
         border-radius: 8px;
-        z-index: 1; /* ensures that the modal appears on top of other elements */
     }
 
     .cropper {
