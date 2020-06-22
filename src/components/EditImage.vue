@@ -36,7 +36,7 @@
             value: {
                 required: true
             },
-            img: undefined
+            img: Object,
         },
         data:() => {
             return {
