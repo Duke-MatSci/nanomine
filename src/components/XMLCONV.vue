@@ -93,31 +93,7 @@
           </v-list-tile>
         </v-list>
       </v-flex>
-      <v-flex xs12 class="text-xs-center text-sm-center text-md-center text-lg-center">
-        <p class="text-xs-left">Select Other Files (including raw data files and image files)
-          <v-btn class="text-xs-left" small color="primary" @click='pickFile'>Browse</v-btn>
-          <input
-            type="file"
-            style="display: none"
-            :multiple="true"
-            ref="myUpload"
-            @change="onFilePicked"
-          >
-        </p>
-        <v-list v-model="filesDisplay" subheader>
-          <v-list-tile
-            v-for="file in filesDisplay"
-            :key="file.fileName"
-          >
-            <v-list-tile-avatar>
-              <v-icon color="primary">check_circle_outline</v-icon>
-            </v-list-tile-avatar>
-            <v-list-tile-content>
-              <v-list-tile-title v-text="file.fileName"></v-list-tile-title>
-            </v-list-tile-content>
-          </v-list-tile>
-        </v-list>
-      </v-flex>
+      <ImageUpload v-on:setFiles="setFiles"></ImageUpload>
       <v-btn v-on:click="submit()" :disabled="templateName.length < 1 || !datasetSelected" color="primary">Submit</v-btn>
       <br>
       <h4 class="text-xs-left">Reference</h4>
@@ -131,6 +107,7 @@
 import {} from 'vuex'
 import {JobMgr} from '@/modules/JobMgr.js'
 import {Auth} from '@/modules/Auth.js'
+import ImageUpload from './ImageUpload.vue'
 
 export default {
   name: 'XMLCONV',
@@ -141,7 +118,6 @@ export default {
     templateUrl: '',
     template: null,
     files: [],
-    filesDisplay: [],
     uploadError: false,
     uploadErrorMsg: '',
     loginRequired: false,
@@ -161,6 +137,11 @@ export default {
     }
   },
   methods: {
+
+    setFiles: function (...files) {
+      this.files = files[0]; // the actual file object
+    },
+
     datasetSelectedHandler (dataset) {
       let vm = this
       if (dataset) {
@@ -178,10 +159,6 @@ export default {
       this.$store.commit('notLoading')
     },
 
-    pickFile () {
-      this.$refs.myUpload.click()
-    },
-
     pickTemplate () {
       this.$refs.myTemplate.click()
     },
@@ -191,11 +168,6 @@ export default {
       this.templateUrl = ''
       this.template = null
       this.templateUploaded = false
-    },
-
-    resetFiles: function () {
-      this.files = []
-      this.filesDisplay = []
     },
 
     onTemplatePicked (e) {
@@ -222,29 +194,6 @@ export default {
       }
     },
 
-    onFilePicked (e) {
-      this.resetFiles()
-      const files = e.target.files
-      for (let i = 0; i < files.length; i++) {
-        let file = {}
-        let f = files[i]
-        if (f !== undefined) {
-          file.fileName = f.name
-          if (file.fileName.lastIndexOf('.') <= 0) {
-            return
-          }
-          const fr = new FileReader()
-          fr.readAsDataURL(f)
-          fr.addEventListener('load', () => {
-            file.fileUrl = fr.result
-            this.files.push(file)
-            this.filesDisplay.push(file)
-          })
-        } else {
-          console.log('File Undefined')
-        }
-      }
-    },
     successDlgClicked: function () {
       let vm = this
       console.log('Success dlg button clicked')
