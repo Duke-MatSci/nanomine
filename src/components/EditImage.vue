@@ -100,8 +100,7 @@
     }
 
     .cropper {
-        max-width: 80%;
-        max-height: 80%;
+        width: 80%;
     }
 
     .modal-container-buttons {
