@@ -50,20 +50,7 @@
         {{errorAlertMsg}}
       </v-alert>
 
-      <v-dialog v-model="successDlg" persistent max-width="500px">
-        <v-card>
-          <v-card-title>
-            <span>Otsu Binarization Job Submitted Successfully</span>
-            <v-spacer></v-spacer>
-          </v-card-title>
-          <v-card-text>
-            Your Otsu job is: {{jobId}} <br/> You should receive an email with a link to the job output.
-          </v-card-text>
-          <v-card-actions>
-            <v-btn color="primary" flat @click="successDlgClicked()">Close</v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
+      <SuccessDialogue v-model="successDlg" v-bind:jobTitle="'Otsu'" v-bind:jobId="jobId" v-on:close="successDlgClicked" persistent max-width="500px"></SuccessDialogue>
 
       <ImageUpload v-on:setFiles="setFiles"></ImageUpload>
 
@@ -86,11 +73,13 @@ import {} from 'vuex'
 import {JobMgr} from '@/modules/JobMgr.js'
 import {Auth} from '@/modules/Auth.js'
 import ImageUpload from './ImageUpload.vue'
+import SuccessDialogue from './SuccessDialogue.vue'
 
 export default {
   name: 'Otsu',
   components: {
-    ImageUpload
+    ImageUpload,
+    SuccessDialogue
   },
   data: () => {
     return ({

@@ -1,3 +1,16 @@
+<!--
+################################################################################
+#
+# File Name: EditImage.vue
+# Application: templates
+# Description: A reusable component that allows users to upload files. Used for Microstructure Characterization & Reconstruction jobs.
+#
+# Created by: Atul Jalan 6/23/20
+# Customized for NanoMine
+#
+################################################################################
+-->
+
 <template>
     <v-flex xs12 class="text-xs-center text-sm-center text-md-center text-lg-center">
 
