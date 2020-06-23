@@ -146,9 +146,8 @@ export default {
       for (let i = 0; i < this.files.length; i++){
         if (this.files[i].fileName == args[1].fileName){
           this.files[i].fileUrl = args[0];
-          this.files[i].fileName = "cropped_" + this.files[i].fileName;
           this.filesDisplay[i].fileUrl = args[0];
-          this.filesDisplay[i].fileName = "cropped_" + this.filesDisplay[i].fileName;
+          this.filesDisplay[i].fileName = "cropped_" + this.filesDisplay[i].fileName; // to ensure that the list of images reloads since they are binded to filenames.
           console.log('image succesfully cropped.')
           return;
         }
