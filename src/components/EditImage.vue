@@ -67,8 +67,8 @@
         background-color: black;
         color: white;
         width: 100%;
-        border-top-left-radius: 8px;
-        border-top-right-radius: 8px;
+        border-top-left-radius: 4px;
+        border-top-right-radius: 4px;
     }
     .modal {
         position: fixed;
