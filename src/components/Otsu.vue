@@ -83,7 +83,7 @@
               <v-list-tile-title v-text="file.fileName"></v-list-tile-title>
             </v-list-tile-content>
             <v-btn v-on:click="openImageEditor()" color="primary">Edit image</v-btn>
-            <EditImage v-model='imageEditorOpen' v-bind:img='file' v-on:setCroppedImage="setCroppedImage($event)"></EditImage>
+            <EditImage v-model='imageEditorOpen' v-bind:img='file' v-on:setCroppedImage="setCroppedImage"></EditImage>
           </v-list-tile>
         </v-list>
       </v-flex>
@@ -143,8 +143,8 @@ export default {
     },
 
     setCroppedImage: function (args) {
-      console.log(this.files)
       console.log(args[1])
+      console.log(args[0])
       for (let i = 0; i < this.files.length; i++){
         if (this.files[i].fileName == args[1].fileName){
           this.files[i].fileUrl = args[0];
