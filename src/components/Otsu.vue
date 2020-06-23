@@ -104,6 +104,7 @@ export default {
       successDlg: false,
       jobId: '',
       files: [],
+      fileName: ''
     })
   },
 
@@ -118,8 +119,9 @@ export default {
 
   methods: {
 
-    setFiles: function (files) {
-      this.files = files;
+    setFiles: function (...files) {
+      this.files = files[0]; // the actual file object
+      this.fileName = files[1]; // the name of the file
     },
 
     setLoading: function () {

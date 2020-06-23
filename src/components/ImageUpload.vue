@@ -62,7 +62,7 @@
                     this.filesDisplay[i].fileUrl = args[0];
                     this.filesDisplay[i].fileName = "cropped_" + this.filesDisplay[i].fileName; // to ensure that the list of images reloads since they are binded to filenames.
                     
-                    this.$emit('setFiles', this.files)
+                    this.$emit('setFiles', this.files, this.fileName)
                     console.log('image succesfully cropped.')
                     
                     return;
@@ -78,7 +78,7 @@
                 this.files = []
                 this.filesDisplay = []
                 this.fileUploaded = false
-                this.$emit('setFiles', this.files)
+                this.$emit('setFiles', this.files, this.fileName)
             },
 
             onFilePicked (e) {
@@ -89,6 +89,7 @@
                     let f = files[i]
                     if (f !== undefined) {
                         file.fileName = f.name
+                        this.fileName = f.name
                         if (file.fileName.lastIndexOf('.') <= 0) {
                             return
                         }
@@ -105,7 +106,7 @@
                         console.log('File Undefined')
                     }
                 }
-                this.$emit('setFiles', this.files)
+                this.$emit('setFiles', this.files, this.fileName)
             }
         }
     }
