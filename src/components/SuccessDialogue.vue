@@ -1,5 +1,5 @@
 <template>
-    <v-dialog persistent max-width="500px">
+    <v-dialog persistent max-width="500px" v-if="value">
         <v-card>
             <v-card-title>
                 <span>{{ jobTitle }} Job Submitted Successfully</span>
@@ -17,6 +17,9 @@
     export default {
         name: 'SuccessDialogue',
         props: {
+            value: {
+                required: true
+            },
             jobTitle: String,
             jobId: String
         },

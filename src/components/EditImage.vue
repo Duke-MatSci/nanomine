@@ -100,6 +100,7 @@
     }
 
     .cropper {
+        margin-top: 0px;
         max-width: 80%;
     }
 
