@@ -111,6 +111,9 @@ import ImageUpload from './ImageUpload.vue'
 
 export default {
   name: 'XMLCONV',
+  components: {
+    ImageUpload
+  },
   data: () => ({
     title: 'File Upload',
     dialog: false,

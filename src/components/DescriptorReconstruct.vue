@@ -45,28 +45,28 @@
       >
         {{loginRequiredMsg}}
       </v-alert>
-        <v-alert
-          v-model="errorAlert"
-          type="error"
-          dismissible
-        >
-          {{errorAlertMsg}}
-        </v-alert>
-        <v-dialog v-model="successDlg" persistent max-width="500px">
-          <v-card>
-            <v-card-title>
-              <span>Characterization Job Submitted Successfully</span>
-              <v-spacer></v-spacer>
-            </v-card-title>
-            <v-card-text>
-              Your characterization job is: {{jobId}} <br/> You should receive an email with a link to the job output.
-            </v-card-text>
-            <v-card-actions>
-              <v-btn color="primary" flat @click="successDlgClicked()">Close</v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
-        <ImageUpload v-on:setFiles="setFiles"></ImageUpload>
+      <v-alert
+        v-model="errorAlert"
+        type="error"
+        dismissible
+      >
+        {{errorAlertMsg}}
+      </v-alert>
+      <v-dialog v-model="successDlg" persistent max-width="500px">
+        <v-card>
+          <v-card-title>
+            <span>Characterization Job Submitted Successfully</span>
+            <v-spacer></v-spacer>
+          </v-card-title>
+          <v-card-text>
+            Your characterization job is: {{jobId}} <br/> You should receive an email with a link to the job output.
+          </v-card-text>
+          <v-card-actions>
+            <v-btn color="primary" flat @click="successDlgClicked()">Close</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+      <ImageUpload v-on:setFiles="setFiles"></ImageUpload>
       <v-flex class="text-xs-center">
         <v-btn v-on:click="submit()" color="primary">Reconstruct</v-btn>
       </v-flex >
@@ -87,6 +87,9 @@ import ImageUpload from './ImageUpload.vue'
 
 export default {
   name: 'DescriptorReconstruct',
+  components: {
+    ImageUpload
+  },
   data: () => {
     return ({
       title: 'Input Upload',
@@ -130,6 +133,7 @@ export default {
       console.log('Success dlg button clicked')
       vm.$router.go(-2) // go back to mcr homepage page
     },
+    
     submit: function () {
       let vm = this
       vm.files.forEach(function (v) {

@@ -88,6 +88,9 @@ import ImageUpload from './ImageUpload.vue'
 
 export default {
   name: 'SDFReconstruct',
+  components: {
+    ImageUpload
+  },
   data: () => {
     return ({
       title: 'Input Upload',
