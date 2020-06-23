@@ -15,7 +15,7 @@
     <div class='modal' v-if='value'>
         <div class='modal-container'>
             <h1>{{ title }}</h1>
-            <cropper id='cropper' :src='source_image' @change='onChange'></cropper>
+            <cropper class='cropper' imageClassname='cropper-image' :src='source_image' @change='onChange'></cropper>
             <div class='modal-container-buttons'>
                 <v-btn color="primary" v-on:click='closeModal()'>Cancel</v-btn>
                 <v-btn color="primary" v-on:click='saveImage()'>Save</v-btn>
@@ -99,7 +99,7 @@
         border-radius: 8px;
     }
 
-    #cropper {
+    .cropper-image {
         max-width: 80%;
     }
 
