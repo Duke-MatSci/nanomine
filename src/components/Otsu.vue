@@ -147,6 +147,7 @@ export default {
         if (this.files[i].fileName == args[1].fileName){
           this.files[i].fileUrl = args[0];
           this.filesDisplay[i].fileUrl = args[0];
+          console.log('image succesfully cropped.')
           return;
         }
       }
