@@ -50,7 +50,7 @@
         {{errorAlertMsg}}
       </v-alert>
 
-      <SuccessDialogue v-model="successDlg" v-bind:jobTitle="'Otsu'" v-bind:jobId="jobId" v-on:close="successDlgClicked" persistent max-width="500px"></SuccessDialogue>
+      <SuccessDialogue v-model="successDlg" v-bind:jobTitle="'Otsu'" v-bind:jobId="jobId" v-on:close="successDlgClicked"></SuccessDialogue>
 
       <ImageUpload v-on:setFiles="setFiles"></ImageUpload>
 

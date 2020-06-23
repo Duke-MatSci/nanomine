@@ -100,8 +100,11 @@
     }
 
     .cropper {
-        margin-top: 0px;
         max-width: 80%;
+    }
+
+    .cropper img {
+        margin-top: 0px;
     }
 
     .modal-container-buttons {
