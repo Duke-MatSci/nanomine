@@ -143,6 +143,8 @@ export default {
     },
 
     setCroppedImage: function (args) {
+      console.log(this.files)
+      console.log(args[1])
       for (let i = 0; i < this.files.length; i++){
         if (this.files[i].fileName == args[1].fileName){
           this.files[i].fileUrl = args[0];
