@@ -45,7 +45,7 @@
                 files: [],
                 filesDisplay: [],
                 fileName: '',
-                fileUpload: false,
+                fileUploaded: false,
                 imageEditorOpen: false
             }
         },
