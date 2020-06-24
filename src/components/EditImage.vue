@@ -99,8 +99,11 @@
         border-radius: 8px;
     }
 
-    .cropper-image {
+    .cropper {
         max-width: 80%;
+    }
+    
+    .cropper-image {
         margin-top: 0px;
     }
 
