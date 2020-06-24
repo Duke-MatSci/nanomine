@@ -13,10 +13,10 @@
 
 <template>
     <div class='modal' v-if='value'>
-        <div class='modal-container'>
+        <div class='image-cropper-container'>
             <h1>{{ title }}</h1>
-            <cropper :src='source_image' class='cropper' imageClassname='cropper-image' @change='onChange'></cropper>
-            <div class='modal-container-buttons'>
+            <cropper :src='source_image' class='cropper-object' imageClassname='cropper-image' @change='onChange'></cropper>
+            <div class='image-cropper-container-buttons'>
                 <v-btn color="primary" v-on:click='closeModal()'>Cancel</v-btn>
                 <v-btn color="primary" v-on:click='saveImage()'>Save</v-btn>
             </div>
@@ -84,7 +84,7 @@
         z-index: 1; /* ensures that the modal appears on top of other elements */
     }
     
-    .modal-container {
+    .image-cropper-container {
         width: 700px;
         height: 700px;
         margin-top: 48px;
@@ -99,17 +99,17 @@
         border-radius: 8px;
     }
 
-    .cropper {
+    .cropper-object {
         max-width: 80%;
     }
 
-    .modal-container-buttons {
+    .image-cropper-container-buttons {
         margin-top: 10px;
     }
 </style>
 
 <style>
-    .cropper-image {
+    .image-cropper-container img {
         margin-top: 0px;
     }
 </style>
