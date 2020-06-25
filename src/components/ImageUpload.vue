@@ -28,24 +28,24 @@
         <v-list v-model="fileName" subheader: true v-if="fileUploaded">
             <template v-for="file in filesDisplay">
 
-                <v-list-tile
+                <v-list-item
                 :key="file.fileName"
                 >
-                    <v-list-tile-avatar>
+                    <v-list-item-avatar>
                         <v-icon color="primary">check_circle_outline</v-icon>
-                    </v-list-tile-avatar>
-                    <v-list-tile-content>
-                        <v-list-tile-title v-text="file.fileName"></v-list-tile-title>
-                    </v-list-tile-content>
+                    </v-list-item-avatar>
+                    <v-list-item-content>
+                        <v-list-item-title v-text="file.fileName"></v-list-tile-title>
+                    </v-list-item-content>
 
                     <span v-if='fileName.split(".").pop() !== "mat"' :key='file.fileName'>
                         <v-btn v-on:click="openImageEditor()" color="primary">Edit image</v-btn>
-                        <EditImage v-model='imageEditorOpen' v-bind:img='file.fileUrl' v-bind:imgName='file.fileName' v-on:setCroppedImage="setCroppedImage"></EditImage>
+                        <EditImage v-model='imageEditorOpen' v-bind:img='file.fileUrl' v-bind:imgName='file.fileName' v-on:setCroppedImage="setCroppedImage" :key='file.fileName'></EditImage>
                     </span>
 
-                </v-list-tile>
+                </v-list-item>
 
-            </template
+            </template>
         </v-list>
 
     </v-flex>
