@@ -70,14 +70,15 @@
         border-top-left-radius: 4px;
         border-top-right-radius: 4px;
     }
+
     .modal {
         position: fixed;
         top: 0;
         left: 0;
         width: 100vw;
         height: 100vh;
-        background-color: rgba(0, 0, 0, 0.5);
-        display: flex;
+        background-color: rgba(0, 0, 0, 0.5); /* dims the entire screen to make the modal stand out */
+        display: flex; 
         flex-direction: column;
         justify-content: center;
         align-items: center;
@@ -106,6 +107,7 @@
     .image-cropper-container-buttons {
         margin-top: 10px;
     }
+
 </style>
 
 <style>

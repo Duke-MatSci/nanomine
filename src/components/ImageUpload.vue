@@ -47,6 +47,8 @@
 <script>
     import {} from 'vuex'
     import EditImage from './EditImage.vue';
+    import jszip from 'jszip';
+    import pako from 'pako';
 
     export default {
         name: 'ImageUpload',
@@ -119,7 +121,59 @@
                         console.log('File Undefined')
                     }
                 }
+
+                if (files[0].name.split('.').pop() == 'zip') {
+                    this.unzipFiles(files[0])
+                }
+
                 this.$emit('setFiles', this.files, this.fileName)
+            },
+
+            unzipFiles (input_file) {
+                const vm = this;
+                vm.filesDisplay = []
+                const jszip_obj = new jszip();
+
+                jszip_obj.loadAsync(input_file)
+                .then(function(zip) {
+                    for (var key in zip.files){
+
+                        // get file data
+                        var filename = zip.files[key].name;
+                        var filetype = filename.split('.').pop();
+
+                        // uncompress
+                        var raw_data = pako.inflateRaw(zip.files[key]._data.compressedContent);
+
+                        // convert from uint8array to base64
+                        var binary = '';
+                        for (var i = 0; i < raw_data.byteLength; i++){
+                        binary += String.fromCharCode(raw_data[i]);
+                        }
+                        var base64 = 'data:image/' + filetype + ';base64,' + window.btoa(binary);
+
+                        // set to reactive variables
+                        vm.filesDisplay.push({fileName: filename, fileUrl: base64});      
+
+                    }
+                });
+            },
+
+            rezipFiles () {
+                let jszip_obj = new jszip()
+                let vm = this
+                
+                // add images to zip file
+                for(let i = 0; i < this.filesDisplay.length; i++){
+                    jszip_obj.file(this.filesDisplay[i].fileName, this.filesDisplay[i].fileUrl)
+                }
+                
+                // create zip file
+                jszip_obj.generateAsync({type: 'base64'})
+                .then(function (base64) {
+                    vm.files[0].fileUrl = "data:application/zip;base64," + base64;
+                    this.$emit('setFiles', this.files, this.fileName)
+                })
             }
         }
     }
