@@ -36,7 +36,7 @@
             <v-list-tile-content>
                 <v-list-tile-title v-text="file.fileName"></v-list-tile-title>
             </v-list-tile-content>
-            <span v-if='files[0].split(".").pop() != "mat"'>
+            <span v-if='fileName.split(".").pop() !== "mat"'>
                 <v-btn v-on:click="openImageEditor()" color="primary">Edit image</v-btn>
                 <EditImage v-model='imageEditorOpen' v-bind:img='file' v-on:setCroppedImage="setCroppedImage"></EditImage>
             </span>
