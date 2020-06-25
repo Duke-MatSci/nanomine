@@ -27,6 +27,7 @@
 
         <v-list v-model="fileName" subheader: true v-if="fileUploaded">
             <template v-for="file in filesDisplay">
+                <img :src='file.fileUrl' :key='file.fileName'>
                 <v-list-tile
                 :key="file.fileName"
                 >
