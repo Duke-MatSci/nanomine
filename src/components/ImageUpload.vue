@@ -146,7 +146,7 @@
                 const jszip_obj = new jszip();
 
                 jszip_obj.loadAsync(input_file)
-                .then(function(zip) {
+                .then(async function(zip) {
                     for (var key in zip.files){
 
                         // get file data
@@ -154,12 +154,12 @@
                         var filetype = filename.split('.').pop();
 
                         // uncompress
-                        var raw_data = pako.inflateRaw(zip.files[key]._data.compressedContent);
+                        var raw_data = await pako.inflateRaw(zip.files[key]._data.compressedContent);
 
                         // convert from uint8array to base64
                         var binary = '';
                         for (var i = 0; i < raw_data.byteLength; i++){
-                        binary += String.fromCharCode(raw_data[i]);
+                            binary += await String.fromCharCode(raw_data[i]);
                         }
                         var base64 = 'data:image/' + filetype + ';base64,' + window.btoa(binary);
 
