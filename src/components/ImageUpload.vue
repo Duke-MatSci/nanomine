@@ -25,27 +25,25 @@
             >
         </p>
 
-        <v-list v-model="fileName" subheader: true v-if="fileUploaded">
-            <template v-for="file in filesDisplay">
+        <v-list v-model="uploadedFileName" subheader: true v-if="fileUploaded">
 
                 <v-list-item
-                :key="file.fileName"
+                v-for="(fileName, fileUrl) in filesDisplay"
+                :key="fileName"
                 >
                     <v-list-item-avatar>
                         <v-icon color="primary">check_circle_outline</v-icon>
                     </v-list-item-avatar>
                     <v-list-item-content>
-                        <v-list-item-title v-text="file.fileName"></v-list-item-title>
+                        <v-list-item-title v-text="fileName"></v-list-item-title>
                     </v-list-item-content>
 
-                    <span v-if='fileName.split(".").pop() !== "mat"' :key='file.fileName'>
+                    <span v-if='uploadedFileName.split(".").pop() !== "mat"' :key='fileName'>
                         <v-btn v-on:click="openImageEditor()" color="primary">Edit image</v-btn>
-                        <EditImage v-model='imageEditorOpen' v-bind:img='file.fileUrl' v-bind:imgName='file.fileName' v-on:setCroppedImage="setCroppedImage" :key='file.fileName'></EditImage>
+                        <EditImage v-model='imageEditorOpen' v-bind:img='fileUrl' v-bind:imgName='fileName' v-on:setCroppedImage="setCroppedImage"></EditImage>
                     </span>
 
                 </v-list-item>
-
-            </template>
         </v-list>
 
     </v-flex>
@@ -66,7 +64,7 @@
             return {
                 files: [],
                 filesDisplay: [],
-                fileName: '',
+                uploadedFileName: '',
                 fileUploaded: false,
                 imageEditorOpen: false
             }
@@ -88,7 +86,7 @@
                             this.rezipFiles()
                         } else {
                             this.files[0].fileUrl = args[0];
-                            this.$emit('setFiles', this.files, this.fileName)
+                            this.$emit('setFiles', this.files, this.uploadedFileName)
                         }
 
                         console.log('image succesfully cropped.')
@@ -105,7 +103,7 @@
                 this.files = []
                 this.filesDisplay = []
                 this.fileUploaded = false
-                this.$emit('setFiles', this.files, this.fileName)
+                this.$emit('setFiles', this.files, this.uploadedFileName)
             },
 
             onFilePicked (e) {
@@ -116,7 +114,7 @@
                     let f = files[i]
                     if (f !== undefined) {
                         file.fileName = f.name
-                        this.fileName = f.name
+                        this.uploadedFileName = f.name
                         if (file.fileName.lastIndexOf('.') <= 0) {
                             return
                         }
@@ -142,7 +140,7 @@
                     this.unzipFiles(files[0])
                 }
 
-                this.$emit('setFiles', this.files, this.fileName)
+                this.$emit('setFiles', this.files, this.uploadedFileName)
             },
 
             unzipFiles (input_file) {
@@ -188,7 +186,7 @@
                 jszip_obj.generateAsync({type: 'base64'})
                 .then(function (base64) {
                     vm.files[0].fileUrl = "data:application/zip;base64," + base64;
-                    this.$emit('setFiles', this.files, this.fileName)
+                    this.$emit('setFiles', this.files, this.uploadedFileName)
                 })
             },
 
