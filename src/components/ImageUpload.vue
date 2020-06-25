@@ -35,7 +35,7 @@
                         <v-icon color="primary">check_circle_outline</v-icon>
                     </v-list-item-avatar>
                     <v-list-item-content>
-                        <v-list-item-title v-text="file.fileName"></v-list-tile-title>
+                        <v-list-item-title v-text="file.fileName"></v-list-item-title>
                     </v-list-item-content>
 
                     <span v-if='fileName.split(".").pop() !== "mat"' :key='file.fileName'>
