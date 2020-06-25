@@ -36,12 +36,13 @@
             value: {
                 required: true
             },
-            img: Object,
+            img: String,
+            imgName: String
         },
         data() {
             return {
                 title: "Edit Image",
-                source_image: this.img.fileUrl,
+                source_image: this.img,
                 cropped_image: null,
                 coordinates: null
             }
@@ -55,7 +56,7 @@
                 this.$emit("input", !this.value);
             },
             saveImage() {
-                this.$emit('setCroppedImage', this.cropped_image, this.img.fileName, this.coordinates)
+                this.$emit('setCroppedImage', this.cropped_image, this.imgName, this.coordinates)
                 this.closeModal()
             }
         }
