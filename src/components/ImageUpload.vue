@@ -196,9 +196,11 @@
 
                         canvas.width = coordinates.width;
                         canvas.height = coordinates.height;
-
+    
                         var ctx = canvas.getContext('2d');
-                        ctx.drawImage(this.filesDisplay[i].fileUrl, -coordinates.left, -coordinates.top);
+                        var image = new Image();
+                        image.src = this.filesDisplay[i].fileUrl
+                        ctx.drawImage(image, -coordinates.left, -coordinates.top);
 
                         this.filesDisplay[i].fileUrl = canvas.toDataURL();
 
