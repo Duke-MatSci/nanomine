@@ -42,18 +42,20 @@
             return {
                 title: "Edit Image",
                 source_image: this.img.fileUrl,
-                cropped_image: null
+                cropped_image: null,
+                coordinates: null
             }
         },
         methods: {
             onChange ({ coordinates, canvas}) {
                 this.cropped_image = canvas.toDataURL();
+                this.coordinates = coordinates;
             },
             closeModal() {
                 this.$emit("input", !this.value);
             },
             saveImage() {
-                this.$emit('setCroppedImage', this.cropped_image, this.img)
+                this.$emit('setCroppedImage', this.cropped_image, this.img.fileName, this.coordinates)
                 this.closeModal()
             }
         }
@@ -77,7 +79,7 @@
         left: 0;
         width: 100vw;
         height: 100vh;
-        background-color: rgba(0, 0, 0, 0.5); /* dims the entire screen to make the modal stand out */
+        background-color: rgba(0, 0, 0, 0.3); /* dims the entire screen to make the modal stand out */
         display: flex; 
         flex-direction: column;
         justify-content: center;

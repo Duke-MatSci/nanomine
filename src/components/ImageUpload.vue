@@ -36,8 +36,10 @@
             <v-list-tile-content>
                 <v-list-tile-title v-text="file.fileName"></v-list-tile-title>
             </v-list-tile-content>
-            <v-btn v-on:click="openImageEditor()" color="primary">Edit image</v-btn>
-            <EditImage v-model='imageEditorOpen' v-bind:img='file' v-on:setCroppedImage="setCroppedImage"></EditImage>
+            <span v-if='files[0].split(".").pop() != "mat"'>
+                <v-btn v-on:click="openImageEditor()" color="primary">Edit image</v-btn>
+                <EditImage v-model='imageEditorOpen' v-bind:img='file' v-on:setCroppedImage="setCroppedImage"></EditImage>
+            </span>
             </v-list-tile>
         </v-list>
 
@@ -69,18 +71,23 @@
                 this.imageEditorOpen = !this.imageEditorOpen // toggle the image editor modal being open and closed
             },
 
-            setCroppedImage: function (...args) {    
-                for (let i = 0; i < this.files.length; i++){
-                    if (this.files[i].fileName == args[1].fileName){
+            setCroppedImage: async function (...args) {    
+                for (let i = 0; i < this.filesDisplay.length; i++){
+                    if (this.filesDisplay[i].fileName == args[1]){
 
-                    this.files[i].fileUrl = args[0];
-                    this.filesDisplay[i].fileUrl = args[0];
-                    this.filesDisplay[i].fileName = "cropped_" + this.filesDisplay[i].fileName; // to ensure that the list of images reloads since they are binded to filenames.
-                    
-                    this.$emit('setFiles', this.files, this.fileName)
-                    console.log('image succesfully cropped.')
-                    
-                    return;
+                        this.filesDisplay[i].fileUrl = args[0];
+                        this.filesDisplay[i].fileName = "cropped_" + this.filesDisplay[i].fileName; // to ensure that the list of images reloads since they are binded to filenames.
+                        
+                        if (this.files[0].fileName.split('.').pop() == 'zip'){
+                            await this.cropAllImages(args[2], args[1])
+                            this.rezipFiles()
+                        } else {
+                            this.files[0].fileUrl = args[0];
+                            this.$emit('setFiles', this.files, this.fileName)
+                        }
+
+                        console.log('image succesfully cropped.')
+                        return;
                     }
                 }
             },
@@ -114,9 +121,13 @@
                         fr.addEventListener('load', () => {
                             file.fileUrl = fr.result
                             this.files.push(file)
-                            this.filesDisplay.push(file)
                             this.fileUploaded = true
+
+                            if (file.fileName.split('.').pop() != 'zip'){
+                                this.filesDisplay.push(file)
+                            }
                         })
+
                     } else {
                         console.log('File Undefined')
                     }
@@ -174,6 +185,25 @@
                     vm.files[0].fileUrl = "data:application/zip;base64," + base64;
                     this.$emit('setFiles', this.files, this.fileName)
                 })
+            },
+
+            cropAllImages (coordinates, fileName) {
+                
+                var canvas = document.createElement('canvas')
+
+                for (let i = 0; i < this.filesDisplay.length; i++){
+                    if (this.filesDisplay[i].fileName != fileName){
+
+                        canvas.width = coordinates.width;
+                        canvas.height = coordinates.height;
+
+                        var ctx = canvas.getContext('2d');
+                        ctx.drawImage(this.filesDisplay[i].fileUrl, -coordinates.left, -coordinates.top);
+
+                        this.filesDisplay[i].fileUrl = canvas.toDataURL();
+
+                    }
+                }
             }
         }
     }
