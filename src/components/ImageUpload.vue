@@ -26,10 +26,11 @@
         </p>
 
         <v-list v-model="fileName" subheader: true v-if="fileUploaded">
-            <template v-for="file in filesDisplay">
-                <img :src='file.fileUrl' :key='file.fileName'>
+            <template v-for="file in filesDisplay" class='v-list'>
+
                 <v-list-tile
                 :key="file.fileName"
+                class='v-list-tile'
                 >
                     <v-list-tile-avatar>
                         <v-icon color="primary">check_circle_outline</v-icon>
@@ -37,11 +38,13 @@
                     <v-list-tile-content>
                         <v-list-tile-title v-text="file.fileName"></v-list-tile-title>
                     </v-list-tile-content>
-                    <span v-if='fileName.split(".").pop() !== "mat"'>
-                        <v-btn v-on:click="openImageEditor()" color="primary">Edit image</v-btn>
-                        <EditImage v-model='imageEditorOpen' v-bind:img='file' v-on:setCroppedImage="setCroppedImage"></EditImage>
-                    </span>
                 </v-list-tile>
+
+                <span v-if='fileName.split(".").pop() !== "mat"' :key='file.fileName'>
+                    <v-btn v-on:click="openImageEditor()" color="primary" class='edit-image-button'>Edit image</v-btn>
+                    <EditImage v-model='imageEditorOpen' v-bind:img='file' v-on:setCroppedImage="setCroppedImage"></EditImage>
+                </span>
+
             </template
         </v-list>
 
@@ -214,4 +217,14 @@
 </script>
 
 <style scoped>
+
+    .v-list-tile {
+        width: 70%;
+        float: left;
+    }
+    
+    .edit-image-button {
+        float: right;
+    }
+
 </style>
