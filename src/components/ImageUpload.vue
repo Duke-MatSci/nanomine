@@ -26,21 +26,22 @@
         </p>
 
         <v-list v-model="fileName" subheader: true v-if="fileUploaded">
-            <v-list-tile
-            v-for="file in filesDisplay"
-            :key="file.fileName"
-            >
-            <v-list-tile-avatar>
-                <v-icon color="primary">check_circle_outline</v-icon>
-            </v-list-tile-avatar>
-            <v-list-tile-content>
-                <v-list-tile-title v-text="file.fileName"></v-list-tile-title>
-            </v-list-tile-content>
-            <span v-if='fileName.split(".").pop() !== "mat"'>
-                <v-btn v-on:click="openImageEditor()" color="primary">Edit image</v-btn>
-                <EditImage v-model='imageEditorOpen' v-bind:img='file' v-on:setCroppedImage="setCroppedImage"></EditImage>
-            </span>
-            </v-list-tile>
+            <template v-for="file in filesDisplay">
+                <v-list-tile
+                :key="file.fileName"
+                >
+                    <v-list-tile-avatar>
+                        <v-icon color="primary">check_circle_outline</v-icon>
+                    </v-list-tile-avatar>
+                    <v-list-tile-content>
+                        <v-list-tile-title v-text="file.fileName"></v-list-tile-title>
+                    </v-list-tile-content>
+                    <span v-if='fileName.split(".").pop() !== "mat"'>
+                        <v-btn v-on:click="openImageEditor()" color="primary">Edit image</v-btn>
+                        <EditImage v-model='imageEditorOpen' v-bind:img='file' v-on:setCroppedImage="setCroppedImage"></EditImage>
+                    </span>
+                </v-list-tile>
+            </template
         </v-list>
 
     </v-flex>
