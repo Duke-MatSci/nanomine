@@ -215,11 +215,12 @@
                         var ctx = canvas.getContext('2d');
                         var image = new Image();
                         image.src = this.filesDisplay[i].fileUrl
-                        ctx.drawImage(image, (-1) * coordinates.left, (-1) * coordinates.top);
-
-                        this.filesDisplay[i].fileUrl = canvas.toDataURL();
-                        this.filesDisplay[i].fileName = 'cropped_' + this.filesDisplay[i].fileName;
-
+                        let vm = this
+                        image.onload = function () {
+                            ctx.drawImage(image, (-1) * coordinates.left, (-1) * coordinates.top);
+                            vm.filesDisplay[i].fileUrl = canvas.toDataURL();
+                            vm.filesDisplay[i].fileName = 'cropped_' + vm.filesDisplay[i].fileName;
+                        }
                     }
                 }
 
