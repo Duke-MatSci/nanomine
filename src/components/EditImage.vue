@@ -40,7 +40,7 @@
         },
         watch: {
             img: function(newVal, oldVal) {
-                this.source_image = newVal
+                this.source_image = newVal.fileUrl
             }
         },
         data() {
