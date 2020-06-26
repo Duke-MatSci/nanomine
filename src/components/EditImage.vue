@@ -15,7 +15,7 @@
     <div class='modal' v-if='value'>
         <div class='image-cropper-container'>
             <h1>{{ title }}</h1>
-            <cropper :src='source_image' class='cropper-object' imageClassname='cropper-image' @change='onChange'></cropper>
+            <cropper :src='img.fileUrl' class='cropper-object' imageClassname='cropper-image' @change='onChange'></cropper>
             <div class='image-cropper-container-buttons'>
                 <v-btn color="primary" v-on:click='closeModal()'>Cancel</v-btn>
                 <v-btn color="primary" v-on:click='saveImage()'>Save</v-btn>
@@ -38,15 +38,9 @@
             },
             img: Object
         },
-        watch: {
-            img: function(newVal, oldVal) {
-                this.source_image = newVal.fileUrl
-            }
-        },
         data() {
             return {
                 title: "Edit Image",
-                source_image: this.img.fileUrl,
                 cropped_image: null,
                 coordinates: null
             }
