@@ -40,7 +40,7 @@
 
                     <span v-if='fileName.split(".").pop() !== "mat"' :key='file.fileName'>
                         <v-btn :key='index' v-on:click="openImageEditor(index)" color="primary">Edit image</v-btn>
-                        <EditImage v-model='imageEditorOpen[index]' v-bind:img='file.fileUrl' v-bind:imgName='file.fileName' v-on:setCroppedImage="setCroppedImage"></EditImage>
+                        <EditImage v-model='imageEditorOpen.index' v-bind:img='file.fileUrl' v-bind:imgName='file.fileName' v-on:setCroppedImage="setCroppedImage"></EditImage>
                     </span>
 
                 </v-list-tile>
@@ -68,12 +68,12 @@
                 filesDisplay: [],
                 fileName: '',
                 fileUploaded: false,
-                imageEditorOpen: [false]
+                imageEditorOpen: {0: false}
             }
         },
         methods: {
             openImageEditor: function (index) {
-                this.imageEditorOpen[index] = true // toggle the image editor modal being open and closed
+                this.imageEditorOpen.index = !this.imageEditorOpen.index // toggle the image editor modal being open and closed
             },
 
             setCroppedImage: async function (...args) {    
@@ -153,6 +153,7 @@
 
                 jszip_obj.loadAsync(input_file)
                 .then(async function(zip) {
+                    let count = 0;
                     for (var key in zip.files){
 
                         // get file data
@@ -171,7 +172,8 @@
 
                         // set to reactive variables
                         vm.filesDisplay.push({fileName: filename, fileUrl: base64});      
-                        vm.imageEditorOpen.push(false);
+                        vm.imageEditorOpen[count] = false;
+                        count += 1;
                     }
                 });
             },
