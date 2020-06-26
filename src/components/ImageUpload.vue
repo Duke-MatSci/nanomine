@@ -215,20 +215,20 @@
             },
 
             async rezipFiles () {
-                let jszip_obj = new jszip()
-                let vm = this
+                let jszip_obj = new jszip();
+                let vm = this;
                 
                 // add images to zip file
                 for(let i = 0; i < this.filesDisplay.length; i++){
-                    jszip_obj.file(this.filesDisplay[i].fileName, this.filesDisplay[i].fileUrl.split(',').pop(), {base64: true})
+                    jszip_obj.file(this.filesDisplay[i].fileName, this.filesDisplay[i].fileUrl.split(',').pop(), {base64: true});
                 }
                 
                 // create zip file
                 jszip_obj.generateAsync({type: 'base64'})
                 .then(function (base64) {
-                    vm.files[0].fileUrl = base64
-                    vm.$emit('setFiles', vm.files, vm.fileName)
-                    console.log('rezipped files')
+                    vm.files[0].fileUrl = "data:application/zip;base64," + base64;
+                    vm.$emit('setFiles', vm.files, vm.fileName);
+                    console.log('rezipped files');
                 })
             }
         }
