@@ -188,16 +188,15 @@
                 let jszip_obj = new jszip()
                 let vm = this
                 
-                // compress images and them to zip file
+                // add images to zip file
                 for(let i = 0; i < this.filesDisplay.length; i++){
-                    // var compressed_file = await pako.deflateRaw(this.filesDisplay[i].fileUrl)
-                    jszip_obj.file(this.filesDisplay[i].fileName, this.filesDisplay[i].fileUrl)
+                    jszip_obj.file(this.filesDisplay[i].fileName, this.filesDisplay[i].fileUrl.split(',').pop(), {base64: true})
                 }
                 
                 // create zip file
-                jszip_obj.generateAsync({type: 'blob'})
-                .then(function (content) {
-                    vm.files[0].fileUrl = URL.createObjectURL(content)
+                jszip_obj.generateAsync({type: 'base64'})
+                .then(function (base64) {
+                    vm.files[0].fileUrl = base64
                     vm.$emit('setFiles', vm.files, vm.fileName)
                     console.log('rezipped files')
                 })
@@ -205,22 +204,25 @@
 
             cropAllImages (coordinates, fileName) {
 
+                var canvas = document.createElement('canvas')
+                canvas.width = coordinates.width;
+                canvas.height = coordinates.height;
+
+                var ctx = canvas.getContext('2d');
+                var image = new Image();
+                let vm = this;
+
                 for (let i = 0; i < this.filesDisplay.length; i++){
                     if (this.filesDisplay[i].fileName !== fileName){
-                    
-                        var canvas = document.createElement('canvas')
-                        canvas.width = coordinates.width;
-                        canvas.height = coordinates.height;
     
-                        var ctx = canvas.getContext('2d');
-                        var image = new Image();
-                        image.src = this.filesDisplay[i].fileUrl
-                        let vm = this
+                        image.src = this.filesDisplay[i].fileUrl;
+
                         image.onload = function () {
                             ctx.drawImage(image, (-1) * coordinates.left, (-1) * coordinates.top);
                             vm.filesDisplay[i].fileUrl = canvas.toDataURL();
                             vm.filesDisplay[i].fileName = 'cropped_' + vm.filesDisplay[i].fileName;
                         }
+
                     }
                 }
 
