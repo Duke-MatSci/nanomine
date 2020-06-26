@@ -124,7 +124,7 @@
 
                 // check for acceptable filetype
                 const accepted_types = ['jpg', 'jpeg', 'tif', 'png', 'mat', 'zip'];
-                const fileType = input_file.name;
+                const fileType = input_file.name.split('.').pop();
                 this.fileType = fileType;
                 if (accepted_types.includes(fileType) === false) {
                     return;
