@@ -15,7 +15,7 @@
     <div class='modal' v-if='value'>
         <div class='image-cropper-container'>
             <h1>{{ title }}</h1>
-            <cropper :src='img.fileUrl' class='cropper-object' imageClassname='cropper-image' @change='onChange'></cropper>
+            <cropper :src='img' class='cropper-object' imageClassname='cropper-image' @change='onChange'></cropper>
             <div class='image-cropper-container-buttons'>
                 <v-btn color="primary" v-on:click='closeModal()'>Cancel</v-btn>
                 <v-btn color="primary" v-on:click='saveImage()'>Save</v-btn>
@@ -36,7 +36,8 @@
             value: {
                 required: true
             },
-            img: Object
+            img: String,
+            imgName: String
         },
         data() {
             return {
@@ -54,7 +55,7 @@
                 this.$emit("input", !this.value);
             },
             saveImage() {
-                this.$emit('setCroppedImage', this.cropped_image, this.img.fileName, this.coordinates)
+                this.$emit('setCroppedImage', this.cropped_image, this.imgName, this.coordinates)
                 this.closeModal()
             }
         }
