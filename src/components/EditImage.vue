@@ -89,7 +89,6 @@
     
     .image-cropper-container {
         width: 700px;
-        height: 700px;
         margin-top: 48px;
         max-width: 90%;
         max-height: calc(90% - 48px);
@@ -103,11 +102,12 @@
     }
 
     .cropper-object {
-        max-width: 80%;
+        width: 90%;
     }
 
     .image-cropper-container-buttons {
-        margin-top: 10px;
+        margin-top: 25px;
+        margin-bottom: 25px;
     }
 
 </style>

@@ -47,9 +47,9 @@
 
 <script>
     import {} from 'vuex'
-    import EditImage from './EditImage.vue';
-    import jszip from 'jszip';
-    import pako from 'pako';
+    import EditImage from './EditImage.vue'; // image cropping modal
+    import jszip from 'jszip'; // for unzipping and rezipping files
+    import pako from 'pako'; // for uncompressing files
 
     export default {
         name: 'ImageUpload',
@@ -124,7 +124,7 @@
                                 }
                             })
                         }
-                        await awaitImageCrop(image);
+                        await awaitImageCrop(image); // done to ensure that all images are cropped before files are rezipped
                     }
                 }
 
