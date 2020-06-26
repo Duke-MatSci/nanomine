@@ -75,7 +75,7 @@
         },
         methods: {
             openImageEditor: function (index) {
-                this.imageEditorData = filesDisplay[index]
+                this.imageEditorData = this.filesDisplay[index]
                 this.imageEditorOpen = !this.imageEditorOpen // toggle the image editor modal being open and closed
             },
 
