@@ -33,7 +33,7 @@
                 <v-list-tile
                 :key="file.fileName"
                 >
-                
+
                     <v-list-tile-avatar>
                         <v-icon color="primary">check_circle_outline</v-icon>
                     </v-list-tile-avatar>
@@ -207,13 +207,13 @@
                     if (this.filesDisplay[i].fileName != fileName){
                     
                         var canvas = document.createElement('canvas')
-                        canvas.width = coordinates.width;
-                        canvas.height = coordinates.height;
+                        canvas.width = coordinates.width - coordinates.left;
+                        canvas.height = coordinates.height - coordinates.top;
     
                         var ctx = canvas.getContext('2d');
                         var image = new Image();
                         image.src = this.filesDisplay[i].fileUrl
-                        ctx.drawImage(image, -coordinates.left, -coordinates.top);
+                        ctx.drawImage(image, (-1) * coordinates.left, (-1) * coordinates.top);
 
                         this.filesDisplay[i].fileUrl = canvas.toDataURL();
 
