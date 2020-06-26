@@ -39,7 +39,7 @@
                     </v-list-tile-content>
 
                     <span v-if='fileName.split(".").pop() !== "mat"' :key='file.fileName'>
-                        <v-btn v-on:click="openImageEditor(), index" color="primary">Edit image</v-btn>
+                        <v-btn v-on:click="openImageEditor(index)" color="primary">Edit image</v-btn>
                         <EditImage v-model='imageEditorOpen[index]' v-bind:img='file.fileUrl' v-bind:imgName='file.fileName' v-on:setCroppedImage="setCroppedImage"></EditImage>
                     </span>
 
@@ -73,6 +73,7 @@
         },
         methods: {
             openImageEditor: function (index) {
+                console.log(index)
                 this.imageEditorOpen[index] = !this.imageEditorOpen[index] // toggle the image editor modal being open and closed
             },
 
