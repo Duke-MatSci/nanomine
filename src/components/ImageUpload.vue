@@ -213,8 +213,9 @@
                         var ctx = canvas.getContext('2d');
                         var image = new Image();
                         image.src = this.filesDisplay[i].fileUrl
+                        console.log(i)
                         ctx.drawImage(image, (-1) * coordinates.left, (-1) * coordinates.top);
-
+                        console.log(i)
                         this.filesDisplay[i].fileUrl = canvas.toDataURL();
 
                     }
