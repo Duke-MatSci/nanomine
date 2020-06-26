@@ -33,6 +33,8 @@
                 <v-list-tile
                 :key="file.fileName"
                 >
+                    <img :src='file.fileUrl' :key='file.fileName'>
+                    
                     <v-list-tile-avatar>
                         <v-icon color="primary">check_circle_outline</v-icon>
                     </v-list-tile-avatar>
@@ -156,6 +158,7 @@
 
                 jszip_obj.loadAsync(input_file)
                 .then(async function(zip) {
+                    console.log('unzipped file')
                     let count = 0;
                     for (var key in zip.files){
 
@@ -176,7 +179,7 @@
                         // set to reactive variables
                         vm.filesDisplay.push({fileName: filename, fileUrl: base64});      
                     }
-                    console.log('unzipped files')
+                    console.log('finished extracting images')
                 });
             },
 
@@ -195,7 +198,7 @@
                 .then(function (base64) {
                     vm.files[0].fileUrl = "data:application/x-zip-compressed;base64," + base64;
                     vm.$emit('setFiles', vm.files, vm.fileName)
-                    console.log('rezipped rezipFiles')
+                    console.log('rezipped files')
                 })
             },
 
