@@ -176,6 +176,7 @@
                         // set to reactive variables
                         vm.filesDisplay.push({fileName: filename, fileUrl: base64});      
                     }
+                    console.log('unzipped files')
                 });
             },
 
@@ -193,17 +194,17 @@
                 jszip_obj.generateAsync({type: 'base64'})
                 .then(function (base64) {
                     vm.files[0].fileUrl = "data:application/x-zip-compressed;base64," + base64;
-                    this.$emit('setFiles', vm.files, vm.fileName)
+                    vm.$emit('setFiles', vm.files, vm.fileName)
+                    console.log('rezipped rezipFiles')
                 })
             },
 
             cropAllImages (coordinates, fileName) {
-                
-                var canvas = document.createElement('canvas')
-
+            
                 for (let i = 0; i < this.filesDisplay.length; i++){
                     if (this.filesDisplay[i].fileName != fileName){
-
+                    
+                        var canvas = document.createElement('canvas')
                         canvas.width = coordinates.width;
                         canvas.height = coordinates.height;
     
@@ -216,6 +217,8 @@
 
                     }
                 }
+
+                console.log('applied crop to all images')
             }
         }
     }
