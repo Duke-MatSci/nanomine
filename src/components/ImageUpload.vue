@@ -191,7 +191,7 @@
                 jszip_obj.generateAsync({type: 'base64'})
                 .then(function (base64) {
                     vm.files[0].fileUrl = "data:application/zip;base64," + base64;
-                    this.$emit('setFiles', this.files, this.fileName)
+                    this.$emit('setFiles', vm.files, vm.fileName)
                 })
             },
 
