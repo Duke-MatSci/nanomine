@@ -79,6 +79,7 @@
                 this.imageEditorOpen = !this.imageEditorOpen // toggle the image editor modal being open and closed
             },
 
+            // args: [cropped image, filename of cropped image, coordinates]
             setCroppedImage: async function (...args) {    
                 for (let i = 0; i < this.filesDisplay.length; i++){
                     if (this.filesDisplay[i].fileName == args[1]){
@@ -182,15 +183,16 @@
                 let jszip_obj = new jszip()
                 let vm = this
                 
-                // add images to zip file
+                // compress images and them to zip file
                 for(let i = 0; i < this.filesDisplay.length; i++){
-                    jszip_obj.file(this.filesDisplay[i].fileName, this.filesDisplay[i].fileUrl)
+                    var compressed_file = await pako.deflateRaw(this.filesDisplay[i].fileUrl)
+                    jszip_obj.file(this.filesDisplay[i].fileName, compressed_file)
                 }
                 
                 // create zip file
                 jszip_obj.generateAsync({type: 'base64'})
                 .then(function (base64) {
-                    vm.files[0].fileUrl = "data:application/zip;base64," + base64;
+                    vm.files[0].fileUrl = "data:application/x-zip-compressed;base64," + base64;
                     this.$emit('setFiles', vm.files, vm.fileName)
                 })
             },
