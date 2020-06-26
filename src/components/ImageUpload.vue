@@ -98,6 +98,33 @@
                     }
                 }
             },
+            
+            cropAllImages (coordinates, fileName) {
+
+                var canvas = document.createElement('canvas')
+                canvas.width = coordinates.width;
+                canvas.height = coordinates.height;
+
+                var ctx = canvas.getContext('2d');
+                var image = new Image();
+                let vm = this;
+
+                for (let i = 0; i < this.filesDisplay.length; i++){
+                    if (this.filesDisplay[i].fileName !== fileName){
+    
+                        image.src = this.filesDisplay[i].fileUrl;
+
+                        image.onload = function () {
+                            ctx.drawImage(image, (-1) * coordinates.left, (-1) * coordinates.top);
+                            vm.filesDisplay[i].fileUrl = canvas.toDataURL();
+                            vm.filesDisplay[i].fileName = 'cropped_' + vm.filesDisplay[i].fileName;
+                        }
+
+                    }
+                }
+
+                console.log('applied crop to all images')
+            },
 
             pickFile () {
                 this.$refs.myUpload.click()
@@ -136,11 +163,14 @@
                 fr.addEventListener('load', () => {
                     file.fileUrl = fr.result
                     this.files.push(file)
-                    this.filesDisplay.push(file)
                     this.filesUploaded = true
+
+                    if (filetype !== 'zip'){
+                        this.filesDisplay.push(file)
+                    }
                 })
 
-                if (fileType == 'zip') {
+                if (fileType === 'zip') {
                     this.unzipFiles(input_file)
                 }
 
@@ -200,33 +230,6 @@
                     vm.$emit('setFiles', vm.files, vm.fileName)
                     console.log('rezipped files')
                 })
-            },
-
-            cropAllImages (coordinates, fileName) {
-
-                var canvas = document.createElement('canvas')
-                canvas.width = coordinates.width;
-                canvas.height = coordinates.height;
-
-                var ctx = canvas.getContext('2d');
-                var image = new Image();
-                let vm = this;
-
-                for (let i = 0; i < this.filesDisplay.length; i++){
-                    if (this.filesDisplay[i].fileName !== fileName){
-    
-                        image.src = this.filesDisplay[i].fileUrl;
-
-                        image.onload = function () {
-                            ctx.drawImage(image, (-1) * coordinates.left, (-1) * coordinates.top);
-                            vm.filesDisplay[i].fileUrl = canvas.toDataURL();
-                            vm.filesDisplay[i].fileName = 'cropped_' + vm.filesDisplay[i].fileName;
-                        }
-
-                    }
-                }
-
-                console.log('applied crop to all images')
             }
         }
     }
