@@ -179,7 +179,7 @@
                 });
             },
 
-            rezipFiles () {
+            async rezipFiles () {
                 let jszip_obj = new jszip()
                 let vm = this
                 
