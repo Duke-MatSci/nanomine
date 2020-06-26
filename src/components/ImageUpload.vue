@@ -33,8 +33,7 @@
                 <v-list-tile
                 :key="file.fileName"
                 >
-                    <img :src='file.fileUrl' :key='file.fileName'>
-                    
+                
                     <v-list-tile-avatar>
                         <v-icon color="primary">check_circle_outline</v-icon>
                     </v-list-tile-avatar>
@@ -90,7 +89,7 @@
                         this.filesDisplay[i].fileName = "cropped_" + this.filesDisplay[i].fileName; // to ensure that the list of images reloads since they are binded to filenames.
                         
                         if (this.files[0].fileName.split('.').pop() == 'zip'){
-                            await this.cropAllImages(args[2], args[1])
+                            await this.cropAllImages(args[2], "cropped_" + args[1])
                             this.rezipFiles()
                         } else {
                             this.files[0].fileUrl = args[0];
