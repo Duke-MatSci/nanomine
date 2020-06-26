@@ -70,7 +70,7 @@
                 fileName: '',
                 fileUploaded: false,
                 imageEditorOpen: false,
-                imageEditorData: null
+                imageEditorData: {fileUrl: null, fileName: null}
             }
         },
         methods: {
