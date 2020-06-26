@@ -188,14 +188,14 @@
                 
                 // compress images and them to zip file
                 for(let i = 0; i < this.filesDisplay.length; i++){
-                    var compressed_file = await pako.deflateRaw(this.filesDisplay[i].fileUrl)
+                    // var compressed_file = await pako.deflateRaw(this.filesDisplay[i].fileUrl)
                     jszip_obj.file(this.filesDisplay[i].fileName, compressed_file)
                 }
                 
                 // create zip file
-                jszip_obj.generateAsync({type: 'base64'})
-                .then(function (base64) {
-                    vm.files[0].fileUrl = "data:application/x-zip-compressed;base64," + base64;
+                jszip_obj.generateAsync({type: 'blob'})
+                .then(function (content) {
+                    vm.files[0].fileUrl = URL.createObjectURL(content)
                     vm.$emit('setFiles', vm.files, vm.fileName)
                     console.log('rezipped files')
                 })
