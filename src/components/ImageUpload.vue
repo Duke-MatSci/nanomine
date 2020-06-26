@@ -25,6 +25,8 @@
             >
         </p>
 
+        <EditImage v-model='imageEditorOpen' v-bind:img='imageEditorData.fileUrl' v-bind:imgName='imageEditorData.fileName' v-on:setCroppedImage="setCroppedImage"></EditImage>
+
         <v-list v-model="fileName" subheader: true v-if="fileUploaded">
             <template v-for="(file, index) in filesDisplay">
 
@@ -40,7 +42,6 @@
 
                     <span v-if='fileName.split(".").pop() !== "mat"' :key='file.fileName'>
                         <v-btn :key='index' v-on:click="openImageEditor(index)" color="primary">Edit image</v-btn>
-                        <EditImage v-model='imageEditorOpen.index' v-bind:img='file.fileUrl' v-bind:imgName='file.fileName' v-on:setCroppedImage="setCroppedImage"></EditImage>
                     </span>
 
                 </v-list-tile>
@@ -68,12 +69,14 @@
                 filesDisplay: [],
                 fileName: '',
                 fileUploaded: false,
-                imageEditorOpen: {0: false}
+                imageEditorOpen: false,
+                imageEditorData: null
             }
         },
         methods: {
             openImageEditor: function (index) {
-                this.imageEditorOpen.index = !this.imageEditorOpen.index // toggle the image editor modal being open and closed
+                this.imageEditorData = filesDisplay[index]
+                this.imageEditorOpen = !this.imageEditorOpen // toggle the image editor modal being open and closed
             },
 
             setCroppedImage: async function (...args) {    
@@ -148,7 +151,6 @@
             unzipFiles (input_file) {
                 const vm = this;
                 vm.filesDisplay = [];
-                vm.imageEditorOpen = [];
                 const jszip_obj = new jszip();
 
                 jszip_obj.loadAsync(input_file)
@@ -172,8 +174,6 @@
 
                         // set to reactive variables
                         vm.filesDisplay.push({fileName: filename, fileUrl: base64});      
-                        vm.imageEditorOpen[count] = false;
-                        count += 1;
                     }
                 });
             },
