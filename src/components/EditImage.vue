@@ -38,6 +38,11 @@
             },
             img: Object
         },
+        watch: {
+            img: function(newVal, oldVal) {
+                this.source_image = newVal
+            }
+        },
         data() {
             return {
                 title: "Edit Image",
