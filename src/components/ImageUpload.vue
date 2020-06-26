@@ -25,7 +25,7 @@
             >
         </p>
 
-        <EditImage v-model='imageEditorOpen' v-bind:img='imageEditorData.fileUrl' v-bind:imgName='imageEditorData.fileName' v-on:setCroppedImage="setCroppedImage"></EditImage>
+        <EditImage v-model='imageEditorOpen' v-bind:img='imageEditorData' v-on:setCroppedImage="setCroppedImage"></EditImage>
 
         <v-list v-model="fileName" subheader: true v-if="fileUploaded">
             <template v-for="(file, index) in filesDisplay">
