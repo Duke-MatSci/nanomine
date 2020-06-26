@@ -99,7 +99,7 @@
                 }
             },
             
-            cropAllImages (coordinates, fileName) {
+            async cropAllImages (coordinates, fileName) {
 
                 for (let i = 0; i < this.filesDisplay.length; i++){
                     if (this.filesDisplay[i].fileName !== fileName){
@@ -114,12 +114,16 @@
             
                         image.src = this.filesDisplay[i].fileUrl;
 
-                        image.onload = function () {
-                            ctx.drawImage(image, (-1) * coordinates.left, (-1) * coordinates.top);
-                            vm.filesDisplay[i].fileUrl = canvas.toDataURL();
-                            vm.filesDisplay[i].fileName = 'cropped_' + vm.filesDisplay[i].fileName;
+                        function awaitImageCrop(image) {
+                            return new Promise((resolve, reject) => {
+                                image.onload = await function () {
+                                    ctx.drawImage(image, (-1) * coordinates.left, (-1) * coordinates.top);
+                                    vm.filesDisplay[i].fileUrl = canvas.toDataURL();
+                                    vm.filesDisplay[i].fileName = 'cropped_' + vm.filesDisplay[i].fileName;
+                                }
+                            })
                         }
-
+                        await awaitImageCrop(image);
                     }
                 }
 
