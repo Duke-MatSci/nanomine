@@ -140,7 +140,7 @@
                     this.filesUploaded = true
                 })
 
-                if (files[0].name.split('.').pop() == 'zip') {
+                if (fileType == 'zip') {
                     this.unzipFiles(files[0])
                 }
 
