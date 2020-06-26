@@ -180,7 +180,7 @@
                 }
 
                 this.fileUploaded = true;
-                this.$emit('setFiles', file, file.fileName)
+                this.$emit('setFiles', [file], file.fileName)
 
             },
 
