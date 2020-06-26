@@ -25,25 +25,27 @@
             >
         </p>
 
-        <v-list v-model="uploadedFileName" subheader: true v-if="fileUploaded">
+        <v-list v-model="fileName" subheader: true v-if="fileUploaded">
+            <template v-for="(file, index) in filesDisplay">
 
-                <v-list-item
-                v-for="(fileName, fileUrl) in filesDisplay"
-                :key="fileName"
+                <v-list-tile
+                :key="file.fileName"
                 >
-                    <v-list-item-avatar>
+                    <v-list-tile-avatar>
                         <v-icon color="primary">check_circle_outline</v-icon>
-                    </v-list-item-avatar>
-                    <v-list-item-content>
-                        <v-list-item-title v-text="fileName"></v-list-item-title>
-                    </v-list-item-content>
+                    </v-list-tile-avatar>
+                    <v-list-tile-content>
+                        <v-list-tile-title v-text="file.fileName"></v-list-tile-title>
+                    </v-list-tile-content>
 
-                    <span v-if='uploadedFileName.split(".").pop() !== "mat"' :key='fileName'>
-                        <v-btn v-on:click="openImageEditor()" color="primary">Edit image</v-btn>
-                        <EditImage v-model='imageEditorOpen' v-bind:img='fileUrl' v-bind:imgName='fileName' v-on:setCroppedImage="setCroppedImage"></EditImage>
+                    <span v-if='fileName.split(".").pop() !== "mat"' :key='file.fileName'>
+                        <v-btn v-on:click="openImageEditor(index)" color="primary">Edit image</v-btn>
+                        <EditImage v-model='imageEditorOpen[index]' v-bind:img='file.fileUrl' v-bind:imgName='file.fileName' v-on:setCroppedImage="setCroppedImage"></EditImage>
                     </span>
 
-                </v-list-item>
+                </v-list-tile>
+
+            </template>
         </v-list>
 
     </v-flex>
@@ -64,14 +66,14 @@
             return {
                 files: [],
                 filesDisplay: [],
-                uploadedFileName: '',
+                fileName: '',
                 fileUploaded: false,
-                imageEditorOpen: false
+                imageEditorOpen: [false]
             }
         },
         methods: {
-            openImageEditor: function () {
-                this.imageEditorOpen = !this.imageEditorOpen // toggle the image editor modal being open and closed
+            openImageEditor: function (index) {
+                this.imageEditorOpen[index] = !this.imageEditorOpen[index] // toggle the image editor modal being open and closed
             },
 
             setCroppedImage: async function (...args) {    
@@ -86,7 +88,7 @@
                             this.rezipFiles()
                         } else {
                             this.files[0].fileUrl = args[0];
-                            this.$emit('setFiles', this.files, this.uploadedFileName)
+                            this.$emit('setFiles', this.files, this.fileName)
                         }
 
                         console.log('image succesfully cropped.')
@@ -103,7 +105,7 @@
                 this.files = []
                 this.filesDisplay = []
                 this.fileUploaded = false
-                this.$emit('setFiles', this.files, this.uploadedFileName)
+                this.$emit('setFiles', this.files, this.fileName)
             },
 
             onFilePicked (e) {
@@ -114,7 +116,7 @@
                     let f = files[i]
                     if (f !== undefined) {
                         file.fileName = f.name
-                        this.uploadedFileName = f.name
+                        this.fileName = f.name
                         if (file.fileName.lastIndexOf('.') <= 0) {
                             return
                         }
@@ -140,12 +142,13 @@
                     this.unzipFiles(files[0])
                 }
 
-                this.$emit('setFiles', this.files, this.uploadedFileName)
+                this.$emit('setFiles', this.files, this.fileName)
             },
 
             unzipFiles (input_file) {
                 const vm = this;
-                vm.filesDisplay = []
+                vm.filesDisplay = [];
+                vm.imageEditorOpen = [];
                 const jszip_obj = new jszip();
 
                 jszip_obj.loadAsync(input_file)
@@ -168,7 +171,7 @@
 
                         // set to reactive variables
                         vm.filesDisplay.push({fileName: filename, fileUrl: base64});      
-
+                        vm.imageEditorOpen.push(false);
                     }
                 });
             },
@@ -186,7 +189,7 @@
                 jszip_obj.generateAsync({type: 'base64'})
                 .then(function (base64) {
                     vm.files[0].fileUrl = "data:application/zip;base64," + base64;
-                    this.$emit('setFiles', this.files, this.uploadedFileName)
+                    this.$emit('setFiles', this.files, this.fileName)
                 })
             },
 
