@@ -101,17 +101,17 @@
             
             cropAllImages (coordinates, fileName) {
 
-                var canvas = document.createElement('canvas')
-                canvas.width = coordinates.width;
-                canvas.height = coordinates.height;
-
-                var ctx = canvas.getContext('2d');
-                var image = new Image();
-                let vm = this;
-
                 for (let i = 0; i < this.filesDisplay.length; i++){
                     if (this.filesDisplay[i].fileName !== fileName){
-    
+
+                        var canvas = document.createElement('canvas')
+                        canvas.width = coordinates.width;
+                        canvas.height = coordinates.height;
+
+                        var ctx = canvas.getContext('2d');
+                        var image = new Image();
+                        let vm = this;
+            
                         image.src = this.filesDisplay[i].fileUrl;
 
                         image.onload = function () {
@@ -165,7 +165,7 @@
                     this.files.push(file)
                     this.filesUploaded = true
 
-                    if (filetype !== 'zip'){
+                    if (fileType !== 'zip'){
                         this.filesDisplay.push(file)
                     }
                 })
