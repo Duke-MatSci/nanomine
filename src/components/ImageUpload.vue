@@ -201,20 +201,19 @@
                 })
             },
 
-            cropAllImages (coordinates, fileName) {
-            
+            async cropAllImages (coordinates, fileName) {
                 for (let i = 0; i < this.filesDisplay.length; i++){
                     if (this.filesDisplay[i].fileName != fileName){
                     
                         var canvas = document.createElement('canvas')
-                        canvas.width = coordinates.width - coordinates.left;
-                        canvas.height = coordinates.height - coordinates.top;
+                        canvas.width = coordinates.width;
+                        canvas.height = coordinates.height;
     
                         var ctx = canvas.getContext('2d');
                         var image = new Image();
                         image.src = this.filesDisplay[i].fileUrl
                         console.log(i)
-                        ctx.drawImage(image, (-1) * coordinates.left, (-1) * coordinates.top);
+                        await ctx.drawImage(image, (-1) * coordinates.left, (-1) * coordinates.top);
                         console.log(i)
                         this.filesDisplay[i].fileUrl = canvas.toDataURL();
 
