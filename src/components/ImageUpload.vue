@@ -144,6 +144,7 @@
                     this.unzipFiles(input_file)
                 }
 
+                this.fileUploaded = true;
                 this.$emit('setFiles', file, file.fileName)
 
             },
