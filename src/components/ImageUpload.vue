@@ -141,7 +141,7 @@
                 })
 
                 if (fileType == 'zip') {
-                    this.unzipFiles(files[0])
+                    this.unzipFiles(input_file)
                 }
 
                 this.$emit('setFiles', file, file.fileName)
