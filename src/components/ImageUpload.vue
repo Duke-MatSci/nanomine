@@ -189,7 +189,7 @@
                 // compress images and them to zip file
                 for(let i = 0; i < this.filesDisplay.length; i++){
                     // var compressed_file = await pako.deflateRaw(this.filesDisplay[i].fileUrl)
-                    jszip_obj.file(this.filesDisplay[i].fileName, compressed_file)
+                    jszip_obj.file(this.filesDisplay[i].fileName, this.filesDisplay[i].fileUrl)
                 }
                 
                 // create zip file
@@ -212,10 +212,10 @@
                         var ctx = canvas.getContext('2d');
                         var image = new Image();
                         image.src = this.filesDisplay[i].fileUrl
-                        console.log(i)
                         await ctx.drawImage(image, (-1) * coordinates.left, (-1) * coordinates.top);
-                        console.log(i)
+
                         this.filesDisplay[i].fileUrl = canvas.toDataURL();
+                        this.filesDisplay[i].fileName = 'cropped_' + this.filesDisplay[i].fileName;
 
                     }
                 }
