@@ -40,14 +40,12 @@
             imgName: String,
             aspectRatio: String
         },
-        watch: {
-            aspectRatio: function(newVal, oldVal){
-                if (newVal === 'square') {
-                    this.stencil_props.aspectRatio = 1;
-                } else if (newVal === 'free') {
-                    if ('aspectRatio' in this.stencil_props) {
-                        delete this.stencil_props.aspectRatio;
-                    }
+        mounted() {
+            if (this.aspectRatio === 'square') {
+                this.stencil_props.aspectRatio = 1;
+            } else if (this.aspectRatio === 'free') {
+                if ('aspectRatio' in this.stencil_props) {
+                    delete this.stencil_props.aspectRatio;
                 }
             }
         },
