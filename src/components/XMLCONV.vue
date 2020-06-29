@@ -93,7 +93,7 @@
           </v-list-tile>
         </v-list>
       </v-flex>
-      <ImageUpload v-on:setFiles="setFiles"></ImageUpload>
+      <ImageUpload v-on:setFiles="setFiles" aspectRatio='free'></ImageUpload>
       <v-btn v-on:click="submit()" :disabled="templateName.length < 1 || !datasetSelected" color="primary">Submit</v-btn>
       <br>
       <h4 class="text-xs-left">Reference</h4>

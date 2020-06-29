@@ -66,7 +66,7 @@
         </v-card>
       </v-dialog>
       <v-select label="Number Of Reconstructions" v-bind:items="options" v-model="num_recon"></v-select>
-      <ImageUpload v-on:setFiles="setFiles"></ImageUpload>
+      <ImageUpload v-on:setFiles="setFiles" aspectRatio='square'></ImageUpload>
       <v-flex class="text-xs-center">
       <v-btn v-on:click="submit()" color="primary">Reconstruct</v-btn>
       </v-flex>

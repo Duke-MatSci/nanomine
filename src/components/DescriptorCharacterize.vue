@@ -62,7 +62,7 @@
           </v-card-actions>
         </v-card>
       </v-dialog>
-      <ImageUpload v-on:setFiles="setFiles"></ImageUpload>
+      <ImageUpload v-on:setFiles="setFiles" aspectRatio='free'></ImageUpload>
       <v-flex class="text-xs-center">
       <v-btn v-on:click="submit()" color="primary">Characterize</v-btn>
       </v-flex>

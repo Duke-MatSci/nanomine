@@ -15,7 +15,7 @@
     <div class='modal' v-if='value'>
         <div class='image-cropper-container'>
             <h1>{{ title }}</h1>
-            <cropper :src='img' class='cropper-object' imageClassname='cropper-image' @change='onChange'></cropper>
+            <cropper :src='img' class='cropper-object' imageClassname='cropper-image' :stencil-props='stencil_props' @change='onChange'></cropper>
             <div class='image-cropper-container-buttons'>
                 <v-btn color="primary" v-on:click='closeModal()'>Cancel</v-btn>
                 <v-btn color="primary" v-on:click='saveImage()'>Save</v-btn>
@@ -37,13 +37,26 @@
                 required: true
             },
             img: String,
-            imgName: String
+            imgName: String,
+            aspectRatio: String
+        },
+        watch: {
+            aspectRatio: function(newVal, oldVal){
+                if (newVal === 'square') {
+                    this.stencil_props.aspectRatio = 1;
+                } else if (newVal === 'free') {
+                    if ('aspectRatio' in this.stencil_props) {
+                        delete this.stencil_props.aspectRatio;
+                    }
+                }
+            }
         },
         data() {
             return {
                 title: "Edit Image",
                 cropped_image: null,
-                coordinates: null
+                coordinates: null,
+                stencil_props: {}
             }
         },
         methods: {

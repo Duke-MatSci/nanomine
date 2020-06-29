@@ -20,7 +20,13 @@
         </p>
 
         <!-- Image Cropper Modal -->
-        <EditImage v-model='imageEditorOpen' v-bind:img='imageEditorData.fileUrl' v-bind:imgName='imageEditorData.fileName' v-on:setCroppedImage="setCroppedImage"></EditImage>
+        <EditImage 
+            v-model='imageEditorOpen' 
+            v-bind:img='imageEditorData.fileUrl' 
+            v-bind:imgName='imageEditorData.fileName' 
+            v-bind:aspectRatio='aspectRatio' 
+            v-on:setCroppedImage="setCroppedImage"
+        ></EditImage>
 
         <v-list v-model="fileName" subheader: true v-if="fileUploaded">
             <template v-for="(file, index) in filesDisplay">
@@ -56,6 +62,10 @@
 
         components: {
             EditImage
+        },
+
+        props: {
+            aspectRatio: String
         },
 
         data() {

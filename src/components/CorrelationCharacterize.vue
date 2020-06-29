@@ -61,7 +61,7 @@
         </v-card>
       </v-dialog>
       <v-select label="Correlation Name" v-bind:items="options" v-model="corr"></v-select>
-      <ImageUpload v-on:setFiles="setFiles"></ImageUpload>
+      <ImageUpload v-on:setFiles="setFiles" aspectRatio='square'></ImageUpload>
       <v-flex class="text-xs-center">
         <v-btn v-on:click="submit()" color="primary">Characterize</v-btn>
       </v-flex>
