@@ -19,18 +19,14 @@
       <v-layout row wrap>
         <v-flex xs12>
           <h3>Description</h3>
-          <br>
           <p>Upload an image or ZIP file containing set of images (Supported file formats: .jpg, .tif, .png) and click
             "Binarize" to binarize image using Otsu's Method.</p>
         </v-flex>
-        <v-flex xs12 justify-start>
-          <h4> Input Options:</h4>
-          <p class="text-xs-left"><strong> Upload a single image: </strong>Supported image formats are .jpg, .tif and .png.
-          <p class="text-xs-left"><strong> --OR-- Upload a single image in .mat format :</strong> The .mat file must contain ONLY ONE variable named
-            "Input" - which contains the image.</p>
-          <p class="text-xs-left"><strong> --OR-- Upload multiple images in ZIP File:</strong> Submit a ZIP file containing multiple images (supported
-            formats: .jpg, .tif, .png) of same size (in pixels).
-            DO NOT ZIP the folder containing images; select all images and ZIP them directly.</p>
+        <v-flex xs12>
+          <h3>Input Options</h3>
+          <p><strong>1. Single image:</strong>Supported image formats are .jpg, .tif and .png.
+          <p><strong>2. Single image in .mat format:</strong> The .mat file must contain ONLY ONE variable named "Input," which contains the image.</p>
+          <p><strong>3. ZIP file with multiple images:</strong> Submit a ZIP file containing multiple images (supported formats: .jpg, .tif, .png) of same size (in pixels). DO NOT ZIP the folder containing images; select all images and ZIP them directly.</p>
         </v-flex>
       </v-layout>
 
@@ -71,9 +67,9 @@
         <v-btn id="binarize-button" v-on:click="submit()" color="primary">Binarize</v-btn>
       </v-flex>
 
-      <h4>References</h4>
       <v-flex xs12>
-        <p> N. Otsu, A threshold selection method from gray-level histograms, IEEE transactions on systems, man, and
+        <h3>References</h3>
+        <p>N. Otsu, A threshold selection method from gray-level histograms, IEEE transactions on systems, man, and
           cybernetics, vol. 9, no. 1, pp. 62-66, 1979.</p>
       </v-flex>
 
@@ -184,17 +180,18 @@ export default {
     width: 240px;
   }
 
-  h4 {
-    text-transform: uppercase;
-  }
   h1 {
     margin-top: 10px;
     background-color: black;
     color: white;
   }
 
-  #binarize-button {
-    z-index: 0; /* ensures that the binary button does not appear on top of the edit image modal */
+  h3 {
+    margin-bottom: 15px;
+  }
+  
+  p {
+    margin-left: 15px;
   }
 
 </style>
