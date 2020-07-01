@@ -1,3 +1,16 @@
+<!--
+################################################################################
+#
+# File Name: McrJobsTemplate.vue
+# Application: templates
+# Description: Reusable component for all the MCR jobs
+#
+# Created by: Atul Jalan, July 1, 2020
+# Customized for NanoMine
+#
+################################################################################
+-->
+
 <template>
 <div>
 
@@ -12,8 +25,8 @@
 
             <v-flex xs12>
                 <h3>Description</h3>
-                <div v-for='(description, index) in job.descriptions' v-bind:key='index'>
-                    <p>{{ description }}</p>
+                <div v-for='(sentence, index) in job.description' v-bind:key='index'>
+                    <p>{{ sentence }}</p>
                 </div>
             </v-flex>
 

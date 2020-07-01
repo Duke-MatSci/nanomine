@@ -36,7 +36,7 @@
 
           pageTitle: 'Microstructure Characterization - Spectral Density Function',
 
-          descriptions: [
+          description: [
             'Upload a binarized image / ZIP file containing set of images (Supported file formats: .jpg, .tif, .png) and click "Characterize". All correlation functions are evaluated for the "white" phase in image.'
           ],
           

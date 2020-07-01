@@ -1,7 +1,7 @@
 <!--
 ################################################################################
 #
-# File Name: EditImage.vue
+# File Name: ImageUpload.vue
 # Application: templates
 # Description: A reusable component that allows users to upload files. Used for Microstructure Characterization & Reconstruction jobs.
 #

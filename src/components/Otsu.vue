@@ -37,7 +37,7 @@
 
           pageTitle: 'Binarization - Otsu Method',
 
-          descriptions: [
+          description: [
             'Upload an image or ZIP file containing set of images (Supported file formats: .jpg, .tif, .png) and click "Binarize" to binarize image using Otsu\'s Method.'
           ],
           

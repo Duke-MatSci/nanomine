@@ -18,7 +18,7 @@ for i = 1 : num_images
     if i ==1
         imwrite(image,[path_to_write,'/','Input',num2str(i),'.jpg']); % save image with modified name
     end
-    input_name = images(i+2).name; % name of input file processed in i'th loop
+    input_name = images(i+2).name; % name of input file processed in ith loop 
     newFolder = [path_to_write,'/Input',num2str(i)]; % create new directory for each input image and write its files
     mkdir(newFolder);
     
