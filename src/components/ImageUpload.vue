@@ -12,6 +12,7 @@
 -->
 
 <template>
+
     <v-flex xs12 class="text-xs-center text-sm-center text-md-center text-lg-center">
 
         <p class="text-xs-left">Select File
