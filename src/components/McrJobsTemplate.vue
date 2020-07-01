@@ -5,6 +5,9 @@
 
     <v-container class="text-xs-left">
 
+        <!-- Error for when user is not logged in -->
+        <v-alert v-model="loginRequired" type="error" outline>{{ loginRequiredMsg }}</v-alert>
+
         <v-layout row wrap>
 
             <v-flex xs12>
@@ -22,11 +25,8 @@
             </v-flex>
             
         </v-layout>
-
-        <v-alert v-model="loginRequired" type="error" outline>{{ loginRequiredMsg }}</v-alert>
-
-        <v-alert v-model="errorAlert" type="error" dismissible>{{ errorAlertMsg }}</v-alert>
       
+        <!-- Modal that shows up upon file submission that shows a successful submission and the Job ID -->
         <v-dialog v-model="successDlg" persistent max-width="500px">
             <v-card>
 
@@ -45,6 +45,9 @@
 
             </v-card>
         </v-dialog>
+        
+        <!-- Error for when there are issues with submitting the uploaded files -->
+        <v-alert v-model="errorAlert" type="error" dismissible>{{ errorAlertMsg }}</v-alert>
 
         <h3>Image Upload</h3>
         <ImageUpload class='imageUpload' v-on:setFiles="setFiles" :aspectRatio="job.aspectRatio"></ImageUpload>
@@ -142,13 +145,13 @@
                 }
 
                 let jm = new JobMgr()
-                console.log('Called Job Manager')
+                console.log('Called Job Manager for ' + vm.submit.submitJobTitle)
                 jm.setJobType(vm.submit.submitJobTitle)
                 jm.setJobParameters({'InputType': vm.fileName.split('.').pop()}) // Figure out which input type
 
                 jm.addInputFile(vm.fileName, vm.files[0].fileUrl)
-                console.log('Job Manager added file: ' + vm.vileName)
-
+                console.log('Job Manager added file: ' + vm.fileName)
+                
                 return jm.submitJob(function (jobId) {
                     console.log('Success! JobId is: ' + jobId)
                     vm.jobId = jobId

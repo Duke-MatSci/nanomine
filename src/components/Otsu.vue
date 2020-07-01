@@ -13,7 +13,7 @@
 -->
 
 <template>
-  <McrJobsTemplate :job='jobInfo'></McrJobsTemplate>
+  <McrJobsTemplate v-bind:job='jobInfo'></McrJobsTemplate>
 </template>
 
 <script>
