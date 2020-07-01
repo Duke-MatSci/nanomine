@@ -33,7 +33,7 @@ try
                     imwrite(256*img_original,[path_to_write,'/','Input1.jpg'])
                 end
             case 2
-                unzip([path_to_read,file_name],[path_to_write,'/input']);
+                img = unzip([path_to_read,file_name],[path_to_write,'/input']);
             case 3
                 load([path_to_read,file_name]);
                 img_original = Input;
