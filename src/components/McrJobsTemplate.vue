@@ -145,13 +145,13 @@
                 }
 
                 let jm = new JobMgr()
-                console.log('Called Job Manager for ' + vm.submit.submitJobTitle)
-                jm.setJobType(vm.submit.submitJobTitle)
+                console.log('Called Job Manager for ' + vm.job.submit.submitJobTitle)
+                jm.setJobType(vm.job.submit.submitJobTitle)
                 jm.setJobParameters({'InputType': vm.fileName.split('.').pop()}) // Figure out which input type
 
                 jm.addInputFile(vm.fileName, vm.files[0].fileUrl)
                 console.log('Job Manager added file: ' + vm.fileName)
-                
+
                 return jm.submitJob(function (jobId) {
                     console.log('Success! JobId is: ' + jobId)
                     vm.jobId = jobId
