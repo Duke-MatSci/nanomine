@@ -6,6 +6,7 @@
 # Description:
 #
 # Created by: Akshay Iyer, July 23, 2018
+# Rewritten by: Atul Jalan, June 30, 2020
 # Customized for NanoMine
 #
 ################################################################################
@@ -36,12 +37,17 @@
 
           pageTitle: 'Binarization - Otsu Method',
 
-          description: 'Upload an image or ZIP file containing set of images (Supported file formats: .jpg, .tif, .png) and click "Binarize" to binarize image using Otsu\'s Method.',
+          descriptions: [
+            'Upload an image or ZIP file containing set of images (Supported file formats: .jpg, .tif, .png) and click "Binarize" to binarize image using Otsu\'s Method.'
+          ],
           
           aspectRatio: 'free',
-          
-          submitButtonTitle: 'Binarize',
-          
+
+          submit: {
+            submitButtonTitle: 'Binarize',
+            submitJobTitle: 'otsu'
+          },
+                    
           uploadOptions: [
             {
               title: 'Single image', 
@@ -65,5 +71,6 @@
       }
     }
   }
+
 </script>
 

@@ -9,7 +9,9 @@
 
             <v-flex xs12>
                 <h3>Description</h3>
-                <p>{{ job.description }}</p>
+                <div v-for='(description, index) in job.descriptions' v-bind:key='index'>
+                    <p>{{ description }}</p>
+                </div>
             </v-flex>
 
             <v-flex xs12>
@@ -45,10 +47,10 @@
         </v-dialog>
 
         <h3>Image Upload</h3>
-        <ImageUpload v-on:setFiles="setFiles" :aspectRatio="job.aspectRatio"></ImageUpload>
+        <ImageUpload class='imageUpload' v-on:setFiles="setFiles" :aspectRatio="job.aspectRatio"></ImageUpload>
 
         <v-flex class="text-xs-center">
-            <v-btn v-on:click="submit()" color="primary">{{ job.submitButtonTitle }}</v-btn>
+            <v-btn v-on:click="submit()" color="primary">{{ job.submit.submitButtonTitle }}</v-btn>
         </v-flex>
 
         <v-flex xs12>
@@ -141,7 +143,7 @@
 
                 let jm = new JobMgr()
                 console.log('Called Job Manager')
-                jm.setJobType('otsu')
+                jm.setJobType(vm.submit.submitJobTitle)
                 jm.setJobParameters({'InputType': vm.fileName.split('.').pop()}) // Figure out which input type
 
                 jm.addInputFile(vm.fileName, vm.files[0].fileUrl)
@@ -180,6 +182,10 @@
     }
 
     p {
+        margin-left: 15px;
+    }
+
+    .imageUpload {
         margin-left: 15px;
     }
 
