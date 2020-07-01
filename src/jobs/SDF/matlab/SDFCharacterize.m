@@ -31,7 +31,7 @@ try
             end
             
         case 2
-            img = unzip([path_to_read,file_name],[path_to_write,'/input']);
+            unzip([path_to_read,file_name],[path_to_write,'/input']);
         case 3
             path=[path_to_read,file_name];
             k=load(path);
