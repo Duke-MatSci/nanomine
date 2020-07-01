@@ -18,6 +18,7 @@
 <script>
 
   import {} from 'vuex'
+  import McrJobsTemplate from './McrJobsTemplate.vue'
 
   export default {
 
