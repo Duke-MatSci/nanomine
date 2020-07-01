@@ -240,7 +240,7 @@
                 }
                 
                 // create zip file
-                jszip_obj.generateAsync({type: 'base64'})
+                jszip_obj.generateAsync({type: 'base64', compression: 'DEFLATE'})
                 .then(function (base64) {
                     vm.files[0].fileUrl = "data:application/zip;base64," + base64;
                     vm.$emit('setFiles', vm.files, vm.fileName);
