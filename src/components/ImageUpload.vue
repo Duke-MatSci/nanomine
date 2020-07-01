@@ -211,7 +211,12 @@
                         var filetype = filename.split('.').pop();
 
                         // uncompress
-                        var raw_data = await pako.inflateRaw(zip.files[key]._data.compressedContent);
+                        var raw_data = undefined;
+                        if (zip.files[key]._data.compressedSize == zip.files[key]._data.uncompressedSize) {
+                            raw_data = zip.files[key]._data.compressedContent
+                        } else {
+                            raw_data = await pako.inflateRaw(zip.files[key]._data.compressedContent);
+                        }
 
                         // convert from uint8array to base64
                         var binary = '';

@@ -62,6 +62,13 @@
         <!-- Error for when there are issues with submitting the uploaded files -->
         <v-alert v-model="errorAlert" type="error" dismissible>{{ errorAlertMsg }}</v-alert>
 
+        <v-flex v-if='includesResults' xs12>
+            <h3>Results</h3>
+            <div v-for='(result, index) in job.results' v-bind:key='index'>
+                <p>{{ result }}</p>
+            </div>
+        </v-flex>
+
         <h3>Image Upload</h3>
         <ImageUpload class='imageUpload' v-on:setFiles="setFiles" :aspectRatio="job.aspectRatio"></ImageUpload>
 
@@ -110,6 +117,7 @@
                 jobId: '',
                 files: [],
                 fileName: '',
+                includesResults: false
             }
         },
 
@@ -119,6 +127,12 @@
             if (!vm.auth.isLoggedIn()) {
                 vm.loginRequired = true
                 vm.loginRequiredMsg = 'Login is required.'
+            }
+        },
+
+        mounted() {
+            if (results in this.job) {
+                this.includesResults = true
             }
         },
 
