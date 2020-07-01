@@ -48,7 +48,7 @@
         <ImageUpload v-on:setFiles="setFiles" :aspectRatio="job.aspectRatio"></ImageUpload>
 
         <v-flex class="text-xs-center">
-            <v-btn id="binarize-button" v-on:click="submit()" color="primary">{{ job.submitButtonTitle }}</v-btn>
+            <v-btn v-on:click="submit()" color="primary">{{ job.submitButtonTitle }}</v-btn>
         </v-flex>
 
         <v-flex xs12>
@@ -126,40 +126,39 @@
             },
 
             submit: function () {
-                let vm = this
-                vm.files.forEach(function (v) {
-                    console.log(JSON.stringify(v))
-                })
 
+                let vm = this
                 vm.setLoading()
                 console.log('Loading..')
+
+                if (vm.files.length == 0) {
+                    let msg = 'Please select a file to process.'
+                    vm.errorAlertMsg = msg
+                    vm.errorAlert = true
+                    vm.resetLoading()
+                    return;
+                }
+
                 let jm = new JobMgr()
                 console.log('Called Job Manager')
                 jm.setJobType('otsu')
                 jm.setJobParameters({'InputType': vm.fileName.split('.').pop()}) // Figure out which input type
-                if (vm.files && vm.files.length >= 1) {
-                    vm.files.forEach(function (v) {
-                    jm.addInputFile(v.fileName, v.fileUrl)
-                    console.log('Job Manager added file: ' + v.fileName)
-                    })
-                    return jm.submitJob(function (jobId) {
+
+                jm.addInputFile(vm.fileName, vm.files[0].fileUrl)
+                console.log('Job Manager added file: ' + vm.vileName)
+
+                return jm.submitJob(function (jobId) {
                     console.log('Success! JobId is: ' + jobId)
                     vm.jobId = jobId
                     vm.resetLoading()
                     vm.successDlg = true
-                    }, function (errCode, errMsg) {
+                }, function (errCode, errMsg) {
                     let msg = 'error: ' + errCode + ' msg: ' + errMsg
                     console.log(msg)
                     vm.errorAlertMsg = msg
                     vm.errorAlert = true
                     vm.resetLoading()
-                    })
-                } else {
-                    let msg = 'Please select a file to process.'
-                    vm.errorAlertMsg = msg
-                    vm.errorAlert = true
-                    vm.resetLoading()
-                }
+                })
             }
 
         }
