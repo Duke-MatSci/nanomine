@@ -12,180 +12,72 @@
 -->
 
 <template>
-  <div class="CorrelationCharacterize">
-    <h1>{{ msg }}</h1>
-    <v-container class="text-xs-left">
-      <v-layout row wrap>
-        <v-flex xs12>
-          <h3>Description</h3>
-          <br>
-          <p>Upload a binarized image / ZIP file containing set of images (Supported file formats: .jpg, .tif, .png) and click "Characterize".
-            All correlation functions are evaluated for the "white" phase in image.</p>
-        </v-flex>
-        <v-flex xs12 justify-start>
-          <h4> Input Options:</h4>
-          <p class="text-xs-left"><strong> Upload a single image: </strong>Supported image formats are .jpg, .tif and .png.
-          <p class="text-xs-left"><strong> --OR-- Upload a single image in .mat format :</strong> The .mat file must contain ONLY ONE variable named
-            "Input" - which contains the image.</p>
-          <p class="text-xs-left"><strong> --OR-- Upload multiple images in ZIP File:</strong> Submit a ZIP file containing multiple images (supported
-            formats: .jpg, .tif, .png) of same size (in pixels).
-            DO NOT ZIP the folder containing images; select all images and ZIP them directly.</p>
-        </v-flex>
-      </v-layout>
-      <v-alert
-        v-model="loginRequired"
-        type="error"
-        outline
-      >
-        {{loginRequiredMsg}}
-      </v-alert>
-      <v-alert
-        v-model="errorAlert"
-        type="error"
-        dismissible
-      >
-        {{errorAlertMsg}}
-      </v-alert>
-      <v-dialog v-model="successDlg" persistent max-width="500px">
-        <v-card>
-          <v-card-title>
-            <span>Characterization Job Submitted Successfully</span>
-            <v-spacer></v-spacer>
-          </v-card-title>
-          <v-card-text>
-            Your characterization job is: {{jobId}} <br/> You should receive an email with a link to the job output.
-          </v-card-text>
-          <v-card-actions>
-            <v-btn color="primary" flat @click="successDlgClicked()">Close</v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-      <v-select label="Correlation Name" v-bind:items="options" v-model="corr"></v-select>
-      <ImageUpload v-on:setFiles="setFiles" aspectRatio='square'></ImageUpload>
-      <v-flex class="text-xs-center">
-        <v-btn v-on:click="submit()" color="primary">Characterize</v-btn>
-      </v-flex>
-      <h4>References</h4>
-      <v-flex xs12>
-        <p>Rintoul, M.D. and Torquato, S., 1997. Reconstruction of the structure of dispersions. <i>Journal of Colloid and Interface Science</i>, 186(2), pp.467-476.</p>
-        <p>Yeong,C. and Torquato,S., 1998. Reconstructing random media Physical Review E, vol. 57, no. 1, p. 495</p>
-      </v-flex>
-    </v-container>
-  </div>
+  <McrJobsTemplate v-bind:job='jobInfo'></McrJobsTemplate>
 </template>
 
 <script>
-import {} from 'vuex'
-import {JobMgr} from '@/modules/JobMgr.js'
-import {Auth} from '@/modules/Auth.js'
-import ImageUpload from './ImageUpload.vue'
 
-export default {
-  name: 'CorrelationCharacterize',
-  components: {
-    ImageUpload
-  },
-  data: () => {
-    return ({
-      title: 'Input Upload',
-      msg: 'Microstructure Characterization - Correlation Function Approach',
-      dialog: false,
-      fileName: '',
-      files: [],
-      errorAlert: false,
-      errorAlertMsg: '',
-      loginRequired: false,
-      loginRequiredMsg: '',
-      successDlg: false,
-      jobId: '',
-      corr: null,
-      options: [
-        'Autocorrelation', 'Lineal Path Correlation', 'Cluster Correlation', 'Surface Correlation'
-      ]
-    })
-  },
-  beforeMount: function () {
-    let vm = this
-    vm.auth = new Auth()
-    if (!vm.auth.isLoggedIn()) {
-      vm.loginRequired = true
-      vm.loginRequiredMsg = 'Login is required.'
-    }
-  },
-  methods: {
+  import {} from 'vuex'
+  import McrJobsTemplate from './McrJobsTemplate.vue'
 
-    setFiles: function (...files) {
-      this.files = files[0]; // the actual file object
-      this.fileName = files[1]; // the name of the file
-    },
-    
-    setLoading: function () {
-      this.$store.commit('isLoading')
+  export default {
+
+    name: 'CorrelationCharacterize',
+
+    components: {
+      McrJobsTemplate
     },
 
-    resetLoading: function () {
-      this.$store.commit('notLoading')
-    },
+    data: () => {
+      return {
+        jobInfo: {
 
-    successDlgClicked: function () {
-      let vm = this
-      console.log('Success dlg button clicked')
-      vm.$router.go(-2) // go back to mcr homepage page
-    },
+          jobTitle: 'Correlation Characterize',
 
-    submit: function () {
-      let vm = this
-      vm.files.forEach(function (v) {
-        console.log(JSON.stringify(v))
-      })
+          pageTitle: 'Microstructure Characterization - Correlation Function Approach',
 
-      vm.setLoading()
-      console.log('Loading..')
-      let jm = new JobMgr()
-      console.log('Called Job Manager')
-      jm.setJobType('CorrelationCharacterize')
-      jm.setJobParameters({'CorrelationType': vm.corr, 'InputType': vm.fileName.split('.').pop()}) // Figure out which input type
-      if (vm.files && vm.files.length >= 1) {
-        vm.files.forEach(function (v) {
-          jm.addInputFile(v.fileName, v.fileUrl)
-          console.log('Job Manager added file: ' + v.fileName)
-        })
-        return jm.submitJob(function (jobId) {
-          console.log('Success! JobId is: ' + jobId)
-          vm.jobId = jobId
-          vm.resetLoading()
-          vm.successDlg = true
-        }, function (errCode, errMsg) {
-          let msg = 'error: ' + errCode + ' msg: ' + errMsg
-          console.log(msg)
-          vm.errorAlertMsg = msg
-          vm.errorAlert = true
-          vm.resetLoading()
-        })
-      } else {
-        let msg = 'Please select a file to process.'
-        vm.errorAlertMsg = msg
-        vm.errorAlert = true
-        vm.resetLoading()
+          description: [
+            'Upload a binarized image / ZIP file containing set of images (Supported file formats: .jpg, .tif, .png) and click "Characterize". All correlation functions are evaluated for the "white" phase in image.'
+          ],
+          
+          aspectRatio: 'square',
+
+          submit: {
+            submitButtonTitle: 'Characterize',
+            submitJobTitle: 'CorrelationCharacterize'
+          },
+                    
+          uploadOptions: [
+            {
+              title: 'Single image', 
+              description: 'Supported image formats are .jpg, .tif and .png.'
+            },
+            {
+              title: 'Single image in .mat format',
+              description: 'The .mat file must contain ONLY ONE variable named "Input" - which contains the image.'
+            },
+            {
+              title: 'ZIP file with multiple images (Coming soon!)',
+              description: 'Submit a ZIP file containing multiple images (supported formats: .jpg, .tif, .png) of same size (in pixels). DO NOT ZIP the folder containing images; select all images and ZIP them directly.'
+            }
+          ],
+
+          references: [
+            'Rintoul, M.D. and Torquato, S., 1997. Reconstruction of the structure of dispersions. Journal of Colloid and Interface Science, 186(2), pp.467-476.',
+            'Yeong,C. and Torquato,S., 1998. Reconstructing random media Physical Review E, vol. 57, no. 1, p. 495'
+          ],
+
+          selects: [
+            {
+              title: 'Correlation Name',
+              submitJobTitle: 'CorrelationType',
+              options: ['Autocorrelation', 'Lineal Path Correlation', 'Cluster Correlation', 'Surface Correlation']
+            }
+          ]
+
+        }
       }
     }
   }
-}
+
 </script>
-
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-  img {
-    width: 240px;
-  }
-
-  h4 {
-    text-transform: uppercase;
-  }
-  h1 {
-    margin-top: 10px;
-    background-color: black;
-    color: white;
-  }
-
-</style>
