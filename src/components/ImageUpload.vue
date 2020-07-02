@@ -28,6 +28,34 @@
             v-bind:aspectRatio='aspectRatio' 
             v-on:setCroppedImage="setCroppedImage"
         ></EditImage>
+
+        <div v-if="fileUploaded">
+
+            <h4>Image Dimensions</h4>
+
+            <div class='imageDimensionsWrapper'>
+                
+                <div class='imgDimWidth'>
+                    <v-text-field height='40' outline label='width' v-model='originalSize.width'></v-text-field>
+                </div>
+
+                <h3>x</h3>
+
+                <div class='imgDimHeight'>
+                <v-text-field height='40' outline label='height' v-model='originalSize.height'></v-text-field>
+
+                <div class='imgDimUnits'>
+                    <v-select
+                        height='40'
+                        label="units"
+                        :items="dimensionUnits"
+                        v-model="originalSize.units"
+                    ></v-select>
+                </div>
+
+            </div> 
+
+        </div>
         
         <div v-if="fileUploaded && selects.length > 0">
 
@@ -36,7 +64,7 @@
             <div class='selectDropdownsWrapper'>
                 <div class='singleSelectDropdown' v-for="(select, index) in selects" :key='index'>
                     <v-select
-                        dense
+                        height='40'
                         outline 
                         :label="select.title" 
                         :items="select.options" 
@@ -45,30 +73,6 @@
                     ></v-select>
                 </div>
             </div>
-
-        </div>
-
-        <div v-if="fileUploaded">
-
-            <h4>Image Dimensions</h4>
-
-            <div class='imageDimensionsWrapper'>
-                
-                <v-text-field outline dense label='width' v-model='originalSize.width'></v-text-field>
-
-                <p> x </p>
-
-                <v-text-field outline dense label='width' v-model='originalSize.height'></v-text-field>
-
-                <v-select
-                    dense
-                    outline
-                    label="units"
-                    :items="dimensionUnits"
-                    v-model="originalSize.units"
-                ></v-select>
-
-            </div> 
 
         </div>
 
@@ -333,6 +337,22 @@
         flex-direction: row;
         flex-wrap: wrap;
         justify-content: flex-start;
+        align-items: center;
+    }
+
+    .imgDimWidth {
+        width: 20%;
+        margin-right: 15px;
+    }
+
+    .imgDimHeight {
+        width: 20%;
+        margin-left: 15px;
+    }
+
+    .imgDimUnits {
+        width: 100px;
+        max-width: 25%;
     }
 
 </style>
