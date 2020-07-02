@@ -52,7 +52,7 @@
           aspectRatio: 'free',
 
           submit: {
-            submitButtonTitle: 'Intelligent Characterization',
+            submitButtonTitle: 'Characterize',
             submitJobTitle: 'IntelligentCharacterize'
           },
                     

@@ -29,6 +29,10 @@
             v-on:setCroppedImage="setCroppedImage"
         ></EditImage>
 
+        <div v-for="(select, index) in selects" :key='index'>
+            <v-select :label="select.title" :items="select.options" v-model="selectedOptions[select.submitJobTitle]" v-on:change="$emit('setSelectors', selectedOptions)" ></v-select>
+        </div>
+
         <v-list v-model="fileName" subheader: true v-if="fileUploaded">
             <template v-for="(file, index) in filesDisplay">
                 <v-list-tile :key="file.fileName">
@@ -66,7 +70,8 @@
         },
 
         props: {
-            aspectRatio: String
+            aspectRatio: String,
+            selects: Object
         },
 
         data() {
@@ -77,7 +82,14 @@
                 fileName: '',
                 fileUploaded: false,
                 imageEditorOpen: false,
-                imageEditorData: {fileUrl: null, fileName: null}
+                imageEditorData: {fileUrl: null, fileName: null},
+                selectedOptions: {}
+            }
+        },
+
+        mounted() {
+            for (let i = 0; i < this.selects.length; i++){
+                this.selectedOptions[this.selects[i].submitJobTitle] = null;
             }
         },
 

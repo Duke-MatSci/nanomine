@@ -26,14 +26,14 @@
             <v-flex xs12>
                 <h3>Description</h3>
                 <div v-for='(sentence, index) in job.description' v-bind:key='index'>
-                    <p>{{ sentence }}</p>
+                    <p v-html='sentence' >{{ sentence }}</p>
                 </div>
             </v-flex>
 
             <v-flex xs12>
                 <h3>Input Options</h3>
                 <div v-for='(uploadOption, index) in job.uploadOptions' v-bind:key='uploadOption.title'>
-                    <p><strong>{{ index + 1 }}. {{ uploadOption.title }}:</strong> {{ uploadOption.description }}</p>
+                    <p v-html='uploadOption.description' ><strong>{{ index + 1 }}. {{ uploadOption.title }}:</strong> {{ uploadOption.description }}</p>
                 </div>
             </v-flex>
             
@@ -62,15 +62,15 @@
         <!-- Error for when there are issues with submitting the uploaded files -->
         <v-alert v-model="errorAlert" type="error" dismissible>{{ errorAlertMsg }}</v-alert>
 
-        <v-flex v-if='includesResults' xs12>
+        <v-flex v-if='"results" in job' xs12>
             <h3>Results</h3>
             <div v-for='(result, index) in job.results' v-bind:key='index'>
-                <p>{{ result }}</p>
+                <p v-html='result' >{{ result }}</p>
             </div>
         </v-flex>
 
         <h3>Image Upload</h3>
-        <ImageUpload class='imageUpload' v-on:setFiles="setFiles" :aspectRatio="job.aspectRatio"></ImageUpload>
+        <ImageUpload class='imageUpload' v-on:setFiles="setFiles" :aspectRatio="job.aspectRatio" :selects='selects' ></ImageUpload>
 
         <v-flex class="text-xs-center">
             <v-btn v-on:click="submit()" color="primary">{{ job.submit.submitButtonTitle }}</v-btn>
@@ -79,7 +79,7 @@
         <v-flex xs12>
             <h3>References</h3>
             <div v-for='(reference, index) in job.references' v-bind:key='index'>
-                <p>{{ reference }}</p>
+                <p v-html='reference' >{{ reference }}</p>
             </div>
         </v-flex>
 
@@ -117,7 +117,8 @@
                 jobId: '',
                 files: [],
                 fileName: '',
-                includesResults: false
+                selects: [],
+                selectedOptions: {}
             }
         },
 
@@ -131,9 +132,11 @@
         },
 
         mounted() {
-            if (results in this.job) {
-                this.includesResults = true
+
+            if ("selects" in this.job) {
+                this.selects = this.job.selects;
             }
+
         },
 
         methods: {
@@ -143,12 +146,16 @@
                 this.fileName = files[1]; // the name of the file
             },
 
+            setSelectors: function(selectedOptions) {
+                this.selectedOptions = selectedOptions;
+            },
+
             setLoading: function () {
-                this.$store.commit('isLoading')
+                this.$store.commit('isLoading');
             },
 
             resetLoading: function () {
-                this.$store.commit('notLoading')
+                this.$store.commit('notLoading');
             },
 
             successDlgClicked: function () {
@@ -174,7 +181,12 @@
                 let jm = new JobMgr()
                 console.log('Called Job Manager for ' + vm.job.submit.submitJobTitle)
                 jm.setJobType(vm.job.submit.submitJobTitle)
-                jm.setJobParameters({'InputType': vm.fileName.split('.').pop()}) // Figure out which input type
+
+                var jobParameters = {'InputType': vm.fileName.split('.').pop()}; // Figure out which input type
+                for (var key in vm.selectedOptions) {
+                    jobParameters[key] = vm.selectedOptions[key]
+                }
+                jm.setJobParameters(jobParameters)
 
                 jm.addInputFile(vm.fileName, vm.files[0].fileUrl)
                 console.log('Job Manager added file: ' + vm.fileName)
