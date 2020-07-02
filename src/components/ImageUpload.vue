@@ -75,25 +75,30 @@
 
         </div>
 
-        <v-list v-model="fileName" subheader: true v-if="fileUploaded">
-            <template v-for="(file, index) in filesDisplay">
-                <v-list-tile :key="file.fileName">
+        <div v-if="fileUploaded">
 
-                    <v-list-tile-avatar>
-                        <v-icon color="primary">check_circle_outline</v-icon>
-                    </v-list-tile-avatar>
+            <div class='imageTableHeader'>
+                <h4>Name</h4>
+                <h4>Size</h4>
+                <h4>Selected phase</h4>
+                <h4>Options</h4>
+            </div>
 
-                    <v-list-tile-content>
-                        <v-list-tile-title v-text="file.fileName"></v-list-tile-title>
-                    </v-list-tile-content>
+            <div class='imageTableContents' v-for="(file, index) in filesDisplay" :key='file.fileName'>
+                
+                <p>{{ file.fileName }}</p>
 
-                    <span v-if='fileType !== "mat"' :key='file.fileName'>
-                        <v-btn :key='index' v-on:click="openImageEditor(index)" color="primary">Edit image</v-btn>
-                    </span>
+                <p v-if="dimensionsEntered">{{ file.size.width }} x {{ file.size.height }} {{ file.size.units }}</p>
+                <p v-else>N/A</p>
 
-                </v-list-tile>
-            </template>
-        </v-list>
+                <p v-if="phaseIsEdited">Manually set</p>
+                <p v-else>Preset</p>
+
+                <v-btn :key='index' v-on:click="openImageEditor(index)" color="primary">Edit image</v-btn>
+
+            </div>
+
+        </div>
 
     </v-flex>
 </template>
@@ -127,11 +132,10 @@
                 imageEditorData: {fileUrl: null, fileName: null},
                 selectedOptions: {},
                 dimensionUnits: ['nanometers (nm)', 'micrometers (µM)', 'millimeters (mm)'],
-                originalSize: {
-                    units: null,
-                    width: 0,
-                    height: 0
-                }
+                originalSize: {units: null, width: 0, height: 0},
+                phaseIsEdited: false,
+                isCropped: false,
+                dimensionsEntered: false
             }
         },
 
@@ -231,7 +235,11 @@
                 const fr = new FileReader();
                 fr.readAsDataURL(input_file)
                 fr.addEventListener('load', () => {
+
                     file.fileUrl = fr.result
+                    file.size = {width: 0, height: 0, units: null}
+                    file.phase = {x_offset: 0, y_offset: 0}
+
                     this.files.push(file)
                     this.filesUploaded = true
 
@@ -279,8 +287,11 @@
                         }
                         var base64 = 'data:image/' + filetype + ';base64,' + window.btoa(binary);
 
-                        // set to reactive variables
-                        vm.filesDisplay.push({fileName: filename, fileUrl: base64});      
+                        // push to filesDisplay variable
+                        var single_file = {fileName: filename, fileUrl: base64}
+                        single_file.size = {width: 0, height: 0, units: null}
+                        single_file.phase = {x_offset: 0, y_offset: 0}
+                        vm.filesDisplay.push(single_file);      
 
                     }
 
@@ -312,11 +323,14 @@
 
 <style scoped>
 
+    /* Browse files button */
     .fileButton {
         margin-left: 0px;
         margin-bottom: 20px;
     }
 
+
+    /* Subheaders such as 'Image dimensions' and 'Parameters' and 'Selected phase' */
     h4 {
         text-align: left;
         margin-bottom: 15px;
@@ -325,6 +339,23 @@
         border-bottom: 1px solid gray;
     }
 
+    /* 
+    IMAGE TABLE 
+    */
+    .imageTableHeader, .imageTableContents {
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-start;
+    }
+
+    .imageTableHeader h4, .imageTableHeader p {
+        width: 25%;
+        font-size: 15px;
+    }
+
+    /* 
+    PARAMETERS
+    */
     .selectDropdownsWrapper {
         display: flex;
         flex-direction: row;
@@ -336,6 +367,9 @@
         width: 49%;
     }
 
+    /* 
+    IMAGE DIMENSIONS
+     */
     .imageDimensionsWrapper {
         display: flex;
         flex-direction: row;
@@ -344,17 +378,21 @@
         align-items: center;
     }
 
+    /* giant x between width and height for image dimensions */
     h3 {
         font-size: 20px;
+        margin-top: -28px;
     }
 
     .imgDimWidth {
         width: 20%;
+        max-width: 225px;
         margin-right: 15px;
     }
 
     .imgDimHeight {
         width: 20%;
+        max-width: 225px;
         margin-left: 15px;
         margin-right: 30px;
     }
@@ -362,6 +400,7 @@
     .imgDimUnits {
         width: 200px;
         max-width: 25%;
+        margin-top: -10px;
     }
 
 </style>
