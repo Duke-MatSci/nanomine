@@ -29,18 +29,18 @@
             v-on:setCroppedImage="setCroppedImage"
         ></EditImage>
         
-        <div v-if="fileUploaded" class='selectDropdowns'>
+        <div v-if="fileUploaded && selects.length > 0" class='selectDropdowns'>
 
-            <h3>Parameters</h3>
+            <h4>Parameters</h4>
 
             <div class='selectDropdownsWrapper'>
                 <div class='singleSelectDropdown' v-for="(select, index) in selects" :key='index'>
-                    <v-select 
+                    <v-select
+                        filled 
                         :label="select.title" 
                         :items="select.options" 
                         v-model="selectedOptions[select.submitJobTitle]" 
-                        v-on:change="$emit('setSelectors', selectedOptions)"
-                        filled 
+                        v-on:change="$emit('setSelectors', selectedOptions)" 
                     ></v-select>
                 </div>
             </div>
@@ -278,15 +278,7 @@
 
 <style scoped>
 
-    .selectDropdowns {
-        background-color: rgba(192, 192, 192, .1);
-        border: 1px solid gray;
-        border-radius: 8px;
-        padding: 15px;
-
-    }
-
-    .selectDropdowns h3 {
+    .selectDropdowns h4 {
         text-align: left;
         margin-bottom: 5px;
     }
@@ -300,7 +292,7 @@
 
     .singleSelectDropdown {
         width: 48%;
-        margin: 0px 1%;
+        margin-right: 2%;
     }
 
 </style>
