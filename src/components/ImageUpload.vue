@@ -36,7 +36,7 @@
             <div class='selectDropdownsWrapper'>
                 <div class='singleSelectDropdown' v-for="(select, index) in selects" :key='index'>
                     <v-select
-                        filled 
+                        solo 
                         :label="select.title" 
                         :items="select.options" 
                         v-model="selectedOptions[select.submitJobTitle]" 
@@ -281,18 +281,19 @@
     .selectDropdowns h4 {
         text-align: left;
         margin-bottom: 5px;
+        font-size: 15px;
+        border-bottom: 1px solid gray;
     }
 
     .selectDropdownsWrapper {
         display: flex;
         flex-direction: row;
         flex-wrap: wrap;
-        justify-content: flex-start;
+        justify-content: space-between;
     }
 
     .singleSelectDropdown {
-        width: 48%;
-        margin-right: 2%;
+        width: 49%;
     }
 
 </style>
