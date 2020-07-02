@@ -36,7 +36,7 @@
             <div class='selectDropdownsWrapper'>
                 <div class='singleSelectDropdown' v-for="(select, index) in selects" :key='index'>
                     <v-select
-                        solo 
+                        box 
                         :label="select.title" 
                         :items="select.options" 
                         v-model="selectedOptions[select.submitJobTitle]" 
