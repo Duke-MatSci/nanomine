@@ -36,7 +36,7 @@
             <div class='selectDropdownsWrapper'>
                 <div class='singleSelectDropdown' v-for="(select, index) in selects" :key='index'>
                     <v-select
-                        box 
+                        outline 
                         :label="select.title" 
                         :items="select.options" 
                         v-model="selectedOptions[select.submitJobTitle]" 
@@ -280,7 +280,7 @@
 
     .selectDropdowns h4 {
         text-align: left;
-        margin-bottom: 5px;
+        margin-bottom: 15px;
         font-size: 15px;
         border-bottom: 1px solid gray;
     }
