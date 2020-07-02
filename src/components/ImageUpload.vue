@@ -38,7 +38,8 @@
                     label="Select an option" 
                     :items="select.options" 
                     v-model="selectedOptions[select.submitJobTitle]" 
-                    v-on:change="$emit('setSelectors', selectedOptions)" 
+                    v-on:change="$emit('setSelectors', selectedOptions)"
+                    filled 
                 ></v-select>
 
             </div>
