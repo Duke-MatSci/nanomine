@@ -31,7 +31,7 @@
         
         <div v-if="fileUploaded" class='selectDropdowns'>
 
-            <p>Parameters</p>
+            <h3>Parameters</h3>
 
             <div class='selectDropdownsWrapper'>
                 <div class='singleSelectDropdown' v-for="(select, index) in selects" :key='index'>
@@ -282,11 +282,11 @@
         background-color: rgba(192, 192, 192, .1);
         border: 1px solid gray;
         border-radius: 8px;
-        padding: 10px 2.5%;
+        padding: 15px;
 
     }
 
-    .selectDropdowns p {
+    .selectDropdowns h3 {
         text-align: left;
         margin-bottom: 5px;
     }
@@ -299,8 +299,8 @@
     }
 
     .singleSelectDropdown {
-        width: 40%;
-        margin-right: 10%;
+        width: 48%;
+        margin: 0px 1%;
     }
 
 </style>
