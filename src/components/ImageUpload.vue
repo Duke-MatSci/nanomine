@@ -123,8 +123,8 @@
                 imageEditorOpen: false,
                 imageEditorData: {fileUrl: null, fileName: null},
                 selectedOptions: {},
-                dimensionUnits = ['nanometers (nm)', 'micrometers (µM)', 'millimeters (mm)'],
-                originalSize = {
+                dimensionUnits: ['nanometers (nm)', 'micrometers (µM)', 'millimeters (mm)'],
+                originalSize: {
                     units: null,
                     width: 0,
                     height: 0
