@@ -33,7 +33,7 @@
             <v-flex xs12>
                 <h3>Input Options</h3>
                 <div v-for='(uploadOption, index) in job.uploadOptions' v-bind:key='uploadOption.title'>
-                    <p v-html='uploadOption.description' ><strong>{{ index + 1 }}. {{ uploadOption.title }}:</strong> {{ uploadOption.description }}</p>
+                    <p><strong>{{ index + 1 }}. {{ uploadOption.title }}:</strong> <span v-html='uploadOption.description'>{{ uploadOption.description }}</span></p>
                 </div>
             </v-flex>
             

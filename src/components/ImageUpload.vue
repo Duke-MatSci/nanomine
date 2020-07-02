@@ -29,20 +29,22 @@
             v-on:setCroppedImage="setCroppedImage"
         ></EditImage>
         
-        <div v-if="fileUploaded">
-            <div class='selectDropdowns' v-for="(select, index) in selects" :key='index'>
+        <div v-if="fileUploaded" class='selectDropdowns'>
 
-                <p><strong>{{ select.title }}: <strong></p>
+            <p>Parameters</p>
 
-                <v-select 
-                    label="Select an option" 
-                    :items="select.options" 
-                    v-model="selectedOptions[select.submitJobTitle]" 
-                    v-on:change="$emit('setSelectors', selectedOptions)"
-                    filled 
-                ></v-select>
-
+            <div class='selectDropdownsWrapper'>
+                <div class='singleSelectDropdown' v-for="(select, index) in selects" :key='index'>
+                    <v-select 
+                        :label="select.title" 
+                        :items="select.options" 
+                        v-model="selectedOptions[select.submitJobTitle]" 
+                        v-on:change="$emit('setSelectors', selectedOptions)"
+                        filled 
+                    ></v-select>
+                </div>
             </div>
+
         </div>
 
         <v-list v-model="fileName" subheader: true v-if="fileUploaded">
@@ -277,13 +279,28 @@
 <style scoped>
 
     .selectDropdowns {
+        background-color: rgba(192, 192, 192, .1);
+        border: 1px solid gray;
+        border-radius: 8px;
+        padding: 10px 2.5%;
+
+    }
+
+    .selectDropdowns p {
+        text-align: left;
+        margin-bottom: 5px;
+    }
+
+    .selectDropdownsWrapper {
         display: flex;
         flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: flex-start;
     }
-    
-    .selectDropdowns v-select {
-        width: 200px;
-        max-width: 25%;
+
+    .singleSelectDropdown {
+        width: 40%;
+        margin-right: 10%;
     }
 
 </style>
