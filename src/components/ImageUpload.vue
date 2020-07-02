@@ -20,15 +20,6 @@
             <input type="file" style="display: none" accept=".jpg, .png, .tif, .mat, .zip" ref="myUpload" @change="onFilePicked">
         </p>
 
-        <!-- Image Cropper Modal -->
-        <EditImage 
-            v-model='imageEditorOpen' 
-            v-bind:img='imageEditorData.fileUrl' 
-            v-bind:imgName='imageEditorData.fileName' 
-            v-bind:aspectRatio='aspectRatio' 
-            v-on:setCroppedImage="setCroppedImage"
-        ></EditImage>
-
         <div v-if="fileUploaded">
 
             <h4>Image Dimensions</h4>
@@ -75,7 +66,16 @@
 
         </div>
 
-        <div v-if="fileUploaded">
+        <!-- Image Cropper Modal -->
+        <EditImage 
+            v-model='imageEditorOpen' 
+            v-bind:img='imageEditorData.fileUrl' 
+            v-bind:imgName='imageEditorData.fileName' 
+            v-bind:aspectRatio='aspectRatio' 
+            v-on:setCroppedImage="setCroppedImage"
+        ></EditImage>
+
+        <div v-if="fileUploaded" class='imageTable'>
 
             <div class='imageTableHeader'>
                 <h4>Name</h4>
@@ -94,7 +94,7 @@
                 <p v-if="phaseIsEdited">Manually set</p>
                 <p v-else>Preset</p>
 
-                <v-btn :key='index' v-on:click="openImageEditor(index)" color="primary">Edit image</v-btn>
+                <v-btn small  class='imageTableButton' :key='index' v-on:click="openImageEditor(index)" color="primary">Edit image</v-btn>
 
             </div>
 
@@ -342,15 +342,34 @@
     /* 
     IMAGE TABLE 
     */
+    .imageTable {
+        margin-bottom: 20px;
+    }
+
     .imageTableHeader, .imageTableContents {
         display: flex;
         flex-direction: row;
         justify-content: flex-start;
     }
 
-    .imageTableHeader h4, .imageTableHeader p {
+    .imageTableContents {
+        margin-bottom: 5px;
+    }
+
+    .imageTableHeader h4, .imageTableContents p {
         width: 25%;
-        font-size: 15px;
+        text-align: left;
+    }
+
+    .imageTableContents p {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        padding-right: 15px;
+    }
+
+    .imageTableButton {
+        margin-top: 0px;
+        margin-left: 0px;
     }
 
     /* 
@@ -400,7 +419,6 @@
     .imgDimUnits {
         width: 200px;
         max-width: 25%;
-        margin-top: -10px;
     }
 
 </style>
