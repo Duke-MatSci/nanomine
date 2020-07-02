@@ -15,8 +15,8 @@
 
     <v-flex xs12 class="text-xs-center text-sm-center text-md-center text-lg-center">
 
-        <p class="text-xs-left">Select File
-            <v-btn class="text-xs-left" small color="primary" @click='pickFile'>Browse</v-btn>
+        <p class="text-xs-left">
+            <v-btn class="text-xs-left" color="primary" @click='pickFile'>Browse files</v-btn>
             <input type="file" style="display: none" accept=".jpg, .png, .tif, .mat, .zip" ref="myUpload" @change="onFilePicked">
         </p>
 
@@ -29,13 +29,14 @@
             v-on:setCroppedImage="setCroppedImage"
         ></EditImage>
         
-        <div v-if="fileUploaded && selects.length > 0" class='selectDropdowns'>
+        <div v-if="fileUploaded && selects.length > 0">
 
             <h4>Parameters</h4>
 
             <div class='selectDropdownsWrapper'>
                 <div class='singleSelectDropdown' v-for="(select, index) in selects" :key='index'>
                     <v-select
+                        dense
                         outline 
                         :label="select.title" 
                         :items="select.options" 
@@ -44,6 +45,30 @@
                     ></v-select>
                 </div>
             </div>
+
+        </div>
+
+        <div v-if="fileUploaded">
+
+            <h4>Image Dimensions</h4>
+
+            <div class='imageDimensionsWrapper'>
+                
+                <v-text-field outline dense label='width' v-model='originalSize.width'></v-text-field>
+
+                <p> x </p>
+
+                <v-text-field outline dense label='width' v-model='originalSize.height'></v-text-field>
+
+                <v-select
+                    dense
+                    outline
+                    label="units"
+                    :items="dimensionUnits"
+                    v-model="originalSize.units"
+                ></v-select>
+
+            </div> 
 
         </div>
 
@@ -97,7 +122,13 @@
                 fileUploaded: false,
                 imageEditorOpen: false,
                 imageEditorData: {fileUrl: null, fileName: null},
-                selectedOptions: {}
+                selectedOptions: {},
+                dimensionUnits = ['nanometers (nm)', 'micrometers (µM)', 'millimeters (mm)'],
+                originalSize = {
+                    units: null,
+                    width: 0,
+                    height: 0
+                }
             }
         },
 
@@ -278,9 +309,10 @@
 
 <style scoped>
 
-    .selectDropdowns h4 {
+    h4 {
         text-align: left;
         margin-bottom: 15px;
+        margin-top: 0px;
         font-size: 15px;
         border-bottom: 1px solid gray;
     }
@@ -294,6 +326,13 @@
 
     .singleSelectDropdown {
         width: 49%;
+    }
+
+    .imageDimensionsWrapper {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: flex-start;
     }
 
 </style>
