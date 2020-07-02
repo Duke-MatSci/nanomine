@@ -42,7 +42,8 @@
                 <h3>x</h3>
 
                 <div class='imgDimHeight'>
-                <v-text-field height='40' outline label='height' v-model='originalSize.height'></v-text-field>
+                    <v-text-field height='40' outline label='height' v-model='originalSize.height'></v-text-field>
+                </div>
 
                 <div class='imgDimUnits'>
                     <v-select
