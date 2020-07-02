@@ -28,9 +28,20 @@
             v-bind:aspectRatio='aspectRatio' 
             v-on:setCroppedImage="setCroppedImage"
         ></EditImage>
+        
+        <div v-if="fileUploaded">
+            <div class='selectDropdowns' v-for="(select, index) in selects" :key='index'>
 
-        <div v-for="(select, index) in selects" :key='index'>
-            <v-select :label="select.title" :items="select.options" v-model="selectedOptions[select.submitJobTitle]" v-on:change="$emit('setSelectors', selectedOptions)" ></v-select>
+                <p><strong>{{ select.title }}: <strong></p>
+
+                <v-select 
+                    label="Select an option" 
+                    :items="select.options" 
+                    v-model="selectedOptions[select.submitJobTitle]" 
+                    v-on:change="$emit('setSelectors', selectedOptions)" 
+                ></v-select>
+
+            </div>
         </div>
 
         <v-list v-model="fileName" subheader: true v-if="fileUploaded">
@@ -84,12 +95,6 @@
                 imageEditorOpen: false,
                 imageEditorData: {fileUrl: null, fileName: null},
                 selectedOptions: {}
-            }
-        },
-
-        mounted() {
-            for (let i = 0; i < this.selects.length; i++){
-                this.selectedOptions[this.selects[i].submitJobTitle] = null;
             }
         },
 
@@ -269,4 +274,15 @@
 </script>
 
 <style scoped>
+
+    .selectDropdowns {
+        display: flex;
+        flex-direction: row;
+    }
+    
+    .selectDropdowns v-select {
+        width: 200px;
+        max-width: 25%;
+    }
+
 </style>
