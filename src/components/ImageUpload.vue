@@ -16,7 +16,7 @@
     <v-flex xs12 class="text-xs-center text-sm-center text-md-center text-lg-center">
 
         <p class="text-xs-left">
-            <v-btn class="text-xs-left" color="primary" @click='pickFile'>Browse files</v-btn>
+            <v-btn class="text-xs-left fileButton" color="primary" @click='pickFile'>Browse files</v-btn>
             <input type="file" style="display: none" accept=".jpg, .png, .tif, .mat, .zip" ref="myUpload" @change="onFilePicked">
         </p>
 
@@ -36,18 +36,17 @@
             <div class='imageDimensionsWrapper'>
                 
                 <div class='imgDimWidth'>
-                    <v-text-field :height='40' outline label='width' v-model='originalSize.width'></v-text-field>
+                    <v-text-field outline label='width' v-model='originalSize.width'></v-text-field>
                 </div>
 
                 <h3>x</h3>
 
                 <div class='imgDimHeight'>
-                    <v-text-field :height='40' outline label='height' v-model='originalSize.height'></v-text-field>
+                    <v-text-field outline label='height' v-model='originalSize.height'></v-text-field>
                 </div>
 
                 <div class='imgDimUnits'>
                     <v-select
-                        :height='40'
                         label="units"
                         :items="dimensionUnits"
                         v-model="originalSize.units"
@@ -65,7 +64,6 @@
             <div class='selectDropdownsWrapper'>
                 <div class='singleSelectDropdown' v-for="(select, index) in selects" :key='index'>
                     <v-select
-                        :height='40'
                         outline 
                         :label="select.title" 
                         :items="select.options" 
@@ -314,6 +312,11 @@
 
 <style scoped>
 
+    .fileButton {
+        margin-left: 0px;
+        margin-bottom: 20px;
+    }
+
     h4 {
         text-align: left;
         margin-bottom: 15px;
@@ -341,6 +344,10 @@
         align-items: center;
     }
 
+    h3 {
+        font-size: 20px;
+    }
+
     .imgDimWidth {
         width: 20%;
         margin-right: 15px;
@@ -349,10 +356,11 @@
     .imgDimHeight {
         width: 20%;
         margin-left: 15px;
+        margin-right: 30px;
     }
 
     .imgDimUnits {
-        width: 100px;
+        width: 200px;
         max-width: 25%;
     }
 
