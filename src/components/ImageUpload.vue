@@ -89,12 +89,12 @@
                 
                 <p>{{ file.fileName }}</p>
 
-                <p><span v-if="dimensionsEntered">{{ file.size.width }} x {{ file.size.height }} {{ file.size.units }} / </span>{{ file.pixelSize.width }} x {{ file.pixelSize.height }} pixels</p>
+                <p :key='file.pixelSize.width'><span v-if="dimensionsEntered" :key='file.size.height'>{{ file.size.width }} x {{ file.size.height }} {{ file.size.units }} / </span>{{ file.pixelSize.width }} x {{ file.pixelSize.height }} pixels</p>
 
                 <p v-if="phaseIsEdited">Manually set</p>
                 <p v-else>Preset</p>
 
-                <v-btn small  class='imageTableButton' :key='index' v-on:click="openImageEditor(index)" color="primary">Edit image</v-btn>
+                <v-btn small class='imageTableButton' :key='index' v-on:click="openImageEditor(index)" color="primary">Edit image</v-btn>
 
             </div>
 
@@ -154,7 +154,7 @@
                 if (this.originalSize.units !== null && this.originalSize.width > 0 && this.originalSize.height > 0) {
                     this.dimensionsEntered == true;
                     if (this.filesDisplay.length > 0) {
-                        this.updateImageDimensions(this.filesDisplay.pixelSize.width, this.filesDisplay.pixelSize.height);
+                        this.updateImageDimensions(this.filesDisplay[0].pixelSize.width, this.filesDisplay[0].pixelSize.height);
                     }
                 }
 
