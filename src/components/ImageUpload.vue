@@ -220,13 +220,13 @@
             updateImageDimensions (width, height) {
                 
                 for (let i = 0; i < this.filesDisplay.length; i++){
-                    this.filesDisplay.pixelSize.width = width;
-                    this.filesDisplay.pixelSize.height = height;
+                    this.filesDisplay[i].pixelSize.width = width;
+                    this.filesDisplay[i].pixelSize.height = height;
 
                     if (this.dimensionsEntered == true) {
-                        this.filesDisplay.size.units = this.originalSize.units;
-                        this.filesDisplay.size.width = (this.originalSize.width / this.originalPixelSize.width) * width;
-                        this.filesDisplay.size.height = (this.originalSize.height / this.originalPixelSize.height) * height;
+                        this.filesDisplay[i].size.units = this.originalSize.units;
+                        this.filesDisplay[i].size.width = (this.originalSize.width / this.originalPixelSize.width) * width;
+                        this.filesDisplay[i].size.height = (this.originalSize.height / this.originalPixelSize.height) * height;
                     }
                 }
 
