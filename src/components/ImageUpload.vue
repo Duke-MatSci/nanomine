@@ -348,7 +348,7 @@
                         // push to filesDisplay variable
                         var single_file = {fileName: filename, fileUrl: base64};
                         single_file.size = {width: 0, height: 0, units: null};
-                        single_file.pizelSize = {width: 0, height: 0};
+                        single_file.pixelSize = {width: 0, height: 0};
                         single_file.phase = {x_offset: 0, y_offset: 0};
                         single_file.id = count;
                         vm.filesDisplay.push(single_file);      
