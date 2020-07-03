@@ -70,7 +70,14 @@
         </v-flex>
 
         <h3>Image Upload</h3>
-        <ImageUpload class='imageUpload' v-on:setFiles="setFiles" v-on:setSelectors="setSelectors" :aspectRatio="job.aspectRatio" :selects='selects' ></ImageUpload>
+        <ImageUpload 
+            class='imageUpload' 
+            v-on:setFiles="setFiles" 
+            v-on:setSelectors="setSelectors" 
+            :aspectRatio="job.aspectRatio" 
+            :selects='selects'
+            :collectDimensions='job.getImageDimensions' 
+        ></ImageUpload>
 
         <v-flex class="text-xs-center">
             <v-btn v-on:click="submit()" color="primary">{{ job.submit.submitButtonTitle }}</v-btn>

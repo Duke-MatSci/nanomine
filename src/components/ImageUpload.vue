@@ -15,25 +15,25 @@
 
     <v-flex xs12 class="text-xs-center text-sm-center text-md-center text-lg-center">
 
-        <p class="text-xs-left">
+        <p class="text-xs-left fileButtonWrapper">
             <v-btn class="text-xs-left fileButton" color="primary" @click='pickFile'>Browse files</v-btn>
             <input type="file" style="display: none" accept=".jpg, .png, .tif, .mat, .zip" ref="myUpload" @change="onFilePicked">
         </p>
 
-        <div v-if="fileUploaded">
+        <div v-if="fileUploaded && collectDimensions">
 
             <h4>Image Dimensions</h4>
 
             <div class='imageDimensionsWrapper'>
                 
                 <div class='imgDimWidth'>
-                    <v-text-field outline label='width' v-model='originalSize.width'></v-text-field>
+                    <v-text-field outline label='width' v-model='originalSize.width' @change="imageDimensionPicked"></v-text-field>
                 </div>
 
                 <h3>x</h3>
 
                 <div class='imgDimHeight'>
-                    <v-text-field outline label='height' v-model='originalSize.height'></v-text-field>
+                    <v-text-field outline label='height' v-model='originalSize.height' @change="imageDimensionPicked"></v-text-field>
                 </div>
 
                 <div class='imgDimUnits'>
@@ -41,6 +41,7 @@
                         label="units"
                         :items="dimensionUnits"
                         v-model="originalSize.units"
+                        @change="imageDimensionPicked"
                     ></v-select>
                 </div>
 
@@ -88,8 +89,7 @@
                 
                 <p>{{ file.fileName }}</p>
 
-                <p v-if="dimensionsEntered">{{ file.size.width }} x {{ file.size.height }} {{ file.size.units }}</p>
-                <p v-else>N/A</p>
+                <p><span v-if="dimensionsEntered">{{ file.size.width }} x {{ file.size.height }} {{ file.size.units }} / </span>{{ file.pixelSize.width }} x {{ file.pixelSize.height }} pixels</p>
 
                 <p v-if="phaseIsEdited">Manually set</p>
                 <p v-else>Preset</p>
@@ -104,6 +104,7 @@
 </template>
 
 <script>
+
     import {} from 'vuex'
     import EditImage from './EditImage.vue'; // image cropping modal
     import jszip from 'jszip'; // for unzipping and rezipping files
@@ -118,7 +119,8 @@
 
         props: {
             aspectRatio: String,
-            selects: Object
+            selects: Object,
+            collectDimensions: Boolean
         },
 
         data() {
@@ -133,6 +135,7 @@
                 selectedOptions: {},
                 dimensionUnits: ['nanometers (nm)', 'micrometers (µM)', 'millimeters (mm)'],
                 originalSize: {units: null, width: 0, height: 0},
+                originalPixelSize: {width: 0, height: 0},
                 phaseIsEdited: false,
                 isCropped: false,
                 dimensionsEntered: false
@@ -146,6 +149,17 @@
                 this.imageEditorOpen = !this.imageEditorOpen // toggle the image editor modal being open and closed
             },
 
+            imageDimensionPicked: function () {
+
+                if (this.originalSize.units !== null && this.originalSize.width > 0 && this.originalSize.height > 0) {
+                    this.dimensionsEntered == true;
+                    if (this.filesDisplay.length > 0) {
+                        this.updateImageDimensions(this.filesDisplay.pixelSize.width, this.filesDisplay.pixelSize.height);
+                    }
+                }
+
+            },
+
             // args: [cropped image, filename of cropped image, coordinates]
             setCroppedImage: async function (...args) {    
                 for (let i = 0; i < this.filesDisplay.length; i++){
@@ -154,6 +168,8 @@
                         this.filesDisplay[i].fileUrl = args[0];
                         this.filesDisplay[i].fileName = "cropped_" + this.filesDisplay[i].fileName; // to ensure that the list of images reloads since they are binded to filenames.
                         
+                        await this.updateImageDimensions(args[2].width, args[2].height)
+
                         if (this.fileType == 'zip'){
                             await this.cropAllImages(args[2], "cropped_" + args[1])
                             this.rezipFiles()
@@ -200,6 +216,35 @@
                 console.log('applied crop to all images')
             },
 
+            updateImageDimensions (width, height) {
+                
+                for (let i = 0; i < this.filesDisplay.length; i++){
+                    this.filesDisplay.pixelSize.width = width;
+                    this.filesDisplay.pixelSize.height = height;
+
+                    if (this.dimensionsEntered == true) {
+                        this.filesDisplay.size.units = this.originalSize.units;
+                        this.filesDisplay.size.width = (this.originalSize.width / this.originalPixelSize.width) * width;
+                        this.filesDisplay.size.height = (this.originalSize.height / this.originalPixelSize.height) * height;
+                    }
+                }
+
+                this.files[0].pixelSize = this.filesDisplay[0].pixelSize;
+                this.files[0].size = this.filesDisplay[0].size;
+
+            },
+
+            getImageDimensions () {
+
+                var img = new Image();
+                img.src = this.filesDisplay[0].fileUrl;
+                img.onload = function () {
+                    this.originalPixelSize = {width: img.width, height: img.height}
+                    this.updateImageDimensions(img.width, img.height);
+                }
+
+            },
+
             pickFile () {
                 this.$refs.myUpload.click()
             },
@@ -233,19 +278,25 @@
 
                 // extract data from uploaded file
                 const fr = new FileReader();
-                fr.readAsDataURL(input_file)
+                fr.readAsDataURL(input_file);
                 fr.addEventListener('load', () => {
 
-                    file.fileUrl = fr.result
-                    file.size = {width: 0, height: 0, units: null}
-                    file.phase = {x_offset: 0, y_offset: 0}
+                    file.fileUrl = fr.result;
+                    file.size = {width: 0, height: 0, units: null};
+                    file.pixelSize = {width: 0, height: 0};
+                    file.phase = {x_offset: 0, y_offset: 0};
 
-                    this.files.push(file)
-                    this.filesUploaded = true
+                    this.files.push(file);
+                    this.filesUploaded = true;
 
                     if (fileType !== 'zip'){
-                        this.filesDisplay.push(file)
+                        this.filesDisplay.push(file);
                     }
+
+                    if (fileType !== 'zip' && fileType !== 'mat'){
+                        this.getImageDimensions();
+                    }
+
                 })
 
                 if (fileType === 'zip') {
@@ -275,7 +326,7 @@
                         // uncompress
                         var raw_data = undefined;
                         if (zip.files[key]._data.compressedSize == zip.files[key]._data.uncompressedSize) {
-                            raw_data = zip.files[key]._data.compressedContent
+                            raw_data = zip.files[key]._data.compressedContent;
                         } else {
                             raw_data = await pako.inflateRaw(zip.files[key]._data.compressedContent);
                         }
@@ -288,14 +339,16 @@
                         var base64 = 'data:image/' + filetype + ';base64,' + window.btoa(binary);
 
                         // push to filesDisplay variable
-                        var single_file = {fileName: filename, fileUrl: base64}
-                        single_file.size = {width: 0, height: 0, units: null}
-                        single_file.phase = {x_offset: 0, y_offset: 0}
+                        var single_file = {fileName: filename, fileUrl: base64};
+                        single_file.size = {width: 0, height: 0, units: null};
+                        single_file.pizelSize = {width: 0, height: 0};
+                        single_file.phase = {x_offset: 0, y_offset: 0};
                         vm.filesDisplay.push(single_file);      
 
                     }
 
-                    console.log('finished extracting images')
+                    this.getImageDimensions();
+                    console.log('finished extracting images');
 
                 });
             },
@@ -317,6 +370,7 @@
                     console.log('rezipped files');
                 })
             }
+
         }
     }
 </script>
@@ -324,11 +378,14 @@
 <style scoped>
 
     /* Browse files button */
+    .fileButtonWrapper {
+        margin-bottom: 0px;
+    }
+    
     .fileButton {
         margin-left: 0px;
         margin-bottom: 20px;
     }
-
 
     /* Subheaders such as 'Image dimensions' and 'Parameters' and 'Selected phase' */
     h4 {

@@ -43,6 +43,8 @@
           
           aspectRatio: 'free',
 
+          getImageDimensions: false,
+
           submit: {
             submitButtonTitle: 'Binarize',
             submitJobTitle: 'otsu'

@@ -43,6 +43,8 @@
           
           aspectRatio: 'free',
 
+          getImageDimensions: true,
+
           submit: {
             submitButtonTitle: 'Characterize',
             submitJobTitle: 'DescriptorCharacterize'

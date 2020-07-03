@@ -42,6 +42,8 @@
           
           aspectRatio: 'square',
 
+          getImageDimensions: true,
+
           submit: {
             submitButtonTitle: 'Characterize',
             submitJobTitle: 'SDFCharacterize'

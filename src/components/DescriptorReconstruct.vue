@@ -44,6 +44,8 @@
           
           aspectRatio: 'free',
 
+          getImageDimensions: true,
+
           submit: {
             submitButtonTitle: 'Reconstruct',
             submitJobTitle: 'DescriptorReconstruct'

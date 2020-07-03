@@ -43,6 +43,8 @@
           
           aspectRatio: 'square',
 
+          getImageDimensions: true,
+
           submit: {
             submitButtonTitle: 'Reconstruct',
             submitJobTitle: 'CorrelationReconstruct'
