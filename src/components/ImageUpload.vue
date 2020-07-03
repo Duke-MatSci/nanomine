@@ -85,7 +85,7 @@
                 <h4>Options</h4>
             </div>
 
-            <div class='imageTableContents' v-for="(file, index) in filesDisplay" :key='file.fileName'>
+            <div class='imageTableContents' v-for="(file, index) in filesDisplay" :key='file.id'>
                 
                 <p>{{ file.fileName }}</p>
 
@@ -151,7 +151,7 @@
 
             imageDimensionPicked: function () {
 
-                if (this.originalSize.units !== null && this.originalSize.width > 0 && this.originalSize.height > 0) {
+                if (this.originalSize.units !== null && parseInt(this.originalSize.width) > 0 && parseInt(this.originalSize.height) > 0) {
                     this.dimensionsEntered == true;
                     if (this.filesDisplay.length > 0) {
                         this.updateImageDimensions(this.filesDisplay[0].pixelSize.width, this.filesDisplay[0].pixelSize.height);
@@ -181,6 +181,7 @@
                         console.log('image succesfully cropped.')
                         return;
                     }
+                    this.filesDisplay[i].id += 100; //force rerender of component
                 }
             },
             
@@ -225,9 +226,10 @@
 
                     if (this.dimensionsEntered == true) {
                         this.filesDisplay[i].size.units = this.originalSize.units;
-                        this.filesDisplay[i].size.width = (this.originalSize.width / this.originalPixelSize.width) * width;
-                        this.filesDisplay[i].size.height = (this.originalSize.height / this.originalPixelSize.height) * height;
+                        this.filesDisplay[i].size.width = parseInt((parseInt(this.originalSize.width) / this.originalPixelSize.width) * width);
+                        this.filesDisplay[i].size.height = parseInt((parseInt(this.originalSize.height) / this.originalPixelSize.height) * height);
                     }
+                    this.filesDisplay[i].id += 100; // force rerender of component
                 }
 
                 this.files[0].pixelSize = this.filesDisplay[0].pixelSize;
@@ -293,6 +295,7 @@
                     vm.filesUploaded = true;
 
                     if (fileType !== 'zip'){
+                        file.id = 0;
                         vm.filesDisplay.push(file);
                     }
 
@@ -320,6 +323,7 @@
                 jszip_obj.loadAsync(input_file)
                 .then(async function(zip) {
 
+                    let count = 0
                     for (var key in zip.files){
 
                         // get file data
@@ -346,7 +350,9 @@
                         single_file.size = {width: 0, height: 0, units: null};
                         single_file.pizelSize = {width: 0, height: 0};
                         single_file.phase = {x_offset: 0, y_offset: 0};
+                        single_file.id = count;
                         vm.filesDisplay.push(single_file);      
+                        count += 1;
 
                     }
 
