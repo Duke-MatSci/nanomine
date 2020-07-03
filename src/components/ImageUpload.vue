@@ -186,8 +186,10 @@
             
             async cropAllImages (coordinates, fileName) {
 
-                for (let i = 0; i < this.filesDisplay.length; i++){
-                    if (this.filesDisplay[i].fileName !== fileName){
+                let vm = this;
+
+                for (let i = 0; i < vm.filesDisplay.length; i++){
+                    if (vm.filesDisplay[i].fileName !== fileName){
 
                         var canvas = document.createElement('canvas')
                         canvas.width = coordinates.width;
@@ -195,9 +197,8 @@
 
                         var ctx = canvas.getContext('2d');
                         var image = new Image();
-                        let vm = this;
             
-                        image.src = this.filesDisplay[i].fileUrl;
+                        image.src = vm.filesDisplay[i].fileUrl;
 
                         function awaitImageCrop(image) {
                             return new Promise((resolve, reject) => {
@@ -235,12 +236,13 @@
             },
 
             getImageDimensions () {
-
+                
+                let vm = this;
                 var img = new Image();
-                img.src = this.filesDisplay[0].fileUrl;
+                img.src = vm.filesDisplay[0].fileUrl;
                 img.onload = function () {
-                    this.originalPixelSize = {width: img.width, height: img.height}
-                    this.updateImageDimensions(img.width, img.height);
+                    vm.originalPixelSize = {width: img.width, height: img.height}
+                    vm.updateImageDimensions(img.width, img.height);
                 }
 
             },
@@ -257,21 +259,22 @@
             },
 
             onFilePicked (e) {
-
-                this.resetFiles();
+                
+                let vm = this;
+                vm.resetFiles();
                 const input_file = e.target.files[0];
                 let file = {};
 
                 // set filename
                 if (input_file !== undefined) {
                     file.fileName = input_file.name;
-                    this.fileName = input_file.name;
+                    vm.fileName = input_file.name;
                 }
 
                 // check for acceptable filetype
                 const accepted_types = ['jpg', 'jpeg', 'tif', 'png', 'mat', 'zip'];
                 const fileType = input_file.name.split('.').pop();
-                this.fileType = fileType;
+                vm.fileType = fileType;
                 if (accepted_types.includes(fileType) === false) {
                     return;
                 }
@@ -286,25 +289,25 @@
                     file.pixelSize = {width: 0, height: 0};
                     file.phase = {x_offset: 0, y_offset: 0};
 
-                    this.files.push(file);
-                    this.filesUploaded = true;
+                    vm.files.push(file);
+                    vm.filesUploaded = true;
 
                     if (fileType !== 'zip'){
-                        this.filesDisplay.push(file);
+                        vm.filesDisplay.push(file);
                     }
 
                     if (fileType !== 'zip' && fileType !== 'mat'){
-                        this.getImageDimensions();
+                        vm.getImageDimensions();
                     }
 
                 })
 
                 if (fileType === 'zip') {
-                    this.unzipFiles(input_file)
+                    vm.unzipFiles(input_file)
                 }
 
-                this.fileUploaded = true;
-                this.$emit('setFiles', [file], file.fileName)
+                vm.fileUploaded = true;
+                vm.$emit('setFiles', [file], file.fileName)
 
             },
 
@@ -347,7 +350,7 @@
 
                     }
 
-                    this.getImageDimensions();
+                    vm.getImageDimensions();
                     console.log('finished extracting images');
 
                 });
