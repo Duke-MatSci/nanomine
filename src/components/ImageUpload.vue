@@ -85,7 +85,7 @@
                 <h4>Options</h4>
             </div>
 
-            <div class='imageTableContents' v-for="(file, index) in filesDisplay" :key='file.id'>
+            <div class='imageTableContents' v-for="(file, index) in filesDisplay" :key='file.fileName'>
                 
                 <p>{{ file.fileName }}</p>
 
@@ -181,7 +181,6 @@
                         console.log('image succesfully cropped.')
                         return;
                     }
-                    this.filesDisplay[i].id += 100; //force rerender of component
                 }
             },
             
@@ -229,7 +228,8 @@
                         this.filesDisplay[i].size.width = parseInt((parseInt(this.originalSize.width) / this.originalPixelSize.width) * width);
                         this.filesDisplay[i].size.height = parseInt((parseInt(this.originalSize.height) / this.originalPixelSize.height) * height);
                     }
-                    this.filesDisplay[i].id += 100; // force rerender of component
+
+                    this.filesDisplay[i].fileName = this.filesDisplay[i].fileName + " ";
                 }
 
                 this.files[0].pixelSize = this.filesDisplay[0].pixelSize;
@@ -295,7 +295,6 @@
                     vm.filesUploaded = true;
 
                     if (fileType !== 'zip'){
-                        file.id = 0;
                         vm.filesDisplay.push(file);
                     }
 
@@ -350,7 +349,6 @@
                         single_file.size = {width: 0, height: 0, units: null};
                         single_file.pixelSize = {width: 0, height: 0};
                         single_file.phase = {x_offset: 0, y_offset: 0};
-                        single_file.id = count;
                         vm.filesDisplay.push(single_file);      
                         count += 1;
 
