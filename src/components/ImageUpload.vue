@@ -152,7 +152,7 @@
             imageDimensionPicked: function () {
 
                 if (this.originalSize.units !== null && parseInt(this.originalSize.width) > 0 && parseInt(this.originalSize.height) > 0) {
-                    this.dimensionsEntered == true;
+                    this.dimensionsEntered = true;
                     if (this.filesDisplay.length > 0) {
                         this.updateImageDimensions(this.filesDisplay[0].pixelSize.width, this.filesDisplay[0].pixelSize.height);
                     }
