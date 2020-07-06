@@ -52,7 +52,7 @@ try
 
     % run characterization algorithm
     addpath('./descriptor_char'); % add path of directory holding MAIN.m
-    er=Descriptor_C2_Binary(path_to_write,str2num(input_type)); %
+    er=Descriptor_C2_Binary(img,path_to_write,str2num(input_type)); %
     if er==1
         writeError([path_to_write, '/errors.txt'], ['Some of the files in zip folder were not accessible ']);
         rc = 99;

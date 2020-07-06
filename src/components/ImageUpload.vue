@@ -171,7 +171,7 @@
                         await this.updateImageDimensions(args[2].width, args[2].height)
 
                         if (this.fileType == 'zip'){
-                            await this.cropAllImages(args[2], "cropped_" + args[1])
+                            await this.cropAllImages(args[2], "cropped_" + args[1] + " ")
                             this.rezipFiles()
                         } else {
                             this.files[0].fileUrl = args[0];
