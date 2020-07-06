@@ -92,7 +92,7 @@
                 <p :key='file.pixelSize.width'><span v-if="dimensionsEntered" :key='file.size.height'>{{ file.size.width }} x {{ file.size.height }} {{ file.size.units }} / </span>{{ file.pixelSize.width }} x {{ file.pixelSize.height }} pixels</p>
 
                 <p v-if="phaseIsEdited">Manually set</p>
-                <p v-else>Preset</p>
+                <p v-else>Preset (bright phase)</p>
 
                 <v-btn small class='imageTableButton' :key='index' v-on:click="openImageEditor(index)" color="primary">Edit image</v-btn>
 
