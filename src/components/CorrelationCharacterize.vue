@@ -61,31 +61,7 @@
         </v-card>
       </v-dialog>
       <v-select label="Correlation Name" v-bind:items="options" v-model="corr"></v-select>
-      <v-flex xs12 class="text-xs-center text-sm-center text-md-center text-lg-center">
-        <p class="text-xs-left">Select File
-          <v-btn class="text-xs-left" small color="primary" @click='pickFile'>Browse</v-btn>
-          <input
-            type="file"
-            style="display: none"
-            accept=".jpg, .png, .tif, .mat, .zip"
-            ref="myUpload"
-            @change="onFilePicked"
-          >
-        </p>
-        <v-list v-model="fileName" subheader: true v-if="fileUploaded">
-          <v-list-tile
-            v-for="file in filesDisplay"
-            :key="file.fileName"
-          >
-            <v-list-tile-avatar>
-              <v-icon color="primary">check_circle_outline</v-icon>
-            </v-list-tile-avatar>
-            <v-list-tile-content>
-              <v-list-tile-title v-text="file.fileName"></v-list-tile-title>
-            </v-list-tile-content>
-          </v-list-tile>
-        </v-list>
-      </v-flex>
+      <ImageUpload v-on:setFiles="setFiles" aspectRatio='square'></ImageUpload>
       <v-flex class="text-xs-center">
         <v-btn v-on:click="submit()" color="primary">Characterize</v-btn>
       </v-flex>
@@ -102,23 +78,24 @@
 import {} from 'vuex'
 import {JobMgr} from '@/modules/JobMgr.js'
 import {Auth} from '@/modules/Auth.js'
+import ImageUpload from './ImageUpload.vue'
 
 export default {
   name: 'CorrelationCharacterize',
+  components: {
+    ImageUpload
+  },
   data: () => {
     return ({
       title: 'Input Upload',
       msg: 'Microstructure Characterization - Correlation Function Approach',
       dialog: false,
       fileName: '',
-      // file_type: [],
       files: [],
-      filesDisplay: [],
       errorAlert: false,
       errorAlertMsg: '',
       loginRequired: false,
       loginRequiredMsg: '',
-      fileUploaded: false,
       successDlg: false,
       jobId: '',
       corr: null,
@@ -136,6 +113,12 @@ export default {
     }
   },
   methods: {
+
+    setFiles: function (...files) {
+      this.files = files[0]; // the actual file object
+      this.fileName = files[1]; // the name of the file
+    },
+    
     setLoading: function () {
       this.$store.commit('isLoading')
     },
@@ -144,46 +127,12 @@ export default {
       this.$store.commit('notLoading')
     },
 
-    pickFile () {
-      this.$refs.myUpload.click()
-    },
-
-    resetFiles: function () {
-      this.files = []
-      this.filesDisplay = []
-      this.fileUploaded = false
-    },
-
-    onFilePicked (e) {
-      this.resetFiles()
-      const files = e.target.files
-      for (let i = 0; i < files.length; i++) {
-        let file = {}
-        let f = files[i]
-        if (f !== undefined) {
-          file.fileName = f.name
-          if (file.fileName.lastIndexOf('.') <= 0) {
-            return
-          }
-          console.log(file.fileName)
-          const fr = new FileReader()
-          fr.readAsDataURL(f)
-          fr.addEventListener('load', () => {
-            file.fileUrl = fr.result
-            this.files.push(file)
-            this.filesDisplay.push(file)
-            this.fileUploaded = true
-          })
-        } else {
-          console.log('File Undefined')
-        }
-      }
-    },
     successDlgClicked: function () {
       let vm = this
       console.log('Success dlg button clicked')
       vm.$router.go(-2) // go back to mcr homepage page
     },
+
     submit: function () {
       let vm = this
       vm.files.forEach(function (v) {

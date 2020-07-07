@@ -16,13 +16,6 @@ const bodyParser = require('body-parser')
 const mimetypes = require('mime-types')
 // was used for posting to rdf - const FormData = require('form-data')
 const config = require('config').get('nanomine')
-
-const {createLogger, format, transports} = require('winston')
-const { combine, label, printf, prettyPrint } = format
-const logFormat = printf(({level, message, label}) => {
-  let now = moment().format('YYYYMMDDHHmmssSSS')
-  return `${now} [${label}] ${level}: ${message}`
-})
 const hasha = require('hasha')
 const moment = require('moment')
 const datauri = require('data-uri-to-buffer')
@@ -50,8 +43,15 @@ const createDataset = nanomineUtils.createDataset
 const updateDataset = nanomineUtils.updateDataset
 const getLatestSchemas = nanomineUtils.getLatestSchemas
 const sortSchemas = nanomineUtils.sortSchemas
+
+/*** Import Centralized Error Reporting Module */
+const centralLogger = require('./middlewares/logger')
 /** Import for Chart Visualization */
 const chartRoutes = require('./routes/chartBackup')
+/** Import Rest Initializer */
+const initialize = require('./rest-initializer')
+
+
 // TODO calling next(err) results in error page rather than error code in json
 
 // TODO runAsUser in jwt if possible
@@ -67,7 +67,7 @@ const chartRoutes = require('./routes/chartBackup')
 
 // const ObjectId = mongoose.Types.ObjectId
 
-let logger = configureLogger()
+let logger = centralLogger(config)
 logger.info('NanoMine REST server version ' + config.version + ' starting')
 
 // let datasetBucketName = nanomineUtils.datasetBucketName
@@ -145,46 +145,23 @@ function inspect (theObj) {
   return util.inspect(theObj, {showHidden: true, depth: 5})
 }
 
-/* Mongoose schemas re-factored start */
-let db = mongoose.connection
-let dbUri = process.env['NM_MONGO_URI']
-let dbPromise = new Promise(function (resolve, reject) {
-  db.on('error', function (err) {
-    logger.error('db error: ' + err)
-    reject(err)
-  })
-  db.once('open', function () {
-    logger.info('database opened successfully via mongoose connect.')
-    resolve()
-  })
-})
-mongoose.connect(dbUri, {keepAlive: true, keepAliveInitialDelay: 300000})
 
-// let mgiVersionSchema = require('./modules/mongo/schema/mgiVersion')(mongoose)
-// let MgiVersion = mongoose.model('mgiversion', mgiVersionSchema)
+/** IMPORTING SCHEMAS */
+let Users = require('./modules/mongo/schema/users')
+let Api = require('./modules/mongo/schema/api')
+let XmlData = require('./modules/mongo/schema/xmldata')
+let XsdSchema = require('./modules/mongo/schema/xsd')
+let XsdVersionSchema = require('./modules/mongo/schema/xsdVersion')
 
 let datasetsSchema = require('./modules/mongo/schema/datasets').datasets(mongoose)
 let Datasets = mongoose.model('datasets', datasetsSchema)
 
-let usersSchema = require('./modules/mongo/schema/users')(mongoose)
-let Users = mongoose.model('users', usersSchema)
-
-let apiSchema = require('./modules/mongo/schema/api')(mongoose)
-let Api = mongoose.model('api', apiSchema)
-
 let sequencesSchema = require('./modules/mongo/schema/sequences').sequences(mongoose)
 let Sequences = mongoose.model('sequences', sequencesSchema)
 
-let xmlDataSchema = require('./modules/mongo/schema/xmldata')(mongoose)
-let XmlData = mongoose.model('xmlData', xmlDataSchema)
+// let mgiVersionSchema = require('./modules/mongo/schema/mgiVersion')(mongoose)
+// let MgiVersion = mongoose.model('mgiversion', mgiVersionSchema)
 
-let xsdSchema = require('./modules/mongo/schema/xsd')(mongoose)
-let XsdSchema = mongoose.model('xsdData', xsdSchema)
-
-let xsdVersionSchema = require('./modules/mongo/schema/xsdVersion')(mongoose)
-let XsdVersionSchema = mongoose.model('xsdVersionData', xsdVersionSchema)
-
-/* Mongoose schemas re-factored end */
 
 try {
   fs.mkdirSync(nmWebFilesRoot) // Sync used during startup
@@ -223,7 +200,10 @@ app.use((req, res, next) => {
   next()
 })
 
-app.use('/chart', chartRoutes)
+app.use('/chart', (req, res, next) => {
+  req.logger = logger;
+  next();
+}, chartRoutes)
 
 app.use('/files', express.static(nmWebFilesRoot, {
   dotfiles: 'ignore',
@@ -3233,38 +3213,38 @@ function submitCurator (userid) {
       })
   })
 }
-dbPromise.then(function () {
-  if (!nmAutostartCurator) {
-    console.log('NOT SUBMITTING CURATOR AT THIS TIME. DISABLED.')
-    return
-  }
-  console.log('db opened successfully. Submitting curator.')
-  submitCurator(nmAuthSystemUserId) // run the curator job (long running job) TODO: monitor curator
-    .then(function () {
-      let msg = 'successfully submitted curator job.'
-      logger.info(msg)
-      console.log(msg) // for convenience
-    })
-    .catch(function (err) {
-      let msg = 'submission of curator job failed. Error: ' + err
-      logger.error(msg)
-      console.log(msg)
-    })
-  submitGenerateSeoFiles(nmAuthSystemUserId) // run the curator job (long running job) TODO: monitor generateSeoFiles
-    .then(function () {
-      let msg = 'successfully submitted generate seo files job.'
-      logger.info(msg)
-      console.log(msg) // for convenience
-    })
-    .catch(function (err) {
-      let msg = 'submission of generate seo files job failed. Error: ' + err
-      logger.error(msg)
-      console.log(msg)
-    })
-})
-dbPromise.catch(function (err) {
-  console.log('dbPromise.catch - db open failed: ' + err)
-})
+// dbPromise.then(function () {
+//   if (!nmAutostartCurator) {
+//     console.log('NOT SUBMITTING CURATOR AT THIS TIME. DISABLED.')
+//     return
+//   }
+//   console.log('db opened successfully. Submitting curator.')
+//   submitCurator(nmAuthSystemUserId) // run the curator job (long running job) TODO: monitor curator
+//     .then(function () {
+//       let msg = 'successfully submitted curator job.'
+//       logger.info(msg)
+//       console.log(msg) // for convenience
+//     })
+//     .catch(function (err) {
+//       let msg = 'submission of curator job failed. Error: ' + err
+//       logger.error(msg)
+//       console.log(msg)
+//     })
+//   submitGenerateSeoFiles(nmAuthSystemUserId) // run the curator job (long running job) TODO: monitor generateSeoFiles
+//     .then(function () {
+//       let msg = 'successfully submitted generate seo files job.'
+//       logger.info(msg)
+//       console.log(msg) // for convenience
+//     })
+//     .catch(function (err) {
+//       let msg = 'submission of generate seo files job failed. Error: ' + err
+//       logger.error(msg)
+//       console.log(msg)
+//     })
+// })
+// dbPromise.catch(function (err) {
+//   console.log('dbPromise.catch - db open failed: ' + err)
+// })
 function jobSubmit (jobId, jobType, userToken) {
   let func = 'jobSubmit'
   return new Promise(function (resolve, reject) {
@@ -3965,48 +3945,25 @@ function postSparql2 (callerpath, query, req, res, cb) {
 //   })
 // })
 
-// function configureLogger () { // logger is not properly configured yet. This config is for an earlier version of Winston
-//   let logger = winston.createLogger({ // need to adjust to the new 3.x version - https://www.npmjs.com/package/winston#formats
-//     transports: [
-//       new (winston.transports.File)({
-//         levels: {error: 0, warn: 1, info: 2, verbose: 3, debug: 4, trace: 5},
-//         level: config.loglevel,
-//         timestamps: true,
-//         // zippedArchive: true,
-//         filename: config.logfilename,
-//         maxfiles: config.maxlogfiles,
-//         maxsize: config.maxlogfilesize,
-//         json: false,
-//         formatter: function (data) {
-//           let dt = moment().format('YYYYMMDDHHmmss')
-//           return (dt + ' ' + data.level + ' ' + data.message)
-//         }
-//       })
-//     ]
-//   })
-//   return logger
-// }
-function configureLogger () { // logger is not properly configured yet. This config is for an earlier version of Winston
-  let logger = createLogger({ // need to adjust to the new 3.x version - https://www.npmjs.com/package/winston#formats
-    levels: {error: 0, warn: 1, info: 2, verbose: 3, debug: 4, trace: 5},
-    format: combine(
-      label({label: 'nm-rest'}),
-      prettyPrint(),
-      logFormat
-    ),
-    transports: [
-      new (transports.File)({
-        level: config.loglevel,
-        filename: config.logfilename,
-        maxfiles: config.maxlogfiles,
-        maxsize: config.maxlogfilesize
-      })
-    ]
-  })
-  return logger
-}
 
-app.listen(3000)
+/** Re-write rule for starting rest-app should mongo connection fail => (06-19-2020) 
+ * Start server after mongodb connection is verified. Wait for the database connection to establish, then start the app.
+*/
+initialize.init(mongoose.connection,
+  {logger,submitCurator,submitGenerateSeoFiles},
+  {nmAutostartCurator,nmAuthSystemUserId}
+)
+
+let dbUri = process.env['NM_MONGO_URI']
+mongoose
+  .connect(
+    dbUri, {useNewUrlParser: true, keepAlive: true, keepAliveInitialDelay: 300000, useUnifiedTopology: true, reconnectTries: 2, reconnectInterval: 500}
+  ).then(result => {
+    app.listen(3000)
+  }).catch(err => logger.error('db error: ' + err))
+
+
+
 
 /*
 prefix dataset: <https://hbgd.tw.rpi.edu/dataset/>

@@ -14,7 +14,17 @@ const chartBackupSchema = new Schema(
         creator: {
             type: String,
             required: true
-        }
+        },
+        creatorref: {
+            type: Schema.Types.ObjectId,
+            ref: 'users'
+        },
+        bookmarked: [
+            {
+                type: Schema.Types.ObjectId,
+                ref: 'chartbookmark'
+            }
+        ]
     },
     { timestamps: true }
 )
