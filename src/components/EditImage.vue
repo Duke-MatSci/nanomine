@@ -3,7 +3,7 @@
 #
 # File Name: EditImage.vue
 # Application: templates
-# Description: a modal that allows the user to edit the selected image. Current functionality includes cropping the image.
+# Description: a modal that allows the user to edit the selected image. Current functionality includes cropping the image and setting the phase.
 #
 # Created by: Atul Jalan 6/20/20
 # Customized for NanoMine
@@ -14,12 +14,27 @@
 <template>
     <div class='modal' v-if='value'>
         <div class='image-cropper-container'>
+
             <h1>{{ title }}</h1>
-            <cropper :src='img' class='cropper-object' imageClassname='cropper-image' :stencil-props='stencil_props' @change='onChange'></cropper>
+
+            <div v-if='type === "crop"'>
+                <cropper :src='file.fileUrl' class='cropper-object' imageClassname='cropper-image' :stencil-props='stencil_props' @change='onChange'></cropper>
+            </div>
+
+            <p v-if='type === "phase"'><strong>Instructions:</strong> click on the phase within the image that you would like to be analyzed.</p>
+
+            <div class='phaseWrapper' v-if='type === "phase"'>
+                <img :src='file.fileUrl' @click='phaseImageClicked($event)'>     
+                <div class='phaseDot' v-bind:style="{ top: computedTop, left: computedLeft, backgroundColor: computedBackground, border: computedBorder}"></div>
+            </div>
+
             <div class='image-cropper-container-buttons'>
+                <p v-if='type === "phase"'>x-offset: {{ phase.x_offset }}</p>
+                <p v-if='type === "phase"'> y-offset: {{ phase.y_offset }}</p>
                 <v-btn color="primary" v-on:click='closeModal()'>Cancel</v-btn>
                 <v-btn color="primary" v-on:click='saveImage()'>Save</v-btn>
             </div>
+
         </div>
     </div>
 </template>
@@ -36,11 +51,12 @@
             value: {
                 required: true
             },
-            img: String,
-            imgName: String,
+            file: Object,
+            type: String,
             aspectRatio: String
         },
         mounted() {
+
             if (this.aspectRatio === 'square') {
                 this.stencil_props.aspectRatio = 1;
             } else if (this.aspectRatio === 'free') {
@@ -48,16 +64,37 @@
                     delete this.stencil_props.aspectRatio;
                 }
             }
+
+            if (this.type === 'crop') {
+                this.title = 'Crop image';
+            } else if (this.type === 'phase') {
+                this.title = 'Set phase';
+                this.phase = this.file.phase;
+            }
+
         },
         data() {
             return {
-                title: "Edit Image",
+                title: "",
                 cropped_image: null,
                 coordinates: null,
-                stencil_props: {}
+                stencil_props: {},
+                phase: {x_offset: 0, y_offset: 0},
+                phaseDotStyle = {top: "0px", left: "0px", backgroundColor: "transparent", border: "1px solid transparent"}
             }
         },
         methods: {
+            phaseImageClicked (e) {
+
+                this.phase.x_offset = e.offsetX;
+                this.phase.y_offset = e.offsetY;
+
+                this.phaseDotStyle.top = (e.offsetY - 4) + "px";
+                this.phaseDotStyle.left = (e.offsetX - 4) + "px";
+                this.phaseDotStyle.backgroundColor = "white";
+                this.phaseDotStyle.border = "1px solid black"
+
+            },
             onChange ({ coordinates, canvas}) {
                 this.cropped_image = canvas.toDataURL();
                 this.coordinates = coordinates;
@@ -66,8 +103,26 @@
                 this.$emit("input", !this.value);
             },
             saveImage() {
-                this.$emit('setCroppedImage', this.cropped_image, this.imgName, this.coordinates)
+                if (this.type === 'crop'){
+                    this.$emit('setCroppedImage', this.cropped_image, this.file.fileName, this.coordinates)
+                } else if (this.type === 'phase'){
+                    this.$emit('setPhase', this.file.fileName, this.phase)
+                }
                 this.closeModal()
+            }
+        },
+        computed: {
+            computedTop: function () {
+                return this.phaseDotStyle.top;
+            },
+            computedLeft: function () {
+                return this.phaseDotStyle.left;
+            },
+            computedBackgroundColor: function () {
+                return this.phaseDotStyle.backgroundColor;
+            },
+            computedBorder: function () {
+                return this.phaseDotStyle.border;
             }
         }
     }
@@ -97,6 +152,17 @@
         align-items: center;
         z-index: 1; /* ensures that the modal appears on top of other elements */
     }
+
+    .phaseWrapper {
+        position: relative;
+    }
+
+    .phaseDot {
+        position: absolute;
+        width: 6px;
+        height: 6px; 
+        border-radius: 50%;
+    }
     
     .image-cropper-container {
         width: 700px;
@@ -117,6 +183,9 @@
     }
 
     .image-cropper-container-buttons {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
         margin-top: 25px;
         margin-bottom: 25px;
     }

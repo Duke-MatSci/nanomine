@@ -39,7 +39,7 @@
                 <div class='imgDimUnits'>
                     <v-select
                         label="units"
-                        :items="dimensionUnits"
+                        :items="['nanometers (nm)', 'micrometers (µM)', 'millimeters (mm)']"
                         v-model="originalSize.units"
                         @change="imageDimensionPicked"
                     ></v-select>
@@ -70,10 +70,11 @@
         <!-- Image Cropper Modal -->
         <EditImage 
             v-model='imageEditorOpen' 
-            v-bind:img='imageEditorData.fileUrl' 
-            v-bind:imgName='imageEditorData.fileName' 
+            v-bind:file='imageEditorData' 
             v-bind:aspectRatio='aspectRatio' 
+            v-bind:type='editImageType'
             v-on:setCroppedImage="setCroppedImage"
+            v-on:setPhase="setPhase"
         ></EditImage>
 
         <div v-if="fileUploaded" class='imageTable'>
@@ -91,10 +92,13 @@
 
                 <p :key='file.pixelSize.width'><span v-if="dimensionsEntered" :key='file.size.height'>{{ file.size.width }} x {{ file.size.height }} {{ file.size.units }} / </span>{{ file.pixelSize.width }} x {{ file.pixelSize.height }} pixels</p>
 
-                <p v-if="phaseIsEdited">Manually set</p>
+                <p v-if="file.phase.x_offset !== 0 || file.phase.y_offset !== 0">Manually set</p>
                 <p v-else>Preset (bright phase)</p>
 
-                <v-btn small class='imageTableButton' :key='index' v-on:click="openImageEditor(index)" color="primary">Edit image</v-btn>
+                <div class='imageTableButtons'>
+                    <v-btn small class='imageTableButton' :key='index' v-on:click="openImageEditor(index, 'crop')" color="primary">Crop image</v-btn>
+                    <v-btn small class='imageTableButton' :key='index' v-on:click="openImageEditor(index, 'phase')" color="primary">Set phase</v-btn>
+                </div>
 
             </div>
 
@@ -131,22 +135,22 @@
                 fileName: '',
                 fileUploaded: false,
                 imageEditorOpen: false,
-                imageEditorData: {fileUrl: null, fileName: null},
+                imageEditorData: {fileUrl: null, fileName: null, phase: {x_offset: null, y_offset: null}},
                 selectedOptions: {},
-                dimensionUnits: ['nanometers (nm)', 'micrometers (µM)', 'millimeters (mm)'],
                 originalSize: {units: null, width: 0, height: 0},
                 originalPixelSize: {width: 0, height: 0},
-                phaseIsEdited: false,
                 isCropped: false,
-                dimensionsEntered: false
+                dimensionsEntered: false,
+                editImageType: 'crop'
             }
         },
 
         methods: {
 
-            openImageEditor: function (index) {
-                this.imageEditorData = this.filesDisplay[index]
-                this.imageEditorOpen = !this.imageEditorOpen // toggle the image editor modal being open and closed
+            openImageEditor: function (index, type) {
+                this.editImageType = type;
+                this.imageEditorData = this.filesDisplay[index];
+                this.imageEditorOpen = !this.imageEditorOpen; // toggle the image editor modal being open and closed
             },
 
             imageDimensionPicked: function () {
@@ -158,6 +162,16 @@
                     }
                 }
 
+            },
+
+            setPhase: function (...args) {
+                for (let i = 0; i < this.filesDisplay.length; i++) {
+                    if (this.filesDisplay[i].fileName === args[0]) {
+                        this.filesDisplay[i].phase = args[1];
+                        this.filesDisplay[i].fileName = this.filesDisplay[i].fileName + " "; // force rerender
+                        return;
+                    }
+                }
             },
 
             // args: [cropped image, filename of cropped image, coordinates]
@@ -229,7 +243,7 @@
                         this.filesDisplay[i].size.height = parseInt((parseInt(this.originalSize.height) / this.originalPixelSize.height) * height);
                     }
 
-                    this.filesDisplay[i].fileName = this.filesDisplay[i].fileName + " ";
+                    this.filesDisplay[i].fileName = this.filesDisplay[i].fileName + " "; // force rerender
                 }
 
                 this.files[0].pixelSize = this.filesDisplay[0].pixelSize;
@@ -429,6 +443,13 @@
         overflow: hidden;
         text-overflow: ellipsis;
         padding-right: 15px;
+    }
+
+    .imageTableButtons {
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-start;
+        flex-wrap: wrap;
     }
 
     .imageTableButton {
