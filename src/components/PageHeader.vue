@@ -15,9 +15,10 @@
         <v-btn flat to="/db" v-if="site === 'nano'">Database</v-btn>
         <v-btn flat to="/mtools" v-if="site === 'nano'">Module Tools</v-btn>
         <v-btn flat to="/simtools" v-if="site === 'nano'">Simulation Tools</v-btn>
+        <v-btn flat @click="openGallery" v-if="site === 'nano'>Gallery</v-btn>
         <v-btn fab flat href="/home" v-if="site === 'nano'"><i class="material-icons nm-search-icon" v-if="searchEnabled()">search</i></v-btn>
         <v-btn v-if="site === 'meta'" flat to="/meta/tools" >Tools</v-btn>
-        <v-btn flat to="/contact" v-on="on">Contact Us<!--i class="material-icons nm-search-icon">contact_support</i--></v-btn>
+        <v-btn v-if="isLoggedIn()" flat to="/contact">Contact Us<!--i class="material-icons nm-search-icon">contact_support</i--></v-btn>
         <v-btn v-if="site === 'nano'" flat to="/mypage" >My Page</v-btn>
         <v-btn v-if="loginStatus" flat v-on:click="$store.commit('setLoginLogout')">
           <i class="material-icons nm-user-icon" v-bind:class="{'nm-admin-icon': (isAdmin && !isRunAs), 'nm-runas-icon': isRunAs}">
@@ -98,7 +99,7 @@
           <v-btn
             color="blue darken-1"
             flat="flat"
-            href="/secure"
+            :href="getLoginLink()"
           >
             Login
           </v-btn>
@@ -169,6 +170,14 @@ export default {
       vm.$refs.logoutLink.click()
       vm.logoutDialog = false
     },
+    getLoginLink: function () {
+      let vm = this
+      let rv = '/secure'
+      if (vm.auth.isTestUser() === true) {
+        rv = '/nmr/nmdevlogin'
+      }
+      return rv
+    },
     cancelLogout: function () {
       let vm = this
       vm.logoutDialog = false
@@ -213,6 +222,10 @@ export default {
     },
     isTestUser: function () {
       return this.auth.isTestUser()
+    },
+    openGallery: function () {
+      window.location = `${window.location.origin}/wi/about?view=gallery&uri=http://semanticscience.org/resource/Chart`;
+      return;
     }
   },
   computed: {

@@ -15,6 +15,7 @@ import traceback
 # -------------------------------------------- convert .XLSX to .XML files
 import xlrd
 import dicttoxml
+import csv
 
 # -------------------------------------------- XML Schemas
 import collections                        # Python standard library
@@ -26,7 +27,9 @@ from xml_update_validator import runValidation
 # -------------------------------------------- REST service
 import urllib.request
 import json
-import logging
+# import logging
+from nm.common import *
+from nm.common.nm_rest import nm_rest
 
 
 ## Helper Methods
@@ -35,28 +38,48 @@ import logging
 def read_excel_profile(filename, jobDir):
     if len(str(filename).strip()) == 0:
        return ''
-    # append file extension if user does not put one
-    if len(filename.strip('.xlsx')) == len(filename):
-        filename += '.xlsx'
+    # # append file extension if user does not put one
+    # if len(filename.strip('.xlsx')) == len(filename):
+    #     filename += '.xlsx'
     # confirm whether the file exists
     if not os.path.exists(jobDir + '/' + filename):
         # write the message in ./error_message.txt
         with open(jobDir + '/error_message.txt', 'a') as fid:
             fid.write('[File Error] Missing file! Please include "%s" in your uploads.\n' % (filename))
             return ''
-    # open and read data
-    data_file = xlrd.open_workbook(jobDir + '/' + filename)
-    data_names = data_file.sheet_names()
-    data_content = data_file.sheet_by_name(data_names[0])
-    # read data from excel file
-    header = [{'column': data_content.row_values(0)[0]},
-              {'column': data_content.row_values(0)[1]}]
-    start_row = 1
-    end_row = data_content.nrows
-    profile_data = []
-    for i in range(start_row, end_row):
-        profile_data.append({'row':({'column':data_content.row_values(i)[0]},
-                                    {'column':data_content.row_values(i)[1]})}) 
+    if os.path.splitext(filename)[-1] == '.xlsx':
+        # open and read data
+        data_file = xlrd.open_workbook(jobDir + '/' + filename)
+        data_names = data_file.sheet_names()
+        data_content = data_file.sheet_by_name(data_names[0])
+        # read data from excel file
+        header = [{'column': data_content.row_values(0)[0]},
+                  {'column': data_content.row_values(0)[1]}]
+        start_row = 1
+        end_row = data_content.nrows
+        profile_data = []
+        for i in range(start_row, end_row):
+            profile_data.append({'row':({'column':data_content.row_values(i)[0]},
+                                        {'column':data_content.row_values(i)[1]})})
+    elif os.path.splitext(filename)[-1] == '.csv':
+        # open and read data
+        with open(jobDir + '/' + filename, newline='') as data_file:
+            data_reader = csv.reader(data_file)
+            first = True
+            profile_data = []
+            for row in data_reader:
+                if len(row) != 2:
+                    # write the message in ./error_message.txt
+                    with open(jobDir + '/error_message.txt', 'a') as fid:
+                        fid.write('[File Error] csv file "%s" has a row that is not occupied by exactly the first and the second column.\n' % (filename))
+                        return ''
+                if first:
+                    header = [{'column': row[0]}, {'column': row[1]}]
+                    first = False
+                else:
+                    profile_data.append({'row':({'column':row[0]},
+                                                {'column':row[1]})})
+    # return the package
     return {'headers': header, 'rows': profile_data}
 
 # a helper method to standardize the axis label and axis unit from headers
@@ -273,7 +296,7 @@ def addKV(key, val, dict_in):
             dict_in[key] = val
     return dict_in
 
-# a helper method to handle a row with a description-value-unit pair, or a 
+# a helper method to handle a row with a description-value-unit pair, or a
 # data_file-data_des pair. Uncertainty type and value are optional.
 def addKVU(key, description, value, unit, unc_type, unc_value,
            data_des, data_file, dict_in, jobDir, myXSDtree):
@@ -451,7 +474,8 @@ def doiAdd(doiKVPair, CommonFields):
 ## Sheet by sheet data extraction
 # Sheet 1. Data Origin (Sample Info)
 # neglecting issue for now
-def sheetSampleInfo(sheet, DATA, myXSDtree, jobDir, restbase):
+def sheetSampleInfo(sheet, DATA, myXSDtree, jobDir, restbase, runCtx):
+
     CurrentTime = strftime("%Y-%m-%d %H:%M:%S", gmtime())
     CommonFields = []
     Journal = []
@@ -465,14 +489,17 @@ def sheetSampleInfo(sheet, DATA, myXSDtree, jobDir, restbase):
     # GET dsInfo by seq
     response = {}
     try:
-        dsurl = restbase + '/nmr/dataset?seq='+seq
+        dsurl = restbase + '/nmr/dataset?id=' + runCtx['datasetId']
         rq = urllib.request.Request(dsurl)
-        j = json.loads(urllib.request.urlopen(rq, context=ssl._create_unverified_context()).read().decode("utf-8"))
+        nmCurate = nm_rest(logging, runCtx['sysToken'], runCtx['curateApiToken'], runCtx['curateRefreshToken'], rq)
+        rv = nmCurate.urlopen(None)
+        j = json.loads(rv.read().decode('utf8')) # no data for GET request
         response = j["data"][0]
     except:
-        print('exception occurred during dataset GET by doi')
+        logging.error('exception occurred during dataset GET by datasetId')
         #print 'exception: ' + str(sys.exc_info()[0])
-        print('exception: '  + str(traceback.format_exc()))
+        logging.error('exception: '  + str(traceback.format_exc()))
+
 
 # special case author and keyword, which are saved as list
     authorREST = 'author' in response
@@ -497,7 +524,7 @@ def sheetSampleInfo(sheet, DATA, myXSDtree, jobDir, restbase):
                 DATA.append({'Control_ID': assembledCtrl})
         elif match(sheet.row_values(row)[0], 'Your Name'):
             UploaderName = sheet.row_values(row)[1]
-        
+
         elif match(sheet.row_values(row)[0], 'Your Email'):
             UploaderEmail = sheet.row_values(row)[1]
 
@@ -506,61 +533,61 @@ def sheetSampleInfo(sheet, DATA, myXSDtree, jobDir, restbase):
             if 'citationType' in response:
                 value = response['citationType']
             CommonFields = insert('CitationType', value, CommonFields)
-            
+
         elif match(sheet.row_values(row)[0], 'Publication'):
             value = sheet.row_values(row)[1]
             if 'publication' in response:
                 value = response['publication']
             CommonFields = insert('Publication', value, CommonFields)
-            
+
         elif match(sheet.row_values(row)[0], 'Title'):
             value = sheet.row_values(row)[1]
             if 'title' in response:
                 value = response['title']
             CommonFields = insert('Title', value, CommonFields)
-            
+
         elif match(sheet.row_values(row)[0], 'Author') and not authorREST:
             CommonFields = insert('Author', sheet.row_values(row)[1], CommonFields)
-            
+
         elif match(sheet.row_values(row)[0], 'Keyword') and not keywordREST:
             CommonFields = insert('Keyword', sheet.row_values(row)[1], CommonFields)
-            
+
         elif match(sheet.row_values(row)[0], 'Publication Year'):
             value = sheet.row_values(row)[1]
             if 'publicationYear' in response:
                 value = response['publicationYear']
             CommonFields = insert('PublicationYear', value, CommonFields)
-        
+
         elif match(sheet.row_values(row)[0], 'DOI'):
             value = sheet.row_values(row)[1].strip()
             if 'doi' in response:
                 value = response['doi']
             CommonFields = insert('DOI', value, CommonFields)
-            
+
         elif match(sheet.row_values(row)[0], 'Volume'):
             value = sheet.row_values(row)[1]
             if 'volume' in response:
                 value = response['volume']
             CommonFields = insert('Volume', value, CommonFields)
-        
+
         elif match(sheet.row_values(row)[0], 'URL'):
             value = sheet.row_values(row)[1]
             if 'url' in response:
                 value = response['url']
             CommonFields = insert('URL', value, CommonFields)
-        
+
         elif match(sheet.row_values(row)[0], 'Language'):
             value = sheet.row_values(row)[1]
             if 'language' in response:
                 value = response['language']
             CommonFields = insert('Language', value, CommonFields)
-            
+
         elif match(sheet.row_values(row)[0], 'Location'):
             value = sheet.row_values(row)[1]
             if 'location' in response:
                 value = response['location']
             CommonFields = insert('Location', value, CommonFields)
-            
+
         elif match(sheet.row_values(row)[0], 'DateOfCitation'):
             value = sheet.row_values(row)[1]
             if 'dateOfCitation' in response:
@@ -572,7 +599,7 @@ def sheetSampleInfo(sheet, DATA, myXSDtree, jobDir, restbase):
             if 'issue' in response:
                 value = response['issue']
             Journal = insert('Issue', value, Journal)
-        # lab generated 
+        # lab generated
         elif match(sheet.row_values(row)[0], 'Date of Sample Made'):
             if hasLen(sheet.row_values(row)[1]) and str(sheet.row_values(row)[1]).replace('.','',1).isdigit():
                 timetuple = xlrd.xldate_as_tuple(sheet.row_values(row)[1], 0)
@@ -589,6 +616,9 @@ def sheetSampleInfo(sheet, DATA, myXSDtree, jobDir, restbase):
         _f.write(CurrentTime + '\t' + str(ID) + '\t' + '(' + str(UploaderName) +  ')' + '\t' + str(UploaderEmail) + '\n')
     # write ID into DATA
     DATA.append({'ID': ID})
+    DATA.append({'SchemaVersion': runCtx['schemaName']})
+    DATA.append({'SchemaID': runCtx['schemaId']})
+    DATA.append({'DatasetID': runCtx['datasetId']})
     # sort CommonFields, Journal, and LabGenerated
     CommonFields = sortSequence(CommonFields, 'CommonFields', myXSDtree)
     Journal = sortSequence(Journal, 'Journal', myXSDtree)
@@ -615,6 +645,7 @@ def sheetMatType(sheet, DATA, myXSDtree, jobDir):
     temp = [] # always save temp if not empty when we find a match in headers
     prevTemp = '' # save the previous cleanTemp
     prevTempPST = '' # save the previous cleanTempPST
+    frac = collections.OrderedDict() # for mass and volume fractions
     for row in range(sheet.nrows):
         # First deal with the ParticleSurfaceTreatment
         cleanTempPST = matchList(sheet.cell_value(row, 0), headers_PST.keys())
@@ -628,13 +659,13 @@ def sheetMatType(sheet, DATA, myXSDtree, jobDir):
                 FillerComponent.append({headers_PST[prevTempPST]: PST})
                 # initialize
                 PST = []
-            prevTempPST = cleanTempPST # update prevTempPST    
+            prevTempPST = cleanTempPST # update prevTempPST
         # Then deal with higher level headers
         cleanTemp = matchList(sheet.cell_value(row, 0), headers.keys())
         if cleanTemp:
             if len(prevTemp) == 0: # initialize prevTemp
                 prevTemp = cleanTemp
-            # special case NonSphericalShape, need to save the dict from bottom up 
+            # special case NonSphericalShape, need to save the dict from bottom up
             # into FillerComponent
             if len(nonSpher) > 0:
                 FillerComponent.append({'NonSphericalShape': nonSpher})
@@ -649,7 +680,7 @@ def sheetMatType(sheet, DATA, myXSDtree, jobDir):
                 # initialize
                 PST = []
                 prevTempPST = ''
-            # special case MatrixComponent, need to save the list from bottom up 
+            # special case MatrixComponent, need to save the list from bottom up
             # into temp
             if len(MatrixComponent) > 0:
                 # sort MatrixComponent
@@ -657,7 +688,7 @@ def sheetMatType(sheet, DATA, myXSDtree, jobDir):
                 temp.append({'MatrixComponent': MatrixComponent})
                 # initialize
                 MatrixComponent = []
-            # special case FillerComponent, need to save the list from bottom up 
+            # special case FillerComponent, need to save the list from bottom up
             # into temp
             if len(FillerComponent) > 0:
                 # sort FillerComponent
@@ -665,6 +696,13 @@ def sheetMatType(sheet, DATA, myXSDtree, jobDir):
                 temp.append({'FillerComponent': FillerComponent})
                 # initialize
                 FillerComponent = []
+            # special case FillerComposition
+            if len(frac) > 0:
+                # sort frac, always follow the order: mass, volume
+                if 'volume' in frac:
+                    frac.move_to_end('volume')
+                temp.append({'FillerComposition':{'Fraction':frac}})
+                frac = collections.OrderedDict()
             # save temp
             if len(temp) > 0: # update temp if it's not empty
                 # sort temp
@@ -746,14 +784,18 @@ def sheetMatType(sheet, DATA, myXSDtree, jobDir):
             mcc = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             if type(myRow[2]) == float or len(myRow[2]) > 0:
-                mcc['mass'] = myRow[2]
+                if hasLen(myRow[1]):
+                    mcc['Constituent'] = myRow[1]
+                mcc['Fraction'] = {'mass':myRow[2]}
             if len(mcc) > 0:
                 MatrixComponent.append({'MatrixComponentComposition':mcc})
         if match(sheet.cell_value(row, 0), 'Matrix Component Composition volume fraction'):
             vcc = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             if type(myRow[2]) == float or len(myRow[2]) > 0:
-                vcc['volume'] = myRow[2]
+                if hasLen(myRow[1]):
+                    vcc['Constituent'] = myRow[1]
+                vcc['Fraction'] = {'volume':myRow[2]}
             if len(vcc) > 0:
                 MatrixComponent.append({'MatrixComponentComposition':vcc})
         # Filler
@@ -848,9 +890,13 @@ def sheetMatType(sheet, DATA, myXSDtree, jobDir):
         if match(sheet.cell_value(row, 0), 'Fraction'):
             if type(sheet.cell_value(row, 2)) == float or len(sheet.cell_value(row, 2)) > 0:
                 if match(sheet.cell_value(row, 1), 'mass'):
-                    temp.append({'FillerComposition':{'Fraction':{'mass':sheet.cell_value(row, 2)}}})
+                    frac['mass'] = collections.OrderedDict([('value',sheet.cell_value(row, 2)),
+                                                            ('source','reported')])
+                    # temp.append({'FillerComposition':{'Fraction':{'mass':sheet.cell_value(row, 2)}}})
                 elif match(sheet.cell_value(row, 1), 'volume'):
-                    temp.append({'FillerComposition':{'Fraction':{'volume':sheet.cell_value(row, 2)}}})
+                    frac['volume'] = collections.OrderedDict([('value',sheet.cell_value(row, 2)),
+                                                              ('source','reported')])
+                    # temp.append({'FillerComposition':{'Fraction':{'volume':sheet.cell_value(row, 2)}}})
             # FillerComponent/ParticleSurfaceTreatment
                 #./ChemicalName
         if match(sheet.cell_value(row,0), 'PST chemical name'):
@@ -932,7 +978,7 @@ def sheetMatType(sheet, DATA, myXSDtree, jobDir):
         FillerComponent.append({'ParticleSurfaceTreatment': PST})
         # initialize
         PST = []
-    # special case MatrixComponent, need to save the list from bottom up 
+    # special case MatrixComponent, need to save the list from bottom up
     # into temp
     if len(MatrixComponent) > 0:
         # sort MatrixComponent
@@ -940,7 +986,7 @@ def sheetMatType(sheet, DATA, myXSDtree, jobDir):
         temp.append({'MatrixComponent': MatrixComponent})
         # initialize
         MatrixComponent = []
-    # special case FillerComponent, need to save the list from bottom up 
+    # special case FillerComponent, need to save the list from bottom up
     # into temp
     if len(FillerComponent) > 0:
         # sort FillerComponent
@@ -948,6 +994,13 @@ def sheetMatType(sheet, DATA, myXSDtree, jobDir):
         temp.append({'FillerComponent': FillerComponent})
         # initialize
         FillerComponent = []
+    # special case FillerComposition
+    if len(frac) > 0:
+        # sort frac, always follow the order: mass, volume
+        if 'volume' in frac:
+            frac.move_to_end('volume')
+        temp.append({'FillerComposition':{'Fraction':frac}})
+        frac = collections.OrderedDict()
     # don't forget about the last temp
     # save temp
     if len(temp) > 0: # update temp if it's not empty
@@ -966,10 +1019,10 @@ def sheetMatType(sheet, DATA, myXSDtree, jobDir):
 def sheetProcTypeHelper(sheet, row, temp_list, stop_sign, myXSDtree, jobDir):
     headers = {'Aging': 'Aging', 'Additive': 'Additive', 'Cooling': 'Cooling',
                'Curing': 'Curing', 'Solvent': 'Solvent', 'Mixing': 'Mixing',
-               'Extrusion': 'Extrusion', 'Heating': 'Heating', 
+               'Extrusion': 'Extrusion', 'Heating': 'Heating',
                'Drying/Evaporation': 'Drying-Evaporation',
                'Centrifugation': 'Centrifugation', 'Molding': 'Molding',
-               'Deposition and Coating': 'DepositionAndCoating', 
+               'Deposition and Coating': 'DepositionAndCoating',
                'Self-Assembly': 'Self-Assembly', 'Other': 'Other'}
     temp = [] # always save temp if not empty when we find a match in headers
     irow = row + 1 # the row we are looking at
@@ -984,7 +1037,7 @@ def sheetProcTypeHelper(sheet, row, temp_list, stop_sign, myXSDtree, jobDir):
     ExtrsOP = [] # a list for Extrusion/.../Output
     # start scanning
     # as long as we are not 1) out of bound 2) find a stop_sign
-    while (irow < sheet.nrows and 
+    while (irow < sheet.nrows and
            not match(sheet.cell_value(irow, 0), stop_sign)):
         cleanTemp = matchList(sheet.cell_value(irow, 0), headers.keys())
         if cleanTemp:
@@ -998,7 +1051,7 @@ def sheetProcTypeHelper(sheet, row, temp_list, stop_sign, myXSDtree, jobDir):
                 temp.append({'MoldingInfo': MoldingInfo})
                 # initialize
                 MoldingInfo = []
-            # special case Extrusion, need to save the list from bottom up 
+            # special case Extrusion, need to save the list from bottom up
             # (HeatingZone and Output => Extrusion => dict with
             # SingleScrewExtrusion or TwinScrewExtrusion as key) into temp
             if prevTemp == 'Extrusion':
@@ -1089,11 +1142,11 @@ def sheetProcTypeHelper(sheet, row, temp_list, stop_sign, myXSDtree, jobDir):
             #     pressure = addKVU('Pressure', sheet.row_values(irow)[1], '',
             #                       sheet.row_values(irow)[2], '', '', '', '', pressure)
             if len(pressure) > 0:
-                temp.append(pressure)    
+                temp.append(pressure)
         # AmbientCondition
         if match(sheet.cell_value(irow, 0), 'Cooling - ambient condition'):
             temp = insert('AmbientCondition', sheet.cell_value(irow, 1), temp)
-        
+
     # Solvent
         # SolventName
         if match(sheet.cell_value(irow, 0), 'Solvent - solvent amount'):
@@ -1154,7 +1207,7 @@ def sheetProcTypeHelper(sheet, row, temp_list, stop_sign, myXSDtree, jobDir):
             #                          sheet.row_values(irow)[2], '', '', '', '', temperature)
             if len(temperature) > 0:
                 temp.append(temperature)
-        
+
     # Extrusion
         # first detect the correct header, single or twin
         if matchList(sheet.cell_value(irow, 0), extrsHeaders.keys()):
@@ -1502,7 +1555,7 @@ def sheetProcTypeHelper(sheet, row, temp_list, stop_sign, myXSDtree, jobDir):
             #     pressure = addKVU('Pressure', sheet.row_values(irow)[1], '',
             #                       sheet.row_values(irow)[2], '', '', '', '', pressure)
             if len(pressure) > 0:
-                temp.append(pressure)    
+                temp.append(pressure)
         # AmbientCondition
         if match(sheet.cell_value(irow, 0), 'Heating - ambient condition'):
             temp = insert('AmbientCondition', sheet.cell_value(irow, 1), temp)
@@ -1543,7 +1596,7 @@ def sheetProcTypeHelper(sheet, row, temp_list, stop_sign, myXSDtree, jobDir):
             #     pressure = addKVU('Pressure', sheet.row_values(irow)[1], '',
             #                       sheet.row_values(irow)[2], '', '', '', '', pressure)
             if len(pressure) > 0:
-                temp.append(pressure)    
+                temp.append(pressure)
         # AmbientCondition
         if match(sheet.cell_value(irow, 0), 'Drying/Evaporation - ambient condition'):
             temp = insert('AmbientCondition', sheet.cell_value(irow, 1), temp)
@@ -1551,7 +1604,7 @@ def sheetProcTypeHelper(sheet, row, temp_list, stop_sign, myXSDtree, jobDir):
     # Centrifugation
         # Used or not
         if match(sheet.cell_value(irow, 0), 'Centrifugation'):
-            temp = sheet.cell_value(irow, 1)    
+            temp = sheet.cell_value(irow, 1)
 
     # Molding
         # MoldingMode
@@ -1633,7 +1686,7 @@ def sheetProcTypeHelper(sheet, row, temp_list, stop_sign, myXSDtree, jobDir):
             #     pressure = addKVU('Pressure', sheet.row_values(irow)[1], '',
             #                       sheet.row_values(irow)[2], '', '', '', '', pressure)
             if len(pressure) > 0:
-                temp.append(pressure)    
+                temp.append(pressure)
         # AmbientCondition
         if match(sheet.cell_value(irow, 0), 'Curing - ambient condition'):
             temp = insert('AmbientCondition', sheet.cell_value(irow, 1), temp)
@@ -1648,7 +1701,7 @@ def sheetProcTypeHelper(sheet, row, temp_list, stop_sign, myXSDtree, jobDir):
         MoldingInfo = sortSequence(MoldingInfo, 'MoldingInfo', myXSDtree)
         # then save MoldingInfo as a dict in temp
         temp.append({'MoldingInfo': MoldingInfo})
-    # special case Extrusion, need to save the list from bottom up 
+    # special case Extrusion, need to save the list from bottom up
     # (HeatingZone and Output => Extrusion => dict with
     # SingleScrewExtrusion or TwinScrewExtrusion as key) into temp
     if prevTemp == 'Extrusion':
@@ -1717,7 +1770,7 @@ def sheetProcType(sheet, DATA, myXSDtree, jobDir):
                     # dump the temp_list as a dict into Process_list
                     Process_list.append(collections.OrderedDict({'In-SituPolymerization': temp_list}))
             # OtherProcessing
-            if match(prcMtd, 'OtherProcessing'):
+            if match(prcMtd, 'Other_Processing'):
                 temp_list = [] # initialize
                 temp_list = sheetProcTypeHelper(sheet, row, temp_list, 'Processing method', myXSDtree, jobDir) # helper
                 if len(temp_list) > 0:
@@ -1731,7 +1784,7 @@ def sheetProcType(sheet, DATA, myXSDtree, jobDir):
         # sort Process_list
         Process_list = sortSequence(Process_list, 'PROCESSING', myXSDtree)
         DATA.append({'PROCESSING': Process_list})
-    return DATA 
+    return DATA
 
 
 
@@ -1744,11 +1797,11 @@ def sheetCharMeth(sheet, DATA, myXSDtree, jobDir):
                'Confocal microscopy': 'Confocal_Microscopy',
                'Scanning tunneling microscopy': 'Scanning_Tunneling_Microscopy',
                'Fourier transform infrared spectroscopy': 'Fourier_Transform_Infrared_Spectroscopy',
-               'Dielectric and impedance spectroscopy analysis': 'Dielectric_and_Impedance_Spectroscopy_Analysis', 
+               'Dielectric and impedance spectroscopy analysis': 'Dielectric_and_Impedance_Spectroscopy_Analysis',
                'Raman spectroscopy': 'Raman_Spectroscopy',
                'Xray photoelectron spectroscopy': 'XRay_Photoelectron_Spectroscopy',
                'Nuclear magnetic resonance': 'Nuclear_Magnetic_Resonance',
-               'Neutron spin echo spectroscopy': 'Neutron_Spin_Echo_Spectroscopy', 
+               'Neutron spin echo spectroscopy': 'Neutron_Spin_Echo_Spectroscopy',
                'Calorimetry': 'Calorimetry',
                'Differential thermal analysis': 'Differential_Thermal_Analysis',
                'Differential scanning calorimetry': 'Differential_Scanning_Calorimetry',
@@ -1863,9 +1916,9 @@ def sheetCharMeth(sheet, DATA, myXSDtree, jobDir):
         # RheometerType
         if match(sheet.cell_value(row, 0), 'Rheometer type'):
             temp = insert('RheometerType', sheet.cell_value(row, 1), temp)
-        # CapillarSize
-        if match(sheet.cell_value(row, 0), 'Capillar size'):
-            temp = insert('CapillarSize', sheet.cell_value(row, 1), temp)
+        # CapillarySize
+        if match(sheet.cell_value(row, 0), 'Capillary size'):
+            temp = insert('CapillarySize', sheet.cell_value(row, 1), temp)
     # END OF THE LOOP
     # don't forget about the last temp
     # save temp
@@ -1933,7 +1986,7 @@ def sheetPropMech(sheet, DATA_PROP, myXSDtree, jobDir):
                     temp.append({headers_fracture[prevTempFrac]: tempFracture})
                     tempFracture = []
                     prevTempFrac = ''
-            # special case Condition, need to save the list from bottom up 
+            # special case Condition, need to save the list from bottom up
             # into temp
             if len(Conditions) > 0:
                 # sort Conditions
@@ -1981,6 +2034,31 @@ def sheetPropMech(sheet, DATA_PROP, myXSDtree, jobDir):
             tenY = addKVU('TensileStressAtYield', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], tenY, jobDir, myXSDtree)
             if len(tenY) > 0:
                 temp.append(tenY)
+            # TensileStrength
+        if match(sheet.cell_value(row, 0), 'Tensile strength'):
+            tenS = collections.OrderedDict()
+            myRow = sheet.row_values(row) # save the list of row_values
+            while len(myRow) < 7:
+                myRow.append('') # prevent IndexError
+            tenS = addKVU('TensileStrength', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], tenS, jobDir, myXSDtree)
+            if len(tenS) > 0:
+                temp.append(tenS)
+            # StressRelaxation
+        if match(sheet.cell_value(row, 0), 'Stress relaxation (filename.xlsx)'):
+            if hasLen(sheet.cell_value(row, 1)):
+                strR = collections.OrderedDict()
+                strR = addKVU('StressRelaxation', '', '', '', '', '', '', sheet.cell_value(row, 1), strR, jobDir, myXSDtree)
+                if len(strR) > 0:
+                    temp.append(strR)
+            # StrainAtBreak
+        if match(sheet.cell_value(row, 0), 'Strain at break'):
+            strB = collections.OrderedDict()
+            myRow = sheet.row_values(row) # save the list of row_values
+            while len(myRow) < 7:
+                myRow.append('') # prevent IndexError
+            strB = addKVU('StrainAtBreak', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], strB, jobDir, myXSDtree)
+            if len(strB) > 0:
+                temp.append(strB)
             # TensileToughness
         if match(sheet.cell_value(row, 0), 'Tensile toughness'):
             tenT = collections.OrderedDict()
@@ -2037,7 +2115,7 @@ def sheetPropMech(sheet, DATA_PROP, myXSDtree, jobDir):
                 temp.append(fibE)
             # PoissonsRatio
         if match(sheet.cell_value(row, 0), '''Poisson's ratio'''):
-            temp = insert('PoissonsRatio', sheet.cell_value(row, 2), temp) 
+            temp = insert('PoissonsRatio', sheet.cell_value(row, 2), temp)
         # Flexural
             # FlexuralModulus
         if match(sheet.cell_value(row, 0), 'Flexural modulus'):
@@ -2143,7 +2221,7 @@ def sheetPropMech(sheet, DATA_PROP, myXSDtree, jobDir):
         # FractureToughness
             # preCrackingProcess (upper case leading P for EssentialWorkFracture)
         if match(sheet.cell_value(row, 0), 'Pre-cracking process'):
-            tempFracture = insert('preCrackingProcess', sheet.cell_value(row, 1), tempFracture) 
+            tempFracture = insert('preCrackingProcess', sheet.cell_value(row, 1), tempFracture)
             # strainRate (upper case leading S for EssentialWorkFracture)
         if match(sheet.cell_value(row, 0), 'Strain rate'):
             strR = collections.OrderedDict()
@@ -2153,12 +2231,21 @@ def sheetPropMech(sheet, DATA_PROP, myXSDtree, jobDir):
             strR = addKVU('strainRate', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], strR, jobDir, myXSDtree)
             if len(strR) > 0:
                 tempFracture.append(strR)
+            # FractureEnergy
+        if match(sheet.cell_value(row, 0), 'Fracture energy'):
+            fraE = collections.OrderedDict()
+            myRow = sheet.row_values(row) # save the list of row_values
+            while len(myRow) < 7:
+                myRow.append('') # prevent IndexError
+            fraE = addKVU('FractureEnergy', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], fraE, jobDir, myXSDtree)
+            if len(fraE) > 0:
+                tempFracture.append(fraE)
             # sampleShape
         if match(sheet.cell_value(row, 0), 'Sample shape'):
-            tempFracture = insert('sampleShape', sheet.cell_value(row, 1), tempFracture) 
+            tempFracture = insert('sampleShape', sheet.cell_value(row, 1), tempFracture)
             # K-factor
         if match(sheet.cell_value(row, 0), 'K-factor'):
-            tempFracture = insert('K-factor', sheet.cell_value(row, 1), tempFracture) 
+            tempFracture = insert('K-factor', sheet.cell_value(row, 1), tempFracture)
             # J-integral
         if match(sheet.cell_value(row, 0), 'J-integral'):
             tempFracture = insert('J-integral', sheet.cell_value(row, 1), tempFracture)
@@ -2201,7 +2288,7 @@ def sheetPropMech(sheet, DATA_PROP, myXSDtree, jobDir):
                 myRow.append('') # prevent IndexError
             impT = addKVU('ImpactToughness', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], impT, jobDir, myXSDtree)
             if len(impT) > 0:
-                temp.append(impT)                
+                temp.append(impT)
         # SHARED PROPERTIES
         # Conditions
             # StrainRate
@@ -2244,7 +2331,7 @@ def sheetPropMech(sheet, DATA_PROP, myXSDtree, jobDir):
                 myRow.append('') # prevent IndexError
             harV = addKVU('HardnessValue', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], harV, jobDir, myXSDtree)
             if len(harV) > 0:
-                temp.append(harV)   
+                temp.append(harV)
     # END OF THE LOOP
     # based on the flag
     if underFrac:
@@ -2460,7 +2547,7 @@ def sheetPropVisc(sheet, DATA_PROP, myXSDtree, jobDir):
                 myRow.append('') # prevent IndexError
             tenC = addKVU('TensileCreepCompliance', myRow[1], myRow[2], myRow[3], myRow[4], myRow[5], '', myRow[6], tenC, jobDir, myXSDtree)
             if len(tenC) > 0:
-                temp_Creep.append(tenC) 
+                temp_Creep.append(tenC)
         # TensileCreepRuptureStrength
         if match(sheet.cell_value(row, 0), 'Tensile creep rupture strength'):
             tenS = collections.OrderedDict()
@@ -2569,7 +2656,7 @@ def sheetPropVisc(sheet, DATA_PROP, myXSDtree, jobDir):
                 temp_list_new.append(myDict)
         # replace temp_list with temp_list_new
         temp_list = temp_list_new
-   
+
     # add temp_list into DATA_PROP
     if len(temp_list) > 0:
         # sort temp_list
@@ -2592,12 +2679,21 @@ def sheetPropElec(sheet, DATA_PROP, myXSDtree, jobDir):
                'Dielectric breakdown strength': 'DielectricBreakdownStrength'}
     temp_list = [] # the highest level list for PROPERTIES/Electrical
     temp = [] # always save temp if not empty when we find a match in headers
+    dep = collections.OrderedDict() # dict for dependence condition
+    depend = '' # FrequencyDependence or TemperatureDependence
     prevTemp = '' # save the previous cleanTemp
     for row in range(sheet.nrows):
         cleanTemp = matchList(sheet.cell_value(row, 0), headers.keys())
         if cleanTemp:
             if len(prevTemp) == 0: # initialize prevTemp
                 prevTemp = cleanTemp
+            # if depend is not '', i.e. cleanTemp is AC dielectric dispersion
+            if len(depend) > 0:
+                # insert the dependence structure to temp, no need to sortSequence since we give it
+                temp.append({'DielectricDispersionDependence':{depend:{'condition':dep}}})
+                # reset dep and depend after added to temp
+                dep = collections.OrderedDict()
+                depend = ''
             # save temp
             if len(temp) > 0: # update temp if it's not empty
                 # sort temp
@@ -2691,6 +2787,38 @@ def sheetPropElec(sheet, DATA_PROP, myXSDtree, jobDir):
         # AC_DielectricDispersion/Description
         if match(sheet.cell_value(row, 0), 'Description'):
             temp = insert('Description', sheet.cell_value(row, 1), temp)
+        # AC_DielectricDispersion/DielectricDispersionDependence
+        if match(sheet.cell_value(row, 0), 'Dependence'):
+            if hasLen(sheet.cell_value(row, 1)):
+                # 'Frequency dependence' or 'Temperature dependence'
+                if match(sheet.cell_value(row, 1), 'Frequency dependence'):
+                    depend = 'FrequencyDependence'
+                elif match(sheet.cell_value(row, 1), 'Temperature dependence'):
+                    depend = 'TemperatureDependence'
+        # AC_DielectricDispersion/DielectricDispersionDependence/.../condition/temperature
+        if match(sheet.cell_value(row, 0), 'Test Conditions - Temperature'):
+            myRow = sheet.row_values(row) # save the list of row_values
+            while len(myRow) < 7:
+                myRow.append('') # prevent IndexError
+            dep = addKVU('temperature', myRow[1], myRow[2], myRow[3], '', '', '', myRow[4], dep, jobDir, myXSDtree)
+            # sanity check
+            if 'temperature' in dep and not match(depend, 'FrequencyDependence'):
+                with open(jobDir + '/error_message.txt', 'a') as fid:
+                    fid.write('[Dielectric Dispersion Dependence Error] If you are to fill in "Test Conditions - Temperature", please select "Frequency dependence" for "Dependence"\n')
+                # reset dep
+                dep = collections.OrderedDict()
+        # AC_DielectricDispersion/DielectricDispersionDependence/.../condition/frequency
+        if match(sheet.cell_value(row, 0), 'Test Conditions - Frequency'):
+            myRow = sheet.row_values(row) # save the list of row_values
+            while len(myRow) < 7:
+                myRow.append('') # prevent IndexError
+            dep = addKVU('frequency', myRow[1], myRow[2], myRow[3], '', '', '', myRow[4], dep, jobDir, myXSDtree)
+            # sanity check
+            if 'frequency' in dep and not match(depend, 'TemperatureDependence'):
+                with open(jobDir + '/error_message.txt', 'a') as fid:
+                    fid.write('[Dielectric Dispersion Dependence Error] If you are to fill in "Test Conditions - Frequency", please select "Temperature dependence" for "Dependence"\n')
+                # reset dep
+                dep = collections.OrderedDict()
         # AC_DielectricDispersion/Dielectric_Real_Permittivity
         if match(sheet.cell_value(row, 0), 'Real permittivity'):
             reaP = collections.OrderedDict()
@@ -2722,8 +2850,11 @@ def sheetPropElec(sheet, DATA_PROP, myXSDtree, jobDir):
         if match(sheet.cell_value(row, 0), 'Dielectric breakdown strength'):
             temp = insert('Condition', sheet.cell_value(row, 1), temp)
             proF = collections.OrderedDict()
-            proF = addKVU('Profile', '', '', '', '', '', '',
-                          sheet.cell_value(row, 2), proF, jobDir, myXSDtree)
+            myRow = sheet.row_values(row) # save the list of row_values
+            while len(myRow) < 7:
+                myRow.append('') # prevent IndexError
+            proF = addKVU('Profile', '', myRow[2], myRow[3], '', '', '',
+                          myRow[4], proF, jobDir, myXSDtree)
             if len(proF) > 0:
                 temp.append(proF)
         # DielectricBreakdownStrength/WeibullPlot
@@ -2736,17 +2867,31 @@ def sheetPropElec(sheet, DATA_PROP, myXSDtree, jobDir):
             if len(wePl) > 0:
                 temp.append(wePl)
         # DielectricBreakdownStrength/WeibullParameter
-        if match(sheet.cell_value(row, 0), 'Weibull parameter'):
+        if match(sheet.cell_value(row, 0), 'Weibull parameter - scale'):
             weiP = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
             while len(myRow) < 7:
                 myRow.append('') # prevent IndexError
-            weiP = addKVU('WeibullParameter', '',
-                          myRow[1], myRow[2], myRow[3], myRow[4], '', '', weiP, jobDir, myXSDtree)
+            weiP = addKVU('WeibullParameter', 'scale parameter', myRow[1], myRow[2], '', '', '', '', weiP, jobDir, myXSDtree)
+            if len(weiP) > 0:
+                temp.append(weiP)
+        if match(sheet.cell_value(row, 0), 'Weibull parameter - shape'):
+            weiP = collections.OrderedDict()
+            myRow = sheet.row_values(row) # save the list of row_values
+            while len(myRow) < 7:
+                myRow.append('') # prevent IndexError
+            weiP = addKVU('WeibullParameter', 'shape parameter', myRow[1], myRow[2], '', '', '', '', weiP, jobDir, myXSDtree)
             if len(weiP) > 0:
                 temp.append(weiP)
     # END OF THE LOOP
     # don't forget about the last temp
+    # if depend is not '', i.e. the last header is AC dielectric dispersion
+    if len(depend) > 0:
+        # insert the dependence structure to temp, no need to sortSequence since we give it
+        temp.append({'DielectricDispersionDependence':{depend:{'condition':dep}}})
+        # reset dep and depend after added to temp
+        dep = collections.OrderedDict()
+        depend = ''
     # save temp
     if len(temp) > 0: # update temp if it's not empty
         # sort temp
@@ -2859,7 +3004,7 @@ def sheetPropTher(sheet, DATA_PROP, myXSDtree, jobDir):
                           '', myRow[6], halC, jobDir, myXSDtree)
             if len(halC) > 0:
                 temp.append(halC)
-        # CrystalizationTemperature            
+        # CrystalizationTemperature
         if match(sheet.cell_value(row, 0), 'Crystallization temperature'):
             cryT = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
@@ -2870,7 +3015,7 @@ def sheetPropTher(sheet, DATA_PROP, myXSDtree, jobDir):
                           '', myRow[6], cryT, jobDir, myXSDtree)
             if len(cryT) > 0:
                 temp_list.append(cryT) # directly append to the higher level list
-        # HeatOfCrystallization            
+        # HeatOfCrystallization
         if match(sheet.cell_value(row, 0), 'Heat of crystallization'):
             heaC = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
@@ -2881,7 +3026,7 @@ def sheetPropTher(sheet, DATA_PROP, myXSDtree, jobDir):
                           '', myRow[6], heaC, jobDir, myXSDtree)
             if len(heaC) > 0:
                 temp_list.append(heaC) # directly append to the higher level list
-        # HeatOfFusion            
+        # HeatOfFusion
         if match(sheet.cell_value(row, 0), 'Heat of fusion'):
             heaF = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
@@ -2892,7 +3037,7 @@ def sheetPropTher(sheet, DATA_PROP, myXSDtree, jobDir):
                          '', myRow[6], heaF, jobDir, myXSDtree)
             if len(heaF) > 0:
                 temp_list.append(heaF) # directly append to the higher level list
-        # ThermalDecompositionTemperature            
+        # ThermalDecompositionTemperature
         if match(sheet.cell_value(row, 0), 'Thermal decomposition temperature'):
             theT = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
@@ -2903,7 +3048,7 @@ def sheetPropTher(sheet, DATA_PROP, myXSDtree, jobDir):
                           '', myRow[6], theT, jobDir, myXSDtree)
             if len(theT) > 0:
                 temp_list.append(theT) # directly append to the higher level list
-        # GlassTransitionTemperature            
+        # GlassTransitionTemperature
         if match(sheet.cell_value(row, 0), 'Glass transition temperature'):
             glaT = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
@@ -2914,7 +3059,7 @@ def sheetPropTher(sheet, DATA_PROP, myXSDtree, jobDir):
                           '', myRow[6], glaT, jobDir, myXSDtree)
             if len(glaT) > 0:
                 temp_list.append(glaT) # directly append to the higher level list
-        # LC_PhaseTransitionTemperature            
+        # LC_PhaseTransitionTemperature
         if match(sheet.cell_value(row, 0), 'LC phase transition temperature'):
             lcpT = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
@@ -2925,7 +3070,7 @@ def sheetPropTher(sheet, DATA_PROP, myXSDtree, jobDir):
                           '', myRow[6], lcpT, jobDir, myXSDtree)
             if len(lcpT) > 0:
                 temp_list.append(lcpT) # directly append to the higher level list
-        # MeltingTemperature            
+        # MeltingTemperature
         if match(sheet.cell_value(row, 0), 'Melting temperature'):
             melT = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
@@ -3035,7 +3180,7 @@ def sheetPropVolu(sheet, DATA_PROP, myXSDtree, jobDir):
                           '', myRow[6], weiL, jobDir, myXSDtree)
             if len(weiL) > 0:
                 temp_list.append(weiL) # directly append to the higher level list
-        # InterphaseThickness            
+        # InterphaseThickness
         if match(sheet.cell_value(row, 0), 'Interfacial thickness'):
             intT = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
@@ -3046,7 +3191,7 @@ def sheetPropVolu(sheet, DATA_PROP, myXSDtree, jobDir):
                           '', myRow[6], intT, jobDir, myXSDtree)
             if len(intT) > 0:
                 temp_list.append(intT) # directly append to the higher level list
-        # Density            
+        # Density
         if match(sheet.cell_value(row, 0), 'Density'):
             denS = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
@@ -3057,7 +3202,7 @@ def sheetPropVolu(sheet, DATA_PROP, myXSDtree, jobDir):
                           '', myRow[6], denS, jobDir, myXSDtree)
             if len(denS) > 0:
                 temp_list.append(denS) # directly append to the higher level list
-        # LinearExpansionCoefficient            
+        # LinearExpansionCoefficient
         if match(sheet.cell_value(row, 0), 'Linear expansion coefficient'):
             linC = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
@@ -3068,7 +3213,7 @@ def sheetPropVolu(sheet, DATA_PROP, myXSDtree, jobDir):
                           '', myRow[6], linC, jobDir, myXSDtree)
             if len(linC) > 0:
                 temp_list.append(linC) # directly append to the higher level list
-        # VolumeExpansionCoefficient            
+        # VolumeExpansionCoefficient
         if match(sheet.cell_value(row, 0), 'Volume expansion coefficient'):
             volC = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
@@ -3079,7 +3224,7 @@ def sheetPropVolu(sheet, DATA_PROP, myXSDtree, jobDir):
                           '', myRow[6], volC, jobDir, myXSDtree)
             if len(volC) > 0:
                 temp_list.append(volC) # directly append to the higher level list
-        # SurfaceTension            
+        # SurfaceTension
         if match(sheet.cell_value(row, 0), 'Surface tension'):
             surT = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
@@ -3090,7 +3235,7 @@ def sheetPropVolu(sheet, DATA_PROP, myXSDtree, jobDir):
                           '', myRow[6], surT, jobDir, myXSDtree)
             if len(surT) > 0:
                 temp_list.append(surT) # directly append to the higher level list
-        # InterfacialTension            
+        # InterfacialTension
         if match(sheet.cell_value(row, 0), 'Interfacial tension'):
             intT = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
@@ -3101,7 +3246,7 @@ def sheetPropVolu(sheet, DATA_PROP, myXSDtree, jobDir):
                           '', myRow[6], intT, jobDir, myXSDtree)
             if len(intT) > 0:
                 temp_list.append(intT) # directly append to the higher level list
-        # WaterAbsorption            
+        # WaterAbsorption
         if match(sheet.cell_value(row, 0), 'Water absorption'):
             watA = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
@@ -3126,7 +3271,7 @@ def sheetPropRheo(sheet, DATA_PROP, myXSDtree, jobDir):
                'Viscosity': 'RheologicalViscosity'}
     headers_DMA = {'Frequency sweep': 'FrequencySweep',
                    'Temperature sweep': 'TemperatureSweep',
-                   'Strain sweep': 'StrainSweep'}           
+                   'Strain sweep': 'StrainSweep'}
     temp_list = [] # the highest level list for PROPERTIES/Rheological
     temp = [] # always save temp if not empty when we find a match in headers
     DMA_Test = [] # a list for Rheological/.../RheometerMode/.../condition
@@ -3242,7 +3387,7 @@ def sheetPropRheo(sheet, DATA_PROP, myXSDtree, jobDir):
                           '', myRow[6], dynV, jobDir, myXSDtree)
             if len(dynV) > 0:
                 temp.append(dynV)
-        # RheologicalViscosity/MeltViscosity            
+        # RheologicalViscosity/MeltViscosity
         if match(sheet.cell_value(row, 0), 'Melt viscosity'):
             melV = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
@@ -3287,7 +3432,7 @@ def sheetMicrostructure(sheet, DATA, myXSDtree, jobDir):
         if cleanTemp:
             if len(prevTemp) == 0: # initialize prevTemp
                 prevTemp = cleanTemp
-            # special case Dimension, need to save the list for Dimension into 
+            # special case Dimension, need to save the list for Dimension into
             # temp if it is not empty
             if len(Dimension) > 0:
                 # sort Dimension
@@ -3307,19 +3452,25 @@ def sheetMicrostructure(sheet, DATA, myXSDtree, jobDir):
         if match(sheet.cell_value(row, 0), 'Microstructure filename'): #(!!!!!!!!!!!!!!!!!)
             if hasLen(sheet.cell_value(row, 1)):
                 filename = str(sheet.cell_value(row, 1)).strip()
-                if filename.split('.')[-1].lower() not in ['png', 'jpg', 'tif', 'tiff', 'gif']:
+                if os.path.splitext(filename)[-1].lower() not in ['.png', '.bmp', '.jpeg', '.jpg', '.tif', '.tiff', '.gif']:
                     # write the message in ./error_message.txt
                     with open(jobDir + '/error_message.txt', 'a') as fid:
                         fid.write('[File Error] "%s" is not an acceptable image file. Please check the file extension.\n' % (filename))
                         continue
                 # confirm whether the file exists
-                if not os.path.exists(jobDir + '/' + filename):
+                filename_up = os.path.splitext(filename)[0] + os.path.splitext(filename)[-1].upper()
+                filename_low = os.path.splitext(filename)[0] + os.path.splitext(filename)[-1].lower()
+                if os.path.exists(jobDir + '/' + filename_low):
+                    imageDir = jobDir + '/' + filename_low
+                    temp = insert('File', imageDir, temp)
+                elif os.path.exists(jobDir + '/' + filename_up):
+                    imageDir = jobDir + '/' + filename_up
+                    temp = insert('File', imageDir, temp)
+                else:
                     # write the message in ./error_message.txt
                     with open(jobDir + '/error_message.txt', 'a') as fid:
                         fid.write('[File Error] Missing file! Please include "%s" in your uploads. Could be the spelling of the file extension.\n' % (filename))
                         continue
-                imageDir = jobDir + '/' + filename
-                temp = insert('File', imageDir, temp)
         # ImageFile/Description
         if match(sheet.cell_value(row, 0), 'Description'):
             temp = insert('Description', sheet.cell_value(row, 1), temp)
@@ -3342,7 +3493,7 @@ def sheetMicrostructure(sheet, DATA, myXSDtree, jobDir):
         # ImagePreProcessing
         if match(sheet.cell_value(row, 0), 'Preprocessing'):
             temp = insert('ImagePreProcessing', sheet.cell_value(row, 1), temp)
-        # Experimental_Sample_Info/SampleSize        
+        # Experimental_Sample_Info/SampleSize
         if match(sheet.cell_value(row, 0), 'Sample size'):
             samS = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
@@ -3351,7 +3502,7 @@ def sheetMicrostructure(sheet, DATA, myXSDtree, jobDir):
             samS = addKVU('SampleSize', '', myRow[1], myRow[2], '', '', '', '', samS, jobDir, myXSDtree)
             if len(samS) > 0:
                 temp.append(samS)
-        # Experimental_Sample_Info/SampleThickness        
+        # Experimental_Sample_Info/SampleThickness
         if match(sheet.cell_value(row, 0), 'Sample thickness'):
             samT = collections.OrderedDict()
             myRow = sheet.row_values(row) # save the list of row_values
@@ -3383,14 +3534,14 @@ def sheetMicrostructure(sheet, DATA, myXSDtree, jobDir):
     return DATA
 
 ## main
-def compiler(jobDir, code_srcDir, xsdDir, templateName, restbase):
+def compiler(jobDir, code_srcDir, xsdDir, templateName, restbase, datasetId):
     ## Global variable myXSDtree
     # read the xsd tree
     myXSDtree = etree.parse(xsdDir)
     # DATA containers
     DATA = [] # the list that will finally be turned into a dict for dicttoxml
     DATA_PROP = [] # the list for the PROPERTIES section
-    
+
     ## Data extraction
     # Read the Excel template
     filename = jobDir + '/' + templateName
@@ -3409,7 +3560,7 @@ def compiler(jobDir, code_srcDir, xsdDir, templateName, restbase):
         # check the header of the sheet to determine what it has inside
         if (sheet.row_values(0)[0].strip().lower() == "sample info"):
             # sample info sheet
-            (ID, DATA) = sheetSampleInfo(sheet, DATA, myXSDtree, jobDir, restbase)
+            (ID, DATA) = sheetSampleInfo(sheet, DATA, myXSDtree, jobDir, restbase, datasetId)
         elif (sheet.row_values(0)[0].strip().lower() == "material types"):
             # material types sheet
             DATA = sheetMatType(sheet, DATA, myXSDtree, jobDir)

@@ -19,6 +19,9 @@ const store = new Vuex.Store({
     sampleList: [], // editor still has dependency -- need to remove when samples get read
 
     editorActive: false, // move to editor object
+    config: {
+      baseServicesUrl: ''
+    },
     cms: { // CMS object contains references to urls by name that can be loaded. At some point, this will be dyn loaded.
       images: {},
       videos: {
@@ -45,6 +48,10 @@ const store = new Vuex.Store({
     addSchemas: function (state, toAdd) {
       // console.log('state.addSchemas: ' + JSON.stringify(toAdd))
       state.editor.schemas = toAdd // Overwrite since call is made that returns all data to client at once
+    },
+    baseServicesUrl: function (state, value) {
+      state.config.baseServicesUrl = value
+      console.log('set state.config.baseServicesUrl: ' + value)
     },
     isLoading: function (state) {
       state.isWaiting = true
@@ -103,6 +110,10 @@ const store = new Vuex.Store({
     }
   },
   getters: {
+    baseServicesUrl: (state) => {
+      console.log('state returning baseServicesUrl: ' + state.config.baseServicesUrl)
+      return state.config.baseServicesUrl
+    },
     getCmsVideo: (state) => (id) => {
       return state.cms.videos[id]
     },
@@ -138,10 +149,10 @@ const store = new Vuex.Store({
         let schemaId = state.editor.tab[state.editor.currentTab].schemaId
         state.editor.schemas.forEach(function (v) {
           if (v.current === schemaId) {
-            rv = v.currentRef[0].title
+            rv = v.currentRef.title
             console.log('$store.getters.editorSchemaName - set rv:' + rv)
           } else {
-            console.log('$store.getters.editorSchemaName - skipped: ' + v.currentRef[0].title)
+            console.log('$store.getters.editorSchemaName - skipped: ' + v.currentRef.title)
           }
         })
       } else {
@@ -156,10 +167,10 @@ const store = new Vuex.Store({
         let schemaId = state.editor.tab[state.editor.currentTab].schemaId
         state.editor.schemas.forEach(function (v) {
           if (v.current === schemaId) {
-            rv = v.currentRef[0].contentJson
+            rv = v.currentRef.contentJson
             console.log('$store.getters.editorSchemaJson - set rv:' + rv)
           } else {
-            console.log('$store.getters.editorSchemaJson - skipped: ' + v.currentRef[0].title)
+            console.log('$store.getters.editorSchemaJson - skipped: ' + v.currentRef.title)
           }
         })
       } else {
@@ -184,10 +195,10 @@ const store = new Vuex.Store({
         let schemaId = state.editor.tab[state.editor.currentTab].schemaId
         state.editor.schemas.forEach(function (v) {
           if (v.current === schemaId) {
-            rv = v.currentRef[0].content
+            rv = v.currentRef.content
             console.log('$store.getters.editorSchemaText - set rv:' + rv)
           } else {
-            console.log('$store.getters.editorSchemaText - skipped: ' + v.currentRef[0].title)
+            console.log('$store.getters.editorSchemaText - skipped: ' + v.currentRef.title)
           }
         })
       } else {
@@ -212,14 +223,14 @@ const store = new Vuex.Store({
       let rv = null
       // console.log(state.editor.schemas)
       if (state.editor.schemas.length > 0) {
-        rv = state.editor.schemas[0].currentRef[0]._id // TODO NOTE: if sort failed for /nmr/templates/versions/select/allactive this will NOT be the latest schema-- REST needs to indicate this
+        rv = state.editor.schemas[0].currentRef._id // TODO NOTE: if sort failed for /nmr/templates/versions/select/allactive this will NOT be the latest schema-- REST needs to indicate this
       }
       return rv
     },
     editorSchemaIds: function (state) {
       let rv = []
       state.editor.schemas.forEach(function (v) {
-        rv.push(v.currentRef[0]._id)
+        rv.push(v.currentRef._id)
       })
       return rv
     },

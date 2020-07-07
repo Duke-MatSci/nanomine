@@ -7,6 +7,7 @@ import Axios from 'axios'
 
 export default {
   name: 'Analytics',
+  // servicesPath: '',
   data () {
     return {
     }

@@ -10,7 +10,10 @@ module.exports = {
     // Paths
     assetsSubDirectory: 'nmstatic',
     assetsPublicPath: '/',
-    proxyTable: {},
+    proxyTable: {
+      'localhost:8080/nmr': 'http://ubuntu.local/', // NOTE: the target "http://..." depends on dev environment and should point to the Virtual Machine being used as the back-end
+      'localhost:8080/nmdevlogin': 'http://ubuntu.local/' // Use path /nmr/nmdevlogin to get a local login when use VueJS local dev mode - erik
+    },
 
     // Various Dev Server settings
     host: 'localhost', // can be overwritten by process.env.HOST

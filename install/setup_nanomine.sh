@@ -3,6 +3,7 @@ export REST_DIR="/apps/nanomine/rest"
 
 source /apps/nanomine_env
 
+echo 'export NM_DATASET_INITIAL_DOI="unpublished-initial-create"' >> /apps/nanomine_env
 echo 'export NM_WEBFILES_ROOT="/apps/nanomine-webfiles"' >> /apps/nanomine_env
 echo 'export NM_WEB_BASE_URI="http://localhost"' >> /apps/nanomine_env # external apache uri. May need to tweak this for your local machine/vm depending on external access location -- external uri to apache
 echo 'export NM_RDF_LOD_PREFIX="http://localhost"' >> /apps/nanomine_env
@@ -49,9 +50,13 @@ cd /apps/whyis
 python manage.py createuser -e nouser@nodomain.edu -p none -f nanomine -l test -u ${NM_AUTH_SYSTEM_USER_ID} --roles=admin
 python manage.py createuser -e testuser@example.com -p none -f test -l user -u testuser # dev systems need this
 
+# NOTE: caller of this script should ensure that /data/loaded exists and is owned by whyis
+
 # python manage.py load -i /apps/nanomine/nm.ttl -f turtle  ## Apparently no longer needed
-# python manage.py load -i /apps/nanomine/setl/ontology.setl.ttl -f turtle  ## Apparently no longer needed
-python manage.py load -i /apps/nanomine-graph/setl/nanomine.ttl -f turtle
+## python manage.py load -i /apps/nanomine-graph/setl/ontology.setl.ttl -f turtle # run setlr on this file directly to get the output
+##  then ingest output
+setlr /apps/nanomine-graph/setl/ontology.setl.ttl # generates nanomine.ttl in current directory
+python manage.py load -i nanomine.ttl -f turtle
 python manage.py load -i /apps/nanomine-graph/setl/xml_ingest.setl.ttl -f turtle
 python manage.py load -i 'http://semanticscience.org/ontology/sio-subset-labels.owl' -f xml
 

@@ -1,11 +1,29 @@
-module.exports = function (mongoose) {
-  let xsdVersionSchema = new mongoose.Schema({ // maps the mongo template_version collection
-    versions: [String], // Array of xsdSchema ids as stings
-    deletedVersions: [String], // deleted versions array of xsdSchema ids
-    nbVersions: Number, // current count of versions
-    isDeleted: Boolean, // this schema is not to be shown/used at all and all xmls based on schema are deprecated
-    current: String, // current schema version id
-    currentRef: [{type: mongoose.Schema.Types.ObjectId, ref: 'xsdData'}]
-  }, {collection: 'template_version'})
-  return xsdVersionSchema
-}
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+
+// maps the mongo template_version collection
+const xsdVersionSchema = new Schema(
+  {
+    versions: {                       // Array of xsdSchema ids as stings
+      type: [String]
+    },
+    deletedVersions: {                // deleted versions array of xsdSchema ids
+      type: [String]
+    },
+    nbVersions: {                     // current count of versions
+      type: Number
+    },
+    isDeleted: {                      // this schema is not to be shown/used at all and all xmls based on schema are deprecated
+      type: Boolean
+    },
+    current: {                        // current schema version id
+      type: String
+    },
+    currentRef: {
+      type: Schema.Types.ObjectId,
+      ref: 'xsdData'
+    }
+  }
+)
+
+module.exports = mongoose.model('xsdVersionData', xsdVersionSchema)
