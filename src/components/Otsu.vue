@@ -15,23 +15,21 @@
   <div class="Otsu">
     <h1>{{ msg }}</h1>
     <v-container class="text-xs-left">
+
       <v-layout row wrap>
         <v-flex xs12>
           <h3>Description</h3>
-          <br>
           <p>Upload an image or ZIP file containing set of images (Supported file formats: .jpg, .tif, .png) and click
             "Binarize" to binarize image using Otsu's Method.</p>
         </v-flex>
-        <v-flex xs12 justify-start>
-          <h4> Input Options:</h4>
-          <p class="text-xs-left"><strong> Upload a single image: </strong>Supported image formats are .jpg, .tif and .png.
-          <p class="text-xs-left"><strong> --OR-- Upload a single image in .mat format :</strong> The .mat file must contain ONLY ONE variable named
-            "Input" - which contains the image.</p>
-          <p class="text-xs-left"><strong> --OR-- Upload multiple images in ZIP File:</strong> Submit a ZIP file containing multiple images (supported
-            formats: .jpg, .tif, .png) of same size (in pixels).
-            DO NOT ZIP the folder containing images; select all images and ZIP them directly.</p>
+        <v-flex xs12>
+          <h3>Input Options</h3>
+          <p><strong>1. Single image:</strong>Supported image formats are .jpg, .tif and .png.
+          <p><strong>2. Single image in .mat format:</strong> The .mat file must contain ONLY ONE variable named "Input," which contains the image.</p>
+          <p><strong>3. ZIP file with multiple images:</strong> Submit a ZIP file containing multiple images (supported formats: .jpg, .tif, .png) of same size (in pixels). DO NOT ZIP the folder containing images; select all images and ZIP them directly.</p>
         </v-flex>
       </v-layout>
+
       <v-alert
         v-model="loginRequired"
         type="error"
@@ -39,6 +37,7 @@
       >
         {{loginRequiredMsg}}
       </v-alert>
+
       <v-alert
         v-model="errorAlert"
         type="error"
@@ -46,6 +45,7 @@
       >
         {{errorAlertMsg}}
       </v-alert>
+      
       <v-dialog v-model="successDlg" persistent max-width="500px">
         <v-card>
           <v-card-title>
@@ -60,39 +60,19 @@
           </v-card-actions>
         </v-card>
       </v-dialog>
-      <v-flex xs12 class="text-xs-center text-sm-center text-md-center text-lg-center">
-        <p class="text-xs-left">Select File
-          <v-btn class="text-xs-left" small color="primary" @click='pickFile'>Browse</v-btn>
-          <input
-            type="file"
-            style="display: none"
-            accept=".jpg, .png, .tif, .mat, .zip"
-            ref="myUpload"
-            @change="onFilePicked"
-          >
-        </p>
-        <v-list v-model="fileName" subheader: true v-if="fileUploaded">
-          <v-list-tile
-            v-for="file in filesDisplay"
-            :key="file.fileName"
-          >
-            <v-list-tile-avatar>
-              <v-icon color="primary">check_circle_outline</v-icon>
-            </v-list-tile-avatar>
-            <v-list-tile-content>
-              <v-list-tile-title v-text="file.fileName"></v-list-tile-title>
-            </v-list-tile-content>
-          </v-list-tile>
-        </v-list>
-      </v-flex>
+
+      <ImageUpload v-on:setFiles="setFiles" aspectRatio='free'></ImageUpload>
+
       <v-flex class="text-xs-center">
-      <v-btn v-on:click="submit()" color="primary">Binarize</v-btn>
+        <v-btn id="binarize-button" v-on:click="submit()" color="primary">Binarize</v-btn>
       </v-flex>
-      <h4>References</h4>
+
       <v-flex xs12>
-        <p> N. Otsu, A threshold selection method from gray-level histograms, IEEE transactions on systems, man, and
+        <h3>References</h3>
+        <p>N. Otsu, A threshold selection method from gray-level histograms, IEEE transactions on systems, man, and
           cybernetics, vol. 9, no. 1, pp. 62-66, 1979.</p>
       </v-flex>
+
     </v-container>
   </div>
 </template>
@@ -101,27 +81,29 @@
 import {} from 'vuex'
 import {JobMgr} from '@/modules/JobMgr.js'
 import {Auth} from '@/modules/Auth.js'
+import ImageUpload from './ImageUpload.vue'
 
 export default {
   name: 'Otsu',
+  components: {
+    ImageUpload
+  },
   data: () => {
     return ({
       title: 'Input Upload',
       msg: 'Binarization - Otsu Method',
       dialog: false,
-      fileName: '',
-      // file_type: [],
-      files: [],
-      filesDisplay: [],
       errorAlert: false,
       errorAlertMsg: '',
       loginRequired: false,
       loginRequiredMsg: '',
-      fileUploaded: false,
       successDlg: false,
-      jobId: ''
+      jobId: '',
+      files: [],
+      fileName: ''
     })
   },
+
   beforeMount: function () {
     let vm = this
     vm.auth = new Auth()
@@ -130,7 +112,14 @@ export default {
       vm.loginRequiredMsg = 'Login is required.'
     }
   },
+
   methods: {
+
+    setFiles: function (...files) {
+      this.files = files[0]; // the actual file object
+      this.fileName = files[1]; // the name of the file
+    },
+
     setLoading: function () {
       this.$store.commit('isLoading')
     },
@@ -139,46 +128,12 @@ export default {
       this.$store.commit('notLoading')
     },
 
-    pickFile () {
-      this.$refs.myUpload.click()
-    },
-
-    resetFiles: function () {
-      this.files = []
-      this.filesDisplay = []
-      this.fileUploaded = false
-    },
-
-    onFilePicked (e) {
-      this.resetFiles()
-      const files = e.target.files
-      for (let i = 0; i < files.length; i++) {
-        let file = {}
-        let f = files[i]
-        if (f !== undefined) {
-          file.fileName = f.name
-          if (file.fileName.lastIndexOf('.') <= 0) {
-            return
-          }
-          console.log(file.fileName)
-          const fr = new FileReader()
-          fr.readAsDataURL(f)
-          fr.addEventListener('load', () => {
-            file.fileUrl = fr.result
-            this.files.push(file)
-            this.filesDisplay.push(file)
-            this.fileUploaded = true
-          })
-        } else {
-          console.log('File Undefined')
-        }
-      }
-    },
     successDlgClicked: function () {
       let vm = this
       console.log('Success dlg button clicked')
       vm.$router.go(-2) // go back to mcr homepage page
     },
+
     submit: function () {
       let vm = this
       vm.files.forEach(function (v) {
@@ -225,13 +180,18 @@ export default {
     width: 240px;
   }
 
-  h4 {
-    text-transform: uppercase;
-  }
   h1 {
     margin-top: 10px;
     background-color: black;
     color: white;
+  }
+
+  h3 {
+    margin-bottom: 15px;
+  }
+  
+  p {
+    margin-left: 15px;
   }
 
 </style>

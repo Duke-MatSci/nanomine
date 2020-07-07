@@ -24,6 +24,7 @@ Vue.use(vPlayBack)
 Vue.use(VueGoogleCharts)
 
 Vue.config.productionTip = false
+Vue.config.devtools = true
 
 Vue.use(Vuex)
 Vue.use(Vuetify, {
