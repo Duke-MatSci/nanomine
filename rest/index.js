@@ -16,13 +16,6 @@ const bodyParser = require('body-parser')
 const mimetypes = require('mime-types')
 // was used for posting to rdf - const FormData = require('form-data')
 const config = require('config').get('nanomine')
-
-const {createLogger, format, transports} = require('winston')
-const { combine, label, printf, prettyPrint } = format
-const logFormat = printf(({level, message, label}) => {
-  let now = moment().format('YYYYMMDDHHmmssSSS')
-  return `${now} [${label}] ${level}: ${message}`
-})
 const hasha = require('hasha')
 const moment = require('moment')
 const datauri = require('data-uri-to-buffer')
@@ -50,6 +43,9 @@ const createDataset = nanomineUtils.createDataset
 const updateDataset = nanomineUtils.updateDataset
 const getLatestSchemas = nanomineUtils.getLatestSchemas
 const sortSchemas = nanomineUtils.sortSchemas
+
+/*** Import Centralized Error Reporting Module */
+const centralLogger = require('./middlewares/logger')
 /** Import for Chart Visualization */
 const chartRoutes = require('./routes/chartBackup')
 /** Import Rest Initializer */
@@ -71,7 +67,7 @@ const initialize = require('./rest-initializer')
 
 // const ObjectId = mongoose.Types.ObjectId
 
-let logger = configureLogger()
+let logger = centralLogger(config)
 logger.info('NanoMine REST server version ' + config.version + ' starting')
 
 // let datasetBucketName = nanomineUtils.datasetBucketName
@@ -204,7 +200,10 @@ app.use((req, res, next) => {
   next()
 })
 
-app.use('/chart', chartRoutes)
+app.use('/chart', (req, res, next) => {
+  req.logger = logger;
+  next();
+}, chartRoutes)
 
 app.use('/files', express.static(nmWebFilesRoot, {
   dotfiles: 'ignore',
@@ -3858,47 +3857,6 @@ function postSparql2 (callerpath, query, req, res, cb) {
 //     }
 //   })
 // })
-
-// function configureLogger () { // logger is not properly configured yet. This config is for an earlier version of Winston
-//   let logger = winston.createLogger({ // need to adjust to the new 3.x version - https://www.npmjs.com/package/winston#formats
-//     transports: [
-//       new (winston.transports.File)({
-//         levels: {error: 0, warn: 1, info: 2, verbose: 3, debug: 4, trace: 5},
-//         level: config.loglevel,
-//         timestamps: true,
-//         // zippedArchive: true,
-//         filename: config.logfilename,
-//         maxfiles: config.maxlogfiles,
-//         maxsize: config.maxlogfilesize,
-//         json: false,
-//         formatter: function (data) {
-//           let dt = moment().format('YYYYMMDDHHmmss')
-//           return (dt + ' ' + data.level + ' ' + data.message)
-//         }
-//       })
-//     ]
-//   })
-//   return logger
-// }
-function configureLogger () { // logger is not properly configured yet. This config is for an earlier version of Winston
-  let logger = createLogger({ // need to adjust to the new 3.x version - https://www.npmjs.com/package/winston#formats
-    levels: {error: 0, warn: 1, info: 2, verbose: 3, debug: 4, trace: 5},
-    format: combine(
-      label({label: 'nm-rest'}),
-      prettyPrint(),
-      logFormat
-    ),
-    transports: [
-      new (transports.File)({
-        level: config.loglevel,
-        filename: config.logfilename,
-        maxfiles: config.maxlogfiles,
-        maxsize: config.maxlogfilesize
-      })
-    ]
-  })
-  return logger
-}
 
 
 /** Re-write rule for starting rest-app should mongo connection fail => (06-19-2020) 
