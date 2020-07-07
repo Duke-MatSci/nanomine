@@ -87,7 +87,7 @@
                 coordinates: null,
                 stencil_props: {},
                 phase: {x_offset: 0, y_offset: 0},
-                phaseDotStyle = {top: "0px", left: "0px", backgroundColor: "transparent", border: "1px solid transparent"}
+                phaseDotStyle: {top: "0px", left: "0px", backgroundColor: "transparent", border: "1px solid transparent"}
             }
         },
         methods: {
