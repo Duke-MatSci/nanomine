@@ -179,8 +179,8 @@
                 
                 for (let i = 0; i < this.filesDisplay.length; i++) {
                     if (this.filesDisplay[i].phase.x_offset !== 0 || this.filesDisplay[i].phase.y_offset !== 0) {
-                        this.filesDisplay.phase.x_offset -= args[2].left;
-                        this.filesDisplay.phase.y_offset -= args[2].top
+                        this.filesDisplay[i].phase.x_offset -= args[2].left;
+                        this.filesDisplay[i].phase.y_offset -= args[2].top
                     }
                 }
 
