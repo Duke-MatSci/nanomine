@@ -88,17 +88,6 @@
                 }
             }
 
-            if (this.type === 'phase') {
-                this.phase = this.file.phase;
-            }
-
-            if (this.file.phase.x_offset > 0 || this.file.phase.y_offset > 0) {
-                this.phaseDotStyle.top = this.file.phase.x_offset + "px";
-                this.phaseDotStyle.left = this.file.phase.y_offset + "px";
-                this.phaseDotStyle.backgroundColor = "white";
-                this.phaseDotStyle.border = "1px solid black";
-            }
-
         },
         data() {
             return {
