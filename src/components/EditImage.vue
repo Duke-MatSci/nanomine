@@ -67,8 +67,8 @@
                         For the x offset, also need to account for the fact that div may be wider than image (image is centered in div) and the dot is centered to the div. Thus, need to add extra offset.
                         */
 
-                        this.phaseDotStyle.top = ((newValue.phase.y_offset * (this.$refs.phaseImage.$el.clientHeight / newValue.pixelSize.height)) - 3) + "px";
-                        this.phaseDotStyle.left = ((newValue.phase.x_offset * (this.$refs.phaseImage.$el.clientWidth / newValue.pixelSize.width)) + ((this.$refs.imageWrapperDiv.$el.clientWidth - this.$refs.phaseImage.$el.clientWidth) / 2) - 3) + "px";
+                        this.phaseDotStyle.top = ((newValue.phase.y_offset * (this.$refs.phaseImage.clientHeight / newValue.pixelSize.height)) - 3) + "px";
+                        this.phaseDotStyle.left = ((newValue.phase.x_offset * (this.$refs.phaseImage.clientWidth / newValue.pixelSize.width)) + ((this.$refs.imageWrapperDiv.clientWidth - this.$refs.phaseImage.clientWidth) / 2) - 3) + "px";
                         this.phaseDotStyle.backgroundColor = "white";
                         this.phaseDotStyle.border = "1px solid black";
 
