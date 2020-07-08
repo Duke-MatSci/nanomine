@@ -68,6 +68,7 @@
                         this.phaseDotStyle.backgroundColor = "transparent";
                         this.phaseDotStyle.border = "1px solid transparent"
                     }
+                    this.phase = newValue.phase;
                 }
             },
             type: {
