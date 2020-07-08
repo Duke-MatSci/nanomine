@@ -20,21 +20,21 @@ module.exports = {
             funcs.submitCurator(args.nmAuthSystemUserId) 
             .then(function () {
                 funcs.logger.info('successfully submitted curator job.')
-                console.log(msg) // for convenience
+                // console.log(msg) // for convenience
             })
             .catch(function (err) {
                 funcs.logger.error('submission of curator job failed. Error: ' + err)
-                console.log(msg)
+                // console.log(msg)
             })
             /** run the curator job (long running job) TODO: monitor generateSeoFiles */ 
             funcs.submitGenerateSeoFiles(args.nmAuthSystemUserId) 
             .then(function () {
                 funcs.logger.info('successfully submitted generate seo files job.')
-                console.log(msg) // for convenience
+                // console.log(msg) // for convenience
             })
             .catch(function (err) {
                 funcs.logger.error('submission of generate seo files job failed. Error: ' + err)
-                console.log(msg)
+                // console.log(msg)
             })
         })
     }
