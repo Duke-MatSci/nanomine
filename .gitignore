@@ -11,6 +11,7 @@ yarn-error.log*
 /test/unit/coverage/
 venv/
 analytics.log
+rest/analytics.log
 nanomine.log
 
 # Editor directories and files
