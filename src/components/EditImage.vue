@@ -23,8 +23,8 @@
 
             <p v-if='type === "phase"'><strong>Instructions:</strong> click on the phase within the image that you would like to be analyzed.</p>
 
-            <div class='phaseWrapper imageWrapper' v-if='type === "phase"'>
-                <img class='image' :src='file.fileUrl' @click='phaseImageClicked($event)'>     
+            <div class='phaseWrapper imageWrapper' v-if='type === "phase"' ref='imageWrapperDiv'>
+                <img class='image' :src='file.fileUrl' @click='phaseImageClicked($event)' ref='phaseImage'>     
                 <div class='phaseDot' v-bind:style="{ top: computedTop, left: computedLeft, backgroundColor: computedBackground, border: computedBorder}"></div>
             </div>
 
@@ -60,10 +60,18 @@
                 deep: true,
                 handler(newValue, oldValue) {
                     if (newValue.phase.x_offset > 0 || newValue.phase.y_offset > 0) {
-                        this.phaseDotStyle.top = newValue.phase.y_offset + "px";
-                        this.phaseDotStyle.left = newValue.phase.x_offset + "px";
+
+                        /* 
+                        Need to account for the fact that image may be scaled down/up while displaying, thus must scale the x and y offset
+                        -3 px is so that the dot appears centered over where they clicked
+                        For the x offset, also need to account for the fact that div may be wider than image (image is centered in div) and the dot is centered to the div. Thus, need to add extra offset.
+                        */
+
+                        this.phaseDotStyle.top = ((newValue.phase.y_offset * (this.$refs.phaseImage.clientHeight / newValue.pixelSize.height)) - 3) + "px";
+                        this.phaseDotStyle.left = ((newValue.phase.x_offset * (this.$refs.phaseImage.clientWidth / newValue.pixelSize.width)) + ((this.$refs.imageWrapperDiv.clientWidth - this.$refs.phaseImage.clientWidth) / 2) - 3) + "px";
                         this.phaseDotStyle.backgroundColor = "white";
                         this.phaseDotStyle.border = "1px solid black";
+                        
                     } else {
                         this.phaseDotStyle.backgroundColor = "transparent";
                         this.phaseDotStyle.border = "1px solid transparent"
@@ -106,9 +114,11 @@
                 // the stuff in the parenthesis is to account for the fact that the image may be scaled upon being displayed, thus we figure out the scale factor to get the correct offset
                 this.phase.x_offset = parseInt(e.offsetX * (this.file.pixelSize.width / e.path[0].clientWidth))
                 this.phase.y_offset = parseInt(e.offsetY * (this.file.pixelSize.height / e.path[0].clientHeight))
+                
 
-                this.phaseDotStyle.top = (e.offsetY - 4) + "px";
-                this.phaseDotStyle.left = (e.offsetX - 4) + "px";
+                // -3 px is to center the dot on wherever they clicked.
+                this.phaseDotStyle.top = (e.offsetY - 3) + "px"
+                this.phaseDotStyle.left = (((e.path[1].clientWidth - e.path[0].clientWidth) / 2) + e.offsetY - 3) + "px"; // account for the fact that div is wider than image and dot is anchored to div
                 this.phaseDotStyle.backgroundColor = "white";
                 this.phaseDotStyle.border = "1px solid black"
 
