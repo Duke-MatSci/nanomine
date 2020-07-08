@@ -175,7 +175,15 @@
             },
 
             // args: [cropped image, filename of cropped image, coordinates]
-            setCroppedImage: async function (...args) {    
+            setCroppedImage: async function (...args) {   
+                
+                for (let i = 0; i < this.filesDisplay.length; i++) {
+                    if (this.filesDisplay[i].phase.x_offset !== 0 || this.filesDisplay[i].phase.y_offset !== 0) {
+                        this.filesDisplay.phase.x_offset -= args[2].left;
+                        this.filesDisplay.phase.y_offset -= args[2].top
+                    }
+                }
+
                 for (let i = 0; i < this.filesDisplay.length; i++){
                     if (this.filesDisplay[i].fileName === args[1]){
 
@@ -231,7 +239,7 @@
                 console.log('applied crop to all images')
             },
 
-            updateImageDimensions (width, height) {
+            updateImageDimensions (width, height, top, left) {
                 
                 for (let i = 0; i < this.filesDisplay.length; i++){
                     this.filesDisplay[i].pixelSize.width = width;

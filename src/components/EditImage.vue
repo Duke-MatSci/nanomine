@@ -60,8 +60,8 @@
                 deep: true,
                 handler(newValue, oldValue) {
                     if (newValue.phase.x_offset > 0 || newValue.phase.y_offset > 0) {
-                        this.phaseDotStyle.top = newValue.phase.x_offset + "px";
-                        this.phaseDotStyle.left = newValue.phase.y_offset + "px";
+                        this.phaseDotStyle.top = newValue.phase.y_offset + "px";
+                        this.phaseDotStyle.left = newValue.phase.x_offset + "px";
                         this.phaseDotStyle.backgroundColor = "white";
                         this.phaseDotStyle.border = "1px solid black";
                     } else {
@@ -211,8 +211,8 @@
         flex-direction: row;
         justify-content: center;
         align-items: center;
-        margin-top: 25px;
-        margin-bottom: 25px;
+        margin-top: 20px;
+        margin-bottom: 20px;
     }
 
     .image-cropper-container-buttons p {
@@ -220,6 +220,9 @@
         font-weight: 700;
         margin-left: 8px;
         margin-right: 8px;
+        background-color: rgba(192, 192, 192, 0.5);
+        padding: 8px 12px;
+        border-radius: 2px;
     }
 
 </style>
