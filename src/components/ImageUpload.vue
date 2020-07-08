@@ -139,7 +139,6 @@
                 selectedOptions: {},
                 originalSize: {units: null, width: 0, height: 0},
                 originalPixelSize: {width: 0, height: 0},
-                isCropped: false,
                 dimensionsEntered: false,
                 editImageType: 'crop'
             }
@@ -296,8 +295,8 @@
                 }
 
                 // check for acceptable filetype
-                const accepted_types = ['jpg', 'jpeg', 'tif', 'png', 'mat', 'zip'];
-                const fileType = input_file.name.split('.').pop();
+                const accepted_types = ['jpg', 'jpeg', 'tif', 'tiff', 'png', 'mat', 'zip'];
+                const fileType = input_file.name.split('.').pop().toLowerCase();
                 vm.fileType = fileType;
                 if (accepted_types.includes(fileType) === false) {
                     return;
@@ -458,6 +457,7 @@
         flex-direction: row;
         justify-content: flex-start;
         flex-wrap: wrap;
+        width: 25%;
     }
 
     .imageTableButton {

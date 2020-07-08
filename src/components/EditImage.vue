@@ -17,14 +17,14 @@
 
             <h1>{{ computedTitle }}</h1>
 
-            <div class='cropper-wrapper' v-if='type === "crop"'>
+            <div class='imageWrapper' v-if='type === "crop"'>
                 <cropper :src='file.fileUrl' :stencil-props='stencil_props' @change='onChange'></cropper>
             </div>
 
             <p v-if='type === "phase"'><strong>Instructions:</strong> click on the phase within the image that you would like to be analyzed.</p>
 
-            <div class='phaseWrapper' v-if='type === "phase"'>
-                <img :src='file.fileUrl' @click='phaseImageClicked($event)'>     
+            <div class='phaseWrapper imageWrapper' v-if='type === "phase"'>
+                <img class='image' :src='file.fileUrl' @click='phaseImageClicked($event)'>     
                 <div class='phaseDot' v-bind:style="{ top: computedTop, left: computedLeft, backgroundColor: computedBackground, border: computedBorder}"></div>
             </div>
 
@@ -102,9 +102,10 @@
         },
         methods: {
             phaseImageClicked (e) {
-
-                this.phase.x_offset = e.offsetX;
-                this.phase.y_offset = e.offsetY;
+                
+                // the stuff in the parenthesis is to account for the fact that the image may be scaled upon being displayed, thus we figure out the scale factor to get the correct offset
+                this.phase.x_offset = parseInt(e.offsetX * (this.file.pixelSize.width / e.path[0].clientWidth))
+                this.phase.y_offset = parseInt(e.offsetY * (this.file.pixelSize.height / e.path[0].clientHeight))
 
                 this.phaseDotStyle.top = (e.offsetY - 4) + "px";
                 this.phaseDotStyle.left = (e.offsetX - 4) + "px";
@@ -177,8 +178,12 @@
         z-index: 1; /* ensures that the modal appears on top of other elements */
     }
 
-    .cropper-wrapper {
+    .imageWrapper {
         width: 90%;
+    }
+
+    .image {
+        max-width: 100%;
     }
 
     .phaseWrapper {
