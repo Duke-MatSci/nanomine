@@ -92,7 +92,7 @@
 
                 <p :key='file.pixelSize.width'><span v-if="dimensionsEntered" :key='file.size.height'>{{ file.size.width }} x {{ file.size.height }} {{ file.size.units }} / </span>{{ file.pixelSize.width }} x {{ file.pixelSize.height }} pixels</p>
 
-                <p v-if="file.phase.x_offset !== 0 || file.phase.y_offset !== 0">Manually set</p>
+                <p v-if="file.phase.x_offset !== 0 || file.phase.y_offset !== 0">Manually set (x-offset: {{ file.phase.x_offset }}px, y-offset: {{ file.phase.y_offset }}px)</p>
                 <p v-else>Preset (bright phase)</p>
 
                 <div class='imageTableButtons'>

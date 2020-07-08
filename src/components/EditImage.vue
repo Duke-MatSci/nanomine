@@ -15,10 +15,10 @@
     <div class='modal' v-if='value'>
         <div class='image-cropper-container'>
 
-            <h1>{{ title }}</h1>
+            <h1>{{ computedTitle }}</h1>
 
-            <div v-if='type === "crop"'>
-                <cropper :src='file.fileUrl' class='cropper-object' imageClassname='cropper-image' :stencil-props='stencil_props' @change='onChange'></cropper>
+            <div class='cropper-wrapper' v-if='type === "crop"'>
+                <cropper :src='file.fileUrl' :stencil-props='stencil_props' @change='onChange'></cropper>
             </div>
 
             <p v-if='type === "phase"'><strong>Instructions:</strong> click on the phase within the image that you would like to be analyzed.</p>
@@ -55,6 +55,29 @@
             type: String,
             aspectRatio: String
         },
+        watch: {
+            file: {
+                deep: true,
+                handler(newValue, oldValue) {
+                    if (newValue.phase.x_offset > 0 || newValue.phase.y_offset > 0) {
+                        this.phaseDotStyle.top = newValue.phase.x_offset + "px";
+                        this.phaseDotStyle.left = newValue.phase.y_offset + "px";
+                        this.phaseDotStyle.backgroundColor = "white";
+                        this.phaseDotStyle.border = "1px solid black";
+                    } else {
+                        this.phaseDotStyle.backgroundColor = "transparent";
+                        this.phaseDotStyle.border = "1px solid transparent"
+                    }
+                }
+            },
+            type: {
+                handler(newValue, oldValue) {
+                    if (newValue === 'phase') {
+                        this.phase = this.file.phase;
+                    }
+                }
+            }
+        },
         mounted() {
 
             if (this.aspectRatio === 'square') {
@@ -65,14 +88,11 @@
                 }
             }
 
-            if (this.type === 'crop') {
-                this.title = 'Crop image';
-            } else if (this.type === 'phase') {
-                this.title = 'Set phase';
+            if (this.type === 'phase') {
                 this.phase = this.file.phase;
             }
 
-            if (this.file.phase.x_offset !== 0 || this.files.phase.y_offset !== 0) {
+            if (this.file.phase.x_offset > 0 || this.file.phase.y_offset > 0) {
                 this.phaseDotStyle.top = this.file.phase.x_offset + "px";
                 this.phaseDotStyle.left = this.file.phase.y_offset + "px";
                 this.phaseDotStyle.backgroundColor = "white";
@@ -125,11 +145,18 @@
             computedLeft: function () {
                 return this.phaseDotStyle.left;
             },
-            computedBackgroundColor: function () {
+            computedBackground: function () {
                 return this.phaseDotStyle.backgroundColor;
             },
             computedBorder: function () {
                 return this.phaseDotStyle.border;
+            },
+            computedTitle: function () {
+                if (this.type === 'crop') {
+                    return 'Crop image';
+                } else if (this.type === 'phase') {
+                    return 'Set phase'
+                }
             }
         }
     }
@@ -160,6 +187,10 @@
         z-index: 1; /* ensures that the modal appears on top of other elements */
     }
 
+    .cropper-wrapper {
+        width: 90%;
+    }
+
     .phaseWrapper {
         position: relative;
     }
@@ -185,16 +216,20 @@
         border-radius: 8px;
     }
 
-    .cropper-object {
-        width: 90%;
-    }
-
     .image-cropper-container-buttons {
         display: flex;
         flex-direction: row;
         justify-content: center;
+        align-items: center;
         margin-top: 25px;
         margin-bottom: 25px;
+    }
+
+    .image-cropper-container-buttons p {
+        margin-bottom: 0px;
+        font-weight: 700;
+        margin-left: 8px;
+        margin-right: 8px;
     }
 
 </style>
