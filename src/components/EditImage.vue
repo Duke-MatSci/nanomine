@@ -59,7 +59,9 @@
             file: {
                 deep: true,
                 handler(newValue, oldValue) {
-                    this.phaseDotVisibility = false
+                    if (newValue.fileName !== oldValue.fileName) {
+                        this.phaseDotVisibility = false
+                    }
                     this.phase = newValue.phase;
                 }
             },
