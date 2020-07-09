@@ -161,7 +161,7 @@
                         this.updateImageDimensions(this.filesDisplay[0].pixelSize.width, this.filesDisplay[0].pixelSize.height);
                     }
 
-                    this.selectionOptions['dimensions'] = this.originalSize;
+                    this.selectedOptions['dimensions'] = this.originalSize;
                     this.$emit('setSelectors', this.selectedOptions);
 
                 }
@@ -175,8 +175,13 @@
 
                         this.filesDisplay[i].phase = args[1];
                         this.filesDisplay[i].fileName = this.filesDisplay[i].fileName + " "; // force rerender
-                        
-                        this.selectedOptions['phase'][this.filesDisplay[i].originalFileName] = args[1];
+
+                        if ('phase' in this.selectedOptions) {
+                            this.selectedOptions['phase'][this.filesDisplay[i].originalFileName] = args[1];
+                        } else {
+                            var key = this.filesDisplay[i].originalFileName;
+                            this.selectedOptions['phase'] = {key: args[1]};
+                        }
                         this.$emit('setSelectors', this.selectedOptions);
 
                         break;
