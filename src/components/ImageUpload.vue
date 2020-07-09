@@ -155,20 +155,32 @@
             imageDimensionPicked: function () {
 
                 if (this.originalSize.units !== null && parseInt(this.originalSize.width) > 0 && parseInt(this.originalSize.height) > 0) {
+    
                     this.dimensionsEntered = true;
                     if (this.filesDisplay.length > 0) {
                         this.updateImageDimensions(this.filesDisplay[0].pixelSize.width, this.filesDisplay[0].pixelSize.height);
                     }
+
+                    this.selectionOptions['dimensions'] = this.originalSize;
+                    this.$emit('setSelectors', this.selectedOptions);
+
                 }
 
             },
-
+            
+            // args: [fileName, phase]
             setPhase: function (...args) {
                 for (let i = 0; i < this.filesDisplay.length; i++) {
                     if (this.filesDisplay[i].fileName === args[0]) {
+
                         this.filesDisplay[i].phase = args[1];
                         this.filesDisplay[i].fileName = this.filesDisplay[i].fileName + " "; // force rerender
-                        return;
+                        
+                        this.selectedOptions['phase'][this.filesDisplay[i].originalFileName] = args[1];
+                        this.$emit('setSelectors', this.selectedOptions);
+
+                        break;
+
                     }
                 }
             },
@@ -310,13 +322,13 @@
                     file.fileUrl = fr.result;
                     file.size = {width: 0, height: 0, units: null};
                     file.pixelSize = {width: 0, height: 0};
-                    file.phase = {x_offset: 0, y_offset: 0};
 
                     vm.files.push(file);
                     vm.filesUploaded = true;
 
                     if (fileType !== 'zip'){
                         vm.filesDisplay.push(file);
+                        vm.filesDisplay[0].originalFileName = file.fileName
                     }
 
                     if (fileType !== 'zip' && fileType !== 'mat'){
@@ -366,7 +378,7 @@
                         var base64 = 'data:image/' + filetype + ';base64,' + window.btoa(binary);
 
                         // push to filesDisplay variable
-                        var single_file = {fileName: filename, fileUrl: base64};
+                        var single_file = {fileName: filename, fileUrl: base64, originalFileName: filename};
                         single_file.size = {width: 0, height: 0, units: null};
                         single_file.pixelSize = {width: 0, height: 0};
                         single_file.phase = {x_offset: 0, y_offset: 0};
@@ -387,7 +399,7 @@
                 
                 // add images to zip file
                 for(let i = 0; i < this.filesDisplay.length; i++){
-                    jszip_obj.file(this.filesDisplay[i].fileName, this.filesDisplay[i].fileUrl.split(',').pop(), {base64: true});
+                    jszip_obj.file(this.filesDisplay[i].originalFileName, this.filesDisplay[i].fileUrl.split(',').pop(), {base64: true});
                 }
                 
                 // create zip file
