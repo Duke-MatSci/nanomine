@@ -59,23 +59,8 @@
             file: {
                 deep: true,
                 handler(newValue, oldValue) {
-                    if (newValue.phase.x_offset > 0 || newValue.phase.y_offset > 0) {
-
-                        /* 
-                        Need to account for the fact that image may be scaled down/up while displaying, thus must scale the x and y offset
-                        -3 px is so that the dot appears centered over where they clicked
-                        For the x offset, also need to account for the fact that div may be wider than image (image is centered in div) and the dot is centered to the div. Thus, need to add extra offset.
-                        */
-
-                        this.phaseDotStyle.top = ((newValue.phase.y_offset * (this.$refs.phaseImage.clientHeight / newValue.pixelSize.height)) - 3) + "px";
-                        this.phaseDotStyle.left = ((newValue.phase.x_offset * (this.$refs.phaseImage.clientWidth / newValue.pixelSize.width)) + ((this.$refs.imageWrapperDiv.clientWidth - this.$refs.phaseImage.clientWidth) / 2) - 3) + "px";
-                        this.phaseDotStyle.backgroundColor = "white";
-                        this.phaseDotStyle.border = "1px solid black";
-
-                    } else {
-                        this.phaseDotStyle.backgroundColor = "transparent";
-                        this.phaseDotStyle.border = "1px solid transparent"
-                    }
+                    if (newValue.phase.x_offset > 0 || newValue.phase.y_offset > 0) { this.phaseDotVisibility = true; } 
+                    else { this.phaseDotVisibility = false; }
                     this.phase = newValue.phase;
                 }
             },
@@ -105,7 +90,7 @@
                 coordinates: null,
                 stencil_props: {},
                 phase: {x_offset: 0, y_offset: 0},
-                phaseDotStyle: {top: "0px", left: "0px", backgroundColor: "transparent", border: "1px solid transparent"}
+                phaseDotVisibility: false
             }
         },
         methods: {
@@ -115,12 +100,7 @@
                 this.phase.x_offset = parseInt(e.offsetX * (this.file.pixelSize.width / e.path[0].clientWidth))
                 this.phase.y_offset = parseInt(e.offsetY * (this.file.pixelSize.height / e.path[0].clientHeight))
                 
-
-                // -3 px is to center the dot on wherever they clicked.
-                this.phaseDotStyle.top = (e.offsetY - 3) + "px"
-                this.phaseDotStyle.left = (((e.path[1].clientWidth - e.path[0].clientWidth) / 2) + e.offsetY - 3) + "px"; // account for the fact that div is wider than image and dot is anchored to div
-                this.phaseDotStyle.backgroundColor = "white";
-                this.phaseDotStyle.border = "1px solid black"
+                this.phaseDotVisibility = true;
 
             },
             onChange ({ coordinates, canvas}) {
@@ -141,16 +121,27 @@
         },
         computed: {
             computedTop: function () {
-                return this.phaseDotStyle.top;
+                var scaleFactor = this.$refs.phaseImage.clientHeight / this.file.pixelSize.height // image might be scaled up/down to fit the modal.
+                return ((this.phase.y_offset * scaleFactor) - 3) + "px"; // -3 pixels to center dot on where they click
             },
             computedLeft: function () {
-                return this.phaseDotStyle.left;
+                var scaleFactor = this.$refs.phaseImage.clientWidth / this.file.pixelSize.width; // image might be scaled up/down to fit the modal.
+                var extraOffset = (this.$refs.imageWrapperDiv.clientWidth - this.$refs.phaseImage.clientWidth) / 2 // phase dot is anchored to the div that contains img. Div width may be larger than img width.
+                return ((this.phase.x_offset * scaleFactor) + extraOffset - 3)  + "px"; // -3 pixels to center dot on where they click
             },
             computedBackground: function () {
-                return this.phaseDotStyle.backgroundColor;
+                if (this.phaseDotVisibility === true) {
+                    return "white";
+                } else {
+                    return "transparent";
+                }
             },
             computedBorder: function () {
-                return this.phaseDotStyle.border;
+                if (this.phaseDotVisibility === true) {
+                    return "1px solid black";
+                } else {
+                    return "1px solid transparent";
+                }
             },
             computedTitle: function () {
                 if (this.type === 'crop') {
