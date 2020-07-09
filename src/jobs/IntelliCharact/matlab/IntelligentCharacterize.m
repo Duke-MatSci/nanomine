@@ -46,7 +46,7 @@ try
     % Otsu binarize
 
     try
-        if str2double(input_type) ~= 2
+        if str2num(input_type) ~= 2
             if length(size(img)) > 2
                 img = img(:,:,1);
             end
