@@ -14,12 +14,14 @@
 <template>
 
     <v-flex xs12 class="text-xs-center text-sm-center text-md-center text-lg-center">
-
+        
+        <!-- file upload button -->
         <p class="text-xs-left fileButtonWrapper">
             <v-btn class="text-xs-left fileButton" color="primary" @click='pickFile'>Browse files</v-btn>
             <input type="file" style="display: none" accept=".jpg, .png, .tif, .mat, .zip" ref="myUpload" @change="onFilePicked">
         </p>
 
+        <!-- image dimension input section -->
         <div v-if="fileUploaded && collectDimensions">
 
             <h4>Image Dimensions</h4>
@@ -49,6 +51,7 @@
 
         </div>
         
+        <!-- parameters that are specific to job type -->
         <div v-if="fileUploaded && selects.length > 0">
 
             <h4>Parameters</h4>
@@ -77,6 +80,7 @@
             v-on:setPhase="setPhase"
         ></EditImage>
 
+        <!-- table of uploaded images -->
         <div v-if="fileUploaded" class='imageTable'>
 
             <div class='imageTableHeader'>
@@ -145,13 +149,15 @@
         },
 
         methods: {
-
+            
+            // opens image editor modal and passes information for specific image that is opened
             openImageEditor: function (index, type) {
                 this.editImageType = type;
                 this.imageEditorData = this.filesDisplay[index];
                 this.imageEditorOpen = !this.imageEditorOpen; // toggle the image editor modal being open and closed
             },
 
+            // callback function for when the user inputs image dimensions. sets 'dimensionsEntered' to true once all parameters have been entered
             imageDimensionPicked: function () {
 
                 if (this.originalSize.units !== null && parseInt(this.originalSize.width) > 0 && parseInt(this.originalSize.height) > 0) {
@@ -169,6 +175,7 @@
 
             },
             
+            // callback function for when user saves changes to phase in image editor modal
             // args: [fileName, phase]
             setPhase: function (...args) {
                 for (let i = 0; i < this.filesDisplay.length; i++) {
@@ -191,10 +198,12 @@
                     }
                 }
             },
-
+            
+            // callback function to save new image upon cropping in image editor modal
             // args: [cropped image, filename of cropped image, coordinates]
             setCroppedImage: async function (...args) {   
                 
+                // update the phase offset given the new top and left of the image
                 for (let i = 0; i < this.filesDisplay.length; i++) {
                     if (this.filesDisplay[i].phase.x_offset !== 0 || this.filesDisplay[i].phase.y_offset !== 0) {
                         this.filesDisplay[i].phase.x_offset -= args[2].left;
@@ -208,7 +217,7 @@
                         this.filesDisplay[i].fileUrl = args[0];
                         this.filesDisplay[i].fileName = "cropped_" + this.filesDisplay[i].fileName; // to ensure that the list of images reloads since they are binded to filenames.
                         
-                        await this.updateImageDimensions(args[2].width, args[2].height)
+                        await this.updateImageDimensions(args[2].width, args[2].height) // update displayed image dimensions
 
                         if (this.fileType == 'zip'){
                             await this.cropAllImages(args[2], "cropped_" + args[1] + " ")
@@ -223,7 +232,8 @@
                     }
                 }
             },
-            
+
+            // applicable when user uploads zip files, since they have multiple images. apply crop from one image to others to preserve the same size on each image
             async cropAllImages (coordinates, fileName) {
 
                 let vm = this;
@@ -256,7 +266,8 @@
 
                 console.log('applied crop to all images')
             },
-
+            
+            // update displayed image dimensions
             updateImageDimensions (width, height, top, left) {
                 
                 for (let i = 0; i < this.filesDisplay.length; i++){
@@ -277,6 +288,7 @@
 
             },
 
+            // called when user uploads an image from computer. gets image dimensions
             getImageDimensions () {
                 
                 let vm = this;
@@ -291,15 +303,24 @@
 
             pickFile () {
                 this.$refs.myUpload.click()
-            },
+            }, 
 
+            // delete old information when new files are uploaded
             resetFiles: function () {
-                this.files = []
-                this.filesDisplay = []
-                this.fileUploaded = false
-                this.$emit('setFiles', this.files, this.fileName)
+
+                this.files = [];
+                this.filesDisplay = [];
+                this.fileUploaded = false;
+                this.$emit('setFiles', this.files, this.fileName);
+
+                if ('phase' in this.selectedOptions) {
+                    delete this.selectedOptions.phase;
+                    this.$emit('setSelectors', this.selectedOptions)
+                }
+
             },
 
+            // callback function to upload file information after user chooses a file to upload
             onFilePicked (e) {
                 
                 let vm = this;
@@ -311,14 +332,6 @@
                 if (input_file !== undefined) {
                     file.fileName = input_file.name;
                     vm.fileName = input_file.name;
-                }
-
-                // check for acceptable filetype
-                const accepted_types = ['jpg', 'jpeg', 'tif', 'tiff', 'png', 'mat', 'zip'];
-                const fileType = input_file.name.split('.').pop().toLowerCase();
-                vm.fileType = fileType;
-                if (accepted_types.includes(fileType) === false) {
-                    return;
                 }
 
                 // extract data from uploaded file
@@ -351,8 +364,9 @@
                 vm.fileUploaded = true;
                 vm.$emit('setFiles', [file], file.fileName)
 
-            },
+            },  
 
+            // unzip contents of zip files upon upload
             unzipFiles (input_file) {
 
                 const vm = this;
@@ -394,12 +408,21 @@
 
                     }
 
+                    // check for acceptable filetype
+                    // const accepted_types = ['jpg', 'jpeg', 'tif', 'tiff'];
+                    // for (let i = 0; i < vm.filesDisplay.length; i++) {
+                    //     if (accepted_types.includes(filesDisplay[i].fileName.split('.').pop()) === false) {
+                    //         // do something
+                    //     }
+                    // }
+
                     vm.getImageDimensions();
                     console.log('finished extracting images');
 
                 });
             },
 
+            // rezip images when images are altered and emit that back parent component
             async rezipFiles () {
                 let jszip_obj = new jszip();
                 let vm = this;

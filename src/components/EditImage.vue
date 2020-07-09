@@ -17,20 +17,23 @@
 
             <h1>{{ computedTitle }}</h1>
 
+            <!-- displayed when user opens image cropper -->
             <div class='imageWrapper' v-if='type === "crop"'>
                 <cropper :src='file.fileUrl' :stencil-props='stencil_props' @change='onChange'></cropper>
             </div>
 
+            <!-- displayed when user opens phase select  -->
             <p v-if='type === "phase"'><strong>Instructions:</strong> click on the phase within the image that you would like to be analyzed.</p>
 
+            <!-- displayed when user opens phase select  -->
             <div class='phaseWrapper imageWrapper' v-if='type === "phase"' ref='imageWrapperDiv'>
                 <img class='image' :src='file.fileUrl' @click='phaseImageClicked($event)' ref='phaseImage'>     
                 <div class='phaseDot' v-bind:style="{ top: computedTop, left: computedLeft, backgroundColor: computedBackground, border: computedBorder}"></div>
             </div>
 
             <div class='image-cropper-container-buttons'>
-                <p v-if='type === "phase"'>x-offset: {{ phase.x_offset }}</p>
-                <p v-if='type === "phase"'> y-offset: {{ phase.y_offset }}</p>
+                <p v-if='type === "phase"'>x-offset: {{ phase.x_offset }}</p> <!-- only displayed when user opens phase select -->
+                <p v-if='type === "phase"'> y-offset: {{ phase.y_offset }}</p> <!-- only displayed when user opens phase select -->
                 <v-btn color="primary" v-on:click='closeModal()'>Cancel</v-btn>
                 <v-btn color="primary" v-on:click='saveImage()'>Save</v-btn>
             </div>
@@ -56,6 +59,8 @@
             aspectRatio: String
         },
         watch: {
+
+            // update phase dot information when new image is opened in modal
             file: {
                 deep: true,
                 handler(newValue, oldValue) {
@@ -65,16 +70,11 @@
                     this.phase = newValue.phase;
                 }
             },
-            type: {
-                handler(newValue, oldValue) {
-                    if (newValue === 'phase') {
-                        this.phase = this.file.phase;
-                    }
-                }
-            }
+
         },
         mounted() {
-
+            
+            // locks the aspect ratio at which the user can crop an image
             if (this.aspectRatio === 'square') {
                 this.stencil_props.aspectRatio = 1;
             } else if (this.aspectRatio === 'free') {
@@ -120,18 +120,29 @@
                 this.closeModal()
             }
         },
+
+        // computed variables are for the phase dot (to determine position and toggle visibility) and modal title
         computed: {
+
+            // phase dot position is calculated from the offset from the top left corner of its parent div
+
+            // gives the y offset of the phase dot
             computedTop: function () {
                 if (this.$refs.phaseImage === undefined) { return this.phase.y_offset * 0  } // refs are not yet rendered on first run
                 var scaleFactor = this.$refs.phaseImage.clientHeight / this.file.pixelSize.height // image might be scaled up/down to fit the modal.
                 return ((this.phase.y_offset * scaleFactor) - 3) + "px"; // -3 pixels to center dot on where they click
             },
+
+            // gives the x offset of the phase dot
             computedLeft: function () {
                 if (this.$refs.phaseImage === undefined) { return this.phase.x_offset * 0 } // refs are not yet rendered on first run
                 var scaleFactor = this.$refs.phaseImage.clientWidth / this.file.pixelSize.width; // image might be scaled up/down to fit the modal.
                 var extraOffset = (this.$refs.imageWrapperDiv.clientWidth - this.$refs.phaseImage.clientWidth) / 2 // phase dot is anchored to the div that contains img. Div width may be larger than img width.
                 return ((this.phase.x_offset * scaleFactor) + extraOffset - 3)  + "px"; // -3 pixels to center dot on where they click
             },
+
+            // computed background and computed border determine whether phase dot is displayed 
+
             computedBackground: function () {
                 if (this.phaseDotVisibility === true) {
                     return "white";
@@ -146,6 +157,8 @@
                     return "1px solid transparent";
                 }
             },
+
+            // determines the title of the modal
             computedTitle: function () {
                 if (this.type === 'crop') {
                     return 'Crop image';

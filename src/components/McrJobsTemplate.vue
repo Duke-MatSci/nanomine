@@ -189,7 +189,7 @@
                 console.log('Called Job Manager for ' + vm.job.submit.submitJobTitle)
                 jm.setJobType(vm.job.submit.submitJobTitle)
 
-                var jobParameters = {'InputType': vm.fileName.split('.').pop()}; // Figure out which input type
+                var jobParameters = {'InputType': vm.fileName.split('.').pop()}; // Figure out which file type
                 for (var key in vm.selectedOptions) {
                     jobParameters[key] = vm.selectedOptions[key]
                 }
