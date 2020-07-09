@@ -74,6 +74,8 @@
         },
         mounted() {
 
+            this.isMounted = true;
+
             if (this.aspectRatio === 'square') {
                 this.stencil_props.aspectRatio = 1;
             } else if (this.aspectRatio === 'free') {
@@ -90,7 +92,8 @@
                 coordinates: null,
                 stencil_props: {},
                 phase: {x_offset: 0, y_offset: 0},
-                phaseDotVisibility: false
+                phaseDotVisibility: false,
+                isMounted: false
             }
         },
         methods: {
@@ -121,10 +124,12 @@
         },
         computed: {
             computedTop: function () {
+                if (this.isMounted === false) { return this.phase.y_offset } // refs are not yet rendered on first run
                 var scaleFactor = this.$refs.phaseImage.clientHeight / this.file.pixelSize.height // image might be scaled up/down to fit the modal.
                 return ((this.phase.y_offset * scaleFactor) - 3) + "px"; // -3 pixels to center dot on where they click
             },
             computedLeft: function () {
+                if (this.isMounted === false) { return this.phase.x_offset } // refs are not yet rendered on first run
                 var scaleFactor = this.$refs.phaseImage.clientWidth / this.file.pixelSize.width; // image might be scaled up/down to fit the modal.
                 var extraOffset = (this.$refs.imageWrapperDiv.clientWidth - this.$refs.phaseImage.clientWidth) / 2 // phase dot is anchored to the div that contains img. Div width may be larger than img width.
                 return ((this.phase.x_offset * scaleFactor) + extraOffset - 3)  + "px"; // -3 pixels to center dot on where they click
