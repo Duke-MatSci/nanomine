@@ -59,9 +59,12 @@
             file: {
                 deep: true,
                 handler(newValue, oldValue) {
+
                     if (newValue.phase.x_offset > 0 || newValue.phase.y_offset > 0) { this.phaseDotVisibility = true; } 
                     else { this.phaseDotVisibility = false; }
+
                     this.phase = newValue.phase;
+
                 }
             },
             type: {
@@ -121,12 +124,12 @@
         },
         computed: {
             computedTop: function () {
-                if (this.$refs.phaseImage === undefined) { return 0 } // refs are not yet rendered on first run
+                if (this.$refs.phaseImage === undefined) { return this.phase.y_offset * 0  } // refs are not yet rendered on first run
                 var scaleFactor = this.$refs.phaseImage.clientHeight / this.file.pixelSize.height // image might be scaled up/down to fit the modal.
                 return ((this.phase.y_offset * scaleFactor) - 3) + "px"; // -3 pixels to center dot on where they click
             },
             computedLeft: function () {
-                if (this.$refs.phaseImage === undefined) { return 0 } // refs are not yet rendered on first run
+                if (this.$refs.phaseImage === undefined) { return this.phase.x_offset * 0 } // refs are not yet rendered on first run
                 var scaleFactor = this.$refs.phaseImage.clientWidth / this.file.pixelSize.width; // image might be scaled up/down to fit the modal.
                 var extraOffset = (this.$refs.imageWrapperDiv.clientWidth - this.$refs.phaseImage.clientWidth) / 2 // phase dot is anchored to the div that contains img. Div width may be larger than img width.
                 return ((this.phase.x_offset * scaleFactor) + extraOffset - 3)  + "px"; // -3 pixels to center dot on where they click
