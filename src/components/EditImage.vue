@@ -59,12 +59,8 @@
             file: {
                 deep: true,
                 handler(newValue, oldValue) {
-
-                    if (newValue.phase.x_offset > 0 || newValue.phase.y_offset > 0) { this.phaseDotVisibility = true; } 
-                    else { this.phaseDotVisibility = false; }
-
+                    this.phaseDotVisibility = false
                     this.phase = newValue.phase;
-
                 }
             },
             type: {
