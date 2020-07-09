@@ -182,10 +182,12 @@
 
     .imageWrapper {
         width: 90%;
+        height: 75%;
     }
 
     .image {
         max-width: 100%;
+        max-height: 100%;
     }
 
     .phaseWrapper {
