@@ -328,11 +328,14 @@
                 const input_file = e.target.files[0];
                 let file = {};
 
-                // set filename
-                if (input_file !== undefined) {
-                    file.fileName = input_file.name;
-                    vm.fileName = input_file.name;
+                if (input_file === undefined) {
+                    return;
                 }
+
+                // set filename
+                file.fileName = input_file.name;
+                vm.fileName = input_file.name;
+                var fileType = input_file.name.split('.').pop().toLowerCase();
 
                 // extract data from uploaded file
                 const fr = new FileReader();
