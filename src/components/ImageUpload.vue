@@ -17,7 +17,7 @@
         
         <!-- file upload button -->
         <p class="text-xs-left fileButtonWrapper">
-            <v-btn class="text-xs-left fileButton" color="primary" @click='pickFile'>Browse files</v-btn>
+            <v-btn class="text-xs-left fileButton" color="primary" @click='$refs.myUpload.click()'>Browse files</v-btn>
             <input type="file" style="display: none" accept=".jpg, .png, .tif, .mat, .zip" ref="myUpload" @change="onFilePicked">
         </p>
 
@@ -70,7 +70,7 @@
 
         </div>
 
-        <!-- Image Cropper Modal -->
+        <!-- image cropper & phase selection modal -->
         <EditImage 
             v-model='imageEditorOpen' 
             v-bind:file='imageEditorData' 
@@ -79,6 +79,8 @@
             v-on:setCroppedImage="setCroppedImage"
             v-on:setPhase="setPhase"
         ></EditImage>
+
+        <v-alert type='error' dismissible v-model="errorAlert.display">{{ errorAlert.text }}</v-alert>
 
         <!-- table of uploaded images -->
         <div v-if="fileUploaded" class='imageTable'>
@@ -99,7 +101,7 @@
                 <p v-if="file.phase.x_offset !== 0 || file.phase.y_offset !== 0">Manually set (x-offset: {{ file.phase.x_offset }}px, y-offset: {{ file.phase.y_offset }}px)</p>
                 <p v-else>Preset (bright phase)</p>
 
-                <div class='imageTableButtons'>
+                <div class='imageTableButtons' v-if="filesEditable">
                     <v-btn small class='imageTableButton' :key='index' v-on:click="openImageEditor(index, 'crop')" color="primary">Crop image</v-btn>
                     <v-btn small class='imageTableButton' :key='index' v-on:click="openImageEditor(index, 'phase')" color="primary">Set phase</v-btn>
                 </div>
@@ -144,7 +146,9 @@
                 originalSize: {units: null, width: 0, height: 0},
                 originalPixelSize: {width: 0, height: 0},
                 dimensionsEntered: false,
-                editImageType: 'crop'
+                editImageType: 'crop',
+                errorAlert: {display: false, text: ''},
+                filesEditable: true
             }
         },
 
@@ -196,41 +200,43 @@
                         break;
 
                     }
-                }
+                }                
             },
             
             // callback function to save new image upon cropping in image editor modal
             // args: [cropped image, filename of cropped image, coordinates]
             setCroppedImage: async function (...args) {   
-                
-                // update the phase offset given the new top and left of the image
-                for (let i = 0; i < this.filesDisplay.length; i++) {
-                    if (this.filesDisplay[i].phase.x_offset !== 0 || this.filesDisplay[i].phase.y_offset !== 0) {
-                        this.filesDisplay[i].phase.x_offset -= args[2].left;
-                        this.filesDisplay[i].phase.y_offset -= args[2].top
-                    }
-                }
 
                 for (let i = 0; i < this.filesDisplay.length; i++){
+
+                    // update the phase offset given the new top and left of the image
+                    if (this.filesDisplay[i].phase.x_offset !== 0 || this.filesDisplay[i].phase.y_offset !== 0) {
+                        this.filesDisplay[i].phase.x_offset -= args[2].left;
+                        this.filesDisplay[i].phase.y_offset -= args[2].top;
+                    }
+
                     if (this.filesDisplay[i].fileName === args[1]){
 
                         this.filesDisplay[i].fileUrl = args[0];
                         this.filesDisplay[i].fileName = "cropped_" + this.filesDisplay[i].fileName; // to ensure that the list of images reloads since they are binded to filenames.
                         
-                        await this.updateImageDimensions(args[2].width, args[2].height) // update displayed image dimensions
+                        await this.updateImageDimensions(args[2].width, args[2].height); // update displayed image dimensions
 
                         if (this.fileType == 'zip'){
-                            await this.cropAllImages(args[2], "cropped_" + args[1] + " ")
-                            this.rezipFiles()
+                            await this.cropAllImages(args[2], "cropped_" + args[1] + " ");
+                            this.rezipFiles();
                         } else {
                             this.files[0].fileUrl = args[0];
-                            this.$emit('setFiles', this.files, this.fileName)
+                            this.$emit('setFiles', this.files, this.fileName);
                         }
 
-                        console.log('image succesfully cropped.')
+                        console.log('image succesfully cropped.');
                         return;
                     }
                 }
+
+                this.validatePhase();
+
             },
 
             // applicable when user uploads zip files, since they have multiple images. apply crop from one image to others to preserve the same size on each image
@@ -266,11 +272,29 @@
 
                 console.log('applied crop to all images')
             },
+
+            // check that selected phase is still within the image -- phase can fall outside the image if user crops after setting phase.
+            validatePhase () {
+                
+                let vm = this;
+
+                for (let i = 0; i < vm.filesDisplay.length; i++) {
+                    if (vm.filesDisplay[i].phase.x_offset < 0 || vm.filesDisplay[i].phase.y_offset < 0) {
+                        this.errorAlert.display = true;
+                        this.errorAlert.text = 'Error: selected phase for ' + vm.filesDisplay[i].fileName + ' has negative values. This is likely due to cropping the image after setting the phase.'
+                    } else if (vm.filesDisplay[i].phase.x_offset > vm.filesDisplay[i].pixelSize.width || vm.filesDisplay[i].phase.y_offset > vm.filesDisplay[i].pixelSize.height) {
+                        this.errorAlert.display = true;
+                        this.errorAlert.text = 'Error: selected phase for ' + vm.filesDisplay[i].fileName + ' is outside the image. This is likely due to cropping the image after setting the phase.';
+                    }
+                }
+
+            },
             
             // update displayed image dimensions
             updateImageDimensions (width, height, top, left) {
                 
                 for (let i = 0; i < this.filesDisplay.length; i++){
+
                     this.filesDisplay[i].pixelSize.width = width;
                     this.filesDisplay[i].pixelSize.height = height;
 
@@ -301,10 +325,6 @@
 
             },
 
-            pickFile () {
-                this.$refs.myUpload.click()
-            }, 
-
             // delete old information when new files are uploaded
             resetFiles: function () {
 
@@ -332,8 +352,7 @@
                     return;
                 }
 
-                // set filename
-                file.fileName = input_file.name;
+                // set filename and type
                 vm.fileName = input_file.name;
                 var fileType = input_file.name.split('.').pop().toLowerCase();
 
@@ -342,13 +361,28 @@
                 fr.readAsDataURL(input_file);
                 fr.addEventListener('load', () => {
 
-                    file.fileUrl = fr.result;
-                    file.size = {width: 0, height: 0, units: null};
-                    file.pixelSize = {width: 0, height: 0};
-                    file.phase = {x_offset: 0, y_offset: 0};
-
+                    var file = {
+                        fileName: input_file.name,
+                        fileUrl: fr.result,
+                        size: {
+                            width: 0,
+                            height: 0,
+                            units: null
+                        },
+                        pixelSize: {
+                            width: 0,
+                            height: 0
+                        },
+                        phase: {
+                            x_offset: 0,
+                            y_offset: 0
+                        }
+                    }
                     vm.files.push(file);
-                    vm.filesUploaded = true;
+
+                    if (fileType === 'mat' || fileType === 'tif') {
+                        vm.filesEditable = false;
+                    }
 
                     if (fileType !== 'zip'){
                         vm.filesDisplay.push(file);
@@ -380,7 +414,6 @@
                 jszip_obj.loadAsync(input_file)
                 .then(async function(zip) {
 
-                    let count = 0
                     for (var key in zip.files){
 
                         // get file data
@@ -403,12 +436,29 @@
                         var base64 = 'data:image/' + filetype + ';base64,' + window.btoa(binary);
 
                         // push to filesDisplay variable
-                        var single_file = {fileName: filename, fileUrl: base64, originalFileName: filename};
-                        single_file.size = {width: 0, height: 0, units: null};
-                        single_file.pixelSize = {width: 0, height: 0};
-                        single_file.phase = {x_offset: 0, y_offset: 0};
-                        vm.filesDisplay.push(single_file);      
-                        count += 1;
+                        var single_file = {
+                            fileName: filename, 
+                            fileUrl: base64, 
+                            originalFileName: filename,
+                            size: {
+                                width: 0,
+                                height: 0,
+                                units: null
+                            },
+                            pixelSize: {
+                                width: 0,
+                                height: 0
+                            },
+                            phase: {
+                                x_offset: 0,
+                                y_offset: 0
+                            }
+                        }
+                        vm.filesDisplay.push(single_file);    
+                        
+                        if (filetype === 'tif') {
+                            vm.filesEditable = false;
+                        }
 
                     }
 
@@ -432,8 +482,10 @@
                 let vm = this;
                 
                 // add images to zip file
-                for(let i = 0; i < this.filesDisplay.length; i++){
+                for(let i = 0; i < vm.filesDisplay.length; i++){
+
                     jszip_obj.file(this.filesDisplay[i].originalFileName, this.filesDisplay[i].fileUrl.split(',').pop(), {base64: true});
+
                 }
                 
                 // create zip file
