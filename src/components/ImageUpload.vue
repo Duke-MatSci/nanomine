@@ -400,7 +400,7 @@
                 }
 
                 vm.fileUploaded = true;
-                vm.$emit('setFiles', [file], vm.fileName)
+                vm.$emit('setFiles', vm.files, vm.fileName)
 
             },  
 
