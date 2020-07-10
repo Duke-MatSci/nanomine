@@ -81,6 +81,7 @@
         ></EditImage>
 
         <v-alert type='error' dismissible v-model="errorAlert.display">{{ errorAlert.text }}</v-alert>
+        <v-alert type='info' dismissible v-model="fileTypeAlert">Note: due to browser limitations, image editing functionality and pulling data about image dimensions is not available for mat and tif file types. But, these file types can still be submitted for jobs.</v-alert> 
 
         <!-- table of uploaded images -->
         <div v-if="fileUploaded" class='imageTable'>
@@ -149,6 +150,12 @@
                 editImageType: 'crop',
                 errorAlert: {display: false, text: ''},
                 filesEditable: true
+            }
+        },
+        
+        computed: {
+            fileTypeAlert: function () {
+                return !this.filesEditable;
             }
         },
 
