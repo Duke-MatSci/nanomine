@@ -342,6 +342,7 @@
                     file.fileUrl = fr.result;
                     file.size = {width: 0, height: 0, units: null};
                     file.pixelSize = {width: 0, height: 0};
+                    file.phase = {x_offset: 0, y_offset: 0};
 
                     vm.files.push(file);
                     vm.filesUploaded = true;
