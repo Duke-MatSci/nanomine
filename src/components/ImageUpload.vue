@@ -14,11 +14,14 @@
 <template>
 
     <v-flex xs12 class="text-xs-center text-sm-center text-md-center text-lg-center">
+
+        <v-alert class='alert' type='error' dismissible v-model="errorAlert.display">{{ errorAlert.text }}</v-alert>
+        <v-alert class='alert' type='info' dismissible v-model="fileTypeAlert">Note: due to browser limitations, image editing functionality and pulling data about image dimensions is not available for mat and tif file types. But, these file types can still be submitted for jobs.</v-alert> 
         
         <!-- file upload button -->
         <p class="text-xs-left fileButtonWrapper">
             <v-btn class="text-xs-left fileButton" color="primary" @click='$refs.myUpload.click()'>Browse files</v-btn>
-            <input type="file" style="display: none" accept=".jpg, .png, .tif, .mat, .zip" ref="myUpload" @change="onFilePicked">
+            <input type="file" style="display: none" accept=".jpg, .png, .tif, .mat, .zip" ref="myUpload" @change="uploadFiles">
         </p>
 
         <!-- image dimension input section -->
@@ -29,21 +32,21 @@
             <div class='imageDimensionsWrapper'>
                 
                 <div class='imgDimWidth'>
-                    <v-text-field outline label='width' v-model='originalSize.width' @change="imageDimensionPicked"></v-text-field>
+                    <v-text-field outline label='width' v-model='inputtedDimensions.width' @change="userDimensionsCallback"></v-text-field>
                 </div>
 
                 <h3>x</h3>
 
                 <div class='imgDimHeight'>
-                    <v-text-field outline label='height' v-model='originalSize.height' @change="imageDimensionPicked"></v-text-field>
+                    <v-text-field outline label='height' v-model='inputtedDimensions.height' @change="userDimensionsCallback"></v-text-field>
                 </div>
 
                 <div class='imgDimUnits'>
                     <v-select
                         label="units"
                         :items="['nanometers (nm)', 'micrometers (µM)', 'millimeters (mm)']"
-                        v-model="originalSize.units"
-                        @change="imageDimensionPicked"
+                        v-model="inputtedDimensions.units"
+                        @change="userDimensionsCallback"
                     ></v-select>
                 </div>
 
@@ -76,12 +79,9 @@
             v-bind:file='imageEditorData' 
             v-bind:aspectRatio='aspectRatio' 
             v-bind:type='editImageType'
-            v-on:setCroppedImage="setCroppedImage"
-            v-on:setPhase="setPhase"
+            v-on:setCroppedImage="cropCallback"
+            v-on:setPhase="phaseCallback"
         ></EditImage>
-
-        <v-alert type='error' dismissible v-model="errorAlert.display">{{ errorAlert.text }}</v-alert>
-        <v-alert type='info' dismissible v-model="fileTypeAlert">Note: due to browser limitations, image editing functionality and pulling data about image dimensions is not available for mat and tif file types. But, these file types can still be submitted for jobs.</v-alert> 
 
         <!-- table of uploaded images -->
         <div v-if="fileUploaded" class='imageTable'>
@@ -93,16 +93,16 @@
                 <h4>Options</h4>
             </div>
 
-            <div class='imageTableContents' v-for="(file, index) in filesDisplay" :key='file.fileName'>
+            <div class='imageTableContents' v-for="(file, index) in displayedFiles" :key='file.name'>
                 
-                <p>{{ file.fileName }}</p>
+                <p>{{ file.name }}</p>
 
                 <p :key='file.pixelSize.width'><span v-if="dimensionsEntered" :key='file.size.height'>{{ file.size.width }} x {{ file.size.height }} {{ file.size.units }} / </span>{{ file.pixelSize.width }} x {{ file.pixelSize.height }} pixels</p>
 
                 <p v-if="file.phase.x_offset !== 0 || file.phase.y_offset !== 0">Manually set (x-offset: {{ file.phase.x_offset }}px, y-offset: {{ file.phase.y_offset }}px)</p>
                 <p v-else>Preset (bright phase)</p>
 
-                <div class='imageTableButtons' v-if="filesEditable">
+                <div class='imageTableButtons' v-if='filesEditable'>
                     <v-btn small class='imageTableButton' :key='index' v-on:click="openImageEditor(index, 'crop')" color="primary">Crop image</v-btn>
                     <v-btn small class='imageTableButton' :key='index' v-on:click="openImageEditor(index, 'phase')" color="primary">Set phase</v-btn>
                 </div>
@@ -136,373 +136,337 @@
 
         data() {
             return {
-                files: [],
-                filesDisplay: [],
-                fileType: '',
-                fileName: '',
-                fileUploaded: false,
+
+                submissionFile: {},
+                displayedFiles: [],
+                selectedOptions: {},
+
+                filesEditable: true,
+                errorAlert: {display: false, text: ''},
+
+                dimensionsEntered: false,
+                inputtedDimensions: {units: null, width: 0, height: 0},
+
                 imageEditorOpen: false,
                 imageEditorData: {fileUrl: null, fileName: null, phase: {x_offset: null, y_offset: null}},
-                selectedOptions: {},
-                originalSize: {units: null, width: 0, height: 0},
-                originalPixelSize: {width: 0, height: 0},
-                dimensionsEntered: false,
-                editImageType: 'crop',
-                errorAlert: {display: false, text: ''},
-                filesEditable: true
+                editImageType: 'crop'
+
             }
         },
         
         computed: {
+
             fileTypeAlert: function () {
-                return !this.filesEditable;
+                return !filesEditable
+            },
+
+            fileUploaded: function () {
+                if (this.displayedFiles.length > 0) {
+                    return true;
+                }
+                return false;
             }
+
         },
 
         methods: {
-            
-            // opens image editor modal and passes information for specific image that is opened
-            openImageEditor: function (index, type) {
-                this.editImageType = type;
-                this.imageEditorData = this.filesDisplay[index];
-                this.imageEditorOpen = !this.imageEditorOpen; // toggle the image editor modal being open and closed
-            },
 
-            // callback function for when the user inputs image dimensions. sets 'dimensionsEntered' to true once all parameters have been entered
-            imageDimensionPicked: function () {
-
-                if (this.originalSize.units !== null && parseInt(this.originalSize.width) > 0 && parseInt(this.originalSize.height) > 0) {
-    
-                    this.dimensionsEntered = true;
-                    if (this.filesDisplay.length > 0) {
-                        this.updateImageDimensions(this.filesDisplay[0].pixelSize.width, this.filesDisplay[0].pixelSize.height);
-                    }
-
-                    // UNCOMMENT THIS TO IMPLEMENT IMAGE DIMENSIONS
-                    // this.selectedOptions['dimensions'] = {'units': this.originalSize.units, 'width': parseInt(this.originalSize.with), 'height': parseInt(this.originalSize.height)}
-                    // this.$emit('setSelectors', this.selectedOptions);
-
-                }
-
-            },
-            
-            // callback function for when user saves changes to phase in image editor modal
-            // args: [fileName, phase]
-            setPhase: function (...args) {
-                for (let i = 0; i < this.filesDisplay.length; i++) {
-                    if (this.filesDisplay[i].fileName === args[0]) {
-
-                        this.filesDisplay[i].phase = args[1];
-                        this.filesDisplay[i].fileName = this.filesDisplay[i].fileName + " "; // force rerender
-
-                        // UNCOMMENT THIS TO IMPLEMENT PHASE SELECTION
-                        // if ('phase' in this.selectedOptions) {
-                        //     this.selectedOptions['phase'][this.filesDisplay[i].originalFileName] = args[1];
-                        // } else {
-                        //     this.selectedOptions['phase'] = {};
-                        //     this.selectedOptions.phase[this.filesDisplay[i].originalFileName] = args[1];
-                        // }
-                        // this.$emit('setSelectors', this.selectedOptions);
-
-                        break;
-
-                    }
-                }                
-            },
-            
-            // callback function to save new image upon cropping in image editor modal
-            // args: [cropped image, filename of cropped image, coordinates]
-            setCroppedImage: async function (...args) {   
-
-                for (let i = 0; i < this.filesDisplay.length; i++){
-
-                    // update the phase offset given the new top and left of the image
-                    if (this.filesDisplay[i].phase.x_offset !== 0 || this.filesDisplay[i].phase.y_offset !== 0) {
-                        this.filesDisplay[i].phase.x_offset -= args[2].left;
-                        this.filesDisplay[i].phase.y_offset -= args[2].top;
-                    }
-
-                    if (this.filesDisplay[i].fileName === args[1]){
-
-                        this.filesDisplay[i].fileUrl = args[0];
-                        this.filesDisplay[i].fileName = "cropped_" + this.filesDisplay[i].fileName; // to ensure that the list of images reloads since they are binded to filenames.
-                        
-                        await this.updateImageDimensions(args[2].width, args[2].height); // update displayed image dimensions
-
-                        if (this.fileType == 'zip'){
-                            await this.cropAllImages(args[2], "cropped_" + args[1] + " ");
-                            this.rezipFiles();
-                        } else {
-                            this.files[0].fileUrl = args[0];
-                            this.$emit('setFiles', this.files, this.fileName);
-                        }
-
-                        console.log('image succesfully cropped.');
-                        return;
-                    }
-                }
-
-                this.validatePhase();
-
-            },
-
-            // applicable when user uploads zip files, since they have multiple images. apply crop from one image to others to preserve the same size on each image
-            async cropAllImages (coordinates, fileName) {
-
-                let vm = this;
-
-                for (let i = 0; i < vm.filesDisplay.length; i++){
-                    if (vm.filesDisplay[i].fileName !== fileName){
-
-                        var canvas = document.createElement('canvas')
-                        canvas.width = coordinates.width;
-                        canvas.height = coordinates.height;
-
-                        var ctx = canvas.getContext('2d');
-                        var image = new Image();
-            
-                        image.src = vm.filesDisplay[i].fileUrl;
-
-                        function awaitImageCrop(image) {
-                            return new Promise((resolve, reject) => {
-                                image.onload = function () {
-                                    ctx.drawImage(image, (-1) * coordinates.left, (-1) * coordinates.top);
-                                    vm.filesDisplay[i].fileUrl = canvas.toDataURL();
-                                    vm.filesDisplay[i].fileName = 'cropped_' + vm.filesDisplay[i].fileName;
-                                    resolve()
-                                }
-                            })
-                        }
-                        await awaitImageCrop(image); // done to ensure that all images are cropped before files are rezipped
-                    }
-                }
-
-                console.log('applied crop to all images')
-            },
-
-            // check that selected phase is still within the image -- phase can fall outside the image if user crops after setting phase.
-            validatePhase () {
+            uploadFiles: function (e) {
                 
+                // initial variable declaration and input validation
                 let vm = this;
+                const inputFile = e.targets.files[0];
+                if (inputFile === undefined) { return; }
 
-                for (let i = 0; i < vm.filesDisplay.length; i++) {
-                    if (vm.filesDisplay[i].phase.x_offset < 0 || vm.filesDisplay[i].phase.y_offset < 0) {
-                        this.errorAlert.display = true;
-                        this.errorAlert.text = 'Error: selected phase for ' + vm.filesDisplay[i].fileName + ' has negative values. This is likely due to cropping the image after setting the phase.'
-                    } else if (vm.filesDisplay[i].phase.x_offset > vm.filesDisplay[i].pixelSize.width || vm.filesDisplay[i].phase.y_offset > vm.filesDisplay[i].pixelSize.height) {
-                        this.errorAlert.display = true;
-                        this.errorAlert.text = 'Error: selected phase for ' + vm.filesDisplay[i].fileName + ' is outside the image. This is likely due to cropping the image after setting the phase.';
-                    }
+                // reset file information
+                vm.submissionFile = {};
+                vm.displayedFiles = [];
+                if ('phase' in vm.selectedOptions) {
+                    delete vm.selectedOptions.phase;
+                    vm.$emit('setSelectors', vm.selectedOptions);
                 }
 
-            },
-            
-            // update displayed image dimensions
-            updateImageDimensions (width, height, top, left) {
-                
-                for (let i = 0; i < this.filesDisplay.length; i++){
-
-                    this.filesDisplay[i].pixelSize.width = width;
-                    this.filesDisplay[i].pixelSize.height = height;
-
-                    if (this.dimensionsEntered == true) {
-                        this.filesDisplay[i].size.units = this.originalSize.units;
-                        this.filesDisplay[i].size.width = parseInt((parseInt(this.originalSize.width) / this.originalPixelSize.width) * width);
-                        this.filesDisplay[i].size.height = parseInt((parseInt(this.originalSize.height) / this.originalPixelSize.height) * height);
-                    }
-
-                    this.filesDisplay[i].fileName = this.filesDisplay[i].fileName + " "; // force rerender
-                }
-
-                this.files[0].pixelSize = this.filesDisplay[0].pixelSize;
-                this.files[0].size = this.filesDisplay[0].size;
-
-            },
-
-            // called when user uploads an image from computer. gets image dimensions
-            getImageDimensions () {
-                
-                let vm = this;
-                var img = new Image();
-                img.src = vm.filesDisplay[0].fileUrl;
-                img.onload = function () {
-                    vm.originalPixelSize = {width: img.width, height: img.height}
-                    vm.updateImageDimensions(img.width, img.height);
-                }
-
-            },
-
-            // delete old information when new files are uploaded
-            resetFiles: function () {
-
-                this.files = [];
-                this.filesDisplay = [];
-                this.fileUploaded = false;
-                this.$emit('setFiles', this.files, this.fileName);
-
-                if ('phase' in this.selectedOptions) {
-                    delete this.selectedOptions.phase;
-                    this.$emit('setSelectors', this.selectedOptions)
-                }
-
-            },
-
-            // callback function to upload file information after user chooses a file to upload
-            onFilePicked (e) {
-                
-                let vm = this;
-                vm.resetFiles();
-                const input_file = e.target.files[0];
-                let file = {};
-
-                if (input_file === undefined) {
-                    return;
-                }
-
-                // set filename and type
-                vm.fileName = input_file.name;
-                var fileType = input_file.name.split('.').pop().toLowerCase();
-
-                // extract data from uploaded file
                 const fr = new FileReader();
                 fr.readAsDataURL(input_file);
                 fr.addEventListener('load', () => {
-
-                    var file = {
-                        fileName: input_file.name,
-                        fileUrl: fr.result,
-                        size: {
-                            width: 0,
-                            height: 0,
-                            units: null
-                        },
-                        pixelSize: {
-                            width: 0,
-                            height: 0
-                        },
-                        phase: {
-                            x_offset: 0,
-                            y_offset: 0
-                        }
-                    }
-                    vm.files.push(file);
-
-                    if (fileType === 'mat' || fileType === 'tif') {
-                        vm.filesEditable = false;
+                    
+                    // get file information
+                    vm.submissionFile = {
+                        name: inputFile.name,
+                        url: fr.result,
+                        fileType: inputFile.name.split('.').pop().toLowerCase(),
                     }
 
-                    if (fileType !== 'zip'){
-                        vm.filesDisplay.push(file);
-                        vm.filesDisplay[0].originalFileName = file.fileName
+                    // push to displayed files
+                    if (vm.submissionFile.fileType === 'zip') {
+                        await vm.unzipUploadedFiles(inputFile); // unzipped files are pushed to displayed files directly within the function
+                    } else {
+                        vm.displayedFiles = [{
+                            name: inputFile.name,
+                            originalName: inputFile.name,
+                            url: fr.result,
+                            fileType: inputFile.name.split('.').pop().toLowerCase(),
+                            size: { width: 0, height: 0, units: null },
+                            pixelSize: { width: 0, height: 0 },
+                            phase: { x_offset: 0, y_offset: 0 }
+                        }];
                     }
 
-                    if (fileType !== 'zip' && fileType !== 'mat'){
-                        vm.getImageDimensions();
-                    }
-
-                })
-
-                if (fileType === 'zip') {
-                    vm.unzipFiles(input_file)
-                }
-
-                vm.fileUploaded = true;
-                vm.$emit('setFiles', vm.files, vm.fileName)
-
-            },  
-
-            // unzip contents of zip files upon upload
-            unzipFiles (input_file) {
-
-                const vm = this;
-                vm.filesDisplay = [];
-                const jszip_obj = new jszip();
-
-                jszip_obj.loadAsync(input_file)
-                .then(async function(zip) {
-
-                    for (var key in zip.files){
-
-                        // get file data
-                        var filename = zip.files[key].name;
-                        var filetype = filename.split('.').pop();
-
-                        // uncompress
-                        var raw_data = undefined;
-                        if (zip.files[key]._data.compressedSize == zip.files[key]._data.uncompressedSize) {
-                            raw_data = zip.files[key]._data.compressedContent;
-                        } else {
-                            raw_data = await pako.inflateRaw(zip.files[key]._data.compressedContent);
-                        }
-
-                        // convert from uint8array to base64
-                        var binary = '';
-                        for (var i = 0; i < raw_data.byteLength; i++){
-                            binary += await String.fromCharCode(raw_data[i]);
-                        }
-                        var base64 = 'data:image/' + filetype + ';base64,' + window.btoa(binary);
-
-                        // push to filesDisplay variable
-                        var single_file = {
-                            fileName: filename, 
-                            fileUrl: base64, 
-                            originalFileName: filename,
-                            size: {
-                                width: 0,
-                                height: 0,
-                                units: null
-                            },
-                            pixelSize: {
-                                width: 0,
-                                height: 0
-                            },
-                            phase: {
-                                x_offset: 0,
-                                y_offset: 0
-                            }
-                        }
-                        vm.filesDisplay.push(single_file);    
-                        
-                        if (filetype === 'tif') {
+                    // set editable status
+                    for (let i = 0; i < vm.displayedFiles.length; i++) {
+                        if (vm.displayableFileType(i) === false) {
                             vm.filesEditable = false;
                         }
-
                     }
 
-                    // check for acceptable filetype
-                    // const accepted_types = ['jpg', 'jpeg', 'tif', 'tiff'];
-                    // for (let i = 0; i < vm.filesDisplay.length; i++) {
-                    //     if (accepted_types.includes(filesDisplay[i].fileName.split('.').pop()) === false) {
-                    //         // do something
-                    //     }
-                    // }
+                    // get file dimensions
+                    for (let i = 0; i < vm.displayedFiles.length; i++) {
+                        const getImageDimensions = (index) => {
+                            var img = new Image();
+                            img.src = vm.displayedFiles[index].url;
+                            img.onload = function () {
+                                vm.displayedFiles[index].originalSize = {width: img.width, height: img.height}
+                            }
+                        }
+                        if (vm.displayableFileType(i) === true) {
+                            getImageDimensions(i);
+                        }
+                    }
 
-                    vm.getImageDimensions();
-                    console.log('finished extracting images');
+                    // push to parent
+                    vm.$emit('setFiles', vm.submissionFile);
 
                 });
+
+            },
+
+            unzipUploadedFiles: function (inputFile) {
+                return new Promise((resolve, reject) => {
+                    
+                    // initial variable declaration
+                    const vm = this;
+                    const jszip_obj = new jszip();
+
+                    jszip_obj.loadAsync(unzipFile)
+                    .then(async function (zip) {
+
+                        for (var key in zip.files) {
+
+                            // get file data
+                            var filename = zip.files[key].name;
+                            var filetype = filename.split('.').pop().toLowerCase();
+
+                            // uncompress
+                            var raw_data = undefined;
+                            if (zip.files[key]._data.compressedSize === zip.files[key]._data.uncompressedSize) {
+                                raw_data = zip.files[key]._data.compressedContent;
+                            } else {
+                                raw_data = await pako.inflateRaw(zip.files[key]._data.compressedContent);
+                            }
+
+                            // convert from uint8array to base64
+                            var binary = '';
+                            for (var i = 0; i < raw_data.byteLength; i++){
+                                binary += await String.fromCharCode(raw_data[i]);
+                            }
+                            var base64 = 'data:image/' + filetype + ';base64,' + window.btoa(binary);
+
+                            // push to filesDisplay variable
+                            vm.displayedFiles.push({
+                                name: filename,
+                                origalName: filename,
+                                url: base64,
+                                fileType: filetype,
+                                size: { width: 0, height: 0, units: null },
+                                pixelSize: { width: 0, height: 0 },
+                                phase: { x_offset: 0, y_offset: 0 }
+                            });
+
+                        }
+
+                        resolve();
+
+                    })
+
+                })
+            },
+
+            userDimensionsCallback: function () {
+                if (this.inputtedDimensions.units !== null && parseInt(this.inputtedDimensions.width) > 0 && parseInt(this.inputtedDimensions.height) > 0) {
+
+                    this.dimensionsEntered = true;
+                    for (let i = 0; i < displayedFiles.length; i++) { this.updateUserDimensions(i); }
+
+                    this.pushImageDimensions();
+
+                }
+            },
+
+            pushImageDimensions: function () {
+                // DELETE THE RETURN STATEMENT BELOW TO IMPLEMENT IMAGE DIMENSIONS
+                return;
+
+                if (this.displayableFileType(0) === true) {
+                    this.selectedOptions['dimensions'] = {'units': this.inputtedDimensions.units, 'width': this.displayedFiles[0].size.width, 'height': this.displayedFiles[0].size.height};
+                } else {
+                    this.selectedOptions['dimensions'] = {'units': this.inputtedDimensions.units, 'width': parseInt(this.inputtedDimensions.width), 'height': parseInt(this.inputtedDimensions.height)};
+                }
+                this.$emit('setSelectors', this.selectedOptions);
+            },
+
+            updateUserDimensions: function (index) {
+                vm.displayedFiles[index].size.width = parseInt( ( parseInt(vm.inputtedDimensions.width) / vm.displayedFiles[index].originalSize.width ) * vm.displayedFiles[index].pixelSize.width );
+                vm.displayedFiles[index].size.height = parseInt( ( parseInt(vm.inputtedDimensions.height) / vm.displayedFiles[index].originalSize.height ) * vm.displayedFiles[index].pixelSize.height );
+            },
+
+            // args: [fileName, phase]
+            phaseCallback: function (...args) {
+                
+                // find index of object to change in array
+                const indexFunction = (object) => object.name === args[0];
+                const index = this.displayedFiles.findIndex(indexFunction);
+
+                // apply new phase
+                this.displayedFiles[index] = args[1]
+                this.displayedFiles[index].name += " "; // force rerender
+
+                // push to parent
+                this.pushPhase();
+                        
+            },
+
+            pushPhase: function (index) {
+                // DELETE THE RETURN STATEMENT BELOW TO IMPLEMENT PHASE
+                return;
+
+                if ('phase' in this.selectedOptions) {
+                    this.selectedOptions['phase'][this.displayedFiles[index].originalName] = this.displayedFiles[index].phase;
+                } else {
+                    this.selectedOptions['phase'] = {};
+                    this.selectedOptions.phase[this.displayedFiles[index].originalName] = this.displayedFiles[index].phase;
+                }
+                this.$emit('setSelectors', this.selectedOptions);
+            },
+            
+            // args: [cropped image, filename of cropped image, coordinates]
+            cropCallback: async function (...args) {
+
+                for (let i = 0; i < displayedFiles.length; i++) {
+
+                    if (displayedFiles[i].name === args[1]) {
+                        await this.cropImage(args[0], args[2], i);
+                    } else if (displayedFiles[i].fileType === 'tif') {
+                        continue;
+                    } else {
+                        await this.cropImage(null, args[2], i);
+                    }
+                    
+                    this.displayedFiles[i].name = 'cropped_' + this.displayedFiles[i].name; // force rerender
+
+                }
+
+                if (vm.submissionFile.fileType === 'zip') {
+                    this.rezipFiles();
+                }
+
+                // push to parent
+                this.$emit('setFiles', vm.submissionFile);
+                this.pushImageDimensions();
+                for (let i = 0; i < this.displayedFiles.length; i++) { this.pushPhase(i) }
+
+
+            },
+
+            // crops a single image: update the image, the image's phase, and the image dimensions
+            cropImage: function (url, coordinates, index) {
+
+                let vm = this;
+
+                // crop the image
+                if (url !== null){
+                    vm.displayedFiles[index] = url;
+                } else {
+
+                    var canvas = document.createElement('canvas')
+                    canvas.width = coordinates.width;
+                    canvas.height = coordinates.height;
+
+                    var ctx = canvas.getContext('2d');
+                    var image = new Image();
+                    image.src = vm.displayedFiles[index].url;
+
+                    function awaitImageCrop(image) {
+                        return new Promise((resolve, reject) => {
+                            image.onload = function () {
+                                ctx.drawImage(image, (-1) * coordinates.left, (-1) * coordinates.top);
+                                vm.displayedFiles[index].fileUrl = canvas.toDataURL();
+                                resolve()
+                            }
+                        })
+                    }
+                    await awaitImageCrop(image); // done to ensure that all images are cropped before files are rezipped
+
+                }
+
+                // update the phase based on new top left of image
+                if (vm.displayedFiles[index].phase.x_offset !== 0 || vm.displayedFiles[index].phase.y_offset !== 0) {
+
+                    vm.displayedFiles[index].phase.x_offset -= coordinates.left;
+                    vm.displayedFiles[index].phase.y_offset -= coordinates.top;
+
+                    // validate that new phase is still within the image
+                    if (vm.displayedFiles[index].phase.x_offset < 0 || vm.displayedFiles[index].phase.y_offset < 0) {
+                        vm.errorAlert.display = true;
+                        vm.errorAlert.text = 'Error: selected phase for ' + vm.displayedFiles[index].fileName + ' has negative values. This is likely due to cropping the image after setting the phase.'
+                    } else if (vm.displayedFiles[index].phase.x_offset > coordinates.width || vm.displayedFiles[index].phase.y_offset > coordinates.height) {
+                        vm.errorAlert.display = true;
+                        vm.errorAlert.text = 'Error: selected phase for ' + vm.displayedFiles[index].fileName + ' is outside the image. This is likely due to cropping the image after setting the phase.';
+                    }
+
+                }
+
+                // update the image dimensions
+                vm.displayedFiles[index].pixelSize.width = coordinates.width;
+                vm.displayedFiles[index].pixelSize.height = coordinates.height;
+
+                if (vm.dimensionsEntered === true) {
+                    vm.updateUserDimensions(index);
+                }
+
             },
 
             // rezip images when images are altered and emit that back parent component
             async rezipFiles () {
+
                 let jszip_obj = new jszip();
                 let vm = this;
                 
                 // add images to zip file
-                for(let i = 0; i < vm.filesDisplay.length; i++){
-
-                    jszip_obj.file(this.filesDisplay[i].originalFileName, this.filesDisplay[i].fileUrl.split(',').pop(), {base64: true});
-
+                for(let i = 0; i < vm.displayedFiles.length; i++){
+                    jszip_obj.file(this.displayedFiles[i].originalName, this.displayedFiles[i].url.split(',').pop(), {base64: true});
                 }
                 
                 // create zip file
                 jszip_obj.generateAsync({type: 'base64', compression: 'DEFLATE'})
                 .then(function (base64) {
-                    vm.files[0].fileUrl = "data:application/zip;base64," + base64;
-                    vm.$emit('setFiles', vm.files, vm.fileName);
-                    console.log('rezipped files');
+                    vm.submissionFile.url = "data:application/zip;base64," + base64;
                 })
-            }
+
+            },
+
+            // opens image editor modal and passes information for specific image that is opened
+            openImageEditor: function (index, type) {
+                this.editImageType = type;
+                this.imageEditorData = this.displayedFiles[index];
+                this.imageEditorOpen = !this.imageEditorOpen; // toggle the image editor modal being open and closed
+            },
+
+            displayableFileType: function (index) {
+                if (this.displayedFiles[index].fileType === 'mat' || this.displayedFiles[index].fileType === 'tif') {
+                    return false;
+                }
+                return true;
+            },
 
         }
     }
@@ -527,6 +491,11 @@
         margin-top: 0px;
         font-size: 15px;
         border-bottom: 1px solid gray;
+    }
+
+    .alert {
+        text-align: left;
+        border: none;
     }
 
     /* 
