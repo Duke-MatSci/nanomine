@@ -201,7 +201,7 @@
 
                 const fr = new FileReader();
                 fr.readAsDataURL(input_file);
-                fr.addEventListener('load', () => {
+                fr.addEventListener('load', async () => {
                     
                     // get file information
                     vm.submissionFile = {
@@ -395,7 +395,7 @@
             },
 
             // crops a single image: update the image, the image's phase, and the image dimensions
-            cropImage: function (url, coordinates, index) {
+            cropImage: async function (url, coordinates, index) {
 
                 let vm = this;
 
