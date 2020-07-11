@@ -19,7 +19,7 @@
 
             <!-- displayed when user opens image cropper -->
             <div class='imageWrapper' v-if='type === "crop"'>
-                <cropper :src='file.fileUrl' :stencil-props='stencil_props' @change='onChange'></cropper>
+                <cropper :src='file.url' :stencil-props='stencil_props' @change='onCropChange'></cropper>
             </div>
 
             <!-- displayed when user opens phase select  -->
@@ -27,7 +27,7 @@
 
             <!-- displayed when user opens phase select  -->
             <div class='phaseWrapper imageWrapper' v-if='type === "phase"' ref='imageWrapperDiv'>
-                <img class='image' :src='file.fileUrl' @click='phaseImageClicked($event)' ref='phaseImage'>     
+                <img class='image' :src='file.url' @click='onPhaseChange($event)' ref='phaseImage'>     
                 <div class='phaseDot' v-bind:style="{ top: computedTop, left: computedLeft, backgroundColor: computedBackground, border: computedBorder}"></div>
             </div>
 
@@ -64,7 +64,7 @@
             file: {
                 deep: true,
                 handler(newValue, oldValue) {
-                    if (newValue.fileName !== oldValue.fileName) {
+                    if (newValue.name !== oldValue.name) {
                         this.phaseDotVisibility = false
                     }
                     this.phase = newValue.phase;
@@ -87,7 +87,7 @@
         data() {
             return {
                 title: "",
-                cropped_image: null,
+                cropped_url: null,
                 coordinates: null,
                 stencil_props: {},
                 phase: {x_offset: 0, y_offset: 0},
@@ -95,17 +95,17 @@
             }
         },
         methods: {
-            phaseImageClicked (e) {
+            onPhaseChange (e) {
                 
-                // the stuff in the parenthesis is to account for the fact that the image may be scaled upon being displayed, thus we figure out the scale factor to get the correct offset
+                // takes the click offset from top left of image and multiplies that by how much the image is scaled up/down to fit the modal
                 this.phase.x_offset = parseInt(e.offsetX * (this.file.pixelSize.width / e.path[0].clientWidth))
                 this.phase.y_offset = parseInt(e.offsetY * (this.file.pixelSize.height / e.path[0].clientHeight))
                 
                 this.phaseDotVisibility = true;
 
             },
-            onChange ({ coordinates, canvas}) {
-                this.cropped_image = canvas.toDataURL();
+            onCropChange ({ coordinates, canvas}) {
+                this.cropped_url = canvas.toDataURL();
                 this.coordinates = coordinates;
             },
             closeModal() {
@@ -113,7 +113,7 @@
             },
             saveImage() {
                 if (this.type === 'crop'){
-                    this.$emit('setCroppedImage', this.cropped_image, this.file.fileName, this.coordinates)
+                    this.$emit('setCroppedImage', this.cropped_url, this.file.fileName, this.coordinates)
                 } else if (this.type === 'phase'){
                     this.$emit('setPhase', this.file.fileName, this.phase)
                 }
@@ -121,7 +121,7 @@
             }
         },
 
-        // computed variables are for the phase dot (to determine position and toggle visibility) and modal title
+        // computed variables are for the phase dot (to determine position and toggle visibility), and modal title
         computed: {
 
             // phase dot position is calculated from the offset from the top left corner of its parent div

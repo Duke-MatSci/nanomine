@@ -6,7 +6,6 @@
 # Description:
 #
 # Created by: Akshay Iyer, July 23, 2018
-# Rewritten by: Atul Jalan, June 30, 2020
 # Customized for NanoMine
 #
 ################################################################################

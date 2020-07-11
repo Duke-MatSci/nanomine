@@ -14,15 +14,18 @@
 <template>
 
     <v-flex xs12 class="text-xs-center text-sm-center text-md-center text-lg-center">
-
-        <v-alert class='alert' type='error' dismissible v-model="errorAlert.display">{{ errorAlert.text }}</v-alert>
-        <v-alert class='alert' type='info' dismissible v-model="fileTypeAlert">Note: due to browser limitations, image editing functionality and pulling data about image dimensions is not available for mat and tif file types. But, these file types can still be submitted for jobs.</v-alert> 
         
         <!-- file upload button -->
         <p class="text-xs-left fileButtonWrapper">
             <v-btn class="text-xs-left fileButton" color="primary" @click='$refs.myUpload.click()'>Browse files</v-btn>
             <input type="file" style="display: none" accept=".jpg, .png, .tif, .mat, .zip" ref="myUpload" @change="uploadFiles">
         </p>
+
+        <!-- error alert if phase becomes invalid after cropping -->
+        <v-alert class='alert' type='error' dismissible v-model="errorAlert.display">{{ errorAlert.text }}</v-alert>
+
+        <!-- info alert that functionality reduced if user uploads mat or tif file type -->
+        <v-alert class='alert' type='info' dismissible v-model="fileTypeAlert">Note: due to browser limitations, image editing functionality and pulling data about image dimensions is not available for mat and tif file types. But, these file types can still be submitted for jobs.</v-alert> 
 
         <!-- image dimension input section -->
         <div v-if="fileUploaded && collectDimensions">
@@ -148,14 +151,15 @@
                 inputtedDimensions: {units: null, width: 0, height: 0},
 
                 imageEditorOpen: false,
-                imageEditorData: {fileUrl: null, fileName: null, phase: {x_offset: null, y_offset: null}},
+                imageEditorData: {url: null, name: null, phase: {x_offset: null, y_offset: null}},
                 editImageType: 'crop'
 
             }
         },
         
         computed: {
-
+            
+            // info alert that functionality is restricted if the user uploads tif or mat file type
             fileTypeAlert: function () {
                 return !filesEditable
             },
@@ -170,7 +174,8 @@
         },
 
         methods: {
-
+            
+            // process uploaded files
             uploadFiles: function (e) {
                 
                 // initial variable declaration and input validation
@@ -212,14 +217,14 @@
                         }];
                     }
 
-                    // set editable status
+                    // set reduced functionality if user uploads mat or tif file type
                     for (let i = 0; i < vm.displayedFiles.length; i++) {
                         if (vm.displayableFileType(i) === false) {
                             vm.filesEditable = false;
                         }
                     }
 
-                    // get file dimensions
+                    // calculate size dimensions for each image
                     for (let i = 0; i < vm.displayedFiles.length; i++) {
                         const getImageDimensions = (index) => {
                             var img = new Image();
@@ -238,8 +243,9 @@
 
                 });
 
-            },
+            }, 
 
+            // unzip if the user uploads a zip file
             unzipUploadedFiles: function (inputFile) {
                 return new Promise((resolve, reject) => {
                     
@@ -291,6 +297,7 @@
                 })
             },
 
+            // callback function for when users enter data into the image dimensions section
             userDimensionsCallback: function () {
                 if (this.inputtedDimensions.units !== null && parseInt(this.inputtedDimensions.width) > 0 && parseInt(this.inputtedDimensions.height) > 0) {
 
@@ -302,6 +309,7 @@
                 }
             },
 
+            // emit image dimensions data back to parent
             pushImageDimensions: function () {
                 // DELETE THE RETURN STATEMENT BELOW TO IMPLEMENT IMAGE DIMENSIONS
                 return;
@@ -314,6 +322,7 @@
                 this.$emit('setSelectors', this.selectedOptions);
             },
 
+            // scale user inputted dimensions by how much user has cropped the images
             updateUserDimensions: function (index) {
                 vm.displayedFiles[index].size.width = parseInt( ( parseInt(vm.inputtedDimensions.width) / vm.displayedFiles[index].originalSize.width ) * vm.displayedFiles[index].pixelSize.width );
                 vm.displayedFiles[index].size.height = parseInt( ( parseInt(vm.inputtedDimensions.height) / vm.displayedFiles[index].originalSize.height ) * vm.displayedFiles[index].pixelSize.height );
@@ -435,7 +444,7 @@
 
             },
 
-            // rezip images when images are altered and emit that back parent component
+            // rezip images when images are altered and emit that back to parent component
             async rezipFiles () {
 
                 let jszip_obj = new jszip();
@@ -493,14 +502,15 @@
         border-bottom: 1px solid gray;
     }
 
+    /* info and error alerts */
     .alert {
         text-align: left;
         border: none;
     }
 
-    /* 
-    IMAGE TABLE 
-    */
+    /********** 
+    image table 
+    **********/
     .imageTable {
         margin-bottom: 20px;
     }
@@ -539,9 +549,9 @@
         margin-left: 0px;
     }
 
-    /* 
-    PARAMETERS
-    */
+    /********* 
+    parameters
+    *********/
     .selectDropdownsWrapper {
         display: flex;
         flex-direction: row;
@@ -553,9 +563,7 @@
         width: 49%;
     }
 
-    /* 
-    IMAGE DIMENSIONS
-     */
+    /* image dimensions */
     .imageDimensionsWrapper {
         display: flex;
         flex-direction: row;

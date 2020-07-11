@@ -6,7 +6,6 @@
 # Description:
 #
 # Created by: Henry Zhang, August 29, 2019
-# Rewritten by: Atul Jalan, July 1, 2020
 # Customized for NanoMine
 #
 ################################################################################
