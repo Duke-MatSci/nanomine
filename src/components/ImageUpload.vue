@@ -92,7 +92,10 @@
             <div class='imageTableHeader'>
                 <h4>Name</h4>
                 <h4>Size</h4>
-                <h4>Selected phase</h4>
+                <div class='tooltipWrapper'>
+                    <h4>Selected phase</h4>
+                    <v-icon>mdi-icon</v-icon>
+                </div>
                 <h4>Options</h4>
             </div>
 
@@ -501,6 +504,12 @@
         font-size: 15px;
         border-bottom: 1px solid gray;
     }
+    
+    .tooltipWrapper {
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-start;
+    }
 
     /* info and error alerts */
     .alert {
@@ -525,9 +534,13 @@
         margin-bottom: 5px;
     }
 
-    .imageTableHeader h4, .imageTableContents p {
+    .imageTableHeader h4, .imageTableContents p, .tooltipWrapper {
         width: 25%;
         text-align: left;
+    }
+
+    .tooltipWrapper h4 {
+        width: initial;
     }
 
     .imageTableContents p {
