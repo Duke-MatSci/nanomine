@@ -94,7 +94,12 @@
                 <h4>Size</h4>
                 <div class='tooltipWrapper'>
                     <h4>Selected phase</h4>
-                    <v-icon>mdi-icon</v-icon>
+                    <v-tooltip top>
+                        <template v-slot:activator="{ on, attrs }">
+                            <v-icon v-bind="attrs" v-on="on">mdi-icon</v-icon>
+                        </template>
+                        <span>Select which phase to analyze for each image</span>
+                    </v-tooltip>
                 </div>
                 <h4>Options</h4>
             </div>
