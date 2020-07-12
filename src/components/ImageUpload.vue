@@ -200,7 +200,7 @@
                 }
 
                 const fr = new FileReader();
-                fr.readAsDataURL(input_file);
+                fr.readAsDataURL(inputFile);
                 fr.addEventListener('load', async () => {
                     
                     // get file information
@@ -261,42 +261,27 @@
                     const vm = this;
                     const jszip_obj = new jszip();
 
+                    // unzip
                     jszip_obj.loadAsync(unzipFile)
                     .then(async function (zip) {
+                        
+                        // transform contents to base64
+                        Object.keys(zip.files).forEach(function (filename) {
+                            zip.files[filename].async("base64").then(function (fileData) {
 
-                        for (var key in zip.files) {
+                                var filetype = filename.split('.').pop().toLowerCase();
+                                vm.displayedFiles.push({
+                                    name: filename,
+                                    originalName: filename,
+                                    url: 'data:image/' + filetype + ':base64,' + fileData,
+                                    fileType: filetype,
+                                    size: { width: 0, height: 0, units: null },
+                                    pixelSize: { width: 0, height: 0 },
+                                    phase: { x_offset: 0, y_offset: 0 }
+                                })
 
-                            // get file data
-                            var filename = zip.files[key].name;
-                            var filetype = filename.split('.').pop().toLowerCase();
-
-                            // uncompress
-                            var raw_data = undefined;
-                            if (zip.files[key]._data.compressedSize === zip.files[key]._data.uncompressedSize) {
-                                raw_data = zip.files[key]._data.compressedContent;
-                            } else {
-                                raw_data = await pako.inflateRaw(zip.files[key]._data.compressedContent);
-                            }
-
-                            // convert from uint8array to base64
-                            var binary = '';
-                            for (var i = 0; i < raw_data.byteLength; i++){
-                                binary += await String.fromCharCode(raw_data[i]);
-                            }
-                            var base64 = 'data:image/' + filetype + ';base64,' + window.btoa(binary);
-
-                            // push to filesDisplay variable
-                            vm.displayedFiles.push({
-                                name: filename,
-                                origalName: filename,
-                                url: base64,
-                                fileType: filetype,
-                                size: { width: 0, height: 0, units: null },
-                                pixelSize: { width: 0, height: 0 },
-                                phase: { x_offset: 0, y_offset: 0 }
                             });
-
-                        }
+                        });
 
                         resolve();
 
