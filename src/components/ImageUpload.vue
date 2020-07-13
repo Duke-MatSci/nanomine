@@ -268,7 +268,7 @@
                         // transform contents to base64
                         Object.keys(zip.files).forEach( 
                             
-                            function getContent(filename) {
+                            async function getContent(filename) {
 
                                 contentWrapper = () => {
 
