@@ -262,7 +262,7 @@
                     const jszip_obj = new jszip();
 
                     // unzip
-                    jszip_obj.loadAsync(unzipFile)
+                    jszip_obj.loadAsync(inputFile)
                     .then(async function (zip) {
                         
                         // transform contents to base64
