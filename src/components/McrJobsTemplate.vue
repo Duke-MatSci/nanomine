@@ -122,7 +122,7 @@
                 errorAlertMsg: '',
                 successDlg: false,
                 jobId: '',
-                files: [],
+                files: undefined,
                 selects: [],
                 selectedOptions: {}
             }
@@ -175,7 +175,7 @@
                 vm.setLoading()
                 console.log('Loading..')
 
-                if (vm.files.length == 0) {
+                if (vm.files === undefined) {
                     let msg = 'Please select a file to process.'
                     vm.errorAlertMsg = msg
                     vm.errorAlert = true
@@ -187,14 +187,14 @@
                 console.log('Called Job Manager for ' + vm.job.submit.submitJobTitle)
                 jm.setJobType(vm.job.submit.submitJobTitle)
 
-                var jobParameters = {'InputType': vm.files[0].fileType}; // Figure out which file type
+                var jobParameters = {'InputType': vm.files.fileType}; // Figure out which file type
                 for (var key in vm.selectedOptions) {
                     jobParameters[key] = vm.selectedOptions[key]
                 }
                 jm.setJobParameters(jobParameters)
 
-                jm.addInputFile(vm.files[0].name, vm.files[0].url)
-                console.log('Job Manager added file: ' + vm.files[0].name)
+                jm.addInputFile(vm.files.name, vm.files.url)
+                console.log('Job Manager added file: ' + vm.files.name)
 
                 return jm.submitJob(function (jobId) {
                     console.log('Success! JobId is: ' + jobId)
