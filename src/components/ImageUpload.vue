@@ -336,7 +336,7 @@
                 const index = this.displayedFiles.findIndex(indexFunction);
 
                 // apply new phase
-                this.displayedFiles[index].phase = args[1]
+                this.displayedFiles[index].phase = args[1];
                 if (this.displayedFiles[index].errors.size === true) {
                     this.displayedFiles[index].errors.size = false;
                     this.errorAlert.count -= 1;

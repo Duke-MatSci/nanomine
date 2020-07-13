@@ -98,8 +98,8 @@
             onPhaseChange (e) {
                 
                 // takes the click offset from top left of image and multiplies that by how much the image is scaled up/down to fit the modal
-                this.phase.x_offset = parseInt(e.offsetX * (this.file.pixelSize.width / e.path[0].clientWidth))
-                this.phase.y_offset = parseInt(e.offsetY * (this.file.pixelSize.height / e.path[0].clientHeight))
+                this.phase.x_offset = parseInt(e.offsetX * (this.file.pixelSize.width / e.path[0].clientWidth));
+                this.phase.y_offset = parseInt(e.offsetY * (this.file.pixelSize.height / e.path[0].clientHeight));
                 
                 this.phaseDotVisibility = true;
 
@@ -113,11 +113,11 @@
             },
             saveImage() {
                 if (this.type === 'crop'){
-                    this.$emit('setCroppedImage', this.cropped_url, this.file.fileName, this.coordinates)
+                    this.$emit('setCroppedImage', this.cropped_url, this.file.name, this.coordinates);
                 } else if (this.type === 'phase'){
-                    this.$emit('setPhase', this.file.fileName, this.phase)
+                    this.$emit('setPhase', this.file.name, this.phase);
                 }
-                this.closeModal()
+                this.closeModal();
             }
         },
 
@@ -129,7 +129,7 @@
             // gives the y offset of the phase dot
             computedTop: function () {
                 if (this.$refs.phaseImage === undefined) { return this.phase.y_offset * 0  } // refs are not yet rendered on first run
-                var scaleFactor = this.$refs.phaseImage.clientHeight / this.file.pixelSize.height // image might be scaled up/down to fit the modal.
+                var scaleFactor = this.$refs.phaseImage.clientHeight / this.file.pixelSize.height; // image might be scaled up/down to fit the modal.
                 return ((this.phase.y_offset * scaleFactor) - 3) + "px"; // -3 pixels to center dot on where they click
             },
 
@@ -137,7 +137,7 @@
             computedLeft: function () {
                 if (this.$refs.phaseImage === undefined) { return this.phase.x_offset * 0 } // refs are not yet rendered on first run
                 var scaleFactor = this.$refs.phaseImage.clientWidth / this.file.pixelSize.width; // image might be scaled up/down to fit the modal.
-                var extraOffset = (this.$refs.imageWrapperDiv.clientWidth - this.$refs.phaseImage.clientWidth) / 2 // phase dot is anchored to the div that contains img. Div width may be larger than img width.
+                var extraOffset = (this.$refs.imageWrapperDiv.clientWidth - this.$refs.phaseImage.clientWidth) / 2; // phase dot is anchored to the div that contains img. Div width may be larger than img width.
                 return ((this.phase.x_offset * scaleFactor) + extraOffset - 3)  + "px"; // -3 pixels to center dot on where they click
             },
 
@@ -163,7 +163,7 @@
                 if (this.type === 'crop') {
                     return 'Crop image';
                 } else if (this.type === 'phase') {
-                    return 'Set phase'
+                    return 'Set phase';
                 }
             }
         }
