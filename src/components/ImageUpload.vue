@@ -108,7 +108,7 @@
                 
                 <p>{{ file.name }}</p>
 
-                <p :key='file.pixelSize.width'><span v-if="dimensionsEntered" :key='file.size.height'>{{ file.size.width }} x {{ file.size.height }} {{ file.size.units }} / </span>{{ file.pixelSize.width }} x {{ file.pixelSize.height }} pixels</p>
+                <p :key='file.pixelSize.width'><span v-if="dimensionsEntered" :key='file.size.height'>{{ file.size.width }} x {{ file.size.height }} {{ file.size.units }} / </span>{{ file.pixelSize.width }} x {{ file.pixelSize.height }} pixels <span v-if='file.errors.size' class='imageSizeError'>ERROR</span></p>
 
                 <p v-if="file.phase.x_offset !== 0 || file.phase.y_offset !== 0">Manually set (x-offset: {{ file.phase.x_offset }}px, y-offset: {{ file.phase.y_offset }}px)</p>
                 <p v-else>Preset (bright phase)</p>
@@ -153,7 +153,7 @@
                 selectedOptions: {},
 
                 filesEditable: true,
-                errorAlert: {display: false, text: ''},
+                errorAlert: {display: false, text: 'Error: selected phase for one or more images falls outside the image(s). This is likely due to cropping the image after setting the phase.'},
 
                 dimensionsEntered: false,
                 inputtedDimensions: {units: null, width: 0, height: 0},
@@ -222,7 +222,8 @@
                             fileType: inputFile.name.split('.').pop().toLowerCase(),
                             size: { width: 0, height: 0, units: null },
                             pixelSize: { width: 0, height: 0 },
-                            phase: { x_offset: 0, y_offset: 0 }
+                            phase: { x_offset: 0, y_offset: 0 },
+                            errors: {size: false}
                         }];
                         vm.getInitialDimensions(0); // set pixel dimensions for image
                         if (vm.displayableFileType(0) === false) { vm.filesEditable = false; } // set displayable status for image
@@ -275,7 +276,8 @@
                                     fileType: filetype,
                                     size: { width: 0, height: 0, units: null },
                                     pixelSize: { width: 0, height: 0 },
-                                    phase: { x_offset: 0, y_offset: 0 }
+                                    phase: { x_offset: 0, y_offset: 0 },
+                                    errors: {size: false}
                                 })                
                             })
                             .then(function () {
@@ -316,6 +318,7 @@
             // scale user inputted dimensions by how much user has cropped the images
             updateUserDimensions: function (index) {
                 let vm = this;
+                vm.displayedFiles[index].size.units = vm.inputtedDimensions.units;
                 vm.displayedFiles[index].size.width = parseInt( ( parseInt(vm.inputtedDimensions.width) / vm.displayedFiles[index].originalSize.width ) * vm.displayedFiles[index].pixelSize.width );
                 vm.displayedFiles[index].size.height = parseInt( ( parseInt(vm.inputtedDimensions.height) / vm.displayedFiles[index].originalSize.height ) * vm.displayedFiles[index].pixelSize.height );
             },
@@ -417,10 +420,12 @@
                     // validate that new phase is still within the image
                     if (vm.displayedFiles[index].phase.x_offset < 0 || vm.displayedFiles[index].phase.y_offset < 0) {
                         vm.errorAlert.display = true;
-                        vm.errorAlert.text = 'Error: selected phase for ' + vm.displayedFiles[index].name + ' has negative values. This is likely due to cropping the image after setting the phase.'
+                        vm.displayedFiles[index].errors.size = true;
                     } else if (vm.displayedFiles[index].phase.x_offset > coordinates.width || vm.displayedFiles[index].phase.y_offset > coordinates.height) {
                         vm.errorAlert.display = true;
-                        vm.errorAlert.text = 'Error: selected phase for ' + vm.displayedFiles[index].name + ' is outside the image. This is likely due to cropping the image after setting the phase.';
+                        vm.displayedFiles[index].errors.size = true;
+                    } else {
+                        vm.displayedFiles[index].errors.size = false;
                     }
 
                 }
@@ -556,6 +561,11 @@
     .imageTableButton {
         margin-top: 0px;
         margin-left: 0px;
+    }
+
+    .imageSizeError {
+        font-weight: 700;
+        color: red;
     }
 
     /********* 
