@@ -169,7 +169,7 @@
             
             // info alert that functionality is restricted if the user uploads tif or mat file type
             fileTypeAlert: function () {
-                return !filesEditable
+                return !this.filesEditable
             },
 
             fileUploaded: function () {
