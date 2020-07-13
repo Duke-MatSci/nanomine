@@ -174,7 +174,7 @@
 
             // show error alert if count of errors is greater than 0
             showErrorAlert: function () {
-                return !!errorAlert.count
+                return !!this.errorAlert.count
             },
 
             fileUploaded: function () {
