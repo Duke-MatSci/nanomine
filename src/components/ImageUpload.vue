@@ -269,7 +269,7 @@
                                 vm.displayedFiles.push({
                                     name: filename,
                                     originalName: filename,
-                                    url: 'data:image/' + filetype + ':base64,' + fileData,
+                                    url: 'data:image/' + filetype + ';base64,' + fileData,
                                     fileType: filetype,
                                     size: { width: 0, height: 0, units: null },
                                     pixelSize: { width: 0, height: 0 },
