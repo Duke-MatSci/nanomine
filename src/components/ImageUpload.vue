@@ -275,8 +275,7 @@
                                     size: { width: 0, height: 0, units: null },
                                     pixelSize: { width: 0, height: 0 },
                                     phase: { x_offset: 0, y_offset: 0 }
-                                })
-                                                
+                                })                
                             })
                             .then(function () {
                                 vm.getInitialDimensions(index); // get image dimensions
@@ -353,9 +352,9 @@
 
                 for (let i = 0; i < this.displayedFiles.length; i++) {
 
-                    if (displayedFiles[i].name === args[1]) {
+                    if (this.displayedFiles[i].name === args[1]) {
                         await this.cropImage(args[0], args[2], i);
-                    } else if (displayedFiles[i].fileType === 'tif') {
+                    } else if (this.displayedFiles[i].fileType === 'tif') {
                         continue;
                     } else {
                         await this.cropImage(null, args[2], i);
@@ -365,12 +364,12 @@
 
                 }
 
-                if (vm.submissionFile.fileType === 'zip') {
+                if (this.submissionFile.fileType === 'zip') {
                     this.rezipFiles();
                 }
 
                 // push to parent
-                this.$emit('setFiles', vm.submissionFile);
+                this.$emit('setFiles', this.submissionFile);
                 this.pushImageDimensions();
                 for (let i = 0; i < this.displayedFiles.length; i++) { this.pushPhase(i) }
 
