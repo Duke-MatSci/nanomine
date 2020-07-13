@@ -123,7 +123,6 @@
                 successDlg: false,
                 jobId: '',
                 files: [],
-                fileName: '',
                 selects: [],
                 selectedOptions: {}
             }
@@ -148,9 +147,8 @@
 
         methods: {
 
-            setFiles: function (...files) {
+            setFiles: function (files) {
                 this.files = files[0]; // the actual file object
-                this.fileName = files[1]; // the name of the file
             },
 
             setSelectors: function (selectedOptions) {
@@ -189,14 +187,14 @@
                 console.log('Called Job Manager for ' + vm.job.submit.submitJobTitle)
                 jm.setJobType(vm.job.submit.submitJobTitle)
 
-                var jobParameters = {'InputType': vm.fileName.split('.').pop()}; // Figure out which file type
+                var jobParameters = {'InputType': vm.files[0].fileType}; // Figure out which file type
                 for (var key in vm.selectedOptions) {
                     jobParameters[key] = vm.selectedOptions[key]
                 }
                 jm.setJobParameters(jobParameters)
 
-                jm.addInputFile(vm.fileName, vm.files[0].fileUrl)
-                console.log('Job Manager added file: ' + vm.fileName)
+                jm.addInputFile(vm.files[0].name, vm.files[0].url)
+                console.log('Job Manager added file: ' + vm.files[0].name)
 
                 return jm.submitJob(function (jobId) {
                     console.log('Success! JobId is: ' + jobId)

@@ -311,6 +311,7 @@
             // emit image dimensions data back to parent
             pushImageDimensions: function () {
                 // DELETE THE RETURN STATEMENT BELOW TO IMPLEMENT IMAGE DIMENSIONS
+                return;
 
                 if (this.displayableFileType(0) === true) {
                     this.selectedOptions['dimensions'] = {'units': this.inputtedDimensions.units, 'width': this.displayedFiles[0].size.width, 'height': this.displayedFiles[0].size.height};
@@ -351,6 +352,7 @@
 
             pushPhase: function (index) {
                 // DELETE THE RETURN STATEMENT BELOW TO IMPLEMENT PHASE
+                return;
 
                 if ('phase' in this.selectedOptions) {
                     this.selectedOptions['phase'][this.displayedFiles[index].originalName] = this.displayedFiles[index].phase;
