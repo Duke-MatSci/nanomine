@@ -315,6 +315,7 @@
 
             // scale user inputted dimensions by how much user has cropped the images
             updateUserDimensions: function (index) {
+                let vm = this;
                 vm.displayedFiles[index].size.width = parseInt( ( parseInt(vm.inputtedDimensions.width) / vm.displayedFiles[index].originalSize.width ) * vm.displayedFiles[index].pixelSize.width );
                 vm.displayedFiles[index].size.height = parseInt( ( parseInt(vm.inputtedDimensions.height) / vm.displayedFiles[index].originalSize.height ) * vm.displayedFiles[index].pixelSize.height );
             },
