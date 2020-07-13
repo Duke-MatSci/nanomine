@@ -216,9 +216,12 @@
                         fileType: inputFile.name.split('.').pop().toLowerCase(),
                     }
 
+                    // push to parent
+                    vm.$emit('setFiles', vm.submissionFile);
+
                     // push to displayed files
                     if (vm.submissionFile.fileType === 'zip') {
-                        await vm.unzipUploadedFiles(inputFile); // function unzips contents, sets editable status and gets image dimensions
+                        vm.unzipUploadedFiles(inputFile); // function unzips contents, sets editable status and gets image dimensions
                     } else {
                         vm.displayedFiles = [{
                             name: inputFile.name,
@@ -233,9 +236,6 @@
                         vm.getInitialDimensions(0); // set pixel dimensions for image
                         if (vm.displayableFileType(0) === false) { vm.filesEditable = false; } // set displayable status for image
                     }
-
-                    // push to parent
-                    vm.$emit('setFiles', vm.submissionFile);
 
                 });
 
@@ -257,43 +257,41 @@
             },
 
             // unzip if the user uploads a zip file
-            unzipUploadedFiles: function (inputFile) {
-                return new Promise((resolve, reject) => {
+            unzipUploadedFiles: function (inputFile) { 
+
+                // initial variable declaration
+                const vm = this;
+                const jszip_obj = new jszip();
+
+                // unzip
+                jszip_obj.loadAsync(inputFile)
+                .then(async function (zip) {
                     
-                    // initial variable declaration
-                    const vm = this;
-                    const jszip_obj = new jszip();
+                    // transform contents to base64
+                    Object.keys(zip.files).forEach(function (filename) {
+                        zip.files[filename].async("base64")
+                        .then(function (fileData) {
 
-                    // unzip
-                    jszip_obj.loadAsync(inputFile)
-                    .then(async function (zip) {
-                        
-                        // transform contents to base64
-                        Object.keys(zip.files).forEach(function (filename) {
-                            zip.files[filename].async("base64")
-                            .then(function (fileData) {
-
-                                var filetype = filename.split('.').pop().toLowerCase();
-                                vm.displayedFiles.push({
-                                    name: filename,
-                                    originalName: filename,
-                                    url: 'data:image/' + filetype + ';base64,' + fileData,
-                                    fileType: filetype,
-                                    size: { width: 0, height: 0, units: null },
-                                    pixelSize: { width: 0, height: 0 },
-                                    phase: { x_offset: 0, y_offset: 0 },
-                                    errors: {size: false}
-                                })                
-                            })
-                            .then(function () {
-                                vm.getInitialDimensions(vm.displayedFiles.length-1); // get image dimensions
-                                if (vm.displayableFileType(vm.displayedFiles.length-1) === false) { vm.filesEditable = false; } // reduce functionality if image is tif or mat
-                            })
+                            var filetype = filename.split('.').pop().toLowerCase();
+                            vm.displayedFiles.push({
+                                name: filename,
+                                originalName: filename,
+                                url: 'data:image/' + filetype + ';base64,' + fileData,
+                                fileType: filetype,
+                                size: { width: 0, height: 0, units: null },
+                                pixelSize: { width: 0, height: 0 },
+                                phase: { x_offset: 0, y_offset: 0 },
+                                errors: {size: false}
+                            })                
                         })
-
+                        .then(function () {
+                            vm.getInitialDimensions(vm.displayedFiles.length-1); // get image dimensions
+                            if (vm.displayableFileType(vm.displayedFiles.length-1) === false) { vm.filesEditable = false; } // reduce functionality if image is tif or mat
+                        })
                     })
 
                 })
+                
             },
 
             // callback function for when users enter data into the image dimensions section
