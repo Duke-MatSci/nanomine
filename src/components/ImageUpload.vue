@@ -303,7 +303,6 @@
             // emit image dimensions data back to parent
             pushImageDimensions: function () {
                 // DELETE THE RETURN STATEMENT BELOW TO IMPLEMENT IMAGE DIMENSIONS
-                return;
 
                 if (this.displayableFileType(0) === true) {
                     this.selectedOptions['dimensions'] = {'units': this.inputtedDimensions.units, 'width': this.displayedFiles[0].size.width, 'height': this.displayedFiles[0].size.height};
@@ -337,7 +336,6 @@
 
             pushPhase: function (index) {
                 // DELETE THE RETURN STATEMENT BELOW TO IMPLEMENT PHASE
-                return;
 
                 if ('phase' in this.selectedOptions) {
                     this.selectedOptions['phase'][this.displayedFiles[index].originalName] = this.displayedFiles[index].phase;
@@ -417,10 +415,10 @@
                     // validate that new phase is still within the image
                     if (vm.displayedFiles[index].phase.x_offset < 0 || vm.displayedFiles[index].phase.y_offset < 0) {
                         vm.errorAlert.display = true;
-                        vm.errorAlert.text = 'Error: selected phase for ' + vm.displayedFiles[index].fileName + ' has negative values. This is likely due to cropping the image after setting the phase.'
+                        vm.errorAlert.text = 'Error: selected phase for ' + vm.displayedFiles[index].name + ' has negative values. This is likely due to cropping the image after setting the phase.'
                     } else if (vm.displayedFiles[index].phase.x_offset > coordinates.width || vm.displayedFiles[index].phase.y_offset > coordinates.height) {
                         vm.errorAlert.display = true;
-                        vm.errorAlert.text = 'Error: selected phase for ' + vm.displayedFiles[index].fileName + ' is outside the image. This is likely due to cropping the image after setting the phase.';
+                        vm.errorAlert.text = 'Error: selected phase for ' + vm.displayedFiles[index].name + ' is outside the image. This is likely due to cropping the image after setting the phase.';
                     }
 
                 }
