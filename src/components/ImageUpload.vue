@@ -224,7 +224,7 @@
                             phase: { x_offset: 0, y_offset: 0 }
                         }];
                         vm.getInitialDimensions(0); // set pixel dimensions for image
-                        if (vm.displayableFiletype(0) === false) { vm.filesEditable = false; } // set displayable status for image
+                        if (vm.displayableFileType(0) === false) { vm.filesEditable = false; } // set displayable status for image
                     }
 
                     // push to parent
@@ -263,7 +263,8 @@
                         
                         // transform contents to base64
                         Object.keys(zip.files).forEach(function (filename, index) {
-                            zip.files[filename].async("base64").then(function (fileData) {
+                            zip.files[filename].async("base64")
+                            .then(function (fileData) {
 
                                 var filetype = filename.split('.').pop().toLowerCase();
                                 vm.displayedFiles.push({
@@ -275,10 +276,11 @@
                                     pixelSize: { width: 0, height: 0 },
                                     phase: { x_offset: 0, y_offset: 0 }
                                 })
-
+                                                
+                            })
+                            .then(function () {
                                 vm.getInitialDimensions(index); // get image dimensions
                                 if (vm.displayableFileType[index] === false) { vm.filesEditable = false; } // reduce functionality if image is tif or mat
-                                
                             })
                         })
                     })
@@ -349,7 +351,7 @@
             // args: [cropped image, filename of cropped image, coordinates]
             cropCallback: async function (...args) {
 
-                for (let i = 0; i < displayedFiles.length; i++) {
+                for (let i = 0; i < this.displayedFiles.length; i++) {
 
                     if (displayedFiles[i].name === args[1]) {
                         await this.cropImage(args[0], args[2], i);
