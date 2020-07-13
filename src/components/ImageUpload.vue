@@ -188,7 +188,7 @@
                 
                 // initial variable declaration and input validation
                 let vm = this;
-                const inputFile = e.targets.files[0];
+                const inputFile = e.target.files[0];
                 if (inputFile === undefined) { return; }
 
                 // reset file information
