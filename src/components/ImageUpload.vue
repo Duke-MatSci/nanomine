@@ -270,7 +270,7 @@
                             
                             async function getContent(filename) {
 
-                                contentWrapper = () => {
+                                const contentWrapper = () => {
 
                                     return new Promise((resolve, reject) => {
                                         zip.files[filename].async("base64").then(function (fileData) {
