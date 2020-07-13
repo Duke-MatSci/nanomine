@@ -335,7 +335,7 @@
                 this.displayedFiles[index].name += " "; // force rerender
 
                 // push to parent
-                this.pushPhase();
+                this.pushPhase(index);
                         
             },
 
