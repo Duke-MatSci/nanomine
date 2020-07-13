@@ -266,22 +266,36 @@
                     .then(async function (zip) {
                         
                         // transform contents to base64
-                        Object.keys(zip.files).forEach(function (filename) {
-                            zip.files[filename].async("base64").then(function (fileData) {
+                        Object.keys(zip.files).forEach( 
+                            
+                            function getContent(filename) {
 
-                                var filetype = filename.split('.').pop().toLowerCase();
-                                vm.displayedFiles.push({
-                                    name: filename,
-                                    originalName: filename,
-                                    url: 'data:image/' + filetype + ':base64,' + fileData,
-                                    fileType: filetype,
-                                    size: { width: 0, height: 0, units: null },
-                                    pixelSize: { width: 0, height: 0 },
-                                    phase: { x_offset: 0, y_offset: 0 }
-                                })
+                                contentWrapper = () => {
 
-                            });
-                        });
+                                    return new Promise((resolve, reject) => {
+                                        zip.files[filename].async("base64").then(function (fileData) {
+
+                                            var filetype = filename.split('.').pop().toLowerCase();
+                                            vm.displayedFiles.push({
+                                                name: filename,
+                                                originalName: filename,
+                                                url: 'data:image/' + filetype + ':base64,' + fileData,
+                                                fileType: filetype,
+                                                size: { width: 0, height: 0, units: null },
+                                                pixelSize: { width: 0, height: 0 },
+                                                phase: { x_offset: 0, y_offset: 0 }
+                                            })
+
+                                            resolve();
+
+                                        });
+                                    });
+                                }
+
+                                await contentWrapper();
+
+                            }
+                        );
 
                         resolve();
 
