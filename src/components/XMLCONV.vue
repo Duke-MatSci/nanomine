@@ -5,7 +5,8 @@
       <h3 class="text-xs-left">Description</h3>
       <br>
       <p class="text-xs-left">The simplest method to curate your sample into the database is by uploading an MS Excel
-        spreadsheet. For each sample, upload a completed Excel template file using the first uploading box and other supplementary image and
+        spreadsheet. For each sample, select or create a dataset for your sample group, upload a completed Excel template
+        file using the first uploading box and other supplementary image and
         raw data files using the second uploading box. The master Excel template contains all possible fields for
         nanocomposite sample data and therefore many fields will remain blank for your sample. Fill in only the
         parameters applicable to your sample. Customized templates are available upon request, please contact
@@ -13,15 +14,22 @@
       </p>
       <br>
       <h3 class="text-xs-left">Steps</h3>
-      <p class="text-xs-left">Step 1: Click <a href="/nmstatic/xmlconv/master_template.zip" download>here</a> to download the
+      <p class="text-xs-left">
+        <span class="font-weight-black">NOTE:</span>  Filesets for samples are grouped into datasets.
+           The files for a sample (images, auxiliary spreadsheet data, completed Excel template, etc)
+           are uploaded as a set called a fileset.  Uploading multiple samples requires multiple fileset uploads.<br/>
+        <span class="font-weight-black">Step 1:</span> Create a new dataset for the control sample and its related files,
+           <span class="font-weight-black">then when uploading each additional sample be
+           sure to select the same dataset</span> that was used for the control sample of the sample group.<br/>
+        <span class="font-weight-black">Step 2:</span> Click <a href="/nmstatic/xmlconv/master_template.zip" download>here</a> to download the
         blank MS Excel template (137 kB).
         (Click <a href="/nmstatic/xmlconv/example.zip" download>here</a> to see an example, 263 kB)<br>
-        Step 2: Fill in the parameters for all applicable cells in the Excel template file. Prepare the supplementary
+        <span class="font-weight-black">Step 3:</span> Fill in the parameters for all applicable cells in the Excel template file. Prepare the supplementary
         images and raw data files.<br>
-        Step 3: Select the completed Excel template file in the first uploading box.<br>
-        Step 4: Select the supplementary images and other raw data files in the second uploading box (press "Ctrl" or
+        <span class="font-weight-black">Step 4:</span> Select the completed Excel template file in the first uploading box.<br>
+        <span class="font-weight-black">Step 5:</span> Select the supplementary images and other raw data files in the second uploading box (press "Ctrl" or
         "Command" when selecting multiple files), then click Submit to upload your data.<br>
-        Step 5: Wait for the feedback message. Please read the message and follow the instructions if an error message
+        <span class="font-weight-black">Step 6:</span> Wait for the feedback message. Please read the message and follow the instructions if an error message
         is displayed.</p>
       <h3 class="text-xs-left">Note</h3>
       <p class="text-xs-left">1. We recommend you to upload your control sample first and remember its sample ID.<br>
@@ -60,6 +68,7 @@
           </v-card-actions>
         </v-card>
       </v-dialog>
+      <dataset-create-or-select selectHeader="Choose or create a dataset" :selectedHandler="datasetSelectedHandler"  :datasetOptions="datasetOptions"></dataset-create-or-select>
       <v-flex xs12 class="text-xs-center text-sm-center text-md-center text-lg-center">
         <p class="text-xs-left">Select a completed Excel Template File
           <v-btn class="text-xs-left" small color="primary" @click='pickTemplate'>Browse</v-btn>
@@ -71,7 +80,7 @@
             @change="onTemplatePicked"
           >
         </p>
-        <v-list v-model="templateName" subheader="true" v-if="templateUploaded">
+        <v-list v-model="templateName" subheader v-if="templateUploaded">
           <v-list-tile
             :key="templateName"
           >
@@ -84,32 +93,8 @@
           </v-list-tile>
         </v-list>
       </v-flex>
-      <v-flex xs12 class="text-xs-center text-sm-center text-md-center text-lg-center">
-        <p class="text-xs-left">Select Other Files (including raw data files and image files)
-          <v-btn class="text-xs-left" small color="primary" @click='pickFile'>Browse</v-btn>
-          <input
-            type="file"
-            style="display: none"
-            :multiple="true"
-            ref="myUpload"
-            @change="onFilePicked"
-          >
-        </p>
-        <v-list v-model="filesDisplay" subheader="true">
-          <v-list-tile
-            v-for="file in filesDisplay"
-            :key="file.fileName"
-          >
-            <v-list-tile-avatar>
-              <v-icon color="primary">check_circle_outline</v-icon>
-            </v-list-tile-avatar>
-            <v-list-tile-content>
-              <v-list-tile-title v-text="file.fileName"></v-list-tile-title>
-            </v-list-tile-content>
-          </v-list-tile>
-        </v-list>
-      </v-flex>
-      <v-btn v-on:click="submit()" color="primary">Submit</v-btn>
+      <ImageUpload v-on:setFiles="setFiles" aspectRatio='free'></ImageUpload>
+      <v-btn v-on:click="submit()" :disabled="templateName.length < 1 || !datasetSelected" color="primary">Submit</v-btn>
       <br>
       <h4 class="text-xs-left">Reference</h4>
       <p class="text-xs-left">Zhao, H., Li, X., Zhang, Y., Schadler, L. S., Chen, W., &amp; Brinson, L. C. (2016). <i><a href="https://aip.scitation.org/doi/abs/10.1063/1.4943679">Perspective: NanoMine: A material genome approach for polymer nanocomposites analysis and design</a></i>. APL Materials, 4(5), 053204.</p>
@@ -122,9 +107,13 @@
 import {} from 'vuex'
 import {JobMgr} from '@/modules/JobMgr.js'
 import {Auth} from '@/modules/Auth.js'
+import ImageUpload from './ImageUpload.vue'
 
 export default {
   name: 'XMLCONV',
+  components: {
+    ImageUpload
+  },
   data: () => ({
     title: 'File Upload',
     dialog: false,
@@ -132,14 +121,15 @@ export default {
     templateUrl: '',
     template: null,
     files: [],
-    filesDisplay: [],
     uploadError: false,
     uploadErrorMsg: '',
     loginRequired: false,
     loginRequiredMsg: '',
     templateUploaded: false,
     successDlg: false,
-    jobId: ''
+    jobId: '',
+    datasetOptions: {mineOnly: 'always'},
+    datasetSelected: null
   }),
   beforeMount: function () {
     let vm = this
@@ -150,16 +140,26 @@ export default {
     }
   },
   methods: {
+
+    setFiles: function (...files) {
+      this.files = files[0]; // the actual file object
+    },
+
+    datasetSelectedHandler (dataset) {
+      let vm = this
+      if (dataset) {
+        console.log('Selected dataset: ' + dataset._id)
+      } else {
+        console.log('Selected dataset is null.')
+      }
+      vm.datasetSelected = dataset
+    },
     setLoading: function () {
       this.$store.commit('isLoading')
     },
 
     resetLoading: function () {
       this.$store.commit('notLoading')
-    },
-
-    pickFile () {
-      this.$refs.myUpload.click()
     },
 
     pickTemplate () {
@@ -171,11 +171,6 @@ export default {
       this.templateUrl = ''
       this.template = null
       this.templateUploaded = false
-    },
-
-    resetFiles: function () {
-      this.files = []
-      this.filesDisplay = []
     },
 
     onTemplatePicked (e) {
@@ -202,29 +197,6 @@ export default {
       }
     },
 
-    onFilePicked (e) {
-      this.resetFiles()
-      const files = e.target.files
-      for (let i = 0; i < files.length; i++) {
-        let file = {}
-        let f = files[i]
-        if (f !== undefined) {
-          file.fileName = f.name
-          if (file.fileName.lastIndexOf('.') <= 0) {
-            return
-          }
-          const fr = new FileReader()
-          fr.readAsDataURL(f)
-          fr.addEventListener('load', () => {
-            file.fileUrl = fr.result
-            this.files.push(file)
-            this.filesDisplay.push(file)
-          })
-        } else {
-          console.log('File Undefined')
-        }
-      }
-    },
     successDlgClicked: function () {
       let vm = this
       console.log('Success dlg button clicked')
@@ -247,7 +219,7 @@ export default {
       vm.setLoading()
       let jm = new JobMgr()
       jm.setJobType('xmlconv')
-      jm.setJobParameters({'templateName': vm.templateName})
+      jm.setJobParameters({'datasetId': vm.datasetSelected._id, 'templateName': vm.templateName})
       vm.files.forEach(function (v) {
         jm.addInputFile(v.fileName, v.fileUrl)
       })

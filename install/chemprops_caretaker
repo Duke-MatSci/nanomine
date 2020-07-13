@@ -9,7 +9,7 @@ curDay="$(date +%u)"
 
 if (( ${curDay} == ${runDay} && ${curHr} == ${runHr} )); then
   echo "Executing ChemProps Caretaker $(date)"
-  (su - whyis -c "/apps/nanomine/scripts/run_chemprops_updater")
+  (su - whyis -c "/apps/nanomine/src/scripts/run_chemprops_updater")
   echo "Done executing ChemProps Caretaker $(date)"
 fi
 

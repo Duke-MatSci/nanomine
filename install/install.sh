@@ -44,7 +44,7 @@ if [[ ! -d /apps ]]; then
 fi
 echo installing whyis ...
 export WHYIS_FORK='bluedevil-oit'
-export WHYIS_BRANCH='b1.3'
+export WHYIS_BRANCH='master'
 ## bash < <(curl -skL https://raw.githubusercontent.com/tetherless-world/whyis/master/install.sh)
 curl -skL --output whyis-install.tmp https://raw.githubusercontent.com/${WHYIS_FORK}/whyis/${WHYIS_BRANCH}/install.sh
 if [[ $? -ne 0 ]]; then
@@ -134,9 +134,14 @@ echo 'export CHEMPROPS_GS_CONFIG_DOWNLOAD_LOCATION='"${CHEMPROPS_GS_CONFIG_DOWNL
 (su - whyis -c '/apps/install/setup_chemprops.sh')
 cp /apps/nanomine/install/chemprops_caretaker /etc/cron.hourly
 
+# ensure that /data/loaded exists and is owned by the correct user before setup_nanomine
+mkdir -p /data/loaded 2> /dev/null
+chown whyis:whyis /data/loaded 2> /dev/null
+
 (su - whyis -c "/apps/install/setup_nanomine.sh")
 systemctl restart nm-rest # since the db was re-created by setup_nanomine.sh
 systemctl restart apache2
 systemctl restart celeryd
+
 
 echo "if you would like to login as whyis from the ubuntu login, execute 'sudo passwd whyis' and set a password to use from the login page"

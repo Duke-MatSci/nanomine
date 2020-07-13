@@ -11,9 +11,10 @@
         <v-btn flat to="/db">Database</v-btn>
         <v-btn flat to="/mtools">Module Tools</v-btn>
         <v-btn flat to="/simtools">Simulation Tools</v-btn>
+        <v-btn flat @click="openGallery">Gallery</v-btn>
         <v-btn fab flat href="/home"><i class="material-icons nm-search-icon" v-if="searchEnabled()">search</i>
         </v-btn>
-        <v-btn flat to="/contact" v-on="on">Contact Us<!--i class="material-icons nm-search-icon">contact_support</i--></v-btn>
+        <v-btn v-if="isLoggedIn()" flat to="/contact">Contact Us<!--i class="material-icons nm-search-icon">contact_support</i--></v-btn>
         <v-btn v-if="isLoggedIn()" flat to="/mypage">My Page</v-btn>
         <v-btn v-else flat to="/mypage">My Page</v-btn>
         <v-btn v-if="loginStatus" flat v-on:click="$store.commit('setLoginLogout')">
@@ -95,7 +96,7 @@
           <v-btn
             color="blue darken-1"
             flat="flat"
-            href="/secure"
+            :href="getLoginLink()"
           >
             Login
           </v-btn>
@@ -159,6 +160,14 @@ export default {
       vm.$refs.logoutLink.click()
       vm.logoutDialog = false
     },
+    getLoginLink: function () {
+      let vm = this
+      let rv = '/secure'
+      if (vm.auth.isTestUser() === true) {
+        rv = '/nmr/nmdevlogin'
+      }
+      return rv
+    },
     cancelLogout: function () {
       let vm = this
       vm.logoutDialog = false
@@ -203,6 +212,10 @@ export default {
     },
     isTestUser: function () {
       return this.auth.isTestUser()
+    },
+    openGallery: function () {
+      window.location = `${window.location.origin}/wi/about?view=gallery&uri=http://semanticscience.org/resource/Chart`;
+      return;
     }
   },
   computed: {

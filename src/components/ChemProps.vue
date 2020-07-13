@@ -15,7 +15,7 @@
       </p>
       <br>
       <h3 class="text-xs-left">Instructions</h3>
-      <p class="text-xs-left"><b>1. Select the collection.
+      <p class="text-xs-left"><b>1. Select the collection.</b></p>
       <v-flex xs12 sm6 md3>
         <v-radio-group v-model="pfRadios">
           <v-radio label="Polymer" value="pol"></v-radio>
@@ -42,10 +42,15 @@
         <v-text-field v-model="stdname" label='Standardized Name' outlined></v-text-field>
         <v-text-field v-model="density" label='Density (g/cm3)' outlined></v-text-field>
         <v-text-field v-model="uSMILES" label='uSMILES' outlined v-if="pfRadios === 'pol'"></v-text-field>
-        <p v-if="pfRadios === 'pol'">Structure (coming soon)</p>
+        <p v-if="pfRadios === 'pol'">Structure
+        <Smiles :smilesOptions="smilesOptions" :smilesInput="inputStr" :formulaHandler="formulaUpdated" :onSuccessHandler="onSuccess" :onErrorHandler="onError" height="100%" width="100%"></Smiles>
+        </p>
+        <p v-if="pfRadios === 'pol'">Formula: {{molecularFormula}}
+        </p>
       </v-flex>
       <br>
       <h4 class="text-xs-left">Reference</h4>
+      <p class="text-xs-left">Probst, Daniel, and Jean-Louis Reymond. "Smilesdrawer: parsing and drawing SMILES-encoded molecular structures using client-side javascript." Journal of chemical information and modeling 58.1 (2018): 1-7.</p>
       <!-- <p class="text-xs-left">Bradshaw et al., <i><a href="http://link.springer.com/article/10.1023/A:1009772018066">A Sign Control Method for Fitting and Interconverting Material Functions for Linearly Viscoelastic Solids</a></i>, Mechanics of Time-Dependent Materials. 1997 1(1)</p> -->
     </v-container>
   </div>
@@ -55,9 +60,13 @@
 import {} from 'vuex'
 import {Auth} from '@/modules/Auth.js'
 import Axios from 'axios'
+import Smiles from './Smiles'
 
 export default {
   name: 'ChemProps',
+  components: {
+    Smiles
+  },
   data () {
     return {
       title: 'ChemProps',
@@ -74,16 +83,33 @@ export default {
       searchErrorMsg: '',
       loginRequired: false,
       loginRequiredMsg: '',
-      successDlg: false
+      successDlg: false,
+      theme: 'dark',
+      smilesError: false,
+      smilesMessage: '',
+      inputStr: '',
+      molecularFormula: '',
+      // https://github.com/reymond-group/smilesDrawer#options
+      smilesOptions: {
+        Padding: 0.0,
+        atomVisualization: 'default', // 'balls',
+        explicitHydrogens: true,
+        terminalCarbons: true,
+        debug: false
+      }
     }
   },
   beforeMount: function () {
     let vm = this
     vm.auth = new Auth()
-    if (!vm.auth.isLoggedIn()) {
-      vm.loginRequired = true
-      vm.loginRequiredMsg = 'Login is required.'
-    }
+    // No longer requiring login
+    // if (!vm.auth.isLoggedIn()) {
+    //   vm.loginRequired = true
+    //   vm.loginRequiredMsg = 'Login is required.'
+    // }
+  },
+  mounted () {
+    console.log('SmilesTest mounted')
   },
   methods: {
     setLoading: function () {
@@ -160,7 +186,25 @@ export default {
         })
         .then(function () {
           // always executed
+          vm.inputStr = vm.uSMILES
         })
+    },
+    onSuccess () {
+      this.smilesError = false
+    },
+    formulaUpdated (formula) {
+      this.molecularFormula = formula
+    },
+    onError (err) {
+      console.trace('Error handler called: ')
+      let vm = this
+      if (err) {
+        vm.smilesMessage = err
+      } else {
+        vm.smilesMessage = 'Undefined error'
+      }
+      vm.smilesError = true
+      console.log('SmilesTest - error: ' + vm.smilesMessage)
     }
   }
 }

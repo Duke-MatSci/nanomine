@@ -48,7 +48,7 @@ class matlab:
       runpgm = ["python", jobSrcDir + '/matlab/' + 'TEST_Otsu.py',
                 userId, jobId, jobType, jobSrcDir, jobDir, webBaseUri, jobDataUriSuffix, matlabDir,
                 "-nodesktop", "-nodisplay", "-nosplash", "-r", runstr]
-
+    print(runpgm)
     p = Popen(runpgm)
     p.wait()
     rc = p.returncode

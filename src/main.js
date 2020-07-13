@@ -17,13 +17,14 @@ import VueGoogleCharts from 'vue-google-charts'
 import TreeView from 'vue-json-tree-view'
 import vPlayBack from 'v-playback'
 import VideoLink from '@/components/VideoLink'
+import DatasetCreateOrSelect from '@/components/DatasetCreateOrSelect'
 
 Vue.use(TreeView)
 Vue.use(vPlayBack)
-
 Vue.use(VueGoogleCharts)
 
 Vue.config.productionTip = false
+Vue.config.devtools = true
 
 Vue.use(Vuex)
 Vue.use(Vuetify, {
@@ -45,6 +46,7 @@ Vue.component('LeftMenu', LeftMenu)
 Vue.component('waiting', Waiting)
 Vue.component('analytics', Analytics)
 Vue.component('video-link', VideoLink)
+Vue.component('dataset-create-or-select', DatasetCreateOrSelect)
 
 /* eslint-disable no-new */
 export default new Vue({
