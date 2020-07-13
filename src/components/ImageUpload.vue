@@ -22,7 +22,7 @@
         </p>
 
         <!-- error alert if phase becomes invalid after cropping -->
-        <v-alert class='alert' type='error' dismissible v-model="errorAlert.display">{{ errorAlert.text }}</v-alert>
+        <v-alert class='alert' type='error' dismissible v-model="showErrorAlert">{{ errorAlert.text }}</v-alert>
 
         <!-- info alert that functionality reduced if user uploads mat or tif file type -->
         <v-alert class='alert' type='info' dismissible v-model="fileTypeAlert">Note: due to browser limitations, image editing functionality and pulling data about image dimensions is not available for mat and tif file types. But, these file types can still be submitted for jobs.</v-alert> 
@@ -153,7 +153,7 @@
                 selectedOptions: {},
 
                 filesEditable: true,
-                errorAlert: {display: false, text: 'Error: selected phase for one or more images falls outside the image(s). This is likely due to cropping the image after setting the phase.'},
+                errorAlert: {count: 0, text: 'Error: selected phase for one or more images falls outside the image(s). This is likely due to cropping the image after setting the phase.'},
 
                 dimensionsEntered: false,
                 inputtedDimensions: {units: null, width: 0, height: 0},
@@ -170,6 +170,11 @@
             // info alert that functionality is restricted if the user uploads tif or mat file type
             fileTypeAlert: function () {
                 return !this.filesEditable
+            },
+
+            // show error alert if count of errors is greater than 0
+            showErrorAlert: function () {
+                return !!errorAlert.count
             },
 
             fileUploaded: function () {
@@ -332,6 +337,11 @@
 
                 // apply new phase
                 this.displayedFiles[index] = args[1]
+                if (this.displayedFiles[index].errors.size === true) {
+                    this.displayedFiles[index].errors.size = false;
+                    this.errorAlert.count -= 1;
+                }
+
                 this.displayedFiles[index].name += " "; // force rerender
 
                 // push to parent
@@ -419,13 +429,11 @@
 
                     // validate that new phase is still within the image
                     if (vm.displayedFiles[index].phase.x_offset < 0 || vm.displayedFiles[index].phase.y_offset < 0) {
-                        vm.errorAlert.display = true;
+                        vm.errorAlert.count += 1;
                         vm.displayedFiles[index].errors.size = true;
                     } else if (vm.displayedFiles[index].phase.x_offset > coordinates.width || vm.displayedFiles[index].phase.y_offset > coordinates.height) {
-                        vm.errorAlert.display = true;
+                        vm.errorAlert.count += 1;
                         vm.displayedFiles[index].errors.size = true;
-                    } else {
-                        vm.displayedFiles[index].errors.size = false;
                     }
 
                 }
