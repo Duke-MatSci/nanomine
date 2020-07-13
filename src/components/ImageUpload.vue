@@ -30,7 +30,7 @@
         <!-- image dimension input section -->
         <div v-if="fileUploaded && collectDimensions">
 
-            <h4>Image Dimensions</h4>
+            <h4 class='subheader' >Image Dimensions</h4>
 
             <div class='imageDimensionsWrapper'>
                 
@@ -60,7 +60,7 @@
         <!-- parameters that are specific to job type -->
         <div v-if="fileUploaded && selects.length > 0">
 
-            <h4>Parameters</h4>
+            <h4 class='subheader'>Parameters</h4>
 
             <div class='selectDropdownsWrapper'>
                 <div class='singleSelectDropdown' v-for="(select, index) in selects" :key='index'>
@@ -96,7 +96,7 @@
                     <h4>Selected phase</h4>
                     <v-tooltip top>
                         <template v-slot:activator="{ on, attrs }">
-                            <v-icon v-bind="attrs" v-on="on">mdi-icon</v-icon>
+                            <v-icon v-bind="attrs" v-on="on">mdi-information</v-icon>
                         </template>
                         <span>Select which phase to analyze for each image</span>
                     </v-tooltip>
@@ -482,12 +482,15 @@
         margin-bottom: 20px;
     }
 
-    /* Subheaders such as 'Image dimensions' and 'Parameters' and 'Selected phase' */
     h4 {
         text-align: left;
-        margin-bottom: 15px;
         margin-top: 0px;
         font-size: 15px;
+    }
+
+    /* Subheaders such as 'Image dimensions' and 'Parameters' */
+    .subheader {
+        margin-bottom: 15px;
         border-bottom: 1px solid gray;
     }
     
@@ -508,6 +511,11 @@
     **********/
     .imageTable {
         margin-bottom: 20px;
+    }
+
+    .imageTableHeader {
+        border-bottom: 1px solid gray;
+        margin-bottom: 15px;
     }
 
     .imageTableHeader, .imageTableContents {
