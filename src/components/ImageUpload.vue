@@ -384,7 +384,7 @@
                 if (this.submissionFile.fileType === 'zip') {
                     this.rezipFiles();
                 } else {
-                    this.submissionFile.url = this.displayesFiles[0].url;
+                    this.submissionFile.url = this.displayedFiles[0].url;
                     this.$emit('setFiles', this.submissionFile)
                 }
                 this.pushImageDimensions();
