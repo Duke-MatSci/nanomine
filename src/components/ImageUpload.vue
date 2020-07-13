@@ -384,7 +384,7 @@
 
                 // crop the image
                 if (url !== null){
-                    vm.displayedFiles[index] = url;
+                    vm.displayedFiles[index].url = url;
                 } else {
 
                     var canvas = document.createElement('canvas')
@@ -399,7 +399,7 @@
                         return new Promise((resolve, reject) => {
                             image.onload = function () {
                                 ctx.drawImage(image, (-1) * coordinates.left, (-1) * coordinates.top);
-                                vm.displayedFiles[index].toDataURL = canvas.toDataURL();
+                                vm.displayedFiles[index].url = canvas.toDataURL();
                                 resolve()
                             }
                         })
