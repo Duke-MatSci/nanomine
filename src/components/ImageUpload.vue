@@ -280,7 +280,7 @@
                                 if (vm.displayableFileType[index] === false) { vm.filesEditable = false; } // reduce functionality if image is tif or mat
                                 
                             })
-                        }
+                        })
                     })
 
                 })
