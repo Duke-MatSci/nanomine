@@ -287,7 +287,7 @@
                             })
                             .then(function () {
                                 vm.getInitialDimensions(vm.displayedFiles.length-1); // get image dimensions
-                                if (vm.displayableFileType[vm.displayedFiles.length-1] === false) { vm.filesEditable = false; } // reduce functionality if image is tif or mat
+                                if (vm.displayableFileType(vm.displayedFiles.length-1) === false) { vm.filesEditable = false; } // reduce functionality if image is tif or mat
                             })
                         })
 
@@ -380,12 +380,13 @@
 
                 }
 
+                // push to parent
                 if (this.submissionFile.fileType === 'zip') {
                     this.rezipFiles();
+                } else {
+                    this.submissionFile.url = this.displayesFiles[0].url;
+                    this.$emit('setFiles', this.submissionFile)
                 }
-
-                // push to parent
-                this.$emit('setFiles', this.submissionFile);
                 this.pushImageDimensions();
                 for (let i = 0; i < this.displayedFiles.length; i++) { this.pushPhase(i) }
 
@@ -465,6 +466,7 @@
                 jszip_obj.generateAsync({type: 'base64', compression: 'DEFLATE'})
                 .then(function (base64) {
                     vm.submissionFile.url = "data:application/zip;base64," + base64;
+                    vm.$emit('setFiles', vm.submissionFile)
                 })
 
             },

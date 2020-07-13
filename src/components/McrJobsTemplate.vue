@@ -148,7 +148,7 @@
         methods: {
 
             setFiles: function (files) {
-                this.files = files[0]; // the actual file object
+                this.files = files; // the actual file object
             },
 
             setSelectors: function (selectedOptions) {
