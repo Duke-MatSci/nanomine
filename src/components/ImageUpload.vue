@@ -194,6 +194,7 @@
                 // reset file information
                 vm.submissionFile = {};
                 vm.displayedFiles = [];
+                vm.filesEditable = true;
                 if ('phase' in vm.selectedOptions) {
                     delete vm.selectedOptions.phase;
                     vm.$emit('setSelectors', vm.selectedOptions);
@@ -293,7 +294,7 @@
                 if (this.inputtedDimensions.units !== null && parseInt(this.inputtedDimensions.width) > 0 && parseInt(this.inputtedDimensions.height) > 0) {
 
                     this.dimensionsEntered = true;
-                    for (let i = 0; i < displayedFiles.length; i++) { this.updateUserDimensions(i); }
+                    for (let i = 0; i < this.displayedFiles.length; i++) { this.updateUserDimensions(i); }
 
                     this.pushImageDimensions();
 
@@ -353,7 +354,7 @@
 
                     if (this.displayedFiles[i].name === args[1]) {
                         await this.cropImage(args[0], args[2], i);
-                    } else if (this.displayedFiles[i].fileType === 'tif') {
+                    } else if (this.displayableFileType(i) === false) {
                         continue;
                     } else {
                         await this.cropImage(null, args[2], i);
