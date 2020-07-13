@@ -262,7 +262,7 @@
                     .then(async function (zip) {
                         
                         // transform contents to base64
-                        Object.keys(zip.files).forEach(function (filename, index) {
+                        Object.keys(zip.files).forEach(function (filename) {
                             zip.files[filename].async("base64")
                             .then(function (fileData) {
 
@@ -278,10 +278,11 @@
                                 })                
                             })
                             .then(function () {
-                                vm.getInitialDimensions(index); // get image dimensions
-                                if (vm.displayableFileType[index] === false) { vm.filesEditable = false; } // reduce functionality if image is tif or mat
+                                vm.getInitialDimensions(vm.displayedFiles.length-1); // get image dimensions
+                                if (vm.displayableFileType[vm.displayedFiles.length-1] === false) { vm.filesEditable = false; } // reduce functionality if image is tif or mat
                             })
                         })
+
                     })
 
                 })
