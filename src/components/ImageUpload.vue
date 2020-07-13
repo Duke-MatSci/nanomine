@@ -212,7 +212,7 @@
 
                     // push to displayed files
                     if (vm.submissionFile.fileType === 'zip') {
-                        await vm.unzipUploadedFiles(inputFile); // unzipped files are pushed to displayed files directly within the function
+                        await vm.unzipUploadedFiles(inputFile); // function unzips contents, sets editable status and gets image dimensions
                     } else {
                         vm.displayedFiles = [{
                             name: inputFile.name,
@@ -223,27 +223,8 @@
                             pixelSize: { width: 0, height: 0 },
                             phase: { x_offset: 0, y_offset: 0 }
                         }];
-                    }
-
-                    // set reduced functionality if user uploads mat or tif file type
-                    for (let i = 0; i < vm.displayedFiles.length; i++) {
-                        if (vm.displayableFileType(i) === false) {
-                            vm.filesEditable = false;
-                        }
-                    }
-
-                    // calculate size dimensions for each image
-                    for (let i = 0; i < vm.displayedFiles.length; i++) {
-                        const getImageDimensions = (index) => {
-                            var img = new Image();
-                            img.src = vm.displayedFiles[index].url;
-                            img.onload = function () {
-                                vm.displayedFiles[index].originalSize = {width: img.width, height: img.height}
-                            }
-                        }
-                        if (vm.displayableFileType(i) === true) {
-                            getImageDimensions(i);
-                        }
+                        vm.getInitialDimensions(0); // set pixel dimensions for image
+                        if (vm.displayableFiletype(0) === false) { vm.filesEditable = false; } // set displayable status for image
                     }
 
                     // push to parent
@@ -251,7 +232,22 @@
 
                 });
 
-            }, 
+            },
+
+            getInitialDimensions: function (index) {
+            
+                let vm = this;
+                if (vm.displayableFileType[index] === false) { return; }
+
+                var img = new Image();
+                img.src = vm.displayedFiles[index].url;
+                img.onload = function () {
+                    vm.displayedFiles[index].pixelSize = {width: img.width, height: img.height};
+                    vm.displayedFiles[index].originalSize = {width: img.width, height: img.height};;
+                    vm.displayedFiles[index].name += " ";
+                }
+                
+            },
 
             // unzip if the user uploads a zip file
             unzipUploadedFiles: function (inputFile) {
@@ -266,39 +262,25 @@
                     .then(async function (zip) {
                         
                         // transform contents to base64
-                        Object.keys(zip.files).forEach( 
-                            
-                            async function getContent(filename) {
+                        Object.keys(zip.files).forEach(function (filename, index) {
+                            zip.files[filename].async("base64").then(function (fileData) {
 
-                                const contentWrapper = () => {
+                                var filetype = filename.split('.').pop().toLowerCase();
+                                vm.displayedFiles.push({
+                                    name: filename,
+                                    originalName: filename,
+                                    url: 'data:image/' + filetype + ':base64,' + fileData,
+                                    fileType: filetype,
+                                    size: { width: 0, height: 0, units: null },
+                                    pixelSize: { width: 0, height: 0 },
+                                    phase: { x_offset: 0, y_offset: 0 }
+                                })
 
-                                    return new Promise((resolve, reject) => {
-                                        zip.files[filename].async("base64").then(function (fileData) {
-
-                                            var filetype = filename.split('.').pop().toLowerCase();
-                                            vm.displayedFiles.push({
-                                                name: filename,
-                                                originalName: filename,
-                                                url: 'data:image/' + filetype + ':base64,' + fileData,
-                                                fileType: filetype,
-                                                size: { width: 0, height: 0, units: null },
-                                                pixelSize: { width: 0, height: 0 },
-                                                phase: { x_offset: 0, y_offset: 0 }
-                                            })
-
-                                            resolve();
-
-                                        });
-                                    });
-                                }
-
-                                await contentWrapper();
-
-                            }
-                        );
-
-                        resolve();
-
+                                vm.getInitialDimensions(index); // get image dimensions
+                                if (vm.displayableFileType[index] === false) { vm.filesEditable = false; } // reduce functionality if image is tif or mat
+                                
+                            })
+                        }
                     })
 
                 })
@@ -415,7 +397,7 @@
                         return new Promise((resolve, reject) => {
                             image.onload = function () {
                                 ctx.drawImage(image, (-1) * coordinates.left, (-1) * coordinates.top);
-                                vm.displayedFiles[index].fileUrl = canvas.toDataURL();
+                                vm.displayedFiles[index].toDataURL = canvas.toDataURL();
                                 resolve()
                             }
                         })
