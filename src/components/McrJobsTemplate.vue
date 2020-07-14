@@ -36,9 +36,9 @@
           <p><strong>{{ index + 1 }}. {{ uploadOption.title }}:</strong> <span v-html='uploadOption.description'>{{ uploadOption.description }}</span></p>
         </div>
       </v-flex>
-      
+
     </v-layout>
-    
+
     <!-- Modal that shows up upon file submission that shows a successful submission and the Job ID -->
     <v-dialog v-model="successDlg" persistent max-width="500px">
       <v-card>
@@ -58,7 +58,7 @@
 
       </v-card>
     </v-dialog>
-    
+
     <!-- Error for when there are issues with submitting the uploaded files -->
     <v-alert v-model="errorAlert" type="error" dismissible>{{ errorAlertMsg }}</v-alert>
 
@@ -70,13 +70,13 @@
     </v-flex>
 
     <h3>Image Upload</h3>
-    <ImageUpload 
-      class='imageUpload' 
-      v-on:setFiles="setFiles" 
-      v-on:setSelectors="setSelectors" 
-      :aspectRatio="job.aspectRatio" 
+    <ImageUpload
+      class='imageUpload'
+      v-on:setFiles="setFiles"
+      v-on:setSelectors="setSelectors"
+      :aspectRatio="job.aspectRatio"
       :selects='selects'
-      :collectDimensions='job.getImageDimensions' 
+      :collectDimensions='job.getImageDimensions'
     ></ImageUpload>
 
     <v-flex class="text-xs-center">
@@ -114,7 +114,7 @@ export default {
     job: Object
   },
 
-  data() {
+  data () {
     return {
       loginRequired: false,
       loginRequiredMsg: '',
@@ -137,16 +137,13 @@ export default {
     }
   },
 
-  mounted() {
-
-    if ("selects" in this.job) {
+  mounted () {
+    if ('selects' in this.job) {
       this.selects = this.job.selects
     }
-
   },
 
   methods: {
-
     setFiles: function (files) {
       this.files = files // the actual file object
     },
@@ -179,7 +176,7 @@ export default {
         vm.errorAlertMsg = msg
         vm.errorAlert = true
         vm.resetLoading()
-        return;
+        return
       }
 
       let jm = new JobMgr()

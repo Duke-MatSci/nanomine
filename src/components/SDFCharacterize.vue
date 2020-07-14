@@ -47,7 +47,7 @@ export default {
           submitButtonTitle: 'Characterize',
           submitJobTitle: 'SDFCharacterize'
         },
-     
+
         uploadOptions: [
           {
             title: 'Single image',

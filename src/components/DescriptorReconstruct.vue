@@ -49,7 +49,7 @@ export default {
           submitButtonTitle: 'Reconstruct',
           submitJobTitle: 'DescriptorReconstruct'
         },
-     
+
         uploadOptions: [
           {
             title: 'Note',

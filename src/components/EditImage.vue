@@ -44,7 +44,7 @@
 
 <script>
 
-import { Cropper } from 'vue-advanced-cropper';
+import { Cropper } from 'vue-advanced-cropper'
 
 export default {
   name: 'EditImage',
@@ -60,21 +60,18 @@ export default {
     aspectRatio: String
   },
   watch: {
-
     // update phase dot information when new image is opened in modal
     file: {
       deep: true,
-      handler(newValue, oldValue) {
+      handler (newValue, oldValue) {
         if (newValue.name !== oldValue.name) {
           this.phaseDotVisibility = false
         }
         this.phase = newValue.phase
       }
-    },
-
+    }
   },
-  mounted() {
-    
+  mounted () {
     // locks the aspect ratio at which the user can crop an image
     if (this.aspectRatio === 'square') {
       this.stencil_props.aspectRatio = 1
@@ -83,9 +80,8 @@ export default {
         delete this.stencil_props.aspectRatio
       }
     }
-
   },
-  data() {
+  data () {
     return {
       title: '',
       cropped_url: null,
@@ -97,34 +93,33 @@ export default {
   },
   methods: {
     onPhaseChange (e) {
-      
+
       // takes the click offset from top left of image and multiplies that by how much the image is scaled up/down to fit the modal
       this.phase.x_offset = parseInt(e.offsetX * (this.file.pixelSize.width / e.path[0].clientWidth))
       this.phase.y_offset = parseInt(e.offsetY * (this.file.pixelSize.height / e.path[0].clientHeight))
-      
-      this.phaseDotVisibility = true;
+
+      this.phaseDotVisibility = true
 
     },
-    onCropChange ({ coordinates, canvas}) {
+    onCropChange ({coordinates, canvas}) {
       this.cropped_url = canvas.toDataURL()
       this.coordinates = coordinates
     },
-    closeModal() {
-      this.$emit('input', !this.value);
+    closeModal () {
+      this.$emit('input', !this.value)
     },
-    saveImage() {
-      if (this.type === 'crop'){
+    saveImage () {
+      if (this.type === 'crop') {
         this.$emit('setCroppedImage', this.cropped_url, this.file.name, this.coordinates)
-      } else if (this.type === 'phase'){
+      } else if (this.type === 'phase') {
         this.$emit('setPhase', this.file.name, this.phase)
       }
-      this.closeModal();
+      this.closeModal()
     }
   },
 
   // computed variables are for the phase dot (to determine position and toggle visibility), and modal title
   computed: {
-
     // phase dot position is calculated from the offset from the top left corner of its parent div
 
     // gives the y offset of the phase dot
@@ -139,10 +134,10 @@ export default {
       if (this.$refs.phaseImage === undefined) { return this.phase.x_offset * 0 } // refs are not yet rendered on first run
       var scaleFactor = this.$refs.phaseImage.clientWidth / this.file.pixelSize.width // image might be scaled up/down to fit the modal.
       var extraOffset = (this.$refs.imageWrapperDiv.clientWidth - this.$refs.phaseImage.clientWidth) / 2 // phase dot is anchored to the div that contains img. Div width may be larger than img width.
-      return ((this.phase.x_offset * scaleFactor) + extraOffset - 3)  + 'px' // -3 pixels to center dot on where they click
+      return ((this.phase.x_offset * scaleFactor) + extraOffset - 3) + 'px' // -3 pixels to center dot on where they click
     },
 
-    // computed background and computed border determine whether phase dot is displayed 
+    // computed background and computed border determine whether phase dot is displayed
 
     computedBackground: function () {
       if (this.phaseDotVisibility === true) {
@@ -167,7 +162,6 @@ export default {
         return 'Set phase'
       }
     }
-
   }
 }
 </script>
@@ -214,7 +208,7 @@ export default {
   .phaseDot {
     position: absolute;
     width: 6px;
-    height: 6px; 
+    height: 6px;
     border-radius: 50%;
   }
   

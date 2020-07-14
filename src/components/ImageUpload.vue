@@ -205,8 +205,7 @@ export default {
 
       const fr = new FileReader()
       fr.readAsDataURL(inputFile)
-      fr.addEventListener('load', async () => {
-        
+      fr.addEventListener('load', async () => {  
         // get file information
         vm.submissionFile = {
           name: inputFile.name,
@@ -234,7 +233,6 @@ export default {
           vm.getInitialDimensions(0) // set pixel dimensions for image
           if (vm.displayableFileType(0) === false) { vm.filesEditable = false } // set displayable status for image
         }
-
       })
     },
 
@@ -248,62 +246,53 @@ export default {
         vm.displayedFiles[index].pixelSize = {width: img.width, height: img.height}
         vm.displayedFiles[index].originalSize = {width: img.width, height: img.height}
         vm.displayedFiles[index].name += ' '
-      }     
+      }
     },
 
     // unzip if the user uploads a zip file
-    unzipUploadedFiles: function (inputFile) { 
+    unzipUploadedFiles: function (inputFile) {
       // initial variable declaration
       const vm = this
       const jszipObj = new jszip()
 
       // unzip
       jszipObj.loadAsync(inputFile)
-      .then(async function (zip) {
-        
-        // transform contents to base64
-        Object.keys(zip.files).forEach(function (filename) {
-          zip.files[filename].async('base64')
-            .then(function (fileData) {
-
-                var filetype = filename.split('.').pop().toLowerCase()
-                vm.displayedFiles.push({
-                name: filename,
-                originalName: filename,
-                url: 'data:image/' + filetype + ';base64,' + fileData,
-                fileType: filetype,
-                size: { width: 0, height: 0, units: null },
-                pixelSize: { width: 0, height: 0 },
-                phase: { x_offset: 0, y_offset: 0 },
-                errors: {size: false}
-                })        
-            })
-            .then(function () {
-                vm.getInitialDimensions(vm.displayedFiles.length-1) // get image dimensions
-                if (vm.displayableFileType(vm.displayedFiles.length-1) === false) { vm.filesEditable = false } // reduce functionality if image is tif or mat
+        .then(async function (zip) {
+            // transform contents to base64
+            Object.keys(zip.files).forEach(function (filename) {
+            zip.files[filename].async('base64')
+                .then(function (fileData) {
+                    var filetype = filename.split('.').pop().toLowerCase()
+                    vm.displayedFiles.push({
+                    name: filename,
+                    originalName: filename,
+                    url: 'data:image/' + filetype + ';base64,' + fileData,
+                    fileType: filetype,
+                    size: { width: 0, height: 0, units: null },
+                    pixelSize: { width: 0, height: 0 },
+                    phase: { x_offset: 0, y_offset: 0 },
+                    errors: {size: false}
+                    })
+                })
+                .then(function () {
+                    vm.getInitialDimensions(vm.displayedFiles.length - 1) // get image dimensions
+                    if (vm.displayableFileType(vm.displayedFiles.length - 1) === false) { vm.filesEditable = false } // reduce functionality if image is tif or mat
+                })
             })
         })
-
-      })
     },
 
     // callback function for when users enter data into the image dimensions section
     userDimensionsCallback: function () {
       if (this.inputtedDimensions.units !== null && parseInt(this.inputtedDimensions.width) > 0 && parseInt(this.inputtedDimensions.height) > 0) {
-
         this.dimensionsEntered = true
         for (let i = 0; i < this.displayedFiles.length; i++) { this.updateUserDimensions(i) }
-
         this.pushImageDimensions()
-
       }
     },
 
     // emit image dimensions data back to parent
     pushImageDimensions: function () {
-      // DELETE THE RETURN STATEMENT BELOW TO IMPLEMENT IMAGE DIMENSIONS
-      return
-
       if (this.displayableFileType(0) === true) {
         this.selectedOptions['dimensions'] = {'units': this.inputtedDimensions.units, 'width': this.displayedFiles[0].size.width, 'height': this.displayedFiles[0].size.height}
       } else {
@@ -316,8 +305,8 @@ export default {
     updateUserDimensions: function (index) {
       let vm = this
       vm.displayedFiles[index].size.units = vm.inputtedDimensions.units
-      vm.displayedFiles[index].size.width = parseInt( ( parseInt(vm.inputtedDimensions.width) / vm.displayedFiles[index].originalSize.width ) * vm.displayedFiles[index].pixelSize.width )
-      vm.displayedFiles[index].size.height = parseInt( ( parseInt(vm.inputtedDimensions.height) / vm.displayedFiles[index].originalSize.height ) * vm.displayedFiles[index].pixelSize.height )
+      vm.displayedFiles[index].size.width = parseInt((parseInt(vm.inputtedDimensions.width) / vm.displayedFiles[index].originalSize.width) * vm.displayedFiles[index].pixelSize.width)
+      vm.displayedFiles[index].size.height = parseInt((parseInt(vm.inputtedDimensions.height) / vm.displayedFiles[index].originalSize.height) * vm.displayedFiles[index].pixelSize.height)
     },
 
     // args: [fileName, phase]
@@ -340,9 +329,6 @@ export default {
     },
 
     pushPhase: function (index) {
-      // DELETE THE RETURN STATEMENT BELOW TO IMPLEMENT PHASE
-      return
-
       if ('phase' in this.selectedOptions) {
         this.selectedOptions['phase'][this.displayedFiles[index].originalName] = this.displayedFiles[index].phase
       } else {
@@ -355,7 +341,6 @@ export default {
     // args: [cropped image, filename of cropped image, coordinates]
     cropCallback: async function (...args) {
       for (let i = 0; i < this.displayedFiles.length; i++) {
-
         if (this.displayedFiles[i].name === args[1]) {
           await this.cropImage(args[0], args[2], i)
         } else if (this.displayableFileType(i) === false) {
@@ -365,7 +350,6 @@ export default {
         }
         
         this.displayedFiles[i].name = 'cropped_' + this.displayedFiles[i].name // force rerender
-
       }
 
       // push to parent
@@ -446,10 +430,10 @@ export default {
 
       // create zip file
       jszip_obj.generateAsync({type: 'base64', compression: 'DEFLATE'})
-      .then(function (base64) {
-        vm.submissionFile.url = "data:application/zip;base64," + base64
-        vm.$emit('setFiles', vm.submissionFile)
-      })
+        .then(function (base64) {
+            vm.submissionFile.url = "data:application/zip;base64," + base64
+            vm.$emit('setFiles', vm.submissionFile)
+        })
 
     },
 
@@ -465,7 +449,7 @@ export default {
         return false
       }
       return true
-    },
+    }
   }
 }
 </script>
@@ -476,7 +460,7 @@ export default {
   .fileButtonWrapper {
     margin-bottom: 0px;
   }
-  
+
   .fileButton {
     margin-left: 0px;
     margin-bottom: 20px;
@@ -506,8 +490,8 @@ export default {
     border: none;
   }
 
-  /********** 
-  image table 
+  /**********
+  image table
   **********/
   .imageTable {
     margin-bottom: 20px;
@@ -561,7 +545,7 @@ export default {
     color: red;
   }
 
-  /********* 
+  /*********
   parameters
   *********/
   .selectDropdownsWrapper {
