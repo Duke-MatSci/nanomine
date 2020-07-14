@@ -17,78 +17,78 @@
 
 <script>
 
-  import {} from 'vuex'
-  import McrJobsTemplate from './McrJobsTemplate.vue'
+import {} from 'vuex'
+import McrJobsTemplate from './McrJobsTemplate.vue'
 
-  export default {
+export default {
 
-    name: 'CorrelationReconstruct',
-    
-    components: {
-      McrJobsTemplate
-    },
+  name: 'CorrelationReconstruct',
+  
+  components: {
+    McrJobsTemplate
+  },
 
-    data: () => {
-      return {
-        jobInfo: {
+  data: () => {
+    return {
+      jobInfo: {
 
-          jobTitle: 'Correlation Reconstruction',
+        jobTitle: 'Correlation Reconstruction',
 
-          pageTitle: 'Microstructure Reconstruction - Correlation Function Approach',
+        pageTitle: 'Microstructure Reconstruction - Correlation Function Approach',
 
-          description: [
-            'Upload a binarized image / ZIP file containing set of images (Supported file formats: .jpg, .tif, .png) and click "Reconstruct" to reconstruct statistically equivalent image. All correlation functions are evaluated for the "white" phase in image.'
-          ],
-          
-          aspectRatio: 'square',
+        description: [
+          'Upload a binarized image / ZIP file containing set of images (Supported file formats: .jpg, .tif, .png) and click "Reconstruct" to reconstruct statistically equivalent image. All correlation functions are evaluated for the "white" phase in image.'
+        ],
 
-          getImageDimensions: true,
+        aspectRatio: 'square',
 
-          submit: {
-            submitButtonTitle: 'Reconstruct',
-            submitJobTitle: 'CorrelationReconstruct'
+        getImageDimensions: true,
+
+        submit: {
+          submitButtonTitle: 'Reconstruct',
+          submitJobTitle: 'CorrelationReconstruct'
+        },
+
+        uploadOptions: [
+          {
+            title: 'Note',
+            description: 'Images must be binarized.'
           },
-                    
-          uploadOptions: [
-            {
-              title: 'Note',
-              description: 'Images must be binarized.'
-            },
-            {
-              title: 'Single image', 
-              description: 'Supported image formats are .jpg, .tif and .png. The reconstruction results will include the input and reconstructed images in JPG format, the 2D SDF (data in Input_SDF_2D.csv, plotted in SDF_2D.jpg) and it\'s radial average (Input_SDF_1D.csv). The reconstructed images will be provided in JPEG format along with a plot comparing their autocorrelation function with the autocorrelation of input image.'
-            },
-            {
-              title: 'Single image in .mat format',
-              description: 'The .mat file must contain ONLY ONE variable named "Input" - which contains pixel values (only 0 or 1). The reconstruction results will include the input and reconstructed images in JPG format, the 2D SDF (data in Input_SDF_2D.csv, plotted in SDF_2D.jpg) and it\'s radial average (Input_SDF_1D.csv). The reconstructed images will be provided in JPEG format along with a plot comparing their autocorrelation function with the mean autocorrelation of input images.'
-            },
-            {
-              title: 'ZIP file with multiple images',
-              description: 'Submit a ZIP file containing multiple images of same size (in pixels). DO NOT ZIP the folder containing images; select all images and ZIP them directly. The mean value of chosen correlation (averaged over all input images) will be used for reconstruction. The results include 2D and 1D SDF for all input images provided in folders named "Input1", "Input2" etc. The mean SDF of input images are provided in CSV files "SDF_1D_mean.csv" and "SDF_2D_mean.csv" and the 2D mean plotted in "SDF_2D.jpg". The reconstructed images will be provided in JPEG format along with a plot comparing their autocorrelation function with the mean autocorrelation of input images.'
-            }
-          ],
+          {
+            title: 'Single image',
+            description: 'Supported image formats are .jpg, .tif and .png. The reconstruction results will include the input and reconstructed images in JPG format, the 2D SDF (data in Input_SDF_2D.csv, plotted in SDF_2D.jpg) and it\'s radial average (Input_SDF_1D.csv). The reconstructed images will be provided in JPEG format along with a plot comparing their autocorrelation function with the autocorrelation of input image.'
+          },
+          {
+            title: 'Single image in .mat format',
+            description: 'The .mat file must contain ONLY ONE variable named "Input" - which contains pixel values (only 0 or 1). The reconstruction results will include the input and reconstructed images in JPG format, the 2D SDF (data in Input_SDF_2D.csv, plotted in SDF_2D.jpg) and it\'s radial average (Input_SDF_1D.csv). The reconstructed images will be provided in JPEG format along with a plot comparing their autocorrelation function with the mean autocorrelation of input images.'
+          },
+          {
+            title: 'ZIP file with multiple images',
+            description: 'Submit a ZIP file containing multiple images of same size (in pixels). DO NOT ZIP the folder containing images; select all images and ZIP them directly. The mean value of chosen correlation (averaged over all input images) will be used for reconstruction. The results include 2D and 1D SDF for all input images provided in folders named "Input1", "Input2" etc. The mean SDF of input images are provided in CSV files "SDF_1D_mean.csv" and "SDF_2D_mean.csv" and the 2D mean plotted in "SDF_2D.jpg". The reconstructed images will be provided in JPEG format along with a plot comparing their autocorrelation function with the mean autocorrelation of input images.'
+          }
+        ],
 
-          references: [
-            'Rintoul, M.D. and Torquato, S., 1997. Reconstruction of the structure of dispersions. Journal of Colloid and Interface Science, 186(2), pp.467-476.',
-            'Yeong,C. and Torquato,S., 1998. Reconstructing random media Physical Review E, vol. 57, no. 1, p. 495',
-          ],
+        references: [
+          'Rintoul, M.D. and Torquato, S., 1997. Reconstruction of the structure of dispersions. Journal of Colloid and Interface Science, 186(2), pp.467-476.',
+          'Yeong,C. and Torquato,S., 1998. Reconstructing random media Physical Review E, vol. 57, no. 1, p. 495',
+        ],
 
-          selects: [
-            {
-              title: 'Correlation Name',
-              submitJobTitle: 'CorrelationType',
-              options: ['Autocorrelation', 'Lineal Path Correlation', 'Cluster Correlation', 'Surface Correlation']
-            },
-            {
-              title: 'Number of Reconstructions',
-              submitJobTitle: 'NumOfReconstructs',
-              options: ['1', '2']
-            }
-          ]
+        selects: [
+          {
+            title: 'Correlation Name',
+            submitJobTitle: 'CorrelationType',
+            options: ['Autocorrelation', 'Lineal Path Correlation', 'Cluster Correlation', 'Surface Correlation']
+          },
+          {
+            title: 'Number of Reconstructions',
+            submitJobTitle: 'NumOfReconstructs',
+            options: ['1', '2']
+          }
+        ]
 
-        }
       }
     }
   }
+}
 
 </script>

@@ -17,69 +17,69 @@
 
 <script>
 
-  import {} from 'vuex'
-  import McrJobsTemplate from './McrJobsTemplate.vue'
+import {} from 'vuex'
+import McrJobsTemplate from './McrJobsTemplate.vue'
 
-  export default {
+export default {
 
-    name: 'CorrelationCharacterize',
+  name: 'CorrelationCharacterize',
 
-    components: {
-      McrJobsTemplate
-    },
+  components: {
+    McrJobsTemplate
+  },
 
-    data: () => {
-      return {
-        jobInfo: {
+  data: () => {
+    return {
+      jobInfo: {
 
-          jobTitle: 'Correlation Characterize',
+        jobTitle: 'Correlation Characterize',
 
-          pageTitle: 'Microstructure Characterization - Correlation Function Approach',
+        pageTitle: 'Microstructure Characterization - Correlation Function Approach',
 
-          description: [
-            'Upload a binarized image / ZIP file containing set of images (Supported file formats: .jpg, .tif, .png) and click "Characterize". All correlation functions are evaluated for the "white" phase in image.'
-          ],
-          
-          aspectRatio: 'square',
+        description: [
+          'Upload a binarized image / ZIP file containing set of images (Supported file formats: .jpg, .tif, .png) and click "Characterize". All correlation functions are evaluated for the "white" phase in image.'
+        ],
 
-          getImageDimensions: true,
+        aspectRatio: 'square',
 
-          submit: {
-            submitButtonTitle: 'Characterize',
-            submitJobTitle: 'CorrelationCharacterize'
+        getImageDimensions: true,
+
+        submit: {
+          submitButtonTitle: 'Characterize',
+          submitJobTitle: 'CorrelationCharacterize'
+        },
+
+        uploadOptions: [
+          {
+            title: 'Single image',
+            description: 'Supported image formats are .jpg, .tif and .png.'
           },
-                    
-          uploadOptions: [
-            {
-              title: 'Single image', 
-              description: 'Supported image formats are .jpg, .tif and .png.'
-            },
-            {
-              title: 'Single image in .mat format',
-              description: 'The .mat file must contain ONLY ONE variable named "Input" - which contains the image.'
-            },
-            {
-              title: 'ZIP file with multiple images (Coming soon!)',
-              description: 'Submit a ZIP file containing multiple images (supported formats: .jpg, .tif, .png) of same size (in pixels). DO NOT ZIP the folder containing images; select all images and ZIP them directly.'
-            }
-          ],
+          {
+            title: 'Single image in .mat format',
+            description: 'The .mat file must contain ONLY ONE variable named "Input" - which contains the image.'
+          },
+          {
+            title: 'ZIP file with multiple images (Coming soon!)',
+            description: 'Submit a ZIP file containing multiple images (supported formats: .jpg, .tif, .png) of same size (in pixels). DO NOT ZIP the folder containing images; select all images and ZIP them directly.'
+          }
+        ],
 
-          references: [
-            'Rintoul, M.D. and Torquato, S., 1997. Reconstruction of the structure of dispersions. Journal of Colloid and Interface Science, 186(2), pp.467-476.',
-            'Yeong,C. and Torquato,S., 1998. Reconstructing random media Physical Review E, vol. 57, no. 1, p. 495'
-          ],
+        references: [
+          'Rintoul, M.D. and Torquato, S., 1997. Reconstruction of the structure of dispersions. Journal of Colloid and Interface Science, 186(2), pp.467-476.',
+          'Yeong,C. and Torquato,S., 1998. Reconstructing random media Physical Review E, vol. 57, no. 1, p. 495'
+        ],
 
-          selects: [
-            {
-              title: 'Correlation Name',
-              submitJobTitle: 'CorrelationType',
-              options: ['Autocorrelation', 'Lineal Path Correlation', 'Cluster Correlation', 'Surface Correlation']
-            }
-          ]
+        selects: [
+          {
+            title: 'Correlation Name',
+            submitJobTitle: 'CorrelationType',
+            options: ['Autocorrelation', 'Lineal Path Correlation', 'Cluster Correlation', 'Surface Correlation']
+          }
+        ]
 
-        }
       }
     }
   }
+}
 
 </script>
