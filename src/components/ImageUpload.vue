@@ -260,24 +260,24 @@ export default {
         .then(async function (zip) {
           // transform contents to base64
           Object.keys(zip.files).forEach(function (filename) {
-          zip.files[filename].async('base64')
-            .then(function (fileData) {
-              var filetype = filename.split('.').pop().toLowerCase()
-              vm.displayedFiles.push({
-                name: filename,
-                originalName: filename,
-                url: 'data:image/' + filetype + ';base64,' + fileData,
-                fileType: filetype,
-                size: { width: 0, height: 0, units: null },
-                pixelSize: { width: 0, height: 0 },
-                phase: { x_offset: 0, y_offset: 0 },
-                errors: {size: false}
+            zip.files[filename].async('base64')
+              .then(function (fileData) {
+                var filetype = filename.split('.').pop().toLowerCase()
+                vm.displayedFiles.push({
+                  name: filename,
+                  originalName: filename,
+                  url: 'data:image/' + filetype + ';base64,' + fileData,
+                  fileType: filetype,
+                  size: { width: 0, height: 0, units: null },
+                  pixelSize: { width: 0, height: 0 },
+                  phase: { x_offset: 0, y_offset: 0 },
+                  errors: {size: false}
+                })
               })
-            })
-            .then(function () {
-              vm.getInitialDimensions(vm.displayedFiles.length - 1) // get image dimensions
-              if (vm.displayableFileType(vm.displayedFiles.length - 1) === false) { vm.filesEditable = false } // reduce functionality if image is tif or mat
-            })
+              .then(function () {
+                vm.getInitialDimensions(vm.displayedFiles.length - 1) // get image dimensions
+                if (vm.displayableFileType(vm.displayedFiles.length - 1) === false) { vm.filesEditable = false } // reduce functionality if image is tif or mat
+              })
           })
         })
     },
@@ -368,10 +368,9 @@ export default {
       let vm = this
 
       // crop the image
-      if (url !== null){
+      if (url !== null) {
         vm.displayedFiles[index].url = url
       } else {
-
         var canvas = document.createElement('canvas')
         canvas.width = coordinates.width
         canvas.height = coordinates.height
