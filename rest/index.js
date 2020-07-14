@@ -3256,7 +3256,7 @@ function jobSubmit (jobId, jobType, userToken) {
                     var contents = data.toString();
                     contentsArray = contents.split('|')
                     if (contentsArray[0] == 'results'){
-                      return res.send({url:contentsArray[1]});
+                      resolve(contentsArray[1])
                     }
                   })
                   child.stderr.on('data', (data) => {
