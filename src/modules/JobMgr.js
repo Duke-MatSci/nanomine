@@ -91,6 +91,7 @@ JobMgr.prototype = {
                   'jobType': vm.jobType
                 })
                   .then(function (res) {
+                    console.log(res.json())
                     console.log('submit job success - statusCode: ' + res.status + ' statusText: ' + res.statusText)
                     return successFunction(vm.jobId)
                   })
