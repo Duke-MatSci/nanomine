@@ -19,6 +19,7 @@ try
     %
     %% Specify import function according to input option
     %% Specify import function according to input option
+   condition=1; % for phase selection
     switch str2num(input_type)
         case 1
             img = imread([path_to_read,file_name]); % read the incming target and store pixel values
