@@ -205,7 +205,7 @@ export default {
 
       const fr = new FileReader()
       fr.readAsDataURL(inputFile)
-      fr.addEventListener('load', async () => {  
+      fr.addEventListener('load', async () => {
         // get file information
         vm.submissionFile = {
           name: inputFile.name,
@@ -258,27 +258,27 @@ export default {
       // unzip
       jszipObj.loadAsync(inputFile)
         .then(async function (zip) {
-            // transform contents to base64
-            Object.keys(zip.files).forEach(function (filename) {
-            zip.files[filename].async('base64')
-                .then(function (fileData) {
-                    var filetype = filename.split('.').pop().toLowerCase()
-                    vm.displayedFiles.push({
-                    name: filename,
-                    originalName: filename,
-                    url: 'data:image/' + filetype + ';base64,' + fileData,
-                    fileType: filetype,
-                    size: { width: 0, height: 0, units: null },
-                    pixelSize: { width: 0, height: 0 },
-                    phase: { x_offset: 0, y_offset: 0 },
-                    errors: {size: false}
-                    })
-                })
-                .then(function () {
-                    vm.getInitialDimensions(vm.displayedFiles.length - 1) // get image dimensions
-                    if (vm.displayableFileType(vm.displayedFiles.length - 1) === false) { vm.filesEditable = false } // reduce functionality if image is tif or mat
-                })
+          // transform contents to base64
+          Object.keys(zip.files).forEach(function (filename) {
+          zip.files[filename].async('base64')
+            .then(function (fileData) {
+              var filetype = filename.split('.').pop().toLowerCase()
+              vm.displayedFiles.push({
+                name: filename,
+                originalName: filename,
+                url: 'data:image/' + filetype + ';base64,' + fileData,
+                fileType: filetype,
+                size: { width: 0, height: 0, units: null },
+                pixelSize: { width: 0, height: 0 },
+                phase: { x_offset: 0, y_offset: 0 },
+                errors: {size: false}
+              })
             })
+            .then(function () {
+              vm.getInitialDimensions(vm.displayedFiles.length - 1) // get image dimensions
+              if (vm.displayableFileType(vm.displayedFiles.length - 1) === false) { vm.filesEditable = false } // reduce functionality if image is tif or mat
+            })
+          })
         })
     },
 
@@ -348,7 +348,7 @@ export default {
         } else {
           await this.cropImage(null, args[2], i)
         }
-        
+
         this.displayedFiles[i].name = 'cropped_' + this.displayedFiles[i].name // force rerender
       }
 
@@ -380,7 +380,7 @@ export default {
         var image = new Image()
         image.src = vm.displayedFiles[index].url
 
-        function awaitImageCrop(image) {
+        function awaitImageCrop (image) {
           return new Promise((resolve, reject) => {
             image.onload = function () {
               ctx.drawImage(image, (-1) * coordinates.left, (-1) * coordinates.top)
@@ -394,7 +394,6 @@ export default {
 
       // update the phase based on new top left of image
       if (vm.displayedFiles[index].phase.x_offset !== 0 || vm.displayedFiles[index].phase.y_offset !== 0) {
-
         vm.displayedFiles[index].phase.x_offset -= coordinates.left
         vm.displayedFiles[index].phase.y_offset -= coordinates.top
 
@@ -406,7 +405,6 @@ export default {
           vm.errorAlert.count += 1
           vm.displayedFiles[index].errors.size = true
         }
-
       }
 
       // update the image dimensions
@@ -424,17 +422,16 @@ export default {
       let vm = this
 
       // add images to zip file
-      for(let i = 0; i < vm.displayedFiles.length; i++){
+      for (let i = 0; i < vm.displayedFiles.length; i++) {
         jszip_obj.file(this.displayedFiles[i].originalName, this.displayedFiles[i].url.split(',').pop(), {base64: true})
       }
 
       // create zip file
       jszip_obj.generateAsync({type: 'base64', compression: 'DEFLATE'})
         .then(function (base64) {
-            vm.submissionFile.url = "data:application/zip;base64," + base64
-            vm.$emit('setFiles', vm.submissionFile)
+          vm.submissionFile.url = 'data:application/zip;base64,' + base64
+          vm.$emit('setFiles', vm.submissionFile)
         })
-
     },
 
     // opens image editor modal and passes information for specific image that is opened
