@@ -1,5 +1,9 @@
 function [condition]=check_phase(img,phase_cords)
-
+        if length(size(img)) > 2
+            img = img(:,:,1);
+        else
+            img = img;
+        end
         if max(img(:))>1
             Target = double(img);
             Target = Target/256; %

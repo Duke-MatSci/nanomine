@@ -20,17 +20,14 @@ rc=0;
     %% Specify import function according to input option
     switch str2num(input_type)
         case 1
-            
             img = imread([path_to_read,file_name]); % read the incming target and store pixel values
             if length(size(img)) > 1
             [condition]=check_phase(img,phase_cords); % if 0 image needs to be inverted
-           
             else
                 writeError([path_to_write, '/errors.txt'], ['failed to read image file: ', file_name]);
                 rc = 97
                 exit(rc)
-            end
-            
+            end    
         case 2
             unzip([path_to_read,file_name],[path_to_write,'/input']);
         case 3
@@ -47,11 +44,9 @@ rc=0;
                 writeError([path_to_write, '/errors.txt'], msg);
                 writeError([path_to_write, '/errors.txt'], sprintf('\n'));
                 exit(rc);
-            end
-            % imwrite(img,[path_to_write,'/','Input1.jpg']);
-            
+            end  
     end
-    
+    %% 
     if str2num(input_type) ~= 2
         %% SDF code - Shuangchen & Yichi
         % img_original - binary original image

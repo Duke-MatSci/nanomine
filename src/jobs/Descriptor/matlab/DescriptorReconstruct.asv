@@ -1,4 +1,4 @@
-function DescriptorReconstruct(userId, jobId, jobType, jobSrcDir, jobDir, webBaseUri,input_type,file_name,phase_cords)
+function DescriptorReconstruct(userId, jobId, jobType, jobSrcDir, jobDir, webBaseUri,input_type,file_name)
 % function MAIN(img_name, type, cutL, VF, recon_length, scale, visualize_fine_recon, visualize_coarse_recon, workingdir)
 %
 % This package is developed by Hongyi Xu, Northwestern University
@@ -6,7 +6,7 @@ function DescriptorReconstruct(userId, jobId, jobType, jobSrcDir, jobDir, webBas
 % Contact: hongyixu2014@u.northwestern.edu
 % Modified for NANOMINE by: Akshay Iyer; 6th Dec. 2018
 % Modified for NANOMINE by: Umar Farooq Ghumman; 11th Feb. 2019 (Added an upper limit for recon_length i.e. reconstruction size.
-% Modified for NANOMINE by: Umar, 14th July 2020 (Added phase selection feature)
+% Modified for NANOMINE by: Umar, 14th July 2020 (
 %%% Input Types %%
 % 1 : Single JPEG Image
 % 2 : ZIP file containing JPEG images
@@ -22,24 +22,41 @@ try
     path_to_write = [jobSrcDir,'/output'];
     mkdir(path_to_write);
     %% Specify import function according to input option
-   switch str2num(input_type)
+    switch str2num(input_type)
         case 1
             img = imread([path_to_read,file_name]); % read the incming target and store pixel values
-            if length(size(img)) > 1
-            [condition]=check_phase(img,phase_cords); % if 0 image needs to be inverted
+            
+            %             if size(img) > 1
+            if length(size(img))>2
+                img_original = img(:,:,1);
             else
-                writeError([path_to_write, '/errors.txt'], ['failed to read image file: ', file_name]);
-                rc = 97
-                exit(rc)
-            end    
+                img_original = img;
+            end
+            %% Umar added to check and binarize the image using Otsu 02/27/2019
+            
+            if max(img_original(:))>1
+                Target = double(img_original);
+                Target = Target/256; %
+                level = graythresh(Target);
+                img_original = im2bw(Target,level);
+                
+            end
+            %%
+            if max(img(:)) > 1
+                imwrite(img,[path_to_write,'/','Input1.jpg'])
+                img = round(img_original/256);
+            else
+                imwrite(256*img,[path_to_write,'/','Input1.jpg'])
+            end
+            
         case 2
-            img=unzip([path_to_read,file_name],[path_to_write,'/input']);
+            unzip([path_to_read,file_name],[path_to_write,'/input']); % Umar - i think there is something missing here. The file is not even read.
         case 3
             path=[path_to_read,file_name];
             k=load(path);
             [no_need,f_name,ext]=fileparts(file_name);
             try
-                img = getfield(k,f_name);
+                img_original = getfield(k,f_name);
             catch ex
                 rc = 98;
                 msg = getReport(ex);
@@ -48,30 +65,11 @@ try
                 writeError([path_to_write, '/errors.txt'], msg);
                 writeError([path_to_write, '/errors.txt'], sprintf('\n'));
                 exit(rc);
-            end  
-   end
-   
-   %%
-   if length(size(img)) > 2
-            img_original = img(:,:,1);
-        else
-            img_original = img;
-   end
-        
-           %% Umar added to check and binarize the image using Otsu 02/27/2019
-        if max(img_original(:))>1
-            Target = double(img_original);
-            Target = Target/256; %
-            level = graythresh(Target);
-            img_original = im2bw(Target,level);
-        end
-        
-             if condition==0
-                img_original=abs(img_original-1);
             end
-   
-   %% Define useful variables as required by package %%
+            imwrite(256*img_original,[path_to_write,'/','Input.jpg']);
+    end
     
+    %% Define useful variables as required by package %%
     img = img_original;
     type = 0; % this webtool is for binary images only
     cutL = size(img_original,1);
