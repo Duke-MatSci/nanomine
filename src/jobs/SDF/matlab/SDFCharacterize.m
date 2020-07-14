@@ -1,4 +1,4 @@
-function SDFCharacterize(userId, jobId, jobType, jobSrcDir, jobDir, webBaseUri,input_type,file_name)
+function SDFCharacterize(userId, jobId, jobType, jobSrcDir, jobDir, webBaseUri,input_type,file_name,phase_cords)
 
 %%% Input Types %%
 % 1 : Single JPEG Image
@@ -7,8 +7,10 @@ function SDFCharacterize(userId, jobId, jobType, jobSrcDir, jobDir, webBaseUri,i
 %% Added changed
 % Accept Odd shaped images 
 % Binarize raw jpg image
+% Select Phase
+
 rc=0;
-try
+% % % % try
     path_to_read = [jobSrcDir,'/'];
     path_to_write = [jobSrcDir,'/output'];
     mkdir(path_to_write);
@@ -18,16 +20,15 @@ try
     %% Specify import function according to input option
     switch str2num(input_type)
         case 1
+            
             img = imread([path_to_read,file_name]); % read the incming target and store pixel values
-            if length(size(img)) > 2
-                imwrite(img(:,:,1:3),[path_to_write,'/','Input1.jpg'])
-            elseif length(size(img)) > 1
-                imwrite(img,[path_to_write,'/','Input1.jpg'])
+            if length(size(img)) > 1
+            [condition]=check_phase(img,phase_cords); % if 0 image needs to be inverted
+           
             else
                 writeError([path_to_write, '/errors.txt'], ['failed to read image file: ', file_name]);
                 rc = 97
                 exit(rc)
-                
             end
             
         case 2
@@ -48,7 +49,7 @@ try
                 exit(rc);
             end
             % imwrite(img,[path_to_write,'/','Input1.jpg']);
-            imwrite(256*img,[path_to_write,'/','Input1.jpg']);
+            
     end
     
     if str2num(input_type) ~= 2
@@ -72,6 +73,25 @@ try
             level = graythresh(Target);
             img_original = im2bw(Target,level);
         end
+        
+             if condition==0
+                img_original=abs(img_original-1);
+            end
+        img=img_original;
+        
+        %% writing input file
+        if str2num(input_type)==1
+            if length(size(img)) > 2
+                imwrite(img(:,:,1:3),[path_to_write,'/','Input1.jpg'])
+                
+            else
+                imwrite(img,[path_to_write,'/','Input1.jpg'])
+            end
+        else 
+            imwrite(256*img,[path_to_write,'/','Input1.jpg']);
+             
+         end
+        %%
         %%
         vf = mean(img_original(:));
         % pixel = size(img_original,1);
@@ -103,10 +123,10 @@ try
     
     %% ZIP files %%
     zip([path_to_write,'/Results.zip'],{'*'},path_to_write);
-catch ex
-    rc = 99;
-    exit(rc);
-end
+% % % % catch ex
+% % % %     rc = 99;
+% % % %     exit(rc);
+% % % % end
     function writeError(file, msg)
         f = fopen(file,'a+');
         fprintf(f, '%s\n', msg);
