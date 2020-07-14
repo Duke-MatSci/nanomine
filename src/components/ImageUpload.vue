@@ -14,7 +14,7 @@
 <template>
 
   <v-flex xs12 class="text-xs-center text-sm-center text-md-center text-lg-center">
-    
+
     <!-- file upload button -->
     <p class="text-xs-left fileButtonWrapper">
       <v-btn class="text-xs-left fileButton" color="primary" @click='$refs.myUpload.click()'>Browse files</v-btn>
@@ -25,7 +25,7 @@
     <v-alert class='alert' type='error' dismissible v-model="showErrorAlert">{{ errorAlert.text }}</v-alert>
 
     <!-- info alert that functionality reduced if user uploads mat or tif file type -->
-    <v-alert class='alert' type='info' dismissible v-model="fileTypeAlert">Note: due to browser limitations, image editing functionality and pulling data about image dimensions is not available for mat and tif file types. But, these file types can still be submitted for jobs.</v-alert> 
+    <v-alert class='alert' type='info' dismissible v-model="fileTypeAlert">Note: due to browser limitations, image editing functionality and pulling data about image dimensions is not available for mat and tif file types. But, these file types can still be submitted for jobs.</v-alert>
 
     <!-- image dimension input section -->
     <div v-if="fileUploaded && collectDimensions">
@@ -33,7 +33,7 @@
       <h4 class='subheader' >Image Dimensions</h4>
 
       <div class='imageDimensionsWrapper'>
-        
+
         <div class='imgDimWidth'>
           <v-text-field outline label='width' v-model='inputtedDimensions.width' @change="userDimensionsCallback"></v-text-field>
         </div>
@@ -53,10 +53,10 @@
           ></v-select>
         </div>
 
-      </div> 
+      </div>
 
     </div>
-    
+
     <!-- parameters that are specific to job type -->
     <div v-if="fileUploaded && selects.length > 0">
 
@@ -65,11 +65,11 @@
       <div class='selectDropdownsWrapper'>
         <div class='singleSelectDropdown' v-for="(select, index) in selects" :key='index'>
           <v-select
-            outline 
-            :label="select.title" 
-            :items="select.options" 
-            v-model="selectedOptions[select.submitJobTitle]" 
-            v-on:change="$emit('setSelectors', selectedOptions)" 
+            outline
+            :label="select.title"
+            :items="select.options"
+            v-model="selectedOptions[select.submitJobTitle]"
+            v-on:change="$emit('setSelectors', selectedOptions)"
           ></v-select>
         </div>
       </div>
@@ -77,10 +77,10 @@
     </div>
 
     <!-- image cropper & phase selection modal -->
-    <EditImage 
-      v-model='imageEditorOpen' 
-      v-bind:file='imageEditorData' 
-      v-bind:aspectRatio='aspectRatio' 
+    <EditImage
+      v-model='imageEditorOpen'
+      v-bind:file='imageEditorData'
+      v-bind:aspectRatio='aspectRatio'
       v-bind:type='editImageType'
       v-on:setCroppedImage="cropCallback"
       v-on:setPhase="phaseCallback"
@@ -105,7 +105,7 @@
       </div>
 
       <div class='imageTableContents' v-for="(file, index) in displayedFiles" :key='file.name'>
-        
+
         <p>{{ file.name }}</p>
 
         <p :key='file.pixelSize.width'><span v-if="dimensionsEntered" :key='file.size.height'>{{ file.size.width }} x {{ file.size.height }} {{ file.size.units }} / </span>{{ file.pixelSize.width }} x {{ file.pixelSize.height }} pixels <span v-if='file.errors.size' class='imageSizeError'>ERROR</span></p>
@@ -130,7 +130,6 @@
 import {} from 'vuex'
 import EditImage from './EditImage.vue' // image cropping modal
 import jszip from 'jszip' // for unzipping and rezipping files
-import pako from 'pako' // for uncompressing files
 
 export default {
   name: 'ImageUpload',
@@ -145,7 +144,7 @@ export default {
     collectDimensions: Boolean
   },
 
-  data() {
+  data () {
     return {
 
       submissionFile: {},
@@ -164,9 +163,9 @@ export default {
 
     }
   },
-  
+
   computed: {
-    
+
     // info alert that functionality is restricted if the user uploads tif or mat file type
     fileTypeAlert: function () {
       return !this.filesEditable
@@ -187,10 +186,9 @@ export default {
   },
 
   methods: {
-    
+
     // process uploaded files
     uploadFiles: function (e) {
-      
       // initial variable declaration and input validation
       let vm = this
       const inputFile = e.target.files[0]
@@ -213,7 +211,7 @@ export default {
         vm.submissionFile = {
           name: inputFile.name,
           url: fr.result,
-          fileType: inputFile.name.split('.').pop().toLowerCase(),
+          fileType: inputFile.name.split('.').pop().toLowerCase()
         }
 
         // push to parent
@@ -238,11 +236,9 @@ export default {
         }
 
       })
-
     },
 
     getInitialDimensions: function (index) {
-    
       let vm = this
       if (vm.displayableFileType[index] === false) { return }
 
@@ -252,46 +248,43 @@ export default {
         vm.displayedFiles[index].pixelSize = {width: img.width, height: img.height}
         vm.displayedFiles[index].originalSize = {width: img.width, height: img.height}
         vm.displayedFiles[index].name += ' '
-      }
-      
+      }     
     },
 
     // unzip if the user uploads a zip file
     unzipUploadedFiles: function (inputFile) { 
-
       // initial variable declaration
       const vm = this
-      const jszip_obj = new jszip()
+      const jszipObj = new jszip()
 
       // unzip
-      jszip_obj.loadAsync(inputFile)
+      jszipObj.loadAsync(inputFile)
       .then(async function (zip) {
         
         // transform contents to base64
         Object.keys(zip.files).forEach(function (filename) {
-          zip.files[filename].async("base64")
-          .then(function (fileData) {
+          zip.files[filename].async('base64')
+            .then(function (fileData) {
 
-            var filetype = filename.split('.').pop().toLowerCase()
-            vm.displayedFiles.push({
-              name: filename,
-              originalName: filename,
-              url: 'data:image/' + filetype + ';base64,' + fileData,
-              fileType: filetype,
-              size: { width: 0, height: 0, units: null },
-              pixelSize: { width: 0, height: 0 },
-              phase: { x_offset: 0, y_offset: 0 },
-              errors: {size: false}
-            })        
-          })
-          .then(function () {
-            vm.getInitialDimensions(vm.displayedFiles.length-1) // get image dimensions
-            if (vm.displayableFileType(vm.displayedFiles.length-1) === false) { vm.filesEditable = false } // reduce functionality if image is tif or mat
-          })
+                var filetype = filename.split('.').pop().toLowerCase()
+                vm.displayedFiles.push({
+                name: filename,
+                originalName: filename,
+                url: 'data:image/' + filetype + ';base64,' + fileData,
+                fileType: filetype,
+                size: { width: 0, height: 0, units: null },
+                pixelSize: { width: 0, height: 0 },
+                phase: { x_offset: 0, y_offset: 0 },
+                errors: {size: false}
+                })        
+            })
+            .then(function () {
+                vm.getInitialDimensions(vm.displayedFiles.length-1) // get image dimensions
+                if (vm.displayableFileType(vm.displayedFiles.length-1) === false) { vm.filesEditable = false } // reduce functionality if image is tif or mat
+            })
         })
 
       })
-      
     },
 
     // callback function for when users enter data into the image dimensions section
@@ -329,7 +322,6 @@ export default {
 
     // args: [fileName, phase]
     phaseCallback: function (...args) {
-      
       // find index of object to change in array
       const indexFunction = (object) => object.name === args[0]
       const index = this.displayedFiles.findIndex(indexFunction)
@@ -345,7 +337,6 @@ export default {
 
       // push to parent
       this.pushPhase(index)
-          
     },
 
     pushPhase: function (index) {
@@ -360,10 +351,9 @@ export default {
       }
       this.$emit('setSelectors', this.selectedOptions)
     },
-    
+
     // args: [cropped image, filename of cropped image, coordinates]
     cropCallback: async function (...args) {
-
       for (let i = 0; i < this.displayedFiles.length; i++) {
 
         if (this.displayedFiles[i].name === args[1]) {
@@ -387,13 +377,10 @@ export default {
       }
       this.pushImageDimensions()
       for (let i = 0; i < this.displayedFiles.length; i++) { this.pushPhase(i) }
-
-
     },
 
     // crops a single image: update the image, the image's phase, and the image dimensions
     cropImage: async function (url, coordinates, index) {
-
       let vm = this
 
       // crop the image
@@ -419,7 +406,6 @@ export default {
           })
         }
         await awaitImageCrop(image) // done to ensure that all images are cropped before files are rezipped
-
       }
 
       // update the phase based on new top left of image
@@ -446,20 +432,18 @@ export default {
       if (vm.dimensionsEntered === true) {
         vm.updateUserDimensions(index)
       }
-
     },
 
     // rezip images when images are altered and emit that back to parent component
     async rezipFiles () {
-
       let jszip_obj = new jszip()
       let vm = this
-      
+
       // add images to zip file
       for(let i = 0; i < vm.displayedFiles.length; i++){
         jszip_obj.file(this.displayedFiles[i].originalName, this.displayedFiles[i].url.split(',').pop(), {base64: true})
       }
-      
+
       // create zip file
       jszip_obj.generateAsync({type: 'base64', compression: 'DEFLATE'})
       .then(function (base64) {
@@ -482,7 +466,6 @@ export default {
       }
       return true
     },
-
   }
 }
 </script>
@@ -510,7 +493,7 @@ export default {
     margin-bottom: 15px;
     border-bottom: 1px solid gray;
   }
-  
+
   .tooltipWrapper {
     display: flex;
     flex-direction: row;
