@@ -135,15 +135,10 @@ connected
 
     let fsfilesSchema = require(schemaPath + '/fsfiles')(mongoose)
     FsFiles = mongoose.model('api', fsfilesSchema)
-
-    xmlDataSchema = require(schemaPath + '/xmldata')(mongoose)
-    XmlData = mongoose.model('xmlData', xmlDataSchema)
-
-    xsdSchema = require(schemaPath + '/xsd')(mongoose)
-    XsdSchema = mongoose.model('xsdData', xsdSchema)
-
-    xsdVersionSchema = require(schemaPath + '/xsdVersion')(mongoose)
-    XsdVersionSchema = mongoose.model('xsdVersionData', xsdVersionSchema)
+    XmlData = require(schemaPath + '/xmldata')
+    XsdSchema = require(schemaPath + '/xsd')
+    XsdVersionSchema = require(schemaPath + '/xsdVersion')
+    
     logger.info('curateDatasetUpload: running main entry point.')
     let jobType = process.argv[2]
     let jobId = process.argv[3]

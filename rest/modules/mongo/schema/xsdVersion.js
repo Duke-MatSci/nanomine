@@ -23,7 +23,6 @@ const xsdVersionSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: 'xsdData'
     }
-  }
+  }, {collection: 'template_version'}
 )
-
 module.exports = mongoose.model('xsdVersionData', xsdVersionSchema)

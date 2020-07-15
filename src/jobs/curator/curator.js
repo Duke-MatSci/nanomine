@@ -66,7 +66,7 @@ let XsdSchema = null
 let XsdVersionSchema = null
 
 let connected = new Promise(function (resolve, reject) {
-  mongoose.connect(dbUri, {keepAlive: true, keepAliveInitialDelay: 300000})
+  mongoose.connect(dbUri, {keepAlive: true, keepAliveInitialDelay: 300000, useUnifiedTopology: true, reconnectTries: 2})
   db.on('error', function (err) {
     logger.error('db error: ' + err)
     resolve(err)
@@ -86,20 +86,11 @@ connected
     let datasetsSchema = require(schemaPath + '/datasets').datasets(mongoose)
     Datasets = mongoose.model('datasets', datasetsSchema)
 
-    let usersSchema = require(schemaPath + '/users')(mongoose)
-    Users = mongoose.model('users', usersSchema)
-
-    let apiSchema = require(schemaPath + '/api')(mongoose)
-    Api = mongoose.model('api', apiSchema)
-
-    let xmlDataSchema = require(schemaPath + '/xmldata')(mongoose)
-    XmlData = mongoose.model('xmlData', xmlDataSchema)
-
-    let xsdSchema = require(schemaPath + '/xsd')(mongoose)
-    XsdSchema = mongoose.model('xsdData', xsdSchema)
-
-    let xsdVersionSchema = require(schemaPath + '/xsdVersion')(mongoose)
-    XsdVersionSchema = mongoose.model('xsdVersionData', xsdVersionSchema)
+    Users = require(schemaPath + '/users')
+    Api = require(schemaPath + '/api')
+    XmlData = require(schemaPath + '/xmldata')
+    XsdSchema = require(schemaPath + '/xsd')
+    XsdVersionSchema = require(schemaPath + '/xsdVersion')
     curator()
   })
   .catch(function (err) {
@@ -119,6 +110,7 @@ function getLatestSchema () {
         // logger.error(inspect(response))
         let latestVersions = data
         let latestSchema = latestVersions[0].currentRef
+        logger.info('Tolu:', latestSchema)
         resolve(latestSchema)
       })
       .catch(function (err) {
@@ -229,6 +221,7 @@ function curator () {
         // NOTE: TODO for now, the schemaId is disregarded in the getNextXmlDataRecordWithEntityStates function
         //   in favor of selecting XMLs with isDeleted $ne true (really old recs have the flag set now) that
         //   are in the correct entityState
+        console.log(schemaRec)
         getNextXmlDataRecordWithEntityStates(schemaRec._id, [entityStates[valid], entityStates[editedValid]])
           .then(function (xmlData) {
             if (xmlData) {

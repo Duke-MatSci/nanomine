@@ -1,6 +1,7 @@
 const ChartBackup = require('../modules/mongo/schema/chartbkSchema');
 const AppList = require('../modules/mongo/schema/appListing');
 const ChartBkmk = require('../modules/mongo/schema/chartbookmarks');
+const User = require('../modules/mongo/schema/users');
 
 const controllerFor = 'Visualization Gallery';
 exports.getUser = (req, res, next) => {
@@ -11,10 +12,26 @@ exports.getUser = (req, res, next) => {
     return;
 }
 
+exports.getUserListing = async(req, res, next) => {
+    const logger = req.logger;
+    try {
+        const userList = await User.find({}, {'userid': 1, 'givenName': 1, 'surName': 1, '_id':0})
+        res.status(201).json({
+            users: userList
+        })
+    } catch(err){
+        if(!err.statusCode){
+            err.statusCode = 500;
+        }
+        logger.error('NM-Rest Chart Gallery Error (GET USERLIST): Server error, cannot retrieve user list data')
+        next(err);
+    }
+}
+
 exports.getChartBackup = async(req, res, next) => {
     const logger = req.logger;
     try {
-        const getChart = await ChartBackup.find({},{'_id':1, 'name':1, 'backup':1, 'creator':1, 'creatorref':1}).sort({bookmarked: -1})
+        const getChart = await ChartBackup.find({},{'_id':1, 'name':1, 'backup':1, 'creator':1, 'creatorref':1, 'enabled':1, 'restored': 1}).sort({bookmarked: -1})
         res.status(201).json({
             charts: getChart
         })
@@ -50,6 +67,7 @@ exports.createChartBackup = async(req, res, next) => {
     let parsedChart = null;
     let user = req.user._id
     let postChart, message = 'Thank you';
+    let named = req.body.prevChartID != 'null' ? req.body.prevChartID : req.body.name
     if(req.body.chart) {  
         parsedChart = JSON.stringify(req.body.chart)
     }
@@ -59,7 +77,9 @@ exports.createChartBackup = async(req, res, next) => {
             name: req.body.name,
             backup: parsedChart,
             creator: req.body.creator,
-            creatorref: user
+            creatorref: user,
+            restored: req.body.restored,
+            enabled: req.body.enabled
         })
     } else {
         const error = new Error('No Content or Incomplete Content')
@@ -71,15 +91,15 @@ exports.createChartBackup = async(req, res, next) => {
     try {
         const blacklist = await AppList.findOne({appname: controllerFor, blockedusers: user}) // => CHECK IF USER IS BLACKLISTED
         if(!blacklist){
-            let check = await ChartBackup.findOne({name: req.body.name})
+            let check = await ChartBackup.findOne({name: named})
             if(!check){
                 await postChart.save();
                 message = "Chart Created Successfully"
             } else {
                 check.name = req.body.name;
                 check.backup = parsedChart;
-                check.creator = req.body.creator;
-                check.creatorref = user
+                check.restored = req.body.restored;
+                check.enabled = req.body.enabled;
                 await check.save();
                 message = "Chart Updated Successfully"
             }    
