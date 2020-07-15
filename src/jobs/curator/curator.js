@@ -66,7 +66,7 @@ let XsdSchema = null
 let XsdVersionSchema = null
 
 let connected = new Promise(function (resolve, reject) {
-  mongoose.connect(dbUri, {keepAlive: true, keepAliveInitialDelay: 300000, useUnifiedTopology: true, reconnectTries: 2})
+  mongoose.connect(dbUri, {keepAlive: true, keepAliveInitialDelay: 300000})
   db.on('error', function (err) {
     logger.error('db error: ' + err)
     resolve(err)
@@ -87,10 +87,13 @@ connected
     Datasets = mongoose.model('datasets', datasetsSchema)
 
     Users = require(schemaPath + '/users')
-    Api = require(schemaPath + '/api')
-    XmlData = require(schemaPath + '/xmldata')
-    XsdSchema = require(schemaPath + '/xsd')
-    XsdVersionSchema = require(schemaPath + '/xsdVersion')
+
+    Api = require('../../../rest/modules/mongo/schema/api')
+    XmlData = require('../../../rest/modules/mongo/schema/xmldata')
+    XsdSchema = require('../../../rest/modules/mongo/schema/xsd')
+
+    let xsdVersionSchema = require(schemaPath + '/xsdVersion')(mongoose)
+    XsdVersionSchema = mongoose.model('xsdVersionData', xsdVersionSchema)
     curator()
   })
   .catch(function (err) {
@@ -110,7 +113,6 @@ function getLatestSchema () {
         // logger.error(inspect(response))
         let latestVersions = data
         let latestSchema = latestVersions[0].currentRef
-        logger.info('Tolu:', latestSchema)
         resolve(latestSchema)
       })
       .catch(function (err) {
@@ -221,7 +223,6 @@ function curator () {
         // NOTE: TODO for now, the schemaId is disregarded in the getNextXmlDataRecordWithEntityStates function
         //   in favor of selecting XMLs with isDeleted $ne true (really old recs have the flag set now) that
         //   are in the correct entityState
-        console.log(schemaRec)
         getNextXmlDataRecordWithEntityStates(schemaRec._id, [entityStates[valid], entityStates[editedValid]])
           .then(function (xmlData) {
             if (xmlData) {

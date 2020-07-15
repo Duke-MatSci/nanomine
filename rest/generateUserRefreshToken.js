@@ -9,28 +9,18 @@ const config = require('config').get('nanomine')
 
 // let nmAuthSysToken = process.env['NM_AUTH_SYS_TOKEN']
 
+let db = mongoose.connection
 let dbUri = process.env['NM_MONGO_URI']
 
 let logger = nmutils.configureLogger(config, 'generateRefreshToken')
 
-mongoose
-  .connect(
-    dbUri, {useNewUrlParser: true, keepAlive: true, keepAliveInitialDelay: 300000, useUnifiedTopology: true, reconnectTries: 2, reconnectInterval: 500}
-  ).then(result => {
-    logger.info('database opened successfully.')
-  }).catch(err => logger.error('db error: ' + err))
-
-// let db = mongoose.connection
-// let dbUri = process.env['NM_MONGO_URI']
-
-
-// mongoose.connect(dbUri, {keepAlive: true, keepAliveInitialDelay: 300000})
-// db.on('error', function (err) {
-//   logger.error('db error: ' + err)
-// })
-// db.once('open', function () {
-//   logger.info('database opened successfully.')
-// })
+mongoose.connect(dbUri, {keepAlive: true, keepAliveInitialDelay: 300000})
+db.on('error', function (err) {
+  logger.error('db error: ' + err)
+})
+db.once('open', function () {
+  logger.info('database opened successfully.')
+})
 
 let usersSchema = new mongoose.Schema({
   alias: String, // random unless overridden by user - not used for attribution, only display
