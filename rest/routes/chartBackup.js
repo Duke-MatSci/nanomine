@@ -22,5 +22,8 @@ router.delete('/deletecharts', middleware.check, chartBackupController.deleteCha
 /** GET USER */
 router.post('/vu', middleware.check, middleware.getUser, chartBackupController.getUser)
 
+/** GET USER LIST */
+router.post('/chartuserlist', middleware.check, middleware.getUser, chartBackupController.getUserListing)
+
 module.exports = router;
 

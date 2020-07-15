@@ -147,17 +147,17 @@ function inspect (theObj) {
 
 
 /** IMPORTING SCHEMAS */
-let Users = require('./modules/mongo/schema/users')
-let Api = require('./modules/mongo/schema/api')
-let XmlData = require('./modules/mongo/schema/xmldata')
-let XsdSchema = require('./modules/mongo/schema/xsd')
-let XsdVersionSchema = require('./modules/mongo/schema/xsdVersion')
 
 let datasetsSchema = require('./modules/mongo/schema/datasets').datasets(mongoose)
 let Datasets = mongoose.model('datasets', datasetsSchema)
 
 let sequencesSchema = require('./modules/mongo/schema/sequences').sequences(mongoose)
 let Sequences = mongoose.model('sequences', sequencesSchema)
+let Users = require('./modules/mongo/schema/users')
+let Api = require('./modules/mongo/schema/api')
+let XmlData = require('./modules/mongo/schema/xmldata')
+let XsdSchema = require('./modules/mongo/schema/xsd')
+let XsdVersionSchema = require('./modules/mongo/schema/xsdVersion')
 
 // let mgiVersionSchema = require('./modules/mongo/schema/mgiVersion')(mongoose)
 // let MgiVersion = mongoose.model('mgiversion', mgiVersionSchema)
