@@ -55,7 +55,7 @@ const xmlDataSchema = new Schema(
     resultSeq: {        /* 0 is the control sample */
       type: Number
     }
-  }
+  }, {collection: 'xmldata'}
 )
 
 module.exports = mongoose.model('xmldata', xmlDataSchema)

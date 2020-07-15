@@ -84,7 +84,8 @@ connected
     Api = require(schemaPath + '/api')
     XmlData = require(schemaPath + '/xmldata')
     XsdSchema = require(schemaPath + '/xsd')
-    XsdVersionSchema = require(schemaPath + '/xsdVersion')
+    let xsdVersionSchema = require(schemaPath + '/xsdVersion')(mongoose)
+    XsdVersionSchema = mongoose.model('xsdVersionData', xsdVersionSchema)
 
     generator()
   })
