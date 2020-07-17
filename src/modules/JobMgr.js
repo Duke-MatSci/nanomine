@@ -92,7 +92,7 @@ JobMgr.prototype = {
                 })
                   .then(function (res) {
                     console.log('submit job success - statusCode: ' + res.status + ' statusText: ' + res.statusText)
-                    console.log(res.data.json())
+                    console.log(res)
                     return successFunction(vm.jobId)
                   })
                   .catch(function (err) {
