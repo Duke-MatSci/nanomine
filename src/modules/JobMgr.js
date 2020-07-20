@@ -5,6 +5,7 @@
 import {} from 'vuex'
 import Axios from 'axios'
 import Vue from '../main'
+
 export function JobMgr () {
   this.jobType = null
   this.jobId = null
