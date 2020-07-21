@@ -42,7 +42,6 @@ const groupMgr = require('./modules/groupMgr').groupmgr
 const s2a = require('stream-to-array')
 const libxml = require('libxmljs')
 const nanomineUtils = require('./modules/utils')
-const io = require('socket.io')(3000)
 let matchValidXmlTitle = nanomineUtils.matchValidXmlTitle
 let env = nanomineUtils.getEnv()
 // const getDatasetXmlFileList = nanomineUtils.getDatasetXmlFileList
@@ -3181,13 +3180,13 @@ dbPromise.catch(function (err) {
 })
 
 /* websockets for real time response upon job completion */
-var currentJobs = {}
-io.on('connection', socket => {
-  socket.emit('hello', [1, 2, 3])
-  socket.on('newJob', jobId => {
-    currentJobs[jobId] = socket.id
-  })
-})
+// var currentJobs = {}
+// io.on('connection', socket => {
+//   socket.emit('hello', [1, 2, 3])
+//   socket.on('newJob', jobId => {
+//     currentJobs[jobId] = socket.id
+//   })
+// })
 
 function jobSubmit (jobId, jobType, userToken) {
   let func = 'jobSubmit'
@@ -3265,7 +3264,7 @@ function jobSubmit (jobId, jobType, userToken) {
                     var contents = data.toString();
                     contentsArray = contents.split('|');
                     if (contentsArray[0] == 'results') {
-                      io.to(currentJobs[jobId].emit('finished', contentsArray[1]))
+                      // io.to(currentJobs[jobId].emit('finished', contentsArray[1]))
                     }
                     logger.info('job ' + jobId + ' o: ' + data)
                   })
