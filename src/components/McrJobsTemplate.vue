@@ -116,7 +116,7 @@ export default {
     job: Object
   },
 
-  created() {
+  created () {
     socket.on('finished', data => {
       console.log('received!')
       console.log(data)

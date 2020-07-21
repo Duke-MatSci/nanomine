@@ -42,8 +42,7 @@ const groupMgr = require('./modules/groupMgr').groupmgr
 const s2a = require('stream-to-array')
 const libxml = require('libxmljs')
 const nanomineUtils = require('./modules/utils')
-const listenPort = 3000
-const io = require('socket.io')(listenPort)
+const io = require('socket.io')(3000)
 let matchValidXmlTitle = nanomineUtils.matchValidXmlTitle
 let env = nanomineUtils.getEnv()
 // const getDatasetXmlFileList = nanomineUtils.getDatasetXmlFileList
@@ -3936,7 +3935,7 @@ function configureLogger () { // logger is not properly configured yet. This con
   return logger
 }
 
-app.listen(listenPort)
+app.listen(3000)
 
 /*
 prefix dataset: <https://hbgd.tw.rpi.edu/dataset/>
