@@ -121,6 +121,10 @@ export default {
       console.log('received!')
       console.log(data)
     })
+    socket.on('hello', data => {
+      console.log('hello!')
+      console.log(data)
+    })
   },
 
   data () {

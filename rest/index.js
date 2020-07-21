@@ -3184,6 +3184,7 @@ dbPromise.catch(function (err) {
 /* websockets for real time response upon job completion */
 var currentJobs = {}
 io.on('connection', socket => {
+  socket.emit('hello', [1, 2, 3])
   socket.on('newJob', jobId => {
     currentJobs[jobId] = socket.id
   })
