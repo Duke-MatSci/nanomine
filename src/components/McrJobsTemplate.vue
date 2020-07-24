@@ -101,6 +101,8 @@ import ImageUpload from './ImageUpload.vue'
 import {Auth} from '@/modules/Auth.js'
 import {JobMgr} from '@/modules/JobMgr.js'
 import {} from 'vuex'
+import io from 'socket.io-client'
+var socket = io()
 
 export default {
 
@@ -112,6 +114,17 @@ export default {
 
   props: {
     job: Object
+  },
+
+  created () {
+    socket.on('finished', data => {
+      console.log('received!')
+      console.log(data)
+    })
+    socket.on('hello', data => {
+      console.log('hello!')
+      console.log(data)
+    })
   },
 
   data () {
@@ -193,6 +206,7 @@ export default {
       console.log('Job Manager added file: ' + vm.files.name)
 
       return jm.submitJob(function (jobId) {
+        socket.emit('newJob', jobId)
         console.log('Success! JobId is: ' + jobId)
         vm.jobId = jobId
         vm.resetLoading()

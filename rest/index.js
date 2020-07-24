@@ -3178,6 +3178,16 @@ dbPromise.then(function () {
 dbPromise.catch(function (err) {
   console.log('dbPromise.catch - db open failed: ' + err)
 })
+
+/* websockets for real time response upon job completion */
+// var currentJobs = {}
+// io.on('connection', socket => {
+//   socket.emit('hello', [1, 2, 3])
+//   socket.on('newJob', jobId => {
+//     currentJobs[jobId] = socket.id
+//   })
+// })
+
 function jobSubmit (jobId, jobType, userToken) {
   let func = 'jobSubmit'
   return new Promise(function (resolve, reject) {
@@ -3251,13 +3261,12 @@ function jobSubmit (jobId, jobType, userToken) {
                   jobPid = child.pid
                   updateJobStatus(jobDir, {'status': 'submitted', 'pid': jobPid})
                   child.stdout.on('data', (data) => {
-                    res.status()
-                    logger.info('job ' + jobId + ' o: ' + data)
                     var contents = data.toString();
-                    contentsArray = contents.split('|')
-                    if (contentsArray[0] == 'results'){
-                      resolve(contentsArray[1])
+                    contentsArray = contents.split('|');
+                    if (contentsArray[0] == 'results') {
+                      // io.to(currentJobs[jobId].emit('finished', contentsArray[1]))
                     }
+                    logger.info('job ' + jobId + ' o: ' + data)
                   })
                   child.stderr.on('data', (data) => {
                     logger.error('job ' + jobId + ' e: ' + data)
