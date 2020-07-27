@@ -232,6 +232,8 @@ export default {
           }]
           vm.getInitialDimensions(0) // set pixel dimensions for image
           if (vm.displayableFileType(0) === false) { vm.filesEditable = false } // set displayable status for image
+          vm.pushPhase(0)
+          vm.pushImageDimensions()
         }
       })
     },
@@ -276,6 +278,8 @@ export default {
               })
               .then(function () {
                 vm.getInitialDimensions(vm.displayedFiles.length - 1) // get image dimensions
+                vm.pushPhase(vm.displayedFiles.length - 1)
+                vm.pushImageDimensions()
                 if (vm.displayableFileType(vm.displayedFiles.length - 1) === false) { vm.filesEditable = false } // reduce functionality if image is tif or mat
               })
           })
@@ -441,7 +445,9 @@ export default {
     },
 
     displayableFileType: function (index) {
-      if (this.displayedFiles[index].fileType === 'mat' || this.displayedFiles[index].fileType === 'tif') {
+      if (this.displayedFiles === []) {
+        return false
+      } else if (this.displayedFiles[index].fileType === 'mat' || this.displayedFiles[index].fileType === 'tif') {
         return false
       }
       return true

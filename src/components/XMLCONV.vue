@@ -142,7 +142,7 @@ export default {
   methods: {
 
     setFiles: function (...files) {
-      this.files = files[0]; // the actual file object
+      this.files = files[0] // the actual file object
     },
 
     datasetSelectedHandler (dataset) {

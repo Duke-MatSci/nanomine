@@ -93,13 +93,11 @@ export default {
   },
   methods: {
     onPhaseChange (e) {
-
       // takes the click offset from top left of image and multiplies that by how much the image is scaled up/down to fit the modal
       this.phase.x_offset = parseInt(e.offsetX * (this.file.pixelSize.width / e.target.parentNode.clientWidth))
       this.phase.y_offset = parseInt(e.offsetY * (this.file.pixelSize.height / e.target.parentNode.clientHeight))
 
       this.phaseDotVisibility = true
-
     },
     onCropChange ({coordinates, canvas}) {
       this.cropped_url = canvas.toDataURL()
@@ -124,7 +122,7 @@ export default {
 
     // gives the y offset of the phase dot
     computedTop: function () {
-      if (this.$refs.phaseImage === undefined) { return this.phase.y_offset * 0  } // refs are not yet rendered on first run
+      if (this.$refs.phaseImage === undefined) { return this.phase.y_offset * 0 } // refs are not yet rendered on first run
       var scaleFactor = this.$refs.phaseImage.clientHeight / this.file.pixelSize.height // image might be scaled up/down to fit the modal.
       return ((this.phase.y_offset * scaleFactor) - 3) + 'px' // -3 pixels to center dot on where they click
     },
@@ -184,7 +182,7 @@ export default {
     width: 100vw;
     height: 100vh;
     background-color: rgba(0, 0, 0, 0.3); /* dims the entire screen to make the modal stand out */
-    display: flex; 
+    display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
