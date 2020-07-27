@@ -95,8 +95,8 @@ export default {
     onPhaseChange (e) {
 
       // takes the click offset from top left of image and multiplies that by how much the image is scaled up/down to fit the modal
-      this.phase.x_offset = parseInt(e.offsetX * (this.file.pixelSize.width / e.path[0].clientWidth))
-      this.phase.y_offset = parseInt(e.offsetY * (this.file.pixelSize.height / e.path[0].clientHeight))
+      this.phase.x_offset = parseInt(e.offsetX * (this.file.pixelSize.width / e.target.parentNode.clientWidth))
+      this.phase.y_offset = parseInt(e.offsetY * (this.file.pixelSize.height / e.target.parentNode.clientHeight))
 
       this.phaseDotVisibility = true
 
