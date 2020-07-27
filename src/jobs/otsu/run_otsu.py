@@ -132,7 +132,7 @@ except:
 # templates are in rest/config/emailtemplates/JOBTYPE/TEMPLATENAME.etf (etf extension is required, but implied in POST data)
 if rc == 0: # send success email
   try:
-    print('results|' + webBaseUri + '/nm#/OtsuResult?refuri='+jobDataUriSuffix+'/'+jobId)
+    # print('results|' + webBaseUri + '/nm#/OtsuResult?refuri='+jobDataUriSuffix+'/'+jobId) -- for the websocket
     logging.info('emailurl: ' + emailurl)
     emaildata = {
       "jobid": jobId,
