@@ -198,10 +198,9 @@ export default {
       vm.submissionFile = {}
       vm.displayedFiles = []
       vm.filesEditable = true
-      if ('phase' in vm.selectedOptions) {
-        delete vm.selectedOptions.phase
-        vm.$emit('setSelectors', vm.selectedOptions)
-      }
+      if ('phase' in vm.selectedOptions) { delete vm.selectedOptions.phase }
+      if ('dimensions' in vm.selectedOptions) { delete vm.selectedOptions.dimensions }
+      vm.$emit('setSelectors', vm.selectedOptions)
 
       const fr = new FileReader()
       fr.readAsDataURL(inputFile)

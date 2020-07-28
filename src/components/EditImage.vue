@@ -94,8 +94,8 @@ export default {
   methods: {
     onPhaseChange (e) {
       // takes the click offset from top left of image and multiplies that by how much the image is scaled up/down to fit the modal
-      this.phase.x_offset = parseInt(e.offsetX * (this.file.pixelSize.width / e.target.parentNode.clientWidth))
-      this.phase.y_offset = parseInt(e.offsetY * (this.file.pixelSize.height / e.target.parentNode.clientHeight))
+      this.phase.x_offset = parseInt(e.offsetX * (this.file.pixelSize.width / e.target.clientWidth))
+      this.phase.y_offset = parseInt(e.offsetY * (this.file.pixelSize.height / e.target.clientHeight))
 
       this.phaseDotVisibility = true
     },
@@ -209,7 +209,7 @@ export default {
     height: 6px;
     border-radius: 50%;
   }
-  
+
   .image-cropper-container {
     width: 700px;
     margin-top: 48px;
