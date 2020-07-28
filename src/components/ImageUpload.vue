@@ -299,7 +299,6 @@ export default {
 
     // emit image dimensions data back to parent
     pushImageDimensions: function () {
-      if (this.dimensionsEntered === false) { return }
       if (this.displayableFileType(0) === true) {
         this.selectedOptions['dimensions'] = {'units': this.inputtedDimensions.units, 'width': this.displayedFiles[0].size.width, 'height': this.displayedFiles[0].size.height}
       } else {
