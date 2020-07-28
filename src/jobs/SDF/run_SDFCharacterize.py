@@ -38,6 +38,8 @@ emailRefreshToken = os.environ['NM_AUTH_API_REFRESH_EMAIL']
 paramFile = open(jobDir + '/' + 'job_parameters.json', 'r')
 inputParameters = json.load(paramFile)
 userId = str(inputParameters['user'])
+ImageDimensions = inputParameters['dimensions']
+PhaseInfo = inputParameters['phase']
 
 jobSrcDir = os.getcwd()
 webBaseUri = os.environ['NM_WEB_BASE_URI']
@@ -67,7 +69,7 @@ for f in myfiles:
 matlabPgm = 'SDFCharacterize' # .m is implied, test mode will use python pgm
 mlab = matlab(logging) # create matlab object
 
-matlabPgmParams = (input_type,input_name)
+matlabPgmParams = (input_type,input_name, ImageDimensions, PhaseInfo)
 
 rc = mlab.run(userId, jobId, jobType, jobSrcDir, jobDir, webBaseUri, jobDataUriSuffix, matlabPgm, matlabPgmParams)
 print('MATLAB return code - rc: ' + str(rc))

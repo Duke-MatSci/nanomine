@@ -39,10 +39,6 @@ CorrelationType = str(inputParameters['CorrelationType'])
 ImageDimensions = inputParameters['dimensions']
 PhaseInfo = inputParameters['phase']
 
-print ('IMAGE AND PHASE INFO')
-print (ImageDimensions)
-print (PhaseInfo)
-
 jobSrcDir = os.getcwd()
 webBaseUri = os.environ['NM_WEB_BASE_URI']
 

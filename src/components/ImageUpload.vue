@@ -248,6 +248,7 @@ export default {
       img.onload = function () {
         vm.displayedFiles[index].pixelSize = {width: img.width, height: img.height}
         vm.displayedFiles[index].originalSize = {width: img.width, height: img.height}
+        vm.updateUserDimensions(index)
         vm.displayedFiles[index].name += ' '
       }
     },
