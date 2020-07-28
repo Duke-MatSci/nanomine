@@ -94,12 +94,6 @@ export default {
   methods: {
     onPhaseChange (e) {
       // takes the click offset from top left of image and multiplies that by how much the image is scaled up/down to fit the modal
-      console.log(e.offsetX)
-      console.log(e.offsetY)
-      console.log(this.file.pixelSize.width)
-      console.log(this.file.pixelSize.height)
-      console.log(e.target.clientWidth)
-      console.log(e.target.clientHeight)
       this.phase.x_offset = parseInt(e.offsetX * (this.file.pixelSize.width / e.target.clientWidth))
       this.phase.y_offset = parseInt(e.offsetY * (this.file.pixelSize.height / e.target.clientHeight))
 

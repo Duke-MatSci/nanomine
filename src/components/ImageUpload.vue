@@ -199,7 +199,9 @@ export default {
       vm.displayedFiles = []
       vm.filesEditable = true
       if ('phase' in vm.selectedOptions) { delete vm.selectedOptions.phase }
-      if ('dimensions' in vm.selectedOptions) { delete vm.selectedOptions.dimensions }
+      if ('dimensions' in vm.selectedOptions) { 
+        vm.selectedOptions['dimensions'] = {'units': vm.inputtedDimensions.units, 'width': parseInt(vm.inputtedDimensions.width), 'height': parseInt(vm.inputtedDimensions.height)}  
+      }
       vm.$emit('setSelectors', vm.selectedOptions)
 
       const fr = new FileReader()
@@ -296,6 +298,7 @@ export default {
 
     // emit image dimensions data back to parent
     pushImageDimensions: function () {
+      if (this.dimensionsEntered === false) { return }
       if (this.displayableFileType(0) === true) {
         this.selectedOptions['dimensions'] = {'units': this.inputtedDimensions.units, 'width': this.displayedFiles[0].size.width, 'height': this.displayedFiles[0].size.height}
       } else {

@@ -37,7 +37,7 @@ inputParameters = json.load(paramFile)
 userId = str(inputParameters['user'])
 CorrelationType = str(inputParameters['CorrelationType'])
 ImageDimensions = inputParameters['dimensions']
-PhaseInfo = inputParamters['phase']
+PhaseInfo = inputParameters['phase']
 
 print ('IMAGE AND PHASE INFO')
 print (ImageDimensions)
