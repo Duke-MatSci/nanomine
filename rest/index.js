@@ -158,7 +158,7 @@ let dbPromise = new Promise(function (resolve, reject) {
     resolve()
   })
 })
-mongoose.connect(dbUri, {keepAlive: true, keepAliveInitialDelay:  00})
+mongoose.connect(dbUri, {keepAlive: true, keepAliveInitialDelay: 300000})
 
 // let mgiVersionSchema = require('./modules/mongo/schema/mgiVersion')(mongoose)
 // let MgiVersion = mongoose.model('mgiversion', mgiVersionSchema)
