@@ -159,8 +159,8 @@ export default {
       this.calculateScale()
     },
     calculateScale () {
-      this.calibratedDimensions.width = this.scaleBar.width * (this.$refs.calibrationImage.clientWidth / this.calibrationLine.width)
-      this.calibratedDimensions.height = this.scaleBar.width * (this.$refs.calibrationImage.clientHeight / this.calibrationLine.width)
+      this.calibratedDimensions.width = parseInt(this.scaleBar.width * (this.$refs.calibrationImage.clientWidth / this.calibrationLine.width))
+      this.calibratedDimensions.height = parseInt(this.scaleBar.width * (this.$refs.calibrationImage.clientHeight / this.calibrationLine.width))
     },
     onCropChange ({coordinates, canvas}) {
       this.cropped_url = canvas.toDataURL()

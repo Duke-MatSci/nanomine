@@ -202,8 +202,8 @@ export default {
       vm.displayedFiles = []
       vm.filesEditable = true
       if ('phase' in vm.selectedOptions) { delete vm.selectedOptions.phase }
-      if ('dimensions' in vm.selectedOptions) { 
-        vm.selectedOptions['dimensions'] = {'units': vm.inputtedDimensions.units, 'width': parseInt(vm.inputtedDimensions.width), 'height': parseInt(vm.inputtedDimensions.height)}  
+      if ('dimensions' in vm.selectedOptions) {
+        vm.selectedOptions['dimensions'] = {'units': vm.inputtedDimensions.units, 'width': parseInt(vm.inputtedDimensions.width), 'height': parseInt(vm.inputtedDimensions.height)}
       }
       vm.$emit('setSelectors', vm.selectedOptions)
 
@@ -295,7 +295,7 @@ export default {
       this.inputtedDimensions.width = args[0].width
       this.inputtedDimensions.height = args[0].height
       this.inputtedDimensions.units = args[1].units
-      userDimensionsCallback()
+      this.userDimensionsCallback()
     },
 
     // callback function for when users enter data into the image dimensions section
