@@ -607,7 +607,7 @@ export default {
   }
 
   .imgDimButton {
-    margin-left: 15px;
+    margin-left: 30px;
   }
 
 </style>

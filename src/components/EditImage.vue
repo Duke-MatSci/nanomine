@@ -223,6 +223,8 @@ export default {
         return 'Crop image'
       } else if (this.type === 'phase') {
         return 'Set phase'
+      } else if (this.type === 'calibration') {
+        return 'Scale bar calibration'
       }
     }
   }
