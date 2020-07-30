@@ -156,7 +156,7 @@ export default {
     },
     mouseUp () {
       this.calibrationLine.drawLine = false
-      calculateScale()
+      this.calculateScale()
     },
     calculateScale () {
       this.calibratedDimensions.width = this.scaleBar.width * (this.$refs.calibrationImage.clientWidth / this.calibrationLine.width)
