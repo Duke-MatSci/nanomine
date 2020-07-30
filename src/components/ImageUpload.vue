@@ -53,6 +53,8 @@
           ></v-select>
         </div>
 
+        <v-btn small v-on:click="openImageEditor(0, 'calibrate')" color="primary">Scale Bar Calibration Tool</v-btn>
+
       </div>
 
     </div>
@@ -84,6 +86,7 @@
       v-bind:type='editImageType'
       v-on:setCroppedImage="cropCallback"
       v-on:setPhase="phaseCallback"
+      v-on:setCalibration="calibrationCallback"
     ></EditImage>
 
     <!-- table of uploaded images -->
@@ -286,6 +289,13 @@ export default {
               })
           })
         })
+    },
+
+    calibrationCallback: function (...args) {
+      this.inputtedDimensions.width = args[0].width
+      this.inputtedDimensions.height = args[0].height
+      this.inputtedDimensions.units = args[1].units
+      userDimensionsCallback()
     },
 
     // callback function for when users enter data into the image dimensions section
