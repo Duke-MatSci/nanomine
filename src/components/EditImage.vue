@@ -42,11 +42,16 @@
       <div class='scale-bar-inputs' v-if='type === "calibrate"'>
 
         <div>
-          <v-text-field outline label='Scale bar width' v-model='scaleBar.width'></v-text-field>
+          <v-text-field outline label='Scale bar width' v-model='scaleBar.width' @change='calculateScale()'></v-text-field>
         </div>
 
         <div>
-          <v-text-field outline label='Scale bar units' v-model='scaleBar.units'></v-text-field>
+          <v-select
+            outline
+            label="Scale bar units"
+            :items="['nanometers (nm)', 'micrometers (µM)', 'millimeters (mm)']"
+            v-model="scaleBar.units"
+          ></v-select>
         </div>
 
       </div>
@@ -115,7 +120,7 @@ export default {
         width: 0,
         left: 0,
         top: 0,
-        drawLine: false,
+        drawLine: false
       },
       calibratedDimensions: {
         width: 0,
@@ -150,9 +155,12 @@ export default {
       }
     },
     mouseUp () {
-      this.drawLine = false
+      this.calibrationLine.drawLine = false
+      calculateScale()
+    },
+    calculateScale () {
       this.calibratedDimensions.width = this.scaleBar.width * (this.$refs.calibrationImage.clientWidth / this.calibrationLine.width)
-      this.calibratedDimensions.heigh = this.scaleBar.width * (this.$refs.calibrationImage.clientHeight / this.calibrationLine.width)
+      this.calibratedDimensions.height = this.scaleBar.width * (this.$refs.calibrationImage.clientHeight / this.calibrationLine.width)
     },
     onCropChange ({coordinates, canvas}) {
       this.cropped_url = canvas.toDataURL()

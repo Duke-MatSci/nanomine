@@ -53,7 +53,7 @@
           ></v-select>
         </div>
 
-        <v-btn class='imgDimButton' small v-on:click="openImageEditor(0, 'calibrate')" color="primary">Scale Bar Calibration Tool</v-btn>
+        <v-btn v-if='filesEditable' class='imgDimButton' small v-on:click="openImageEditor(0, 'calibrate')" color="primary">Scale Bar Calibration Tool</v-btn>
 
       </div>
 
