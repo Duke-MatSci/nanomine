@@ -35,11 +35,11 @@
       <!-- displayed when user opens calibration tool -->
       <div class='relative imageWrapper' v-if='type === "calibrate"' ref='calibrationContainer'>
         <img class='image' :src='file.url' draggable='false' ref='calibrationImage' @mousedown='mouseDown($event)' @mousemove='mouseMove($event)' @mouseup='mouseUp()'>
-        <div class='calibrationLine' ref='calibrationLine' v-bind:style="{width: line.width + 'px', top: line.top + 'px', left: line.left + 'px'}" @mouseup='mouseUp()'></div>
+        <div class='calibrationLine' ref='calibrationLine' v-bind:style="{width: calibrationLine.width + 'px', top: calibrationLine.top + 'px', left: calibrationLine.left + 'px'}" @mouseup='mouseUp()'></div>
       </div>
 
       <!-- displayed when user opens calibration tool -->
-      <div class='scale-bar-inputs'>
+      <div class='scale-bar-inputs' v-if='type === "calibrate"'>
 
         <div>
           <v-text-field outline label='Scale bar width' v-model='scaleBar.width'></v-text-field>
@@ -264,6 +264,7 @@ export default {
   .imageWrapper {
     width: 90%;
     height: 75%;
+    margin-bottom: 20px;
   }
 
   .image {
@@ -286,10 +287,10 @@ export default {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    margin-top: 20px;
+    width: 90%;
   }
   .scale-bar-inputs div {
-    width: 48%;
+    width: 98%;
   }
 
   .image-cropper-container-buttons {
@@ -297,7 +298,6 @@ export default {
     flex-direction: row;
     justify-content: center;
     align-items: center;
-    margin-top: 20px;
     margin-bottom: 20px;
   }
 

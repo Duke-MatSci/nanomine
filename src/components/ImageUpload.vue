@@ -53,7 +53,7 @@
           ></v-select>
         </div>
 
-        <v-btn small v-on:click="openImageEditor(0, 'calibrate')" color="primary">Scale Bar Calibration Tool</v-btn>
+        <v-btn class='imgDimButton' small v-on:click="openImageEditor(0, 'calibrate')" color="primary">Scale Bar Calibration Tool</v-btn>
 
       </div>
 
@@ -604,6 +604,10 @@ export default {
   .imgDimUnits {
     width: 200px;
     max-width: 25%;
+  }
+
+  .imgDimButton {
+    margin-left: 15px;
   }
 
 </style>
