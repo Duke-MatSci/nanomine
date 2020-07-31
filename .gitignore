@@ -10,7 +10,8 @@ yarn-debug.log*
 yarn-error.log*
 /test/unit/coverage/
 venv/
-rest/analytics.log
+/rest/analytics.log
+/rest/jobanalytics.js
 nanomine.log
 
 # Editor directories and files
