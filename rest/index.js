@@ -3873,7 +3873,13 @@ mongoose
   .connect(
     dbUri, {useNewUrlParser: true, keepAlive: true, keepAliveInitialDelay: 300000, useUnifiedTopology: true, reconnectTries: 2, reconnectInterval: 500}
   ).then(result => {
-    app.listen(3000)
+    const server = app.listen(3000);
+    const io = require('./rest-initializer/socket').init(server);
+    io.on('connection', socket => {
+      socket.on('disconnect', () => {
+        delete socket;
+      })
+    })
   }).catch(err => logger.error('db error: ' + err))
 
 
