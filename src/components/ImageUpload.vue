@@ -53,6 +53,8 @@
           ></v-select>
         </div>
 
+        <v-btn v-if='filesEditable' class='imgDimButton' small v-on:click="openImageEditor(0, 'calibrate')" color="primary">Scale Bar Calibration Tool</v-btn>
+
       </div>
 
     </div>
@@ -84,6 +86,7 @@
       v-bind:type='editImageType'
       v-on:setCroppedImage="cropCallback"
       v-on:setPhase="phaseCallback"
+      v-on:setCalibration="calibrationCallback"
     ></EditImage>
 
     <!-- table of uploaded images -->
@@ -198,10 +201,11 @@ export default {
       vm.submissionFile = {}
       vm.displayedFiles = []
       vm.filesEditable = true
-      if ('phase' in vm.selectedOptions) {
-        delete vm.selectedOptions.phase
-        vm.$emit('setSelectors', vm.selectedOptions)
+      if ('phase' in vm.selectedOptions) { delete vm.selectedOptions.phase }
+      if ('dimensions' in vm.selectedOptions) {
+        vm.selectedOptions['dimensions'] = {'units': vm.inputtedDimensions.units, 'width': parseInt(vm.inputtedDimensions.width), 'height': parseInt(vm.inputtedDimensions.height)}
       }
+      vm.$emit('setSelectors', vm.selectedOptions)
 
       const fr = new FileReader()
       fr.readAsDataURL(inputFile)
@@ -232,6 +236,8 @@ export default {
           }]
           vm.getInitialDimensions(0) // set pixel dimensions for image
           if (vm.displayableFileType(0) === false) { vm.filesEditable = false } // set displayable status for image
+          vm.pushPhase(0)
+          vm.pushImageDimensions()
         }
       })
     },
@@ -245,6 +251,7 @@ export default {
       img.onload = function () {
         vm.displayedFiles[index].pixelSize = {width: img.width, height: img.height}
         vm.displayedFiles[index].originalSize = {width: img.width, height: img.height}
+        vm.updateUserDimensions(index)
         vm.displayedFiles[index].name += ' '
       }
     },
@@ -276,10 +283,19 @@ export default {
               })
               .then(function () {
                 vm.getInitialDimensions(vm.displayedFiles.length - 1) // get image dimensions
+                vm.pushPhase(vm.displayedFiles.length - 1)
+                vm.pushImageDimensions()
                 if (vm.displayableFileType(vm.displayedFiles.length - 1) === false) { vm.filesEditable = false } // reduce functionality if image is tif or mat
               })
           })
         })
+    },
+
+    calibrationCallback: function (...args) {
+      this.inputtedDimensions.width = args[0].width
+      this.inputtedDimensions.height = args[0].height
+      this.inputtedDimensions.units = args[1].units
+      this.userDimensionsCallback()
     },
 
     // callback function for when users enter data into the image dimensions section
@@ -441,7 +457,9 @@ export default {
     },
 
     displayableFileType: function (index) {
-      if (this.displayedFiles[index].fileType === 'mat' || this.displayedFiles[index].fileType === 'tif') {
+      if (this.displayedFiles === []) {
+        return false
+      } else if (this.displayedFiles[index].fileType === 'mat' || this.displayedFiles[index].fileType === 'tif') {
         return false
       }
       return true
@@ -586,6 +604,10 @@ export default {
   .imgDimUnits {
     width: 200px;
     max-width: 25%;
+  }
+
+  .imgDimButton {
+    margin-left: 30px;
   }
 
 </style>

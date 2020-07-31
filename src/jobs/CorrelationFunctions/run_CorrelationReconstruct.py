@@ -39,6 +39,8 @@ inputParameters = json.load(paramFile)
 userId = str(inputParameters['user'])
 NumOfReconstructions = str(inputParameters['NumOfReconstructs'])
 CorrelationType = str(inputParameters['CorrelationType'])
+ImageDimensions = inputParameters['dimensions']
+PhaseInfo = inputParameters['phase']
 
 jobSrcDir = os.getcwd()
 webBaseUri = os.environ['NM_WEB_BASE_URI']
@@ -78,7 +80,7 @@ else:
 matlabPgm = 'CorrelationRecon' # .m is implied, test mode will use python pgm
 mlab = matlab(logging) # create matlab object
 
-matlabPgmParams = (input_type,input_name,NumOfReconstructions,correlation_type)
+matlabPgmParams = (input_type,input_name,NumOfReconstructions,correlation_type, ImageDimensions, PhaseInfo)
 
 rc = mlab.run(userId, jobId, jobType, jobSrcDir, jobDir, webBaseUri, jobDataUriSuffix, matlabPgm, matlabPgmParams)
 print('MATLAB return code - rc: ' + str(rc))
