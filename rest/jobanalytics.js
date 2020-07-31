@@ -45,11 +45,15 @@ function addJobInfo (dir, jobParams) {
 
 function getJobParams (dir) {
   let jobDir = jobDataDir + '/' + dir
-  let json = fs.readFileSync(jobDir + '/job_parameters.json')
   let jp = null
-  try {
-    jp = JSON.parse(json)
-  } catch (err) {
+  if (fs.existsSync(jobDir + '/job_parameters.json')) {
+    let json = fs.readFileSync(jobDir + '/job_parameters.json')
+    try {
+      jp = JSON.parse(json)
+    } catch (err) {
+      jp = {'user': 'unknown'}
+    }
+  } else {
     jp = {'user': 'unknown'}
   }
   return jp
