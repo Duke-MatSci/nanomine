@@ -12,7 +12,7 @@ const apiSchema = new Schema(
     token: {
       type: String,
     }
-  }
+  }, {collection: 'api'}
 )
 
 module.exports = mongoose.model('api', apiSchema)

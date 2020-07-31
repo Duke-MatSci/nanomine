@@ -147,17 +147,18 @@ function inspect (theObj) {
 
 
 /** IMPORTING SCHEMAS */
-let Users = require('./modules/mongo/schema/users')
-let Api = require('./modules/mongo/schema/api')
-let XmlData = require('./modules/mongo/schema/xmldata')
-let XsdSchema = require('./modules/mongo/schema/xsd')
-let XsdVersionSchema = require('./modules/mongo/schema/xsdVersion')
 
 let datasetsSchema = require('./modules/mongo/schema/datasets').datasets(mongoose)
 let Datasets = mongoose.model('datasets', datasetsSchema)
 
 let sequencesSchema = require('./modules/mongo/schema/sequences').sequences(mongoose)
 let Sequences = mongoose.model('sequences', sequencesSchema)
+let Users = require('./modules/mongo/schema/users')
+let Api = require('./modules/mongo/schema/api')
+let XmlData = require('./modules/mongo/schema/xmldata')
+let XsdSchema = require('./modules/mongo/schema/xsd')
+let xsdVersionSchema = require('./modules/mongo/schema/xsdVersion')(mongoose)
+let XsdVersionSchema = mongoose.model('xsdVersionData', xsdVersionSchema)
 
 // let mgiVersionSchema = require('./modules/mongo/schema/mgiVersion')(mongoose)
 // let MgiVersion = mongoose.model('mgiversion', mgiVersionSchema)
@@ -3959,7 +3960,13 @@ mongoose
   .connect(
     dbUri, {useNewUrlParser: true, keepAlive: true, keepAliveInitialDelay: 300000, useUnifiedTopology: true, reconnectTries: 2, reconnectInterval: 500}
   ).then(result => {
-    app.listen(3000)
+    const server = app.listen(3000);
+    const io = require('./rest-initializer/socket').init(server);
+    io.on('connection', socket => {
+      socket.on('disconnect', () => {
+        delete socket;
+      })
+    })
   }).catch(err => logger.error('db error: ' + err))
 
 

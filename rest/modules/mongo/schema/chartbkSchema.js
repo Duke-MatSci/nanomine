@@ -24,7 +24,15 @@ const chartBackupSchema = new Schema(
                 type: Schema.Types.ObjectId,
                 ref: 'chartbookmark'
             }
-        ]
+        ],
+        restored: {
+            type: Boolean,
+            default: false
+        },
+        enabled: {
+            type: Boolean,
+            default: true
+        }
     },
     { timestamps: true }
 )

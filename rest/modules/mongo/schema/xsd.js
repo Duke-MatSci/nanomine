@@ -31,7 +31,7 @@ const xsdSchema = new Schema(
     XSLTFiles: {         // Optional and will not be used
       type: Array
     }
-  }
+  }, {collection: 'template'}
 )
 
 module.exports = mongoose.model('xsdData', xsdSchema)
