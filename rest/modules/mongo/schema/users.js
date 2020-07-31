@@ -24,7 +24,7 @@ const usersSchema = new Schema(
     apiAccess: {      // api token | refresh token | accessToken:expiration
       type: [String]
     }
-  }
+  }, {collection: 'users'}
 )
 
 module.exports = mongoose.model('users', usersSchema)
