@@ -3964,7 +3964,9 @@ mongoose
     const io = require('./rest-initializer/socket').init(server);
     io.on('connection', socket => {
       socket.on('disconnect', () => {
-        delete socket;
+        if (socket.sockets[socket.id]) {
+          socket.sockets[socket.id].disconnect();
+        }
       })
     })
   }).catch(err => logger.error('db error: ' + err))
