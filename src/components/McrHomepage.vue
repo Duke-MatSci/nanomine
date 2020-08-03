@@ -40,7 +40,7 @@
               details.
               The functions obtained as a result are useful in developing insights on structure - property relationships
               and serve as the basis for reconstruction algorithms.
-              Upload a binarized microstructure image / set of images and obtain characterization data of your choice.
+              Upload a binarized microstructure image / set of images and obtain characterization data of your choice. <a href='https://materialsmine.org/nm#/nanomine/tutorials'>Tutorial</a>.
             </v-flex>
             <router-link to="/characterization_homepage">Characterize Microstructure</router-link>
           <!-- Reconstruction -->
@@ -50,14 +50,14 @@
               reconstruction is cast as an optimization problem; with the goal of matching characteristics of
               reconstructed image to that of input image.
               In this section, you can upload a binary microstructure image / set of images and obtain 2D/3D
-              reconstructions using method of your choice.
+              reconstructions using method of your choice. <a href='https://materialsmine.org/nm#/nanomine/tutorials'>Tutorial</a>.
             </v-flex>
             <router-link to="/reconstruction_homepage">Reconstruct Microstructure</router-link>
         <!-- Intelligent Characterization -->
           <v-flex class="title cap heavy skip">Intelligent Characterization</v-flex>
           <v-flex class="body">The intelligent characterization tool selects the most suitable characterization
             method between the “physical descriptors” and the “spectral density function (SDF)”
-            approaches based on analyzing the user uploaded image(s). Results generated can be easily passed to the NanoMine Database.
+            approaches based on analyzing the user uploaded image(s). Results generated can be easily passed to the NanoMine Database. <a href='https://materialsmine.org/nm#/nanomine/tutorials'>Tutorial</a>.
           </v-flex>
           <router-link to="/IntelligentCharacterize">Intelligent Characterization</router-link>
         </v-flex>
