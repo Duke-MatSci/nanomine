@@ -80,18 +80,10 @@ connected
     let datasetsSchema = require(schemaPath + '/datasets')(mongoose)
     Datasets = mongoose.model('datasets', datasetsSchema)
 
-    let usersSchema = require(schemaPath + '/users')(mongoose)
-    Users = mongoose.model('users', usersSchema)
-
-    let apiSchema = require(schemaPath + '/api')(mongoose)
-    Api = mongoose.model('api', apiSchema)
-
-    let xmlDataSchema = require(schemaPath + '/xmldata')(mongoose)
-    XmlData = mongoose.model('xmlData', xmlDataSchema)
-
-    let xsdSchema = require(schemaPath + '/xsd')(mongoose)
-    XsdSchema = mongoose.model('xsdData', xsdSchema)
-
+    Users = require(schemaPath + '/users')
+    Api = require(schemaPath + '/api')
+    XmlData = require(schemaPath + '/xmldata')
+    XsdSchema = require(schemaPath + '/xsd')
     let xsdVersionSchema = require(schemaPath + '/xsdVersion')(mongoose)
     XsdVersionSchema = mongoose.model('xsdVersionData', xsdVersionSchema)
 
