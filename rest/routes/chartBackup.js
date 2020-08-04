@@ -17,7 +17,7 @@ router.post('/postcharts', middleware.check, middleware.getUser, chartBackupCont
 router.post('/postchartbkmks', middleware.check, middleware.getUser, chartBackupController.bookmarkChartBackup)
 
 /** DELETE CHARTS */
-router.delete('/deletecharts', middleware.check, chartBackupController.deleteChartBackup)
+router.delete('/deletecharts', middleware.check, middleware.getUser, chartBackupController.deleteChartBackup)
 
 /** GET USER */
 router.post('/vu', middleware.check, middleware.getUser, chartBackupController.getUser)
