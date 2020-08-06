@@ -3232,11 +3232,11 @@ function jobSubmit (jobId, jobType, userToken) {
                   jobPid = child.pid
                   updateJobStatus(jobDir, {'status': 'submitted', 'pid': jobPid})
                   child.stdout.on('data', (data) => {
-                    // var contents = data.toString();
-                    // contentsArray = contents.split('|');
-                    // if (contentsArray[0] == 'results') {
-                    //   emitResults(jobId, contentsArray[1])
-                    // }
+                    var contents = data.toString();
+                    contentsArray = contents.split('|');
+                    if (contentsArray[0] == 'results') {
+                      emitResults(jobId, contentsArray[1])
+                    }
                     logger.info('job ' + jobId + ' o: ' + data)
                   })
                   child.stderr.on('data', (data) => {
@@ -3874,7 +3874,7 @@ initialize.init(mongoose.connection,
 )
 
 let dbUri = process.env['NM_MONGO_URI']
-// let socketConnections = {}
+let socketConnections = {}
 // let io = undefined
 
 mongoose
@@ -3889,9 +3889,9 @@ mongoose
           socket.sockets[socket.id].disconnect();
         }
       })
-      // socket.on('newJob', jobId => {
-      //   socketConnections[jobId] = socket.id
-      // })
+      socket.on('newJob', jobId => {
+        socketConnections[jobId] = socket.id
+      })
     })
   }).catch(err => logger.error('db error: ' + err))
 
