@@ -64,7 +64,7 @@ for f in myfiles:
     input_type = '1'
     input_name = f
 
-matlabPgm = 'Otsu' # .m is implied, test mode will use python pgm
+matlabPgm = 'niblack' # .m is implied, test mode will use python pgm
 mlab = matlab(logging) # create matlab object
 
 matlabPgmParams = (input_type,input_name, PhaseInfo)
@@ -133,7 +133,7 @@ except:
 # templates are in rest/config/emailtemplates/JOBTYPE/TEMPLATENAME.etf (etf extension is required, but implied in POST data)
 if rc == 0: # send success email
   try:
-    print('results|' + webBaseUri + '/nm#/OtsuResult?refuri='+jobDataUriSuffix+'/'+jobId) -- for the websocket
+    # print('results|' + webBaseUri + '/nm#/OtsuResult?refuri='+jobDataUriSuffix+'/'+jobId) -- for the websocket
     logging.info('emailurl: ' + emailurl)
     emaildata = {
       "jobid": jobId,

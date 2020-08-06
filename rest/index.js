@@ -3232,12 +3232,11 @@ function jobSubmit (jobId, jobType, userToken) {
                   jobPid = child.pid
                   updateJobStatus(jobDir, {'status': 'submitted', 'pid': jobPid})
                   child.stdout.on('data', (data) => {
-                    // for the websocket
-                    // var contents = data.toString();
-                    // contentsArray = contents.split('|');
-                    // if (contentsArray[0] == 'results') {
-                    //   io.to(currentJobs[jobId].emit('finished', contentsArray[1]))
-                    // }
+                    var contents = data.toString();
+                    contentsArray = contents.split('|');
+                    if (contentsArray[0] == 'results') {
+                      emitResults(jobId, contentsArray[1])
+                    }
                     logger.info('job ' + jobId + ' o: ' + data)
                   })
                   child.stderr.on('data', (data) => {
@@ -3875,21 +3874,30 @@ initialize.init(mongoose.connection,
 )
 
 let dbUri = process.env['NM_MONGO_URI']
+let socketConnections = {}
+let io = undefined
+
 mongoose
   .connect(
     dbUri, {useNewUrlParser: true, keepAlive: true, keepAliveInitialDelay: 300000, useUnifiedTopology: true, reconnectTries: 2, reconnectInterval: 500}
   ).then(result => {
     const server = app.listen(3000);
-    const io = require('./rest-initializer/socket').init(server);
+    io = require('./rest-initializer/socket').init(server);
     io.on('connection', socket => {
       socket.on('disconnect', () => {
         if (socket.sockets[socket.id]) {
           socket.sockets[socket.id].disconnect();
         }
       })
+      socket.on('newJob', jobId => {
+        socketConnections[jobId] = socket.id
+      })
     })
   }).catch(err => logger.error('db error: ' + err))
 
+const emitResults = (jobId, data) => {
+  io.to(currentJobs[jobId].emit('finished', data))
+}
 
 
 
