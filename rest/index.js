@@ -3875,20 +3875,20 @@ initialize.init(mongoose.connection,
 
 let dbUri = process.env['NM_MONGO_URI']
 let socketConnections = {}
-let io = undefined
+// let io = undefined
 
 mongoose
   .connect(
     dbUri, {useNewUrlParser: true, keepAlive: true, keepAliveInitialDelay: 300000, useUnifiedTopology: true, reconnectTries: 2, reconnectInterval: 500}
   ).then(result => {
     const server = app.listen(3000);
-    io = require('./rest-initializer/socket').init(server);
+    const io = require('./rest-initializer/socket').init(server);
     io.on('connection', socket => {
       socket.on('disconnect', () => {
         if (socket.sockets[socket.id]) {
           socket.sockets[socket.id].disconnect();
         }
-      })
+      }),
       socket.on('newJob', jobId => {
         socketConnections[jobId] = socket.id
       })
@@ -3896,7 +3896,7 @@ mongoose
   }).catch(err => logger.error('db error: ' + err))
 
 const emitResults = (jobId, data) => {
-  io.to(currentJobs[jobId].emit('finished', data))
+  // io.to(currentJobs[jobId].emit('finished', data))
 }
 
 
