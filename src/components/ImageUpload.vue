@@ -71,7 +71,7 @@
             :label="select.title"
             :items="select.options"
             v-model="selectedOptions[select.submitJobTitle]"
-            v-on:change="$emit('setSelectors', selectedOptions)"
+            v-on:change="$emit('set-selectors', selectedOptions)"
           ></v-select>
         </div>
       </div>

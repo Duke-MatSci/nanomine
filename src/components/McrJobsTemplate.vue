@@ -73,7 +73,7 @@
     <ImageUpload
       class='imageUpload'
       v-on:setFiles="setFiles"
-      v-on:setSelectors="setSelectors"
+      v-on:set-selectors="setSelectors"
       :aspectRatio="job.aspectRatio"
       :selects='selects'
       :collectDimensions='job.getImageDimensions'
