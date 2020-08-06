@@ -3888,7 +3888,7 @@ mongoose
         if (socket.sockets[socket.id]) {
           socket.sockets[socket.id].disconnect();
         }
-      }),
+      })
       socket.on('newJob', jobId => {
         socketConnections[jobId] = socket.id
       })
