@@ -3888,17 +3888,17 @@ mongoose
 // }
 
 const server = app.listen(3000);
-const io = require('./rest-initializer/socket').init(server);
-io.on('connection', socket => {
-  socket.on('disconnect', () => {
-    if (socket.sockets[socket.id]) {
-      socket.sockets[socket.id].disconnect();
-    }
-  })
-  // socket.on('newJob', jobId => {
-  //   socketConnections[jobId] = socket.id
-  // })
-})
+// const io = require('./rest-initializer/socket').init(server);
+// io.on('connection', socket => {
+//   socket.on('disconnect', () => {
+//     if (socket.sockets[socket.id]) {
+//       socket.sockets[socket.id].disconnect();
+//     }
+//   })
+//   // socket.on('newJob', jobId => {
+//   //   socketConnections[jobId] = socket.id
+//   // })
+// })
 
 /*
 prefix dataset: <https://hbgd.tw.rpi.edu/dataset/>
