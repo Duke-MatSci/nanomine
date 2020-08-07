@@ -14,6 +14,17 @@ class matlab:
       self.matlabAvailable = (os.environ['NM_MATLAB_AVAILABLE']=='yes')
     except:
       pass
+      
+  def phaseToString(self, phaseObj):
+    returnString = ''
+    for key in phaseObj:
+      if returnString is not '':
+        returnString += "|"
+      returnString += phaseObj[key]['x_offset'] + "*" + phaseObj[key]['y_offset']
+    return returnString
+  
+  def dimensionToString(self, dimensionObj):
+    return dimensionObj['width'] + "*" + dimensionObj['height'] + "*" dimensionObj['units']
 
   def run(self, userId, jobId, jobType, jobSrcDir, jobDir, webBaseUri, jobDataUriSuffix, matlabPgm, matlabPgmParams):
     self.logger.info('path ' + os.environ['PATH'])
