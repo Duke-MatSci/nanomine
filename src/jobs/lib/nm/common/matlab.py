@@ -24,7 +24,7 @@ class matlab:
     return returnString
   
   def dimensionToString(self, dimensionObj):
-    return dimensionObj['width'] + "*" + dimensionObj['height'] + "*" dimensionObj['units']
+    return dimensionObj['width'] + "*" + dimensionObj['height'] + "*" + dimensionObj['units']
 
   def run(self, userId, jobId, jobType, jobSrcDir, jobDir, webBaseUri, jobDataUriSuffix, matlabPgm, matlabPgmParams):
     self.logger.info('path ' + os.environ['PATH'])
