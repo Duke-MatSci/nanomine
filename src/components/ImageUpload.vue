@@ -205,7 +205,7 @@ export default {
       if ('dimensions' in vm.selectedOptions) {
         vm.selectedOptions['dimensions'] = {'units': vm.inputtedDimensions.units, 'width': parseInt(vm.inputtedDimensions.width), 'height': parseInt(vm.inputtedDimensions.height)}
       }
-      vm.$emit('setSelectors', vm.selectedOptions)
+      vm.$emit('set-selectors', vm.selectedOptions)
 
       const fr = new FileReader()
       fr.readAsDataURL(inputFile)
@@ -314,7 +314,7 @@ export default {
       } else {
         this.selectedOptions['dimensions'] = {'units': this.inputtedDimensions.units, 'width': parseInt(this.inputtedDimensions.width), 'height': parseInt(this.inputtedDimensions.height)}
       }
-      this.$emit('setSelectors', this.selectedOptions)
+      this.$emit('set-selectors', this.selectedOptions)
     },
 
     // scale user inputted dimensions by how much user has cropped the images
@@ -351,7 +351,7 @@ export default {
         this.selectedOptions['phase'] = {}
         this.selectedOptions.phase[this.displayedFiles[index].originalName] = this.displayedFiles[index].phase
       }
-      this.$emit('setSelectors', this.selectedOptions)
+      this.$emit('set-selectors', this.selectedOptions)
     },
 
     // args: [cropped image, filename of cropped image, coordinates]
