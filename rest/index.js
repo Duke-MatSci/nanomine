@@ -3880,9 +3880,8 @@ mongoose
   .connect(
     dbUri, {useNewUrlParser: true, keepAlive: true, keepAliveInitialDelay: 300000, useUnifiedTopology: true, reconnectTries: 2, reconnectInterval: 500}
   ).then(result => {
-    const server = https.createServer(app)
+    const server = app.listen(3000);
     io = require('./rest-initializer/socket').init(server);
-    server.listen(3000)
     io.on('connection', socket => {
       socket.emit('hello', 'hi there!')
       socket.on('disconnect', () => {
