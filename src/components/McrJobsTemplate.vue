@@ -197,6 +197,11 @@ export default {
 
       var jobParameters = {'InputType': vm.files.fileType} // Figure out which file type
       for (var key in vm.selectedOptions) {
+        if (key === 'phase') {
+          jobParameters[key] = vm.phaseToString(vm.selectedOptions[key])
+        } else if (key === 'dimensions') {
+          jobParameters[key] = vm.dimensionToString(vm.selectedOptions[key])
+        }
         jobParameters[key] = vm.selectedOptions[key]
       }
       jm.setJobParameters(jobParameters)
@@ -217,6 +222,21 @@ export default {
         vm.errorAlert = true
         vm.resetLoading()
       })
+    },
+
+    phaseToString: function (phaseObj) {
+      var returnString = ''
+      for (var key in phaseObj) {
+        if (returnString !== '') {
+          returnString += "|"
+        }
+        returnString += phaseObj[key]['x_offset'] + "*" + phaseObj[key]['y_offset']
+      }
+      return returnString
+    },
+
+    dimensionToString: function (dimensionObj) {
+      return dimensionObj['width'] + "*" + dimensionObj['height'] + "*" + dimensionObj['units']
     }
   }
 
