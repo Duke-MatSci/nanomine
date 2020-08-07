@@ -201,8 +201,9 @@ export default {
           jobParameters[key] = vm.phaseToString(vm.selectedOptions[key])
         } else if (key === 'dimensions') {
           jobParameters[key] = vm.dimensionToString(vm.selectedOptions[key])
+        } else {
+          jobParameters[key] = vm.selectedOptions[key]
         }
-        jobParameters[key] = vm.selectedOptions[key]
       }
       jm.setJobParameters(jobParameters)
 
@@ -228,15 +229,15 @@ export default {
       var returnString = ''
       for (var key in phaseObj) {
         if (returnString !== '') {
-          returnString += "|"
+          returnString += '|'
         }
-        returnString += phaseObj[key]['x_offset'] + "*" + phaseObj[key]['y_offset']
+        returnString += phaseObj[key]['x_offset'] + '*' + phaseObj[key]['y_offset']
       }
       return returnString
     },
 
     dimensionToString: function (dimensionObj) {
-      return dimensionObj['width'] + "*" + dimensionObj['height'] + "*" + dimensionObj['units']
+      return dimensionObj['width'] + '*' + dimensionObj['height'] + '*' + dimensionObj['units']
     }
   }
 
