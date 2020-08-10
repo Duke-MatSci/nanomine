@@ -27,6 +27,8 @@ try
         case 1
             img = imread([path_to_read,file_name]); % read the incming target and store pixel values
             if length(size(img)) > 1
+            phase_cords = split(phase_cords, '*');
+            phase_cords = [str2num(phase_cords(1)) str2num(phase_cords(2))];
             [condition]=check_phase(img,phase_cords); % if 0 image needs to be inverted
             else
                 writeError([path_to_write, '/errors.txt'], ['failed to read image file: ', file_name]);
