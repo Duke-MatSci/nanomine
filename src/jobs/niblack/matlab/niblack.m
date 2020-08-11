@@ -18,35 +18,74 @@
 %   Contributed by Jan Motl (jan@motl.us)
 %   $Revision: 1.0 $  $Date: 2013/03/09 16:58:01 $
 
-function output = niblack(image, varargin)
-% Initialization
-numvarargs = length(varargin);      % only want 4 optional inputs at most
-if numvarargs > 4
-    error('myfuns:somefun2Alt:TooManyInputs', ...
-     'Possible parameters are: (image, [m n], k, offset, padding)');
-end
- 
-optargs = {[3 3] -0.2 0 'replicate'};   % set defaults
- 
-optargs(1:numvarargs) = varargin;   % use memorable variable names
-[window, k, offset, padding] = optargs{:};
 
-if ndims(image) ~= 2
-    error('The input image must be a two-dimensional array.');
-end
 
-% Convert to double
-image = double(image);
+function Niblack(userId, jobId, jobType, jobSrcDir, jobDir, webBaseUri,input_type,file_name, window)
 
-% Mean value
-mean = averagefilter(image, window, padding);
+    k = -0.2;
+    offset = 0;
+    padding = 'replicate';
 
-% Standard deviation
-meanSquare = averagefilter(image.^2, window, padding);
-deviation = ((meanSquare - mean.^2)).^0.5;
+    rc=0;
+    try
+        path_to_read = [jobSrcDir,'/'];
+        path_to_write = [jobSrcDir,'/output'];
+        mkdir(path_to_write);
+        writeError([path_to_write, '/errors.txt'], ''); % ensure that errors.txt exists
 
-% Initialize the output
-output = zeros(size(image));
+        try
+            switch str2num(input_type)
+                case 1
+                    img = imread([path_to_read,file_name]);
+                case 2
+                    rc = 91
+                    exit(rc)
+                case 3
+                    path=[path_to_read,file_name];
+                    k=load(path);
+                    [no_need,f_name,ext]=fileparts(file_name);
+                    img = getfield(k,f_name);
+            end
+        catch ex
+            rc = 98;
+            msg = getReport(ex);
+            writeError([path_to_write, '/errors.txt'], msg);
+            writeError([path_to_write, '/errors.txt'], sprintf('\n'));
+            exit(rc);
+        end
 
-% Niblack
-output(image > mean + k * deviation - offset) = 1;
+        % Convert to double
+        image = double(img)
+
+        % Mean value
+        mean = averagefilter(image, window, padding);
+
+        % Standard deviation
+        meanSquare = averagefilter(image.^2, window, padding);
+        deviation = ((meanSquare - mean.^2)).^0.5;
+
+        % Initialize the output
+        output = zeros(size(image));
+
+        % Niblack
+        output(image > mean + k * deviation - offset) = 1;
+
+        % write output image
+        imwrite(output,[path_to_write,'/','Input1.jpg']);
+
+    catch
+        rc = 99;
+        exit(rc);
+    end
+        function writeError(file, msg)
+        f = fopen(file,'a+');
+        fprintf(f, '%s\n', msg);
+        fclose(f);
+        end
+    end
+
+    function writeError(file, msg)
+        f = fopen(file,'a+');
+        fprintf(f, '%s\n', msg);
+        fclose(f);
+    end

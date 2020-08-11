@@ -66,13 +66,26 @@
 
       <div class='selectDropdownsWrapper'>
         <div class='singleSelectDropdown' v-for="(select, index) in selects" :key='index'>
-          <v-select
-            outline
-            :label="select.title"
-            :items="select.options"
-            v-model="selectedOptions[select.submitJobTitle]"
-            v-on:change="$emit('set-selectors', selectedOptions)"
-          ></v-select>
+
+          <div v-if="'options' in select">
+            <v-select
+              outline
+              :label="select.title"
+              :items="select.options"
+              v-model="selectedOptions[select.submitJobTitle]"
+              v-on:change="$emit('set-selectors', selectedOptions)"
+            ></v-select>
+          </div>
+
+          <div v-else>
+            <v-text-field
+              outline
+              :label="select.title"
+              v-model="selectedOptions[select.submitJobTitle]"
+              @change="$emit('set-selectors', selectedOptions)"
+            ></v-text-field>
+          </div>
+
         </div>
       </div>
 

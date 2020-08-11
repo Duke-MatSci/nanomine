@@ -68,6 +68,13 @@ export default {
         references: [
           'W. Niblack, An Introduction to Image Processing. Englewood Cliffs, NJ: Prentice-Hall, 1986, pp. 115-116.',
           'Khurshid, K.,Siddiqi, I., Faure, C. and Vincent, N., 2009. Comparison of Niblack inspired Binarization methods for ancient document. DRR, 7247, pp.1-10'
+        ],
+
+        selects: [
+          {
+            title: 'Window Size',
+            submitJobTitle: 'WindowSize',
+          }
         ]
 
       }

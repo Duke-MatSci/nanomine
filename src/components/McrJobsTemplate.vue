@@ -83,6 +83,11 @@
       <v-btn v-on:click="submit()" color="primary">{{ job.submit.submitButtonTitle }}</v-btn>
     </v-flex>
 
+    <v-flex xs12 v-if='resultsObtained'>
+      <h3>Submission Results</h3>
+      
+    </v-flex>
+
     <v-flex xs12>
       <h3>References</h3>
       <div v-for='(reference, index) in job.references' v-bind:key='index'>
@@ -136,7 +141,8 @@ export default {
       jobId: '',
       files: undefined,
       selects: [],
-      selectedOptions: {}
+      selectedOptions: {},
+      resultsObtained: false
     }
   },
 
