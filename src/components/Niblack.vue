@@ -1,60 +1,77 @@
 <!--
 ################################################################################
 #
-# File Name: Niblack.vue
+# File Name: Otsu.vue
 # Application: templates
+# Description:
 #
-# Created by: Akshay Iyer, August 18, 2018
+# Created by: Akshay Iyer, July 23, 2018
 # Customized for NanoMine
 #
 ################################################################################
 -->
 
 <template>
-  <div class="Niblack">
-    <h1>{{ msg }}</h1>
-    <v-container>
-      <v-flex xs12>
-          <h3>Description</h3>
-          <br>
-            <p>Upload a grayscale micrograph image in .jpg/.png/.tif format and click "Binarize" to perform dynamic niblack binarization. A default window size of 5 pixels (i.e. 5 x 5 pixel window) will be used. </p>
-            <p>After binarization is complete, this page will be updated to show the results. You can change window size and retry binarization until you get satisfactory result. </p>
-      </v-flex>
-          <h2> Create Agent to accept user uploaded files and process it in MATLAB</h2>
-
-    </v-container>
-
-    <h4>Reference</h4>
-    <v-flex xs12>
-        <p>W. Niblack, An Introduction to Image Processing. Englewood Cliffs, NJ: Prentice-Hall, 1986, pp. 115-116.</p>
-        <p>Khurshid, K.,Siddiqi, I., Faure, C. and Vincent, N., 2009. Comparison of Niblack inspired Binarization methods for ancient document. DRR, 7247, pp.1-10</p>
-    </v-flex>
-  </div>
+  <McrJobsTemplate v-bind:job='jobInfo'></McrJobsTemplate>
 </template>
 
 <script>
+
+import {} from 'vuex'
+import McrJobsTemplate from './McrJobsTemplate.vue'
+
 export default {
+
   name: 'Niblack',
-  data () {
+
+  components: {
+    McrJobsTemplate
+  },
+
+  data: () => {
     return {
-      msg: 'Niblack Binarization Method'
+      jobInfo: {
+
+        jobTitle: 'Niblack',
+
+        pageTitle: 'Binarization - Niblack Method',
+
+        description: [
+          'Upload a grayscale micrograph image in .jpg/.png/.tif format and click "Binarize" to perform dynamic niblack binarization. A default window size of 5 pixels (i.e. 5 x 5 pixel window) will be used.',
+          'After binarization is complete, this page will be updated to show the results. You can change window size and retry binarization until you get satisfactory result.'
+        ],
+
+        aspectRatio: 'free',
+
+        getImageDimensions: false,
+
+        submit: {
+          submitButtonTitle: 'Binarize',
+          submitJobTitle: 'niblack'
+        },
+
+        uploadOptions: [
+          {
+            title: 'Single image',
+            description: 'Supported image formats are .jpg, .tif and .png.'
+          },
+          {
+            title: 'Single image in .mat format',
+            description: 'The .mat file must contain ONLY ONE variable named "Input," which contains the image.'
+          },
+          {
+            title: 'ZIP file with multiple images',
+            description: 'Submit a ZIP file containing multiple images (supported formats: .jpg, .tif, .png) of same size (in pixels). DO NOT ZIP the folder containing images; select all images and ZIP them directly.'
+          }
+        ],
+
+        references: [
+          'W. Niblack, An Introduction to Image Processing. Englewood Cliffs, NJ: Prentice-Hall, 1986, pp. 115-116.',
+          'Khurshid, K.,Siddiqi, I., Faure, C. and Vincent, N., 2009. Comparison of Niblack inspired Binarization methods for ancient document. DRR, 7247, pp.1-10'
+        ]
+
+      }
     }
   }
 }
 </script>
-
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-  img {
-    width: 240px;
-  }
-  h4 {
-    text-transform: uppercase;
-  }
-  h1 {
-    margin-top: 10px;
-    background-color: black;
-    color: white;
-  }
-
-</style>
