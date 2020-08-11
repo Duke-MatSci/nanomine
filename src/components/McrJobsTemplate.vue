@@ -102,7 +102,7 @@ import {Auth} from '@/modules/Auth.js'
 import {JobMgr} from '@/modules/JobMgr.js'
 import {} from 'vuex'
 import io from 'socket.io-client'
-var socket = io({path: '/nmr/socket.io'})
+var socket = io({path: '/nmr/socket.io', transports: ['websocket']})
 
 export default {
 
