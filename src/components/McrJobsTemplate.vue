@@ -217,7 +217,7 @@ export default {
       console.log('Job Manager added file: ' + vm.files.name)
 
       return jm.submitJob(function (jobId) {
-        // socket.emit('newJob', jobId)
+        socket.emit('newJob', jobId)
         console.log('Success! JobId is: ' + jobId)
         vm.jobId = jobId
         vm.resetLoading()
