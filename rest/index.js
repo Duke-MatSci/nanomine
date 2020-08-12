@@ -3881,9 +3881,11 @@ mongoose
     dbUri, {useNewUrlParser: true, keepAlive: true, keepAliveInitialDelay: 300000, useUnifiedTopology: true, reconnectTries: 2, reconnectInterval: 500}
   ).then(result => {
     const server = app.listen(3000);
-    io = require('./rest-initializer/socket').init(server);
+    // io = require('./rest-initializer/socket').init(server);
+    io = require('socket.io')(server)
+    logger.info('IO INFO: ' + io)
     io.on('connection', socket => {
-      // socket.emit('hello', 'hi there!')
+      socket.emit('hello', 'hi there!')
       logger.info('socket info: ' + socket)
       socket.on('disconnect', () => {
         if (socket.sockets[socket.id]) {
