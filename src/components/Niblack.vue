@@ -58,10 +58,6 @@ export default {
           {
             title: 'Single image in .mat format',
             description: 'The .mat file must contain ONLY ONE variable named "Input," which contains the image.'
-          },
-          {
-            title: 'ZIP file with multiple images',
-            description: 'Submit a ZIP file containing multiple images (supported formats: .jpg, .tif, .png) of same size (in pixels). DO NOT ZIP the folder containing images; select all images and ZIP them directly.'
           }
         ],
 

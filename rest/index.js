@@ -3883,7 +3883,8 @@ mongoose
     const server = app.listen(3000);
     io = require('./rest-initializer/socket').init(server);
     io.on('connection', socket => {
-      socket.emit('hello', 'hi there!')
+      // socket.emit('hello', 'hi there!')
+      logger.info('socket info: ' + socket)
       socket.on('disconnect', () => {
         if (socket.sockets[socket.id]) {
           socket.sockets[socket.id].disconnect();
