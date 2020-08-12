@@ -85,7 +85,7 @@
 
     <v-flex xs12 v-if='resultsObtained'>
       <h3>Submission Results</h3>
-      
+
     </v-flex>
 
     <v-flex xs12>
