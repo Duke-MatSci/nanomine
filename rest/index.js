@@ -3887,11 +3887,6 @@ mongoose
     io.on('connection', socket => {
       socket.emit('hello', 'hi there!')
       logger.info('socket info: ' + socket)
-      socket.on('disconnect', () => {
-        if (socket.sockets[socket.id]) {
-          socket.sockets[socket.id].disconnect();
-        }
-      })
       socket.on('newJob', jobId => {
         socketConnections[jobId] = socket.id
       })
