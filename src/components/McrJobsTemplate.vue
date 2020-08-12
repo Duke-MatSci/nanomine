@@ -122,7 +122,7 @@ export default {
   },
 
   created () {
-    io.connect(`${window.location.origin}/nmr/`)
+    let socket = io.connect(`${window.location.origin}/nmr/`)
     socket.on('finished', data => {
       console.log('received')
       console.log(data)
