@@ -3877,7 +3877,7 @@ initialize.init(mongoose.connection,
 
 let dbUri = process.env['NM_MONGO_URI']
 let socketConnections = {}
-let io = undefined
+// let io = undefined
 mongoose
   .connect(
     dbUri, {useNewUrlParser: true, keepAlive: true, keepAliveInitialDelay: 300000, useUnifiedTopology: true, reconnectTries: 2, reconnectInterval: 500}
