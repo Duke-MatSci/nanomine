@@ -43,7 +43,7 @@ const createDataset = nanomineUtils.createDataset
 const updateDataset = nanomineUtils.updateDataset
 const getLatestSchemas = nanomineUtils.getLatestSchemas
 const sortSchemas = nanomineUtils.sortSchemas
-
+const io = require('./rest-initializer/socket')
 /*** Import Centralized Error Reporting Module */
 const centralLogger = require('./middlewares/logger')
 /** Import for Chart Visualization */
@@ -2974,6 +2974,8 @@ app.post('/jobcreate', function (req, res, next) {
   let jsonResp = {'error': null, 'data': null}
   let jobType = req.body.jobType
   let jobParams = req.body.jobParameters
+  const ioObject = io.getIO(logger)
+  ioObject.emit('hello', 'this is a message!!!')
   jobCreate(jobType, jobParams)
     .then(function (jobInfo) {
       jsonResp.data = jobInfo
