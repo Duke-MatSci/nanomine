@@ -43,7 +43,6 @@ const createDataset = nanomineUtils.createDataset
 const updateDataset = nanomineUtils.updateDataset
 const getLatestSchemas = nanomineUtils.getLatestSchemas
 const sortSchemas = nanomineUtils.sortSchemas
-const io = require('./rest-initializer/socket')
 /*** Import Centralized Error Reporting Module */
 const centralLogger = require('./middlewares/logger')
 /** Import for Chart Visualization */
@@ -2974,8 +2973,6 @@ app.post('/jobcreate', function (req, res, next) {
   let jsonResp = {'error': null, 'data': null}
   let jobType = req.body.jobType
   let jobParams = req.body.jobParameters
-  const ioObject = io.getIO(logger)
-  ioObject.emit('hello', 'this is a message!!!')
   jobCreate(jobType, jobParams)
     .then(function (jobInfo) {
       jsonResp.data = jobInfo
@@ -3876,24 +3873,23 @@ initialize.init(mongoose.connection,
 )
 
 let dbUri = process.env['NM_MONGO_URI']
-let socketConnections = {}
-// let io = undefined
+
 mongoose
   .connect(
     dbUri, {useNewUrlParser: true, keepAlive: true, keepAliveInitialDelay: 300000, useUnifiedTopology: true, reconnectTries: 2, reconnectInterval: 500}
-  ).then(result => {
-    const server = app.listen(3000);
-    ioObj = io.init(server);
-    // io = require('socket.io')(server)
-    // logger.info('IO INFO: ' + io)
-    ioObj.on('connection', socket => {
-      socket.emit('hello', 'hi there!')
-      logger.info('socket info: ' + socket)
-      socket.on('newJob', jobId => {
-        socketConnections[jobId] = socket.id
-      })
-    })
-  }).catch(err => logger.error('db error: ' + err))
+  ).catch(err => logger.error('db error: ' + err))
+
+const server = app.listen(3000)
+let socketConnections = {}
+const io = require('socket.io')(server)
+
+io.on('connection', socket => {
+  socket.emit('hello', 'welcome! we are connected.')
+  socket.on('newJob', jobId => {
+    socketConnections[jobId] = socket.id
+    socket.emit('hello', 'socket has received jobId.')
+  })
+})
 
 function emitResults (jobId, data) {
   io.to(currentJobs[jobId]).emit('finished', data)
