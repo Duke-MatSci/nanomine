@@ -3892,7 +3892,8 @@ io.on('connection', socket => {
 })
 
 function emitResults (jobId, data) {
-  io.to(currentJobs[jobId]).emit('finished', data)
+  logger.info('emitting results of MCR JOB: ' + data)
+  io.to(socketConnections[jobId]).emit('finished', data)
 }
 
 /*
