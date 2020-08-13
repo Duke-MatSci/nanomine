@@ -135,7 +135,6 @@ import {Auth} from '@/modules/Auth.js'
 import {JobMgr} from '@/modules/JobMgr.js'
 import {} from 'vuex'
 import io from 'socket.io-client'
-var socket = io({path: '/nmr/socket.io', port: 3000})
 import jszip from 'jszip'
 
 export default {
@@ -151,6 +150,8 @@ export default {
   },
 
   created () {
+    var socket = io({path: '/nmr/socket.io', port: 3000})
+
     socket.on('finished', data => {
       let vm = this
       vm.results.jobid = data
