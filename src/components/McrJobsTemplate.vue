@@ -92,14 +92,14 @@
         <v-btn class='resultsButton' v-if='results.obtained' v-on:click="download()" color="primary">Download results</v-btn>
 
         <div class='resultsContainer'>
-          
+
           <div>
             <h4 class='resultsSubtitle'>Inputs</h4>
             <div v-for='(file, index) in results.files.input' v-bind:key='index'>
               <img class='resultsImage' :src='getResultImage(index, "input")'>
             </div>
           </div>
-          
+
           <div>
             <h4 class='resultsSubtitle'>Outputs</h4>
             <div v-for='(file, index) in results.files.output' v-bind:key='index'>
@@ -275,6 +275,7 @@ export default {
       return jm.submitJob(function (jobId) {
         socket.emit('newJob', jobId)
         vm.results.submitted = true
+        vm.results.obtained = false
         console.log('Success! JobId is: ' + jobId)
         vm.jobId = jobId
         vm.resetLoading()
