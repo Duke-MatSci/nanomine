@@ -93,14 +93,14 @@
 
         <div class='resultsContainer'>
 
-          <div>
+          <div class='resultsSubcontainer'>
             <h4 class='resultsSubtitle'>Inputs</h4>
             <div v-for='(file, index) in results.files' v-bind:key='index'>
               <img class='resultsImage' :src='getResultImage(index, "input")'>
             </div>
           </div>
 
-          <div>
+          <div class='resultsSubcontainer'>
             <h4 class='resultsSubtitle'>Outputs</h4>
             <div v-for='(file, index) in results.files' v-bind:key='index'>
               <img class='resultsImage' :src='getResultImage(index, "output")'>
@@ -136,6 +136,7 @@ import {JobMgr} from '@/modules/JobMgr.js'
 import {} from 'vuex'
 import io from 'socket.io-client'
 var socket = io({path: '/nmr/socket.io', port: 3000})
+import jszip from 'jszip'
 
 export default {
 
@@ -208,6 +209,23 @@ export default {
   },
 
   methods: {
+
+    // download: function () {
+    //   let vm = this;
+    //   let jszip_obj = new jszip()
+
+    //   // add images to zip file
+    //   for (let i = 0; i < vm.results.files.length; i++) {
+
+    //     const getBase64 = (path) => {
+    //       var canvas = document.createElement('canvas')
+    //       canvas.width = coordinates.width
+    //       canvas.height = coordinates.height
+    //     }
+    //     var image = vm.results.uri + '/' + vm.results.files[i].output
+    //     jszip_obj.file(this.displayedFiles[i].originalName, this.displayedFiles[i].url.split(',').pop(), {base64: true})
+    //   }
+    // },
 
     getResultImage: function (index, type) {
       let vm = this
@@ -337,12 +355,17 @@ export default {
     justify-content: space-between;
   }
 
-  .resultsContainer div {
+  .resultsSubcontainer {
     width: 48%;
+  }
+
+  .resultsSubcontainer div {
+    width: 100%;
   }
 
   .resultsSubtitle {
     text-align: left;
+    font-size: 15px;
   }
 
   .resultsImage {
