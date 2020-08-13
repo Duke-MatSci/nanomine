@@ -3232,13 +3232,6 @@ function jobSubmit (jobId, jobType, userToken) {
                   jobPid = child.pid
                   updateJobStatus(jobDir, {'status': 'submitted', 'pid': jobPid})
                   child.stdout.on('data', (data) => {
-                    logger.info('STDOUT DATA: ' + data)
-                    logger.info('STDOUT DATA: ' + data.toString())
-                    var contents = data.toString()
-                    contentsArray = contents.split('|')
-                    if (contentsArray[0] === 'results') {
-                      emitResults(jobId, contentsArray[1])
-                    }
                     logger.info('job ' + jobId + ' o: ' + data)
                   })
                   child.stderr.on('data', (data) => {
@@ -3249,10 +3242,12 @@ function jobSubmit (jobId, jobType, userToken) {
                     updateJobStatus(jobDir, {'status': 'failed to execute', 'error': err})
                   })
                   child.on('close', (data) => {
+                    emitResults(jobId, jobId)
                     logger.info('job ' + jobId + ' exited with code: ' + data)
                     updateJobStatus(jobDir, {'status': 'completed', 'rc': data})
                   })
                   child.on('exit', (data) => {
+                    emitResults(jobId, jobId)
                     logger.info('job ' + jobId + ' exited with code: ' + data)
                     updateJobStatus(jobDir, {'status': 'completed', 'rc': data})
                   })
@@ -3315,8 +3310,6 @@ function fillOutJobEmailTemplate (jobtype, templateName, emailvars) {
   // rejects with new Error('error text')
   let func = 'fillOutJobEmailTemplate'
   let emailtemplate = templateName
-  logger.info('EMAIL VARS ARE:' + emailvars)
-  emitResults(emailvars.jobid, emailvars.resultpage)
   return new Promise(function (resolve, reject) {
     // read the email template, merge with email vars
     fs.readFile('config/emailtemplates/' + jobtype + '/' + emailtemplate + '.etf', function (err, etfText) {
