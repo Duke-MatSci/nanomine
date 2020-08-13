@@ -284,6 +284,9 @@ export default {
           jobParameters[key] = vm.selectedOptions[key]
         }
       }
+      if ('submitJobType' in vm.job.submit) {
+        jobParameters['jobtype'] = vm.job.submitJobType
+      }
       jm.setJobParameters(jobParameters)
 
       jm.addInputFile(vm.files.name, vm.files.url)

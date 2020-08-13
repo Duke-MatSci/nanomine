@@ -38,6 +38,10 @@ paramFile = open(jobDir + '/' + 'job_parameters.json', 'r')
 inputParameters = json.load(paramFile)
 userId = str(inputParameters['user'])
 PhaseInfo = inputParameters['phase']
+jobType = inputParameters['jobtype']
+WindowSize = 3
+if jobType == 'niblack':
+  WindowSize = inputParameters['WindowSize']
 
 jobSrcDir = os.getcwd()
 webBaseUri = os.environ['NM_WEB_BASE_URI']
@@ -65,9 +69,14 @@ for f in myfiles:
     input_name = f
 
 matlabPgm = 'Otsu' # .m is implied, test mode will use python pgm
+if jobType == 'niblack':
+  matlabPgm = 'niblack'
 mlab = matlab(logging) # create matlab object
 
 matlabPgmParams = (input_type,input_name)
+
+if jobType == 'niblack':
+  matlabPgmParams = (input_type, input_name, WindowSize)
 
 rc = mlab.run(userId, jobId, jobType, jobSrcDir, jobDir, webBaseUri, jobDataUriSuffix, matlabPgm, matlabPgmParams)
 print('MATLAB return code - rc: ' + str(rc))
