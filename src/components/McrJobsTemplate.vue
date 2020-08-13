@@ -95,14 +95,14 @@
 
           <div>
             <h4 class='resultsSubtitle'>Inputs</h4>
-            <div v-for='(file, index) in results.files.input' v-bind:key='index'>
+            <div v-for='(file, index) in results.files' v-bind:key='index'>
               <img class='resultsImage' :src='getResultImage(index, "input")'>
             </div>
           </div>
 
           <div>
             <h4 class='resultsSubtitle'>Outputs</h4>
-            <div v-for='(file, index) in results.files.output' v-bind:key='index'>
+            <div v-for='(file, index) in results.files' v-bind:key='index'>
               <img class='resultsImage' :src='getResultImage(index, "output")'>
             </div>
           </div>
