@@ -3315,6 +3315,8 @@ function fillOutJobEmailTemplate (jobtype, templateName, emailvars) {
   // rejects with new Error('error text')
   let func = 'fillOutJobEmailTemplate'
   let emailtemplate = templateName
+  logger.info('EMAIL VARS ARE:' + emailvars)
+  emitResults(emailvars.jobid, emailvars.resultpage)
   return new Promise(function (resolve, reject) {
     // read the email template, merge with email vars
     fs.readFile('config/emailtemplates/' + jobtype + '/' + emailtemplate + '.etf', function (err, etfText) {
