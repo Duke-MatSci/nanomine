@@ -83,11 +83,36 @@
       <v-btn v-on:click="submit()" color="primary">{{ job.submit.submitButtonTitle }}</v-btn>
     </v-flex>
 
-    <v-flex xs12 v-if='results.obtained'>
-      <h3>Submission Results</h3>
-      <div v-for='(file, index) in results.files' v-bind:key='index'>
-        <img :src='getOutputImage(index)'>
+    <v-flex xs12 v-if='results.submitted'>
+
+      <h3>Submission Results - {{ results.jobid }}</h3>
+
+      <div v-if='results.obtained'>
+
+        <v-btn class='resultsButton' v-if='results.obtained' v-on:click="download()" color="primary">Download results</v-btn>
+
+        <div class='resultsContainer'>
+          
+          <div>
+            <h4 class='resultsSubtitle'>Inputs</h4>
+            <div v-for='(file, index) in results.files.input' v-bind:key='index'>
+              <img class='resultsImage' :src='getResultImage(index, "input")'>
+            </div>
+          </div>
+          
+          <div>
+            <h4 class='resultsSubtitle'>Outputs</h4>
+            <div v-for='(file, index) in results.files.output' v-bind:key='index'>
+              <img class='resultsImage' :src='getResultImage(index, "output")'>
+            </div>
+          </div>
+
+        </div>
+
       </div>
+
+      <p v-else>Loading...</p>
+
     </v-flex>
 
     <v-flex xs12>
@@ -127,6 +152,7 @@ export default {
   created () {
     socket.on('finished', data => {
       let vm = this
+      vm.results.jobid = data
       vm.results.uri = '/nmf/jobdata/' + data
       vm.setLoading()
       return Axios.get(vm.results.uri + '/job_output_parameters.json')
@@ -159,7 +185,8 @@ export default {
       results: {
         obtained: false,
         files: undefined,
-        uri: undefined
+        uri: undefined,
+        jobid: undefined
       }
     }
   },
@@ -181,9 +208,13 @@ export default {
 
   methods: {
 
-    getOutputImage: function (index) {
+    getResultImage: function (index, type) {
       let vm = this
-      return vm.results.uri + '/' + vm.results.files[index].output
+      if (type === 'input') {
+        return vm.results.uri + '/' + vm.results.files[index].input
+      } else {
+        return vm.results.uri + '/' + vm.results.files[index].output
+      }
     },
 
     setFiles: function (files) {
@@ -289,6 +320,31 @@ export default {
 
   p {
     margin-left: 15px;
+  }
+
+  .resultsButton {
+    margin-left: 15px;
+    margin-top: 0px;
+    margin-bottom: 20px;
+  }
+
+  .resultsContainer {
+    display: flex;
+    flex-direction: column;
+    margin-left: 15px;
+    justify-content: space-between;
+  }
+
+  .resultsContainer div {
+    width: 48%;
+  }
+
+  .resultsSubtitle {
+    text-align: left;
+  }
+
+  .resultsImage {
+    width: 100%;
   }
 
   .imageUpload {
