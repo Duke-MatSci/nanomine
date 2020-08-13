@@ -181,7 +181,6 @@ export default {
     successDlgClicked: function () {
       let vm = this
       console.log('Success dlg button clicked')
-      vm.$router.go(-2) // go back to mcr homepage page
     },
 
     submit: function () {
