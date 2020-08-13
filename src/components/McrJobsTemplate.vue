@@ -149,10 +149,8 @@ export default {
     job: Object
   },
 
-  created () {
-    var socket = io({path: '/nmr/socket.io', port: 3000})
-
-    socket.on('finished', data => {
+  sockets: {
+    finished: function (data) {
       let vm = this
       vm.results.jobid = data
       vm.results.uri = '/nmf/jobdata/' + data
@@ -167,10 +165,10 @@ export default {
           console.log(err)
           vm.resetLoading()
         })
-    })
-    socket.on('hello', data => {
+    },
+    hello: function (data) {
       console.log(data)
-    })
+    }
   },
 
   data () {
@@ -292,7 +290,7 @@ export default {
       console.log('Job Manager added file: ' + vm.files.name)
 
       return jm.submitJob(function (jobId) {
-        socket.emit('newJob', jobId)
+        this.$socket.emit('newJob', jobId)
         vm.results.submitted = true
         vm.results.obtained = false
         console.log('Success! JobId is: ' + jobId)
