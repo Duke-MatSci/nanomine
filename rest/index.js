@@ -3224,13 +3224,16 @@ function jobSubmit (jobId, jobType, userToken) {
                   _.merge(localEnv, process.env)
                   logger.debug(func + ' - running job ' + jobId + ' with env path = ' + localEnv['PATH'] +
                       ' PYTHONPATH = ' + localEnv['PYTHONPATH'] + '' + ' NODE_PATH: ' + localEnv['NODE_PATH'])
-                  let child = require('child_process').spawn(pgm, [jobType, jobId, jobDir], {
+                  var spawn = require('child_process').spawn
+                  let child = spawn(pgm, [jobType, jobId, jobDir], {
                     'cwd': pgmpath,
                     'env': localEnv
                   })
                   jobPid = child.pid
                   updateJobStatus(jobDir, {'status': 'submitted', 'pid': jobPid})
                   child.stdout.on('data', (data) => {
+                    logger.info('STDOUT DATA: ' + data)
+                    logger.info('STDOUT DATA: ' + data.toString())
                     var contents = data.toString()
                     contentsArray = contents.split('|')
                     if (contentsArray[0] === 'results') {

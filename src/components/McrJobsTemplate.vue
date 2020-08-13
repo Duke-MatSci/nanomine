@@ -181,6 +181,7 @@ export default {
     successDlgClicked: function () {
       let vm = this
       console.log('Success dlg button clicked')
+      vm.successDlg = false
     },
 
     submit: function () {
