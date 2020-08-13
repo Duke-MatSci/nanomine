@@ -327,13 +327,12 @@ export default {
 
   .resultsButton {
     margin-left: 15px;
-    margin-top: 0px;
     margin-bottom: 20px;
   }
 
   .resultsContainer {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     margin-left: 15px;
     justify-content: space-between;
   }
