@@ -129,13 +129,13 @@
 
 <script>
 
+import Axios from 'axios'
 import ImageUpload from './ImageUpload.vue'
 import {Auth} from '@/modules/Auth.js'
 import {JobMgr} from '@/modules/JobMgr.js'
 import {} from 'vuex'
 import io from 'socket.io-client'
 var socket = io({path: '/nmr/socket.io', port: 3000})
-import Axios from 'axios'
 
 export default {
 
@@ -186,7 +186,8 @@ export default {
         obtained: false,
         files: undefined,
         uri: undefined,
-        jobid: undefined
+        jobid: undefined,
+        submitted: false
       }
     }
   },
@@ -273,6 +274,7 @@ export default {
 
       return jm.submitJob(function (jobId) {
         socket.emit('newJob', jobId)
+        vm.results.submitted = true
         console.log('Success! JobId is: ' + jobId)
         vm.jobId = jobId
         vm.resetLoading()
