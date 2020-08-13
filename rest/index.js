@@ -286,7 +286,7 @@ function getBearerTokenInfo (bearerToken) {
           let refreshToken = parts[APIACCESS_REFRESHTOKEN_PART]
           let accessToken = parts[APIACCESS_ACCESSTOKEN_PART]
           let expiration = parts[APIACCESS_EXPIRATION_PART]
-          logger.debug(func + ' - checking bearer token: ' + bearerToken + ' against access token: ' + accessToken)
+          // logger.debug(func + ' - checking bearer token: ' + bearerToken + ' against access token: ' + accessToken)
           if (bearerToken === accessToken) {
             tokenInfo.userId = userid
             tokenInfo.apiToken = apiToken
@@ -3224,8 +3224,7 @@ function jobSubmit (jobId, jobType, userToken) {
                   _.merge(localEnv, process.env)
                   logger.debug(func + ' - running job ' + jobId + ' with env path = ' + localEnv['PATH'] +
                       ' PYTHONPATH = ' + localEnv['PYTHONPATH'] + '' + ' NODE_PATH: ' + localEnv['NODE_PATH'])
-                  var spawn = require('child_process').spawn
-                  let child = spawn(pgm, [jobType, jobId, jobDir], {
+                  let child = require('child_process').spawn(pgm, [jobType, jobId, jobDir], {
                     'cwd': pgmpath,
                     'env': localEnv
                   })
