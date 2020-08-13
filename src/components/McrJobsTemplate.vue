@@ -83,9 +83,11 @@
       <v-btn v-on:click="submit()" color="primary">{{ job.submit.submitButtonTitle }}</v-btn>
     </v-flex>
 
-    <v-flex xs12 v-if='resultsObtained'>
+    <v-flex xs12 v-if='results.obtained'>
       <h3>Submission Results</h3>
-
+      <div v-for='(file, index) in results.files' v-bind:key='index'>
+        <img :src='getOutputImage(index)'>
+      </div>
     </v-flex>
 
     <v-flex xs12>
@@ -108,6 +110,7 @@ import {JobMgr} from '@/modules/JobMgr.js'
 import {} from 'vuex'
 import io from 'socket.io-client'
 var socket = io({path: '/nmr/socket.io', port: 3000})
+import Axios from 'axios'
 
 export default {
 
@@ -123,8 +126,19 @@ export default {
 
   created () {
     socket.on('finished', data => {
-      console.log('received')
-      console.log(data)
+      let vm = this
+      vm.results.uri = '/nmf/jobdata/' + data + '/job_output_parameters.json'
+      vm.setLoading()
+      return Axios.get(vm.results.uri)
+        .then(function (response) {
+          vm.results.files = response.data.files // use files array instead of individual file references
+          vm.results.obtained = true
+          vm.resetLoading()
+        })
+        .catch(function (err) {
+          console.log(err)
+          vm.resetLoading()
+        })
     })
     socket.on('hello', data => {
       console.log(data)
@@ -142,7 +156,11 @@ export default {
       files: undefined,
       selects: [],
       selectedOptions: {},
-      resultsObtained: false
+      results: {
+        obtained: false,
+        files: undefined,
+        uri: undefined
+      }
     }
   },
 
@@ -162,6 +180,12 @@ export default {
   },
 
   methods: {
+
+    getOutputImage: function (index) {
+      let vm = this
+      return vm.results.uri + '/' + vm.results.files[index].output
+    },
+
     setFiles: function (files) {
       this.files = files // the actual file object
     },
