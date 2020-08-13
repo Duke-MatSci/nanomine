@@ -3218,7 +3218,7 @@ function jobSubmit (jobId, jobType, userToken) {
                   let cwd = process.cwd()
                   let pgmpath = pathModule.join(cwd, pgmdir)
                   pgm = pathModule.join(pgmpath, pgm)
-                  logger.info('JOB INFORMATION: type - ' + jobType + ', ID: ' + jobId + ' jobDir- ' + jobDir + ', pgmpath: '+ pgmpath + ' pgm: ' + pgm)
+                  logger.info('JOB INFORMATION: cwd: ' + cwd + 'type - ' + jobType + ', ID: ' + jobId + ' jobDir- ' + jobDir + ', pgmpath: '+ pgmpath + ' pgm: ' + pgm)
                   logger.info('executing: ' + pgm + ' in: ' + pgmpath)
                   let path = process.env['PATH'] + ':/apps/n/bin'
                   logger.info('PATH: ' + path)
