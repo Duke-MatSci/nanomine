@@ -85,7 +85,7 @@
 
     <v-flex xs12 v-if='results.submitted'>
 
-      <h3>Submission Results - {{ results.jobid }}</h3>
+      <h3>Submission Results<span v-if='results.obtained'> - Job ID: {{ results.jobid }}</h3>
 
       <div v-if='results.obtained'>
 
@@ -366,10 +366,12 @@ export default {
   .resultsSubtitle {
     text-align: left;
     font-size: 15px;
+    margin-top: 0px;
   }
 
   .resultsImage {
     width: 100%;
+    margin-top: 15px;
   }
 
   .imageUpload {
