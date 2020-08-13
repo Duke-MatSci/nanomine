@@ -290,7 +290,7 @@ export default {
       console.log('Job Manager added file: ' + vm.files.name)
 
       return jm.submitJob(function (jobId) {
-        this.$socket.emit('newJob', jobId)
+        vm.$socket.emit('newJob', jobId)
         vm.results.submitted = true
         vm.results.obtained = false
         console.log('Success! JobId is: ' + jobId)
