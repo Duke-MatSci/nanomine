@@ -127,9 +127,9 @@ export default {
   created () {
     socket.on('finished', data => {
       let vm = this
-      vm.results.uri = '/nmf/jobdata/' + data + '/job_output_parameters.json'
+      vm.results.uri = '/nmf/jobdata/' + data
       vm.setLoading()
-      return Axios.get(vm.results.uri)
+      return Axios.get(vm.results.uri + '/job_output_parameters.json')
         .then(function (response) {
           vm.results.files = response.data.files // use files array instead of individual file references
           vm.results.obtained = true
