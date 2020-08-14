@@ -3234,7 +3234,7 @@ function jobSubmit (jobId, jobType, userToken) {
                   jobPid = child.pid
                   updateJobStatus(jobDir, {'status': 'submitted', 'pid': jobPid})
                   child.stdout.on('data', (data) => {
-                    logger.info('job ' + jobId + ' o: ' + data)
+                    // logger.info('job ' + jobId + ' o: ' + data)
                   })
                   child.stderr.on('data', (data) => {
                     logger.error('job ' + jobId + ' e: ' + data)
