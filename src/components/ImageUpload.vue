@@ -225,7 +225,7 @@ export default {
       fr.addEventListener('load', async () => {
         // get file information
         vm.submissionFile = {
-          name: inputFile.name,
+          name: inputFile.name.toLowerCase(),
           url: fr.result,
           fileType: inputFile.name.split('.').pop().toLowerCase()
         }
