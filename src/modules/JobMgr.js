@@ -76,7 +76,6 @@ JobMgr.prototype = {
             })
             Axios.all(fileSends)
               .then((p) => {
-                console.log(p)
                 // wait for all files to be sent then submit job
                 p.forEach(function (v) {
                   // console.log('logging response info below: ')
@@ -93,7 +92,6 @@ JobMgr.prototype = {
                 })
                   .then(function (res) {
                     console.log('submit job success - statusCode: ' + res.status + ' statusText: ' + res.statusText)
-                    console.log(res)
                     return successFunction(vm.jobId)
                   })
                   .catch(function (err) {

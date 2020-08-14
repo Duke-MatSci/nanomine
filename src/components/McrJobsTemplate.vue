@@ -49,7 +49,7 @@
         </v-card-title>
 
         <v-card-text>
-          Your {{ job.jobTitle }} job is: {{jobId}} <br/> <span v-if='useWebsocket'>Please stay on this page. Results may take up to a few minutes to load</span><span v-else>You should receive an email with a link to the job output.</span>
+          Your {{ job.jobTitle }} job is: {{jobId}} <br/> <span v-if='useWebsocket'>Please stay on this page. Results may take up to a few minutes to load.</span><span v-else>You should receive an email with a link to the job output.</span>
         </v-card-text>
 
         <v-card-actions>

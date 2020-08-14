@@ -51,6 +51,7 @@ function niblack(userId, jobId, jobType, jobSrcDir, jobDir, webBaseUri,input_typ
                     img = getfield(k,f_name);
                     if size(img) > 1
                         imwrite(img(:,:,1),[path_to_write,'/','Input1.jpg'])
+                    end
             end
         catch ex
             rc = 98;
@@ -60,25 +61,25 @@ function niblack(userId, jobId, jobType, jobSrcDir, jobDir, webBaseUri,input_typ
             exit(rc);
         end
 
-        % Median filter 
+         % Median filter 
         image = medfilt2(img, [5 5]); %%%%%%% second input is a variable, will depend on noise level
-
+        
         % Convert to double
-        image = double(img)
-
+        image = double(image);
+​
         % Mean value
         mean = averagefilter(image, window, padding);
-
+​
         % Standard deviation
         meanSquare = averagefilter(image.^2, window, padding);
         deviation = ((meanSquare - mean.^2)).^0.5;
-
+​
         % Initialize the output
         output = zeros(size(image));
-
+​
         % Niblack
         output(image > mean + k * deviation - offset) = 1;
-
+        
         % Complement to ensure filler is always white
         output = imcomplement(output);
         
