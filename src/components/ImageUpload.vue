@@ -237,11 +237,12 @@ export default {
         if (vm.submissionFile.fileType === 'zip') {
           vm.unzipUploadedFiles(inputFile) // function unzips contents, sets editable status and gets image dimensions
         } else {
+          inputFile.name = inputFile.name.toLowerCase()
           vm.displayedFiles = [{
             name: inputFile.name,
             originalName: inputFile.name,
             url: fr.result,
-            fileType: inputFile.name.split('.').pop().toLowerCase(),
+            fileType: inputFile.name.split('.').pop(),
             size: { width: 0, height: 0, units: null },
             pixelSize: { width: 0, height: 0 },
             phase: { x_offset: 0, y_offset: 0 },
@@ -282,7 +283,8 @@ export default {
           Object.keys(zip.files).forEach(function (filename) {
             zip.files[filename].async('base64')
               .then(function (fileData) {
-                var filetype = filename.split('.').pop().toLowerCase()
+                filename = filename.toLowerCase()
+                var filetype = filename.split('.').pop()
                 vm.displayedFiles.push({
                   name: filename,
                   originalName: filename,

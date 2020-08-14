@@ -38,6 +38,9 @@ function niblack(userId, jobId, jobType, jobSrcDir, jobDir, webBaseUri,input_typ
             switch str2num(input_type)
                 case 1
                     img = imread([path_to_read,file_name]);
+                    if size(img) > 1
+                        imwrite(img(:,:,1),[path_to_write,'/','Input1.jpg'])
+                    end
                 case 2
                     rc = 91
                     exit(rc)
@@ -72,7 +75,7 @@ function niblack(userId, jobId, jobType, jobSrcDir, jobDir, webBaseUri,input_typ
         output(image > mean + k * deviation - offset) = 1;
 
         % write output image
-        imwrite(output,[path_to_write,'/','Input1.jpg']);
+        imwrite(output,[path_to_write,'/','Binarized_Input1.jpg']);
 
     catch
         rc = 99;
