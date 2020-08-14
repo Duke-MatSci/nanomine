@@ -61,7 +61,7 @@ function niblack(userId, jobId, jobType, jobSrcDir, jobDir, webBaseUri,input_typ
             exit(rc);
         end
 
-         % Median filter 
+        % Median filter 
         image = medfilt2(img, [5 5]); %%%%%%% second input is a variable, will depend on noise level
         
         % Convert to double
@@ -69,7 +69,7 @@ function niblack(userId, jobId, jobType, jobSrcDir, jobDir, webBaseUri,input_typ
 ​
         % Mean value
         mean = averagefilter(image, window, padding);
-​
+​   
         % Standard deviation
         meanSquare = averagefilter(image.^2, window, padding);
         deviation = ((meanSquare - mean.^2)).^0.5;
