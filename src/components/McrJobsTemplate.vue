@@ -217,7 +217,7 @@ export default {
   methods: {
 
     download: function () {
-      for (let i = 0; i < this.results.files.length) {
+      for (let i = 0; i < this.results.files.length; i++) {
         var link = document.createElement('a')
         link.href = vm.results.uri + '/' + vm.results.files[i].output
         link.download = 'output-' + (i+1) + '.jpg'
