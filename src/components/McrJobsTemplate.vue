@@ -285,12 +285,13 @@ export default {
         }
       }
       if ('submitJobType' in vm.job.submit) {
-        jobParameters['jobtype'] = vm.job.submitJobType
+        jobParameters['jobtype'] = vm.job.submit.submitJobType
       }
       jm.setJobParameters(jobParameters)
 
       jm.addInputFile(vm.files.name, vm.files.url)
       console.log('Job Manager added file: ' + vm.files.name)
+      console.log('added parameters: ' + jobParameters)
 
       return jm.submitJob(function (jobId) {
         vm.$socket.emit('newJob', jobId)

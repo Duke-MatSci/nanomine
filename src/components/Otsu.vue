@@ -46,7 +46,8 @@ export default {
 
         submit: {
           submitButtonTitle: 'Binarize',
-          submitJobTitle: 'otsu'
+          submitJobTitle: 'otsu',
+          submitJobType: 'otsu'
         },
 
         uploadOptions: [
