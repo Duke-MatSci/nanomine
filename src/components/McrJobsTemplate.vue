@@ -135,8 +135,6 @@ import ImageUpload from './ImageUpload.vue'
 import {Auth} from '@/modules/Auth.js'
 import {JobMgr} from '@/modules/JobMgr.js'
 import {} from 'vuex'
-import io from 'socket.io-client'
-import jszip from 'jszip'
 
 export default {
 
@@ -170,7 +168,7 @@ export default {
     },
     hello: function (data) {
       console.log(data)
-      if (data === 'connection received' && this.job.useWebsocket == true) {
+      if (data === 'connection received' && this.job.useWebsocket === true) {
         this.useWebsocket = true
       }
     }
@@ -219,8 +217,8 @@ export default {
     download: function () {
       for (let i = 0; i < this.results.files.length; i++) {
         var link = document.createElement('a')
-        link.href = vm.results.uri + '/' + vm.results.files[i].output
-        link.download = 'output-' + (i+1) + '.jpg'
+        link.href = this.results.uri + '/' + this.results.files[i].output
+        link.download = 'output-' + (i + 1) + '.jpg'
         document.body.appendChild(link)
         link.click()
         document.body.removeChild(link)
