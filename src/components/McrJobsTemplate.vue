@@ -49,7 +49,7 @@
         </v-card-title>
 
         <v-card-text>
-          Your {{ job.jobTitle }} job is: {{jobId}} <br/> You should receive an email with a link to the job output.
+          Your {{ job.jobTitle }} job is: {{jobId}} <br/> <span v-if='useWebsocket'>Please stay on this page. Results may take up to a few minutes to load</span><span v-else>You should receive an email with a link to the job output.</span>
         </v-card-text>
 
         <v-card-actions>
@@ -77,13 +77,14 @@
       :aspectRatio="job.aspectRatio"
       :selects='selects'
       :collectDimensions='job.getImageDimensions'
+      :acceptFileTypes="job.acceptableFileTypes"
     ></ImageUpload>
 
     <v-flex class="text-xs-center">
       <v-btn v-on:click="submit()" color="primary">{{ job.submit.submitButtonTitle }}</v-btn>
     </v-flex>
 
-    <v-flex xs12 v-if='results.submitted'>
+    <v-flex xs12 v-if='results.submitted && useWebsocket'>
 
       <h3>Submission Results<span v-if='results.obtained'> - Job ID: {{ results.jobid }}</h3>
 
@@ -151,6 +152,7 @@ export default {
 
   sockets: {
     finished: function (data) {
+      console.log('socket received finished images')
       let vm = this
       vm.results.jobid = data
       vm.results.uri = '/nmf/jobdata/' + data
@@ -168,6 +170,9 @@ export default {
     },
     hello: function (data) {
       console.log(data)
+      if (data === 'connection received' && this.job.useWebsocket == true) {
+        this.useWebsocket = true
+      }
     }
   },
 
@@ -188,7 +193,8 @@ export default {
         uri: undefined,
         jobid: undefined,
         submitted: false
-      }
+      },
+      useWebsocket: false
     }
   },
 
@@ -205,26 +211,21 @@ export default {
     if ('selects' in this.job) {
       this.selects = this.job.selects
     }
+    this.$socket.emit('testConnection')
   },
 
   methods: {
 
-    // download: function () {
-    //   let vm = this;
-    //   let jszip_obj = new jszip()
-
-    //   // add images to zip file
-    //   for (let i = 0; i < vm.results.files.length; i++) {
-
-    //     const getBase64 = (path) => {
-    //       var canvas = document.createElement('canvas')
-    //       canvas.width = coordinates.width
-    //       canvas.height = coordinates.height
-    //     }
-    //     var image = vm.results.uri + '/' + vm.results.files[i].output
-    //     jszip_obj.file(this.displayedFiles[i].originalName, this.displayedFiles[i].url.split(',').pop(), {base64: true})
-    //   }
-    // },
+    download: function () {
+      for (let i = 0; i < this.results.files.length) {
+        var link = document.createElement('a')
+        link.href = vm.results.uri + '/' + vm.results.files[i].output
+        link.download = 'output-' + (i+1) + '.jpg'
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+      }
+    },
 
     getResultImage: function (index, type) {
       let vm = this
@@ -274,7 +275,7 @@ export default {
       console.log('Called Job Manager for ' + vm.job.submit.submitJobTitle)
       jm.setJobType(vm.job.submit.submitJobTitle)
 
-      var jobParameters = {'InputType': vm.files.fileType} // Figure out which file type
+      var jobParameters = {'InputType': vm.files.fileType, 'useWebsocket': vm.useWebsocket} // Figure out which file type
       for (var key in vm.selectedOptions) {
         if (key === 'phase') {
           jobParameters[key] = vm.phaseToString(vm.selectedOptions[key])

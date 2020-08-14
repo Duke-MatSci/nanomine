@@ -49,6 +49,8 @@ function niblack(userId, jobId, jobType, jobSrcDir, jobDir, webBaseUri,input_typ
                     k=load(path);
                     [no_need,f_name,ext]=fileparts(file_name);
                     img = getfield(k,f_name);
+                    if size(img) > 1
+                        imwrite(img(:,:,1),[path_to_write,'/','Input1.jpg'])
             end
         catch ex
             rc = 98;
@@ -57,6 +59,9 @@ function niblack(userId, jobId, jobType, jobSrcDir, jobDir, webBaseUri,input_typ
             writeError([path_to_write, '/errors.txt'], sprintf('\n'));
             exit(rc);
         end
+
+        % Median filter 
+        image = medfilt2(img, [5 5]); %%%%%%% second input is a variable, will depend on noise level
 
         % Convert to double
         image = double(img)
@@ -73,6 +78,12 @@ function niblack(userId, jobId, jobType, jobSrcDir, jobDir, webBaseUri,input_typ
 
         % Niblack
         output(image > mean + k * deviation - offset) = 1;
+
+        % Complement to ensure filler is always white
+        output = imcomplement(output);
+        
+        % remove noise i.e. partilces with radius < 5 pixels
+        output = noise_filter(output, 5); %%%%%%% second input is a variable, will depend on noise level
 
         % write output image
         imwrite(output,[path_to_write,'/','Binarized_Input1.jpg']);

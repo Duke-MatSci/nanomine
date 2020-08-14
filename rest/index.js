@@ -3884,7 +3884,9 @@ let socketConnections = {}
 const io = require('socket.io')(server)
 
 io.on('connection', socket => {
-  socket.emit('hello', 'welcome! we are connected.')
+  socket.on('testConnection', () => {
+    socket.emit('hello', 'connection received')
+  })
   socket.on('newJob', jobId => {
     socketConnections[jobId] = socket.id
     socket.emit('hello', 'socket has received jobId.')

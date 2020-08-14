@@ -18,7 +18,7 @@
     <!-- file upload button -->
     <p class="text-xs-left fileButtonWrapper">
       <v-btn class="text-xs-left fileButton" color="primary" @click='$refs.myUpload.click()'>Browse files</v-btn>
-      <input type="file" style="display: none" accept=".jpg, .png, .tif, .mat, .zip" ref="myUpload" @change="uploadFiles">
+      <input type="file" style="display: none" :accept="acceptFileTypes" ref="myUpload" @change="uploadFiles">
     </p>
 
     <!-- error alert if phase becomes invalid after cropping -->
@@ -157,7 +157,8 @@ export default {
   props: {
     aspectRatio: String,
     selects: Object,
-    collectDimensions: Boolean
+    collectDimensions: Boolean,
+    acceptFileTypes: String
   },
 
   data () {

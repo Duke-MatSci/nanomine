@@ -23,7 +23,7 @@
 function niblack(userId, jobId, jobType, jobSrcDir, jobDir, webBaseUri,input_type,file_name,window)
 
     k = -0.2;
-    offset = 0;
+    offset = 10;
     padding = 'replicate';
     window = [str2num(window) str2num(window)]
 
@@ -55,6 +55,9 @@ function niblack(userId, jobId, jobType, jobSrcDir, jobDir, webBaseUri,input_typ
             exit(rc);
         end
 
+        % Median filter 
+        image = medfilt2(img, [5 5]); 
+
         % Convert to double
         image = double(img)
 
@@ -70,6 +73,12 @@ function niblack(userId, jobId, jobType, jobSrcDir, jobDir, webBaseUri,input_typ
 
         % Niblack
         output(image > mean + k * deviation - offset) = 1;
+
+        % Complement to ensure filler is always white
+        output = imcomplement(output);
+        
+        % remove noise i.e. partilces with radius < 5 pixels
+        output = noise_filter(output, 5); %%%%%%% second input is a variable, will depend on noise level
 
         % write output image
         imwrite(output,[path_to_write,'/','Input1.jpg']);

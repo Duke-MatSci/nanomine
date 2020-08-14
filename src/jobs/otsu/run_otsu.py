@@ -39,6 +39,7 @@ inputParameters = json.load(paramFile)
 userId = str(inputParameters['user'])
 PhaseInfo = inputParameters['phase']
 jobType = inputParameters['jobtype']
+useWebsocket = inputParameters['useWebsocket']
 WindowSize = 3
 if jobType == 'niblack':
   WindowSize = inputParameters['WindowSize']
@@ -140,7 +141,7 @@ except:
 # If the NM_SMTP_TEST environment variable is set to true, then emails are not sent via email and are instead
 #   go into the rest server log file: nanomine/rest/nanomine.log.gz (log file name will get fixed soon)
 # templates are in rest/config/emailtemplates/JOBTYPE/TEMPLATENAME.etf (etf extension is required, but implied in POST data)
-if rc == 0: # send success email
+if rc == 0 and useWebsocket == False: # send success email
   try:
     socketString = 'results|' + webBaseUri + '/nm#/OtsuResult?refuri='+jobDataUriSuffix+'/'+jobId
     print(socketString)
