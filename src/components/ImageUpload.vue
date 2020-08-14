@@ -237,7 +237,7 @@ export default {
         if (vm.submissionFile.fileType === 'zip') {
           vm.unzipUploadedFiles(inputFile) // function unzips contents, sets editable status and gets image dimensions
         } else {
-          lowerCaseName = inputFile.name.toLowerCase()
+          var lowerCaseName = inputFile.name.toLowerCase()
           vm.displayedFiles = [{
             name: lowerCaseName,
             originalName: lowerCaseName,
@@ -283,7 +283,7 @@ export default {
           Object.keys(zip.files).forEach(function (filename) {
             zip.files[filename].async('base64')
               .then(function (fileData) {
-                lowerCaseName = filename.toLowerCase()
+                var lowerCaseName = filename.toLowerCase()
                 var filetype = lowerCaseName.split('.').pop()
                 vm.displayedFiles.push({
                   name: lowerCaseName,
