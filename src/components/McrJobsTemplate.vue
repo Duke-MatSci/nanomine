@@ -86,7 +86,7 @@
 
     <v-flex xs12 v-if='results.submitted && useWebsocket'>
 
-      <h3>Submission Results<span v-if='results.obtained'> - Job ID: {{ results.jobid }}</h3>
+      <h3>Submission Results</h3>
 
       <div v-if='results.obtained'>
 
@@ -135,6 +135,7 @@ import ImageUpload from './ImageUpload.vue'
 import {Auth} from '@/modules/Auth.js'
 import {JobMgr} from '@/modules/JobMgr.js'
 import {} from 'vuex'
+import jszip from 'jszip'
 
 export default {
 
@@ -214,15 +215,47 @@ export default {
 
   methods: {
 
-    download: function () {
-      for (let i = 0; i < this.results.files.length; i++) {
-        var link = document.createElement('a')
-        link.href = this.results.uri + '/' + this.results.files[i].output
-        link.download = 'output-' + (i + 1) + '.jpg'
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
+    download: async function () {
+
+      let jszip_obj = new jszip()
+      let vm = this
+
+      // add images to zip file
+      for (let i = 0; i < vm.results.files.length; i++) {
+
+        var canvas = document.createElement('canvas')
+        var ctx = canvas.getContext('2d')
+        var image = new Image()
+        image.src = vm.results.uri + '/' + vm.results.files[index].output
+
+        function getBase64 () {
+          return new Promise((resolve, reject) => {
+            image.onload = function () {
+              canvas.width = img.width
+              canvas.height = img.height
+              ctx.drawImage(image, 0, 0)
+              resolve(canvas.toDataURL())
+            }
+          })
+        }
+
+        base64Image = await getBase64()
+
+        jszip_obj.file('output-' + (i+1) + '.jpg', base64Image.split(',').pop(), {base64: true})
       }
+
+      // create zip file & download
+      jszip_obj.generateAsync({type: 'base64', compression: 'DEFLATE'})
+        .then(function (base64) {
+          downloadFile = 'data:application/zip;base64,' + base64
+          var link = document.createElement('a')
+          link.href = downloadFile
+          link.download = 'output.zip'
+          document.body.appendChild(link)
+          link.click()
+          document.body.removeChild(link)
+        })
+
     },
 
     getResultImage: function (index, type) {
