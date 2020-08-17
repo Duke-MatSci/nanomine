@@ -39,9 +39,9 @@ function niblack(userId, jobId, jobType, jobSrcDir, jobDir, webBaseUri,input_typ
             switch str2num(input_type)
                 case 1
                     img = imread([path_to_read,file_name]);
-                    if size(img) > 1
-                        imwrite(img(:,:,1),[path_to_write,'/','Input1.jpg'])
-                    end
+                    % if size(img) > 1
+                    %     imwrite(img(:,:,1),[path_to_write,'/','Input1.jpg'])
+                    % end
                 case 2
                     rc = 91
                 case 3
@@ -49,9 +49,9 @@ function niblack(userId, jobId, jobType, jobSrcDir, jobDir, webBaseUri,input_typ
                     k=load(path);
                     [no_need,f_name,ext]=fileparts(file_name);
                     img = getfield(k,f_name);
-                    if size(img) > 1
-                        imwrite(img(:,:,1),[path_to_write,'/','Input1.jpg'])
-                    end
+                    % if size(img) > 1
+                    %     imwrite(img(:,:,1),[path_to_write,'/','Input1.jpg'])
+                    % end
             end
         catch ex
             rc = 98;
@@ -91,6 +91,12 @@ function niblack(userId, jobId, jobType, jobSrcDir, jobDir, webBaseUri,input_typ
     catch ex
         rc = 99
         exit(rc);
+    end
+
+    function writeError(file, msg)
+        f = fopen(file,'a+');
+        fprintf(f, '%s\n', msg);
+        fclose(f);
     end
 
 end
