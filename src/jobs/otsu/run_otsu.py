@@ -38,10 +38,10 @@ paramFile = open(jobDir + '/' + 'job_parameters.json', 'r')
 inputParameters = json.load(paramFile)
 userId = str(inputParameters['user'])
 PhaseInfo = inputParameters['phase']
-jobType = inputParameters['jobtype']
+sentInJobType = inputParameters['jobtype']
 useWebsocket = inputParameters['useWebsocket']
 WindowSize = 3
-if jobType == 'niblack':
+if sentInJobType == 'niblack':
   WindowSize = inputParameters['WindowSize']
 
 jobSrcDir = os.getcwd()
@@ -70,13 +70,13 @@ for f in myfiles:
     input_name = f
 
 matlabPgm = 'Otsu' # .m is implied, test mode will use python pgm
-if jobType == 'niblack':
+if sentInJobType == 'niblack':
   matlabPgm = 'niblack'
 mlab = matlab(logging) # create matlab object
 
 matlabPgmParams = (input_type,input_name)
 
-if jobType == 'niblack':
+if sentInJobType == 'niblack':
   matlabPgmParams = (input_type, input_name, WindowSize)
 
 rc = mlab.run(userId, jobId, jobType, jobSrcDir, jobDir, webBaseUri, jobDataUriSuffix, matlabPgm, matlabPgmParams)
