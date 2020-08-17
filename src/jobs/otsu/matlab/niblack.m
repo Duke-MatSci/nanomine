@@ -29,11 +29,12 @@ function niblack(userId, jobId, jobType, jobSrcDir, jobDir, webBaseUri,input_typ
 ​
     rc=0;
     try
+    
         path_to_read = [jobSrcDir,'/'];
         path_to_write = [jobSrcDir,'/output'];
         mkdir(path_to_write);
         writeError([path_to_write, '/errors.txt'], ''); % ensure that errors.txt exists
-​
+
         try
             switch str2num(input_type)
                 case 1
@@ -43,7 +44,6 @@ function niblack(userId, jobId, jobType, jobSrcDir, jobDir, webBaseUri,input_typ
                     end
                 case 2
                     rc = 91
-                    % exit(rc)
                 case 3
                     path=[path_to_read,file_name];
                     k=load(path);
@@ -58,46 +58,39 @@ function niblack(userId, jobId, jobType, jobSrcDir, jobDir, webBaseUri,input_typ
             msg = getReport(ex);
             writeError([path_to_write, '/errors.txt'], msg);
             writeError([path_to_write, '/errors.txt'], sprintf('\n'));
-%             exit(rc);
         end
-​
+
         % Median filter 
-%         image = medfilt2(img, [5 5]); %%%%%%% second input is a variable, will depend on noise level
+        % image = medfilt2(img, [5 5]); %%%%%%% second input is a variable, will depend on noise level
+
         % Convert to double
         image = double(img);
-​
+
         % Mean value
         mean = averagefilter(image, window, padding);
-​
+
         % Standard deviation
         meanSquare = averagefilter(image.^2, window, padding);
         deviation = ((meanSquare - mean.^2)).^0.5;
-​
+
         % Initialize the output
         output = zeros(size(image));
-​
+
         % Niblack
         output(image > mean + k * deviation - offset) = 1;
         
         % Complement to ensure filler is always white
-%         output = imcomplement(output);
+        % output = imcomplement(output);
         
         % remove noise i.e. partilces with radius < 5 pixels
-%         output = noise_filter(output, 5); %%%%%%% second input is a variable, will depend on noise level
-​
+        % output = noise_filter(output, 5); %%%%%%% second input is a variable, will depend on noise level
+
         % write output image
         imwrite(output,[path_to_write,'/','Binarized_Input1.jpg']);
-​
+
     catch ex
         rc = 99
         exit(rc);
     end
 
-
-    function writeError(file, msg)
-        f = fopen(file,'a+');
-        fprintf(f, '%s\n', msg);
-        fclose(f);
-    end
-    
 end
