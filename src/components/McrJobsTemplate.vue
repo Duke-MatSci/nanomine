@@ -226,20 +226,20 @@ export default {
         var canvas = document.createElement('canvas')
         var ctx = canvas.getContext('2d')
         var image = new Image()
-        image.src = vm.results.uri + '/' + vm.results.files[index].output
+        image.src = vm.results.uri + '/' + vm.results.files[i].output
 
-        function getBase64 () {
+        function getBase64 (image) {
           return new Promise((resolve, reject) => {
             image.onload = function () {
-              canvas.width = img.width
-              canvas.height = img.height
+              canvas.width = image.width
+              canvas.height = image.height
               ctx.drawImage(image, 0, 0)
               resolve(canvas.toDataURL())
             }
           })
         }
 
-        base64Image = await getBase64()
+        var base64Image = await getBase64(image)
 
         jszip_obj.file('output-' + (i+1) + '.jpg', base64Image.split(',').pop(), {base64: true})
       }
