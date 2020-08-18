@@ -26,7 +26,7 @@ Vue.use(vPlayBack)
 Vue.use(VueGoogleCharts)
 
 Vue.config.productionTip = false
-Vue.config.devtools = true
+// Vue.config.devtools = true
 
 Vue.use(Vuex)
 Vue.use(Vuetify, {
@@ -42,7 +42,7 @@ Vue.use(Vuetify, {
 })
 
 Vue.use(new VueSocketIO({
-  debug: true,
+  // debug: true,
   connection: SocketIO({path: '/nmr/socket.io', port: 3000})
 }))
 
