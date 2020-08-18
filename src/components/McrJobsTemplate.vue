@@ -247,7 +247,7 @@ export default {
       // create zip file & download
       jszip_obj.generateAsync({type: 'base64', compression: 'DEFLATE'})
         .then(function (base64) {
-          downloadFile = 'data:application/zip;base64,' + base64
+          var downloadFile = 'data:application/zip;base64,' + base64
           var link = document.createElement('a')
           link.href = downloadFile
           link.download = 'output.zip'
