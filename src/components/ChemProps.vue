@@ -22,12 +22,20 @@
           <v-radio label="Filler" value="fil"></v-radio>
         </v-radio-group>
       </v-flex>
-      <p class="text-xs-left"><b>2. Input the searching terms. Note that you must input a chemical name.</b></p>
+      <p class="text-xs-left" v-if="pfRadios === 'pol'"><b>2. Input the searching terms. For the quick search, you can search by either chemical name, abbreviation, trade name, or SMILES. For the advanced search, you must input a chemical name.</b></p>
+      <p class="text-xs-left" v-if="pfRadios === 'fil'"><b>2. Input the searching terms. Note that you must input a chemical name.</b></p>
       <v-flex xs12 sm6 md3>
-        <v-text-field v-model="chemicalname" label='Enter the chemical name (required):' outlined></v-text-field>
-        <v-text-field v-model="abbreviation" label='Enter the abbreviation (optional):' outlined></v-text-field>
-        <v-text-field v-model="SMILES" label='Enter the SMILES (optional):' outlined v-if="pfRadios === 'pol'"></v-text-field>
-        <v-text-field v-model="tradename" label='Enter the tradename (optional):' outlined v-if="pfRadios === 'pol'"></v-text-field>
+        <v-card v-if="pfRadios === 'pol'">
+          <p class="text-xs-left"><b>Quick Search (Filling this textbox will overwrite the advanced search)</b></p>
+          <v-text-field v-model="quicksearchkeyword" label='Enter the keyword:' outlined></v-text-field>
+        </v-card>
+        <v-card>
+        <p class="text-xs-left" v-if="pfRadios === 'pol'"><b>Advanced Search</b></p>
+          <v-text-field v-model="chemicalname" label='Enter the chemical name (required):' outlined></v-text-field>
+          <v-text-field v-model="abbreviation" label='Enter the abbreviation (optional):' outlined></v-text-field>
+          <v-text-field v-model="SMILES" label='Enter the SMILES (optional):' outlined v-if="pfRadios === 'pol'"></v-text-field>
+          <v-text-field v-model="tradename" label='Enter the tradename (optional):' outlined v-if="pfRadios === 'pol'"></v-text-field>
+        </v-card>
       </v-flex>
       <v-alert
         v-model="searchError"
@@ -72,6 +80,10 @@ export default {
       title: 'ChemProps',
       dialog: false,
       pfRadios: 'pol',
+      // quicksearch: true,
+      // polQSbgc: '#5DADEC',
+      // polASbgc: 'white',
+      quicksearchkeyword: '',
       chemicalname: '',
       abbreviation: '',
       SMILES: '',
@@ -133,6 +145,17 @@ export default {
     search: function () {
       let vm = this
       vm.resetOutput()
+      if (vm.pfRadios === 'pol' && vm.quicksearchkeyword.trim() !== '') {
+        if (vm.quicksearchkeyword === '') {
+          vm.searchError = true
+          vm.searchErrorMsg = 'Please input the quick search keyword.'
+          return
+        }
+        vm.chemicalname = vm.quicksearchkeyword
+        vm.abbreviation = vm.quicksearchkeyword
+        vm.tradename = vm.quicksearchkeyword
+        vm.SMILES = vm.quicksearchkeyword
+      }
       if (vm.chemicalname === '') {
         vm.searchError = true
         vm.searchErrorMsg = 'Please input the chemical name.'
@@ -187,6 +210,13 @@ export default {
         .then(function () {
           // always executed
           vm.inputStr = vm.uSMILES
+          // reset input if using quick search
+          if (vm.quicksearchkeyword.trim() !== '') {
+            vm.chemicalname = ''
+            vm.abbreviation = ''
+            vm.tradename = ''
+            vm.SMILES = ''
+          }
         })
     },
     onSuccess () {
