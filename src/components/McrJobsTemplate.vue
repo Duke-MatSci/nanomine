@@ -90,7 +90,7 @@
 
       <div v-if='results.obtained'>
 
-        <v-btn class='resultsButton' v-if='results.obtained' v-on:click="download()" color="primary">Download results</v-btn>
+        <v-btn class='resultsButton' v-if='results.obtained' v-on:click="download()" color="primary"><span v-if='results.downloading'>Creating zipped file...</span><span v-else>Download results</span></v-btn>
 
         <div class='resultsContainer'>
 
@@ -191,7 +191,8 @@ export default {
         files: undefined,
         uri: undefined,
         jobid: undefined,
-        submitted: false
+        submitted: false,
+        downloading: false
       },
       useWebsocket: false
     }
@@ -219,6 +220,7 @@ export default {
 
       let jszip_obj = new jszip()
       let vm = this
+      vm.results.downloading = true
 
       // add images to zip file
       for (let i = 0; i < vm.results.files.length; i++) {
@@ -254,6 +256,7 @@ export default {
           document.body.appendChild(link)
           link.click()
           document.body.removeChild(link)
+          vm.results.downloading = false
         })
 
     },
