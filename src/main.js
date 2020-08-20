@@ -43,8 +43,7 @@ Vue.use(Vuetify, {
 
 Vue.use(new VueSocketIO({
   // debug: true,
-  connection: 'http://localhost',
-  options: {path: '/nmr/socket.io'}
+  connection: SocketIO({path: '/nmr/socket.io', port: 3000})
 }))
 
 Vue.component('page-header', Header)

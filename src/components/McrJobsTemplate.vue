@@ -217,14 +217,12 @@ export default {
   methods: {
 
     download: async function () {
-
       let jszip_obj = new jszip()
       let vm = this
       vm.results.downloading = true
 
       // add images to zip file
       for (let i = 0; i < vm.results.files.length; i++) {
-
         var canvas = document.createElement('canvas')
         var ctx = canvas.getContext('2d')
         var image = new Image()
@@ -243,7 +241,7 @@ export default {
 
         var base64Image = await getBase64(image)
 
-        jszip_obj.file('output-' + (i+1) + '.jpg', base64Image.split(',').pop(), {base64: true})
+        jszip_obj.file('output-' + (i + 1) + '.jpg', base64Image.split(',').pop(), {base64: true})
       }
 
       // create zip file & download
@@ -258,7 +256,6 @@ export default {
           document.body.removeChild(link)
           vm.results.downloading = false
         })
-
     },
 
     getResultImage: function (index, type) {
