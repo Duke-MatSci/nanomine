@@ -5,183 +5,77 @@
 # Application: templates
 # Description:
 #
-# Created by: Akshay Iyer, November  , 2018
+# Created by: Akshay Iyer, November 1, 2018
 # Customized for NanoMine
 #
 ################################################################################
 -->
 
 <template>
-  <div class="DescriptorCharacterize">
-    <h1>{{ msg }}</h1>
-    <v-container class="text-xs-left">
-      <v-layout row wrap>
-        <v-flex xs12>
-          <h3>Description</h3>
-          <br>
-          <p>Upload a binarized image or a ZIP file containing set of images and click "Characterize" to get descriptors for filler material. The descriptors evaluated by this webtool are -
-            filler volume fraction (equivalent to area fraction), number of filler clusters and area, aspect ratio & nearest neighbor distance of each filler cluster.
-             Nearest neighbor distance of a cluster is the distance between its centroid and that of a cluster nearest to it. Except for volume fraction, number of clusters and aspect ratio
-             (which are dimensionless), all descriptors have units of "pixels" ("pixel^2" for area descriptor).</p>
-        </v-flex>
-        <v-flex xs12 justify-start>
-          <h4> Input Options:</h4>
-          <p class="text-xs-left"><strong> Upload a single image: </strong>Supported image formats are .jpg, .tif and .png.</p>
-          <p class="text-xs-left"><strong> --OR-- Upload a single image in .mat format :</strong> The .mat file must contain ONLY ONE variable named
-            "Input" - which contains the image.</p>
-          <p class="text-xs-left"><strong> --OR-- Upload multiple images in ZIP File:</strong> Submit a ZIP file containing multiple images (supported
-            formats: .jpg, .tif, .png) of same size (in pixels). DO NOT ZIP the folder containing images; select all images and ZIP them directly.
-            DO NOT ZIP the folder containing images; select all images and ZIP them directly.</p>
-        </v-flex>
-      </v-layout>
-      <v-alert
-        v-model="loginRequired"
-        type="error"
-        outline
-      >
-        {{loginRequiredMsg}}
-      </v-alert>
-      <v-alert
-        v-model="errorAlert"
-        type="error"
-        dismissible
-      >
-        {{errorAlertMsg}}
-      </v-alert>
-      <v-dialog v-model="successDlg" persistent max-width="500px">
-        <v-card>
-          <v-card-title>
-            <span>Descriptor Characterization Job Submitted Successfully</span>
-            <v-spacer></v-spacer>
-          </v-card-title>
-          <v-card-text>
-            Your job is: {{jobId}} <br/> You should receive an email with a link to the job output.
-          </v-card-text>
-          <v-card-actions>
-            <v-btn color="primary" flat @click="successDlgClicked()">Close</v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-      <ImageUpload v-on:setFiles="setFiles" aspectRatio='free'></ImageUpload>
-      <v-flex class="text-xs-center">
-      <v-btn v-on:click="submit()" color="primary">Characterize</v-btn>
-      </v-flex>
-      <h4>References</h4>
-      <v-flex xs12>
-        <p> Xu, H., Li, Y., Brinson, C. and Chen, W., 2014. A descriptor-based design methodology for developing heterogeneous microstructural materials system. <i>Journal of Mechanical Design</i>, 136(5), p.051007.</p>
-        <p>Xu, H., Dikin, D.A., Burkhart, C. and Chen, W., 2014. Descriptor-based methodology for statistical characterization and 3D reconstruction of microstructural materials. <i>Computational Materials Science</i>, 85, pp.206-216.</p>
-      </v-flex>
-    </v-container>
-  </div>
+  <McrJobsTemplate v-bind:job='jobInfo'></McrJobsTemplate>
 </template>
 
 <script>
+
 import {} from 'vuex'
-import {JobMgr} from '@/modules/JobMgr.js'
-import {Auth} from '@/modules/Auth.js'
-import ImageUpload from './ImageUpload.vue'
+import McrJobsTemplate from './McrJobsTemplate.vue'
 
 export default {
+
   name: 'DescriptorCharacterize',
+
   components: {
-    ImageUpload
+    McrJobsTemplate
   },
+
   data: () => {
-    return ({
-      title: 'Input Upload',
-      msg: 'Microstructure Characterization - Physical Descriptors',
-      dialog: false,
-      fileName: '',
-      files: [],
-      errorAlert: false,
-      errorAlertMsg: '',
-      loginRequired: false,
-      loginRequiredMsg: '',
-      successDlg: false,
-      jobId: ''
-    })
-  },
-  beforeMount: function () {
-    let vm = this
-    vm.auth = new Auth()
-    if (!vm.auth.isLoggedIn()) {
-      vm.loginRequired = true
-      vm.loginRequiredMsg = 'Login is required.'
-    }
-  },
-  methods: {
+    return {
+      jobInfo: {
 
-    setFiles: function (...files) {
-      this.files = files[0]; // the actual file object
-      this.fileName = files[1]; // the name of the file
-    },
+        jobTitle: 'Descriptor Characterization',
 
-    setLoading: function () {
-      this.$store.commit('isLoading')
-    },
+        pageTitle: 'Microstructure Characterization - Physical Descriptors',
 
-    resetLoading: function () {
-      this.$store.commit('notLoading')
-    },
+        description: [
+          'Upload a binarized image or a ZIP file containing set of images and click "Characterize" to get descriptors for filler material. The descriptors evaluated by this webtool are - filler volume fraction (equivalent to area fraction), number of filler clusters and area, aspect ratio & nearest neighbor distance of each filler cluster. Nearest neighbor distance of a cluster is the distance between its centroid and that of a cluster nearest to it. Except for volume fraction, number of clusters and aspect ratio (which are dimensionless), all descriptors have units of "pixels" ("pixel^2" for area descriptor).'
+        ],
 
-    successDlgClicked: function () {
-      let vm = this
-      console.log('Success dlg button clicked')
-      vm.$router.go(-2) // go back to mcr homepage page
-    },
-    submit: function () {
-      let vm = this
-      vm.files.forEach(function (v) {
-        console.log(JSON.stringify(v))
-      })
+        aspectRatio: 'free',
 
-      vm.setLoading()
-      console.log('Loading..')
-      let jm = new JobMgr()
-      console.log('Called Job Manager')
-      jm.setJobType('DescriptorCharacterize')
-      jm.setJobParameters({'InputType': vm.fileName.split('.').pop()}) // Figure out which input type
-      if (vm.files && vm.files.length >= 1) {
-        vm.files.forEach(function (v) {
-          jm.addInputFile(v.fileName, v.fileUrl)
-          console.log('Job Manager added file: ' + v.fileName)
-        })
-        return jm.submitJob(function (jobId) {
-          console.log('Success! JobId is: ' + jobId)
-          vm.jobId = jobId
-          vm.resetLoading()
-          vm.successDlg = true
-        }, function (errCode, errMsg) {
-          let msg = 'error: ' + errCode + ' msg: ' + errMsg
-          console.log(msg)
-          vm.errorAlertMsg = msg
-          vm.errorAlert = true
-          vm.resetLoading()
-        })
-      } else {
-        let msg = 'Please select a file to process.'
-        vm.errorAlertMsg = msg
-        vm.errorAlert = true
-        vm.resetLoading()
+        getImageDimensions: true,
+
+        submit: {
+          submitButtonTitle: 'Characterize',
+          submitJobTitle: 'DescriptorCharacterize'
+        },
+
+        uploadOptions: [
+          {
+            title: 'Single image',
+            description: 'Supported image formats are .jpg, .tif and .png.'
+          },
+          {
+            title: 'Single image in .mat format',
+            description: 'The .mat file must contain ONLY ONE variable named "Input," which contains the image.'
+          },
+          {
+            title: 'ZIP file with multiple images',
+            description: 'Submit a ZIP file containing multiple images (supported formats: .jpg, .tif, .png) of same size (in pixels). DO NOT ZIP the folder containing images; select all images and ZIP them directly.'
+          }
+        ],
+
+        acceptableFileTypes: '.jpg, .png, .tif, .zip, .mat',
+
+        useWebsocket: false,
+
+        references: [
+          'Xu, H., Li, Y., Brinson, C. and Chen, W., 2014. A descriptor-based design methodology for developing heterogeneous microstructural materials system. Journal of Mechanical Design, 136(5), p.051007.',
+          'Xu, H., Dikin, D.A., Burkhart, C. and Chen, W., 2014. Descriptor-based methodology for statistical characterization and 3D reconstruction of microstructural materials. Computational Materials Science, 85, pp.206-216.'
+        ]
+
       }
     }
   }
 }
+
 </script>
-
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-  img {
-    width: 240px;
-  }
-
-  h4 {
-    text-transform: uppercase;
-  }
-  h1 {
-    margin-top: 10px;
-    background-color: black;
-    color: white;
-  }
-
-</style>

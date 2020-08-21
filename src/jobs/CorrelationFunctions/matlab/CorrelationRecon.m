@@ -70,7 +70,7 @@ try
             legendInfo_table{1} = 'Target_Image'; % Create variable names to save in .csv
     end 
     
-    if input_type ~= 2
+    if str2num(input_type) ~= 2
         if length(size(img)) > 2
             img = img(:,:,1);
         end

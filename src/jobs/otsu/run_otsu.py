@@ -37,6 +37,12 @@ emailRefreshToken = os.environ['NM_AUTH_API_REFRESH_EMAIL']
 paramFile = open(jobDir + '/' + 'job_parameters.json', 'r')
 inputParameters = json.load(paramFile)
 userId = str(inputParameters['user'])
+PhaseInfo = inputParameters['phase']
+sentInJobType = inputParameters['jobtype']
+useWebsocket = inputParameters['useWebsocket']
+WindowSize = 3
+if sentInJobType == 'niblack':
+  WindowSize = inputParameters['WindowSize']
 
 jobSrcDir = os.getcwd()
 webBaseUri = os.environ['NM_WEB_BASE_URI']
@@ -64,9 +70,14 @@ for f in myfiles:
     input_name = f
 
 matlabPgm = 'Otsu' # .m is implied, test mode will use python pgm
+if sentInJobType == 'niblack':
+  matlabPgm = 'niblack'
 mlab = matlab(logging) # create matlab object
 
 matlabPgmParams = (input_type,input_name)
+
+if sentInJobType == 'niblack':
+  matlabPgmParams = (input_type, input_name, WindowSize)
 
 rc = mlab.run(userId, jobId, jobType, jobSrcDir, jobDir, webBaseUri, jobDataUriSuffix, matlabPgm, matlabPgmParams)
 print('MATLAB return code - rc: ' + str(rc))
@@ -130,60 +141,61 @@ except:
 # If the NM_SMTP_TEST environment variable is set to true, then emails are not sent via email and are instead
 #   go into the rest server log file: nanomine/rest/nanomine.log.gz (log file name will get fixed soon)
 # templates are in rest/config/emailtemplates/JOBTYPE/TEMPLATENAME.etf (etf extension is required, but implied in POST data)
-if rc == 0: # send success email
-  try:
-    logging.info('emailurl: ' + emailurl)
-    emaildata = {
-      "jobid": jobId,
-      "jobtype": jobType,
-      "emailtemplatename": "success",
-      "emailvars": {
-        "resultpage": webBaseUri + '/nm#/OtsuResult?refuri='+jobDataUriSuffix+'/'+jobId,
-        "jobinfo": {
-          "resultcode":rc
-        },
-        "user": userId
+if useWebsocket == False:
+  if rc == 0: # send success email
+    try:
+      logging.info('emailurl: ' + emailurl)
+      emaildata = {
+        "jobid": jobId,
+        "jobtype": jobType,
+        "emailtemplatename": "success",
+        "emailvars": {
+          "resultpage": webBaseUri + '/nm#/OtsuResult?refuri='+jobDataUriSuffix+'/'+jobId,
+          "jobinfo": {
+            "resultcode":rc
+          },
+          "user": userId
+        }
       }
-    }
-    print('email data: %s' % emaildata)
-    logging.info('emaildata: ' + json.dumps(emaildata))
-    rq = urllib.request.Request(emailurl)
-    logging.info('request created using emailurl')
-    rq.add_header('Content-Type','application/json')
-    nmEmail = nm_rest(logging, sysToken, emailApiToken, emailRefreshToken, rq)
-    #r = urllib2.urlopen(rq, json.dumps(emaildata))
-    r = nmEmail.urlopen(json.dumps(emaildata).encode("utf8"))
-    logging.info('sent success email: ' + str(r.getcode()))
-  except:
-    logging.info('exception occurred sending run_otsu success email')
-    logging.info('exception: ' + traceback.format_exc())
-else: # send error email
-  try:
-    logging.info('emailurl: ' + emailurl)
-    emaildata = {
-      "jobid": jobId,
-      "jobtype": jobType,
-      "emailtemplatename": "failure",
-      "emailvars": {
-        "jobinfo": {
-          "resultcode":rc,
-          "errors": errmsgs
-        },
-        "user": userId
+      print('email data: %s' % emaildata)
+      logging.info('emaildata: ' + json.dumps(emaildata))
+      rq = urllib.request.Request(emailurl)
+      logging.info('request created using emailurl')
+      rq.add_header('Content-Type','application/json')
+      nmEmail = nm_rest(logging, sysToken, emailApiToken, emailRefreshToken, rq)
+      #r = urllib2.urlopen(rq, json.dumps(emaildata))
+      r = nmEmail.urlopen(json.dumps(emaildata).encode("utf8"))
+      logging.info('sent success email: ' + str(r.getcode()))
+    except:
+      logging.info('exception occurred sending run_otsu success email')
+      logging.info('exception: ' + traceback.format_exc())
+  else: # send error email
+    try:
+      logging.info('emailurl: ' + emailurl)
+      emaildata = {
+        "jobid": jobId,
+        "jobtype": jobType,
+        "emailtemplatename": "failure",
+        "emailvars": {
+          "jobinfo": {
+            "resultcode":rc,
+            "errors": errmsgs
+          },
+          "user": userId
+        }
       }
-    }
-    print('email data: %s' % emaildata)
-    logging.info('emaildata: ' + json.dumps(emaildata))
-    rq = urllib.request.Request(emailurl)
-    logging.info('request created using emailurl')
-    rq.add_header('Content-Type','application/json')
-    nmEmail = nm_rest(logging, sysToken, emailApiToken, emailRefreshToken, rq)
-    #r = urllib2.urlopen(rq, json.dumps(emaildata))
-    r = nmEmail.urlopen(json.dumps(emaildata).encode("utf8"))
-    logging.info('sent failure email: ' + str(r.getcode()))
-  except:
-    logging.info('exception occurred sending run_otsu failure email')
-    logging.info('exception: ' + traceback.format_exc())
+      print('email data: %s' % emaildata)
+      logging.info('emaildata: ' + json.dumps(emaildata))
+      rq = urllib.request.Request(emailurl)
+      logging.info('request created using emailurl')
+      rq.add_header('Content-Type','application/json')
+      nmEmail = nm_rest(logging, sysToken, emailApiToken, emailRefreshToken, rq)
+      #r = urllib2.urlopen(rq, json.dumps(emaildata))
+      r = nmEmail.urlopen(json.dumps(emaildata).encode("utf8"))
+      logging.info('sent failure email: ' + str(r.getcode()))
+    except:
+      logging.info('exception occurred sending run_otsu failure email')
+      logging.info('exception: ' + traceback.format_exc())
 
 
 

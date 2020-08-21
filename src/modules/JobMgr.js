@@ -5,6 +5,7 @@
 import {} from 'vuex'
 import Axios from 'axios'
 import Vue from '../main'
+
 export function JobMgr () {
   this.jobType = null
   this.jobId = null
@@ -75,7 +76,6 @@ JobMgr.prototype = {
             })
             Axios.all(fileSends)
               .then((p) => {
-                console.log(p)
                 // wait for all files to be sent then submit job
                 p.forEach(function (v) {
                   // console.log('logging response info below: ')
