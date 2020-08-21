@@ -1,4 +1,4 @@
-function DescriptorCharacterize(userId, jobId, jobType, jobSrcDir, jobDir, webBaseUri,input_type,file_name)
+function DescriptorCharacterize(userId, jobId, jobType, jobSrcDir, jobDir, webBaseUri,input_type,file_name,phase_cords)
 
 %%% Input Types %%
 % 1 : Single JPEG Image
@@ -7,7 +7,6 @@ function DescriptorCharacterize(userId, jobId, jobType, jobSrcDir, jobDir, webBa
 %%
 
 rc=0;
-
 
 try
 
@@ -18,21 +17,22 @@ try
 
     %
     %% Specify import function according to input option
+    %% Specify import function according to input option
+   condition=1; % for phase selection
     switch str2num(input_type)
         case 1
             img = imread([path_to_read,file_name]); % read the incming target and store pixel values
-            if length(size(img)) > 2
-                imwrite(img(:,:,1:3),[path_to_write,'/','Input1.jpg'])
-            elseif length(size(img)) > 1
-                imwrite(img,[path_to_write,'/','Input1.jpg'])
+            if length(size(img)) > 1
+                phase_cords = split(phase_cords, '*');
+                phase_cords = [str2num(phase_cords{1}) str2num(phase_cords{2})];
+                [condition]=check_phase(img,phase_cords); % if 0 image needs to be inverted
             else
                 writeError([path_to_write, '/errors.txt'], ['failed to read image file: ', file_name]);
                 rc = 97
                 exit(rc)
-
-            end
+            end    
         case 2
-            img = unzip([path_to_read,file_name],[path_to_write,'/input']);
+            img=unzip([path_to_read,file_name],[path_to_write,'/input']);
         case 3
             path=[path_to_read,file_name];
             k=load(path);
@@ -43,16 +43,16 @@ try
                 rc = 98;
                 msg = getReport(ex);
                 writeError([path_to_write, '/errors.txt'], 'The variable name inside the material file shold be the same as the name of the file. Technical details below:');
+                
                 writeError([path_to_write, '/errors.txt'], msg);
                 writeError([path_to_write, '/errors.txt'], sprintf('\n'));
                 exit(rc);
-            end
-            imwrite(img,[path_to_write,'/','Input1.jpg']);
+            end  
     end
 
-    % run characterization algorithm
+    %%  run characterization algorithm
     addpath('./descriptor_char'); % add path of directory holding MAIN.m
-    er=Descriptor_C2_Binary(img,path_to_write,str2num(input_type)); %
+    er=Descriptor_C2_Binary(img,path_to_write,str2num(input_type),condition); %
     if er==1
         writeError([path_to_write, '/errors.txt'], ['Some of the files in zip folder were not accessible ']);
         rc = 99;

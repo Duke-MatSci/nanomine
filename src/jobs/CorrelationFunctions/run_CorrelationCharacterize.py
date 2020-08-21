@@ -36,6 +36,8 @@ paramFile = open(jobDir + '/' + 'job_parameters.json', 'r')
 inputParameters = json.load(paramFile)
 userId = str(inputParameters['user'])
 CorrelationType = str(inputParameters['CorrelationType'])
+ImageDimensions = inputParameters['dimensions']
+PhaseInfo = inputParameters['phase']
 
 jobSrcDir = os.getcwd()
 webBaseUri = os.environ['NM_WEB_BASE_URI']

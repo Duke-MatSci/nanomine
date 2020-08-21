@@ -43,7 +43,6 @@ const createDataset = nanomineUtils.createDataset
 const updateDataset = nanomineUtils.updateDataset
 const getLatestSchemas = nanomineUtils.getLatestSchemas
 const sortSchemas = nanomineUtils.sortSchemas
-
 /*** Import Centralized Error Reporting Module */
 const centralLogger = require('./middlewares/logger')
 /** Import for Chart Visualization */
@@ -287,7 +286,7 @@ function getBearerTokenInfo (bearerToken) {
           let refreshToken = parts[APIACCESS_REFRESHTOKEN_PART]
           let accessToken = parts[APIACCESS_ACCESSTOKEN_PART]
           let expiration = parts[APIACCESS_EXPIRATION_PART]
-          logger.debug(func + ' - checking bearer token: ' + bearerToken + ' against access token: ' + accessToken)
+          // logger.debug(func + ' - checking bearer token: ' + bearerToken + ' against access token: ' + accessToken)
           if (bearerToken === accessToken) {
             tokenInfo.userId = userid
             tokenInfo.apiToken = apiToken
@@ -3219,8 +3218,10 @@ function jobSubmit (jobId, jobType, userToken) {
                   let cwd = process.cwd()
                   let pgmpath = pathModule.join(cwd, pgmdir)
                   pgm = pathModule.join(pgmpath, pgm)
+                  logger.info('JOB INFORMATION: cwd: ' + cwd + 'type - ' + jobType + ', ID: ' + jobId + ' jobDir- ' + jobDir + ', pgmpath: '+ pgmpath + ' pgm: ' + pgm)
                   logger.info('executing: ' + pgm + ' in: ' + pgmpath)
                   let path = process.env['PATH'] + ':/apps/n/bin'
+                  logger.info('PATH: ' + path)
                   let localEnv = {'PYTHONPATH': pathModule.join(cwd, '../src/jobs/lib'), 'NODE_PATH': '/apps/nanomine/rest/node_modules', 'PATH': path}
                   _.merge(localEnv, process.env)
                   logger.debug(func + ' - running job ' + jobId + ' with env path = ' + localEnv['PATH'] +
@@ -3229,10 +3230,11 @@ function jobSubmit (jobId, jobType, userToken) {
                     'cwd': pgmpath,
                     'env': localEnv
                   })
+                  logger.info('CHLID: ' + child)
                   jobPid = child.pid
                   updateJobStatus(jobDir, {'status': 'submitted', 'pid': jobPid})
                   child.stdout.on('data', (data) => {
-                    logger.info('job ' + jobId + ' o: ' + data)
+                    // logger.info('job ' + jobId + ' o: ' + data)
                   })
                   child.stderr.on('data', (data) => {
                     logger.error('job ' + jobId + ' e: ' + data)
@@ -3242,10 +3244,12 @@ function jobSubmit (jobId, jobType, userToken) {
                     updateJobStatus(jobDir, {'status': 'failed to execute', 'error': err})
                   })
                   child.on('close', (data) => {
+                    emitResults(jobId, jobId)
                     logger.info('job ' + jobId + ' exited with code: ' + data)
                     updateJobStatus(jobDir, {'status': 'completed', 'rc': data})
                   })
                   child.on('exit', (data) => {
+                    emitResults(jobId, jobId)
                     logger.info('job ' + jobId + ' exited with code: ' + data)
                     updateJobStatus(jobDir, {'status': 'completed', 'rc': data})
                   })
@@ -3868,24 +3872,59 @@ initialize.init(mongoose.connection,
   {nmAutostartCurator,nmAuthSystemUserId}
 )
 
+// let dbUri = process.env['NM_MONGO_URI']
+
+// mongoose
+//   .connect(
+//     dbUri, {useNewUrlParser: true, keepAlive: true, keepAliveInitialDelay: 300000, useUnifiedTopology: true, reconnectTries: 2, reconnectInterval: 500}
+//   ).catch(err => logger.error('db error: ' + err))
+
+// const server = app.listen(3000)
+// let socketConnections = {}
+// const io = require('socket.io')(server)
+
+// io.on('connection', socket => {
+//   socket.on('testConnection', () => {
+//     socket.emit('hello', 'connection received')
+//   })
+//   socket.on('newJob', jobId => {
+//     socketConnections[jobId] = socket.id
+//     socket.emit('hello', 'socket has received jobId.')
+//   })
+// })
+
+// function emitResults (jobId, data) {
+//   logger.info('emitting results of MCR JOB: ' + data)
+//   io.to(socketConnections[jobId]).emit('finished', data)
+// }
+
 let dbUri = process.env['NM_MONGO_URI']
+let socketConnections = {}
+let io = undefined
 mongoose
   .connect(
     dbUri, {useNewUrlParser: true, keepAlive: true, keepAliveInitialDelay: 300000, useUnifiedTopology: true, reconnectTries: 2, reconnectInterval: 500}
   ).then(result => {
     const server = app.listen(3000);
-    const io = require('./rest-initializer/socket').init(server);
+    io = require('./rest-initializer/socket').init(server);
     io.on('connection', socket => {
-      socket.on('disconnect', () => {
-        if (socket.sockets[socket.id]) {
-          socket.sockets[socket.id].disconnect();
-        }
+      logger.info('checking socket')
+
+      socket.on('testConnection', () => {
+        socket.emit('hello', 'connection received')
+      })
+
+      socket.on('newJob', jobId => {
+        socketConnections[jobId] = socket.id
+        socket.emit('hello', 'socket has received jobId.')
       })
     })
   }).catch(err => logger.error('db error: ' + err))
 
-
-
+function emitResults (jobId, data) {
+  logger.info('emitting results of MCR JOB: ' + data)
+  io.to(socketConnections[jobId]).emit('finished', data)
+}
 
 /*
 prefix dataset: <https://hbgd.tw.rpi.edu/dataset/>
@@ -3912,29 +3951,24 @@ prefix lang: <http://nanomine.tw.rpi.edu/language/>
 prefix void: <http://rdfs.org/ns/void#>
 prefix dcat: <http://www.w3.org/ns/dcat#>
 prefix xsd: <http://www.w3.org/2001/XMLSchema#>
-
 select *
 where {
  ?p ?s ?o. FILTER regex(?o,".*png.*","i")
 }
-
 select *
 where {
   ?p ?s ?o FILTER ( strstarts(str(?p), "http://nanomine.tw.rpi.edu/unit/") )
 }
-
 SELECT * WHERE {
   ?s ?p ?o
   FILTER( regex(str(?p), "^(?http://nanomine.tw.rpi.edu/entry/).+"))
 }
 https://stackoverflow.com/questions/24180387/filtering-based-on-a-uri-in-sparql
 https://stackoverflow.com/questions/19044871/exclude-results-from-dbpedia-sparql-query-based-on-uri-prefix
-
 prefix sio: <http://semanticscience.org/resource/>
 prefix ns: <http://nanomine.tw.rpi.edu/ns/>
 prefix np: <http://www.nanopub.org/nschema#>
 prefix dcterms: <http://purl.org/dc/terms/>
-
 select distinct ?sample ?x ?y ?xUnit ?yUnit ?matrixPolymer ?fillerPolymer ?fillerProperty ?fillerPropertyValue ?fillerPropertyUnit ?doi ?title
 where {
   ?nanopub np:hasAssertion ?ag.
@@ -3964,7 +3998,6 @@ where {
     ?doi dcterms:title ?title.
   }
 }
-
 -- simplest sparql to get sample id (#1) -- effectively gets all samples
 prefix sio:<http://semanticscience.org/resource/>
 prefix ns:<http://nanomine.tw.rpi.edu/ns/>
@@ -3977,7 +4010,6 @@ where {
       ?ac <http://www.w3.org/ns/prov#specializationOf> ?sample.
   }
 }
-
 -- this adds journal name and title to sample id in #1 above (#2)
 prefix ns:<http://nanomine.tw.rpi.edu/ns/>
 prefix np: <http://www.nanopub.org/nschema#>
@@ -3994,7 +4026,6 @@ where {
      ?doi dcterms:title ?title.
   }
 }
-
 --- #1 and #2 above can be extended to this (#3)
 prefix sio:<http://semanticscience.org/resource/>
 prefix ns:<http://nanomine.tw.rpi.edu/ns/>
@@ -4017,7 +4048,6 @@ where {
      ?doi dcterms:title ?title.
   }
 }
-
 ---- Interesting one that looks for nanopubs and returns the trees (for ~ 320 samples this result is ~ 240,000 triples)
 prefix sio:<http://semanticscience.org/resource/>
 prefix ns:<http://nanomine.tw.rpi.edu/ns/>
@@ -4030,7 +4060,6 @@ where {
     ?s ?p ?o.
   }
 }
-
 --query to retire nanopubs
 select ?np ?assertion ?provenance ?pubinfo where {
     hint:Query hint:optimizer "Runtime" .
@@ -4039,7 +4068,6 @@ select ?np ?assertion ?provenance ?pubinfo where {
         np:hasPublicationInfo ?pubinfo;
         np:hasProvenance ?provenance.
 }
-
 --This returns sample names along with a few other things (the others look like a punt)
 --    ex: correct -
 --       http://nanomine.tw.rpi.edu/sample/l217-s4-ash-2002
@@ -4053,7 +4081,6 @@ select distinct ?nanopub
 where {
   ?nanopub a <http://nanomine.tw.rpi.edu/ns/PolymerNanocomposite>.
 }
-
 -- Select nanopubs of type #File that are Xmls
 prefix sio:<http://semanticscience.org/resource/>
 prefix ns:<http://nanomine.tw.rpi.edu/ns/>
@@ -4064,9 +4091,7 @@ where {
   ?file a <http://purl.org/net/provenance/ns#File>.
   ?nanopub a <https://www.iana.org/assignments/media-types/text/xml>
 }
-
 -- Ontology based queries
-
 SELECT DISTINCT ?count ?value ?unit
  WHERE {
    SELECT DISTINCT ?count ?value ?unit {
@@ -4078,7 +4103,6 @@ SELECT DISTINCT ?count ?value ?unit
          ?id <http://semanticscience.org/resource/hasComponentPart>/<http://semanticscience.org/resource/isSurroundedBy>/<http://semanticscience.org/resource/hasAttribute>/rdf:type ?value .
          ?id <http://semanticscience.org/resource/hasComponentPart>/<http://semanticscience.org/resource/isSurroundedBy> ?surfacePart. ?surfacePart <http://semanticscience.org/resource/hasRole> [ a <http://nanomine.org/ns/SurfaceTreatment>]. ?surfacePart <http://semanticscience.org/resource/hasAttribute>/rdf:type ?value.
          optional { ?id <http://semanticscience.org/resource/hasComponentPart>/<http://semanticscience.org/resource/isSurroundedBy>/<http://semanticscience.org/resource/hasAttribute>/<http://semanticscience.org/resource/hasUnit> ?unit. }
-
          ?id rdf:type/rdfs:subClassOf* <http://nanomine.org/ns/PolymerNanocomposite>.
          FILTER (!ISBLANK(?id))
          FILTER ( !strstarts(str(?id), "bnode:") )
@@ -4087,11 +4111,9 @@ SELECT DISTINCT ?count ?value ?unit
      FILTER(BOUND(?value))
    }
  }
-
  --- ingested count
  SELECT DISTINCT (count(distinct ?id) as ?count)
  WHERE {
          ?id rdf:type/rdfs:subClassOf* <http://nanomine.org/ns/PolymerNanocomposite>.
    }
-
 */

@@ -11,177 +11,71 @@
 ################################################################################
 -->
 <template>
-  <div class="SDFCharacterize">
-    <h1>{{ msg }}</h1>
-    <v-container class="text-xs-left">
-      <v-layout row wrap>
-        <v-flex xs12>
-          <h3>Description</h3>
-          <br>
-          <p>Upload a binarized image / ZIP file containing set of images (Supported file formats: .jpg, .tif, .png) and click "Characterize".
-            All correlation functions are evaluated for the "white" phase in image.</p>
-        </v-flex>
-        <v-flex xs12 justify-start>
-          <h4> Input Options:</h4>
-          <p class="text-xs-left"><strong> Upload a single image: </strong>Supported image formats are .jpg, .tif and .png.The results will include the 2D SDF and it's radially averaged 1D version in CSV file format.</p>
-          <p class="text-xs-left"><strong> --OR-- Upload a single image in .mat format :</strong> The .mat file must contain ONLY ONE variable named
-            "Input" - which contains the image.The results will include the 2D SDF and it's radially averaged 1D version in CSV file format.</p>
-          <p class="text-xs-left"><strong> --OR-- Upload multiple images in ZIP File:</strong> Submit a ZIP file containing multiple images (supported
-            formats: .jpg, .tif, .png) of same size (in pixels). DO NOT ZIP the folder containing images; select all images and ZIP them directly.
-            DO NOT ZIP the folder containing images; select all images and ZIP them directly. The results will include a folder "input" which contains all images submitted by user,
-            one folder for each input image that comprises the 2D and 1D SDF (in CSV format) of the respective image.
-            Additionally, the mean 2D and 1D SDF, averaged over all input images is provided in CSV file along with a plot of the mean 2D SDF in "SDF_2D.jpg".</p>
-        </v-flex>
-      </v-layout>
-      <v-alert
-        v-model="loginRequired"
-        type="error"
-        outline
-      >
-        {{loginRequiredMsg}}
-      </v-alert>
-      <v-alert
-        v-model="errorAlert"
-        type="error"
-        dismissible
-      >
-        {{errorAlertMsg}}
-      </v-alert>
-      <v-dialog v-model="successDlg" persistent max-width="500px">
-        <v-card>
-          <v-card-title>
-            <span>SDF Characterization Job Submitted Successfully</span>
-            <v-spacer></v-spacer>
-          </v-card-title>
-          <v-card-text>
-            Your job is: {{jobId}} <br/> You should receive an email with a link to the job output.
-          </v-card-text>
-          <v-card-actions>
-            <v-btn color="primary" flat @click="successDlgClicked()">Close</v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-      <ImageUpload v-on:setFiles="setFiles" aspectRatio='square'></ImageUpload>
-      <v-flex class="text-xs-center">
-      <v-btn v-on:click="submit()" color="primary">Characterize</v-btn>
-      </v-flex>
-      <h4>References</h4>
-      <v-flex xs12>
-        <p>Ghumman, U.F., Iyer, A., Dulal, R., Munshi, J., Wang, A., Chien, T., Balasubramanian, G., and Chen, W., A Spectral Density Function Approach for Active Layer Design of Organic Photovoltaic Cells, <i>Journal of Mechanical Design</i>, Special Issue on Design of Engineered Materials and Structures, accepted July 2018. doi:10.1115/1.4040912.</p>
-        <p>Yu, S., Zhang, Y., Wang, C., Lee, W.K., Dong, B., Odom, T.W., Sun, C. and Chen, W., 2017. Characterization and design of functional quasi-random nanostructured materials using spectral density function. <i>Journal of Mechanical Design</i>, 139(7), p.071401.</p>
-        <p>Lee, W. K., Yu, S., Engel, C. J., Reese, T., Rhee, D., Chen, W., & Odom, T. W. (2017). Concurrent design of quasi-random photonic nanostructures. Proceedings of the National Academy of Sciences, 114(33), 8734-8739.</p>
-      </v-flex>
-    </v-container>
-  </div>
+  <McrJobsTemplate v-bind:job='jobInfo'></McrJobsTemplate>
 </template>
 
 <script>
+
 import {} from 'vuex'
-import {JobMgr} from '@/modules/JobMgr.js'
-import {Auth} from '@/modules/Auth.js'
-import ImageUpload from './ImageUpload.vue'
+import McrJobsTemplate from './McrJobsTemplate.vue'
 
 export default {
+
   name: 'SDFCharacterize',
+
   components: {
-    ImageUpload
+    McrJobsTemplate
   },
+
   data: () => {
-    return ({
-      title: 'Input Upload',
-      msg: 'Microstructure Characterization - Spectral Density Function',
-      dialog: false,
-      fileName: '',
-      files: [],
-      errorAlert: false,
-      errorAlertMsg: '',
-      loginRequired: false,
-      loginRequiredMsg: '',
-      successDlg: false,
-      jobId: ''
-    })
-  },
-  beforeMount: function () {
-    let vm = this
-    vm.auth = new Auth()
-    if (!vm.auth.isLoggedIn()) {
-      vm.loginRequired = true
-      vm.loginRequiredMsg = 'Login is required.'
-    }
-  },
-  methods: {
+    return {
+      jobInfo: {
 
-    setFiles: function (...files) {
-      this.files = files[0]; // the actual file object
-      this.fileName = files[1]; // the name of the file
-    },
+        jobTitle: 'SDF Characterization',
 
-    setLoading: function () {
-      this.$store.commit('isLoading')
-    },
+        pageTitle: 'Microstructure Characterization - Spectral Density Function',
 
-    resetLoading: function () {
-      this.$store.commit('notLoading')
-    },
+        description: [
+          'Upload a binarized image / ZIP file containing set of images (Supported file formats: .jpg, .tif, .png) and click "Characterize". All correlation functions are evaluated for the "white" phase in image.'
+        ],
 
-    successDlgClicked: function () {
-      let vm = this
-      console.log('Success dlg button clicked')
-      vm.$router.go(-2) // go back to mcr homepage page
-    },
-    submit: function () {
-      let vm = this
-      vm.files.forEach(function (v) {
-        console.log(JSON.stringify(v))
-      })
+        aspectRatio: 'square',
 
-      vm.setLoading()
-      console.log('Loading..')
-      let jm = new JobMgr()
-      console.log('Called Job Manager')
-      jm.setJobType('SDFCharacterize')
-      jm.setJobParameters({'InputType': vm.fileName.split('.').pop()}) // Figure out which input type
-      if (vm.files && vm.files.length >= 1) {
-        vm.files.forEach(function (v) {
-          jm.addInputFile(v.fileName, v.fileUrl)
-          console.log('Job Manager added file: ' + v.fileName)
-        })
-        return jm.submitJob(function (jobId) {
-          console.log('Success! JobId is: ' + jobId)
-          vm.jobId = jobId
-          vm.resetLoading()
-          vm.successDlg = true
-        }, function (errCode, errMsg) {
-          let msg = 'error: ' + errCode + ' msg: ' + errMsg
-          console.log(msg)
-          vm.errorAlertMsg = msg
-          vm.errorAlert = true
-          vm.resetLoading()
-        })
-      } else {
-        let msg = 'Please select a file to process.'
-        vm.errorAlertMsg = msg
-        vm.errorAlert = true
-        vm.resetLoading()
+        getImageDimensions: true,
+
+        submit: {
+          submitButtonTitle: 'Characterize',
+          submitJobTitle: 'SDFCharacterize'
+        },
+
+        uploadOptions: [
+          {
+            title: 'Single image',
+            description: 'Supported image formats are .jpg, .tif and .png.The results will include the 2D SDF and it\'s radially averaged 1D version in CSV file format.'
+          },
+          {
+            title: 'Single image in .mat format',
+            description: 'The .mat file must contain ONLY ONE variable named "Input" - which contains the image.The results will include the 2D SDF and it\'s radially averaged 1D version in CSV file format.'
+          },
+          {
+            title: 'ZIP file with multiple images',
+            description: 'Submit a ZIP file containing multiple images (supported formats: .jpg, .tif, .png) of same size (in pixels). DO NOT ZIP the folder containing images; select all images and ZIP them directly. DO NOT ZIP the folder containing images; select all images and ZIP them directly. The results will include a folder "input" which contains all images submitted by user, one folder for each input image that comprises the 2D and 1D SDF (in CSV format) of the respective image. Additionally, the mean 2D and 1D SDF, averaged over all input images is provided in CSV file along with a plot of the mean 2D SDF in "SDF_2D.jpg".'
+          }
+        ],
+
+        acceptableFileTypes: '.jpg, .png, .tif, .zip, .mat',
+
+        useWebsocket: false,
+
+        references: [
+          'Ghumman, U.F., Iyer, A., Dulal, R., Munshi, J., Wang, A., Chien, T., Balasubramanian, G., and Chen, W., A Spectral Density Function Approach for Active Layer Design of Organic Photovoltaic Cells, Journal of Mechanical Design, Special Issue on Design of Engineered Materials and Structures, accepted July 2018. doi:10.1115/1.4040912.',
+          'Yu, S., Zhang, Y., Wang, C., Lee, W.K., Dong, B., Odom, T.W., Sun, C. and Chen, W., 2017. Characterization and design of functional quasi-random nanostructured materials using spectral density function. Journal of Mechanical Design, 139(7), p.071401.',
+          'Lee, W. K., Yu, S., Engel, C. J., Reese, T., Rhee, D., Chen, W., & Odom, T. W. (2017). Concurrent design of quasi-random photonic nanostructures. Proceedings of the National Academy of Sciences, 114(33), 8734-8739.'
+        ]
+
       }
     }
   }
 }
+
 </script>
-
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-  img {
-    width: 240px;
-  }
-
-  h4 {
-    text-transform: uppercase;
-  }
-  h1 {
-    margin-top: 10px;
-    background-color: black;
-    color: white;
-  }
-
-</style>
