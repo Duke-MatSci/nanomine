@@ -24,7 +24,7 @@
     "html-loader": "^1.0.0",
     "jsonwebtoken": "^8.4.0",
     "jszip": "^3.5.0",
-    "lodash": "^4.17.11",
+    "lodash": "^4.17.20",
     "moment": "^2.23.0",
     "short-uuid": "^3.1.0",
     "smiles-drawer": "1.1.22",

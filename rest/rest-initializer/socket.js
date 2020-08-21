@@ -9,6 +9,7 @@ module.exports = {
     getIO: logger => {
         if(!io){
             logger.error('Failed Socket Initialization')
+            return
         }
         return io;
     }

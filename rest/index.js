@@ -69,6 +69,9 @@ const initialize = require('./rest-initializer')
 let logger = centralLogger(config)
 logger.info('NanoMine REST server version ' + config.version + ' starting')
 
+// Restful API Socket Handler
+const { getIO } = require('./rest-initializer/socket');
+
 // let datasetBucketName = nanomineUtils.datasetBucketName
 
 let sendEmails = env.sendEmails
@@ -3872,41 +3875,14 @@ initialize.init(mongoose.connection,
   {nmAutostartCurator,nmAuthSystemUserId}
 )
 
-// let dbUri = process.env['NM_MONGO_URI']
-
-// mongoose
-//   .connect(
-//     dbUri, {useNewUrlParser: true, keepAlive: true, keepAliveInitialDelay: 300000, useUnifiedTopology: true, reconnectTries: 2, reconnectInterval: 500}
-//   ).catch(err => logger.error('db error: ' + err))
-
-// const server = app.listen(3000)
-// let socketConnections = {}
-// const io = require('socket.io')(server)
-
-// io.on('connection', socket => {
-//   socket.on('testConnection', () => {
-//     socket.emit('hello', 'connection received')
-//   })
-//   socket.on('newJob', jobId => {
-//     socketConnections[jobId] = socket.id
-//     socket.emit('hello', 'socket has received jobId.')
-//   })
-// })
-
-// function emitResults (jobId, data) {
-//   logger.info('emitting results of MCR JOB: ' + data)
-//   io.to(socketConnections[jobId]).emit('finished', data)
-// }
-
 let dbUri = process.env['NM_MONGO_URI']
 let socketConnections = {}
-let io = undefined
 mongoose
   .connect(
     dbUri, {useNewUrlParser: true, keepAlive: true, keepAliveInitialDelay: 300000, useUnifiedTopology: true, reconnectTries: 2, reconnectInterval: 500}
   ).then(result => {
     const server = app.listen(3000);
-    io = require('./rest-initializer/socket').init(server);
+    const io = require('./rest-initializer/socket').init(server);
     io.on('connection', socket => {
       logger.info('checking socket')
 
@@ -3923,7 +3899,10 @@ mongoose
 
 function emitResults (jobId, data) {
   logger.info('emitting results of MCR JOB: ' + data)
-  io.to(socketConnections[jobId]).emit('finished', data)
+  const io = getIO(logger);
+  if(io){
+    io.to(socketConnections[jobId]).emit('finished', data)
+  }
 }
 
 /*
