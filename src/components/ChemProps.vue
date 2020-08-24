@@ -24,7 +24,7 @@
       </v-flex>
       <p class="text-xs-left" v-if="pfRadios === 'pol'"><b>2. Input the searching terms. For the quick search, you can search by either chemical name, abbreviation, trade name, or SMILES. For the advanced search, you must input a chemical name.</b></p>
       <p class="text-xs-left" v-if="pfRadios === 'fil'"><b>2. Input the searching terms. Note that you must input a chemical name.</b></p>
-      <v-flex xs12 sm6 md3>
+      <v-flex xs12 sm6 md6>
         <v-card v-if="pfRadios === 'pol'">
           <p class="text-xs-left"><b>Quick Search (Filling this textbox will overwrite the advanced search)</b></p>
           <v-text-field v-model="quicksearchkeyword" label='Enter the keyword:' outlined></v-text-field>
@@ -45,7 +45,7 @@
         {{searchErrorMsg}}
       </v-alert>
       <v-btn v-on:click="search()" color="primary">Search</v-btn>
-      <v-flex xs12 sm6 md5 class="text-xs-left" v-if="stdname !== ''">
+      <v-flex xs12 sm6 md6 class="text-xs-left" v-if="stdname !== ''">
         <p class="text-xs-left">Standardized chemical name and density information:</p>
         <v-text-field v-model="stdname" label='Standardized Name' outlined></v-text-field>
         <v-text-field v-model="density" label='Density (g/cm3)' outlined></v-text-field>
