@@ -16,13 +16,6 @@ const bodyParser = require('body-parser')
 const mimetypes = require('mime-types')
 // was used for posting to rdf - const FormData = require('form-data')
 const config = require('config').get('nanomine')
-
-const {createLogger, format, transports} = require('winston')
-const { combine, label, printf, prettyPrint } = format
-const logFormat = printf(({level, message, label}) => {
-  let now = moment().format('YYYYMMDDHHmmssSSS')
-  return `${now} [${label}] ${level}: ${message}`
-})
 const hasha = require('hasha')
 const moment = require('moment')
 const datauri = require('data-uri-to-buffer')
@@ -50,8 +43,14 @@ const createDataset = nanomineUtils.createDataset
 const updateDataset = nanomineUtils.updateDataset
 const getLatestSchemas = nanomineUtils.getLatestSchemas
 const sortSchemas = nanomineUtils.sortSchemas
+/*** Import Centralized Error Reporting Module */
+const centralLogger = require('./middlewares/logger')
 /** Import for Chart Visualization */
 const chartRoutes = require('./routes/chartBackup')
+/** Import Rest Initializer */
+const initialize = require('./rest-initializer')
+
+
 // TODO calling next(err) results in error page rather than error code in json
 
 // TODO runAsUser in jwt if possible
@@ -67,7 +66,7 @@ const chartRoutes = require('./routes/chartBackup')
 
 // const ObjectId = mongoose.Types.ObjectId
 
-let logger = configureLogger()
+let logger = centralLogger(config)
 logger.info('NanoMine REST server version ' + config.version + ' starting')
 
 // let datasetBucketName = nanomineUtils.datasetBucketName
@@ -145,46 +144,24 @@ function inspect (theObj) {
   return util.inspect(theObj, {showHidden: true, depth: 5})
 }
 
-/* Mongoose schemas re-factored start */
-let db = mongoose.connection
-let dbUri = process.env['NM_MONGO_URI']
-let dbPromise = new Promise(function (resolve, reject) {
-  db.on('error', function (err) {
-    logger.error('db error: ' + err)
-    reject(err)
-  })
-  db.once('open', function () {
-    logger.info('database opened successfully via mongoose connect.')
-    resolve()
-  })
-})
-mongoose.connect(dbUri, {keepAlive: true, keepAliveInitialDelay: 300000})
 
-// let mgiVersionSchema = require('./modules/mongo/schema/mgiVersion')(mongoose)
-// let MgiVersion = mongoose.model('mgiversion', mgiVersionSchema)
+/** IMPORTING SCHEMAS */
 
 let datasetsSchema = require('./modules/mongo/schema/datasets').datasets(mongoose)
 let Datasets = mongoose.model('datasets', datasetsSchema)
 
-let usersSchema = require('./modules/mongo/schema/users')(mongoose)
-let Users = mongoose.model('users', usersSchema)
-
-let apiSchema = require('./modules/mongo/schema/api')(mongoose)
-let Api = mongoose.model('api', apiSchema)
-
 let sequencesSchema = require('./modules/mongo/schema/sequences').sequences(mongoose)
 let Sequences = mongoose.model('sequences', sequencesSchema)
-
-let xmlDataSchema = require('./modules/mongo/schema/xmldata')(mongoose)
-let XmlData = mongoose.model('xmlData', xmlDataSchema)
-
-let xsdSchema = require('./modules/mongo/schema/xsd')(mongoose)
-let XsdSchema = mongoose.model('xsdData', xsdSchema)
-
+let Users = require('./modules/mongo/schema/users')
+let Api = require('./modules/mongo/schema/api')
+let XmlData = require('./modules/mongo/schema/xmldata')
+let XsdSchema = require('./modules/mongo/schema/xsd')
 let xsdVersionSchema = require('./modules/mongo/schema/xsdVersion')(mongoose)
 let XsdVersionSchema = mongoose.model('xsdVersionData', xsdVersionSchema)
 
-/* Mongoose schemas re-factored end */
+// let mgiVersionSchema = require('./modules/mongo/schema/mgiVersion')(mongoose)
+// let MgiVersion = mongoose.model('mgiversion', mgiVersionSchema)
+
 
 try {
   fs.mkdirSync(nmWebFilesRoot) // Sync used during startup
@@ -223,7 +200,10 @@ app.use((req, res, next) => {
   next()
 })
 
-app.use('/chart', chartRoutes)
+app.use('/chart', (req, res, next) => {
+  req.logger = logger;
+  next();
+}, chartRoutes)
 
 app.use('/files', express.static(nmWebFilesRoot, {
   dotfiles: 'ignore',
@@ -306,7 +286,7 @@ function getBearerTokenInfo (bearerToken) {
           let refreshToken = parts[APIACCESS_REFRESHTOKEN_PART]
           let accessToken = parts[APIACCESS_ACCESSTOKEN_PART]
           let expiration = parts[APIACCESS_EXPIRATION_PART]
-          logger.debug(func + ' - checking bearer token: ' + bearerToken + ' against access token: ' + accessToken)
+          // logger.debug(func + ' - checking bearer token: ' + bearerToken + ' against access token: ' + accessToken)
           if (bearerToken === accessToken) {
             tokenInfo.userId = userid
             tokenInfo.apiToken = apiToken
@@ -3146,48 +3126,38 @@ function submitCurator (userid) {
       })
   })
 }
-dbPromise.then(function () {
-  if (!nmAutostartCurator) {
-    console.log('NOT SUBMITTING CURATOR AT THIS TIME. DISABLED.')
-    return
-  }
-  console.log('db opened successfully. Submitting curator.')
-  submitCurator(nmAuthSystemUserId) // run the curator job (long running job) TODO: monitor curator
-    .then(function () {
-      let msg = 'successfully submitted curator job.'
-      logger.info(msg)
-      console.log(msg) // for convenience
-    })
-    .catch(function (err) {
-      let msg = 'submission of curator job failed. Error: ' + err
-      logger.error(msg)
-      console.log(msg)
-    })
-  submitGenerateSeoFiles(nmAuthSystemUserId) // run the curator job (long running job) TODO: monitor generateSeoFiles
-    .then(function () {
-      let msg = 'successfully submitted generate seo files job.'
-      logger.info(msg)
-      console.log(msg) // for convenience
-    })
-    .catch(function (err) {
-      let msg = 'submission of generate seo files job failed. Error: ' + err
-      logger.error(msg)
-      console.log(msg)
-    })
-})
-dbPromise.catch(function (err) {
-  console.log('dbPromise.catch - db open failed: ' + err)
-})
-
-/* websockets for real time response upon job completion */
-// var currentJobs = {}
-// io.on('connection', socket => {
-//   socket.emit('hello', [1, 2, 3])
-//   socket.on('newJob', jobId => {
-//     currentJobs[jobId] = socket.id
-//   })
+// dbPromise.then(function () {
+//   if (!nmAutostartCurator) {
+//     console.log('NOT SUBMITTING CURATOR AT THIS TIME. DISABLED.')
+//     return
+//   }
+//   console.log('db opened successfully. Submitting curator.')
+//   submitCurator(nmAuthSystemUserId) // run the curator job (long running job) TODO: monitor curator
+//     .then(function () {
+//       let msg = 'successfully submitted curator job.'
+//       logger.info(msg)
+//       console.log(msg) // for convenience
+//     })
+//     .catch(function (err) {
+//       let msg = 'submission of curator job failed. Error: ' + err
+//       logger.error(msg)
+//       console.log(msg)
+//     })
+//   submitGenerateSeoFiles(nmAuthSystemUserId) // run the curator job (long running job) TODO: monitor generateSeoFiles
+//     .then(function () {
+//       let msg = 'successfully submitted generate seo files job.'
+//       logger.info(msg)
+//       console.log(msg) // for convenience
+//     })
+//     .catch(function (err) {
+//       let msg = 'submission of generate seo files job failed. Error: ' + err
+//       logger.error(msg)
+//       console.log(msg)
+//     })
 // })
-
+// dbPromise.catch(function (err) {
+//   console.log('dbPromise.catch - db open failed: ' + err)
+// })
 function jobSubmit (jobId, jobType, userToken) {
   let func = 'jobSubmit'
   return new Promise(function (resolve, reject) {
@@ -3248,8 +3218,10 @@ function jobSubmit (jobId, jobType, userToken) {
                   let cwd = process.cwd()
                   let pgmpath = pathModule.join(cwd, pgmdir)
                   pgm = pathModule.join(pgmpath, pgm)
+                  logger.info('JOB INFORMATION: cwd: ' + cwd + 'type - ' + jobType + ', ID: ' + jobId + ' jobDir- ' + jobDir + ', pgmpath: '+ pgmpath + ' pgm: ' + pgm)
                   logger.info('executing: ' + pgm + ' in: ' + pgmpath)
                   let path = process.env['PATH'] + ':/apps/n/bin'
+                  logger.info('PATH: ' + path)
                   let localEnv = {'PYTHONPATH': pathModule.join(cwd, '../src/jobs/lib'), 'NODE_PATH': '/apps/nanomine/rest/node_modules', 'PATH': path}
                   _.merge(localEnv, process.env)
                   logger.debug(func + ' - running job ' + jobId + ' with env path = ' + localEnv['PATH'] +
@@ -3258,16 +3230,11 @@ function jobSubmit (jobId, jobType, userToken) {
                     'cwd': pgmpath,
                     'env': localEnv
                   })
+                  logger.info('CHLID: ' + child)
                   jobPid = child.pid
                   updateJobStatus(jobDir, {'status': 'submitted', 'pid': jobPid})
                   child.stdout.on('data', (data) => {
-                    // for the websocket
-                    // var contents = data.toString();
-                    // contentsArray = contents.split('|');
-                    // if (contentsArray[0] == 'results') {
-                    //   io.to(currentJobs[jobId].emit('finished', contentsArray[1]))
-                    // }
-                    logger.info('job ' + jobId + ' o: ' + data)
+                    // logger.info('job ' + jobId + ' o: ' + data)
                   })
                   child.stderr.on('data', (data) => {
                     logger.error('job ' + jobId + ' e: ' + data)
@@ -3277,10 +3244,12 @@ function jobSubmit (jobId, jobType, userToken) {
                     updateJobStatus(jobDir, {'status': 'failed to execute', 'error': err})
                   })
                   child.on('close', (data) => {
+                    emitResults(jobId, jobId)
                     logger.info('job ' + jobId + ' exited with code: ' + data)
                     updateJobStatus(jobDir, {'status': 'completed', 'rc': data})
                   })
                   child.on('exit', (data) => {
+                    emitResults(jobId, jobId)
                     logger.info('job ' + jobId + ' exited with code: ' + data)
                     updateJobStatus(jobDir, {'status': 'completed', 'rc': data})
                   })
@@ -3894,48 +3863,68 @@ function postSparql2 (callerpath, query, req, res, cb) {
 //   })
 // })
 
-// function configureLogger () { // logger is not properly configured yet. This config is for an earlier version of Winston
-//   let logger = winston.createLogger({ // need to adjust to the new 3.x version - https://www.npmjs.com/package/winston#formats
-//     transports: [
-//       new (winston.transports.File)({
-//         levels: {error: 0, warn: 1, info: 2, verbose: 3, debug: 4, trace: 5},
-//         level: config.loglevel,
-//         timestamps: true,
-//         // zippedArchive: true,
-//         filename: config.logfilename,
-//         maxfiles: config.maxlogfiles,
-//         maxsize: config.maxlogfilesize,
-//         json: false,
-//         formatter: function (data) {
-//           let dt = moment().format('YYYYMMDDHHmmss')
-//           return (dt + ' ' + data.level + ' ' + data.message)
-//         }
-//       })
-//     ]
-//   })
-//   return logger
-// }
-function configureLogger () { // logger is not properly configured yet. This config is for an earlier version of Winston
-  let logger = createLogger({ // need to adjust to the new 3.x version - https://www.npmjs.com/package/winston#formats
-    levels: {error: 0, warn: 1, info: 2, verbose: 3, debug: 4, trace: 5},
-    format: combine(
-      label({label: 'nm-rest'}),
-      prettyPrint(),
-      logFormat
-    ),
-    transports: [
-      new (transports.File)({
-        level: config.loglevel,
-        filename: config.logfilename,
-        maxfiles: config.maxlogfiles,
-        maxsize: config.maxlogfilesize
-      })
-    ]
-  })
-  return logger
-}
 
-app.listen(3000)
+/** Re-write rule for starting rest-app should mongo connection fail => (06-19-2020) 
+ * Start server after mongodb connection is verified. Wait for the database connection to establish, then start the app.
+*/
+initialize.init(mongoose.connection,
+  {logger,submitCurator,submitGenerateSeoFiles},
+  {nmAutostartCurator,nmAuthSystemUserId}
+)
+
+// let dbUri = process.env['NM_MONGO_URI']
+
+// mongoose
+//   .connect(
+//     dbUri, {useNewUrlParser: true, keepAlive: true, keepAliveInitialDelay: 300000, useUnifiedTopology: true, reconnectTries: 2, reconnectInterval: 500}
+//   ).catch(err => logger.error('db error: ' + err))
+
+// const server = app.listen(3000)
+// let socketConnections = {}
+// const io = require('socket.io')(server)
+
+// io.on('connection', socket => {
+//   socket.on('testConnection', () => {
+//     socket.emit('hello', 'connection received')
+//   })
+//   socket.on('newJob', jobId => {
+//     socketConnections[jobId] = socket.id
+//     socket.emit('hello', 'socket has received jobId.')
+//   })
+// })
+
+// function emitResults (jobId, data) {
+//   logger.info('emitting results of MCR JOB: ' + data)
+//   io.to(socketConnections[jobId]).emit('finished', data)
+// }
+
+let dbUri = process.env['NM_MONGO_URI']
+let socketConnections = {}
+let io = undefined
+mongoose
+  .connect(
+    dbUri, {useNewUrlParser: true, keepAlive: true, keepAliveInitialDelay: 300000, useUnifiedTopology: true, reconnectTries: 2, reconnectInterval: 500}
+  ).then(result => {
+    const server = app.listen(3000);
+    io = require('./rest-initializer/socket').init(server);
+    io.on('connection', socket => {
+      logger.info('checking socket')
+
+      socket.on('testConnection', () => {
+        socket.emit('hello', 'connection received')
+      })
+
+      socket.on('newJob', jobId => {
+        socketConnections[jobId] = socket.id
+        socket.emit('hello', 'socket has received jobId.')
+      })
+    })
+  }).catch(err => logger.error('db error: ' + err))
+
+function emitResults (jobId, data) {
+  logger.info('emitting results of MCR JOB: ' + data)
+  io.to(socketConnections[jobId]).emit('finished', data)
+}
 
 /*
 prefix dataset: <https://hbgd.tw.rpi.edu/dataset/>
@@ -3962,29 +3951,24 @@ prefix lang: <http://nanomine.tw.rpi.edu/language/>
 prefix void: <http://rdfs.org/ns/void#>
 prefix dcat: <http://www.w3.org/ns/dcat#>
 prefix xsd: <http://www.w3.org/2001/XMLSchema#>
-
 select *
 where {
  ?p ?s ?o. FILTER regex(?o,".*png.*","i")
 }
-
 select *
 where {
   ?p ?s ?o FILTER ( strstarts(str(?p), "http://nanomine.tw.rpi.edu/unit/") )
 }
-
 SELECT * WHERE {
   ?s ?p ?o
   FILTER( regex(str(?p), "^(?http://nanomine.tw.rpi.edu/entry/).+"))
 }
 https://stackoverflow.com/questions/24180387/filtering-based-on-a-uri-in-sparql
 https://stackoverflow.com/questions/19044871/exclude-results-from-dbpedia-sparql-query-based-on-uri-prefix
-
 prefix sio: <http://semanticscience.org/resource/>
 prefix ns: <http://nanomine.tw.rpi.edu/ns/>
 prefix np: <http://www.nanopub.org/nschema#>
 prefix dcterms: <http://purl.org/dc/terms/>
-
 select distinct ?sample ?x ?y ?xUnit ?yUnit ?matrixPolymer ?fillerPolymer ?fillerProperty ?fillerPropertyValue ?fillerPropertyUnit ?doi ?title
 where {
   ?nanopub np:hasAssertion ?ag.
@@ -4014,7 +3998,6 @@ where {
     ?doi dcterms:title ?title.
   }
 }
-
 -- simplest sparql to get sample id (#1) -- effectively gets all samples
 prefix sio:<http://semanticscience.org/resource/>
 prefix ns:<http://nanomine.tw.rpi.edu/ns/>
@@ -4027,7 +4010,6 @@ where {
       ?ac <http://www.w3.org/ns/prov#specializationOf> ?sample.
   }
 }
-
 -- this adds journal name and title to sample id in #1 above (#2)
 prefix ns:<http://nanomine.tw.rpi.edu/ns/>
 prefix np: <http://www.nanopub.org/nschema#>
@@ -4044,7 +4026,6 @@ where {
      ?doi dcterms:title ?title.
   }
 }
-
 --- #1 and #2 above can be extended to this (#3)
 prefix sio:<http://semanticscience.org/resource/>
 prefix ns:<http://nanomine.tw.rpi.edu/ns/>
@@ -4067,7 +4048,6 @@ where {
      ?doi dcterms:title ?title.
   }
 }
-
 ---- Interesting one that looks for nanopubs and returns the trees (for ~ 320 samples this result is ~ 240,000 triples)
 prefix sio:<http://semanticscience.org/resource/>
 prefix ns:<http://nanomine.tw.rpi.edu/ns/>
@@ -4080,7 +4060,6 @@ where {
     ?s ?p ?o.
   }
 }
-
 --query to retire nanopubs
 select ?np ?assertion ?provenance ?pubinfo where {
     hint:Query hint:optimizer "Runtime" .
@@ -4089,7 +4068,6 @@ select ?np ?assertion ?provenance ?pubinfo where {
         np:hasPublicationInfo ?pubinfo;
         np:hasProvenance ?provenance.
 }
-
 --This returns sample names along with a few other things (the others look like a punt)
 --    ex: correct -
 --       http://nanomine.tw.rpi.edu/sample/l217-s4-ash-2002
@@ -4103,7 +4081,6 @@ select distinct ?nanopub
 where {
   ?nanopub a <http://nanomine.tw.rpi.edu/ns/PolymerNanocomposite>.
 }
-
 -- Select nanopubs of type #File that are Xmls
 prefix sio:<http://semanticscience.org/resource/>
 prefix ns:<http://nanomine.tw.rpi.edu/ns/>
@@ -4114,9 +4091,7 @@ where {
   ?file a <http://purl.org/net/provenance/ns#File>.
   ?nanopub a <https://www.iana.org/assignments/media-types/text/xml>
 }
-
 -- Ontology based queries
-
 SELECT DISTINCT ?count ?value ?unit
  WHERE {
    SELECT DISTINCT ?count ?value ?unit {
@@ -4128,7 +4103,6 @@ SELECT DISTINCT ?count ?value ?unit
          ?id <http://semanticscience.org/resource/hasComponentPart>/<http://semanticscience.org/resource/isSurroundedBy>/<http://semanticscience.org/resource/hasAttribute>/rdf:type ?value .
          ?id <http://semanticscience.org/resource/hasComponentPart>/<http://semanticscience.org/resource/isSurroundedBy> ?surfacePart. ?surfacePart <http://semanticscience.org/resource/hasRole> [ a <http://nanomine.org/ns/SurfaceTreatment>]. ?surfacePart <http://semanticscience.org/resource/hasAttribute>/rdf:type ?value.
          optional { ?id <http://semanticscience.org/resource/hasComponentPart>/<http://semanticscience.org/resource/isSurroundedBy>/<http://semanticscience.org/resource/hasAttribute>/<http://semanticscience.org/resource/hasUnit> ?unit. }
-
          ?id rdf:type/rdfs:subClassOf* <http://nanomine.org/ns/PolymerNanocomposite>.
          FILTER (!ISBLANK(?id))
          FILTER ( !strstarts(str(?id), "bnode:") )
@@ -4137,11 +4111,9 @@ SELECT DISTINCT ?count ?value ?unit
      FILTER(BOUND(?value))
    }
  }
-
  --- ingested count
  SELECT DISTINCT (count(distinct ?id) as ?count)
  WHERE {
          ?id rdf:type/rdfs:subClassOf* <http://nanomine.org/ns/PolymerNanocomposite>.
    }
-
 */

@@ -46,7 +46,8 @@ export default {
 
         submit: {
           submitButtonTitle: 'Binarize',
-          submitJobTitle: 'otsu'
+          submitJobTitle: 'otsu',
+          submitJobType: 'otsu'
         },
 
         uploadOptions: [
@@ -63,6 +64,10 @@ export default {
             description: 'Submit a ZIP file containing multiple images (supported formats: .jpg, .tif, .png) of same size (in pixels). DO NOT ZIP the folder containing images; select all images and ZIP them directly.'
           }
         ],
+
+        acceptableFileTypes: '.jpg, .png, .tif, .zip, .mat',
+
+        useWebsocket: true,
 
         references: [
           'N. Otsu, A threshold selection method from gray-level histograms, IEEE transactions on systems, man, and cybernetics, vol. 9, no. 1, pp. 62-66, 1979.'

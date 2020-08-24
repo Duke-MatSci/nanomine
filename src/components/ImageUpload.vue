@@ -18,7 +18,7 @@
     <!-- file upload button -->
     <p class="text-xs-left fileButtonWrapper">
       <v-btn class="text-xs-left fileButton" color="primary" @click='$refs.myUpload.click()'>Browse files</v-btn>
-      <input type="file" style="display: none" accept=".jpg, .png, .tif, .mat, .zip" ref="myUpload" @change="uploadFiles">
+      <input type="file" style="display: none" :accept="acceptFileTypes" ref="myUpload" @change="uploadFiles">
     </p>
 
     <!-- error alert if phase becomes invalid after cropping -->
@@ -66,13 +66,26 @@
 
       <div class='selectDropdownsWrapper'>
         <div class='singleSelectDropdown' v-for="(select, index) in selects" :key='index'>
-          <v-select
-            outline
-            :label="select.title"
-            :items="select.options"
-            v-model="selectedOptions[select.submitJobTitle]"
-            v-on:change="$emit('setSelectors', selectedOptions)"
-          ></v-select>
+
+          <div v-if="'options' in select">
+            <v-select
+              outline
+              :label="select.title"
+              :items="select.options"
+              v-model="selectedOptions[select.submitJobTitle]"
+              v-on:change="$emit('set-selectors', selectedOptions)"
+            ></v-select>
+          </div>
+
+          <div v-else>
+            <v-text-field
+              outline
+              :label="select.title"
+              v-model="selectedOptions[select.submitJobTitle]"
+              @change="$emit('set-selectors', selectedOptions)"
+            ></v-text-field>
+          </div>
+
         </div>
       </div>
 
@@ -144,7 +157,8 @@ export default {
   props: {
     aspectRatio: String,
     selects: Object,
-    collectDimensions: Boolean
+    collectDimensions: Boolean,
+    acceptFileTypes: String
   },
 
   data () {
@@ -205,14 +219,14 @@ export default {
       if ('dimensions' in vm.selectedOptions) {
         vm.selectedOptions['dimensions'] = {'units': vm.inputtedDimensions.units, 'width': parseInt(vm.inputtedDimensions.width), 'height': parseInt(vm.inputtedDimensions.height)}
       }
-      vm.$emit('setSelectors', vm.selectedOptions)
+      vm.$emit('set-selectors', vm.selectedOptions)
 
       const fr = new FileReader()
       fr.readAsDataURL(inputFile)
       fr.addEventListener('load', async () => {
         // get file information
         vm.submissionFile = {
-          name: inputFile.name,
+          name: inputFile.name.toLowerCase(),
           url: fr.result,
           fileType: inputFile.name.split('.').pop().toLowerCase()
         }
@@ -224,11 +238,12 @@ export default {
         if (vm.submissionFile.fileType === 'zip') {
           vm.unzipUploadedFiles(inputFile) // function unzips contents, sets editable status and gets image dimensions
         } else {
+          var lowerCaseName = inputFile.name.toLowerCase()
           vm.displayedFiles = [{
-            name: inputFile.name,
-            originalName: inputFile.name,
+            name: lowerCaseName,
+            originalName: lowerCaseName,
             url: fr.result,
-            fileType: inputFile.name.split('.').pop().toLowerCase(),
+            fileType: lowerCaseName.split('.').pop(),
             size: { width: 0, height: 0, units: null },
             pixelSize: { width: 0, height: 0 },
             phase: { x_offset: 0, y_offset: 0 },
@@ -269,10 +284,11 @@ export default {
           Object.keys(zip.files).forEach(function (filename) {
             zip.files[filename].async('base64')
               .then(function (fileData) {
-                var filetype = filename.split('.').pop().toLowerCase()
+                var lowerCaseName = filename.toLowerCase()
+                var filetype = lowerCaseName.split('.').pop()
                 vm.displayedFiles.push({
-                  name: filename,
-                  originalName: filename,
+                  name: lowerCaseName,
+                  originalName: lowerCaseName,
                   url: 'data:image/' + filetype + ';base64,' + fileData,
                   fileType: filetype,
                   size: { width: 0, height: 0, units: null },
@@ -314,7 +330,7 @@ export default {
       } else {
         this.selectedOptions['dimensions'] = {'units': this.inputtedDimensions.units, 'width': parseInt(this.inputtedDimensions.width), 'height': parseInt(this.inputtedDimensions.height)}
       }
-      this.$emit('setSelectors', this.selectedOptions)
+      this.$emit('set-selectors', this.selectedOptions)
     },
 
     // scale user inputted dimensions by how much user has cropped the images
@@ -351,7 +367,7 @@ export default {
         this.selectedOptions['phase'] = {}
         this.selectedOptions.phase[this.displayedFiles[index].originalName] = this.displayedFiles[index].phase
       }
-      this.$emit('setSelectors', this.selectedOptions)
+      this.$emit('set-selectors', this.selectedOptions)
     },
 
     // args: [cropped image, filename of cropped image, coordinates]

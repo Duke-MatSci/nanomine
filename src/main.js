@@ -18,13 +18,15 @@ import TreeView from 'vue-json-tree-view'
 import vPlayBack from 'v-playback'
 import VideoLink from '@/components/VideoLink'
 import DatasetCreateOrSelect from '@/components/DatasetCreateOrSelect'
+import VueSocketIO from 'vue-socket.io'
+import SocketIO from 'socket.io-client'
 
 Vue.use(TreeView)
 Vue.use(vPlayBack)
 Vue.use(VueGoogleCharts)
 
 Vue.config.productionTip = false
-Vue.config.devtools = true
+// Vue.config.devtools = true
 
 Vue.use(Vuex)
 Vue.use(Vuetify, {
@@ -38,6 +40,11 @@ Vue.use(Vuetify, {
     success: '#4caf50'
   }
 })
+
+Vue.use(new VueSocketIO({
+  // debug: true,
+  connection: SocketIO({path: '/nmr/socket.io', port: 3000})
+}))
 
 Vue.component('page-header', Header)
 Vue.component('page-subheader', SubHeader)

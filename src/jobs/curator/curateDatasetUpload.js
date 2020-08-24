@@ -136,11 +136,8 @@ connected
     let fsfilesSchema = require(schemaPath + '/fsfiles')(mongoose)
     FsFiles = mongoose.model('api', fsfilesSchema)
 
-    xmlDataSchema = require(schemaPath + '/xmldata')(mongoose)
-    XmlData = mongoose.model('xmlData', xmlDataSchema)
-
-    xsdSchema = require(schemaPath + '/xsd')(mongoose)
-    XsdSchema = mongoose.model('xsdData', xsdSchema)
+    XmlData = require('../../../rest/modules/mongo/schema/xmldata')
+    XsdSchema = require('../../../rest/modules/mongo/schema/xsd')
 
     xsdVersionSchema = require(schemaPath + '/xsdVersion')(mongoose)
     XsdVersionSchema = mongoose.model('xsdVersionData', xsdVersionSchema)

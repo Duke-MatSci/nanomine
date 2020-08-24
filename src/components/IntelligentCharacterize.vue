@@ -73,6 +73,10 @@ export default {
           }
         ],
 
+        acceptableFileTypes: '.jpg, .png, .tif, .zip, .mat',
+
+        useWebsocket: false,
+
         references: [
           'Bostanabad, R. et al., 2018. Computational microstructure characterization and reconstruction: Review of the state-of-the-art techniques. Progress in Materials Science, 95, pp. 1-41.'
         ]

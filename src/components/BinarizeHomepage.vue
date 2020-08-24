@@ -32,10 +32,8 @@
               <h2> Niblack's Method </h2>
               <p> Niblack's method is an adaptive thresholding algorithm which calculates a pixel-wise threshold by sliding a rectangular window over the image.
                   It works well for gray-level images with low contrast between filler and matrix material.
-              </p><h3>Under Construction. Not currently available.</h3>
-              <!--router-link to="/Niblack">
-              Use Niblack Binarization Webtool
-              </router-link-->
+              </p>
+              <router-link to="/Niblack">Use Niblack Binarization Webtool</router-link>
             </div>
         </v-flex>
       </v-layout>

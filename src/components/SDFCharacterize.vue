@@ -63,6 +63,10 @@ export default {
           }
         ],
 
+        acceptableFileTypes: '.jpg, .png, .tif, .zip, .mat',
+
+        useWebsocket: false,
+
         references: [
           'Ghumman, U.F., Iyer, A., Dulal, R., Munshi, J., Wang, A., Chien, T., Balasubramanian, G., and Chen, W., A Spectral Density Function Approach for Active Layer Design of Organic Photovoltaic Cells, Journal of Mechanical Design, Special Issue on Design of Engineered Materials and Structures, accepted July 2018. doi:10.1115/1.4040912.',
           'Yu, S., Zhang, Y., Wang, C., Lee, W.K., Dong, B., Odom, T.W., Sun, C. and Chen, W., 2017. Characterization and design of functional quasi-random nanostructured materials using spectral density function. Journal of Mechanical Design, 139(7), p.071401.',

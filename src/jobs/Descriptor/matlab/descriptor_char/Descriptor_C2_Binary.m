@@ -39,7 +39,7 @@ if input_type ~= 2
     %Umar commented out
     
     %% writing input file
-        if str2num(input_type)==1
+        if input_type==1
             if length(size(img)) > 2
                 imwrite(img(:,:,1:3),[path_to_write,'/','Input1.jpg'])
                 

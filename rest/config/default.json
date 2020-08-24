@@ -95,6 +95,12 @@
         "lang": "python",
         "pgmdir": "../src/jobs/Dynamfit",
         "pgmname": "run_dynamfit.py"
+      },
+      {
+        "jobtype": "niblack",
+        "lang": "python",
+        "pgmdir": "../src/jobs/niblack",
+        "pgmname": "run_niblack.py"
       }
     ]
   }

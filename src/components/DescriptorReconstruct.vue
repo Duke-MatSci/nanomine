@@ -69,6 +69,10 @@ export default {
           }
         ],
 
+        acceptableFileTypes: '.jpg, .png, .tif, .zip, .mat',
+
+        useWebsocket: false,
+
         results: [
           'The results will include 3D reconstructed image (Input_3D_recon.mat), a list of coordinates of cluster (white phase) centroids in "Input_3D_recon_center_list.mat", the input image and a random 2D cross-section (Slice.jpg) from the 3D reconstructed image. Additionally, a plot (Autocorrelation_comparison.jpg) comparing the autocorrelation of input image with 10 randomly chosen 2D slices from reconstruction is provided to validate the accuracy of reconstruction.'
         ],

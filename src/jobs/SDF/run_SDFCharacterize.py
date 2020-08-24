@@ -69,7 +69,7 @@ for f in myfiles:
 matlabPgm = 'SDFCharacterize' # .m is implied, test mode will use python pgm
 mlab = matlab(logging) # create matlab object
 
-matlabPgmParams = (input_type,input_name, ImageDimensions, PhaseInfo)
+matlabPgmParams = (input_type,input_name,PhaseInfo)
 
 rc = mlab.run(userId, jobId, jobType, jobSrcDir, jobDir, webBaseUri, jobDataUriSuffix, matlabPgm, matlabPgmParams)
 print('MATLAB return code - rc: ' + str(rc))
