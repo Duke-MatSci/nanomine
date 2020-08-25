@@ -1,4 +1,4 @@
-function DescriptorCharacterize(userId, jobId, jobType, jobSrcDir, jobDir, webBaseUri,input_type,file_name,phase_cords)
+function DescriptorCharacterize(userId, jobId, jobType, jobSrcDir, jobDir, webBaseUri,input_type,file_name,phase_cords,conversion_factor)
 
 %%% Input Types %%
 % 1 : Single JPEG Image
@@ -19,6 +19,7 @@ try
     %% Specify import function according to input option
     %% Specify import function according to input option
    condition=1; % for phase selection
+   conversion_factor=str2num(conversion_factor);
     switch str2num(input_type)
         case 1
             img = imread([path_to_read,file_name]); % read the incming target and store pixel values
@@ -52,7 +53,7 @@ try
 
     %%  run characterization algorithm
     addpath('./descriptor_char'); % add path of directory holding MAIN.m
-    er=Descriptor_C2_Binary(img,path_to_write,str2num(input_type),condition); %
+    er=Descriptor_C2_Binary(img,path_to_write,str2num(input_type),condition,conversion_factor); %
     if er==1
         writeError([path_to_write, '/errors.txt'], ['Some of the files in zip folder were not accessible ']);
         rc = 99;
