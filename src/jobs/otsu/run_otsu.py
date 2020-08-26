@@ -40,9 +40,9 @@ userId = str(inputParameters['user'])
 PhaseInfo = inputParameters['phase']
 sentInJobType = inputParameters['jobtype']
 useWebsocket = inputParameters['useWebsocket']
-WindowSize = 3
-KValue = -0.2
-OffsetValue = 0
+WindowSize = "3"
+KValue = "-0.2"
+OffsetValue = "0"
 
 if 'WindowSize' in inputParameters.values():
   WindowSize = inputParameters['WindowSize']
