@@ -44,13 +44,13 @@ WindowSize = "3"
 KValue = "-0.2"
 OffsetValue = "0"
 
-if 'WindowSize' in inputParameters.values():
+if 'WindowSize' in inputParameters:
   WindowSize = str(inputParameters['WindowSize'])
 
-if 'KNiblack' in inputParameters.values():
+if 'KNiblack' in inputParameters:
   KValue = str(inputParameters['KNiblack'])
 
-if 'OffsetNiblack' in inputParameters.values():
+if 'OffsetNiblack' in inputParameters:
   OffsetValue = str(inputParameters['OffsetNiblack'])
 
 jobSrcDir = os.getcwd()
