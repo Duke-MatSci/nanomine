@@ -45,13 +45,13 @@ KValue = "-0.2"
 OffsetValue = "0"
 
 if 'WindowSize' in inputParameters.values():
-  WindowSize = inputParameters['WindowSize']
+  WindowSize = str(inputParameters['WindowSize'])
 
 if 'KNiblack' in inputParameters.values():
-  KValue = inputParameters['KNiblack']
+  KValue = str(inputParameters['KNiblack'])
 
 if 'OffsetNiblack' in inputParameters.values():
-  OffsetValue = inputParameters['OffsetNiblack']
+  OffsetValue = str(inputParameters['OffsetNiblack'])
 
 jobSrcDir = os.getcwd()
 webBaseUri = os.environ['NM_WEB_BASE_URI']
