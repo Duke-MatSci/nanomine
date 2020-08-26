@@ -21,10 +21,10 @@
 
 
 
-function niblack(userId, jobId, jobType, jobSrcDir, jobDir, webBaseUri,input_type,file_name,window)
+function niblack(userId, jobId, jobType, jobSrcDir, jobDir, webBaseUri,input_type,file_name,window, k, offset)
 
-    k = -0.2;
-    offset = 0;
+    k = str2num(k)
+    offset = str2num(offset)
     padding = 'replicate';
     window = [str2num(window) str2num(window)]
 

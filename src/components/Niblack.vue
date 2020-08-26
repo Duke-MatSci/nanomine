@@ -37,6 +37,9 @@ export default {
         pageTitle: 'Binarization - Niblack Method',
 
         description: [
+          'Explanation of parameters: Niblack is a local thresholhding method which involves computing for each pixel in the grayscale image the mean and standard devation of the colors of the neighboring pixels in an area (WINDOW SIZE) of predefined size.',
+          'K is an image dependent manually selected parameter (generally, the value is -0.2 for dark foreground and +0.2 for dark background).',
+          'Offset is an offset value that is applied when computing the mean and standard deviation for threshold values for pixels in an image (to separate foreground and background pixels.) Most of the time, the offset value can be 0.',
           'Upload a grayscale micrograph image in .jpg/.png/.tif format and click "Binarize" to perform dynamic niblack binarization. A default window size of 5 pixels (i.e. 5 x 5 pixel window) will be used.',
           'After binarization is complete, this page will be updated to show the results. You can change window size and retry binarization until you get satisfactory result.'
         ],
@@ -75,6 +78,14 @@ export default {
           {
             title: 'Window Size',
             submitJobTitle: 'WindowSize',
+          },
+          {
+            title: 'K (Optional)',
+            submitJobTitle: 'KNiblack'
+          },
+          {
+            title: 'Offset (Optional)',
+            submitJobTitle: 'OffsetNiblack'
           }
         ]
 

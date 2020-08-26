@@ -41,8 +41,17 @@ PhaseInfo = inputParameters['phase']
 sentInJobType = inputParameters['jobtype']
 useWebsocket = inputParameters['useWebsocket']
 WindowSize = 3
-if sentInJobType == 'niblack':
+KValue = -0.2
+OffsetValue = 0
+
+if 'WindowSize' in inputParameters.values():
   WindowSize = inputParameters['WindowSize']
+
+if 'KNiblack' in inputParameters.values():
+  KValue = inputParameters['KNiblack']
+
+if 'OffsetNiblack' in inputParameters.values():
+  OffsetValue = inputParameters['OffsetNiblack']
 
 jobSrcDir = os.getcwd()
 webBaseUri = os.environ['NM_WEB_BASE_URI']
@@ -77,7 +86,7 @@ mlab = matlab(logging) # create matlab object
 matlabPgmParams = (input_type,input_name)
 
 if sentInJobType == 'niblack':
-  matlabPgmParams = (input_type, input_name, WindowSize)
+  matlabPgmParams = (input_type, input_name, WindowSize, KValue, OffsetValue)
 
 rc = mlab.run(userId, jobId, jobType, jobSrcDir, jobDir, webBaseUri, jobDataUriSuffix, matlabPgm, matlabPgmParams)
 print('MATLAB return code - rc: ' + str(rc))
