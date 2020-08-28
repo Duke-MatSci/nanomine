@@ -25,7 +25,11 @@ try
                 if length(size(img)) > 1
             phase_cords = split(phase_cords, '*');
             phase_cords = [str2num(phase_cords{1}) str2num(phase_cords{2})];
-            [condition]=check_phase(img,phase_cords); % if 0 image needs to be inverted
+            if phase_cords(1)==0 & phase_cords(2) == 0
+                condition=1;
+            else
+                [condition]=check_phase(img,phase_cords); % if 0 image needs to be inverted
+            end
            
             else
                 writeError([path_to_write, '/errors.txt'], ['failed to read image file: ', file_name]);
@@ -137,7 +141,7 @@ try
         plot(0:1:length(S2_all(:,i))-1, S2_all(:,i) , 'LineWidth',2.5);
         if i==1
             legendInfo{i} = 'Input Image';
-            if input_type == 2
+            if str2num(input_type) == 2
                 legendInfo{i} = 'Mean of Input Images';
             end
         else
