@@ -50,6 +50,7 @@ function niblack(userId, jobId, jobType, jobSrcDir, jobDir, webBaseUri,input_typ
                     k=load(path);
                     [no_need,f_name,ext]=fileparts(file_name);
                     img = getfield(k,f_name);
+                    imwrite(img,[path_to_write,'/','Input1.jpg']);
             end
         catch ex
             rc = 98;
