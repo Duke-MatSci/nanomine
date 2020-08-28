@@ -28,7 +28,7 @@
     <v-alert class='alert' type='info' dismissible v-model="fileTypeAlert">Note: due to browser limitations, image editing functionality and pulling data about image dimensions is not available for mat and tif file types. But, these file types can still be submitted for jobs.</v-alert>
 
     <!-- image dimension input section -->
-    <div v-if="fileUploaded && collectDimensions">
+    <div v-if="fileUploaded && collectDimensions && filesEditable">
 
       <h4 class='subheader' >Image Dimensions</h4>
 
