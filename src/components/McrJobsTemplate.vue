@@ -354,8 +354,11 @@ export default {
     },
 
     dimensionToString: function (dimensionObj) {
+      if ('ratio' in dimensionObj === false) {
+        return '0'
+      }
       if (dimensionObj['ratio'] === null) {
-        return null
+        return '0'
       }
       return dimensionObj['ratio'].toString()
       // return dimensionObj['width'] + '*' + dimensionObj['height'] + '*' + dimensionObj['units']
