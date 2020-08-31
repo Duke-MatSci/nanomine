@@ -29,7 +29,11 @@ try
             if length(size(img)) > 1
             phase_cords = split(phase_cords, '*');
             phase_cords = [str2num(phase_cords{1}) str2num(phase_cords{2})];
-            [condition]=check_phase(img,phase_cords); % if 0 image needs to be inverted
+            if phase_cords(1)==0 & phase_cords(2) == 0
+                condition=1;
+            else
+                [condition]=check_phase(img,phase_cords); % if 0 image needs to be inverted
+            end
             else
                 writeError([path_to_write, '/errors.txt'], ['failed to read image file: ', file_name]);
                 rc = 97

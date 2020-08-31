@@ -1,4 +1,4 @@
-function[er]= Descriptor_C2_Binary(img,path_to_write,input_type,condition)
+function[er]= Descriptor_C2_Binary(img,path_to_write,input_type,condition,conversion_factor)
 
 
 % Descriptor-based characterization of the BINARY size microstructure image
@@ -67,6 +67,12 @@ if input_type ~= 2
     std_nd = std(nd);
     std_asp = std(Els);
     mean_area = mean(areas);
+    %% Converting as per the physical units
+    mean_nd=mean_nd*conversion_factor;
+    mean_area=mean_area*conversion_factor;
+    rc_mean=rc_mean*conversion_factor;
+    intph=intph*conversion_factor;
+    areas=areas*conversion_factor;
     %% convert variables to tables
     Num_Clusters = array2table(N); Num_Clusters.Properties.VariableNames = {'Num_of_Clusters'};
     VF = array2table(vf); VF.Properties.VariableNames = {'Volume_Fraction'};
