@@ -28,7 +28,7 @@
     <v-alert class='alert' type='info' dismissible v-model="fileTypeAlert">Note: due to browser limitations, image editing functionality and pulling data about image dimensions is not available for mat and tif file types. But, these file types can still be submitted for jobs.</v-alert>
 
     <!-- image dimension input section -->
-    <div v-if="fileUploaded && collectDimensions">
+    <div v-if="fileUploaded && collectDimensions && filesEditable">
 
       <h4 class='subheader' >Image Dimensions</h4>
 
@@ -217,7 +217,7 @@ export default {
       vm.filesEditable = true
       if ('phase' in vm.selectedOptions) { delete vm.selectedOptions.phase }
       if ('dimensions' in vm.selectedOptions) {
-        vm.selectedOptions['dimensions'] = {'units': vm.inputtedDimensions.units, 'width': parseInt(vm.inputtedDimensions.width), 'height': parseInt(vm.inputtedDimensions.height)}
+        vm.selectedOptions['dimensions'] = {'units': vm.inputtedDimensions.units, 'width': parseInt(vm.inputtedDimensions.width), 'height': parseInt(vm.inputtedDimensions.height), 'ratio': null}
       }
       vm.$emit('set-selectors', vm.selectedOptions)
 
@@ -326,9 +326,19 @@ export default {
     // emit image dimensions data back to parent
     pushImageDimensions: function () {
       if (this.displayableFileType(0) === true) {
-        this.selectedOptions['dimensions'] = {'units': this.inputtedDimensions.units, 'width': this.displayedFiles[0].size.width, 'height': this.displayedFiles[0].size.height}
+        var ratio = this.displayedFiles[0].size.width / this.displayedFiles[0].pixelSize.width
+
+        if (this.inputtedDimensions.units === 'nanometers (nm)') {
+          ratio = ratio / 1000000000
+        } else if (this.inputtedDimensions.units === 'micrometers (µM)') {
+          ratio = ratio / 1000000
+        } else if (this.inputtedDimensions.units === 'millimeters (mm)') {
+          ratio = ratio / 1000
+        }
+
+        this.selectedOptions['dimensions'] = {'units': this.inputtedDimensions.units, 'width': this.displayedFiles[0].size.width, 'height': this.displayedFiles[0].size.height, 'ratio': ratio}
       } else {
-        this.selectedOptions['dimensions'] = {'units': this.inputtedDimensions.units, 'width': parseInt(this.inputtedDimensions.width), 'height': parseInt(this.inputtedDimensions.height)}
+        this.selectedOptions['dimensions'] = {'units': this.inputtedDimensions.units, 'width': parseInt(this.inputtedDimensions.width), 'height': parseInt(this.inputtedDimensions.height), 'ratio': null}
       }
       this.$emit('set-selectors', this.selectedOptions)
     },
