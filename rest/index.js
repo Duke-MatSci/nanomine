@@ -47,6 +47,8 @@ const sortSchemas = nanomineUtils.sortSchemas
 const centralLogger = require('./middlewares/logger')
 /** Import for Chart Visualization */
 const chartRoutes = require('./routes/chartBackup')
+/** Import for API Route Controller */
+const apiRoutes = require('./routes/apiAccess')
 /** Import Rest Initializer */
 const initialize = require('./rest-initializer')
 
@@ -207,6 +209,11 @@ app.use('/chart', (req, res, next) => {
   req.logger = logger;
   next();
 }, chartRoutes)
+
+app.use('/api', (req, res, next) => {
+  req.logger = logger;
+  next();
+}, apiRoutes)
 
 app.use('/files', express.static(nmWebFilesRoot, {
   dotfiles: 'ignore',
@@ -734,6 +741,10 @@ function handleLogin (req, res) {
       })
   })
 }
+
+app.get('/nmr', (req, res, next) => {
+  res.redirect('/nm')
+})
 
 app.get('/secure', function (req, res, next) {
   let func = '/secure handler'

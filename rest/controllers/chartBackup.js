@@ -2,6 +2,7 @@ const ChartBackup = require('../modules/mongo/schema/chartbkSchema');
 const AppList = require('../modules/mongo/schema/appListing');
 const ChartBkmk = require('../modules/mongo/schema/chartbookmarks');
 const User = require('../modules/mongo/schema/users');
+const ChartTag = require('../modules/mongo/schema/chartTag');
 
 const controllerFor = 'Visualization Gallery';
 exports.getUser = (req, res, next) => {
@@ -31,7 +32,8 @@ exports.getUserListing = async(req, res, next) => {
 exports.getChartBackup = async(req, res, next) => {
     const logger = req.logger;
     try {
-        const getChart = await ChartBackup.find({},{'_id':1, 'name':1, 'backup':1, 'creator':1, 'creatorref':1, 'enabled':1, 'restored': 1}).sort({bookmarked: -1})
+        const getChart = await ChartBackup.find({},{'_id':1, 'name':1, 'backup':1, 'creator':1, 'creatorref':1, 'enabled':1, 'restored': 1, 'tags':1})
+        .populate('tags', 'title description uri').sort({bookmarked: -1})
         res.status(201).json({
             charts: getChart
         })
@@ -58,6 +60,77 @@ exports.getChartBkmk = async(req, res, next) => {
             err.statusCode = 500;
         }
         logger.error('NM-Rest Chart Gallery Error (GET BOOKMARK): Server error, cannot retrieve bookmarks')
+        next(err);
+    }
+}
+
+exports.submitTag = async(req, res, next) => {
+    const logger = req.logger;
+    try {
+        const existingTag = await ChartTag.findOne({title: req.body.title})
+        if(!existingTag && req.body.uri){
+            const chartTag = new ChartTag({
+                title: req.body.title,
+                description: req.body.desc,
+                uri: req.body.uri
+            })
+            await chartTag.save()
+            res.status(201).json({
+                mssg: "Tag saved successfully!"
+            })
+        } else {
+            if(!req.body.uri){
+                res.status(201).json({
+                    mssg: existingTag ? existingTag : "No Tag"
+                })
+            } else {
+                existingTag.title = req.body.title,
+                existingTag.description = req.body.desc,
+                existingTag.uri = req.body.uri
+                existingTag.save()
+                res.status(201).json({
+                    mssg: "Tag Updated successfully!"
+                })
+            }
+        }
+    } catch(err) {
+        if(!err.statusCode){
+            err.statusCode = 500;
+        }
+        logger.error('NM-Rest Chart Gallery Error (SUBMIT TAG): Server error, cannot submit/retrieve tags')
+        next(err);
+    }
+}
+
+exports.getChartTag = async(req, res, next) => {
+    const logger = req.logger;
+    try {
+        const getTag = await ChartTag.find({},{'_id':1, 'title':1})
+        res.status(201).json({
+            tags: getTag
+        })
+        return;
+    } catch(err) {
+        if(!err.statusCode){
+            err.statusCode = 500;
+        }
+        logger.error('NM-Rest Chart Gallery Error (GET TAG): Server error, cannot retrieve chart tags')
+        next(err);
+    }
+}
+
+exports.resetChart = async(req, res, next) => {
+    const logger = req.logger;
+    try {
+        await ChartBackup.updateMany({restored: true}, { restored: false });
+        res.status(201).json({
+            mssg: "Reset completed successfully!"
+        })
+    } catch(err) {
+        if(!err.statusCode){
+            err.statusCode = 500;
+        }
+        logger.error('NM-Rest Chart Gallery Error (RESET CHART): Server error, cannot reset chart')
         next(err);
     }
 }
@@ -93,14 +166,25 @@ exports.createChartBackup = async(req, res, next) => {
         if(!blacklist){
             let check = await ChartBackup.findOne({name: named})
             if(!check){
-                await postChart.save();
+                const cB = await postChart.save();
+                if(req.body.tag && req.body.tag.length > 0){
+                    await req.body.tag.forEach(el => cB.tags.push(el))
+                    cB.save()
+                }
                 message = "Chart Created Successfully"
             } else {
                 check.name = req.body.name;
                 check.backup = parsedChart;
                 check.restored = req.body.restored;
                 check.enabled = req.body.enabled;
-                await check.save();
+                const cB = await check.save();
+                if(req.body.tag && req.body.tag.length > 0){
+                    if(cB.tags && cB.tags.length > 0){
+                        await cB.tags.splice(0, cB.tags.length)
+                    }
+                    await req.body.tag.forEach(el => cB.tags.push(el))
+                    cB.save()
+                }
                 message = "Chart Updated Successfully"
             }    
         } else {

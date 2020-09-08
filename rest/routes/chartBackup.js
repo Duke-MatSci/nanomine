@@ -16,6 +16,15 @@ router.post('/postcharts', middleware.check, middleware.getUser, chartBackupCont
 /** MANAGES CHART BOOKMARKS */
 router.post('/postchartbkmks', middleware.check, middleware.getUser, chartBackupController.bookmarkChartBackup)
 
+/** CREATE NEW CHART TAG */
+router.post('/submittag', middleware.check, middleware.getUser, chartBackupController.submitTag)
+
+/** RETREIVE CHART TAG */
+router.post('/gettag', middleware.check, middleware.getUser, chartBackupController.getChartTag)
+
+/** RESET RESTORE */
+router.post('/resetcharts', middleware.check, middleware.getUser, chartBackupController.resetChart)
+
 /** DELETE CHARTS */
 router.delete('/deletecharts', middleware.check, middleware.getUser, chartBackupController.deleteChartBackup)
 
