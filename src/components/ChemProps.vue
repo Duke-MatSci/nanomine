@@ -3,7 +3,7 @@
     <h1>ChemProps - A growing polymer name and filler name standardization database</h1>
     <v-container>
       <v-alert
-        v-model="loginRequired"
+        v-model="submitError"
         type="error"
         outline
       >
@@ -20,46 +20,68 @@
         <v-radio-group v-model="pfRadios">
           <v-radio label="Polymer" value="pol"></v-radio>
           <v-radio label="Filler" value="fil"></v-radio>
+          <v-radio label="Request API Access" value="apiAccess"></v-radio>
         </v-radio-group>
       </v-flex>
-      <p class="text-xs-left" v-if="pfRadios === 'pol'"><b>2. Input the searching terms. For the quick search, you can search by either chemical name, abbreviation, trade name, or SMILES. For the advanced search, you must input a chemical name.</b></p>
-      <p class="text-xs-left" v-if="pfRadios === 'fil'"><b>2. Input the searching terms. Note that you must input a chemical name.</b></p>
-      <v-flex xs12 sm6 md6>
-        <v-card v-if="pfRadios === 'pol'">
-          <p class="text-xs-left"><b>Quick Search (Filling this textbox will overwrite the advanced search)</b></p>
-          <v-text-field v-model="quicksearchkeyword" label='Enter the keyword:' outlined></v-text-field>
-        </v-card>
-        <v-card>
-        <p class="text-xs-left" v-if="pfRadios === 'pol'"><b>Advanced Search</b></p>
-          <v-text-field v-model="chemicalname" label='Enter the chemical name (required):' outlined></v-text-field>
-          <v-text-field v-model="abbreviation" label='Enter the abbreviation (optional):' outlined></v-text-field>
-          <v-text-field v-model="SMILES" label='Enter the SMILES (optional):' outlined v-if="pfRadios === 'pol'"></v-text-field>
-          <v-text-field v-model="tradename" label='Enter the tradename (optional):' outlined v-if="pfRadios === 'pol'"></v-text-field>
-        </v-card>
-      </v-flex>
-      <v-alert
-        v-model="searchError"
-        type="error"
-        dismissible
-      >
-        {{searchErrorMsg}}
-      </v-alert>
-      <v-btn v-on:click="search()" color="primary">Search</v-btn>
-      <v-flex xs12 sm6 md6 class="text-xs-left" v-if="stdname !== ''">
-        <p class="text-xs-left">Standardized chemical name and density information:</p>
-        <v-text-field v-model="stdname" label='Standardized Name' outlined></v-text-field>
-        <v-text-field v-model="density" label='Density (g/cm3)' outlined></v-text-field>
-        <v-text-field v-model="uSMILES" label='uSMILES' outlined v-if="pfRadios === 'pol'"></v-text-field>
-        <p v-if="pfRadios === 'pol'">Structure
-        <Smiles :smilesOptions="smilesOptions" :smilesInput="inputStr" :formulaHandler="formulaUpdated" :onSuccessHandler="onSuccess" :onErrorHandler="onError" height="100%" width="100%"></Smiles>
-        </p>
-        <p v-if="pfRadios === 'pol'">Formula: {{molecularFormula}}
-        </p>
-      </v-flex>
-      <br>
-      <h4 class="text-xs-left">Reference</h4>
-      <p class="text-xs-left">Probst, Daniel, and Jean-Louis Reymond. "Smilesdrawer: parsing and drawing SMILES-encoded molecular structures using client-side javascript." Journal of chemical information and modeling 58.1 (2018): 1-7.</p>
-      <!-- <p class="text-xs-left">Bradshaw et al., <i><a href="http://link.springer.com/article/10.1023/A:1009772018066">A Sign Control Method for Fitting and Interconverting Material Functions for Linearly Viscoelastic Solids</a></i>, Mechanics of Time-Dependent Materials. 1997 1(1)</p> -->
+      <div v-if="pfRadios !== 'apiAccess'">
+        <p class="text-xs-left" v-if="pfRadios === 'pol'"><b>2. Input the searching terms. For the quick search, you can search by either chemical name, abbreviation, trade name, or SMILES. For the advanced search, you must input a chemical name.</b></p>
+        <p class="text-xs-left" v-if="pfRadios === 'fil'"><b>2. Input the searching terms. Note that you must input a chemical name.</b></p>
+        <v-flex xs12>
+          <v-card v-if="pfRadios === 'pol'" style="box-shadow:none">
+            <p class="text-xs-left"><b>Quick Search (Filling this textbox will overwrite the advanced search)</b></p>
+            <v-text-field v-model="quicksearchkeyword" label='Enter the keyword:' outlined></v-text-field>
+          </v-card>
+          <v-card style="box-shadow:none">
+          <p class="text-xs-left" v-if="pfRadios === 'pol'"><b>Advanced Search</b></p>
+            <v-text-field v-model="chemicalname" label='Enter the chemical name (required):' outlined></v-text-field>
+            <v-text-field v-model="abbreviation" label='Enter the abbreviation (optional):' outlined></v-text-field>
+            <v-text-field v-model="SMILES" label='Enter the SMILES (optional):' outlined v-if="pfRadios === 'pol'"></v-text-field>
+            <v-text-field v-model="tradename" label='Enter the tradename (optional):' outlined v-if="pfRadios === 'pol'"></v-text-field>
+          </v-card>
+        </v-flex>
+        <v-alert
+          v-model="searchError"
+          type="error"
+          dismissible
+        >
+          {{searchErrorMsg}}
+        </v-alert>
+        <v-btn v-on:click="search()" color="primary">Search</v-btn>
+        <v-flex xs12 sm6 md6 class="text-xs-left" v-if="stdname !== ''">
+          <p class="text-xs-left">Standardized chemical name and density information:</p>
+          <v-text-field v-model="stdname" label='Standardized Name' outlined></v-text-field>
+          <v-text-field v-model="density" label='Density (g/cm3)' outlined></v-text-field>
+          <v-text-field v-model="uSMILES" label='uSMILES' outlined v-if="pfRadios === 'pol'"></v-text-field>
+          <p v-if="pfRadios === 'pol'">Structure
+          <Smiles :smilesOptions="smilesOptions" :smilesInput="inputStr" :formulaHandler="formulaUpdated" :onSuccessHandler="onSuccess" :onErrorHandler="onError" height="100%" width="100%"></Smiles>
+          </p>
+          <p v-if="pfRadios === 'pol'">Formula: {{molecularFormula}}
+          </p>
+        </v-flex>
+        <br>
+        <h4 class="text-xs-left">Reference</h4>
+        <p class="text-xs-left">Probst, Daniel, and Jean-Louis Reymond. "Smilesdrawer: parsing and drawing SMILES-encoded molecular structures using client-side javascript." Journal of chemical information and modeling 58.1 (2018): 1-7.</p>
+        <!-- <p class="text-xs-left">Bradshaw et al., <i><a href="http://link.springer.com/article/10.1023/A:1009772018066">A Sign Control Method for Fitting and Interconverting Material Functions for Linearly Viscoelastic Solids</a></i>, Mechanics of Time-Dependent Materials. 1997 1(1)</p> -->
+      </div>
+      <div v-else>
+        <div v-if="loginRequired">
+          <p class="text-xs-left">If you already have a Duke University account, proceed to login.  Otherwise create a <a href="https://accounts.oit.duke.edu/onelink/register" target="_blank">Duke OneLink</a> account.</p>
+          <v-btn :href="getUserLoginLink()" color="primary">Login</v-btn>
+        </div>
+        <div v-else>
+          <v-card style="box-shadow:none" v-if="!accessAuth">
+            <p class="text-xs-left"><b>2. Create Access Token</b></p>
+            <form>
+              <v-text-field v-model="domainname" label='Enter your domain name (required):' outlined></v-text-field>
+              <v-text-field v-model="domainsecret" label='Enter a secret (required):' outlined  type="password"></v-text-field>
+              <v-btn class="mr-4" @click="submitRequest">Request Token</v-btn>
+            </form>
+          </v-card>
+          <v-card style="box-shadow:none" v-else>
+            <p class="text-xs-left">You have already created an API access</p>
+          </v-card>
+        </div>
+      </div>
     </v-container>
   </div>
 </template>
@@ -80,6 +102,11 @@ export default {
       title: 'ChemProps',
       dialog: false,
       pfRadios: 'pol',
+      auth: null,
+      accessAuth: false,
+      domainname: null,
+      domainsecret: null,
+      submitError: false,
       // quicksearch: true,
       // polQSbgc: '#5DADEC',
       // polASbgc: 'white',
@@ -112,8 +139,12 @@ export default {
     }
   },
   beforeMount: function () {
-    let vm = this
-    vm.auth = new Auth()
+    this.auth = new Auth()
+    if (!this.auth.isLoggedIn()) {
+      this.loginRequired = true
+    }
+    // let vm = this
+    // vm.auth = new Auth()
     // No longer requiring login
     // if (!vm.auth.isLoggedIn()) {
     //   vm.loginRequired = true
@@ -235,6 +266,47 @@ export default {
       }
       vm.smilesError = true
       console.log('SmilesTest - error: ' + vm.smilesMessage)
+    },
+    getUserLoginLink () {
+      let rv = '/secure'
+      if (this.auth.isTestUser() === true) {
+        rv = '/nmr/nmdevlogin'
+      }
+      return rv
+    },
+    async submitRequest () {
+      // const LOCAL = 'http://localhost:8000/nmr/api';
+      // const SERVER = `${window.location.origin}/nmr/api`;
+      // const URL = LOCAL;
+      // this.submitError = false
+      // this.loginRequiredMsg = null
+      // if(this.auth.isLoggedIn() && this.domainname != null && this.domainsecret != null){
+      //   try{
+          let cookies = this.auth.getCookieToken()
+      //     let result = await fetch(`${URL}/create`, {
+      //         method: 'POST',
+      //         headers: {
+      //             Accept: '*/*',
+      //             'Content-Type': 'application/json',
+      //             Authorization: 'Bearer' + cookies
+      //         },
+      //         body: JSON.stringify({domain: this.domainname, token: this.domainsecret})
+      //     })
+      //     if(result && result.status == 201){
+      //         result = await result.json()
+      //         return result
+      //     }
+      //     return [];
+      //   } catch (err) {
+      //     this.submitError = true
+      //     this.loginRequiredMsg = err
+      //     throw err
+      //   }
+      // } else {
+      //   this.submitError = true
+      //   this.loginRequiredMsg = "Domain name & domain secret fields are required!"
+      // }
+      console.log(this.domainname, this.domainsecret)
     }
   }
 }
