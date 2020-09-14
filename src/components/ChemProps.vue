@@ -112,7 +112,7 @@ import Smiles from './Smiles'
 
 const LOCAL = 'http://localhost/nmr/api';
 const SERVER = `${window.location.origin}/nmr/api`;
-const URL = LOCAL;
+const URL = SERVER;
 
 export default {
   name: 'ChemProps',
