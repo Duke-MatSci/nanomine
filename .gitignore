@@ -12,6 +12,7 @@ yarn-error.log*
 venv/
 rest/analytics.log
 nanomine.log
+pyserver/nmChemPropsInteract.log
 
 # Editor directories and files
 .idea
