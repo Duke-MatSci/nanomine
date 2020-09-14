@@ -198,7 +198,7 @@ app.use((req, res, next) => {
     'Access-Control-Allow-Methods',
     'OPTIONS, GET, POST, PUT, PATCH, DELETE'
   );
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
   if(req.method === 'OPTIONS') {
     return res.sendStatus(200)
   }
@@ -212,6 +212,8 @@ app.use('/chart', (req, res, next) => {
 
 app.use('/api', (req, res, next) => {
   req.logger = logger;
+  req.env = env;
+  req.https = https
   next();
 }, apiRoutes)
 
@@ -221,6 +223,12 @@ app.use('/files', express.static(nmWebFilesRoot, {
   redirect: false
 }))
 
+app.use((error, req, res, next) => {
+  const status = error.statusCode || 500;
+  const message = error.message;
+  res.status(status).json({error:message})
+})
+
 
 // app.use(session({
   //   name: 'session',
@@ -229,16 +237,10 @@ app.use('/files', express.static(nmWebFilesRoot, {
   // }
   // ))
   
-  app.use(jwt({
-    secret: nmAuthSecret,
-    credentialsRequired: false
-  }))
-  
-  app.use((error, req, res, next) => {
-    const status = error.statusCode || 500;
-    const message = error.message;
-    res.status(status).json({error:message})
-  })
+app.use(jwt({
+  secret: nmAuthSecret,
+  credentialsRequired: false
+}))
 
 /* BEGIN Api Authorization */
 let allMethods = ['connect', 'delete', 'get', 'head', 'options', 'patch', 'post', 'put', 'trace']
@@ -741,10 +743,6 @@ function handleLogin (req, res) {
       })
   })
 }
-
-app.get('/nmr', (req, res, next) => {
-  res.redirect('/nm')
-})
 
 app.get('/secure', function (req, res, next) {
   let func = '/secure handler'

@@ -1,8 +1,11 @@
 const express = require('express');
 const chartBackupController = require('../controllers/chartBackup');
 const middleware = require('../middlewares/tempVerifier');
-
+const apiAccessController = require('../controllers/apiAccess');
 const router = express.Router();
+
+/*** RETURN TO HOME PAGE IF NO ROUTE IS SPECIFIED */
+router.get('/', apiAccessController.redirectToHome)
 
 /** GET CHART BACKUP STORED IN MONGO */
 router.get('/retrievecharts', chartBackupController.getChartBackup)
