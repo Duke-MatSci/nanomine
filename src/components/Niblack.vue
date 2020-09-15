@@ -1,60 +1,97 @@
 <!--
 ################################################################################
 #
-# File Name: Niblack.vue
+# File Name: Otsu.vue
 # Application: templates
+# Description:
 #
-# Created by: Akshay Iyer, August 18, 2018
+# Created by: Akshay Iyer, July 23, 2018
 # Customized for NanoMine
 #
 ################################################################################
 -->
 
 <template>
-  <div class="Niblack">
-    <h1>{{ msg }}</h1>
-    <v-container>
-      <v-flex xs12>
-          <h3>Description</h3>
-          <br>
-            <p>Upload a grayscale micrograph image in .jpg/.png/.tif format and click "Binarize" to perform dynamic niblack binarization. A default window size of 5 pixels (i.e. 5 x 5 pixel window) will be used. </p>
-            <p>After binarization is complete, this page will be updated to show the results. You can change window size and retry binarization until you get satisfactory result. </p>
-      </v-flex>
-          <h2> Create Agent to accept user uploaded files and process it in MATLAB</h2>
-
-    </v-container>
-
-    <h4>Reference</h4>
-    <v-flex xs12>
-        <p>W. Niblack, An Introduction to Image Processing. Englewood Cliffs, NJ: Prentice-Hall, 1986, pp. 115-116.</p>
-        <p>Khurshid, K.,Siddiqi, I., Faure, C. and Vincent, N., 2009. Comparison of Niblack inspired Binarization methods for ancient document. DRR, 7247, pp.1-10</p>
-    </v-flex>
-  </div>
+  <McrJobsTemplate v-bind:job='jobInfo'></McrJobsTemplate>
 </template>
 
 <script>
+
+import {} from 'vuex'
+import McrJobsTemplate from './McrJobsTemplate.vue'
+
 export default {
+
   name: 'Niblack',
-  data () {
+
+  components: {
+    McrJobsTemplate
+  },
+
+  data: () => {
     return {
-      msg: 'Niblack Binarization Method'
+      jobInfo: {
+
+        jobTitle: 'Niblack',
+
+        pageTitle: 'Binarization - Niblack Method',
+
+        description: [
+          'Niblack is a local thresholding method for binarization that is particularly useful for images without uniform backgrounds and images where calculating a global threshold does not yield good results.',
+          'WINDOW SIZE: Niblack involves computing, for each pixel in the grayscale image, the mean and standard devation of the colors of the neighboring pixels in an area (i.e. window size) of predefined size. Window size is generally between 1-50, depending on the size of the particles of interest.',
+          'K: an image dependent manually selected parameter (generally, the value is -0.2 for dark foreground and +0.2 for dark background).',
+          'OFFSET: an offset value that is applied when computing the mean and standard deviation for threshold values for pixels in an image (to separate foreground and background pixels.) Most of the time, the offset value can be 0.',
+          'Upload a grayscale micrograph image in .jpg/.png/.tif format and click "Binarize" to perform dynamic niblack binarization. A default window size of 5 pixels (i.e. 5 x 5 pixel window) will be used.',
+          'After binarization is complete, this page will be updated to show the results. You can change window size and retry binarization until you get satisfactory result.'
+        ],
+
+        aspectRatio: 'free',
+
+        getImageDimensions: false,
+
+        submit: {
+          submitButtonTitle: 'Binarize',
+          submitJobTitle: 'otsu',
+          submitJobType: 'niblack'
+        },
+
+        uploadOptions: [
+          {
+            title: 'Single image',
+            description: 'Supported image formats are .jpg, .tif and .png.'
+          },
+          {
+            title: 'Single image in .mat format',
+            description: 'The .mat file must contain ONLY ONE variable named "Input," which contains the image.'
+          }
+        ],
+
+        acceptableFileTypes: '.jpg, .png, .tif, .mat',
+
+        useWebsocket: true,
+
+        references: [
+          'W. Niblack, An Introduction to Image Processing. Englewood Cliffs, NJ: Prentice-Hall, 1986, pp. 115-116.',
+          'Khurshid, K.,Siddiqi, I., Faure, C. and Vincent, N., 2009. Comparison of Niblack inspired Binarization methods for ancient document. DRR, 7247, pp.1-10'
+        ],
+
+        selects: [
+          {
+            title: 'Window Size (usually between 1 and 50)',
+            submitJobTitle: 'WindowSize',
+          },
+          {
+            title: 'K (Optional, usually between -0.2 and +0.2)',
+            submitJobTitle: 'KNiblack'
+          },
+          {
+            title: 'Offset (Optional, usually set to 0)',
+            submitJobTitle: 'OffsetNiblack'
+          }
+        ]
+
+      }
     }
   }
 }
 </script>
-
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-  img {
-    width: 240px;
-  }
-  h4 {
-    text-transform: uppercase;
-  }
-  h1 {
-    margin-top: 10px;
-    background-color: black;
-    color: white;
-  }
-
-</style>

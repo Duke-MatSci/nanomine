@@ -39,6 +39,8 @@ inputParameters = json.load(paramFile)
 userId = str(inputParameters['user'])
 NumOfReconstructions = str(inputParameters['NumOfReconstructs'])
 CorrelationType = str(inputParameters['CorrelationType'])
+ImageDimensions = inputParameters['dimensions']
+PhaseInfo = inputParameters['phase']
 
 jobSrcDir = os.getcwd()
 webBaseUri = os.environ['NM_WEB_BASE_URI']

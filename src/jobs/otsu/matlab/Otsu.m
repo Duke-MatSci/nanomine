@@ -1,5 +1,4 @@
 function Otsu(userId, jobId, jobType, jobSrcDir, jobDir, webBaseUri,input_type,file_name)
-
   function writeError(file, msg)
     f = fopen(file,'a+');
     fprintf(f, '%s\n', msg);
@@ -11,6 +10,7 @@ function Otsu(userId, jobId, jobType, jobSrcDir, jobDir, webBaseUri,input_type,f
 % 2 : ZIP file containing JPEG images
 % 3 : Image in .mat file
 %%
+
 rc = 0;
 try 
     path_to_read = [jobSrcDir,'/'];

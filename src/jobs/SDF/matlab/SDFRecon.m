@@ -1,4 +1,4 @@
-function SDFRecon(userId, jobId, jobType, jobSrcDir, jobDir, webBaseUri,input_type,file_name,NumOfRecon)
+function SDFRecon(userId, jobId, jobType, jobSrcDir, jobDir, webBaseUri,input_type,file_name,NumOfRecon,phase_cords)
 
 %%% Input Types %%
 % 1 : Single JPEG Image
@@ -7,6 +7,7 @@ function SDFRecon(userId, jobId, jobType, jobSrcDir, jobDir, webBaseUri,input_ty
 %% Changes
 % Otsu
 % Odd shape fix
+% Select Phase
 rc=0;
 try
     path_to_read = [jobSrcDir,'/'];
@@ -16,28 +17,42 @@ try
     writeError([path_to_write, '/errors.txt'], ''); % ensure that errors.txt exists
     
     %% Specify import function according to input option
+    condition=1; % for phase selection
     try
         switch str2num(input_type)
             case 1
                 img = imread([path_to_read,file_name]); % read the incming target and store pixel values
-                
-                if length(size(img)) > 2
-                    img_original = img(:,:,1);
-                else
-                    img_original = img;
-                end
-                if max(img_original(:)) > 1
-                    imwrite(img_original,[path_to_write,'/','Input1.jpg'])
-                    img_original = round(img_original/256);
-                else
-                    imwrite(256*img_original,[path_to_write,'/','Input1.jpg'])
-                end
+                if length(size(img)) > 1
+            phase_cords = split(phase_cords, '*');
+            phase_cords = [str2num(phase_cords{1}) str2num(phase_cords{2})];
+            if phase_cords(1)==0 & phase_cords(2) == 0
+                condition=1;
+            else
+                [condition]=check_phase(img,phase_cords); % if 0 image needs to be inverted
+            end
+           
+            else
+                writeError([path_to_write, '/errors.txt'], ['failed to read image file: ', file_name]);
+                rc = 97
+                exit(rc)
+            end
             case 2
                 unzip([path_to_read,file_name],[path_to_write,'/input']);
             case 3
-                load([path_to_read,file_name]);
-                img_original = Input;
-                imwrite(256*img_original,[path_to_write,'/','Input1.jpg']);
+                            path=[path_to_read,file_name];
+            k=load(path);
+            [no_need,f_name,ext]=fileparts(file_name);
+            try
+                img = getfield(k,f_name);
+            catch ex
+                rc = 98;
+                msg = getReport(ex);
+                writeError([path_to_write, '/errors.txt'], 'The variable name inside the material file shold be the same as the name of the file. Technical details below:');
+                
+                writeError([path_to_write, '/errors.txt'], msg);
+                writeError([path_to_write, '/errors.txt'], sprintf('\n'));
+                exit(rc);
+            end
         end
     catch
         writeError([path_to_write, '/errors.txt'], ['Failed to read image file']);
@@ -47,16 +62,41 @@ try
         %% SDF code - Shuangchen & Yichi
         % img_original - binary original image
         %% Umar added to check and binarize the image using Otsu
+        if length(size(img)) > 2
+            img_original = img(:,:,1);
+        else
+            img_original = img;
+        end
         %% Umar added to deal with odd shaped images
+        
         md=min(size(img_original));
         img_original=img_original(1:md,1:md);
         
+        %% Umar added to check and binarize the image using Otsu 02/27/2019
         if max(img_original(:))>1
             Target = double(img_original);
             Target = Target/256; %
             level = graythresh(Target);
             img_original = im2bw(Target,level);
         end
+        
+             if condition==0
+                img_original=abs(img_original-1);
+            end
+        img=img_original;
+        
+        %% writing input file
+        if str2num(input_type)==1
+            if length(size(img)) > 2
+                imwrite(img(:,:,1:3),[path_to_write,'/','Input1.jpg'])
+                
+            else
+                imwrite(img,[path_to_write,'/','Input1.jpg'])
+            end
+        else 
+            imwrite(256*img,[path_to_write,'/','Input1.jpg']);
+             
+         end
         %%
         img_original = double(img_original);
         vf = mean(img_original(:));
@@ -101,7 +141,7 @@ try
         plot(0:1:length(S2_all(:,i))-1, S2_all(:,i) , 'LineWidth',2.5);
         if i==1
             legendInfo{i} = 'Input Image';
-            if input_type == 2
+            if str2num(input_type) == 2
                 legendInfo{i} = 'Mean of Input Images';
             end
         else

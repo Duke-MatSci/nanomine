@@ -131,7 +131,6 @@
 import {} from 'vuex'
 import {JobMgr} from '@/modules/JobMgr.js'
 import {Auth} from '@/modules/Auth.js'
-
 export default {
   name: 'XMLCONV',
   data: () => ({
@@ -173,31 +172,25 @@ export default {
     setLoading: function () {
       this.$store.commit('isLoading')
     },
-
     resetLoading: function () {
       this.$store.commit('notLoading')
     },
-
     pickFile () {
       this.$refs.myUpload.click()
     },
-
     pickTemplate () {
       this.$refs.myTemplate.click()
     },
-
     resetTemplate: function () {
       this.templateName = ''
       this.templateUrl = ''
       this.template = null
       this.templateUploaded = false
     },
-
     resetFiles: function () {
       this.files = []
       this.filesDisplay = []
     },
-
     onTemplatePicked (e) {
       this.resetTemplate()
       const files = e.target.files
@@ -221,7 +214,6 @@ export default {
         this.resetTemplate()
       }
     },
-
     onFilePicked (e) {
       this.resetFiles()
       const files = e.target.files
@@ -250,7 +242,6 @@ export default {
       console.log('Success dlg button clicked')
       vm.$router.go(-1) // go back to previous page
     },
-
     submit: function () {
       let vm = this
       vm.files.forEach(function (v) {
@@ -291,7 +282,6 @@ export default {
   img {
     width: 240px;
   }
-
   h4 {
     text-transform: uppercase;
   }
@@ -300,5 +290,4 @@ export default {
     background-color: black;
     color: white;
   }
-
 </style>

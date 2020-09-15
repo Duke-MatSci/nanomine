@@ -1,12 +1,14 @@
-function SDFCharacterize(userId, jobId, jobType, jobSrcDir, jobDir, webBaseUri,input_type,file_name)
+function SDFCharacterize(userId, jobId, jobType, jobSrcDir, jobDir, webBaseUri,input_type,file_name,phase_cords,pixellength)
 
 %%% Input Types %%
 % 1 : Single JPEG Image
 % 2 : ZIP file containing JPEG images
 % 3 : Image in .mat file
 %% Added changed
-% Accept Odd shaped images 
+% Accept Odd shaped images
 % Binarize raw jpg image
+% Select Phase
+pixellength=str2num(pixellength);
 rc=0;
 try
     path_to_read = [jobSrcDir,'/'];
@@ -16,20 +18,23 @@ try
     writeError([path_to_write, '/errors.txt'], ''); % ensure that errors.txt exists
     
     %% Specify import function according to input option
+    condition=1; % for phase selection
     switch str2num(input_type)
         case 1
             img = imread([path_to_read,file_name]); % read the incming target and store pixel values
-            if length(size(img)) > 2
-                imwrite(img(:,:,1:3),[path_to_write,'/','Input1.jpg'])
-            elseif length(size(img)) > 1
-                imwrite(img,[path_to_write,'/','Input1.jpg'])
+            if length(size(img)) > 1
+                phase_cords = split(phase_cords, '*');
+                phase_cords = [str2num(phase_cords{1}) str2num(phase_cords{2})];
+                if phase_cords(1)==0 & phase_cords(2) == 0
+                    condition=1;
+                else
+                    [condition]=check_phase(img,phase_cords); % if 0 image needs to be inverted
+                end
             else
                 writeError([path_to_write, '/errors.txt'], ['failed to read image file: ', file_name]);
                 rc = 97
                 exit(rc)
-                
             end
-            
         case 2
             unzip([path_to_read,file_name],[path_to_write,'/input']);
         case 3
@@ -47,10 +52,8 @@ try
                 writeError([path_to_write, '/errors.txt'], sprintf('\n'));
                 exit(rc);
             end
-            % imwrite(img,[path_to_write,'/','Input1.jpg']);
-            imwrite(256*img,[path_to_write,'/','Input1.jpg']);
     end
-    
+    %%
     if str2num(input_type) ~= 2
         %% SDF code - Shuangchen & Yichi
         % img_original - binary original image
@@ -72,14 +75,41 @@ try
             level = graythresh(Target);
             img_original = im2bw(Target,level);
         end
+        
+        if condition==0
+            img_original=abs(img_original-1);
+        end
+        img=img_original;
+        
+        %% writing input file
+        if str2num(input_type)==1
+            if length(size(img)) > 2
+                imwrite(img(:,:,1:3),[path_to_write,'/','Input1.jpg'])
+                
+            else
+                imwrite(img,[path_to_write,'/','Input1.jpg'])
+            end
+        else
+            imwrite(256*img,[path_to_write,'/','Input1.jpg']);
+            
+        end
+        %%
         %%
         vf = mean(img_original(:));
         % pixel = size(img_original,1);
         sdf2d = fftshift(abs(fft2(img_original-vf)).^2); % 2D sdf
         sdf1d = FFT2oneD(sdf2d); % 1D sdf ** removed transpose to make it a coloumn vector **
+        % For physical length below
+        fmax=1/(2*pixellength);
+        xaxis = linspace(0,fmax,size(sdf1d,1))';
         
+        SDF = array2table(sdf1d); SDF.Properties.VariableNames = {'SDF'};
+        X_AXIS = array2table(xaxis); X_AXIS.Properties.VariableNames = {'x_axis'};
+        sdf = cat(2,SDF,X_AXIS);
+        writetable(sdf,[path_to_write,'/SDF_1D.csv']);
+        %
         csvwrite([path_to_write,'/SDF_2D.csv'],sdf2d);
-        csvwrite([path_to_write,'/SDF_1D.csv'],sdf1d);
+        %         csvwrite([path_to_write,'/SDF_1D.csv'],sdf1d);
         
         % plot 2d SDF and save image
         figure('color',[1,1,1])
