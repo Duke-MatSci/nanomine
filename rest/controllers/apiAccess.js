@@ -1,4 +1,5 @@
 const controllerFor = 'API ACCESS';
+const https = require('https')
 const jwt = require('jsonwebtoken');
 const axios = require('axios');
 const bycrypt = require('bcryptjs');
@@ -46,13 +47,20 @@ exports.chemprops = async(req, res, next) => {
             const Abbreviation = req.query.abbreviation ? req.query.abbreviation : req.query.search;
             const TradeName = req.query.tradename ? req.query.tradename : req.query.search;
             const uSMILES = req.query.smiles ? req.query.usmiles : req.query.search;
-            result = await axios.request({
-                url: `http://localhost:80/api/v1/chemprops/?polfil=${polfil}&nmId=${nmId}&ChemicalName=${ChemicalName}&Abbreviation=${Abbreviation}&TradeName=${TradeName}&uSMILES=${uSMILES}`,
-                method: "get", 
-                headers: {
-                    token: token
-                }
-           })
+            let httpsAgent = {
+                host: 'localhost',
+                port: '443',
+                // path: '/',
+                path: '/api/v1/chemprops',
+                rejectUnauthorized: false
+            }
+            result = await axios({
+            'method': 'get',
+            'url': req.env.nmLocalRestBase + `/api/v1/chemprops?polfil=${polfil}&nmId=${nmId}&ChemicalName=${ChemicalName}&Abbreviation=${Abbreviation}&TradeName=${TradeName}&uSMILES=${uSMILES}`,
+            // 'params': {ID: 12345},
+            'httpsAgent': new https.Agent(httpsAgent),
+            'headers': {'Content-Type': 'text/html', 'token': token}
+            })
         } catch(err){
             logger.error("CHEMPROPS API: " + err)
             result = err.data
