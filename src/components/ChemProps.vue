@@ -248,56 +248,44 @@ export default {
           Authorization: 'Bearer ' + vm.chempropsToken
         }
       })
-      // Axios.get('/api/v1/chemprops', {
-      //   params: {
-      //     polfil: vm.pfRadios,
-      //     ChemicalName: vm.chemicalname,
-      //     Abbreviation: vm.abbreviation,
-      //     TradeName: vm.tradename,
-      //     uSMILES: vm.SMILES,
-      //     nmId: 'restNmId'
-      //   }
-      // })
-      // Axios.get('/nmr//explore/select', {
-      //   params: {
-      //     title: 'L148_S1_Virtanen_2014.xml'
-      //   }
-      // })
-        .then(function (response) {
-          console.log(JSON.stringify(response.data.stdname))
-          console.log('get response from ChemProps!')
-          vm.stdname = response.data.StandardName
-          vm.density = parseFloat(response.data.density)
-          // show uSMILES if it's polymer search
-          if (vm.pfRadios === 'pol') {
-            vm.uSMILES = response.data.uSMILES
-          }
-          // check if stdname is found
-          if (vm.stdname === '') {
-            vm.searchError = true
-            vm.searchErrorMsg = 'No results found. Admin will update the database soon. Please try again in a week.'
-            vm.resetOutput()
-          }
-          vm.resetLoading()
-        })
-        .catch(function (error) {
-          console.log(error)
-          vm.resetOutput()
+      .then(function (res) {
+        return res.json()
+      })
+      .then(function(response) {
+        console.log(JSON.stringify(response.data.stdname))
+        console.log('get response from ChemProps!')
+        vm.stdname = response.data.StandardName
+        vm.density = parseFloat(response.data.density)
+        // show uSMILES if it's polymer search
+        if (vm.pfRadios === 'pol') {
+          vm.uSMILES = response.data.uSMILES
+        }
+        // check if stdname is found
+        if (vm.stdname === '') {
           vm.searchError = true
-          vm.searchErrorMsg = 'An exception occurred when calling the ChemProps API service.'
-          vm.resetLoading()
-        })
-        .then(function () {
-          // always executed
-          vm.inputStr = vm.uSMILES
-          // reset input if using quick search
-          if (vm.quicksearchkeyword.trim() !== '') {
-            vm.chemicalname = ''
-            vm.abbreviation = ''
-            vm.tradename = ''
-            vm.SMILES = ''
-          }
-        })
+          vm.searchErrorMsg = 'No results found. Admin will update the database soon. Please try again in a week.'
+          vm.resetOutput()
+        }
+        vm.resetLoading()
+      })
+      .catch(function (error) {
+        console.log(error)
+        vm.resetOutput()
+        vm.searchError = true
+        vm.searchErrorMsg = 'An exception occurred when calling the ChemProps API service.'
+        vm.resetLoading()
+      })
+      .then(function () {
+        // always executed
+        vm.inputStr = vm.uSMILES
+        // reset input if using quick search
+        if (vm.quicksearchkeyword.trim() !== '') {
+          vm.chemicalname = ''
+          vm.abbreviation = ''
+          vm.tradename = ''
+          vm.SMILES = ''
+        }
+      })
     },
     onSuccess () {
       this.smilesError = false
