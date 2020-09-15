@@ -13,13 +13,13 @@ exports.chemprops = async(req, res, next) => {
     const authHeader = req.get('Authorization')
     if(!authHeader){
         logger.error("CHEMPROPS API: No Authorization header information")
-        return errorResponse(res, 401, "Nothing Found")
+        return apiResponse(res, 401, {mssg: "Nothing Found"})
     }
     const receivedToken = authHeader.split(' ')[1]
     const exist = await Apiaccess.findOne({token:receivedToken})
     if(!exist){
         logger.error("CHEMPROPS API: Received token does not match any record")
-        return errorResponse(res, 401, "Nothing Found")
+        return apiResponse(res, 401, {mssg: "Nothing Found"})
     }
     const decoded = jwt.verify(exist.token, exist.key)
     if(decoded && decoded.mail && req.query.search){
@@ -27,7 +27,7 @@ exports.chemprops = async(req, res, next) => {
             const userExist = await userExistCheck(decoded.mail)
             if(!userExist){
                 logger.error("CHEMPROPS API: Token failed user verification")
-                return errorResponse(res, 401, "Cannot process data")
+                return apiResponse(res, 401, {mssg: "Cannot process data"})
             }
             const token = jwt.sign({
                 sub: decoded.sub,
@@ -55,21 +55,20 @@ exports.chemprops = async(req, res, next) => {
                 rejectUnauthorized: false
             }
             result = await axios({
-            'method': 'get',
-            'url': req.env.nmLocalRestBase + `/api/v1/chemprops?polfil=${polfil}&nmId=${nmId}&ChemicalName=${ChemicalName}&Abbreviation=${Abbreviation}&TradeName=${TradeName}&uSMILES=${uSMILES}`,
-            // 'params': {ID: 12345},
-            'httpsAgent': new https.Agent(httpsAgent),
-            'headers': {'Content-Type': 'text/html', 'token': token}
+                'method': 'get',
+                'url': req.env.nmLocalRestBase + `/api/v1/chemprops?polfil=${polfil}&nmId=${nmId}&ChemicalName=${ChemicalName}&Abbreviation=${Abbreviation}&TradeName=${TradeName}&uSMILES=${uSMILES}`,
+                // 'params': {ID: 12345},
+                'httpsAgent': new https.Agent(httpsAgent),
+                'headers': {'Content-Type': 'application/json', 'token': token}
             })
+            return apiResponse(res, 200, {data: result.data})   
         } catch(err){
             logger.error("CHEMPROPS API: " + err)
             result = err.data
-            return errorResponse(res, 404, "An error occurred")
+            return apiResponse(res, 404, {mssg: "An error occurred"})
         }
     }
-    res.status(200).json({
-        data: result
-    })
+    apiResponse(res, 200, {data: result})
 }
 
 exports.checkApi = async(req,res,next) => {
@@ -80,7 +79,7 @@ exports.checkApi = async(req,res,next) => {
     }
     const exist = await Apiaccess.findOne({user: req.userToken.mail}, {'user':1, 'token':1})
     if(exist){
-        res.status(201).json({
+        apiResponse(res, 201, {
             token: exist.token,
             email: req.userToken.mail,
             user: req.userToken.user
@@ -94,7 +93,7 @@ exports.tokenParser = async(req,res,next) => {
     const logger = req.logger;
     const exist = await Apiaccess.findOne({user: req.env.emailTestAddr}, {'user':1, 'token':1})
     if(exist){
-        res.status(201).json({
+        return apiResponse(res, 201, {
             token: exist.token
         })
     } else {
@@ -108,7 +107,7 @@ exports.createAccess = async(req, res, next) => {
     const errors = validationResult(req)
     if (!errors.isEmpty()) {
         logger.error("Request to create API access failed middleware validation")
-        return errorResponse(res, 401, "Failed Validation. Try again!")
+        return apiResponse(res, 401, {mssg: "Failed Validation. Try again!"})
     }
 
     if (!req.userToken) {
@@ -120,7 +119,7 @@ exports.createAccess = async(req, res, next) => {
     const userExist = await userExistCheck(req.userToken.mail)
     if (!userExist || !req.body.token) {
         logger.error("Invalid token. Token does not match any user")
-        return errorResponse(res, 401, "Authentication failed")
+        return apiResponse(res, 401, {mssg: "Authentication failed"})
     }
     const hashedKey = await bycrypt.hash(req.body.token, 12)
     const token = jwt.sign({
@@ -142,7 +141,7 @@ exports.createAccess = async(req, res, next) => {
         token: token
     })
     await apiAccess.save();
-    res.status(201).json({
+    return apiResponse(res, 201, {
         token: token,
         email: req.userToken.mail
     })
@@ -152,10 +151,8 @@ exports.redirectToHome = (req, res, next) => {
     res.redirect('/nm')
 }
 
-const errorResponse = (x,y,z) =>{
-    return x.status(y).json({
-        mssg: z
-    })
+const apiResponse = (x,y,z) =>{
+    return x.status(y).json(z)
 }
 
 const userExistCheck = async(email) =>{
