@@ -125,10 +125,10 @@ export default {
         'Content-Type': 'application/json'
       }
     })
-    if (result && result.status == 201) {
+    if (result && result.status === 201) {
       result = await result.json()
       console.log(result)
-      if(result.token) this.chempropsToken = result.token
+      if (result.token) this.chempropsToken = result.token
     }
   },
   methods: {
@@ -153,7 +153,7 @@ export default {
     search: function () {
       let vm = this
       vm.resetOutput()
-      if(!vm.chempropsToken){
+      if (!vm.chempropsToken) {
         vm.searchError = true
         vm.searchErrorMsg = 'System error, contact our system administrator'
         return
@@ -183,51 +183,51 @@ export default {
       vm.setLoading()
       Axios.request({
         url: `${URL}/chemprops?polfil=${vm.pfRadios}&nmId=restNmId&search=${vm.chemicalname}&abbreviation=${vm.abbreviation}&tradename=${vm.tradename}&usmiles=${vm.SMILES}`,
-        method: "get", 
+        method: 'get',
         headers: {
           Accept: 'application/json',
           'Content-Type': 'application/json',
           Authorization: 'Bearer ' + vm.chempropsToken
         }
       })
-      .then(function (res) {
-        return res.json()
-      })
-      .then(function(response) {
-        console.log(JSON.stringify(response.data.stdname))
-        console.log('get response from ChemProps!')
-        vm.stdname = response.data.StandardName
-        vm.density = parseFloat(response.data.density)
-        // show uSMILES if it's polymer search
-        if (vm.pfRadios === 'pol') {
-          vm.uSMILES = response.data.uSMILES
-        }
-        // check if stdname is found
-        if (vm.stdname === '') {
-          vm.searchError = true
-          vm.searchErrorMsg = 'No results found. Admin will update the database soon. Please try again in a week.'
+        .then(function (res) {
+          return res.json()
+        })
+        .then(function (response) {
+          console.log(JSON.stringify(response.data.stdname))
+          console.log('get response from ChemProps!')
+          vm.stdname = response.data.StandardName
+          vm.density = parseFloat(response.data.density)
+          // show uSMILES if it's polymer search
+          if (vm.pfRadios === 'pol') {
+            vm.uSMILES = response.data.uSMILES
+          }
+          // check if stdname is found
+          if (vm.stdname === '') {
+            vm.searchError = true
+            vm.searchErrorMsg = 'No results found. Admin will update the database soon. Please try again in a week.'
+            vm.resetOutput()
+          }
+          vm.resetLoading()
+        })
+        .catch(function (error) {
+          console.log(error)
           vm.resetOutput()
-        }
-        vm.resetLoading()
-      })
-      .catch(function (error) {
-        console.log(error)
-        vm.resetOutput()
-        vm.searchError = true
-        vm.searchErrorMsg = 'An exception occurred when calling the ChemProps API service.'
-        vm.resetLoading()
-      })
-      .then(function () {
-        // always executed
-        vm.inputStr = vm.uSMILES
-        // reset input if using quick search
-        if (vm.quicksearchkeyword.trim() !== '') {
-          vm.chemicalname = ''
-          vm.abbreviation = ''
-          vm.tradename = ''
-          vm.SMILES = ''
-        }
-      })
+          vm.searchError = true
+          vm.searchErrorMsg = 'An exception occurred when calling the ChemProps API service.'
+          vm.resetLoading()
+        })
+        .then(function () {
+          // always executed
+          vm.inputStr = vm.uSMILES
+          // reset input if using quick search
+          if (vm.quicksearchkeyword.trim() !== '') {
+            vm.chemicalname = ''
+            vm.abbreviation = ''
+            vm.tradename = ''
+            vm.SMILES = ''
+          }
+        })
     },
     onSuccess () {
       this.smilesError = false

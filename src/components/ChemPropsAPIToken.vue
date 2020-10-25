@@ -37,7 +37,7 @@
               <div class="text-xs-left" style="display:block; color:palevioletred; max-width: 98%; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 8; -webkit-box-orient: vertical;"><strong>API Token:</strong> {{accessAuth}} </div>
             </kbd>
             <p class="text-xs-left" style="margin-top:1rem">
-              To access this protected api resource, the user agent should send the API Token, 
+              To access this protected api resource, the user agent should send the API Token,
               typically in the Authorization header using the Bearer schema. The content of the header should look like the following:<br />
               <kbd class="text-xs-left" style="margin-top:1rem; display:block; margin-bottom:1rem; padding:0 0.6rem">
                 <span class="text-xs-left" style="display:block">'Content-Type': 'application/json',</span>
@@ -55,11 +55,9 @@
 <script>
 import {} from 'vuex'
 import {Auth} from '@/modules/Auth.js'
-import Axios from 'axios'
 
-const LOCAL = 'http://localhost/nmr/api';
-const SERVER = `${window.location.origin}/nmr/api`;
-const URL = SERVER;
+const SERVER = `${window.location.origin}/nmr/api`
+const URL = SERVER
 
 export default {
   name: 'ChemPropsAPIToken',
@@ -99,8 +97,8 @@ export default {
     async submitRequest () {
       this.submitError = false
       this.loginRequiredMsg = null
-      if (this.auth.isLoggedIn() && this.domainsecret != null){
-        try{
+      if (this.auth.isLoggedIn() && this.domainsecret != null) {
+        try {
           let cookies = this.auth.getCookieToken()
           let result = await fetch(`${URL}/create`, {
             method: 'POST',
@@ -111,13 +109,15 @@ export default {
             },
             body: JSON.stringify({domain: this.domainname, token: this.domainsecret})
           })
-          if (result && result.status == 201) {
+          if (result && result.status === 201) {
             result = await result.json()
-            return this.accessAuth = result
+            this.accessAuth = result
+            return this.accessAuth
           } else {
             result = await result.json()
             this.submitError = true
-            return this.loginRequiredMsg = result.mssg
+            this.loginRequiredMsg = result.mssg
+            return this.loginRequiredMsg
           }
         } catch (err) {
           this.submitError = true
@@ -127,12 +127,12 @@ export default {
         }
       } else {
         this.submitError = true
-        this.loginRequiredMsg = "Secret fields are required!"
+        this.loginRequiredMsg = 'Secret fields are required!'
       }
     },
-    async checkIfApiExist(){
+    async checkIfApiExist () {
       if (this.auth.isLoggedIn()) {
-        try{
+        try {
           let cookies = this.auth.getCookieToken()
           let result = await fetch(`${URL}/check`, {
             method: 'GET',
@@ -140,12 +140,13 @@ export default {
               Accept: 'application/json',
               'Content-Type': 'application/json',
               Authorization: 'Bearer ' + cookies
-            },
+            }
           })
           if (result && result.status == 201) {
             result = await result.json()
             if (result && result.token) {
-              return this.accessAuth = result
+              this.accessAuth = result
+              return this.accessAuth
             }
           }
         } catch (err) {
