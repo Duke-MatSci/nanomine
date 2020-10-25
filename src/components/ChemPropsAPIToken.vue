@@ -142,7 +142,7 @@ export default {
               Authorization: 'Bearer ' + cookies
             }
           })
-          if (result && result.status == 201) {
+          if (result && result.status === 201) {
             result = await result.json()
             if (result && result.token) {
               this.accessAuth = result
