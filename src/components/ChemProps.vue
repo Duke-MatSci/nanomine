@@ -74,6 +74,9 @@ import {Auth} from '@/modules/Auth.js'
 import Axios from 'axios'
 import Smiles from './Smiles'
 
+const SERVER = `${window.location.origin}/nmr/api`
+const URL = SERVER
+
 export default {
   name: 'ChemProps',
   components: {
@@ -214,7 +217,11 @@ export default {
           console.log(error)
           vm.resetOutput()
           vm.searchError = true
-          vm.searchErrorMsg = 'An exception occurred when calling the ChemProps API service.'
+          if (error.message.includes('404')) {
+            vm.searchErrorMsg = 'No results found. Admin will update the database soon. Please try again in a week.'
+          } else {
+            vm.searchErrorMsg = 'An exception occurred when calling the ChemProps API service.'
+          }
           vm.resetLoading()
         })
         .then(function () {
