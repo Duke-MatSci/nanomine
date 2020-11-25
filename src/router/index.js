@@ -47,6 +47,7 @@ import ViewData from '@/components/ViewData'
 import ChemProps from '@/components/ChemProps'
 import XmlUploader from '@/components/XmlUploader'
 import SmilesTest from '@/components/nanomine/SmilesTest'
+import ChemPropsAPIToken from '@/components/ChemPropsAPIToken'
 
 // For Nanomine Gallery of Interactive Chart (Req 04/01/2020)
 import GalleryApp from '@/components/GalleryApp'
@@ -298,6 +299,11 @@ export default new Router({
       path: '/XmlUploader',
       name: 'XmlUploader',
       component: XmlUploader
+    },
+    {
+      path: '/ChemPropsAPIToken',
+      name: 'ChemPropsAPIToken',
+      component: ChemPropsAPIToken
     }
   ]
 })
