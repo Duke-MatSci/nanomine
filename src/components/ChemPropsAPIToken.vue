@@ -10,15 +10,15 @@
         {{loginRequiredMsg}}
       </v-alert>
       <h3 class="text-xs-left">Instructions</h3>
-      <p class="text-xs-left"><b>Put instructions here!!!!!!</b></p>
+      <p class="text-xs-left">In this page, you can request token for API access to ChemProps. For the first-time users, you will need to create access token by entering a domain secret. The token information will display once the secret is submitted. Please keep the token safe. In case of losing the token, the token information will show again when users log in and land on this page once the access token is created.</p>
       <div>
         <div v-if="loginRequired">
-          <p class="text-xs-left">If you already have a Duke University account, proceed to login.  Otherwise create a <a href="https://accounts.oit.duke.edu/onelink/register" target="_blank">Duke OneLink</a> account.</p>
+          <p class="text-xs-left">If you already have a Duke University account, proceed to login. Otherwise create a <a href="https://accounts.oit.duke.edu/onelink/register" target="_blank">Duke OneLink</a> account.</p>
           <v-btn :href="getUserLoginLink()" color="primary">Login</v-btn>
         </div>
         <div v-else>
           <v-card style="box-shadow:none" v-if="!accessAuth">
-            <p class="text-xs-left"><b>2. Create Access Token</b></p>
+            <p class="text-xs-left"><b>Create Access Token</b></p>
             <form>
               <v-text-field
                 name="domainsecret"
