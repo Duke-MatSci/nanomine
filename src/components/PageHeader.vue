@@ -214,7 +214,7 @@ export default {
       return this.auth.isTestUser()
     },
     openGallery: function () {
-      window.location = `${window.location.origin}/wi/about?view=gallery&uri=http://semanticscience.org/resource/Chart`
+      window.location = `${window.location.origin}/wi/about?view=view&uri=http://semanticscience.org/resource/Chart`
     }
   },
   computed: {
