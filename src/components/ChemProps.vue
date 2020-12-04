@@ -48,7 +48,7 @@
         >
           {{searchErrorMsg}}
         </v-alert>
-        <v-btn v-on:click="search()" color="primary">Search</v-btn>
+        <v-btn @keyup.enter.native="search()" @click.prevent="search()" color="primary">Search</v-btn>
         <v-flex xs12 sm6 md6 class="text-xs-left" v-if="stdname !== ''">
           <p class="text-xs-left">Standardized chemical name and density information:</p>
           <v-text-field v-model="stdname" label='Standardized Name' outlined></v-text-field>
@@ -193,48 +193,46 @@ export default {
           Authorization: 'Bearer ' + vm.chempropsToken
         }
       })
-        .then(function (res) {
-          return res.json()
-        })
-        .then(function (response) {
-          console.log(JSON.stringify(response.data.stdname))
-          console.log('get response from ChemProps!')
-          vm.stdname = response.data.StandardName
-          vm.density = parseFloat(response.data.density)
-          // show uSMILES if it's polymer search
-          if (vm.pfRadios === 'pol') {
-            vm.uSMILES = response.data.uSMILES
-          }
-          // check if stdname is found
-          if (vm.stdname === '') {
-            vm.searchError = true
-            vm.searchErrorMsg = 'No results found. Admin will update the database soon. Please try again in a week.'
-            vm.resetOutput()
-          }
-          vm.resetLoading()
-        })
-        .catch(function (error) {
-          console.log(error)
-          vm.resetOutput()
+      .then(function (res) {
+        return res
+      })
+      .then(function (response) {
+        vm.stdname = response.data.data.StandardName
+        vm.density = parseFloat(response.data.data.density)
+        // show uSMILES if it's polymer search
+        if (vm.pfRadios === 'pol') {
+          vm.uSMILES = response.data.data.uSMILES
+        }
+        // check if stdname is found
+        if (vm.stdname === '') {
           vm.searchError = true
-          if (error.message.includes('404')) {
-            vm.searchErrorMsg = 'No results found. Admin will update the database soon. Please try again in a week.'
-          } else {
-            vm.searchErrorMsg = 'An exception occurred when calling the ChemProps API service.'
-          }
-          vm.resetLoading()
-        })
-        .then(function () {
-          // always executed
-          vm.inputStr = vm.uSMILES
-          // reset input if using quick search
-          if (vm.quicksearchkeyword.trim() !== '') {
-            vm.chemicalname = ''
-            vm.abbreviation = ''
-            vm.tradename = ''
-            vm.SMILES = ''
-          }
-        })
+          vm.searchErrorMsg = 'No results found. Admin will update the database soon. Please try again in a week.'
+          vm.resetOutput()
+        }
+        vm.resetLoading()
+      })
+      .catch(function (error) {
+        console.log(error)
+        vm.resetOutput()
+        vm.searchError = true
+        if (error.message.includes('404')) {
+          vm.searchErrorMsg = 'No results found. Admin will update the database soon. Please try again in a week.'
+        } else {
+          vm.searchErrorMsg = 'An exception occurred when calling the ChemProps API service.'
+        }
+        vm.resetLoading()
+      })
+      .then(function () {
+        // always executed
+        vm.inputStr = vm.uSMILES
+        // reset input if using quick search
+        if (vm.quicksearchkeyword.trim() !== '') {
+          vm.chemicalname = ''
+          vm.abbreviation = ''
+          vm.tradename = ''
+          vm.SMILES = ''
+        }
+      })
     },
     onSuccess () {
       this.smilesError = false
