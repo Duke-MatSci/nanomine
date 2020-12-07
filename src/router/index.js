@@ -46,6 +46,10 @@ import ChemPropsAPIToken from '@/components/ChemPropsAPIToken'
 // For Nanomine Gallery of Interactive Chart (Req 04/01/2020)
 import GalleryApp from '@/components/GalleryApp'
 
+// Nanomine Version 2
+import LandingPage from '@/components/main/main.vue'
+import TeamsPage from '@/components/teams/teams.vue'
+
 // DISABLED FOR NOW import XmlUploader from '@/components/XmlUploader'
 
 Vue.use(Router)
@@ -59,6 +63,16 @@ export default new Router({
       path: '/',
       name: 'NanoMine',
       component: NanoMine
+    },
+    {
+      path: '/home_v2',
+      name: 'LandingPage',
+      component: LandingPage
+    },
+    {
+      path: '/teams',
+      name: 'TeamsPage',
+      component: TeamsPage
     },
     {
       path: '/admin',
