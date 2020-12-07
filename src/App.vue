@@ -63,32 +63,4 @@ export default {
 <style>
   @import './css/styles.css';
   @import './css/old_css.css';
-
-  /** h1 {
-    margin-top: 25px;
-    margin-bottom: 15px;
-  }
-
-  h4 {
-    margin-top: 25px;
-  }
-
-  .utility_old {
-    img {
-      margin-top: 30px;
-    }
-  }
-
-
-  .utility_old_mg {
-    margin-top: 38px;
-  }
-
-  .utility_old_align {
-    text-align: center;
-  }
-
-  .container {
-
-  } */ 
 </style>
