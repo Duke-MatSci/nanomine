@@ -1,0 +1,43 @@
+.quicklinks {
+    padding: 0 7rem;
+    &-border {
+        border-left: .1rem solid rgba($primary-grey, .2);
+        border-right: .1rem solid rgba($primary-grey, .2);
+    }
+    &_content {
+        padding: 1rem 2.2rem;
+        transition: all .6s ease-out;
+        // height: 24rem;
+        cursor: pointer;
+
+        &:hover{
+            box-shadow: 0.1rem 0.505rem 1rem rgba($primary-black, .25);
+            transform: scale(1.25);
+        }
+
+        & > i {
+            font-size: 10rem;
+            font-weight: 200;
+            display: block;
+            text-align: center;
+            margin: 3.8rem;
+            color: $primary;
+        }
+
+        & > h2 {
+            font-weight: 300;
+            font-size: 2.5rem;
+            color: rgba($primary-black, .35);
+            text-align: center;
+        }
+
+        &-description {
+            font-size: 1.4rem;
+            font-weight: 300;
+            color: rgba($primary-black, .35);
+            padding: 0 .1rem;
+            text-align: center;
+            margin: 0 auto;
+        }
+    }
+}
