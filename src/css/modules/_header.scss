@@ -1,0 +1,82 @@
+.header {
+    position: fixed;
+    background-color: $primary;
+    z-index: 1;
+    width: 100%;
+    transition: background-color .4s ease-out;
+    border-bottom: .1rem solid $primary-white;
+
+    @include respond(tab-port){
+        padding: 0.12rem;
+    }
+
+    @include respond(phone){
+        border-bottom: .01rem solid $primary-white;
+    }
+
+    &-logo {
+        transition: all 1.2s ease-out;
+        width: 27rem;
+        display: inline-block;
+        margin: .5rem 0;
+
+        @include respond(tab-land){
+            width: 21rem;
+        }
+
+        @include respond(tab-port){
+            width: 16rem;
+        }
+
+        @include respond(phone) {
+            width: 14rem;
+            padding: .4rem 0 0 0;
+            margin: .2rem 0 0 1rem;
+        }
+    }
+
+    &_nav {
+        position: absolute;
+        right: 6.1875rem;
+        opacity: 1;
+        transition: all 1.2s ease-out;
+        top: 0.8rem;
+
+        @include respond(tab-land){
+            top: 0.1rem;
+            right: 2.1875rem;
+        }
+
+        @include respond(tab-port){
+            right: 3.1875rem;
+        }
+
+        @include respond(phone){
+            visibility: hidden;
+            display: none;
+            opacity: 0;
+        }
+    }
+
+   /*  &-nav {
+        opacity: 0;
+        transform: scale(0.5);
+        z-index: -10;
+        position: relative;
+        padding-top: 5.68rem;
+        text-align: center;
+        transition: all .4s ease-out;
+
+        @include respond(tab-land) {
+            opacity: 1;
+            z-index: 1;
+            display: block;
+            padding-top: 0;
+            transform: scale(1);
+        }
+
+        @include respond(tab-port) {
+            padding-top: 7.25rem;
+        }
+    } */
+}

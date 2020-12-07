@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   id="svg1375"
+   version="1.1"
+   viewBox="0 0 149.23167 15.52016"
+   height="58.658871"
+   width="564.02521">
+  <defs
+     id="defs1369" />
+  <metadata
+     id="metadata1372">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     transform="translate(-25.169884,-119.99587)"
+     id="layer1">
+    <g
+       id="g2282">
+      <g
+         transform="matrix(0.8477051,0,0,0.8477051,34.740375,72.039835)"
+         id="g1840">
+        <circle
+           r="2.1898911"
+           style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.0235562"
+           id="circle1737"
+           cx="155.74626"
+           cy="60.609447" />
+        <circle
+           cy="66.804359"
+           cx="162.14325"
+           id="circle1739"
+           style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.0235562"
+           r="2.1898911" />
+        <circle
+           r="2.1898911"
+           style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.0235562"
+           id="circle1741"
+           cx="149.4301"
+           cy="66.804359" />
+        <circle
+           cy="72.59404"
+           cx="155.74626"
+           id="circle1743"
+           style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.0235562"
+           r="2.1898911" />
+        <circle
+           transform="scale(1,-1)"
+           cy="-73.245644"
+           cx="160.18887"
+           id="circle1753"
+           style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.007222"
+           r="0.67138898" />
+        <ellipse
+           transform="scale(1,-1)"
+           style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.00722199"
+           id="circle1755"
+           cx="162.64673"
+           cy="-70.821228"
+           rx="0.67138904"
+           ry="0.67138898" />
+        <circle
+           style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.007222"
+           id="circle1790"
+           cx="149.53769"
+           cy="70.866447"
+           r="0.67138898" />
+        <circle
+           cy="73.290871"
+           cx="151.99554"
+           id="circle1792"
+           style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.007222"
+           r="0.67138898" />
+        <ellipse
+           style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.00722198"
+           id="circle1794"
+           cx="160.18887"
+           cy="60.812302"
+           rx="0.67138904"
+           ry="0.67138898" />
+        <ellipse
+           cy="63.236717"
+           cx="162.64673"
+           id="circle1796"
+           style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.00722198"
+           rx="0.67138904"
+           ry="0.67138898" />
+        <ellipse
+           cy="-63.191467"
+           cx="149.53769"
+           id="circle1798"
+           style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.00722198"
+           transform="scale(1,-1)"
+           rx="0.67138904"
+           ry="0.67138898" />
+        <ellipse
+           style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.00722199"
+           id="circle1800"
+           cx="151.99553"
+           cy="-60.767056"
+           transform="scale(1,-1)"
+           rx="0.67138904"
+           ry="0.67138898" />
+      </g>
+      <text
+         id="text152"
+         y="134.39188"
+         x="24.697599"
+         style="font-style:normal;font-weight:normal;font-size:19.7556px;line-height:1.25;font-family:sans-serif;letter-spacing:0.3175px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+         xml:space="preserve"><tspan
+           dx="0"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:Roboto;-inkscape-font-specification:'Roboto Bold';stroke-width:0.264583"
+           y="134.39188"
+           x="24.697599"
+           id="tspan150">Materialsmine</tspan></text>
+    </g>
+  </g>
+</svg>
