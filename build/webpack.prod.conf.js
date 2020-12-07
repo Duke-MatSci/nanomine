@@ -120,15 +120,20 @@ const webpackConfig = merge(baseWebpackConfig, {
         ignore: ['.*']
       },
       {
-        from: path.resolve(__dirname, '../node_modules/codemirror/mode/*/*'),
-        to: path.join(config.build.assetsSubDirectory, 'js/codemirror/mode/[name]/[name].js')
+        from: path.resolve(__dirname, '../../mm-model-viewers/dist/'),
+        to: path.join(config.build.assetsSubDirectory, 'js/[name].js'),
+        test: /^mm-model-viewers.js$/
       },
-      {
-        from: path.resolve(__dirname, '../node_modules/codemirror/addon/*/*'),
-        to: path.join(config.dev.assetsSubDirectory, 'js/codemirror/addon/[1]/[name].[ext]'),
-        test: /([^/]+)\/([^/]+)$/
-      }
-    ])
+    //   { // No longer including codemirror editor
+    //     from: path.resolve(__dirname, '../node_modules/codemirror/mode/*/*'),
+    //     to: path.join(config.build.assetsSubDirectory, 'js/codemirror/mode/[name]/[name].js')
+    //   },
+    //   {
+    //     from: path.resolve(__dirname, '../node_modules/codemirror/addon/*/*'),
+    //     to: path.join(config.dev.assetsSubDirectory, 'js/codemirror/addon/[1]/[name].[ext]'),
+    //     test: /([^/]+)\/([^/]+)$/
+    //   }
+     ])
   ]
 })
 

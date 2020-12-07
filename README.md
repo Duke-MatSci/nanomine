@@ -32,7 +32,7 @@ sudo -E ./nminstall.sh 2>&1 | tee nminstall.log # Take a break. It will take a w
      - NM_SMTP_TEST needs to be set to "false" instead of "true" to actually send emails
      - NM_SMTP_AUTH_USER="your email address or smtp server userid" 
      - NM_SMTP_AUTH_PWD="your smtp server password"
-       - Note that most email servers will allow creation of application passwords that are easily revoked without revoking your personal password. An application password may be used here. To find out more about application specific passwords consult your email provider's documentation.  
+       - Note that most email provider's servers will allow creation of application passwords that are easily revoked without revoking your personal password. An application password may be used here. To find out more about application specific passwords consult your email provider's documentation.  
 
 -  <strong>IMPORTANT:</strong> Post install step for <strong>MATLAB</strong>
    - To test jobs that require MATLAB
@@ -46,7 +46,7 @@ sudo -E ./nminstall.sh 2>&1 | tee nminstall.log # Take a break. It will take a w
              - Assuming the path is /opt/matlab/bin (test this with /opt/matlab/bin/matlab -- it should start)
              - The file should contain the single line 'export PATH=$PATH:/opt/matlab/bin'
              - Be sure the path entered is the path to YOUR matlab bin -- it could be different 
-           - Log out of whyis and login again
+           - Log out and login again
            - verify that entering 'matlab' on a command line executes MATLAB 
      - Assuming MATLAB is marked enabled for the server runtime and it's accessible via the system path, MATLAB jobs should be able to execute successfully.            
          
@@ -55,7 +55,7 @@ sudo -E ./nminstall.sh 2>&1 | tee nminstall.log # Take a break. It will take a w
   - The load process can be monitored with 'sudo tail -f /var/log/celery/w1.log', but note that loading will usually not occur until upload via XMLCONV GUI
   
 ### Use the server...  
-- go to http://YOURVMADDRESS/nm to access NanoMine
+- go to http://YOUR_VM_ADDRESS/nm to access NanoMine
 
 ### Code changes
 - If code changes are made to the GUI
