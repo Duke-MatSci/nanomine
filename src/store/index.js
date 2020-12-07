@@ -17,7 +17,7 @@ const store = new Vuex.Store({
       'schemas': []
     },
     sampleList: [], // editor still has dependency -- need to remove when samples get read
-
+    versionNew: false, // Manage view options
     editorActive: false, // move to editor object
     config: {
       baseServicesUrl: ''
