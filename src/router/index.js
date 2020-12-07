@@ -47,8 +47,8 @@ import ChemPropsAPIToken from '@/components/ChemPropsAPIToken'
 import GalleryApp from '@/components/GalleryApp'
 
 // Nanomine Version 2
-import LandingPage from '@/components/main/main.vue'
-import TeamsPage from '@/components/teams/teams.vue'
+// import LandingPage from '@/components/main/main.vue'
+// import TeamsPage from '@/components/teams/teams.vue'
 
 // DISABLED FOR NOW import XmlUploader from '@/components/XmlUploader'
 
@@ -64,16 +64,16 @@ export default new Router({
       name: 'NanoMine',
       component: NanoMine
     },
-    {
-      path: '/home_v2',
-      name: 'LandingPage',
-      component: LandingPage
-    },
-    {
-      path: '/teams',
-      name: 'TeamsPage',
-      component: TeamsPage
-    },
+    // {
+    //   path: '/home_v2',
+    //   name: 'LandingPage',
+    //   component: LandingPage
+    // },
+    // {
+    //   path: '/teams',
+    //   name: 'TeamsPage',
+    //   component: TeamsPage
+    // },
     {
       path: '/admin',
       name: 'Admin',
