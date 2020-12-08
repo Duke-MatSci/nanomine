@@ -1,0 +1,255 @@
+.visualize {
+    &--link {
+        position: absolute;
+        display: none;
+        visibility: hidden;
+        @include respond(laptop){
+           display: block;
+           visibility: visible;
+           position: relative;
+        }
+        &-icons {
+            display: none;
+            visibility: hidden;
+            position: absolute;
+            @include respond(laptop) {
+                display: block;
+                visibility: visible;
+                top: 12rem;
+                cursor: pointer;
+                & > i {
+                    font-size: 6rem;
+                    font-weight: 500;
+                    color: $primary;
+                    @include respond(phone) {
+                        font-size: 4rem;
+                    }
+                }
+            }
+        }
+        &-left {
+            left: -0.5rem;
+        }
+        &-right {
+            right: -0.5rem;
+        }
+    }
+
+    &_header {
+        text-align: center;
+        z-index: 1;
+        & > h1 {
+            font-size: 3rem;
+            font-weight: 300;
+            margin-bottom: 2rem;
+            background-image: linear-gradient(to right bottom, $primary, rgba($primary-light, 0.4));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+
+            @include respond(tab-land){
+                font-size: 2.5rem;
+                margin-bottom: 1.4rem;
+            }
+
+            @include respond(phone){
+                font-size: 2.1rem;
+                margin-bottom: 0;
+            }
+        }
+    }
+    &_accordion {
+        margin-bottom: 6rem;
+        text-align: center;
+        z-index: 2;
+
+        @include respond(laptop) {
+            margin-bottom: 3rem;
+        }
+
+        @include respond(tab-land) {
+            margin-bottom: 2rem;
+        }
+
+        @include respond(phone) {
+            margin-bottom: 1rem;
+        }
+    }
+    &_chart {
+        display: none;
+        visibility: hidden;
+        opacity: 0;
+
+        &-content {
+            background-image: linear-gradient(to right bottom, rgba($primary-light, 0.4), $primary);
+            box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+            width: 23rem;
+            height: 24rem;
+            border-radius: 3px;
+
+            @include respond(laptop) {
+                width: 20rem;
+                height: 22rem;
+            }
+            
+            @include respond(tab-port) {
+                width: 23rem;
+                height: 24rem;
+            }
+
+            @include respond(phone) {
+                width: 20.5rem;
+                height: 22rem;
+            }    
+        }
+    }
+    &_btn {
+        text-align: right;
+        margin-right: 6rem;
+
+        @include respond(tab-land) {
+            margin-right: -1rem;
+        } 
+        
+        @include respond(tab-port) {
+            margin-right: 0;
+        } 
+    }
+    &_text {
+        font-size: 1.6rem;
+        font-weight: 300;
+        word-spacing: .2rem;
+        text-align: center;
+        margin: 2rem 0;
+
+        & > p {
+            padding: 0 24rem;
+            margin-bottom: 0;
+            color: rgba($primary-black, .55);
+
+            @include respond(laptop) {
+                padding: 3rem;
+            }
+
+            @include respond(tab-land) {
+                padding: 0;
+            }
+        }
+
+        @include respond(tab-land) {
+            font-size: 1.4rem;
+        }
+
+        @include respond(phone) {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+        }
+    }
+}
+
+@for $i from 1 through 5 {
+    .charts-#{$i} { 
+        display: inline-block;
+        visibility: visible;
+        opacity: 1;
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+
+        @include respond(laptop) {
+            @if $i > 4 {
+                visibility: hidden;
+                display: none;
+                opacity: 0;
+            }
+        }
+
+        @include respond(tab-land) {
+            @if $i > 3 {
+                visibility: hidden;
+                display: none;
+                opacity: 0;
+            }
+        }
+
+        @include respond(tab-port) {
+            @if $i > 2 {
+                visibility: hidden;
+                display: none;
+                opacity: 0;
+            }
+        }
+
+        @include respond(phone) {
+            @if $i > 1 {
+                visibility: hidden;
+                display: none;
+                opacity: 0;
+            }
+        }
+    }
+    .charts_content-#{$i}{
+        animation-name: moveInTop;
+        animation-duration: 1s;
+        animation-timing-function: ease-out;
+        cursor: pointer;
+        @if $i < 3 {
+            // transition: top .5s ease-out;
+            position: relative;
+            top: calc(60px/#{$i});
+        } @else if $i == 3 {
+            margin-top: 0px;
+        } @else if $i == 4 {
+            // transition: top .5s ease-out;
+            position: relative;
+            top: calc(60px/(#{$i}-2));
+        } @else if $i == 5 {
+            // transition: top .5s ease-out;
+            position: relative;
+            top: calc(60px/(#{$i}-4));
+        }
+
+        @include respond(laptop) {
+            @if $i == 1 or $i == 4 {
+                // transition: top .5s ease-out;
+                position: relative;
+                top: 30px;
+            } @else if $i == 2 or $i == 3 {
+                margin-top: 0px;
+                top: 0;
+            }
+        }
+
+        @include respond(tab-land) {
+            @if $i == 1 or $i == 3 {
+                // transition: top .5s ease-out;
+                position: relative;
+                top: 30px;
+            } @else if $i == 2 {
+                margin-top: 0px;
+                top: 0;
+            }
+        }
+
+        @include respond(tab-port) {
+            @if $i == 1 or $i == 2 {
+                // transition: top .5s ease-out;
+                margin-top: 0px;
+                top: 0;
+            }
+        }
+
+
+        @include respond(tab-port) {
+            top: .4rem;
+        }
+
+        &:hover {
+            position: relative;
+            top: -4rem;
+            animation-name: moveInBottom;
+            animation-duration: 1s;
+            animation-timing-function: ease-out;
+            animation-iteration-count: 1;
+        }
+    }
+}

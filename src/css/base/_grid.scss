@@ -1,0 +1,42 @@
+.grid {
+    display: grid;
+
+    &_gap {
+        &-smaller {
+            grid-gap: .4rem;
+        }
+        &-small {
+            grid-gap: 1rem;
+        }
+        &-big {
+            grid-gap: 5rem;
+        }
+    }
+
+    &_row {
+        &-1 {
+            grid-template-rows: repeat(1, 1fr);
+        }
+        &-2 {
+            grid-template-rows: repeat(2, 1fr);
+        }
+    }
+
+    &_col {
+        &-2 {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        &-3 {
+            grid-template-columns: repeat(3, 1fr);
+        }
+        &-4 {
+            grid-template-columns: repeat(4, 1fr);
+        }
+        &-space-right {
+            grid-template-columns: 1fr 3fr;
+        }
+        &-space-left {
+            grid-template-columns: 3fr 1fr;
+        }
+    }
+}
