@@ -1,0 +1,82 @@
+<template title="Materialsmine V2.0 - Teams Page">
+    <div>
+        <a-header :info="info"></a-header>
+        <div class="u_divider"></div>
+        <div class="section_teams">
+            <div class="wrapper">
+                <div class="research">
+                    <div class="team_header">
+                        <h1 title="Research" class="visualize_header-h1 teams_header">Get in Touch</h1>
+                    </div>
+                    <div class="teams_text">
+                        We'd love to help. Please fill out this quick form and we will be in touch.
+                    </div>
+                    <div class="contactus">
+                        <form class="form">
+                            <div class="form__group">
+                                <!-- <input type="text" class="form__input" placeholder="Project Name" name="name" id="name" onChange={val => this.setState({ name:val.target.value })}  required /> -->
+                                <input type="text" class="form__input" placeholder="Full Name (Required)" name="name" id="name" required />
+                                <label htmlFor="name" class="form__label">Full Name</label>
+                            </div>
+                            <div class="form__group">
+                                <!-- <input type="text" class="form__input" placeholder="Project Name" name="name" id="name" onChange={val => this.setState({ name:val.target.value })}  required /> -->
+                                <input type="email" class="form__input" placeholder="Email Address (Required)" name="email" id="email" required />
+                                <label htmlFor="name" class="form__label">Email Address</label>
+                            </div>
+                            <div class="contactus_radios-text">
+                                I want to...
+                            </div>
+                            <ul class="contactus_radios">
+                                <li>
+                                    <div class="form__radio-group">
+                                        <input type="radio" class="form__radio-input" id="question" name="question">
+                                        <label for="question" class="form__radio-label">
+                                            <span class="form__radio-button"></span>
+                                            Ask Question
+                                        </label>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="form__radio-group">
+                                        <input type="radio" class="form__radio-input" id="report" name="question">
+                                        <label for="report" class="form__radio-label">
+                                            <span class="form__radio-button"></span>
+                                            Report A Problem
+                                        </label>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="form__radio-group">
+                                        <input type="radio" class="form__radio-input" id="suggestion" name="question">
+                                        <label for="suggestion" class="form__radio-label">
+                                            <span class="form__radio-button"></span>
+                                            Make Suggestion
+                                        </label>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="form__radio-group">
+                                        <input type="radio" class="form__radio-input" id="comment" name="question">
+                                        <label for="comment" class="form__radio-label">
+                                            <span class="form__radio-button"></span>
+                                            Make Comment
+                                        </label>
+                                    </div>
+                                </li>
+                            </ul>
+                            <div class="form__group">
+                                <!-- <input type="text" class="form__input" placeholder="Project Name" name="name" id="name" onChange={val => this.setState({ name:val.target.value })}  required /> -->
+                                <textarea rows="4" class="form__input" placeholder="Write your message (Required)" name="message" id="message" required></textarea>
+                                <label htmlFor="message" class="form__label">Message</label>
+                            </div>
+                            <div class="form__group">
+                                <button class="btn btn--primary">Submit Form</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <a-footer></a-footer>
+    </div>
+</template>

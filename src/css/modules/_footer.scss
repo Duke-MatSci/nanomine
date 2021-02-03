@@ -24,11 +24,35 @@
             display: block;
             word-spacing: .1rem;
             font-size: 1.1rem;
+
+            @include respond(laptop){
+                font-size: 1rem;
+            }
+            @include respond(tab-port){
+                font-size: 0.8rem;
+            }
+            @include respond(phone){
+                font-size: 0.66rem;
+            }
         }
     }
 
     &_content {
         margin: 2.2rem 0px 10.5rem 0px;
+        @include respond(phone){
+            margin: 0;
+        }
+
+        &-mobile {
+            display: none;
+            visibility: hidden;
+            @include respond(phone){
+                display: block;
+                visibility: visible;
+                margin: 1.2rem 0px 0.8rem 0px;
+            }
+            
+        }
     }
 
     &_list {

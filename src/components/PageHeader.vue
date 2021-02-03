@@ -8,15 +8,16 @@
       </v-btn>
       <v-spacer></v-spacer>
       <v-toolbar-items class="hidden-sm-and-down">
-        <v-btn flat to="/db">Database</v-btn>
+        <v-btn flat @click="$router.go(-1)">Go Back</v-btn>
+        <!--<v-btn flat to="/db">Database</v-btn>
         <v-btn flat to="/mtools">Module Tools</v-btn>
         <v-btn flat to="/simtools">Simulation Tools</v-btn>
         <v-btn flat @click="openGallery">Gallery</v-btn>
         <v-btn fab flat href="/home"><i class="material-icons nm-search-icon" v-if="searchEnabled()">search</i>
-        </v-btn>
-        <v-btn v-if="isLoggedIn()" flat to="/contact">Contact Us<!--i class="material-icons nm-search-icon">contact_support</i--></v-btn>
-        <v-btn v-if="isLoggedIn()" flat to="/mypage">My Page</v-btn>
-        <v-btn v-else flat to="/mypage">My Page</v-btn>
+        </v-btn>-->
+        <v-btn v-if="isLoggedIn()" flat to="/contactus">Contact Us</v-btn>
+        <!--<v-btn v-if="isLoggedIn()" flat to="/mypage">My Page</v-btn>-->
+        <!--<v-btn v-else flat to="/mypage">My Page</v-btn>-->
         <v-btn v-if="loginStatus" flat v-on:click="$store.commit('setLoginLogout')">
           <i class="material-icons nm-user-icon" v-bind:class="{'nm-admin-icon': (isAdmin && !isRunAs), 'nm-runas-icon': isRunAs}">
             perm_identity

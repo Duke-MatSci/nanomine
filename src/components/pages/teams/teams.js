@@ -1,9 +1,13 @@
-import Data from '../data'
+import Data from '../../data'
+import * as Util from '../../utils'
 export default {
   name: 'TeamsPage',
-  data: Data.MainData,
+  data: () => ({
+    info: {icon: 'fa-users', name: 'Our Team'},
+  }),
   components: {
-    
+    aFooter: Util.Footer,
+    aHeader: Util.Header
   },
   methods: {
     showBox () {
