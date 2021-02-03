@@ -29,7 +29,7 @@
                     text-decoration: none;
                     font-weight: 400;
                     color: $primary-white;
-                    padding: 0.4rem 0.8rem;
+                    padding: 0.1rem 0.2rem;
                     font-size: 1.05rem;
 
                     &:hover{
@@ -50,7 +50,7 @@
         }
 
         &--handler {
-
+            &:active + div.nav_menu--siblings,
             &:hover + div.nav_menu--siblings {
                 display: block;
                 visibility: visible;
@@ -65,7 +65,7 @@
             padding: .3rem 0;
             border-bottom: 0.3rem solid rgb(8, 35, 60);
             position: absolute;
-            top: 2.6rem;
+            top: 2.02rem;
             left: 0;
             /* font-size: 1rem; */
             line-height: 2.5;

@@ -15,7 +15,7 @@
             @include respond(laptop) {
                 display: block;
                 visibility: visible;
-                top: 12rem;
+                top: 10.5rem;
                 cursor: pointer;
                 & > i {
                     font-size: 6rem;
@@ -31,14 +31,13 @@
             left: -0.5rem;
         }
         &-right {
-            right: -0.5rem;
+            right: 0rem;
         }
     }
 
     &_header {
         text-align: center;
-        z-index: 1;
-        & > h1 {
+        &-h1 {
             font-size: 3rem;
             font-weight: 300;
             margin-bottom: 2rem;
@@ -61,14 +60,17 @@
     &_accordion {
         margin-bottom: 6rem;
         text-align: center;
-        z-index: 2;
 
         @include respond(laptop) {
             margin-bottom: 3rem;
         }
 
         @include respond(tab-land) {
-            margin-bottom: 2rem;
+            margin-bottom: 3rem;
+        }
+        
+        @include respond(tab-port) {
+            margin-bottom: 1.5rem;
         }
 
         @include respond(phone) {
@@ -81,15 +83,16 @@
         opacity: 0;
 
         &-content {
-            background-image: linear-gradient(to right bottom, rgba($primary-light, 0.4), $primary);
+            /* background-image: linear-gradient(to right bottom, rgba($primary-light, 0.4), $primary); */
             box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
             width: 23rem;
-            height: 24rem;
+            height: 18rem;
             border-radius: 3px;
+            position: relative;
 
             @include respond(laptop) {
-                width: 20rem;
-                height: 22rem;
+                width: 19rem;
+                height: 21rem;
             }
             
             @include respond(tab-port) {
@@ -98,17 +101,37 @@
             }
 
             @include respond(phone) {
-                width: 20.5rem;
-                height: 22rem;
-            }    
+                width: 18rem;
+                height: 20rem;
+            }
+
+            & > img {
+                width: 100%;
+                height: 17rem;
+            }
+
+            & > span {
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                padding: 1rem .5rem;
+                font-size: 1.3rem;
+                font-weight: 500;
+                background-color: rgba($primary-black, .6);
+                width: 100%;
+                color: $primary-white;
+                text-align: left;
+                font-weight: 350;
+
+            }
         }
     }
     &_btn {
         text-align: right;
         margin-right: 6rem;
 
-        @include respond(tab-land) {
-            margin-right: -1rem;
+        @include respond(laptop) {
+            margin-right: 1rem;
         } 
         
         @include respond(tab-port) {

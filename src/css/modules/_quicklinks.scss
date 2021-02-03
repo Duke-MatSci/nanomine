@@ -1,8 +1,21 @@
 .quicklinks {
     padding: 0 7rem;
+
+    @include respond(laptop) {
+        padding: 0 3rem;
+    }
+
+    @include respond(tab-port) {
+        padding: 0 1rem;
+    }
+
     &-border {
         border-left: .1rem solid rgba($primary-grey, .2);
         border-right: .1rem solid rgba($primary-grey, .2);
+
+        @include respond(phone) {
+            border: none;
+        }
     }
     &_content {
         padding: 1rem 2.2rem;
@@ -10,9 +23,17 @@
         // height: 24rem;
         cursor: pointer;
 
+        @include respond(phone) {
+            border: .1rem solid $primary;
+        }
+
         &:hover{
             box-shadow: 0.1rem 0.505rem 1rem rgba($primary-black, .25);
             transform: scale(1.25);
+
+            @include respond(phone) {
+                transform: scale(1.05);
+            }
         }
 
         & > i {
@@ -22,13 +43,38 @@
             text-align: center;
             margin: 3.8rem;
             color: $primary;
+
+            @include respond(tab-land) {
+                font-size: 8rem;
+                margin: 1.8rem;
+            }
+
+            @include respond(tab-port) {
+                font-size: 4rem;
+            }
+
+            @include respond(phone) {
+                font-size: 8rem;
+            }
         }
 
         & > h2 {
             font-weight: 300;
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             color: rgba($primary-black, .35);
             text-align: center;
+
+            @include respond(tab-land) {
+                font-size: 1.5rem;
+            }
+
+            @include respond(tab-port) {
+                font-size: 1.2rem;
+            }
+
+            @include respond(phone) {
+                font-size: 2rem;
+            }
         }
 
         &-description {
@@ -38,6 +84,22 @@
             padding: 0 .1rem;
             text-align: center;
             margin: 0 auto;
+
+            @include respond(laptop) {
+                font-size: 1rem;
+            }
+
+            @include respond(tab-land) {
+                font-size: 1rem;
+            }
+
+            @include respond(tab-port) {
+                font-size: 0.9rem;
+            }
+
+            @include respond(phone) {
+                font-size: 1.2rem;
+            }
         }
     }
 }

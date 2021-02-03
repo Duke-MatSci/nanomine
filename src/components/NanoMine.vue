@@ -96,6 +96,10 @@ export default {
     console.log('cookies: ' + document.cookie)
     let auth = new Auth()
     console.log('token: ' + JSON.stringify(auth.tokenValues))
+  },
+  created(){
+    let auth = new Auth();
+    return window.location = `${window.location.origin}/home_v2`;
   }
 }
 </script>

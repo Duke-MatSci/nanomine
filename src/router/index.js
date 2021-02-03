@@ -47,8 +47,15 @@ import ChemPropsAPIToken from '@/components/ChemPropsAPIToken'
 import GalleryApp from '@/components/GalleryApp'
 
 // Nanomine Version 2
-// import LandingPage from '@/components/main/main.vue'
-// import TeamsPage from '@/components/teams/teams.vue'
+import LandingPage from '@/components/main/main.vue'
+import TeamsPage from '@/components/pages/teams/teams.vue'
+import HowTo from '@/components/pages/howto/howto.vue'
+import News from '@/components/pages/news/news.vue'
+import Tools from '@/components/pages/tools/tools.vue'
+import SimmTools from '@/components/pages/simm/simm.vue'
+import Upload from '@/components/pages/upload/upload.vue'
+import Textview from '@/components/pages/textview/textview.vue'
+import Contactus from '@/components/pages/contact/contact.vue'
 
 // DISABLED FOR NOW import XmlUploader from '@/components/XmlUploader'
 
@@ -64,16 +71,56 @@ export default new Router({
       name: 'NanoMine',
       component: NanoMine
     },
-    // {
-    //   path: '/home_v2',
-    //   name: 'LandingPage',
-    //   component: LandingPage
-    // },
-    // {
-    //   path: '/teams',
-    //   name: 'TeamsPage',
-    //   component: TeamsPage
-    // },
+    {
+      path: '/home_v2',
+      name: 'LandingPage',
+      component: LandingPage
+    },
+    {
+      path: '/teams',
+      name: 'TeamsPage',
+      component: TeamsPage
+    },
+    {
+      path: '/how',
+      name: 'HowTo',
+      component: HowTo
+    },
+    {
+      path: '/news',
+      name: 'News',
+      component: News
+    },
+    {
+      path: '/research',
+      name: 'News',
+      component: News
+    },
+    {
+      path: '/tools',
+      name: 'Tools',
+      component: Tools
+    },
+    {
+      path: '/simmtools',
+      name: 'SimmTools',
+      component: SimmTools
+    },
+    {
+      path: '/upload',
+      name: 'Upload',
+      component: Upload
+    },
+    {
+      path: '/single',
+      name: 'Textview',
+      component: Textview
+    },
+    {
+      path: '/contactus',
+      name: 'Contactus',
+      component: Contactus
+    },
     {
       path: '/admin',
       name: 'Admin',

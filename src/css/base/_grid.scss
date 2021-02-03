@@ -28,15 +28,27 @@
         }
         &-3 {
             grid-template-columns: repeat(3, 1fr);
+            @include respond(phone) {
+                grid-template-columns: repeat(1, 1fr);
+                grid-gap: 1.4rem;
+            }
         }
         &-4 {
             grid-template-columns: repeat(4, 1fr);
+            @include respond(phone) {
+                grid-template-columns: repeat(1, 1fr);
+                grid-gap: 1.4rem;
+            }
         }
         &-space-right {
-            grid-template-columns: 1fr 3fr;
+            grid-template-columns: 1fr 2fr;
+            @include respond(phone) {
+                grid-template-columns: repeat(1, 1fr);
+                grid-gap: 1rem;
+            }
         }
         &-space-left {
-            grid-template-columns: 3fr 1fr;
+            grid-template-columns: 2fr 1fr;
         }
     }
 }
