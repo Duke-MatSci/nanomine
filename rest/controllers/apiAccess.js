@@ -22,7 +22,7 @@ exports.chemprops = async(req, res, next) => {
         return apiResponse(res, 401, {mssg: "Nothing Found"})
     }
     const decoded = jwt.verify(exist.token, exist.key)
-    if(decoded && decoded.mail && req.query.search){
+    if(decoded && decoded.mail && req.query.chemicalname){
         try {
             const userExist = await userExistCheck(decoded.mail)
             if(!userExist){
@@ -41,12 +41,12 @@ exports.chemprops = async(req, res, next) => {
                 isAnonymous: false,
                 userExists: decoded.userExists,
             }, req.env.nmAuthSecret)
-            const polfil = req.query.type ? req.query.type : 'pol';
-            const ChemicalName = req.query.search;
+            const polfil = req.query.polfil ? req.query.polfil : 'pol';
+            const ChemicalName = req.query.chemicalname;
             const nmId = 'restNmId';
-            const Abbreviation = req.query.abbreviation ? req.query.abbreviation : req.query.search;
-            const TradeName = req.query.tradename ? req.query.tradename : req.query.search;
-            const uSMILES = req.query.smiles ? req.query.usmiles : req.query.search;
+            const Abbreviation = req.query.abbreviation ? req.query.abbreviation : req.query.chemicalname;
+            const TradeName = req.query.tradename ? req.query.tradename : req.query.chemicalname;
+            const uSMILES = req.query.usmiles ? req.query.usmiles : req.query.chemicalname;
             let httpsAgent = {
                 host: 'localhost',
                 port: '443',
