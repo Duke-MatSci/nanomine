@@ -10,7 +10,7 @@
                     <div class="grid grid_col-3">
                         <div class="footer_list">
                             <ul>
-                                <li><a href="/nm#/home_v2">Nanomine</a></li>
+                                <li><a href="/nm#">Nanomine</a></li>
                                 <li><a href="#">Metamine</a></li>
                             </ul>
                         </div>
