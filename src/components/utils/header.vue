@@ -13,7 +13,7 @@
                 <div class="header_nav">
                     <div class="nav nav_menu u--inline">
                         <ul>
-                            <li><a href="/nm#/home_v2">Nanomine</a></li>
+                            <li><a href="/nm#">Nanomine</a></li>
                             <li><a href="#">Metamine</a></li>
                         </ul>
                     </div>
