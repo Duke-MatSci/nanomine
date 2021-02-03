@@ -3,9 +3,11 @@
     <analytics/>
     <v-toolbar app dense>
       <v-toolbar-side-icon @click="toggleLeftMenu()" class="hidden-md-and-up"></v-toolbar-side-icon>
-      <v-btn flat to="/" @click="resetLeftMenu()">
-        <v-toolbar-title><i class="material-icons nm-home-icon">home</i>NanoMine</v-toolbar-title>
+      <v-btn flat to="/" @click="setSite('mm')">
+        <v-toolbar-title><i class="material-icons nm-home-icon">home</i>MaterialsMine</v-toolbar-title>
       </v-btn>
+      <v-btn v-if="site === 'meta'" flat to="/meta">MetaMine</v-btn>
+      <v-btn v-if="site === 'nano'" flat to="/nano">NanoMine</v-btn>
       <v-spacer></v-spacer>
       <v-toolbar-items class="hidden-sm-and-down">
         <v-btn flat @click="$router.go(-1)">Go Back</v-btn>
@@ -151,6 +153,13 @@ export default {
     }, 1000)
   },
   methods: {
+    setSite (siteId) {
+      let vm = this
+      if (siteId === 'mm') {
+        vm.resetLeftMenu()
+      }
+      vm.site = siteId
+    },
     log: function (msg) {
       console.log(msg)
     },
@@ -238,6 +247,7 @@ export default {
   data () {
     return {
       msg: 'PageHeader',
+      site: 'mm', // mm - main site, nano - NanoMine, meta - MetaMine
       auth: null,
       loggedInStatus: false,
       loginDialog: false,
