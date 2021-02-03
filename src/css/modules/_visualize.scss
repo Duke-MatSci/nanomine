@@ -114,15 +114,14 @@
                 position: absolute;
                 bottom: 0;
                 left: 0;
-                padding: 1rem .5rem;
-                font-size: 1.3rem;
+                padding: 1rem .5rem 1.5rem .5rem;
+                font-size: 1.1rem;
                 font-weight: 500;
                 background-color: rgba($primary-black, .6);
                 width: 100%;
                 color: $primary-white;
                 text-align: left;
-                font-weight: 350;
-
+                line-height: 24px;
             }
         }
     }
