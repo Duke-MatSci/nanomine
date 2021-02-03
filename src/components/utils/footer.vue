@@ -33,7 +33,7 @@
             </div>
             <div class="footer_content-mobile">
                 <img src="/nmstatic/img/logo.svg" class="footer_icon-img" alt="Materialsmine Logo">
-                <span class="footer_icon-text">&copy; 2020 Nanomine. All Rights Reserved.</span>
+                <span class="footer_icon-text">&copy; 2014-{{ new Date().getFullYear() }} Materialsmine. All Rights Reserved.</span>
             </div>
         </div>
     </div>
