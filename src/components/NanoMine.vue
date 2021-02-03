@@ -99,7 +99,7 @@ export default {
   },
   created(){
     let auth = new Auth();
-    return window.location = `${window.location.origin}/home_v2`;
+    return this.$router.push('/home_v2');
   }
 }
 </script>
