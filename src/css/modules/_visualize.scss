@@ -87,8 +87,8 @@
             box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
             width: 23rem;
             height: 18rem;
-            border-radius: 3px;
             position: relative;
+            border: .1rem solid rgba($primary-black, .15);
 
             @include respond(laptop) {
                 width: 19rem;
@@ -114,15 +114,15 @@
                 position: absolute;
                 bottom: 0;
                 left: 0;
-                padding: 1rem .5rem;
+                padding: 1.25rem .5rem;
                 font-size: 1.3rem;
                 font-weight: 500;
                 background-color: rgba($primary-black, .6);
                 width: 100%;
                 color: $primary-white;
                 text-align: left;
-                font-weight: 350;
-
+                font-weight: 400;
+                line-height: 1.5;
             }
         }
     }

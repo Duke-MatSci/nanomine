@@ -1,19 +1,20 @@
-import Data from '../data'
-
+import * as Util from '../utils'
+const AppMixin = Util.AppMixin;
 /** NEEDED FOR NANOMINE */
 const LOCAL_DEV_SERVER = 'http://localhost:8000/nmr/chart';
 const SERVER = `${window.location.origin}/nmr/chart`;
-const URL = SERVER;
+const URL = LOCAL_DEV_SERVER;
 
 export default {
   name: 'LandingPage',
+  mixins: [AppMixin],
   data: () => {
     return {
       exploreChart: []
     }
   },
   components: {
-    
+    aFooter: Util.Footer,
   },
   methods: {
     showBox () {
