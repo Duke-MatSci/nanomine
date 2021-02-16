@@ -74,14 +74,9 @@ export default new Router({
   routes: [
     // {
     //   path: '/',
-    //   name: 'MaterialsMine',
-    //   component: MaterialsMine
+    //   name: 'NanoMine',
+    //   component: NanoMine
     // },
-    {
-      path: '/nano',
-      name: 'NanoMine',
-      component: NanoMine
-    },
     {
       path: '/',
       name: 'LandingPage',

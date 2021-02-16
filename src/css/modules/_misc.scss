@@ -52,7 +52,7 @@
     &_container {
         border: .01rem solid rgba($primary-grey, .1);
         box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
-        width: 22rem;
+        width: 25rem;
         height: 31.5rem;
         border-radius: 3px;
         margin: 0 2rem 3rem 0;
@@ -62,7 +62,7 @@
         display: grid;
 
         @include respond(phone){
-            width: 20rem;
+            width: 95% !important;
             margin: 0 1rem 3rem 0;
         }
     }
@@ -167,6 +167,7 @@
 
                 & > a {
                     color: $primary-white;
+                    font-size: 1.4rem;
                 }
             }
         }

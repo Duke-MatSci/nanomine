@@ -2,7 +2,7 @@
     <div>
         <header class="header">
             <div class="wrapper">
-                <div class="header-logo">
+                <div class="header-logo" @click="links('/nm#/')">
                     <div class="">
                         <img src="/nmstatic/img/logo.svg" alt="Materialsmine Logo">
                     </div>
@@ -13,12 +13,13 @@
                 <div class="header_nav">
                     <div class="nav nav_menu u--inline">
                         <ul>
-                            <li><a href="/nm#">Nanomine</a></li>
-                            <li><a href="#">Metamine</a></li>
+                            <li><a href="/nm#/">NanoMine</a></li>
+                            <li><a href="#">MetaMine</a></li>
                         </ul>
                     </div>
                     <div class="u--inline">
-                        <a class="btn btn--tertiary btn--normal" href="/signup">Login/Register</a>
+                        <a class="btn btn--tertiary btn--normal" href="#">Login/Register</a>
+                        <!--<a class="btn btn--tertiary btn--normal" :href="getLoginLink()">Login/Register</a>-->
                     </div>
                 </div>
             </div>
@@ -36,9 +37,9 @@
                             <div class="nav_menu--container">
                                 <a class="u--default-size nav_menu--handler" href="#">About</a>
                                 <div class="nav_menu--siblings">
-                                    <span class="nav_menu--siblings-lists "><a href="/nm#/teams">About us</a></span>
-                                    <span class="nav_menu--siblings-lists"><a href="/nm#/how">How To</a></span>
-                                    <span class="nav_menu--siblings-lists nav_menu--siblings-lists-removebdr"><a href="/nm#/news">Research + News</a></span>
+                                    <span class="nav_menu--siblings-lists" @click="links('/nm#/teams')"><a href="/nm#/teams">About us</a></span>
+                                    <span class="nav_menu--siblings-lists" @click="links('/nm#/how')"><a href="/nm#/how">How To</a></span>
+                                    <span class="nav_menu--siblings-lists nav_menu--siblings-lists-removebdr" @click="links('/nm#/news')"><a href="/nm#/news">Research + News</a></span>
                                 </div>
                             </div>
                         </li>
@@ -46,8 +47,8 @@
                             <div class="nav_menu--container">
                                 <a class="u--default-size nav_menu--handler" href="#">Visualize</a>
                                 <div class="nav_menu--siblings">
-                                    <span class="nav_menu--siblings-lists "><a href="/home">Browse Data</a></span>
-                                    <span class="nav_menu--siblings-lists"><a href="/nm#/gallery">Explore Gallery</a></span>
+                                    <span class="nav_menu--siblings-lists" @click="links('/home')"><a href="/home">Browse Data</a></span>
+                                    <span class="nav_menu--siblings-lists" @click="links('/nm#/gallery')"><a href="/nm#/gallery">Explore Gallery</a></span>
                                 </div>
                             </div>
                         </li>
@@ -55,8 +56,8 @@
                             <div class="nav_menu--container">
                                 <a class="u--default-size nav_menu--handler" href="#">Upload</a>
                                 <div class="nav_menu--siblings">
-                                    <span class="nav_menu--siblings-lists "><a href="/nm#/upload">Xml Based Upload</a></span>
-                                    <span class="nav_menu--siblings-lists"><a href="#">Direct Dataset Upload Form</a></span>
+                                    <span class="nav_menu--siblings-lists" @click="links('/nm#/upload')"><a href="/nm#/upload">Xml-Based Upload</a></span>
+                                    <span class="nav_menu--siblings-lists" @click="links('#')"><a href="#">Direct Dataset Entry Form</a></span>
                                 </div>
                             </div>
                         </li>
@@ -64,9 +65,9 @@
                             <div class="nav_menu--container">
                                 <a class="u--default-size nav_menu--handler" href="#">Tools</a>
                                 <div class="nav_menu--siblings">
-                                    <span class="nav_menu--siblings-lists "><a href="/nm#/tools">Module Tools</a></span>
-                                    <span class="nav_menu--siblings-lists"><a href="/nm#/simmtools">Simmulation Tools</a></span>
-                                    <span class="nav_menu--siblings-lists"><a href="/nm#/ChemProps">Chemprops</a></span>
+                                    <span class="nav_menu--siblings-lists" @click="links('/nm#/tools')"><a href="/nm#/tools">Module Tools</a></span>
+                                    <span class="nav_menu--siblings-lists" @click="links('/nm#/simmtools')"><a href="/nm#/simmtools">Simulation Tools</a></span>
+                                    <span class="nav_menu--siblings-lists" @click="links('/nm#/ChemProps')"><a href="/nm#/ChemProps">ChemProps</a></span>
                                 </div>
                             </div>
                         </li>
@@ -80,8 +81,10 @@
     @import '../../css/new_style.scss';
 </style>
 <script>
+    import AppMixin from './mixins'
     export default {
         name: 'Header',
         props: ['info'],
+        mixins: [AppMixin],
     }
 </script>

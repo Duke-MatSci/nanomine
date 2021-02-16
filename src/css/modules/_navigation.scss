@@ -76,6 +76,9 @@
             border-top-right-radius: .5rem;
             display: none;
             visibility: hidden;
+            @-moz-document url-prefix() { 
+                top: 2rem;
+            }
 
             &-lists {
                 display: block;
