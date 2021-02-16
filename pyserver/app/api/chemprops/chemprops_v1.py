@@ -10,7 +10,7 @@ class ChemPropsDto:
   api = Namespace('chemprops', description='ChemProps REST operations')
   chemprops = api.model('chemprops', {
     'StandardName': fields.String(required=True, description='Standard Chemical Name'),
-    'density': fields.String(required=True, description='Chemical Density'),
+    'density': fields.String(required=True, description='Chemical Density at 25 degree Celsius'),
     'uSMILES': fields.String(required=False, description='Polymer unique SMILES')
   })
 
