@@ -1,7 +1,7 @@
 <template>
   <v-footer app v-bind:class="footerfont" v-if="show()">
     <v-flex align-center>
-    &copy; 2014-{{ new Date().getFullYear() }} NanoMine
+    &copy; 2014-{{ new Date().getFullYear() }} MaterialsMine
     &nbsp;|&nbsp; <a href="https://oarc.duke.edu/privacy/duke-university-privacy-statement" target="_blank">Privacy Policy</a>
     &nbsp;|&nbsp; <a href="https://security.duke.edu/node/82" target="_blank">Terms of Use</a>
     </v-flex>

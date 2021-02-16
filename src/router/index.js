@@ -1,18 +1,26 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Admin from '@/components/Admin'
-import NanoMine from '@/components/NanoMine'
+import BinarizeHomepage from '@/components/BinarizeHomepage'
 import Database from '@/components/Database'
-// import Insight from '@/components/Insight'
+import Contact from '@/components/Contact'
+import Dynamfit from '@/components/Dynamfit'
+import DynamfitExample from '@/components/DynamfitExample'
+import DynamfitExampleInput from '@/components/DynamfitExampleInput'
+import DynamfitResult from '@/components/DynamfitResult'
 import ModuleTools from '@/components/ModuleTools'
 import MyPage from '@/components/MyPage'
+import MaterialsMine from '@/components/MaterialsMine'
+import MetaMine from '@/components/metamine/MetaMine'
+import MetaMineTools from '@/components/metamine/MetaMineTools'
+import ModelViewer from '@/components/metamine/ModelViewer'
+import NanoMine from '@/components/NanoMine'
+import PixelUnit from '@/components/metamine/PixelUnit'
 import SimTools from '@/components/SimTools'
 import XMLCONV from '@/components/XMLCONV'
-// import NmEditor from '@/components/Editor'
 import McrHomepage from '@/components/McrHomepage'
-import BinarizeHomepage from '@/components/BinarizeHomepage'
 import Otsu from '@/components/Otsu'
 import NanoTutorials from '@/components/nanomine/NanoTutorials'
+import NuExampleUnitCell from '@/components/metamine/NuExampleUnitCell'
 import OtsuResult from '@/components/OtsuResult'
 import Niblack from '@/components/Niblack'
 import CharacterizeHomepage from '@/components/CharacterizeHomepage'
@@ -33,11 +41,9 @@ import SDFReconstructResults from '@/components/SDFReconstructResults'
 import CorrelationReconstructResults from '@/components/CorrelationReconstructResults'
 import DescriptorReconstructResults from '@/components/DescriptorReconstructResults'
 import ViewData from '@/components/ViewData'
-import Contact from '@/components/Contact'
-import Dynamfit from '@/components/Dynamfit'
-import DynamfitExample from '@/components/DynamfitExample'
-import DynamfitExampleInput from '@/components/DynamfitExampleInput'
-import DynamfitResult from '@/components/DynamfitResult'
+// import ThreeDModelViewer from '@/components/metamine/ThreeDModelViewer'
+// import NmEditor from '@/components/Editor'
+// import Visualization from '@/components/Visualization'
 import ChemProps from '@/components/ChemProps'
 import XmlUploader from '@/components/XmlUploader'
 import SmilesTest from '@/components/nanomine/SmilesTest'
@@ -68,10 +74,22 @@ export default new Router({
   routes: [
     // {
     //   path: '/',
+<<<<<<< HEAD
     //   name: 'NanoMine',
     //   component: NanoMine
     // },
     {
+=======
+    //   name: 'MaterialsMine',
+    //   component: MaterialsMine
+    // },
+    {
+      path: '/nano',
+      name: 'NanoMine',
+      component: NanoMine
+    },
+    {
+>>>>>>> 0c4614ed6740930cdc5a9af0eabec228b8956a83
       path: '/',
       name: 'LandingPage',
       component: LandingPage
@@ -122,9 +140,19 @@ export default new Router({
       component: Contactus
     },
     {
-      path: '/admin',
-      name: 'Admin',
-      component: Admin
+      path: '/meta',
+      name: 'MetaMine',
+      component: MetaMine
+    },
+    {
+      path: '/meta/tools',
+      name: 'MetaMineTools',
+      component: MetaMineTools
+    },
+    {
+      path: '/meta/modelviewer',
+      name: 'ModelViewer',
+      component: ModelViewer
     },
     {
       path: '/db',
@@ -136,11 +164,6 @@ export default new Router({
       name: 'Contact',
       component: Contact
     },
-    // {
-    //   path: '/insight',
-    //   name: 'Insight',
-    //   component: Insight
-    // },
     {
       path: '/simtools',
       name: 'SimTools',
@@ -188,6 +211,11 @@ export default new Router({
       component: NanoTutorials
     },
     {
+      path: '/metamine/pixelunit50',
+      name: 'NuExampleUnitCell',
+      component: NuExampleUnitCell
+    },
+    {
       path: '/Otsu',
       name: 'Otsu',
       component: Otsu
@@ -216,6 +244,11 @@ export default new Router({
       path: '/Niblack',
       name: 'Niblack',
       component: Niblack
+    },
+    {
+      path: '/meta/pixelunit',
+      name: 'PixelUnit',
+      component: PixelUnit
     },
     {
       path: '/CorrelationCharacterize',
@@ -315,6 +348,11 @@ export default new Router({
       name: 'DynamfitResult',
       component: DynamfitResult
     },
+    // Use ModelViewer instead {
+    //   path: '/meta/threedmodelviewer',
+    //   name: 'ThreeDModelViewer',
+    //   component: ThreeDModelViewer
+    // },
     {
       path: '/SmilesTest',
       name: 'SmilesTest',
