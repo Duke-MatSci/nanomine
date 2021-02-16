@@ -96,6 +96,10 @@ export default {
     console.log('cookies: ' + document.cookie)
     let auth = new Auth()
     console.log('token: ' + JSON.stringify(auth.tokenValues))
+  },
+  created(){
+    let auth = new Auth();
+    return this.$router.push('/home_v2');
   }
 }
 </script>

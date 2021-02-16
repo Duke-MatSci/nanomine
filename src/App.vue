@@ -16,7 +16,7 @@
 <script>
 
 // import {} from 'vuex'
-const newDev = ['/home_v2', '/teams'];
+const newDev = ['/', '/teams', '/how', '/news', '/research', '/tools', '/simmtools', '/upload', '/single', '/contactus'];
 export default {
   name: 'App',
   computed: {

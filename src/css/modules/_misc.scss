@@ -1,0 +1,454 @@
+.teams {
+    &_text {
+        font-size: 1.6rem;
+        font-weight: 300;
+        word-spacing: .2rem;
+        margin: 0 0 5rem 0;
+        line-height: 1.7;
+        text-align: justify;
+
+        & > span {
+            font-weight: bold;
+        }
+
+        @include respond(phone){
+            margin: 0 0 3rem 0;
+            font-size: 1.1rem;
+        }
+    }
+
+    &_header {
+        margin-bottom: 0 !important;
+
+        @include respond(phone){
+            margin-top: 0 !important;
+        }
+
+        &-partner {
+            text-align: center;
+        }
+    }
+
+    &_list {
+        text-align: center;
+        margin-bottom: 5rem;
+
+        @include respond(phone){
+            margin-top: 1rem;
+            margin-bottom: 6rem;
+        }
+        & > ul {
+            @include respond(phone){
+                padding-left: 0;
+            }
+            
+            & > li {
+                display: inline-block;
+                list-style: none;
+            }
+        } 
+    }
+
+    &_container {
+        border: .01rem solid rgba($primary-grey, .1);
+        box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+        width: 25rem;
+        height: 31.5rem;
+        border-radius: 3px;
+        margin: 0 2rem 3rem 0;
+        place-items: center;
+        background: #fff;
+        overflow: hidden;
+        display: grid;
+
+        @include respond(phone){
+            width: 95% !important;
+            margin: 0 1rem 3rem 0;
+        }
+    }
+
+    &_partner{
+        position: relative;
+
+        @include respond(phone){
+            margin: 0 auto;
+        }
+        &-nsf {
+            width: 12rem;
+            @include respond(tab-land){
+                width: 7rem;
+            }
+        }
+        &-chimad {
+            width: 24rem;
+            @include respond(tab-land){
+                width: 13rem;
+            }
+        }
+        &-naval,
+        &-nist {
+            width: 18rem;
+            @include respond(tab-land){
+                width: 9rem;
+            }
+        }
+
+        &-align {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+
+            @include respond(phone){
+                position: relative;
+                top: 0;
+                left: 0;
+                transform: none;
+            }
+        }
+
+        &-container {
+            margin-top: 14rem;
+        }
+    }
+
+    &_profile {
+        &-pic {
+            margin: 5% auto;
+            transition: .5s ease;
+
+            & > img {
+                width: 140px;
+                height: 140px;
+                object-fit: cover;
+                border-radius: 50%;
+                background-position: top;
+            }
+        }
+
+        &-header {
+            margin: 0 0 2px 0;
+            font-size: 1.5rem;
+        }
+
+        &-subhead {
+            font-size: .8rem;
+        }
+
+        &-text {
+           font-size: .9rem;
+           color: $primary-grey; 
+           font-style: italic;
+           line-height: 1.5;
+           margin: .5rem 0;
+           padding: 0 1rem;
+        }
+
+        &_link {
+            position: relative;
+            width: 100%;
+            height: 100px;
+            background: $primary;
+            border-radius: 0 5px 0 0;
+            transform: rotate(-8deg) translateY(69px);
+            transition: .5s;
+            transform-origin: left;
+            right: 0.9rem;
+
+            @include respond(phone){
+                transform: rotate(-8deg) translateY(63px);
+            }
+            
+            &-list {
+                position: absolute;
+                top: 20px;
+                right: 15px;
+                transform: rotate(10deg);
+
+                & > a {
+                    color: $primary-white;
+                    font-size: 1.4rem;
+                }
+            }
+        }
+    }
+}
+
+.howto_item {
+    cursor: pointer;
+    &-header{
+        display: flex;
+        display: -webkit-box;
+        display: -ms-flexbox;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        & > i {
+            font-size: 6rem;
+            margin-right: 1.5rem;
+            background-image: linear-gradient(to right bottom, $primary, rgba($primary-light, 0.4));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+
+            @include respond(phone){
+                font-size: 3rem;
+                margin-right: 1rem;
+            }
+        }
+        & > h1 {
+            display: inline-block;
+
+            @include respond(phone){
+                margin-top: 0;
+                font-size: 1.15rem;
+            }
+        }
+        @include respond(phone){
+            margin-bottom: .5rem;
+        }
+    }
+    & > p {
+        padding: 0 .5rem;
+        font-weight: 300;
+        @include respond(phone){
+            font-size: .8rem;
+        }
+    }
+
+    @include respond(phone){
+        margin-bottom: 1rem;
+        &:not(:last-child){
+            margin-bottom: 2rem;
+        }
+    }
+}
+
+.news {
+    &-container {
+        width: 75%;
+        margin: 0 auto;
+        margin-bottom: 5rem;
+        transition: all 0.3s cubic-bezier(.25,.8,.25,1);
+
+        &:hover{
+            box-shadow: 0 14px 28px rgba($primary-black,0.25), 0 10px 10px rgba($primary-black,0.22);
+            border-radius: 1rem;
+            padding: 3rem;
+            cursor: pointer;
+        }
+    }
+
+    &_header {
+        margin-top: 2rem;
+        text-align: center;
+    }
+
+    &_image{
+        float: left;
+        box-shadow: 0 1px 3px rgba($primary-black, .12), 0 1px 2px rgba($primary-black, .24);
+        margin-right: 3.2rem;
+        padding: .5rem;
+
+        & > img {
+            height: 15rem; 
+            width: auto;
+        }
+    }
+
+    &_text {
+        font-size: 1.4rem;
+        font-weight: 300;
+        word-spacing: .2rem;
+        line-height: 1.7;
+        text-align: justify;
+    }
+
+    &_title{
+        font-weight: 500;
+        font-size: 2rem;
+        color: $primary;
+    }
+
+    &_info {
+        margin-top: 1rem;
+        &-left {
+            color: $primary;
+            padding: .2rem;
+            padding-right: 1rem;
+            border-right: .1rem solid $primary;
+            display: inline-block;
+            & > span {
+                text-transform: uppercase;
+            }
+        }
+        &-right {
+            color: $primary;
+            display: inline-block;
+            padding-left: .8rem;
+        }
+    }
+}
+
+.tools {
+    background: #e2e1e0 !important;
+
+    &-simulation {
+        margin-top: 4rem;
+    }
+
+    &_shortcuts {
+        &-list {
+            margin: 0 auto;
+            & > ul {
+                padding-left: 0;
+                text-align: center;
+                li {
+                    display: table-cell;
+                    margin-right: 5rem;
+                    margin-bottom: 5rem;
+    
+                    @include respond(phone){
+                        display: block;
+                        margin-right: 0;
+                    }
+                }
+            } 
+        }
+    }
+
+    &_box {
+        background-size: cover;
+        border-radius: .6rem;
+        box-shadow: 0 1px 3px rgba($primary-black,0.12), 0 1px 2px rgba($primary-black, .24);
+        width: 45rem;
+        height: 30rem;
+
+        &--1 {
+            background-image: linear-gradient(0deg, 
+                                    rgba($primary-light, 1) 0%,
+                                    rgba($primary-light, .5) 0%,
+                                    transparent 0%),
+                            url(/nmstatic/img/recon_tool.PNG);
+        }
+
+        &--2 {
+            background-image: linear-gradient(0deg, 
+                                rgba($primary-light, 1) 0%,
+                                rgba($primary-light, .5) 0%,
+                                transparent 0%),
+                            url(/nmstatic/img/dynamfit.png);
+        }
+
+        &--3 {
+            background-image: linear-gradient(0deg, 
+                                rgba($primary-light, 1) 0%,
+                                rgba($primary-light, .5) 0%,
+                                transparent 0%),
+                            url(/nmstatic/img/prop_simu.png);
+        }
+
+        @include respond(laptop){
+            width: 34rem;
+            height: 25rem;
+        }
+
+        @include respond(tab-land){
+            width: 28rem;
+            height: 20rem;
+        }
+
+        @include respond(tab-port){
+            height: 18rem;
+        }
+
+        &-content {
+            margin-top: 3rem;
+            padding: .5rem 1rem;
+            text-align: justify;
+
+            &-odd {
+                width: 90%;
+            }
+        }
+    }
+
+    &_description {
+        font-size: 1.1rem;
+        font-weight: 400;
+        line-height: 2;
+        @include clearfix;
+    }
+
+    &_laucher {
+        float: right;
+        line-height: 1;
+    }
+
+    &_name {
+        & > h3 {
+            border-bottom: .1rem solid $primary-black;
+            margin-bottom: .5rem;
+            font-size: 1.5rem;
+        }
+    }
+}
+
+.upload {
+    &_text {
+        margin-top: 1.5rem;
+
+        & > span {
+            font-weight: bold;
+        }
+    }
+
+    &_lists {
+        font-family: "Roboto", sans-serif !important;
+        & div.dataset-header,
+        & * div.dataset-header {
+            background-color: $primary !important;
+        }
+
+        & * button,
+        & button {
+            background-color: $tertiary !important; 
+            color: $primary !important; 
+        }
+    }
+
+    &_btns {
+        background-color: $tertiary !important; 
+        color: $primary !important; 
+    }
+
+    &_txt {
+        font-family: "Roboto", sans-serif !important;
+        font-weight: 300;
+        font-size: 1.2rem;
+    }
+}
+
+.contactus {
+    width: 80%;
+    margin: 0 auto;
+    border: .1rem solid $primary;
+    padding: 2rem;
+    border-radius: .4rem;
+
+    &_radios {
+        padding-left: 0 !important;
+        & > li {
+            display: inline-block;
+            padding: .5rem;
+        }
+
+        &-text {
+            font-size: 1.6rem;
+            font-weight: 300;
+            word-spacing: .2rem;
+            text-align: justify;
+            margin-bottom: 1rem;
+        }
+    }
+}

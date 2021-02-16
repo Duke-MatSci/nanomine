@@ -6,6 +6,7 @@
         height: 42rem;
         width: 100%;
         background-size: cover;
+        z-index: 10;
 
         @include respond(tab-land){
             height: 34rem;
@@ -39,7 +40,11 @@
 
             & > i {
                 color: $tertiary;
-                font-size: 14rem;
+                font-size: 10rem;
+                @include respond(phone) {
+                    font-size: 5rem;
+                }
+
             }
 
             @include respond(tab-land) {
@@ -58,47 +63,7 @@
                 font-size: 1rem;
                 font-weight: 300;
             }
-
-
-            
-
-            // &--h1 {
-            //     font-weight: 300;
-            //     font-size: 2.4rem;
-            //     margin: 0 0 .2rem 0;
-
-            //     @mixin atSmall {
-            //         font-size: 4.8rem;
-            //         margin: 0;
-            //     }
-            // }
-
-            // &--h2 {
-            //     font-weight: 300;
-            //     font-size: 1.5rem;
-            //     margin: 0;
-
-            //     @mixin atSmall {
-            //         font-size: 2.9rem;
-                    
-            //     }
-            // }
-
         }
-        // &__description {
-        //     color: $white;
-        //     font-size: 1.1rem;
-        //     font-weight: 100;
-        //     text-shadow: 2px 2px 0 rgba(0,0,0,.1);
-        //     max-width: 30rem;
-        //     margin-left: auto;
-        //     margin-right: auto;
-
-        //     @mixin atSmall {
-        //         font-size: 1.875rem;
-        //     }
-
-        // }
 
         &__nav {
             position: absolute;
@@ -110,40 +75,63 @@
                 display: none;
             }
         }
+
+        &__misc {
+            height: 22rem !important;
+            background-position: left;
+
+            @include respond(phone){
+                height: 13rem !important;
+            }
+        }
+    }
+
+    &_teams {
+        margin: 0 0 4rem 0;
+
+        @include respond(laptop) {
+            margin: 0 0 2.5rem 0;
+        }
+
+        @include respond(tab-port) {
+            margin: 0;
+        }
     }
 
     &_quicklinks {
-        margin: 5.5rem 0;
+        // margin: 5.5rem 0;
+        padding: 5.5rem 0;
+        background-color: $primary-white;
         @include respond(laptop) {
-            display: none;
+            padding: 3.5rem 0;
+            // margin: 3.5rem 0;
         }
     }
 
     &_footer {
         background-color: $primary;
         padding: 1rem 0;
-
-        @include respond(tab-port) {
-            display: none;
-        }
     }
 
     &_visualize {
-        margin: 5.5rem 0 3.5rem 0;
-
+        // margin: 0 0 3.5rem 0;
+        padding: 5.5rem 0 3.5rem 0;
+        background-color: $primary-white;
         @include respond(laptop) {
             position: relative;
-            margin-top: 3.5rem;
-            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            // margin-top: 1.5rem;
         }
 
         @include respond(tab-land) {
-            margin-top: 0.5rem;
+            padding-top: 0.5rem;
+            // margin-top: 0.5rem;
         }
 
         @include respond(tab-port) {
-            margin-top: 1.9rem;
-            margin-bottom: 2.5rem;
+            padding-top: 1.9rem 0 2.5rem 0;
+            // margin-top: 1.9rem;
+            // margin-bottom: 2.5rem;
         }
 
         @include respond(phone){
@@ -153,5 +141,6 @@
 
     &_teams {
         padding: 2rem 0;
+        background-color: $primary-white;
     }
 }

@@ -1,18 +1,26 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Admin from '@/components/Admin'
-import NanoMine from '@/components/NanoMine'
+import BinarizeHomepage from '@/components/BinarizeHomepage'
 import Database from '@/components/Database'
-// import Insight from '@/components/Insight'
+import Contact from '@/components/Contact'
+import Dynamfit from '@/components/Dynamfit'
+import DynamfitExample from '@/components/DynamfitExample'
+import DynamfitExampleInput from '@/components/DynamfitExampleInput'
+import DynamfitResult from '@/components/DynamfitResult'
 import ModuleTools from '@/components/ModuleTools'
 import MyPage from '@/components/MyPage'
+import MaterialsMine from '@/components/MaterialsMine'
+import MetaMine from '@/components/metamine/MetaMine'
+import MetaMineTools from '@/components/metamine/MetaMineTools'
+import ModelViewer from '@/components/metamine/ModelViewer'
+import NanoMine from '@/components/NanoMine'
+import PixelUnit from '@/components/metamine/PixelUnit'
 import SimTools from '@/components/SimTools'
 import XMLCONV from '@/components/XMLCONV'
-// import NmEditor from '@/components/Editor'
 import McrHomepage from '@/components/McrHomepage'
-import BinarizeHomepage from '@/components/BinarizeHomepage'
 import Otsu from '@/components/Otsu'
 import NanoTutorials from '@/components/nanomine/NanoTutorials'
+import NuExampleUnitCell from '@/components/metamine/NuExampleUnitCell'
 import OtsuResult from '@/components/OtsuResult'
 import Niblack from '@/components/Niblack'
 import CharacterizeHomepage from '@/components/CharacterizeHomepage'
@@ -33,11 +41,9 @@ import SDFReconstructResults from '@/components/SDFReconstructResults'
 import CorrelationReconstructResults from '@/components/CorrelationReconstructResults'
 import DescriptorReconstructResults from '@/components/DescriptorReconstructResults'
 import ViewData from '@/components/ViewData'
-import Contact from '@/components/Contact'
-import Dynamfit from '@/components/Dynamfit'
-import DynamfitExample from '@/components/DynamfitExample'
-import DynamfitExampleInput from '@/components/DynamfitExampleInput'
-import DynamfitResult from '@/components/DynamfitResult'
+// import ThreeDModelViewer from '@/components/metamine/ThreeDModelViewer'
+// import NmEditor from '@/components/Editor'
+// import Visualization from '@/components/Visualization'
 import ChemProps from '@/components/ChemProps'
 import XmlUploader from '@/components/XmlUploader'
 import SmilesTest from '@/components/nanomine/SmilesTest'
@@ -47,8 +53,15 @@ import ChemPropsAPIToken from '@/components/ChemPropsAPIToken'
 import GalleryApp from '@/components/GalleryApp'
 
 // Nanomine Version 2
-// import LandingPage from '@/components/main/main.vue'
-// import TeamsPage from '@/components/teams/teams.vue'
+import LandingPage from '@/components/main/main.vue'
+import TeamsPage from '@/components/pages/teams/teams.vue'
+import HowTo from '@/components/pages/howto/howto.vue'
+import News from '@/components/pages/news/news.vue'
+import Tools from '@/components/pages/tools/tools.vue'
+import SimmTools from '@/components/pages/simm/simm.vue'
+import Upload from '@/components/pages/upload/upload.vue'
+import Textview from '@/components/pages/textview/textview.vue'
+import Contactus from '@/components/pages/contact/contact.vue'
 
 // DISABLED FOR NOW import XmlUploader from '@/components/XmlUploader'
 
@@ -59,25 +72,75 @@ export default new Router({
     return { x: 0, y: 0 }
   },
   routes: [
+    // {
+    //   path: '/',
+    //   name: 'NanoMine',
+    //   component: NanoMine
+    // },
     {
       path: '/',
-      name: 'NanoMine',
-      component: NanoMine
+      name: 'LandingPage',
+      component: LandingPage
     },
-    // {
-    //   path: '/home_v2',
-    //   name: 'LandingPage',
-    //   component: LandingPage
-    // },
-    // {
-    //   path: '/teams',
-    //   name: 'TeamsPage',
-    //   component: TeamsPage
-    // },
     {
-      path: '/admin',
-      name: 'Admin',
-      component: Admin
+      path: '/teams',
+      name: 'TeamsPage',
+      component: TeamsPage
+    },
+    {
+      path: '/how',
+      name: 'HowTo',
+      component: HowTo
+    },
+    {
+      path: '/news',
+      name: 'News',
+      component: News
+    },
+    {
+      path: '/research',
+      name: 'News',
+      component: News
+    },
+    {
+      path: '/tools',
+      name: 'Tools',
+      component: Tools
+    },
+    {
+      path: '/simmtools',
+      name: 'SimmTools',
+      component: SimmTools
+    },
+    {
+      path: '/upload',
+      name: 'Upload',
+      component: Upload
+    },
+    {
+      path: '/single',
+      name: 'Textview',
+      component: Textview
+    },
+    {
+      path: '/contactus',
+      name: 'Contactus',
+      component: Contactus
+    },
+    {
+      path: '/meta',
+      name: 'MetaMine',
+      component: MetaMine
+    },
+    {
+      path: '/meta/tools',
+      name: 'MetaMineTools',
+      component: MetaMineTools
+    },
+    {
+      path: '/meta/modelviewer',
+      name: 'ModelViewer',
+      component: ModelViewer
     },
     {
       path: '/db',
@@ -89,11 +152,6 @@ export default new Router({
       name: 'Contact',
       component: Contact
     },
-    // {
-    //   path: '/insight',
-    //   name: 'Insight',
-    //   component: Insight
-    // },
     {
       path: '/simtools',
       name: 'SimTools',
@@ -141,6 +199,11 @@ export default new Router({
       component: NanoTutorials
     },
     {
+      path: '/metamine/pixelunit50',
+      name: 'NuExampleUnitCell',
+      component: NuExampleUnitCell
+    },
+    {
       path: '/Otsu',
       name: 'Otsu',
       component: Otsu
@@ -169,6 +232,11 @@ export default new Router({
       path: '/Niblack',
       name: 'Niblack',
       component: Niblack
+    },
+    {
+      path: '/meta/pixelunit',
+      name: 'PixelUnit',
+      component: PixelUnit
     },
     {
       path: '/CorrelationCharacterize',
@@ -268,6 +336,11 @@ export default new Router({
       name: 'DynamfitResult',
       component: DynamfitResult
     },
+    // Use ModelViewer instead {
+    //   path: '/meta/threedmodelviewer',
+    //   name: 'ThreeDModelViewer',
+    //   component: ThreeDModelViewer
+    // },
     {
       path: '/SmilesTest',
       name: 'SmilesTest',

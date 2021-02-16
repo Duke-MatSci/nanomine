@@ -1,0 +1,25 @@
+<template title="Materialsmine V2.0 - Teams Page">
+    <div>
+        <a-header :info="info"></a-header>
+        <div class="section_teams">
+            <div class="wrapper">
+                <div class="howto_item" v-for="(video, idx) in videos" :key="idx">
+                    <div class="howto_item-header" @click="displayVideo(idx)">
+                        <i class="fa fa-tv"></i> <h1 :title="video.title" class="visualize_header-h1">{{ video.title }}</h1>
+                    </div>
+                    <p>{{ video.text }}</p>
+                    <div v-if="!video.hide">
+                        <v-playback :url="video.url"></v-playback>
+                    </div>
+                </div>
+                <div class="howto_item">
+                    <div class="howto_item-header" @click="displayVideo('null', true)">
+                        <i class="fa fa-youtube"></i> <h1 title="Nanomine Visualization Gallery" class="visualize_header-h1">Nanomine Visualization Gallery</h1>
+                    </div>
+                    <p>This video tutorial is a short overview of the charts platform.</p>
+                </div>
+            </div>
+        </div>
+        <a-footer></a-footer>
+    </div>
+</template>
