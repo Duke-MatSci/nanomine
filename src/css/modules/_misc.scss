@@ -348,6 +348,20 @@
                             url(/nmstatic/img/prop_simu.png);
         }
 
+        @include respond(laptop){
+            width: 34rem;
+            height: 25rem;
+        }
+
+        @include respond(tab-land){
+            width: 28rem;
+            height: 20rem;
+        }
+
+        @include respond(tab-port){
+            height: 18rem;
+        }
+
         &-content {
             margin-top: 3rem;
             padding: .5rem 1rem;
