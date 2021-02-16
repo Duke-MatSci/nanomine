@@ -2,7 +2,7 @@
     <div>
         <header class="header">
             <div class="wrapper">
-                <div class="header-logo">
+                <div class="header-logo" @click="links('/nm#/')">
                     <div class="">
                         <img src="/nmstatic/img/logo.svg" alt="Materialsmine Logo">
                     </div>
@@ -13,13 +13,8 @@
                 <div class="header_nav">
                     <div class="nav nav_menu u--inline">
                         <ul>
-<<<<<<< HEAD
                             <li><a href="/nm#/">NanoMine</a></li>
                             <li><a href="#">MetaMine</a></li>
-=======
-                            <li><a href="/nm#">Nanomine</a></li>
-                            <li><a href="#">Metamine</a></li>
->>>>>>> 0c4614ed6740930cdc5a9af0eabec228b8956a83
                         </ul>
                     </div>
                     <div class="u--inline">
@@ -91,10 +86,5 @@
         name: 'Header',
         props: ['info'],
         mixins: [AppMixin],
-        // methods: {
-        //     links(args) {
-        //         return window.open(args, '_self');
-        //     }
-        // }
     }
 </script>

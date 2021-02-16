@@ -48,9 +48,6 @@ export default {
       } catch(err){
         throw err;
       }
-    },
-    linkChart(args) {
-      return window.location = args
     }
   },
   created() {

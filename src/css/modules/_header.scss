@@ -19,6 +19,7 @@
         width: 27rem;
         display: inline-block;
         margin: .5rem 0;
+        cursor: pointer;
 
         @include respond(tab-land){
             width: 21rem;
