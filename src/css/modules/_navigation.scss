@@ -76,8 +76,13 @@
             border-top-right-radius: .5rem;
             display: none;
             visibility: hidden;
-            @-moz-document url-prefix() { 
+
+            @include respond(laptop){
                 top: 2rem;
+            }
+            
+            @include respond(tab-land){
+                top: 1.8rem;
             }
 
             &-lists {

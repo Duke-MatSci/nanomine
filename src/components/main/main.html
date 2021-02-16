@@ -84,7 +84,7 @@
                     <h1 title="Visualization Headline" class="visualize_header-h1">Visualize Your Data</h1>
                 </div>
                 <div class="visualize_accordion" title="Visualization Container">
-                    <div class="visualize_chart charts-1" v-for="(result, index) in exploreChart" :key="index">
+                    <div class="visualize_chart" :class="`charts-${index + 1}`" v-for="(result, index) in exploreChart" :key="index">
                         <div class="visualize_chart-content" :class="`charts_content-${index + 1}`" @click.prevent="linkChart(result.backup.uri)">
                             <img :src="result.backup.depiction" :alt="result.backup.title">
                             <span>{{result.backup.title}}</span>
