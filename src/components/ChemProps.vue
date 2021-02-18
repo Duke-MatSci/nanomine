@@ -55,7 +55,7 @@
           <v-flex xs12 sm6 md6 class="text-xs-left" v-if="stdname !== ''">
             <p class="text-xs-left">Standardized chemical name and density information:</p>
             <v-text-field v-model="stdname" label='Standardized Name' outlined></v-text-field>
-            <v-text-field v-model="density" label='Density (g/cm3)' outlined></v-text-field>
+            <v-text-field v-model="density" label='Density (g/cm3 at 25°C)' outlined></v-text-field>
             <v-text-field v-model="uSMILES" label='uSMILES' outlined v-if="pfRadios === 'pol'"></v-text-field>
             <p v-if="pfRadios === 'pol'">Structure
             <Smiles :smilesOptions="smilesOptions" :smilesInput="inputStr" :formulaHandler="formulaUpdated" :onSuccessHandler="onSuccess" :onErrorHandler="onError" height="100%" width="100%"></Smiles>
@@ -203,7 +203,7 @@ export default {
       // TODO need to configure after nmcp API done
       vm.setLoading()
       Axios.request({
-        url: `${URL}/chemprops?polfil=${vm.pfRadios}&nmId=restNmId&chemicalname=${vm.chemicalname}&abbreviation=${vm.abbreviation}&tradename=${vm.tradename}&usmiles=${vm.SMILES}`,
+        url: `${URL}/chemprops?polfil=${vm.pfRadios}&nmId=restNmId&chemicalname=${vm.chemicalname}&abbreviation=${vm.abbreviation}&tradename=${vm.tradename}&smiles=${vm.SMILES}`,
         method: 'get',
         headers: {
           Accept: 'application/json',
