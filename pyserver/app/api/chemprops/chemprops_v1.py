@@ -24,7 +24,7 @@ class ChemPropsApiDoc: # /api/doc
       'ChemicalName': 'Chemical name to locate',
       'Abbreviation': 'Optional abbreviation to locate',
       'TradeName': 'Optional trade name to locate',
-      'uSMILES': 'Optional specific SMILES value to locate',
+      'SMILES': 'Optional specific SMILES value to locate',
       'nmId': 'NanoMine id, required for XMLCONV calls'
       }
     }
@@ -42,7 +42,7 @@ class ChemProps(Resource):
   @api.doc(params={'ChemicalName': ChemPropsApiDoc.getDoc('get','/','ChemicalName')})
   @api.doc(params={'Abbreviation': ChemPropsApiDoc.getDoc('get','/','Abbreviation')})
   @api.doc(params={'TradeName': ChemPropsApiDoc.getDoc('get','/','TradeName')})
-  @api.doc(params={'uSMILES': ChemPropsApiDoc.getDoc('get','/','uSMILES')})
+  @api.doc(params={'SMILES': ChemPropsApiDoc.getDoc('get','/','SMILES')})
   @api.doc(params={'nmId': ChemPropsApiDoc.getDoc('get','/','nmId')})
   @api.response(400,'Incorrect request parameters')
   @api.response(401,'Authentication required')
@@ -51,7 +51,7 @@ class ChemProps(Resource):
   @token_required # removed authentication requirement for now
   def get(self):
     """get chemprops info based on search criteria"""
-    callParams = ('ChemicalName', 'Abbreviation', 'TradeName', 'uSMILES')
+    callParams = ('ChemicalName', 'Abbreviation', 'TradeName', 'SMILES')
     parser = reqparse.RequestParser() # marshmallow is preferred parser, this is technically deprecated but supported long term
     parser.add_argument('polfil', required=True, help=ChemPropsApiDoc.getDoc('get','/','polfil'))
     parser.add_argument('nmId', required=True, help=ChemPropsApiDoc.getDoc('get','/','nmId'))

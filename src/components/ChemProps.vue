@@ -203,7 +203,7 @@ export default {
       // TODO need to configure after nmcp API done
       vm.setLoading()
       Axios.request({
-        url: `${URL}/chemprops?polfil=${vm.pfRadios}&nmId=restNmId&chemicalname=${vm.chemicalname}&abbreviation=${vm.abbreviation}&tradename=${vm.tradename}&usmiles=${vm.SMILES}`,
+        url: `${URL}/chemprops?polfil=${vm.pfRadios}&nmId=restNmId&chemicalname=${vm.chemicalname}&abbreviation=${vm.abbreviation}&tradename=${vm.tradename}&smiles=${vm.SMILES}`,
         method: 'get',
         headers: {
           Accept: 'application/json',
