@@ -46,7 +46,7 @@ exports.chemprops = async(req, res, next) => {
             const nmId = 'restNmId';
             const Abbreviation = req.query.abbreviation ? req.query.abbreviation : req.query.chemicalname;
             const TradeName = req.query.tradename ? req.query.tradename : req.query.chemicalname;
-            const uSMILES = req.query.usmiles ? req.query.usmiles : req.query.chemicalname;
+            const SMILES = req.query.smiles ? req.query.smiles : req.query.chemicalname;
             let httpsAgent = {
                 host: 'localhost',
                 port: '443',
@@ -56,7 +56,7 @@ exports.chemprops = async(req, res, next) => {
             }
             result = await axios({
                 'method': 'get',
-                'url': req.env.nmLocalRestBase + `/api/v1/chemprops?polfil=${polfil}&nmId=${nmId}&ChemicalName=${ChemicalName}&Abbreviation=${Abbreviation}&TradeName=${TradeName}&uSMILES=${uSMILES}`,
+                'url': req.env.nmLocalRestBase + `/api/v1/chemprops?polfil=${polfil}&nmId=${nmId}&ChemicalName=${ChemicalName}&Abbreviation=${Abbreviation}&TradeName=${TradeName}&SMILES=${SMILES}`,
                 // 'params': {ID: 12345},
                 'httpsAgent': new https.Agent(httpsAgent),
                 'headers': {'Content-Type': 'application/json', 'token': token}
