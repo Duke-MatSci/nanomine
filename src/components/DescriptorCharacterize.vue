@@ -12,29 +12,38 @@
 -->
 
 <template>
-  <McrJobsTemplate v-bind:job='jobInfo'></McrJobsTemplate>
+  <div>
+    <a-header :info="info"></a-header>
+    <div class="main">
+      <McrJobsTemplate v-bind:job='jobInfo'></McrJobsTemplate>
+    </div>
+    <a-footer></a-footer>
+  </div>
 </template>
 
 <script>
 
 import {} from 'vuex'
 import McrJobsTemplate from './McrJobsTemplate.vue'
-
+import * as Util from './utils'
 export default {
 
   name: 'DescriptorCharacterize',
 
   components: {
+    aHeader: Util.Header,
+    aFooter: Util.Footer,
     McrJobsTemplate
   },
 
   data: () => {
     return {
+      info: {icon: 'fa-bullseye', name: 'Microstructure Characterization'},
       jobInfo: {
 
         jobTitle: 'Descriptor Characterization',
 
-        pageTitle: 'Microstructure Characterization - Physical Descriptors',
+        pageTitle: 'Physical Descriptors',
 
         description: [
           'Upload a binarized image or a ZIP file containing set of images and click "Characterize" to get descriptors for filler material. The descriptors evaluated by this webtool are - filler volume fraction (equivalent to area fraction), number of filler clusters and area, aspect ratio & nearest neighbor distance of each filler cluster. Nearest neighbor distance of a cluster is the distance between its centroid and that of a cluster nearest to it. Except for volume fraction, number of clusters and aspect ratio (which are dimensionless), all descriptors have units of "pixels" ("pixel^2" for area descriptor).'

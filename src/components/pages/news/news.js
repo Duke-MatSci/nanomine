@@ -10,11 +10,8 @@ export default {
     aHeader: Util.Header
   },
   methods: {
-    showBox () {
-      console.log(this.filter)
+    link (args) {
+      return window.open(args, '_blank');
     }
-  },
-  created() {
-    console.log("hello world", this.filter)
   }
 }

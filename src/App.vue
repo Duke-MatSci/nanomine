@@ -4,19 +4,19 @@
   </div>
   <div v-else>
     <v-app id="app" app>
-      <waiting/>
-      <LeftMenu/>
-      <page-header/>
-      <page-subheader/>
-      <router-view class="app-router"/>
-      <page-footer v-if="$route.path === '/'" />
+      <!--<waiting/>-->
+      <!--<LeftMenu/>-->
+      <!--<page-header/>-->
+      <!--<page-subheader/>-->
+      <router-view />
+      <!--<page-footer v-if="$route.path === '/'" />-->
     </v-app>
   </div>
 </template>
 <script>
-
 // import {} from 'vuex'
-const newDev = ['/', '/teams', '/how', '/news', '/research', '/tools', '/simmtools', '/upload', '/single', '/contactus'];
+// const newDev = ['/', '/teams', '/how', '/news', '/research', '/tools', '/simmtools', '/upload', '/single', '/contactus'];
+const newDev = [''];
 export default {
   name: 'App',
   computed: {
@@ -63,4 +63,8 @@ export default {
 <style>
   @import './css/styles.css';
   @import './css/old_css.css';
+  #app {
+    margin-top: 0!important;
+    background-color: #08233c;
+  }
 </style>

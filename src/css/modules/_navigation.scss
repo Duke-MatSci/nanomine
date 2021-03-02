@@ -61,6 +61,10 @@
             position: relative;
         }
 
+        &--sibheader {
+            top: 1.8rem !important;
+        }
+
         &--siblings {
             padding: .3rem 0;
             border-bottom: 0.3rem solid rgb(8, 35, 60);

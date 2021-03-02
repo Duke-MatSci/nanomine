@@ -1,4 +1,3 @@
-import Data from '../../data'
 import * as Util from '../../utils'
 export default {
   name: 'SimmTools',

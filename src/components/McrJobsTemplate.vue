@@ -13,10 +13,8 @@
 
 <template>
 <div>
-
-  <h1>{{ job.pageTitle }}</h1>
-
   <v-container class="text-xs-left">
+    <h1>{{ job.pageTitle }}</h1>
 
     <!-- Error for when user is not logged in -->
     <v-alert v-model="loginRequired" type="error" outline>{{ loginRequiredMsg }}</v-alert>
@@ -372,8 +370,8 @@ export default {
 
   h1 {
     margin-top: 10px;
-    background-color: black;
-    color: white;
+    padding-bottom: .1rem;
+    border-bottom: .2rem solid black;
   }
 
   h3 {

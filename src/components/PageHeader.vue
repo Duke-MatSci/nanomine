@@ -42,10 +42,7 @@
         </v-btn>
       </v-toolbar-items>
     </v-toolbar>
-    <v-dialog
-      v-model="logoutDialog"
-      max-width="290"
-    >
+    <v-dialog v-model="logoutDialog" max-width="290">
       <v-card>
         <v-card-title class="headline blue lighten-2" primary-title>Log out</v-card-title>
         <v-card-text>
