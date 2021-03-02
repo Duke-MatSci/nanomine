@@ -16,7 +16,6 @@
     <a-header :info="info"></a-header>
     <div class="main">
       <McrJobsTemplate v-bind:job='jobInfo'></McrJobsTemplate>
-      <v-btn v-on:click="window.history.go(-1);" color="primary">Go Back</v-btn>
     </div>
     <a-footer></a-footer>
   </div>
