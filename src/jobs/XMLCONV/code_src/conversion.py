@@ -102,7 +102,7 @@ def conversion(jobDir, code_srcDir, xsdDir, templateName, user, datasetId):
     nm_dataset_initial_doi = os.environ['NM_DATASET_INITIAL_DOI']
     webbase = os.environ['NM_WEB_BASE_URI']
 
-    xsdFilename = xsdDir.split("/")[-1]
+    xsdFilename = os.path.split(xsdDir)[1]
 
     runCtx = {
       'nm_dataset_initial_doi': nm_dataset_initial_doi,
