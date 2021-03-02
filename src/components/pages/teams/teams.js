@@ -1,4 +1,3 @@
-import Data from '../../data'
 import * as Util from '../../utils'
 export default {
   name: 'TeamsPage',
@@ -8,13 +7,5 @@ export default {
   components: {
     aFooter: Util.Footer,
     aHeader: Util.Header
-  },
-  methods: {
-    showBox () {
-      console.log(this.filter)
-    }
-  },
-  created() {
-    console.log("hello world", this.filter)
   }
 }

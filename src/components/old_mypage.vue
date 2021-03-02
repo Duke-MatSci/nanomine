@@ -3,10 +3,546 @@
     <a-header :info="info"></a-header>
     <div class="main">
       <v-flex class="mypage">
-        <h1><i class="material-icons">ballot</i> Reports</h1>
-        <h1><i class="material-icons">laptop</i> Administrative Tools</h1>
-        <h1><i class="material-icons">dashboard</i> Featured Tools + Resources</h1>
+
+        <h1>{{ msg }}</h1>
         <v-container grid-list-xl>
+          <v-alert
+            v-model="myPageError"
+            type="error"
+            dismissible
+          >
+            {{myPageErrorMsg}}
+          </v-alert>
+          <!--
+
+            Admin functions
+
+          -->
+          <v-layout row wrap>
+            <!--v-flex xs4 v-show="isAdmin()" v-on:click="$router.push('/admin')"-->
+            <v-card v-show="isAdmin()" style="width:100%;">
+              <v-card-title class="admin-header"><span style="width:50%;" class="text-xs-left">
+              <v-btn
+                fab small
+                color="primary"
+                class="white--text"
+                @click="toggleShowAdmin()"
+              >
+              <v-icon light v-if="showAdmin">expand_more</v-icon>
+              <v-icon light v-else>expand_less</v-icon>
+              </v-btn>
+                Administrative Functions
+              </span>
+              </v-card-title>
+              <span v-show="showAdmin">
+              <div class="sect-divider"></div>
+              <h5 class="text-xs-left">
+              <v-btn
+                small left flat light
+                color="primary"
+                class="white--text"
+                @click="toggleShowSchemaMgt()"
+              >
+              <v-icon light v-if="showSchemaMgt">expand_more</v-icon>
+              <v-icon light v-else>expand_less</v-icon>
+              </v-btn>Schema Management ...</h5>
+                <v-alert
+                  v-model="schemaSuccess"
+                  type="success"
+                  dismissible
+                >
+                {{schemaSuccessMsg}}
+                </v-alert>
+                <v-alert
+                  v-model="schemaError"
+                  type="error"
+                  dismissible
+                >
+                {{schemaErrorMsg}}
+                </v-alert>
+                <v-layout row wrap justify-center v-if="showSchemaMgt">
+                  <v-card flat>
+                    <v-card-text class="title font-weight-light">Upload Schema</v-card-text>
+                    <v-divider/>
+                    <v-btn class="text-xs-left" small color="primary" @click='selectSchemaFile'>Browse</v-btn>
+                    <input
+                      type="file"
+                      style="display: none"
+                      accept=".xsd"
+                      ref="schemaFileRef"
+                      @change="onSchemaSelected"
+                    >
+                    <v-btn v-if="schemaFileName && schemaFileName.length > 0" class="text-xs-left" small color="primary"
+                          @click="doSchemaUpload()">Upload</v-btn>
+
+                    <v-card-text v-if="schemaFileName && schemaFileName.length > 0" class="body">Selected: {{schemaFileName}}</v-card-text>
+                  </v-card>
+                </v-layout>
+              <div class="sect-divider"></div>
+              <h5 class="text-xs-left">
+                <v-btn
+                  small left flat light
+                  color="primary"
+                  class="white--text"
+                  @click="toggleShowBecomeUser()"
+                >
+              <v-icon light v-if="showBecomeUser">expand_more</v-icon>
+              <v-icon light v-else>expand_less</v-icon>
+              </v-btn>Become User ...</h5>
+              <v-data-table v-if="showBecomeUser"
+                            v-model="userselected"
+                            :headers="userheaders"
+                            :items="users"
+                            :pagination.sync="userpagination"
+                            select-all
+                            item-key="userid"
+                            class="elevation-1"
+              >
+                <template slot="headers" slot-scope="props">
+                  <tr>
+                    <th>
+                      <v-checkbox
+                        :indeterminate="getUserIndeterminate()"
+                        primary
+                        hide-details
+                        @click="usersToggle"
+                      ></v-checkbox>
+                    </th>
+
+                    <th
+                      v-for="header in props.headers"
+                      :key="header.text"
+                      :class="['text-xs-right column sortable', userpagination.descending ? 'desc' : 'asc', header.value === userpagination.sortBy ? 'active' : '']"
+                      @click="usersChangeSort(header.value)"
+                    >
+                      <v-icon small>arrow_upward</v-icon>
+                      {{ header.text }}
+                    </th>
+                  </tr>
+                </template>
+                <template slot="items" slot-scope="props">
+                  <td :active="props.item.selected" @click="props.item.selected = !props.item.selected">
+                    <v-checkbox
+                      v-model="props.item.selected"
+                      primary
+                      hide-details
+                      @click="userSelect(props.item.userid)"
+                    ></v-checkbox>
+                  </td>
+                  <td class="text-xs-right">{{ props.item.userid }}</td>
+                  <td class="text-xs-right">{{ props.item.displayName }}</td>
+                  <td class="text-xs-right">{{ props.item.email }}</td>
+                </template>
+              </v-data-table>
+                </span>
+              <p class="warn-red" v-show="auth.getRunAsUser() !== null">
+                Running as {{auth.getRunAsUser()}} for Curate functions, otherwise running as {{auth.getGivenName()}}
+              </p>
+              <p class="warning">
+                You have administrative privileges. Be careful.
+              </p>
+            </v-card>
+            <div class="sect-divider"></div>
+            <!--
+              Select schema
+            -->
+            <!--v-card style="width:100%">
+              <v-card-title class="dataset-header"><span style="width:40%;" class="text-xs-left">
+              <v-combobox single-line dense
+                v-model="selectedSchemaTitle"
+                @change="onSchemaComboChanged()"
+                :items="schemaTitles"
+                label="Using latest schema - click to change"
+                default="{{firstSchemaTitle}}"
+              ></v-combobox>
+              </span>
+              </v-card-title>
+            </v-card-->
+            <!--
+
+              Dataset Selection
+
+            -->
+            <v-card style="width:100%;">
+              <v-card-title class="dataset-header">
+                <span class="text-xs-left">
+                <v-btn
+                  fab small
+                  color="primary"
+                  class="white--text"
+                  @click="toggleDatasetHide"
+                >
+                <v-icon light v-if="!datasetHideSelector">expand_more</v-icon>
+                <v-icon light v-else>expand_less</v-icon>
+                </v-btn>
+                <!-- Removing add datasets -->
+                <!--v-btn
+                  v-if="isLoggedIn()"
+                  fab small
+                  color="primary"
+                  class="white--text"
+                  @click="addDataset"
+                ><v-icon>library_add</v-icon></v-btn-->
+                <v-btn
+                  v-if="datasetsHeaderInfoIcon"
+                  fab small
+                  color="primary"
+                  class="white--text"
+                  @click="datasetInfoDialog()"
+                >
+                  <v-icon>info</v-icon>
+                </v-btn>
+                {{datasetsHeaderTitle}}</span>
+                <v-spacer></v-spacer>
+                <span class="text-xs-right" style="width:50%;"
+                      v-show="datasetSelected !== null">{{headerDOI}}</span>
+              </v-card-title>
+              <v-card-title v-show="!datasetHideSelector">
+                <!--v-btn v-on:click="mineOnly()"><span v-show="showMineOnly">Show All</span><span v-show="!showMineOnly">Mine Only</span></v-btn-->
+                <v-checkbox
+                  v-if="isLoggedIn()"
+                  v-model="showMineOnly"
+                  primary
+                  hide-details
+                  label="Show mine only"
+                ></v-checkbox>
+                <v-spacer></v-spacer>
+                <v-text-field
+                  v-model="datasetSearch"
+                  append-icon="search"
+                  label="Filter datasets"
+                  single-line
+                  hide-details
+                ></v-text-field>
+              </v-card-title>
+              <v-data-table v-show="!datasetHideSelector" :headers="datasetHeaders" :items="datasetsFiltered"
+                            :search="datasetSearch">
+                <v-divider></v-divider>
+                <template slot="items" slot-scope="props" height="300">
+                  <td class="text-xs-left"
+                      v-on:click="datasetClick(props.item)">
+                    {{props.item.seq}}
+                  </td>
+                  <td class="text-xs-left"
+                      v-on:click="datasetClick(props.item)">
+                    {{props.item.doi}}
+                  </td>
+                  <td class="text-xs-left"
+                      v-on:click="datasetClick(props.item)">
+                    {{props.item.title}}
+                  </td>
+                  <td class="text-xs-left"
+                      v-on:click="datasetClick(props.item)">
+                    {{props.item.datasetComment}}
+                  </td>
+                </template>
+                <v-alert slot="no-results" :value="true" color="error" icon="warning">
+                  Your search for "{{ datasetSearch }}" found no results.
+                </v-alert>
+              </v-data-table>
+            </v-card>
+            <div class="sect-divider"></div>
+            <!--
+
+              Fileset Selection
+
+            -->
+            <v-card style="width:100%;" v-show="datasetSelected !== null">
+              <v-card-title class="filesets-header"><span style="width:50%;" class="text-xs-left">
+                <v-btn
+                  fab small
+                  color="primary"
+                  class="white--text"
+                  @click="toggleFilesetsHide"
+                >
+                <v-icon light v-if="!filesetsHideSelector">expand_more</v-icon>
+                <v-icon light v-else>expand_less</v-icon>
+
+              </v-btn>{{filesetsHeaderTitle}}</span>
+                <span class="text-xs-right" style="width:50%;" v-show="filesetSelected !== null">
+                {{headerFilesetName}}
+              </span>
+              </v-card-title>
+              <v-card-title v-show="!filesetsHideSelector">
+                <v-spacer></v-spacer>
+                <v-text-field
+                  v-model="filesetsSearch"
+                  append-icon="search"
+                  label="Filter filesets"
+                  single-line
+                  hide-details
+                ></v-text-field>
+              </v-card-title>
+              <v-data-table v-show="!filesetsHideSelector" :headers="filesetsHeaders" :items="filesetsList"
+                            :search="filesetsSearch">
+                <v-divider></v-divider>
+                <template slot="items" slot-scope="props" height="300">
+                  <td class="text-xs-left"
+                      v-on:click="filesetClick(props.item)"
+                  >
+                    {{props.item.fileset}}
+                  </td>
+                </template>
+                <v-alert slot="no-results" :value="true" color="error" icon="warning">
+                  Your search for "{{ filesetsSearch }}" found no results.
+                </v-alert>
+              </v-data-table>
+            </v-card>
+            <!--
+
+              Files Selection
+
+            -->
+            <v-card style="width:100%;" v-show="filesetSelected !== null">
+              <v-card-title class="files-header">
+                <span style="width:40%;" class="text-xs-left">
+                  <v-btn
+                    fab small
+                    color="primary"
+                    class="white--text"
+                    @click="toggleFilesHide"
+                  >
+                    <v-icon light v-if="!filesHideSelector">expand_more</v-icon>
+                    <v-icon light v-else>expand_less</v-icon>
+                  </v-btn>
+                  <!--v-btn v-if="datasetSelected && datasetSelected.filesets.length > 0"
+                        fab small
+                        color="primary"
+                        class="white--text"
+                        @click="filesDialogActive = true"
+                  >
+                    <v-icon light>cloud_download</v-icon>
+                  </v-btn-->
+                {{filesHeaderTitle}}
+              </span>
+                <span class="text-xs-right" style="width:60%;" v-show="fileSelected !== null">
+                <!--v-btn v-if="sampleFileinfo.length > 0"
+                        fab small
+                        color="primary"
+                        class="white--text"
+                        @click="filesDialogActive = true"
+                >
+                <v-icon light>cloud_download</v-icon>
+                </v-btn-->
+                {{headerFileName}}
+              </span>
+              </v-card-title>
+              <v-card-title v-show="!filesHideSelector">
+                <v-spacer></v-spacer>
+                <v-text-field
+                  v-model="filesSearch"
+                  append-icon="search"
+                  label="Filter list of files"
+                  single-line
+                  hide-details
+                ></v-text-field>
+              </v-card-title>
+              <v-data-table
+                v-show="!filesHideSelector"
+                :headers="filesHeaders"
+                :items="filesList"
+                :search="filesSearch"
+                v-model="filesDownloadSelected"
+                select-all
+                item-key="id"
+                :pagination.sync="filespagination"
+              >
+                <template slot="headers" slot-scope="props">
+                  <tr>
+                    <!--th>
+                      <v-checkbox
+                        :input-value="props.all"
+                        zzindeterminate="props.indeterminate"
+                        primary
+                        hide-details
+                        @click.stop="sampleFileToggleAll()"
+                      ></v-checkbox>
+                    </th-->
+                    <th
+                      style="text-align:left;"
+                      v-for="header in props.headers"
+                      :key="header.text"
+                      :class="['column sortable', filespagination.descending ? 'desc' : 'asc', header.value === filespagination.sortBy ? 'active' : '']"
+                      @click="filesChangeSort(header.value)"
+                    >
+                      <v-icon small>arrow_upward</v-icon>
+                      {{ header.text }}
+                    </th>
+                  </tr>
+                </template>
+                <v-divider></v-divider>
+                <template slot="items" slot-scope="props" height="300">
+                  <!--td :active="props.selected" @click="props.selected = !props.selected">
+                    <v-checkbox
+                      :input-value="props.selected"
+                      primary
+                      hide-details
+                    ></v-checkbox>
+                  </td-->
+                  <td class="text-xs-left"><a :href="getDownloadName(props.item)"><v-icon small>cloud_download</v-icon></a></td>
+                  <td class="text-xs-left" v-if="isFileViewable(props.item)" v-on:click="fileClick(props.item)"><v-icon small>visibility</v-icon></td>
+                  <td class="text-xs-left" v-else><span>&nbsp;</span><!--v-icon small>visibility_off</v-icon--></td>
+                  <td class="text-xs-left">
+                    {{getFileFilename(props.item)}}
+                  </td>
+                  <td class="text-xs-left">
+                    {{getFileDisplayType(props.item)}}
+                  </td>
+                  <td class="text-xs-left">
+                    {{props.item.id}}
+                  </td>
+                </template>
+                <v-alert slot="no-results" :value="true" color="error" icon="warning">
+                  Your search for "{{ filesSearch }}" found no results.
+                </v-alert>
+              </v-data-table>
+            </v-card>
+            <v-alert
+              v-model="fileError"
+              type="error"
+              dismissible
+            >
+              {{fileErrorMsg}}
+            </v-alert>
+            <v-card style="width:100%;" v-show="(fileSelected !== null && fileSelected.type === 'xmldata')">
+              <v-container v-bind:style="{'display': formInView}" fluid justify-start fill-height>
+                <v-layout row wrap align-start fill-height>
+                  <v-flex fill-height xs12 align-start justify-start>
+                    <div>
+                      <tree-view ref="tree" style="text-align: left;" :data="fileObj"
+                                :options="sampleTreeviewOptions()"></tree-view>
+                    </div>
+                  </v-flex>
+                </v-layout>
+              </v-container>
+            </v-card>
+            <v-card style="width:100%;" v-show="(fileSelected !== null && fileSelected.type === 'blob')">
+              <v-container v-bind:style="{'display': formInView}" fluid justify-start fill-height>
+                <v-layout row wrap align-start fill-height>
+                  <v-flex fill-height xs12 align-start justify-start>
+                    <v-img v-if="fileImageDataUri !== null" ref="fileImageDisplay" :src="fileImageDataUri"></v-img>
+                  </v-flex>
+                </v-layout>
+              </v-container>
+            </v-card>
+          </v-layout>
+          <!--
+
+            Result Files Dialog
+
+          -->
+          <v-layout row justify-center>
+            <v-dialog v-model="filesDialogActive" scrollable width="500">
+              <v-card>
+                <v-card-title class="sample-file-download-header">Download related files</v-card-title>
+                <v-data-table
+                  v-model="filesDownloadSelected"
+                  UNUSED4NOWselect-all
+                  item-key="id"
+                  :pagination.sync="filespagination"
+                  :headers="filesHeaders"
+                  :items="filesList">
+                  <template slot="headers" slot-scope="props">
+                    <tr>
+                      <th>
+                        <v-checkbox
+                          :input-value="props.all"
+                          :indeterminate="props.indeterminate"
+                          primary
+                          hide-details
+                          @click.stop="sampleFileToggleAll()"
+                        ></v-checkbox>
+                      </th>
+                      <th
+                        style="text-align:left;"
+                        v-for="header in props.headers"
+                        :key="header.text"
+                        :class="['column sortable', filespagination.descending ? 'desc' : 'asc', header.value === filespagination.sortBy ? 'active' : '']"
+                        @click="filesChangeSort(header.value)"
+                      >
+                        <v-icon small>arrow_upward</v-icon>
+                        {{ header.text }}
+                      </th>
+                    </tr>
+                  </template>
+                  <v-divider></v-divider>
+                  <template slot="items" slot-scope="props" height="320">
+                    <td :active="props.selected" @click="props.selected = !props.selected">
+                      <v-checkbox
+                        :input-value="props.selected"
+                        primary
+                        hide-details
+                      ></v-checkbox>
+                    </td>
+                    <td class="text-xs-left">
+                      <a :href="getDownloadName(props.item)">{{props.item.metadata.filename}}</a>
+                    </td>
+                  </template>
+                </v-data-table>
+                <v-divider></v-divider>
+                <v-card-actions class="download-footer">
+                  <v-btn color="primary" @click.native="sampleFileDownload()">Download</v-btn>
+                  <v-btn color="normal" @click.native="filesDialogActive = false">Close</v-btn>
+                </v-card-actions>
+              </v-card>
+            </v-dialog>
+          </v-layout>
+
+          <!--
+
+            Dataset Info Dialog
+
+          -->
+          <!--v-layout row justify-center-->
+          <v-dialog v-model="datasetInfoDialogActive">
+            <v-layout row>
+              <v-flex xs12 sm6 offset-sm3>
+                <v-card>
+                  <v-toolbar color="cyan" dark>
+                    <!--v-toolbar-side-icon></v-toolbar-side-icon-->
+
+                    <v-toolbar-title>Dataset Information</v-toolbar-title>
+
+                    <v-spacer></v-spacer>
+
+                    <v-btn icon @click="datasetInfoDialogActive=false">
+                      <v-icon>close</v-icon>
+                    </v-btn>
+                  </v-toolbar>
+
+                  <v-list two-line>
+                    <template v-for="(item, index) in datasetDialogInfo.items">
+                      <v-subheader
+                        v-if="item.header"
+                        :key="item.header"
+                      >
+                        {{ item.header }}
+                      </v-subheader>
+
+                      <v-divider
+                        v-else-if="item.divider"
+                        :key="index"
+                        :inset="item.inset"
+                      ></v-divider>
+
+                      <!--@click=""-->
+                      <v-list-tile
+                        v-else
+                        :key="item.title"
+                        avatar
+                      >
+                        <v-list-tile-content>
+                          <v-list-tile-title v-html="item.title"></v-list-tile-title>
+                          <v-list-tile-sub-title v-html="item.subtitle"></v-list-tile-sub-title>
+                        </v-list-tile-content>
+                      </v-list-tile>
+                    </template>
+                  </v-list>
+                </v-card>
+              </v-flex>
+            </v-layout>
+          </v-dialog>
+          <!--/v-layout-->
         </v-container>
       </v-flex>
     </div>
@@ -21,12 +557,11 @@ import {} from 'vuex'
 import Axios from 'axios'
 import * as xmljs from 'xml-js'
 import * as _ from 'lodash'
-import * as Util from './utils'
+
 export default {
   name: 'MyPage',
   data () {
     return {
-      info: {icon: 'fa-file', name: 'My Portal'},
       formInView: 'block',
       msg: 'My Page',
       showAdmin: false,
@@ -121,10 +656,6 @@ export default {
       sampleTree: {},
       sampleTreeModel: null
     }
-  },
-  components: {
-    aHeader: Util.Header,
-    aFooter: Util.Footer
   },
   beforeMount: function () {
     let vm = this
@@ -1051,10 +1582,6 @@ export default {
     color: #000000;
     font-size: 22px;
     font-weight: bold;
-  }
-
-  .mypage {
-    padding: 2rem 4rem;
   }
 
 </style>

@@ -12,61 +12,72 @@
 -->
 
 <template>
-  <div class="SDFReconstructResults">
-    <v-alert
-      v-model="resultsError"
-      type="error"
-      dismissible
-    >
-      {{resultsErrorMsg}}
-    </v-alert>
-    <h1>{{msg}}</h1>
-    <v-container>
-      <v-layout>
-        <v-flex xs6>
-          <h4>Uploaded Image</h4>
-          <img :src="getInputImage()"/>
-          {{inputImage}}
-          <p></p>
-        </v-flex>
-        <v-flex xs6>
-          <h4>Reconstructed Image</h4>
-          <img :src="getOutputImage()"/>
-          {{outputImage}}
-          <p></p>
-        </v-flex>
-      </v-layout>
-      <v-layout>
-        <v-flex xs12>
-          <h4>Download Results</h4>
-          <a :href="getZipFile()">{{zipFileName}}</a>
-        </v-flex>
-      </v-layout>
-      <h4>Reference</h4>
-      <v-flex xs12>
-        <p>Ghumman, U.F., Iyer, A., Dulal, R., Munshi, J., Wang, A., Chien, T., Balasubramanian, G., and Chen, W., A Spectral Density Function Approach for Active Layer Design of Organic Photovoltaic Cells, <i>Journal of Mechanical Design</i>, Special Issue on Design of Engineered Materials and Structures, accepted July 2018. doi:10.1115/1.4040912.</p>
-        <p>Yu, S., Zhang, Y., Wang, C., Lee, W.K., Dong, B., Odom, T.W., Sun, C. and Chen, W., 2017. Characterization and design of functional quasi-random nanostructured materials using spectral density function. <i>Journal of Mechanical Design</i>, 139(7), p.071401.</p>
-        <p>Lee, W. K., Yu, S., Engel, C. J., Reese, T., Rhee, D., Chen, W., & Odom, T. W. (2017). Concurrent design of quasi-random photonic nanostructures. Proceedings of the National Academy of Sciences, 114(33), 8734-8739.</p>
-      </v-flex>
-    </v-container>
+  <div>
+    <a-header :info="info"></a-header>
+    <div class="main">
+      <div class="SDFReconstructResults">
+        <v-alert
+          v-model="resultsError"
+          type="error"
+          dismissible
+        >
+          {{resultsErrorMsg}}
+        </v-alert>
+        <v-container>
+          <h1>{{msg}}</h1>
+          <v-layout>
+            <v-flex xs6>
+              <h4>Uploaded Image</h4>
+              <img :src="getInputImage()"/>
+              {{inputImage}}
+              <p></p>
+            </v-flex>
+            <v-flex xs6>
+              <h4>Reconstructed Image</h4>
+              <img :src="getOutputImage()"/>
+              {{outputImage}}
+              <p></p>
+            </v-flex>
+          </v-layout>
+          <v-layout>
+            <v-flex xs12>
+              <h4>Download Results</h4>
+              <a :href="getZipFile()">{{zipFileName}}</a>
+            </v-flex>
+          </v-layout>
+          <h4>Reference</h4>
+          <v-flex xs12>
+            <p>Ghumman, U.F., Iyer, A., Dulal, R., Munshi, J., Wang, A., Chien, T., Balasubramanian, G., and Chen, W., A Spectral Density Function Approach for Active Layer Design of Organic Photovoltaic Cells, <i>Journal of Mechanical Design</i>, Special Issue on Design of Engineered Materials and Structures, accepted July 2018. doi:10.1115/1.4040912.</p>
+            <p>Yu, S., Zhang, Y., Wang, C., Lee, W.K., Dong, B., Odom, T.W., Sun, C. and Chen, W., 2017. Characterization and design of functional quasi-random nanostructured materials using spectral density function. <i>Journal of Mechanical Design</i>, 139(7), p.071401.</p>
+            <p>Lee, W. K., Yu, S., Engel, C. J., Reese, T., Rhee, D., Chen, W., & Odom, T. W. (2017). Concurrent design of quasi-random photonic nanostructures. Proceedings of the National Academy of Sciences, 114(33), 8734-8739.</p>
+          </v-flex>
+        </v-container>
+      </div>
+    </div>
+    <a-footer></a-footer>
   </div>
 </template>
 
 <script>
 import Axios from 'axios'
 import {} from 'vuex'
-
+import * as Util from './utils'
 export default {
   name: 'SDFReconstructResults',
   data: () => {
     return ({
-      msg: 'Microstructure reconstruction - Spectral Density Function',
+      info: {icon: 'fa-file', name: 'Microstructure reconstruction'},
+      msg: 'Spectral Density Function',
       resultsError: false,
       resultsErrorMsg: '',
       inputFileName: '',
       ReconstructedFileName: '',
       zipFileName: ''
     })
+  },
+  components: {
+    aHeader: Util.Header,
+    aFooter: Util.Footer,
   },
   mounted: function () {
     this.getJobOutputParams()
@@ -125,8 +136,8 @@ export default {
   }
   h1 {
     margin-top: 10px;
-    background-color: black;
-    color: white;
+    padding-bottom: .1rem;
+    border-bottom: .2rem solid black;
   }
 
 </style>

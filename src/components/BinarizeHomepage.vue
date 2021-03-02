@@ -12,49 +12,60 @@
 -->
 
 <template>
-  <div class="binarization_homepage">
-    <h1>{{ msg }}</h1>
-    <v-container class="text-xs-left">
-          <div>
-            <p> Choose the Binarization method from the options below.</p>
-          </div>
-      <v-layout align-space-between justify-left row fill-height>
-        <v-flex>
-            <div>
-              <h2> Otsu's Method </h2>
-              <p> Otsu's thresholding method involves iterating through all the possible threshold values and calculating a measure of spread for the pixel levels each side of the threshold,
-                  i.e. the pixels that either fall in foreground (white) or background (black). The aim is to find the global threshold that minimizes intraclass variance of the thresholded
-                  black and white pixels. It works well for relatively noise free images having significant contrast between filler and matrix material.
-              </p>
-              <router-link to="/Otsu">Use Otsu's Binarization Webtool</router-link>
-            </div>
-            <div>
-              <h2> Niblack's Method </h2>
-              <p> Niblack's method is an adaptive thresholding algorithm which calculates a pixel-wise threshold by sliding a rectangular window over the image.
-                  It works well for gray-level images with low contrast between filler and matrix material.
-              </p>
-              <router-link to="/Niblack">Use Niblack Binarization Webtool</router-link>
-            </div>
-        </v-flex>
-      </v-layout>
-      <h4>References</h4>
-      <v-flex xs12>
-        <p>N. Otsu, A threshold selection method from gray-level histograms, IEEE transactions on systems, man, and cybernetics, vol. 9, no. 1, pp. 62-66, 1979.</p>
-        <p>W. Niblack, An Introduction to Image Processing. Englewood Cliffs, NJ: Prentice-Hall, 1986, pp. 115-116.</p>
-        <p>Khurshid, K.,Siddiqi, I., Faure, C. and Vincent, N., 2009. Comparison of Niblack inspired Binarization methods for ancient document. DRR, 7247, pp.1-10</p>
-      </v-flex>
-    </v-container>
+  <div>
+    <a-header :info="info"></a-header>
+    <div class="main">
+      <div class="binarization_homepage">
+        <v-container class="text-xs-left">
+              <div>
+                <p> Choose the Binarization method from the options below.</p>
+              </div>
+          <v-layout align-space-between justify-left row fill-height>
+            <v-flex>
+                <div>
+                  <h2>Otsu's Method </h2>
+                  <p> Otsu's thresholding method involves iterating through all the possible threshold values and calculating a measure of spread for the pixel levels each side of the threshold,
+                      i.e. the pixels that either fall in foreground (white) or background (black). The aim is to find the global threshold that minimizes intraclass variance of the thresholded
+                      black and white pixels. It works well for relatively noise free images having significant contrast between filler and matrix material.
+                  </p>
+                  <router-link to="/Otsu">Use Otsu's Binarization Webtool</router-link>
+                </div>
+                <div>
+                  <h2> Niblack's Method </h2>
+                  <p> Niblack's method is an adaptive thresholding algorithm which calculates a pixel-wise threshold by sliding a rectangular window over the image.
+                      It works well for gray-level images with low contrast between filler and matrix material.
+                  </p>
+                  <router-link to="/Niblack">Use Niblack Binarization Webtool</router-link>
+                </div>
+            </v-flex>
+          </v-layout>
+          <h4>References</h4>
+          <v-flex xs12>
+            <p>N. Otsu, A threshold selection method from gray-level histograms, IEEE transactions on systems, man, and cybernetics, vol. 9, no. 1, pp. 62-66, 1979.</p>
+            <p>W. Niblack, An Introduction to Image Processing. Englewood Cliffs, NJ: Prentice-Hall, 1986, pp. 115-116.</p>
+            <p>Khurshid, K.,Siddiqi, I., Faure, C. and Vincent, N., 2009. Comparison of Niblack inspired Binarization methods for ancient document. DRR, 7247, pp.1-10</p>
+          </v-flex>
+        </v-container>
+      </div>
+    </div>
+    <a-footer></a-footer>
   </div>
 </template>
 
 <script>
+import * as Util from './utils'
 export default {
   name: 'BinarizeHomepage',
   data () {
     return {
-      msg: 'Image Binarization'
+      // msg: 'Image Binarization',
+      info: {icon: 'fa-bullseye', name: 'Image Binarization'},
     }
-  }
+  },
+  components: {
+    aFooter: Util.Footer,
+    aHeader: Util.Header
+  },
 }
 </script>
 
@@ -73,8 +84,8 @@ export default {
   }
   h1 {
     margin-top: 10px;
-    background-color: black;
-    color: white;
+    padding-bottom: .1rem;
+    border-bottom: .2rem solid black;
   }
 
 </style>

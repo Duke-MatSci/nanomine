@@ -1,78 +1,85 @@
 <template>
-  <div class="xml-uploader">
-    <h1>{{ msg }}</h1>
-    <v-container grid-list-xl>
-      <v-alert
-        v-model="adminError"
-        type="error"
-      >
-        {{adminErrorMsg}}
-      </v-alert>
-      <v-alert
-        v-model="uploadError"
-        type="error"
-        dismissible
-      >
-        {{uploadErrorMsg}}
-      </v-alert>
-      <v-alert
-        v-model="submittedJobAlert"
-        type="success"
-        dismissible
-      >
-        {{submittedJobMsg}}
-      </v-alert>
-      <v-layout row wrap>
-        <v-flex xs12 class="text-xs-center text-sm-center text-md-center text-lg-center">
-          <p class="text-xs-left">Select XML files to upload
-            <v-btn class="text-xs-left" small color="primary" @click='pickFile'>Browse</v-btn>
-            <input
-              type="file"
-              style="display: none"
-              :multiple="true"
-              accept=".xml"
-              ref="xmlfilebrowser"
-              @change="onFilePicked"
-            >
-          </p>
-          <v-list v-model="xmlFiles" subheader="true">
-            <v-list
-              v-for="(file, idx) in xmlFiles"
-              :key="file.fileName"
-            >
-              <v-list-tile
-                v-if="dsInfo(idx)['isFirst']"
-                :key="dsInfo(idx)['dsid']"
-              >
-                <v-subheader>
-                  Dataset {{ dsInfo(idx)['dsid'] }}
-                </v-subheader>
-                <v-btn color="primary" @click="selectUseIdForDs(idx)" v-if="!isReassigned(idx)&&!isUseIdForDs(idx)">Use ID for Dataset Sequence</v-btn>
-<!--                <v-btn color="primary" @click="reassign(idx)" v-if="!isReassigned(idx)&&!isUseIdForDs(idx)">Assign new Dataset ID</v-btn>-->
-                <v-list-tile-title v-if="!uploaded(idx) && isUseIdForDs(idx)">Will use ID for DS {{ dsInfo(idx)['dsid'] }}</v-list-tile-title>
-<!--                <v-list-tile-title v-else-if="!uploaded(idx) && reassign(idx)">Will Reassign New DS ID</v-list-tile-title>-->
-<!--                <v-list-tile-title v-else>DS reassigned to {{ getNewDsid(idx) }}</v-list-tile-title>-->
-                <v-btn @click="upload(idx)" v-if="(isReassigned(idx) || isUseIdForDs(idx)) && !uploaded(idx)">Upload</v-btn>
-              </v-list-tile>
-              <v-divider
-                v-if="dsInfo(idx)['isFirst']"
-                :key="idx"
-                :inset="false"
-              ></v-divider>
-              <v-list-tile>
-                <v-list-tile-avatar>
-                  <v-icon color="primary">check_box_outline_blank</v-icon>
-                </v-list-tile-avatar>
-                <v-list-tile-content>
-                  <v-list-tile-title>{{ file.fileName }}</v-list-tile-title>
-                  <v-list-tile-sub-title v-if="isReassigned(idx)">New name: {{ file.newFileName }}</v-list-tile-sub-title>
-                </v-list-tile-content>
-              </v-list-tile>
-            </v-list>
-          </v-list>
-        </v-flex>
-      </v-layout>
-    </v-container>
+  <div>
+    <a-header :info="info"></a-header>
+    <div class="main">
+      <div class="xml-uploader">
+        <v-container grid-list-xl>
+          <h1>{{ msg }}</h1>
+          <v-alert
+            v-model="adminError"
+            type="error"
+          >
+            {{adminErrorMsg}}
+          </v-alert>
+          <v-alert
+            v-model="uploadError"
+            type="error"
+            dismissible
+          >
+            {{uploadErrorMsg}}
+          </v-alert>
+          <v-alert
+            v-model="submittedJobAlert"
+            type="success"
+            dismissible
+          >
+            {{submittedJobMsg}}
+          </v-alert>
+          <v-layout row wrap>
+            <v-flex xs12 class="text-xs-center text-sm-center text-md-center text-lg-center">
+              <p class="text-xs-left">Select XML files to upload
+                <v-btn class="text-xs-left" small color="primary" @click='pickFile'>Browse</v-btn>
+                <input
+                  type="file"
+                  style="display: none"
+                  :multiple="true"
+                  accept=".xml"
+                  ref="xmlfilebrowser"
+                  @change="onFilePicked"
+                >
+              </p>
+              <v-list v-model="xmlFiles" subheader="true">
+                <v-list
+                  v-for="(file, idx) in xmlFiles"
+                  :key="file.fileName"
+                >
+                  <v-list-tile
+                    v-if="dsInfo(idx)['isFirst']"
+                    :key="dsInfo(idx)['dsid']"
+                  >
+                    <v-subheader>
+                      Dataset {{ dsInfo(idx)['dsid'] }}
+                    </v-subheader>
+                    <v-btn color="primary" @click="selectUseIdForDs(idx)" v-if="!isReassigned(idx)&&!isUseIdForDs(idx)">Use ID for Dataset Sequence</v-btn>
+    <!--                <v-btn color="primary" @click="reassign(idx)" v-if="!isReassigned(idx)&&!isUseIdForDs(idx)">Assign new Dataset ID</v-btn>-->
+                    <v-list-tile-title v-if="!uploaded(idx) && isUseIdForDs(idx)">Will use ID for DS {{ dsInfo(idx)['dsid'] }}</v-list-tile-title>
+    <!--                <v-list-tile-title v-else-if="!uploaded(idx) && reassign(idx)">Will Reassign New DS ID</v-list-tile-title>-->
+    <!--                <v-list-tile-title v-else>DS reassigned to {{ getNewDsid(idx) }}</v-list-tile-title>-->
+                    <v-btn @click="upload(idx)" v-if="(isReassigned(idx) || isUseIdForDs(idx)) && !uploaded(idx)">Upload</v-btn>
+                  </v-list-tile>
+                  <v-divider
+                    v-if="dsInfo(idx)['isFirst']"
+                    :key="idx"
+                    :inset="false"
+                  ></v-divider>
+                  <v-list-tile>
+                    <v-list-tile-avatar>
+                      <v-icon color="primary">check_box_outline_blank</v-icon>
+                    </v-list-tile-avatar>
+                    <v-list-tile-content>
+                      <v-list-tile-title>{{ file.fileName }}</v-list-tile-title>
+                      <v-list-tile-sub-title v-if="isReassigned(idx)">New name: {{ file.newFileName }}</v-list-tile-sub-title>
+                    </v-list-tile-content>
+                  </v-list-tile>
+                </v-list>
+              </v-list>
+            </v-flex>
+          </v-layout>
+        </v-container>
+      </div>
+      <v-btn v-on:click="window.history.go(-1);" color="primary">Go Back</v-btn>
+    </div>
+    <a-footer></a-footer>
   </div>
 </template>
 
@@ -83,7 +90,7 @@ import {Auth} from '@/modules/Auth.js'
 import * as _ from 'lodash'
 import Axios from 'axios'
 import {JobMgr} from '@/modules/JobMgr.js'
-
+import * as Util from './utils'
 /*
   This code uploads all files selected to a directory on the server named by jobid
    and starts a job to update the files in the db along with creating a new dataset if necessary.
@@ -92,6 +99,7 @@ export default {
   name: 'XmlUploader',
   data () {
     return {
+      info: {icon: 'fa-bullseye', name: 'XML Uploader'},
       msg: 'XML Uploader',
       adminErrorMsg: 'Administrative authority is required for this function',
       uploadError: false,
@@ -404,8 +412,8 @@ export default {
 
   h1 {
     margin-top: 10px;
-    background-color: black;
-    color: white;
+    padding-bottom: .1rem;
+    border-bottom: .2rem solid black;
   }
 
 </style>

@@ -1,52 +1,63 @@
 <template>
-  <div class="DescriptorCharacterizeResults">
-    <v-alert
-      v-model="resultsError"
-      type="error"
-      dismissible
-    >
-      {{resultsErrorMsg}}
-    </v-alert>
-    <h1>{{msg}}</h1>
-    <v-container>
-      <v-layout>
-        <v-flex xs12>
-          <h4>Uploaded Image</h4>
-          <img :src="getInputImage()"/>
-          {{inputImage}}
-          <p></p>
-        </v-flex>
-      </v-layout>
-      <v-layout>
-        <v-flex xs12>
-          <h4>Download Results</h4>
-          <a :href="getZipFile()">{{zipFileName}}</a>
-        </v-flex>
-      </v-layout>
-      <h4>References</h4>
-      <v-flex xs12>
-        <p> Xu, H., Li, Y., Brinson, C. and Chen, W., 2014. A descriptor-based design methodology for developing heterogeneous microstructural materials system. <i>Journal of Mechanical Design</i>, 136(5), p.051007.</p>
-        <p>Xu, H., Dikin, D.A., Burkhart, C. and Chen, W., 2014. Descriptor-based methodology for statistical characterization and 3D reconstruction of microstructural materials. <i>Computational Materials Science</i>, 85, pp.206-216.</p>
-      </v-flex>
-    </v-container>
+  <div>
+    <a-header :info="info"></a-header>
+    <div class="main">
+      <div class="DescriptorCharacterizeResults">
+        <v-alert
+          v-model="resultsError"
+          type="error"
+          dismissible
+        >
+          {{resultsErrorMsg}}
+        </v-alert>
+        <v-container>
+          <h1>{{msg}}</h1>
+          <v-layout>
+            <v-flex xs12>
+              <h4>Uploaded Image</h4>
+              <img :src="getInputImage()"/>
+              {{inputImage}}
+              <p></p>
+            </v-flex>
+          </v-layout>
+          <v-layout>
+            <v-flex xs12>
+              <h4>Download Results</h4>
+              <a :href="getZipFile()">{{zipFileName}}</a>
+            </v-flex>
+          </v-layout>
+          <h4>References</h4>
+          <v-flex xs12>
+            <p> Xu, H., Li, Y., Brinson, C. and Chen, W., 2014. A descriptor-based design methodology for developing heterogeneous microstructural materials system. <i>Journal of Mechanical Design</i>, 136(5), p.051007.</p>
+            <p>Xu, H., Dikin, D.A., Burkhart, C. and Chen, W., 2014. Descriptor-based methodology for statistical characterization and 3D reconstruction of microstructural materials. <i>Computational Materials Science</i>, 85, pp.206-216.</p>
+          </v-flex>
+        </v-container>
+      </div>
+    </div>
+    <a-footer></a-footer>
   </div>
 </template>
 
 <script>
 import Axios from 'axios'
 import {} from 'vuex'
-
+import * as Util from './utils'
 export default {
   name: 'DescriptorCharacterizeResults',
   data: () => {
     return ({
-      msg: 'Physical Descriptors - Characterization Results',
+      info: {icon: 'fa-bullseye', name: 'Physical Descriptors'},
+      msg: 'Characterization Results',
       resultsError: false,
       resultsErrorMsg: '',
       inputFileName: '',
       SDFPlot: '',
       zipFileName: ''
     })
+  },
+  components: {
+    aHeader: Util.Header,
+    aFooter: Util.Footer,
   },
   mounted: function () {
     this.getJobOutputParams()
@@ -105,8 +116,8 @@ export default {
   }
   h1 {
     margin-top: 10px;
-    background-color: black;
-    color: white;
+    padding-bottom: .1rem;
+    border-bottom: .2rem solid black;
   }
 
 </style>

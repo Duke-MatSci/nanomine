@@ -12,29 +12,36 @@
 -->
 
 <template>
-  <McrJobsTemplate v-bind:job='jobInfo'></McrJobsTemplate>
+  <div>
+    <a-header :info="info"></a-header>
+    <div class="main">
+      <McrJobsTemplate v-bind:job='jobInfo'></McrJobsTemplate>
+    </div>
+    <a-footer></a-footer>
+  </div>
 </template>
 
 <script>
 
 import {} from 'vuex'
 import McrJobsTemplate from './McrJobsTemplate.vue'
-
+import * as Util from './utils'
 export default {
-
   name: 'DescriptorReconstruct',
-
   components: {
+    aHeader: Util.Header,
+    aFooter: Util.Footer,
     McrJobsTemplate
   },
 
   data: () => {
     return {
+      info: {icon: 'fa-bullseye', name: 'Microstructure Reconstruction'},
       jobInfo: {
 
         jobTitle: 'Descriptor Reconstruction',
 
-        pageTitle: 'Microstructure Reconstruction - Physical Descriptors',
+        pageTitle: 'Physical Descriptors',
 
         description: [
           'Upload a binarized image in JPEG/PNG/TIF format to generate a statistically equivalent 3D reconstruction.',
