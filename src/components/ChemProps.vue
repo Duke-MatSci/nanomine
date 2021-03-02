@@ -12,7 +12,6 @@
           >
             {{loginRequiredMsg}}
           </v-alert>
-<<<<<<< HEAD
           <h3 class="text-xs-left">Description</h3>
           <br>
           <p class="text-xs-left">ChemProps is a growing polymer name and filler name standardization database. Polymer names and filler names can have many alias, impeding the queries to collect all relevant data by a chemical name as the keyword. Chemprops is a useful resource to address this problem. It standardizes the chemical names that belong to the same database such that queries can retrieve all data that is related to a certain chemical name regardless of how they were originally reported.
@@ -73,26 +72,6 @@
             <p class="text-xs-left">Probst, Daniel, and Jean-Louis Reymond. "Smilesdrawer: parsing and drawing SMILES-encoded molecular structures using client-side javascript." Journal of chemical information and modeling 58.1 (2018): 1-7.</p>
           <!--</div>-->
         </v-container>
-=======
-          <v-btn type="submit" color="primary" form="submit-chemprops-form">Search</v-btn>
-        </v-form>
-        <div id="chemprops-displayed-result">
-          <v-flex xs12 sm6 md6 class="text-xs-left" v-if="stdname !== ''">
-            <p class="text-xs-left">Standardized chemical name and density information:</p>
-            <v-text-field v-model="stdname" label='Standardized Name' outlined></v-text-field>
-            <v-text-field v-model="density" label='Density (g/cm3 at 25°C)' outlined></v-text-field>
-            <v-text-field v-model="uSMILES" label='uSMILES' outlined v-if="pfRadios === 'pol'"></v-text-field>
-            <p v-if="pfRadios === 'pol'">Structure
-            <Smiles :smilesOptions="smilesOptions" :smilesInput="inputStr" :formulaHandler="formulaUpdated" :onSuccessHandler="onSuccess" :onErrorHandler="onError" height="100%" width="100%"></Smiles>
-            </p>
-            <p v-if="pfRadios === 'pol'">Formula: {{molecularFormula}}
-            </p>
-          </v-flex>
-        </div>
-        <br>
-        <h4 class="text-xs-left">Reference</h4>
-        <p class="text-xs-left">Probst, Daniel, and Jean-Louis Reymond. "Smilesdrawer: parsing and drawing SMILES-encoded molecular structures using client-side javascript." Journal of chemical information and modeling 58.1 (2018): 1-7.</p>
->>>>>>> 1651131d416237172f8120d59f7c3d3c2320832c
       </div>
     </div>
     <a-footer></a-footer>
