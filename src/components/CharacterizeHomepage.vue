@@ -16,8 +16,8 @@
     <a-header :info="info"></a-header>
     <div class="main">
       <div class="characterization_homepage">
-        <!--<h1>{{ msg }}</h1>-->
         <v-container class="text-xs-left">
+          <h1>{{ msg }}</h1>
               <div>
                 <p> Choose the characterization method from the options below.</p>
               </div>
@@ -82,6 +82,12 @@ export default {
   }
   h4 {
     text-transform: uppercase;
+  }
+
+  h1 {
+    margin-top: 10px;
+    padding-bottom: .1rem;
+    border-bottom: .2rem solid black;
   }
 
 </style>
