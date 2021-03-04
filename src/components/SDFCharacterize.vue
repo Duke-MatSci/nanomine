@@ -11,29 +11,37 @@
 ################################################################################
 -->
 <template>
-  <McrJobsTemplate v-bind:job='jobInfo'></McrJobsTemplate>
+  <div>
+    <a-header :info="info"></a-header>
+    <div class="main">
+      <McrJobsTemplate v-bind:job='jobInfo'></McrJobsTemplate>
+    </div>
+    <a-footer></a-footer>
+  </div>
 </template>
 
 <script>
 
 import {} from 'vuex'
 import McrJobsTemplate from './McrJobsTemplate.vue'
-
+import * as Util from './utils'
 export default {
-
   name: 'SDFCharacterize',
 
   components: {
+    aHeader: Util.Header,
+    aFooter: Util.Footer,
     McrJobsTemplate
   },
 
   data: () => {
     return {
+      info: {icon: 'fa-file', name: 'Microstructure Characterization'},
       jobInfo: {
 
         jobTitle: 'SDF Characterization',
 
-        pageTitle: 'Microstructure Characterization - Spectral Density Function',
+        pageTitle: 'Spectral Density Function',
 
         description: [
           'Upload a binarized image / ZIP file containing set of images (Supported file formats: .jpg, .tif, .png) and click "Characterize". All correlation functions are evaluated for the "white" phase in image.'

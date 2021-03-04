@@ -17,9 +17,9 @@ export default {
     aFooter: Util.Footer,
   },
   methods: {
-    showBox () {
-      console.log(this.filter)
-    },
+    // showBox () {
+    //   console.log(this.filter)
+    // },
     nav(args) {
       return window.location = `/nm#/${args}`
     },
@@ -52,6 +52,5 @@ export default {
   },
   created() {
     this.restCallFn();
-    console.log("hello world", this.filter)
   }
 }
