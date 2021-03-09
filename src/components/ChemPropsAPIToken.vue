@@ -3,8 +3,8 @@
     <a-header :info="info"></a-header>
     <div class="main">
       <div class="requestToken">
-        <h1>Request token here for ChemProps - A growing polymer name and filler name standardization database</h1>
         <v-container>
+          <h1>Request token here for ChemProps - A growing polymer name and filler name standardization database</h1>
           <v-alert
             v-model="submitError"
             type="error"
