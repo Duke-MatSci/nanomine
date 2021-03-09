@@ -12,29 +12,38 @@
 -->
 
 <template>
-  <McrJobsTemplate v-bind:job='jobInfo'></McrJobsTemplate>
+  <div>
+    <a-header :info="info"></a-header>
+    <div class="main">
+      <McrJobsTemplate v-bind:job='jobInfo'></McrJobsTemplate>
+    </div>
+    <a-footer></a-footer>
+  </div>
 </template>
 
 <script>
 
 import {} from 'vuex'
 import McrJobsTemplate from './McrJobsTemplate.vue'
-
+import * as Util from './utils'
 export default {
 
   name: 'IntelligentCharacterize',
 
   components: {
+    aHeader: Util.Header,
+    aFooter: Util.Footer,
     McrJobsTemplate
   },
 
   data: () => {
     return {
+      info: {icon: 'fa-bullseye', name: 'Microstructure Characterization'},
       jobInfo: {
 
         jobTitle: 'Intelligent Characterization',
 
-        pageTitle: 'Microstructure Characterization - Intelligent',
+        pageTitle: 'Intelligent Characterization',
 
         description: [
           'This tool assesses the uploaded image(s) of microstructure and performs analysis to decide which characterization method suits the best. The process consists of three steps:',
