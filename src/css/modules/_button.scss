@@ -70,6 +70,17 @@
             font-size: .8rem !important;
         }
     }
+
+    &--noradius,
+    &--noradius::after {
+        border-radius: .1rem !important;
+        padding: .5rem 1rem !important;
+        font-weight: 300;
+
+        @include respond(tab-land){
+            font-size: .8rem !important;
+        }
+    }
     
     &::after {
         content: "";

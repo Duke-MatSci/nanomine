@@ -49,7 +49,7 @@
 
         @include respond(tab-land){
             top: -40px;
-            font-size: 5rem;
+            font-size: 4.5rem;
         }
         @include respond(phone){
             top: -20px;

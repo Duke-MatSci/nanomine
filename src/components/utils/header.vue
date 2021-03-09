@@ -27,7 +27,7 @@
                            <!--<a v-else><i class="material-icons" style="vertical-align: bottom;">perm_identity</i> {{auth.getRunAsUser()}}</a>-->
                         </div>
                         <div v-else>
-                            <a class="btn btn--tertiary btn--normal" v-on:click="$store.commit('setLoginLogout')" href="#">Login/Register</a>
+                            <a class="btn btn--tertiary btn--noradius" v-on:click="$store.commit('setLoginLogout')" href="#">Login/Register</a>
                         </div>
                         <!--<a class="btn btn--tertiary btn--normal" :href="getLoginLink()">Login/Register</a>-->
                     </div>

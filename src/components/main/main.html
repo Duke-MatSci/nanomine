@@ -26,7 +26,7 @@
                            <!--<a v-else><i class="material-icons" style="vertical-align: bottom;">perm_identity</i> {{auth.getRunAsUser()}}</a>-->
                         </div>
                         <div v-else>
-                            <a class="btn btn--tertiary btn--normal" v-on:click="$store.commit('setLoginLogout')" href="#">Login/Register</a>
+                            <a class="btn btn--tertiary btn--noradius" v-on:click="$store.commit('setLoginLogout')" href="#">Login/Register</a>
                         </div>
                         <!--<a class="btn btn--tertiary btn--normal" :href="getLoginLink()">Login/Register</a>-->
                     </div>
@@ -76,7 +76,7 @@
                                 <div class="nav_menu--siblings">
                                     <span class="nav_menu--siblings-lists" @click="links('/nm#/simmtools')"><a href="/nm#/tools">Module Tools</a></span>
                                     <span class="nav_menu--siblings-lists" @click="links('/nm#/simmtools')"><a href="/nm#/simmtools">Simmulation Tools</a></span>
-                                    <span class="nav_menu--siblings-lists" @click="links('/nm#/ChemProps')"><a href="/nm#/ChemProps">Chemprops</a></span>
+                                    <span class="nav_menu--siblings-lists" @click="links('/nm#/ChemProps')"><a href="/nm#/ChemProps">ChemProps</a></span>
                                 </div>
                             </div>
                         </li>
@@ -110,7 +110,7 @@
                     <a href="/nm#/gallery" class="btn-text">Explore the chart gallery</a>
                 </div>
                 <div class="visualize_text">
-                    <p>Custom made charts allow you to add your data by editing code in an in-browser editor. The data visualization tool let’s you make your own charts using Nanomine data repository</p>
+                    <p>Our charts platform leverages SPARQL and Vega-Lite to create custom, interactive charts from data in the MaterialsMine knowledge graph using an in-browser editor. Visit our Charts Gallery to see some examples, and contact us to get your data integrated into the knowledge graph</p>
                 </div>
             </div>
         </div>
