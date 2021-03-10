@@ -623,14 +623,26 @@ def sheetSampleInfo(sheet, DATA, myXSDtree, jobDir, restbase, runCtx):
     CommonFields = sortSequence(CommonFields, 'CommonFields', myXSDtree)
     Journal = sortSequence(Journal, 'Journal', myXSDtree)
     LabGenerated = sortSequence(LabGenerated, 'LabGenerated', myXSDtree)
-    if len(CommonFields) > 0 and len(Journal) == 0:
-        DATA.append({'DATA_SOURCE': {'Citation': {'CommonFields':CommonFields}}})
-    if len(CommonFields) == 0 and len(Journal) > 0: # very unlikely
-        DATA.append({'DATA_SOURCE': {'Citation': {'CitationType': {'Journal':Journal}}}})
-    if len(CommonFields) > 0 and len(Journal) > 0:
-        DATA.append({'DATA_SOURCE': {'Citation': collections.OrderedDict([('CommonFields', CommonFields), ('CitationType', {'Journal':Journal})])}})
+    # group CommonFields, Journal, and LabGenerated
+    DataSource = collections.OrderedDict()
+    Citation = collections.OrderedDict()
+    if len(CommonFields) > 0:
+        Citation['CommonFields'] = CommonFields
+    if len(Journal) > 0:
+        Citation['CitationType'] = {'Journal':Journal}
+    if len(Citation) > 0:
+        DataSource['Citation'] = Citation
     if len(LabGenerated) > 0:
-        DATA.append({'DATA_SOURCE': {'LabGenerated': LabGenerated}})
+        DataSource['LabGenerated'] = LabGenerated
+    DATA.append({'DATA_SOURCE': DataSource})
+    # if len(CommonFields) > 0 and len(Journal) == 0:
+    #     DATA.append({'DATA_SOURCE': {'Citation': {'CommonFields':CommonFields}}})
+    # if len(CommonFields) == 0 and len(Journal) > 0: # very unlikely
+    #     DATA.append({'DATA_SOURCE': {'Citation': {'CitationType': {'Journal':Journal}}}})
+    # if len(CommonFields) > 0 and len(Journal) > 0:
+    #     DATA.append({'DATA_SOURCE': {'Citation': collections.OrderedDict([('CommonFields', CommonFields), ('CitationType', {'Journal':Journal})])}})
+    # if len(LabGenerated) > 0:
+    #     DATA.append({'DATA_SOURCE': {'LabGenerated': LabGenerated}})
     return (ID, DATA)
 
 # Sheet 2. Material Types
