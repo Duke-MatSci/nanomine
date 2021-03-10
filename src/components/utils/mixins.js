@@ -49,7 +49,10 @@ export default {
     }, 1000)
   },
   methods: {
-    links(args) {
+    links(args,options) {
+      if(options){
+        return window.location = `${window.location.origin}/wi/about?view=view&uri=http://semanticscience.org/resource/Chart`
+      }
       return window.open(args, '_self');
     },
     setSite (siteId) {

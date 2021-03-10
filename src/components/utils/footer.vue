@@ -3,7 +3,7 @@
         <div class="wrapper">
             <div class="grid grid_col-space-right grid_gap-smaller">
                 <div class="footer_content u_toggle-display-off">
-                    <img src="/nmstatic/img/logo.svg" class="footer_icon-img" alt="Materialsmine Logo">
+                    <img src="/nmstatic/img/logo2.png" class="footer_icon-img" alt="Materialsmine Logo">
                     <span class="footer_icon-text">&copy; 2014 - {{ new Date().getFullYear() }} Nanomine. All Rights Reserved.</span>
                 </div>
                 <div class="footer_content">
@@ -32,7 +32,7 @@
                 </div>
             </div>
             <div class="footer_content-mobile">
-                <img src="/nmstatic/img/logo.svg" class="footer_icon-img" alt="Materialsmine Logo">
+                <img src="/nmstatic/img/logo2.png" class="footer_icon-img" alt="Materialsmine Logo">
                 <span class="footer_icon-text">&copy; 2014-{{ new Date().getFullYear() }} Materialsmine. All Rights Reserved.</span>
             </div>
         </div>

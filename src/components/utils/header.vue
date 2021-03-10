@@ -27,7 +27,7 @@
                            <!--<a v-else><i class="material-icons" style="vertical-align: bottom;">perm_identity</i> {{auth.getRunAsUser()}}</a>-->
                         </div>
                         <div v-else>
-                            <a class="btn btn--tertiary btn--normal" v-on:click="$store.commit('setLoginLogout')" href="#">Login/Register</a>
+                            <a class="btn btn--tertiary btn--noradius" v-on:click="$store.commit('setLoginLogout')" href="#">Login/Register</a>
                         </div>
                         <!--<a class="btn btn--tertiary btn--normal" :href="getLoginLink()">Login/Register</a>-->
                     </div>
@@ -58,7 +58,7 @@
                                 <a class="u--default-size nav_menu--handler" href="#">Visualize</a>
                                 <div class="nav_menu--siblings">
                                     <span class="nav_menu--siblings-lists" @click="links('/home')"><a href="/home">Browse Data</a></span>
-                                    <span class="nav_menu--siblings-lists" @click="window.location = `${window.location.origin}/wi/about?view=view&uri=http://semanticscience.org/resource/Chart`"><a href="/nm#/gallery">Explore Gallery</a></span>
+                                    <span class="nav_menu--siblings-lists" @click="links(true,true)"><a href="/nm#/gallery">Explore Gallery</a></span>
                                 </div>
                             </div>
                         </li>
