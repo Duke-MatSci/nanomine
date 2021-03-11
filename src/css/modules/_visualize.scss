@@ -89,6 +89,7 @@
             height: 18rem;
             position: relative;
             border: .1rem solid rgba($primary-black, .15);
+            background-color: $primary-white;
 
             @include respond(laptop) {
                 width: 19rem;
@@ -121,7 +122,7 @@
                 width: 100%;
                 color: $primary-white;
                 text-align: left;
-                font-weight: 400;
+                font-weight: 600;
                 line-height: 1.5;
             }
         }
@@ -215,20 +216,32 @@
         animation-duration: 1s;
         animation-timing-function: ease-out;
         cursor: pointer;
+        position: relative;
+        z-index: 5;
         @if $i < 3 {
             // transition: top .5s ease-out;
-            position: relative;
             top: calc(60px/#{$i});
         } @else if $i == 3 {
             margin-top: 0px;
         } @else if $i == 4 {
             // transition: top .5s ease-out;
-            position: relative;
             top: calc(60px/(#{$i}-2));
         } @else if $i == 5 {
             // transition: top .5s ease-out;
-            position: relative;
             top: calc(60px/(#{$i}-4));
+        }
+
+        @if $i == 1  {
+            left: 0;
+        } @else if $i == 2 {
+            left: -25px
+        } @else if $i == 3{
+            left: -50px;
+            z-index: 10;
+        } @else if $i == 4 {
+            left: -75px;
+        } @else if $i == 5 {
+            left: -100px;
         }
 
         @include respond(laptop) {

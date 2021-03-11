@@ -85,6 +85,7 @@ import Axios from 'axios'
 import Smiles from './Smiles'
 import * as Util from './utils'
 const SERVER = `${window.location.origin}/nmr/api`
+// const SERVER = `http://localhost:80/nmr/api`
 const URL = SERVER
 
 export default {
