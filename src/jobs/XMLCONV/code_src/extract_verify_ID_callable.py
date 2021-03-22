@@ -24,7 +24,7 @@ def match(testee, testant):
     return False
 
 
-# the method to verify ID
+# the method to verify ID (TODO update this fn with re)
 def verifyID(ID_raw):
     message = '' # init
     SID = ID_raw
@@ -67,26 +67,7 @@ def extractID(xlsxName, jobDir, code_srcDir, restbase, user, runCtx):
         return
     # special case for experimental data
     lab = False
-    for row in range(sheet_sample.nrows):
-        if match(sheet_sample.row_values(row)[0], 'Sample ID'):
-            ID_raw = str(sheet_sample.row_values(row)[1])
-            # if no ID is entered in the cell
-            if len(ID_raw.strip()) == 0:
-                message += '[Excel Error] Excel template value error: Sample ID is not entered in the uploaded Excel template.\n'
-        if match(sheet_sample.row_values(row)[0], 'Citation Type'):
-            if sheet_sample.row_values(row)[1] == 'lab-generated':
-                lab = True
-    if lab:
-        if message != '':
-            # write the message in jobDir/error_message.txt
-            with open(jobDir + '/error_message.txt', 'a') as fid:
-                fid.write(message)
-        else:
-            # write the ID in jobDir/ID.txt
-            with open(jobDir + '/ID.txt', 'w') as fid:
-                fid.write(ID_raw.strip())
-        return
-    # otherwise, find and save the ID in jobDir/ID.txt
+    # find and save the ID in jobDir/ID.txt
     for row in range(sheet_sample.nrows):
         # ID
         if match(sheet_sample.row_values(row)[0], 'Sample ID'):
@@ -100,21 +81,31 @@ def extractID(xlsxName, jobDir, code_srcDir, restbase, user, runCtx):
         # DOI
         if match(sheet_sample.row_values(row)[0], 'DOI'):
             DOI = str(sheet_sample.row_values(row)[1]).strip()
+        # related_DOI, if DOI is not provided, check related_DOI
+        if match(sheet_sample.row_values(row)[0], 'Related DOI') and len(DOI) == 0:
+            DOI = str(sheet_sample.row_values(row)[1]).strip()
+        # a flag for in-house data
+        if match(sheet_sample.row_values(row)[0], 'Citation Type'):
+            if sheet_sample.row_values(row)[1] == 'lab-generated':
+                lab = True
     # if no error detected
     if message == '':
         # call restDOI here
-        dsInfo, message = restDOI(DOI, code_srcDir, restbase, sheet_sample, user, runCtx)
+        dsInfo, message = restDOI(DOI, code_srcDir, restbase, sheet_sample, user, runCtx, lab)
         # if doi is not valid
         if dsInfo is None:
             with open(jobDir + '/error_message.txt', 'a') as fid:
                 fid.write(message)
             return
-        # special case, special issue made-up DOI, format: ma-SI-FirstName-LastName
-        SI_flag = False
-        if 'ma-SI' in DOI:
-            SI_flag = True
+        # # special case, special issue made-up DOI, format: ma-SI-FirstName-LastName (no longer needed)
+        # SI_flag = False
+        # if 'ma-SI' in DOI:
+        #     SI_flag = True
+        # newID = generateID(dsInfo, ID_raw, SI_flag)
+        
+        # special case, in-house lab generated data
         # generate ID here
-        newID = generateID(dsInfo, ID_raw, SI_flag)
+        newID = generateID(dsInfo, ID_raw, lab)
         # write the ID in jobDir/ID.txt
         with open(jobDir + '/ID.txt', 'w') as fid:
             fid.write(newID)
@@ -126,7 +117,7 @@ def extractID(xlsxName, jobDir, code_srcDir, restbase, user, runCtx):
 
 
 # make rest call for doi info
-def restDOI(DOI, code_srcDir, restbase, sheet_sample, user, runCtx) :
+def restDOI(DOI, code_srcDir, restbase, sheet_sample, user, runCtx, lab) :
     message = ''
     new_dataset = False
     response = None
@@ -162,8 +153,8 @@ def restDOI(DOI, code_srcDir, restbase, sheet_sample, user, runCtx) :
     ## However, initially, the dataset is mostly empty, so the data must still be set up
     dsInfo = response
     if new_dataset:
-        # special case, special issue madeup DOI
-        if 'ma-SI' in DOI: # DOI from spreadsheet is special issue
+        # special case, lab generated data
+        if lab and len(DOI) == 0:
             logging.info('DOI from spreadsheet: ' + DOI + ' dsInfo: ' + json.dumps(dsInfo))
             DOI = 'unpublished-' + DOI
             dsInfo['doi'] = DOI
@@ -182,12 +173,16 @@ def restDOI(DOI, code_srcDir, restbase, sheet_sample, user, runCtx) :
 
 
 # generate ID with format PID_SID_LastName_PubYear for users with DOI
-def generateID(response, SID, SI_flag):
+# def generateID(response, SID, SI_flag):
+def generateID(response, SID, lab):
     logging.debug('Dataset Information: ' + str(response))
     seq = response['seq']
-    PID = 'L' + str(seq)
+    if lab:
+        PID = 'E' + str(seq)
+    else:
+        PID = 'L' + str(seq)
     LastName = 'LastName'
-    if 'author' in response:
+    if 'author' in response and len(response['author']) > 0:
         Name = response['author'][0]
         LastName = Name.split(',')[0]
 
@@ -195,7 +190,7 @@ def generateID(response, SID, SI_flag):
     if 'publicationYear' in response:
         PubYearRaw = response['publicationYear']
         PubYear = str(PubYearRaw)
-    if SI_flag: # special issue uses current year
+    if lab: # lab data uses current year
         PubYear = str(datetime.datetime.now().year)
     return '_'.join([PID, SID, slugify(LastName), PubYear])
 
