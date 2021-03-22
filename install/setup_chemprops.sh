@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-CP_FORK='bluedevil-oit'
+CP_FORK='duke-matsci'
 CP_BRANCH='master'
 cd ${HOME}
 git clone https://github.com/"${CP_FORK}"/chemprops.git

@@ -190,7 +190,8 @@ def conversion(jobDir, code_srcDir, xsdDir, templateName, user, datasetId):
         matcomps = xmlTree.findall('.//MatrixComponent')
         filcomps = xmlTree.findall('.//FillerComponent')
         # for each package, send to ChemProps API
-        chemprops_api_url = restbase + '/api/v1/chemprops'
+        # chemprops_api_url = restbase + '/api/v1/chemprops' || old address
+        chemprops_api_url = restbase + '/nmr/api/chemprops_parser'
         # MatrixComponent
         for matcomp in matcomps:
             chemprops_data = {
@@ -207,7 +208,7 @@ def conversion(jobDir, code_srcDir, xsdDir, templateName, user, datasetId):
             # chemprops_rq.add_header('Content-Type','application/json')
             # chemprops_search = nm_rest(logging, sysToken, jobApiToken, jobRefreshToken, chemprops_rq)
             # r = chemprops_search.urlopen(json.dumps(chemprops_data).encode("utf8"))
-            r = requests.get(chemprops_api_url, params = chemprops_data, verify = False) # requirement for auth removed for ChemProps for now
+            r = requests.get(chemprops_api_url, params = chemprops_data) 
             # if r.getcode() == 200:
             if r.status_code == 200:
                 # result = json.loads(r.read().decode("utf-8"))
