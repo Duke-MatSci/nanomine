@@ -8,22 +8,17 @@ const User = require('../modules/mongo/schema/users');
 const Apiaccess = require('../modules/mongo/schema/accessApi');
 
 exports.chempropsParser = async(req, res, next) => {
+    const logger = req.logger;
     const receivedToken = await dbChecker(req.env.emailTestAddr);
     if(!receivedToken) {
         logger.error("CHEMPROPS API: No internal token available to process this request. Create a new internal token")
         return apiResponse(res, 401, {mssg: "No Internal Token"})
     }
     
-    const polfil = req.params.polfil ? req.params.polfil : 'pol';
-    const ChemicalName = req.params.ChemicalName;
-    const nmId = req.params.nmId ? req.params.nmId : 'restNmId';
-    const Abbreviation = req.params.Abbreviation ? req.params.Abbreviation : req.params.ChemicalName;
-    const TradeName = req.params.TradeName ? req.params.TradeName : req.params.ChemicalName;
-    const SMILES = req.params.uSMILES ? req.params.uSMILES : req.params.ChemicalName;
-    return postToChemprops(receivedToken.token, polfil, nmId, ChemicalName, Abbreviation, TradeName, SMILES)
+    return postToChemprops(req, res, receivedToken.token)
 }
 
-exports.chemprops = (req, res, next) => {
+exports.chemprops = async(req, res, next) => {
     let result = "Nothing Found";
     const logger = req.logger;
     const authHeader = req.get('Authorization')
@@ -32,13 +27,7 @@ exports.chemprops = (req, res, next) => {
         return apiResponse(res, 401, {mssg: "Nothing Found"})
     }
     const receivedToken = authHeader.split(' ')[1];
-    const polfil = req.query.polfil ? req.query.polfil : 'pol';
-    const ChemicalName = req.query.chemicalname;
-    const nmId = 'restNmId';
-    const Abbreviation = req.query.abbreviation ? req.query.abbreviation : req.query.chemicalname;
-    const TradeName = req.query.tradename ? req.query.tradename : req.query.chemicalname;
-    const SMILES = req.query.smiles ? req.query.smiles : req.query.chemicalname;
-    return postToChemprops(receivedToken, polfil, nmId, ChemicalName, Abbreviation, TradeName, SMILES)
+    return postToChemprops(req, res, receivedToken)
 }
 
 exports.checkApi = async(req,res,next) => {
@@ -137,14 +126,17 @@ const userExistCheck = async(email) => {
     return result;
 }
 
-const postToChemprops = async(receivedToken) => {
+const postToChemprops = async(req, res, receivedToken) => {
     let result;
+    const logger = req.logger;
+    logger.error("test-token: " + receivedToken)
     const exist = await Apiaccess.findOne({token:receivedToken})
     if(!exist){
         logger.error("CHEMPROPS API: Received token does not match any record")
         return apiResponse(res, 401, {mssg: "Nothing Found"})
     }
     const decoded = jwt.verify(exist.token, exist.key)
+
     if(decoded && decoded.mail && req.query.chemicalname){
         try {
             const userExist = await userExistCheck(decoded.mail)
@@ -164,7 +156,12 @@ const postToChemprops = async(receivedToken) => {
                 isAnonymous: false,
                 userExists: decoded.userExists,
             }, req.env.nmAuthSecret);
-
+            const polfil = req.query.polfil ? req.query.polfil : 'pol';
+            const ChemicalName = req.query.chemicalname;
+            const nmId = 'restNmId';
+            // // const Abbreviation = req.query.abbreviation ? req.query.abbreviation : req.query.chemicalname;
+            // // const TradeName = req.query.tradename ? req.query.tradename : req.query.chemicalname;
+            const SMILES = req.query.smiles ? req.query.smiles : req.query.chemicalname;
             let httpsAgent = {
                 host: 'localhost',
                 port: '443',
@@ -175,7 +172,7 @@ const postToChemprops = async(receivedToken) => {
 
             result = await axios({
                 'method': 'get',
-                'url': req.env.nmLocalRestBase + `/api/v1/chemprops?polfil=${polfil}&nmId=${nmId}&ChemicalName=${ChemicalName}&Abbreviation=${Abbreviation}&TradeName=${TradeName}&SMILES=${SMILES}`,
+                'url': req.env.nmLocalRestBase + `/api/v1/chemprops?polfil=${polfil}&nmId=${nmId}&ChemicalName=${ChemicalName}&SMILES=${SMILES}`,
                 // 'params': {ID: 12345},
                 'httpsAgent': new https.Agent(httpsAgent),
                 'headers': {'Content-Type': 'application/json', 'token': token}
