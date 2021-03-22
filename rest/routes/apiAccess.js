@@ -17,6 +17,9 @@ router.get('/parser', apiAccessController.tokenParser)
 /** CHEMPROPS ENTRY API */
 router.get('/chemprops', apiAccessController.chemprops)
 
+/** XML Conversion API Connection */
+router.get('/chemprops_parser', apiAccessController.chempropsParser)
+
 /** CREATE API TOKEN */
 router.post('/create', middleware.verifyToken, [
     query('userToken')
