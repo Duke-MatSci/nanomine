@@ -196,10 +196,10 @@ def conversion(jobDir, code_srcDir, xsdDir, templateName, user, datasetId):
         for matcomp in matcomps:
             chemprops_data = {
                 "polfil": "pol",
-                "ChemicalName": matcomp.findtext('ChemicalName'),
-                "Abbreviation": '' if matcomp.findtext('Abbreviation') is None else matcomp.findtext('Abbreviation'),
-                "TradeName": '' if matcomp.findtext('TradeName') is None else matcomp.findtext('TradeName'),
-                "uSMILES":  '' if matcomp.findtext('uSMILES') is None else matcomp.findtext('uSMILES'),
+                "chemicalname": matcomp.findtext('ChemicalName'),
+                "abbreviation": '' if matcomp.findtext('Abbreviation') is None else matcomp.findtext('Abbreviation'),
+                "tradename": '' if matcomp.findtext('TradeName') is None else matcomp.findtext('TradeName'),
+                "smiles":  '' if matcomp.findtext('uSMILES') is None else matcomp.findtext('uSMILES'),
                 "nmId": ID
             }
             # chemprops_rq = urllib.request.Request(chemprops_api_url)
@@ -209,12 +209,12 @@ def conversion(jobDir, code_srcDir, xsdDir, templateName, user, datasetId):
             # chemprops_search = nm_rest(logging, sysToken, jobApiToken, jobRefreshToken, chemprops_rq)
             # r = chemprops_search.urlopen(json.dumps(chemprops_data).encode("utf8"))
 
-            # r = requests.get(chemprops_api_url, params = chemprops_data) || updated
-            r = requests.get("%s?chemicalname=%s&polfil=%s" %(chemprops_api_url, chemprops_data['ChemicalName'], chemprops_data['polfil'])) 
+            r = requests.get(chemprops_api_url, params = chemprops_data)
+            # r = requests.get("%s?chemicalname=%s&polfil=%s" %(chemprops_api_url, chemprops_data['ChemicalName'], chemprops_data['polfil'])) 
             # if r.getcode() == 200:
             if r.status_code == 200:
                 # result = json.loads(r.read().decode("utf-8"))
-                result = r.json()
+                result = r.json()['data']
                 logging.debug('Searching result: ' + json.dumps(result)) #.encode("utf8"))
                 # now we modify xml with result
                 stdCN = matcomp.find('.//StdChemicalName')
@@ -242,8 +242,8 @@ def conversion(jobDir, code_srcDir, xsdDir, templateName, user, datasetId):
         for filcomp in filcomps:
             chemprops_data = {
                 "polfil": "fil",
-                "ChemicalName": filcomp.findtext('ChemicalName'),
-                "Abbreviation": '' if filcomp.findtext('Abbreviation') is None else filcomp.findtext('Abbreviation'),
+                "chemicalname": filcomp.findtext('ChemicalName'),
+                "abbreviation": '' if filcomp.findtext('Abbreviation') is None else filcomp.findtext('Abbreviation'),
                 "nmId": ID
             }
             # chemprops_rq = urllib.request.Request(chemprops_api_url)
@@ -253,12 +253,12 @@ def conversion(jobDir, code_srcDir, xsdDir, templateName, user, datasetId):
             # chemprops_search = nm_rest(logging, sysToken, jobApiToken, jobRefreshToken, chemprops_rq)
             # r = chemprops_search.urlopen(json.dumps(chemprops_data).encode("utf8"))
 
-            # r = requests.get(chemprops_api_url, params = chemprops_data, verify=False) # requirement for auth removed for ChemProps for now || updated!!!
-            r = requests.get("%s?chemicalname=%s&polfil=%s" %(chemprops_api_url, chemprops_data['ChemicalName'], chemprops_data['polfil']))
+            r = requests.get(chemprops_api_url, params = chemprops_data)
+            # r = requests.get("%s?chemicalname=%s&polfil=%s" %(chemprops_api_url, chemprops_data['ChemicalName'], chemprops_data['polfil']))
             # if r.getcode() == 200:
             if r.status_code == 200:
                 # result = json.loads(r.read().decode("utf-8"))
-                result = r.json()
+                result = r.json()['data']
                 logging.debug('Searching result: ' + json.dumps(result)) #.encode("utf8"))
                 # now we modify xml with result
                 stdCN = filcomp.find('.//StdChemicalName')

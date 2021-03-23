@@ -129,7 +129,7 @@ const userExistCheck = async(email) => {
 const postToChemprops = async(req, res, receivedToken) => {
     let result;
     const logger = req.logger;
-    logger.error("test-token: " + receivedToken)
+    // logger.error("test-token: " + req.query.ChemicalName)
     const exist = await Apiaccess.findOne({token:receivedToken})
     if(!exist){
         logger.error("CHEMPROPS API: Received token does not match any record")
@@ -158,10 +158,10 @@ const postToChemprops = async(req, res, receivedToken) => {
             }, req.env.nmAuthSecret);
             const polfil = req.query.polfil ? req.query.polfil : 'pol';
             const ChemicalName = req.query.chemicalname;
-            const nmId = 'restNmId';
-            // // const Abbreviation = req.query.abbreviation ? req.query.abbreviation : req.query.chemicalname;
-            // // const TradeName = req.query.tradename ? req.query.tradename : req.query.chemicalname;
-            const SMILES = req.query.smiles ? req.query.smiles : req.query.chemicalname;
+            const nmId = req.params.nmId ? req.params.nmId : 'restNmId';
+            const Abbreviation = req.query.abbreviation;
+            const TradeName = req.query.tradename;
+            const SMILES = req.query.smiles;
             let httpsAgent = {
                 host: 'localhost',
                 port: '443',
@@ -172,7 +172,8 @@ const postToChemprops = async(req, res, receivedToken) => {
 
             result = await axios({
                 'method': 'get',
-                'url': req.env.nmLocalRestBase + `/api/v1/chemprops?polfil=${polfil}&nmId=${nmId}&ChemicalName=${ChemicalName}&SMILES=${SMILES}`,
+                'url': req.env.nmLocalRestBase + `/api/v1/chemprops?polfil=${polfil}&nmId=${nmId}&ChemicalName=${ChemicalName}&Abbreviation=${Abbreviation}&TradeName=${TradeName}&SMILES=${SMILES}`,
+                // 'url': req.env.nmLocalRestBase + `/api/v1/chemprops?polfil=${polfil}&nmId=${nmId}&ChemicalName=${ChemicalName}&SMILES=${SMILES}`,
                 // 'params': {ID: 12345},
                 'httpsAgent': new https.Agent(httpsAgent),
                 'headers': {'Content-Type': 'application/json', 'token': token}
