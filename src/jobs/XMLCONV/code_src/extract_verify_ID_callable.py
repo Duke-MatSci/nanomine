@@ -190,8 +190,10 @@ def generateID(response, SID, lab):
     if 'publicationYear' in response:
         PubYearRaw = response['publicationYear']
         PubYear = str(PubYearRaw)
-    if lab: # lab data uses current year
+    elif lab: # lab data uses current year if no related DOI provided
         PubYear = str(datetime.datetime.now().year)
+    else:
+        PubYear = 'unknownYear'
     return '_'.join([PID, SID, slugify(LastName), PubYear])
 
 
