@@ -142,6 +142,29 @@ def conversion(jobDir, code_srcDir, xsdDir, templateName, user, datasetId):
       messages.append(dsMessage)
       return ('failure', messages)
 
+    # kick off dataset update once the ID is created successfully
+    response = None # initialize response of the request
+    # POST ds-create
+    try:
+      if not dsInfo['userid'] == user: # do not bypass this since updateEx implies admin acccess and OVERWRITE of another user's dataset WOULD occur
+        raise messages.append('Update of dataset failed. Job user: ' + user + ' is not the owner: ' + dsInfo['userid'])
+        return('failure', messages)
+
+      ds_update_url = restbase + '/nmr/dataset/updateEx'
+      rq = urllib.request.Request(ds_update_url)
+      # logging.info('request created using ds_create_url')
+      rq.add_header('Content-Type','application/json')
+
+      nmCurate = nm_rest(logging, runCtx['sysToken'], runCtx['curateApiToken'], runCtx['curateRefreshToken'], rq)
+      rv = nmCurate.urlopen(json.dumps({'dsUpdate': dsInfo}).encode("utf-8"))
+      response = json.loads(rv.read().decode("utf-8"))['data']
+    except:
+      messages.append('exception occurred during dataset-update\n')
+      messages.append('exception: ' + str(traceback.format_exc()) + '\n')
+      # assemble the PID
+    if response is None:
+      messages.append('exception occurred during getting the response of dataset-update\n')
+      
     # check #2: see if ID conversion is successful
     if not os.path.exists(jobDir + '/ID.txt'):
         if os.path.exists(jobDir + '/error_message.txt'):
@@ -347,27 +370,6 @@ def conversion(jobDir, code_srcDir, xsdDir, templateName, user, datasetId):
       dsInfo['filesets'] = []
     dsInfo['filesets'].append(fileset)
 
-    response = None # initialize response of the request
-    # POST ds-create
-    try:
-      if not dsInfo['userid'] == user: # do not bypass this since updateEx implies admin acccess and OVERWRITE of another user's dataset WOULD occur
-        raise messages.append('Update of dataset failed. Job user: ' + user + ' is not the owner: ' + dsInfo['userid'])
-        return('failure', messages)
-
-      ds_update_url = restbase + '/nmr/dataset/updateEx'
-      rq = urllib.request.Request(ds_update_url)
-      # logging.info('request created using ds_create_url')
-      rq.add_header('Content-Type','application/json')
-
-      nmCurate = nm_rest(logging, runCtx['sysToken'], runCtx['curateApiToken'], runCtx['curateRefreshToken'], rq)
-      rv = nmCurate.urlopen(json.dumps({'dsUpdate': dsInfo}).encode("utf-8"))
-      response = json.loads(rv.read().decode("utf-8"))['data']
-    except:
-      messages.append('exception occurred during dataset-update\n')
-      messages.append('exception: ' + str(traceback.format_exc()) + '\n')
-      # assemble the PID
-    if response is None:
-      messages.append('exception occurred during getting the response of dataset-update\n')
     if len(messages) != 0:
       return ('failure', messages)
 
