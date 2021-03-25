@@ -4,6 +4,13 @@ export default {
   name: 'Contactus',
   data: () => ({
     info: {icon: 'mail', name: 'Contact Us'},
+    msg: 'Contact the MaterialsMine Team',
+    helpText: 'Enter problem description',
+    textData: '',
+    contactType: 'comments',
+    confirmationDialog: false,
+    errorState: false,
+    errorMsg: 'xyz'
   }),
   components: {
     aFooter: Util.Footer,
