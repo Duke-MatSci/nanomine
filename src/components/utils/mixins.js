@@ -49,9 +49,10 @@ export default {
     }, 1000)
   },
   methods: {
-    links(args,options) {
-      if(options){
-        return window.location = `${window.location.origin}/wi/about?view=view&uri=http://semanticscience.org/resource/Chart`
+    links(args, options) {
+      if (options) {
+        window.location = `${window.location.origin}/wi/about?view=view&uri=http://semanticscience.org/resource/Chart`;
+        return;
       }
       return window.open(args, '_self');
     },
@@ -124,10 +125,7 @@ export default {
     },
     isTestUser: function () {
       return this.auth.isTestUser()
-    },
-    // openGallery: function () {
-    //   window.location = `${window.location.origin}/wi/about?view=view&uri=http://semanticscience.org/resource/Chart`
-    // }
+    }
   },
   computed: {
     loginStatus: function () { // reactive isLoggedIn to keep status updated in page header
