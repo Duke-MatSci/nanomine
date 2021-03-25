@@ -15,7 +15,7 @@
                     <div class="nav nav_menu u--inline">
                         <ul>
                             <li><a href="/nm#/">NanoMine</a></li>
-                            <li><a href="#">MetaMine</a></li>
+                            <li><a href="/nm#/mm">MetaMine</a></li>
                         </ul>
                     </div>
                     <div class="u--inline">
@@ -42,7 +42,7 @@
             </div>
             <div class="section_banner__nav">
                 <nav class="nav_menu">
-                    <ul>
+                    <ul class="nav_ul">
                         <li class="u_margin-right-small">
                             <div class="nav_menu--container">
                                 <a class="u--default-size nav_menu--handler" href="#">About</a>
