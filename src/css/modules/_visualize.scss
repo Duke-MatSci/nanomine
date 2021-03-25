@@ -161,7 +161,7 @@
         }
 
         @include respond(tab-land) {
-            font-size: 1.4rem;
+            font-size: 1.3rem;
         }
 
         @include respond(phone) {
@@ -263,6 +263,7 @@
             } @else if $i == 2 {
                 margin-top: 0px;
                 top: 0;
+                z-index: 15;
             }
         }
 
