@@ -72,11 +72,11 @@ export default new Router({
     return { x: 0, y: 0 }
   },
   routes: [
-    // {
-    //   path: '/',
-    //   name: 'NanoMine',
-    //   component: NanoMine
-    // },
+    {
+      path: '/mm',
+      name: 'NanoMine',
+      component: NanoMine
+    },
     {
       path: '/',
       name: 'LandingPage',
