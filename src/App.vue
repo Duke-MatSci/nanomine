@@ -1,22 +1,23 @@
 <template>
   <div v-if="versionNew">
-    <router-view />
+    <v-app id="app" app>
+      <waiting/>
+      <LeftMenu/>
+      <page-header/>
+      <page-subheader/>
+      <router-view />
+      <page-footer v-if="$route.path === '/'" />
+    </v-app>
   </div>
   <div v-else>
     <v-app id="app" app>
-      <!--<waiting/>-->
-      <!--<LeftMenu/>-->
-      <!--<page-header/>-->
-      <!--<page-subheader/>-->
       <router-view />
-      <!--<page-footer v-if="$route.path === '/'" />-->
     </v-app>
   </div>
 </template>
 <script>
 // import {} from 'vuex'
-// const newDev = ['/', '/teams', '/how', '/news', '/research', '/tools', '/simmtools', '/upload', '/single', '/contactus'];
-const newDev = [''];
+const mmPages = ['/mm'];
 export default {
   name: 'App',
   computed: {
@@ -35,17 +36,17 @@ export default {
     },
     checkVersion (newPath,oldPath, path) {
       if(path) {
-        if (newDev.includes(path)) {
+        if (mmPages.includes(path)) {
           return this.$store.state.versionNew = true;
         }
         return this.$store.state.versionNew = false;
       } else if(newPath) {
-        if (newDev.includes(newPath)) {
+        if (mmPages.includes(newPath)) {
           return this.$store.state.versionNew = true;
         }
         return this.$store.state.versionNew = false;
       } else if(newPath !== oldPath && !newPath) {
-        if (newDev.includes(oldPath)) {
+        if (mmPages.includes(oldPath)) {
           return this.$store.state.versionNew = true;
         }
         return this.$store.state.versionNew = false;

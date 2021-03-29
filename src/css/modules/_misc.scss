@@ -53,7 +53,7 @@
         border: .01rem solid rgba($primary-grey, .1);
         box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
         width: 25rem;
-        height: 31.5rem;
+        height: 32.5rem;
         border-radius: 3px;
         margin: 0 2rem 3rem 0;
         place-items: center;
@@ -154,6 +154,7 @@
             transition: .5s;
             transform-origin: left;
             right: 0.9rem;
+            bottom: .1px;
 
             @include respond(phone){
                 transform: rotate(-8deg) translateY(63px);
