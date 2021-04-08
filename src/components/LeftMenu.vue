@@ -2,30 +2,32 @@
   <v-card class="rvwm elevation-12" v-if="show()">
     <v-navigation-drawer floating stateless value="show()">
       <v-list dense>
-        <v-list-tile to="/db" v-on:click="clicked()">
-          <v-list-tile-title>Database</v-list-tile-title>
-            <v-icon>collections</v-icon>
+       <v-list-tile>&nbsp;
         </v-list-tile>
-        <v-list-tile to="/mtools" v-on:click="clicked()">
+        <v-list-tile  href="/home" v-on:click="clicked()">
+          <v-list-tile-title>Visualize</v-list-tile-title>
+          <v-icon>search</v-icon>
+        </v-list-tile>
+        <v-list-tile  href="/home" v-on:click="clicked()">
+          <v-list-tile-title>Gallery</v-list-tile-title>
+          <v-icon>search</v-icon>
+        </v-list-tile>
+        <v-list-tile to="/mm/mtools" v-on:click="clicked()">
           <v-list-tile-title>Module Tools</v-list-tile-title>
           <v-icon>insert_chart</v-icon>
         </v-list-tile>
-        <v-list-tile to="/simtools" v-on:click="clicked()">
+        <!--<v-list-tile to="/simtools" v-on:click="clicked()">
           <v-list-tile-title>Simulation Tools</v-list-tile-title>
           <v-icon>waves</v-icon>
-        </v-list-tile>
-        <v-list-tile  href="/home" v-on:click="clicked()">
-          <v-list-tile-title>Search</v-list-tile-title>
-          <v-icon>search</v-icon>
-        </v-list-tile>
-        <v-list-tile to="/contact" v-on:click="clicked()">
+        </v-list-tile>-->
+        <v-list-tile to="/mm/contact" v-on:click="clicked()">
           <v-list-tile-title>Contact Us</v-list-tile-title>
           <v-icon>contact_support</v-icon>
         </v-list-tile>
-        <v-list-tile to="/mypage" v-on:click="clicked()">
+        <!--<v-list-tile to="/mypage" v-on:click="clicked()">
           <v-list-tile-title>My Page</v-list-tile-title>
           <v-icon>folder_shared</v-icon>
-        </v-list-tile>
+        </v-list-tile>-->
         <v-list-tile v-on:click="loginLogout()" v-if="isLoggedIn()">
           <v-list-tile-title>Logout</v-list-tile-title>
           <v-icon>perm_identity</v-icon>

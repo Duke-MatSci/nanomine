@@ -1,14 +1,8 @@
-import * as Util from '../../utils'
 export default {
   name: 'HowTo',
   data: () => ({
-    info: {icon: 'fa-film', name: 'How To'},
     videos: []
   }),
-  components: {
-    aFooter: Util.Footer,
-    aHeader: Util.Header
-  },
   methods: {
     showBox () {
       console.log(this.filter)
@@ -52,5 +46,8 @@ export default {
       vm.videos.push(o)
     })
     vm.hideVideos()
+  },
+  created () {
+    this.$store.commit('setAppHeaderInfo', {icon: 'smart_display', name: 'How To'})
   }
 }

@@ -5,16 +5,16 @@
         <v-layout align-center>
           <div class="centralize-heading white-color">
             <h3 class="mainheading">MetaMine</h3>
-            <span>Material Informatics for Polymer Nanocomposites</span>
+            <span>Material Informatics for Polymer MetaMaterial</span>
           </div>
         </v-layout>
       </v-container>
     </v-jumbotron>
     <v-container fluid>
-      <h3 style="text-align:center; margin-top:1.8rem"><span>MetaMine is an open source, data resource for members of the nanocomposites community with four key goals:</span></h3>
+      <h3 style="text-align:center; margin-top:1.8rem"><span>MetaMine is an open source, data resource for members of the metamaterial community with four key goals:</span></h3>
       <div class="card-container">
-        <ul>
-          <li class="card card-float inline-display" @click="links('/nm#/XMLCONV')">
+        <ul class="ul_adjust">
+          <li class="card card-float inline-display" @click="links('/nm#/mm/XMLCONV')">
             <div class="card-inside">
               <div class="card-icon-container"><i class="material-icons card-icon">people_alt</i></div>
               <h2 class="card-heading">Curation</h2>
@@ -28,18 +28,18 @@
               <p>Provide a platform for visualizing data, and mechanisms for visualization methods to be shared</p>
             </div>
           </li>
-          <li class="card card-float inline-display" @click="links('/nm#/tools')">
+          <li class="card card-float inline-display" @click="links('mtools')">
             <div class="card-inside">
               <div class="card-icon-container"><i class="material-icons card-icon">grain</i></div>
               <h2 class="card-heading">Module Tools</h2>
               <p>Provide module tools that improve the quantification of nano filler dispersion and morphology as well as the ability to reconstruct those morphologies for subsequent modeling and analysis.</p>
             </div>
           </li>
-          <li class="card card-float inline-display" @click="links('/nm#/simmtools')">
+          <li class="card card-float inline-display" @click="links('http://reccr.chem.rpi.edu/polymerizer/index.html', false)">
             <div class="card-inside">
               <div class="card-icon-container"><i class="material-icons card-icon">widgets</i></div>
               <h2 class="card-heading">Simulation Tools</h2>
-              <p>Improve the ability to design nanocomposites through simulation and design tools.</p>
+              <p>Improve the ability to design metamaterial through simulation and design tools.</p>
             </div>
           </li>
         </ul>
@@ -47,11 +47,11 @@
     </v-container>
     <div class="mid-first white-color">
       <ul>
-        <li class="inline-display mid-first-li mid-first-container"><i class="material-icons card-icon">subscriptions</i></li>
+        <li class="inline-display mid-first-li mid-first-container"><i class="material-icons card-icon">smart_display</i></li>
         <li class="inline-display mid-first-li mid-first-container">
-          <p class="mid-first-p">New to NanoMine? <span class="mid-first-span">View Our step-by-step tutorials!</span></p>
+          <p class="mid-first-p">New to MetaMine? <span class="mid-first-span">View Our step-by-step tutorials!</span></p>
         </li>
-        <li class="inline-display mid-first-container" @click="links('/nm#/how')" style="cursor:pointer"><i class="material-icons card-icon">arrow_right_alt</i></li>
+        <li class="inline-display mid-first-container" @click="links('/nm#/mm/tutorials')" style="cursor:pointer"><i class="material-icons card-icon">arrow_right_alt</i></li>
       </ul>
     </div>
     <div class="mid-second white-color">
@@ -62,8 +62,8 @@
         <a href="https://www.incommon.org/federation/incommon-federation-participants/" target="_blank" class="white-color">InCommon federation</a> allows
         many university users to login with the same credentials they use for their own university.
       </p>
-      <p style="font-size:1.3rem;"><span>NanoMine is built on both a <a
-        href="https://github.com/Duke-MatSci/nanomine-schema/tree/master/xml" target="_blank" class="white-color">schema</a>* and an ontology to provide a robustness to the FAIR principles. NanoMine also allows for the registration of materials resources, bridging the gap between existing resources and the end users and making those existing resources available for research to material community.</span>
+      <p style="font-size:1.3rem;"><span>MetaMine is built on both a <a
+        href="https://github.com/Duke-MatSci/nanomine-schema/tree/master/xml" target="_blank" class="white-color">schema</a>* and an ontology to provide a robustness to the FAIR principles. MetaMine also allows for the registration of materials resources, bridging the gap between existing resources and the end users and making those existing resources available for research to material community.</span>
       </p>
     </div>
     <v-container fluid>
@@ -171,16 +171,16 @@ export default {
 
   .card-heading {
     font-size: 2rem;
-    margin-bottom: 1rem;
     font-weight: 400;
   }
 
   .card-icon {
-    font-size: 10rem;
+    font-size: 7rem;
   }
 
   .card-icon-container {
-    margin-bottom: -1.5rem;
+    margin-bottom: .9rem;
+    margin-top: 1rem;
   }
 
   .card-float {
@@ -205,31 +205,8 @@ export default {
     cursor: pointer;
   }
 
-  .mid-first {
-    background-color: #08233c;
-    padding: 2.5rem 1rem;
-    margin: 1.5rem 0;
-    margin-bottom: 0;
-  }
-  .mid-first-container {
-    height: 8rem
-  }
-  .mid-first-li {
-    margin-right: 2rem;
-  }
-  .mid-first-p {
-    margin-top: 0.5rem;
-    font-size: 2.5rem;
-  }
-  .mid-first-span {
-    display: block;
-  }
-
-  .mid-second {
-    background-color: #999999;
-    padding: 6rem 15rem;
-    margin: 0 0 1.5rem 0;
-  }
+  
+  
 
   .visualize-button {
     color: #000000;

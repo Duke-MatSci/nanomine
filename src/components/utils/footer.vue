@@ -10,7 +10,7 @@
                     <div class="grid grid_col-3">
                         <div class="footer_list">
                             <ul>
-                                <li><a href="/nm#">Nanomine</a></li>
+                                <li><a href="/nm">Nanomine</a></li>
                                 <li><a href="#">Metamine</a></li>
                             </ul>
                         </div>
@@ -25,7 +25,7 @@
                             <ul>
                                 <li><a href="https://oarc.duke.edu/privacy/duke-university-privacy-statement" target="_blank">Privacy Policy</a></li>
                                 <li><a href="https://security.duke.edu/node/82" target="_blank">Terms of Use</a></li>
-                                <li><a href="/nm#/contactus">Contact Us</a></li>
+                                <li><a href="/nm#/contact">Contact Us</a></li>
                             </ul>
                         </div>
                     </div>

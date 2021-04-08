@@ -229,6 +229,7 @@
         } @else if $i == 5 {
             // transition: top .5s ease-out;
             top: calc(60px/(#{$i}-4));
+            z-index: 4 !important;
         }
 
         @if $i == 1  {

@@ -1,34 +1,46 @@
 <template>
   <div v-if="versionNew">
-    <v-app id="app" app>
+    <v-app id="app" app class="meta">
       <waiting/>
       <LeftMenu/>
       <page-header/>
       <page-subheader/>
       <router-view />
-      <page-footer v-if="$route.path === '/'" />
+      <page-footer v-if="$route.path === '/mm'" />
     </v-app>
   </div>
   <div v-else>
     <v-app id="app" app>
-      <router-view />
+      <div>
+        <a-header :info="info" v-if="$route.path != '/'"></a-header>
+        <router-view />
+        <a-footer></a-footer>
+      </div>
     </v-app>
   </div>
 </template>
 <script>
+import * as Util from './components/utils'
 // import {} from 'vuex'
-const mmPages = ['/mm'];
+const mmPages = ['/mm', '/mm/db', '/mm/tutorials', '/mm/binarization_homepage', '/mm/mcr_homepage', '/mm/XMLCONV', '/mm/contact', '/mm/mtools', '/mm/Dynamfit', '/mm/DynamfitExample', '/mm/DynamfitExampleInput', '/mm/DynamfitResult'];
 export default {
   name: 'App',
   computed: {
     versionNew(){
       return this.$store.state.versionNew;
+    },
+    info() {
+      return this.$store.state.appHeaderInfo
     }
   },
   watch: {
     '$route.path': function(newPath, oldPath){
       this.checkVersion(newPath,oldPath, undefined)
     }
+  },
+  components: {
+    aHeader: Util.Header,
+    aFooter: Util.Footer,
   },
   methods: {
     showLeftMenu: function () {
@@ -61,11 +73,14 @@ export default {
 }
 </script>
 
-<style>
+<style lang="scss">
   @import './css/styles.css';
-  @import './css/old_css.css';
+  @import './css/old_css.scss';
   #app {
     margin-top: 0!important;
     background-color: #08233c;
+  }
+  .meta {
+    background-color: #ffffff !important;
   }
 </style>
