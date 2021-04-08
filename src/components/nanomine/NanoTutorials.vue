@@ -1,30 +1,36 @@
 <template>
-  <div class="nano_tutorials">
-    <h1>{{ msg }}</h1>
-    <v-container fluid grid-list-md>
-      <v-flex xs1></v-flex>
-      <v-flex xs11 class="title bold text-xs-left">
-        NanoMine usage hints and tips.
-      </v-flex>
-    </v-container>
-    <v-container class="text-xs-left">
-      <v-layout row wrap>
-        <v-flex xs10>
-          <div v-for="(video, idx) in videos" :key="idx">
-            <div @click="displayVideo(idx)">
-              <v-flex class="title heavy skip"><i class="video-icon material-icons">ondemand_video</i>&nbsp;{{video.title}}</v-flex>
-              <v-flex class="body">{{video.text}}
-              </v-flex>
-            </div>
-            <div v-if="!video.hide">
-              <v-playback :url="video.url"></v-playback>
-            </div>
-          </div>
+  <div class="main">
+    <div class="nano_tutorials">
+      <h1 v-if="this.$store.state.versionNew" class="header-mm">{{ msg }}</h1>
+      <v-container fluid grid-list-md>
+        <v-flex xs1></v-flex>
+        <v-flex xs11 class="title bold text-xs-left" style="text-align:center !important;">
+          NanoMine usage hints and tips.
         </v-flex>
-      </v-layout>
-    </v-container>
+      </v-container>
+      <v-container class="text-xs-left">
+        <v-layout row wrap>
+          <v-flex xs10>
+            <div v-for="(video, idx) in videos" :key="idx">
+              <div @click="displayVideo(idx)">
+                <v-flex class="title heavy skip"><i class="video-icon material-icons">ondemand_video</i>&nbsp;{{video.title}} <i class="material-icons icon-adjust">{{video.hide ? 'keyboard_arrow_down':'keyboard_arrow_up'}}</i></v-flex>
+                <v-flex class="body">{{video.text}}</v-flex>
+              </div>
+              <div v-if="!video.hide">
+                <v-playback :url="video.url"></v-playback>
+              </div>
+            </div>
+            <div>
+              <div @click="displayVideo('null', true)">
+                <v-flex class="title heavy skip"><i class="video-icon material-icons">ondemand_video</i>&nbsp;Nanomine Visualization Gallery <i class="material-icons icon-adjust">arrow_right</i></v-flex>
+                <v-flex class="body">This video tutorial is a short overview of the charts platform.</v-flex>
+              </div>
+            </div>
+          </v-flex>
+        </v-layout>
+      </v-container>
+    </div>
   </div>
-
 </template>
 
 <script>
@@ -85,7 +91,10 @@ export default {
         }
       })
     },
-    displayVideo (idx) {
+    displayVideo (idx, link) {
+      if(link){
+        return window.open('https://youtu.be/o2FA1yM85M8', '_blank')
+      }
       let vm = this
       vm.hideVideos(idx)
       let isHidden = vm.videos[idx].hide
@@ -127,12 +136,6 @@ export default {
 
   h4 {
     text-transform: uppercase;
-  }
-
-  h1 {
-    margin-top: 10px;
-    background-color: black;
-    color: white;
   }
 
 </style>

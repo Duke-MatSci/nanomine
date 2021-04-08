@@ -13,8 +13,9 @@
 
 <template>
 <div>
+  <h1 v-if="this.$store.state.versionNew" class="header-mm">{{ job.pageTitle }}</h1>
   <v-container class="text-xs-left">
-    <h1>{{ job.pageTitle }}</h1>
+    <h1 v-if="!this.$store.state.versionNew" class="header-nm">{{ job.pageTitle }}</h1>
 
     <!-- Error for when user is not logged in -->
     <v-alert v-model="loginRequired" type="error" outline>{{ loginRequiredMsg }}</v-alert>
@@ -115,8 +116,9 @@
     </v-flex>
 
     <v-flex xs12>
-      <h3>References</h3>
-      <div v-for='(reference, index) in job.references' v-bind:key='index'>
+      <h3 v-if="referenceOpen" @click="refOpen">References <i class="material-icons icon-adjust">keyboard_arrow_up</i></h3>
+      <h3 v-else @click="refOpen">References <i class="material-icons icon-adjust">keyboard_arrow_down</i></h3>
+      <div v-if="referenceOpen" v-for='(reference, index) in job.references' v-bind:key='index'>
         <p v-html='reference' >{{ reference }}</p>
       </div>
     </v-flex>
@@ -184,6 +186,7 @@ export default {
       files: undefined,
       selects: [],
       selectedOptions: {},
+      referenceOpen: false,
       results: {
         obtained: false,
         files: undefined,
@@ -360,6 +363,9 @@ export default {
       }
       return dimensionObj['ratio'].toString()
       // return dimensionObj['width'] + '*' + dimensionObj['height'] + '*' + dimensionObj['units']
+    },
+    refOpen () {
+      return this.referenceOpen = !this.referenceOpen;
     }
   }
 
@@ -367,12 +373,6 @@ export default {
 </script>
 
 <style scoped>
-
-  h1 {
-    margin-top: 10px;
-    padding-bottom: .1rem;
-    border-bottom: .2rem solid black;
-  }
 
   h3 {
     margin-bottom: 10px;
@@ -416,6 +416,11 @@ export default {
 
   .imageUpload {
     margin-left: 15px;
+  }
+
+  .icon-adjust {
+    font-size: 1.5rem !important;
+    vertical-align: text-bottom;
   }
 
 </style>

@@ -64,19 +64,11 @@
 </template>
 
 <script>
-import * as Util from './utils'
 export default {
   name: 'ReconstructionHomepage',
-  data () {
-    return {
-      info: {icon: 'fa-bullseye', name: 'Microstructure Reconstruction'},
-      // msg: 'Microstructure Reconstruction'
-    }
-  },
-  components: {
-    aFooter: Util.Footer,
-    aHeader: Util.Header
-  },
+  created(){
+    this.$store.commit('setAppHeaderInfo', {icon: 'workspaces', name: 'Microstructure Reconstruction'})
+  }
 }
 </script>
 
@@ -87,11 +79,6 @@ export default {
   }
   h4 {
     text-transform: uppercase;
-  }
-  h1 {
-    margin-top: 10px;
-    padding-bottom: .1rem;
-    border-bottom: .2rem solid black;
   }
   .reconstruction_homepage {
     padding-bottom: 40px;

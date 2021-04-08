@@ -103,7 +103,6 @@ export default {
     },
     handleLoginDialogChange: function (mutation, state) {
       let vm = this
-      console.log('handleLoginDialogChange: ' + mutation.type)
       if (mutation.type === 'setLoginLogout') {
         if (state.loginLogout && !vm.isLoggedIn()) {
           vm.loginDialog = true

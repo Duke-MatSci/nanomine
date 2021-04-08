@@ -3,27 +3,30 @@
     <analytics/>
     <v-toolbar app dense>
       <v-toolbar-side-icon @click="toggleLeftMenu()" class="hidden-md-and-up"></v-toolbar-side-icon>
-      <v-btn flat to="/" @click="setSite('mm')">
-        <v-toolbar-title><i class="material-icons nm-home-icon">home</i>MaterialsMine</v-toolbar-title>
+      <v-btn flat to="/" @click="setSite('nano')">
+        <v-toolbar-title><i class="material-icons nm-home-icon">home</i></v-toolbar-title>
+      </v-btn>
+      <v-btn flat to="/mm" @click="setSite('meta')">
+        <v-toolbar-title>MetaMine</v-toolbar-title>
       </v-btn>
       <v-spacer></v-spacer>
       <v-toolbar-items class="hidden-sm-and-down">
-        <v-btn flat to="/teams">Team</v-btn>
+        <!--<v-btn flat to="/teams">Team</v-btn>-->
         <v-btn flat @click="links('/home')">Visualize</v-btn>
-        <v-btn flat to="/tools">Tools</v-btn>
+        <v-btn flat @click="links(null, true)">Gallery</v-btn>
+        <v-btn flat to="/mm/mtools">Tools</v-btn>
         <!--<v-btn flat to="/db">Database</v-btn>
         <v-btn flat to="/mtools">Module Tools</v-btn>
         <v-btn flat to="/simtools">Simulation Tools</v-btn>
         <v-btn flat @click="openGallery">Gallery</v-btn>
         <v-btn fab flat href="/home"><i class="material-icons nm-search-icon" v-if="searchEnabled()">search</i>
         </v-btn>-->
-        <v-btn v-if="isLoggedIn()" flat to="/mypage">Portal</v-btn>
-        <v-btn flat to="/contactus">Contact</v-btn>
+        <!--<v-btn v-if="isLoggedIn()" flat to="/mypage">Portal</v-btn>-->
+        <v-btn flat to="/mm/tutorials">Learn</v-btn>
+        <v-btn flat to="/mm/contact">Contact</v-btn>
         <!--<v-btn v-if="isLoggedIn()" flat to="/mypage">My Page</v-btn>-->
         <v-btn v-if="loginStatus" flat v-on:click="$store.commit('setLoginLogout')">
-          <i class="material-icons nm-user-icon" v-bind:class="{'nm-admin-icon': (isAdmin && !isRunAs), 'nm-runas-icon': isRunAs}">
-            perm_identity
-          </i>
+          <i class="material-icons nm-user-icon" v-bind:class="{'nm-admin-icon': (isAdmin && !isRunAs), 'nm-runas-icon': isRunAs}">perm_identity</i>
           <span v-if="!isTestUser()">
             &nbsp;Logout&nbsp;
           </span>

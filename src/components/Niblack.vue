@@ -12,12 +12,8 @@
 -->
 
 <template>
-  <div>
-    <a-header :info="info"></a-header>
-    <div class="main">
-      <McrJobsTemplate v-bind:job='jobInfo'></McrJobsTemplate>
-    </div>
-    <a-footer></a-footer>
+  <div class="main">
+    <McrJobsTemplate v-bind:job='jobInfo'></McrJobsTemplate>
   </div>
 </template>
 
@@ -25,20 +21,16 @@
 
 import {} from 'vuex'
 import McrJobsTemplate from './McrJobsTemplate.vue'
-import * as Util from './utils'
 export default {
 
   name: 'Niblack',
 
   components: {
     McrJobsTemplate,
-    aHeader: Util.Header,
-    aFooter: Util.Footer,
   },
 
   data: () => {
     return {
-      info: {icon: 'fa-bullseye', name: 'Binarization - Niblack Method'},
       jobInfo: {
 
         jobTitle: 'Niblack',
@@ -101,6 +93,9 @@ export default {
 
       }
     }
+  },
+  created(){
+    this.$store.commit('setAppHeaderInfo', {icon: 'workspaces', name: 'Binarization - Niblack Method'})
   }
 }
 </script>

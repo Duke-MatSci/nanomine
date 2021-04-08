@@ -85,5 +85,6 @@ export default {
   },
   created() {
     this.restCallFn();
+    this.$store.commit('setAppHeaderInfo', undefined)
   }
 }

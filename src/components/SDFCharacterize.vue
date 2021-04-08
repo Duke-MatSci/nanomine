@@ -11,12 +11,8 @@
 ################################################################################
 -->
 <template>
-  <div>
-    <a-header :info="info"></a-header>
-    <div class="main">
-      <McrJobsTemplate v-bind:job='jobInfo'></McrJobsTemplate>
-    </div>
-    <a-footer></a-footer>
+  <div class="main">
+    <McrJobsTemplate v-bind:job='jobInfo'></McrJobsTemplate>
   </div>
 </template>
 
@@ -24,19 +20,15 @@
 
 import {} from 'vuex'
 import McrJobsTemplate from './McrJobsTemplate.vue'
-import * as Util from './utils'
 export default {
   name: 'SDFCharacterize',
 
   components: {
-    aHeader: Util.Header,
-    aFooter: Util.Footer,
     McrJobsTemplate
   },
 
   data: () => {
     return {
-      info: {icon: 'fa-file', name: 'Microstructure Characterization'},
       jobInfo: {
 
         jobTitle: 'SDF Characterization',
@@ -83,6 +75,9 @@ export default {
 
       }
     }
+  },
+  created(){
+    this.$store.commit('setAppHeaderInfo', {icon: 'workspaces', name: 'Microstructure Characterization'})
   }
 }
 
