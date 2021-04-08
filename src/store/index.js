@@ -10,6 +10,7 @@ const store = new Vuex.Store({
     isWaiting: false,
     loginLogout: false, // used to toggle either login or logout in pageheader (actually does logout, dialog for login)
     runAsUser: null,
+    appHeaderInfo: {icon: '', name: 'Nanomine'},
     'editor': { // editor store should contain all editor state including tabs and data for each tab
       'tab': [
       ],
@@ -107,6 +108,9 @@ const store = new Vuex.Store({
     },
     setEditorInactive: function (state) {
       state.editorActive = false
+    },
+    setAppHeaderInfo: function (state, info) {
+      state.appHeaderInfo = info
     }
   },
   getters: {
