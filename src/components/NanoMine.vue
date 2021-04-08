@@ -28,7 +28,7 @@
               <p>Provide a platform for visualizing data, and mechanisms for visualization methods to be shared</p>
             </div>
           </li>
-          <li class="card card-float inline-display" @click="links('mtools')">
+          <li class="card card-float inline-display" @click="links('nm#/mm/mtools')">
             <div class="card-inside">
               <div class="card-icon-container"><i class="material-icons card-icon">grain</i></div>
               <h2 class="card-heading">Module Tools</h2>
