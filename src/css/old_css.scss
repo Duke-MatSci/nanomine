@@ -87,3 +87,14 @@ img {
         }
     }
 }
+
+.list_menu {
+    display: block; 
+    padding: .5rem 1.5rem; 
+    cursor: pointer;
+
+    &:hover {
+        background-color: rgba(0,0,0,.6);
+        color: #ffffff;
+    }
+}

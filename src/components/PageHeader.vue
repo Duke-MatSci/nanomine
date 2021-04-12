@@ -14,7 +14,21 @@
         <!--<v-btn flat to="/teams">Team</v-btn>-->
         <v-btn flat @click="links('/home')">Visualize</v-btn>
         <v-btn flat @click="links(null, true)">Gallery</v-btn>
-        <v-btn flat to="/mm/mtools">Tools</v-btn>
+        <!-- Begin Test -->
+      <v-menu offset-y open-on-hover transition="slide-x-transition" bottom right>
+        <template v-slot:activator="{ on, attrs }">
+          <v-btn v-bind="attrs" v-on="on" flat>Tools</v-btn>
+        </template>
+        <v-list dense>
+          <!--<v-list-item v-for="(item, index) in listMenu" :key="index" router :to="item.link">-->
+          <v-list-item v-for="(item, index) in listMenu" :key="index" @click="links(item.link)">
+            <v-list-item-action>
+                <v-list-item-title class="list_menu">{{ item.title }}</v-list-item-title>
+            </v-list-item-action>
+          </v-list-item>
+        </v-list>
+      </v-menu>
+      <!-- End of Test -->
         <!--<v-btn flat to="/db">Database</v-btn>
         <v-btn flat to="/mtools">Module Tools</v-btn>
         <v-btn flat to="/simtools">Simulation Tools</v-btn>
@@ -118,6 +132,15 @@ import { AppMixin } from './utils'
 export default {
   name: 'PageHeader',
   mixins: [AppMixin],
+  data () {
+    return {
+      listMenu: [
+        {title: "MCR Tools", link:"/nm#/mm/mtools"},
+        {title: "ChemProps", link:"/nm#/mm/ChemProps"},
+        {title: "Geometry Explorer", link:"/nm#/mm/pixelunit"}
+      ]
+    }
+  }
 }
 </script>
 

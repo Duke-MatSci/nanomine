@@ -1,8 +1,9 @@
 <template>
   <div class="main">
     <div class="requestToken">
+      <h1 v-if="this.$store.state.versionNew" class="header-mm">Request token here for ChemProps - A growing polymer name and filler name standardization database</h1>
       <v-container>
-        <h1 class="header-nm">Request token here for ChemProps - A growing polymer name and filler name standardization database</h1>
+        <h1 v-if="!this.$store.state.versionNew" class="header-nm">Request token here for ChemProps - A growing polymer name and filler name standardization database</h1>
         <v-alert
           v-model="submitError"
           type="error"

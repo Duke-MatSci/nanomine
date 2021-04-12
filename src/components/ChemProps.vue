@@ -1,8 +1,9 @@
 <template>
   <div class="main">
     <div class="chemprops">
+      <h1 v-if="this.$store.state.versionNew" class="header-mm">ChemProps - A growing polymer name and filler name standardization database</h1>
       <v-container>
-        <h1 class="header-nm">ChemProps - A growing polymer name and filler name standardization database</h1>
+        <h1 v-if="!this.$store.state.versionNew" class="header-nm">ChemProps - A growing polymer name and filler name standardization database</h1>
         <v-alert
           v-model="submitError"
           type="error"
@@ -16,7 +17,8 @@
         </p>
         <p class="text-xs-left">This webapp is designed for one-time search. For batch jobs, please use the ChemProps API. A token is required to use the API. You must be logged in to request the ChemProps API token.
         </p>
-        <v-btn to="/ChemPropsAPIToken" color="primary">Request API Token</v-btn>
+        <v-btn v-if="!this.$store.state.versionNew" to="/ChemPropsAPIToken" color="primary">Request API Token</v-btn>
+        <v-btn else to="/mm/ChemPropsAPIToken" color="primary">Request API Token</v-btn>
         <br>
         <h3 class="text-xs-left">Instructions</h3>
         <p class="text-xs-left"><b>1. Select the collection.</b></p>

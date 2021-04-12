@@ -22,7 +22,7 @@
 <script>
 import * as Util from './components/utils'
 // import {} from 'vuex'
-const mmPages = ['/mm', '/mm/db', '/mm/tutorials', '/mm/binarization_homepage', '/mm/mcr_homepage', '/mm/XMLCONV', '/mm/contact', '/mm/mtools', '/mm/Dynamfit', '/mm/DynamfitExample', '/mm/DynamfitExampleInput', '/mm/DynamfitResult'];
+const mmPages = ['/mm', '/mm/db', '/mm/tutorials', '/mm/binarization_homepage', '/mm/mcr_homepage', '/mm/XMLCONV', '/mm/contact', '/mm/mtools', '/mm/Dynamfit', '/mm/DynamfitExample', '/mm/DynamfitExampleInput', '/mm/DynamfitResult', '/mm/pixelunit', '/mm/ChemProps', '/mm/ChemPropsAPIToken'];
 export default {
   name: 'App',
   computed: {
