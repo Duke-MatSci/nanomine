@@ -387,6 +387,11 @@ export default new Router({
       component: SmilesTest
     },
     {
+      path: '/mm/ChemProps',
+      name: 'ChemProps',
+      component: ChemProps
+    },
+    {
       path: '/ChemProps',
       name: 'ChemProps',
       component: ChemProps
@@ -398,6 +403,11 @@ export default new Router({
     },
     {
       path: '/ChemPropsAPIToken',
+      name: 'ChemPropsAPIToken',
+      component: ChemPropsAPIToken
+    },
+    {
+      path: '/mm/ChemPropsAPIToken',
       name: 'ChemPropsAPIToken',
       component: ChemPropsAPIToken
     }
