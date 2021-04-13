@@ -13,8 +13,8 @@
 
 <template>
   <div>
-    <a-header :info="info"></a-header>
       <div class="main">
+      <h1 v-if="this.$store.state.versionNew" class="header-mm">Microstructure Reconstruction</h1>
         <div class="reconstruction_homepage">
           <!--<h1>{{ msg }}</h1>-->
           <v-container class="text-xs-left">

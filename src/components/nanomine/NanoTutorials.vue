@@ -5,7 +5,7 @@
       <v-container fluid grid-list-md>
         <v-flex xs1></v-flex>
         <v-flex xs11 class="title bold text-xs-left" style="text-align:center !important;">
-          NanoMine usage hints and tips.
+          MetaMine usage hints and tips.
         </v-flex>
       </v-container>
       <v-container class="text-xs-left">

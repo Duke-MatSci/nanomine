@@ -214,12 +214,17 @@ export default new Router({
       component: NanoTutorials
     },
     {
-      path: '/metamine/pixelunit50',
+      path: '/mm/pixelunit50',
       name: 'NuExampleUnitCell',
       component: NuExampleUnitCell
     },
     {
       path: '/Otsu',
+      name: 'Otsu',
+      component: Otsu
+    },
+    {
+      path: 'mm/Otsu',
       name: 'Otsu',
       component: Otsu
     },
@@ -234,12 +239,27 @@ export default new Router({
       component: CharacterizeHomepage
     },
     {
+      path: '/mm/characterization_homepage',
+      name: 'CharacterizeHomepage',
+      component: CharacterizeHomepage
+    },
+    {
       path: '/reconstruction_homepage',
       name: 'ReconstructionHomepage',
       component: ReconstructionHomepage
     },
     {
+      path: '/mm/reconstruction_homepage',
+      name: 'ReconstructionHomepage',
+      component: ReconstructionHomepage
+    },
+    {
       path: '/IntelligentCharacterize',
+      name: 'IntelligentCharacterize',
+      component: IntelligentCharacterize
+    },
+    {
+      path: '/mm/IntelligentCharacterize',
       name: 'IntelligentCharacterize',
       component: IntelligentCharacterize
     },

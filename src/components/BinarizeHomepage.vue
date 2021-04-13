@@ -13,6 +13,7 @@
 
 <template>
   <div class="main">
+  <h1 v-if="this.$store.state.versionNew" class="header-mm">Image Binarization</h1>
     <div class="binarization_homepage">
       <v-container class="text-xs-left">
             <div>
@@ -20,7 +21,7 @@
             </div>
         <v-layout align-space-between justify-left row fill-height>
           <v-flex>
-              <div>
+              <div style="margin-bottom:2rem;">
                 <h2>Otsu's Method </h2>
                 <p> Otsu's thresholding method involves iterating through all the possible threshold values and calculating a measure of spread for the pixel levels each side of the threshold,
                     i.e. the pixels that either fall in foreground (white) or background (black). The aim is to find the global threshold that minimizes intraclass variance of the thresholded
@@ -37,8 +38,9 @@
               </div>
           </v-flex>
         </v-layout>
-        <h4>References</h4>
-        <v-flex xs12>
+        <h4 v-if="referenceOpen" @click="refOpen">References <i class="material-icons icon-adjust">keyboard_arrow_up</i></h4>
+        <h4 v-else @click="refOpen">References <i class="material-icons icon-adjust">keyboard_arrow_down</i></h4>
+        <v-flex xs12 v-if="referenceOpen">
           <p>N. Otsu, A threshold selection method from gray-level histograms, IEEE transactions on systems, man, and cybernetics, vol. 9, no. 1, pp. 62-66, 1979.</p>
           <p>W. Niblack, An Introduction to Image Processing. Englewood Cliffs, NJ: Prentice-Hall, 1986, pp. 115-116.</p>
           <p>Khurshid, K.,Siddiqi, I., Faure, C. and Vincent, N., 2009. Comparison of Niblack inspired Binarization methods for ancient document. DRR, 7247, pp.1-10</p>
@@ -53,7 +55,12 @@ export default {
   name: 'BinarizeHomepage',
   data () {
     return {
-      // msg: 'Image Binarization',
+      referenceOpen: false,
+    }
+  },
+  methods: {
+    refOpen () {
+      return this.referenceOpen = !this.referenceOpen;
     }
   },
   created(){
