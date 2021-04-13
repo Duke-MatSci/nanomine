@@ -39,7 +39,10 @@
             <div class="links">
               <div class="links-icon"><img src="/nmstatic/img/Image Binarization.png"/></div>
               <div>
-                <v-flex class="title heavy skip"><router-link to="/binarization_homepage">Image Binarization</router-link></v-flex>
+                <v-flex class="title heavy skip">
+                  <router-link v-if="!this.$store.state.versionNew" to="/binarization_homepage">Image Binarization</router-link>
+                  <router-link v-else to="/mm/binarization_homepage">Image Binarization</router-link>
+                </v-flex>
                 <v-flex class="body">Binarization is the process of converting a micrograph to a black & white image
                     (assuming there are only 2 phases) by removing noise and thus simplifying its analysis.
                     All Characterization and Reconstruction algorithms work with binarized images only.
@@ -50,7 +53,10 @@
               <div class="links">
                 <div class="links-icon"><img src="/nmstatic/img/Microstructure Characterization.png" /></div>
                 <div>
-                  <v-flex class="title heavy skip"><router-link to="/characterization_homepage">Microstructure Characterization</router-link></v-flex>
+                  <v-flex class="title heavy skip">
+                    <router-link v-if="!this.$store.state.versionNew" to="/characterization_homepage">Microstructure Characterization</router-link>
+                    <router-link v-else to="/mm/characterization_homepage">Microstructure Characterization</router-link>
+                  </v-flex>
                   <v-flex class="body"> Microstructure Characterization refes to a statistical quantification of morphology.
                     It essentially converts multi-dimensional microstructure recorded in images
                     into a set of functions (aka features/descriptors/predictors) that encode significant morphological
@@ -65,7 +71,10 @@
               <div class="links">
                 <div class="links-icon"><img src="/nmstatic/img/Microstructure Reconstruction.png" /></div>
                 <div>
-                  <v-flex class="title heavy skip"><router-link to="/reconstruction_homepage">Microstructure Reconstruction</router-link></v-flex>
+                  <v-flex class="title heavy skip">
+                    <router-link v-if="!this.$store.state.versionNew" to="/reconstruction_homepage">Microstructure Reconstruction</router-link>
+                    <router-link v-else to="/mm/reconstruction_homepage">Microstructure Reconstruction</router-link>
+                  </v-flex>
                   <v-flex class="body">Reconstruction involves constructing a statistically equivalent microstructure image
                     given some statistical characterization. In most cases,
                     reconstruction is cast as an optimization problem; with the goal of matching characteristics of
@@ -79,7 +88,10 @@
             <div class="links">
               <div class="links-icon"><img src="/nmstatic/img/Intelligent Characterization.png" /></div>
               <div>
-                <v-flex class="title heavy skip"><router-link to="/IntelligentCharacterize">Intelligent Characterization</router-link></v-flex>
+                <v-flex class="title heavy skip">
+                  <router-link v-if="!this.$store.state.versionNew" to="/IntelligentCharacterize">Intelligent Characterization</router-link>
+                  <router-link v-else to="/mm/IntelligentCharacterize">Intelligent Characterization</router-link>
+                </v-flex>
                 <v-flex class="body">The intelligent characterization tool selects the most suitable characterization
                   method between the “physical descriptors” and the “spectral density function (SDF)”
                   approaches based on analyzing the user uploaded image(s). Results generated can be easily passed to the NanoMine Database. <span class="block"><a href='/nm#/how'>Tutorial</a></span>

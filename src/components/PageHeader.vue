@@ -137,7 +137,8 @@ export default {
       listMenu: [
         {title: "MCR Tools", link:"/nm#/mm/mtools"},
         {title: "ChemProps", link:"/nm#/mm/ChemProps"},
-        {title: "Geometry Explorer", link:"/nm#/mm/pixelunit"}
+        {title: "Geometry Explorer", link:"/nm#/mm/pixelunit"},
+        {title: "Geometry Sample Explorer", link:"/nm#/mm/pixelunit50"}
       ]
     }
   }

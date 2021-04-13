@@ -13,9 +13,10 @@
 
 <template>
   <div class="main">
+    <h1 v-if="this.$store.state.versionNew" class="header-mm">{{ msg }}</h1>
     <div class="characterization_homepage">
       <v-container class="text-xs-left">
-        <h1 class="header-nm">{{ msg }}</h1>
+        <h1 v-if="!this.$store.state.versionNew" class="header-nm">{{ msg }}</h1>
             <div>
               <p> Choose the characterization method from the options below.</p>
             </div>
