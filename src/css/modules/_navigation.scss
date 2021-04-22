@@ -124,6 +124,13 @@
         }
     }
 
+    &_ul {
+        @include respond(tab-land){
+            width: 100vw;
+            text-align: center;
+        }
+    }
+
     &_mobile-icon {
         display: none;
         visibility: hidden;

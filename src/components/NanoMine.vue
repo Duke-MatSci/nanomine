@@ -3,49 +3,70 @@
     <v-jumbotron src="/nmstatic/img/random_network.png">
       <v-container fill-height>
         <v-layout align-center>
-          <v-flex>
-            <h3 class="mainheading">NanoMine</h3>
-            <span class="subheading">Material Informatics for Polymer Nanocomposites</span>
-            <v-divider class="my-3"></v-divider>
-            <v-btn class="mx-0" color="primary" href="/home">Visualization&nbsp;<v-icon>search</v-icon></v-btn>
-            <v-btn class="mx-0" color="secondary" to="/XMLCONV">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CURATION&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</v-btn>
-            <v-btn class="mx-0" color="secondary" to="/nanomine/tutorials">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Tutorials&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</v-btn>
-          </v-flex>
+          <div class="centralize-heading white-color">
+            <h3 class="mainheading">MetaMine</h3>
+            <span>Material Informatics for Polymer MetaMaterial</span>
+          </div>
         </v-layout>
       </v-container>
     </v-jumbotron>
     <v-container fluid>
-      <h1>{{ msg }}</h1>
-      <v-divider class="my-3"></v-divider>
-      <h3><span>NanoMine is an open source, data resource for members of the nanocomposites community with four key goals:</span>
-      </h3>
+      <h3 style="text-align:center; margin-top:1.8rem"><span>MetaMine is an open source, data resource for members of the metamaterial community with four key goals:</span></h3>
+      <div class="card-container">
+        <ul class="ul_adjust">
+          <li class="card card-float inline-display" @click="links('/nm#/mm/XMLCONV')">
+            <div class="card-inside">
+              <div class="card-icon-container"><i class="material-icons card-icon">people_alt</i></div>
+              <h2 class="card-heading">Curation</h2>
+              <p>Provide a curation platform for sharing of data across the community in ways that are findable, accessible, interoperable and reusable (FAIR ww.force11.org)</p>
+            </div>
+          </li>
+          <li class="card card-float inline-display" @click="links('/home')">
+            <div class="card-inside">
+              <div class="card-icon-container"><i class="material-icons card-icon">tune</i></div>
+              <h2 class="card-heading">Visualizing Data</h2>
+              <p>Provide a platform for visualizing data, and mechanisms for visualization methods to be shared</p>
+            </div>
+          </li>
+          <li class="card card-float inline-display" @click="links('nm#/mm/mtools')">
+            <div class="card-inside">
+              <div class="card-icon-container"><i class="material-icons card-icon">grain</i></div>
+              <h2 class="card-heading">Module Tools</h2>
+              <p>Provide module tools that improve the quantification of nano filler dispersion and morphology as well as the ability to reconstruct those morphologies for subsequent modeling and analysis.</p>
+            </div>
+          </li>
+          <li class="card card-float inline-display" @click="links('http://reccr.chem.rpi.edu/polymerizer/index.html', false)">
+            <div class="card-inside">
+              <div class="card-icon-container"><i class="material-icons card-icon">widgets</i></div>
+              <h2 class="card-heading">Simulation Tools</h2>
+              <p>Improve the ability to design metamaterial through simulation and design tools.</p>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </v-container>
+    <div class="mid-first white-color">
       <ul>
-        <li><span>Provide a <router-link to="/XMLCONV">curation</router-link> platform for sharing of data across the community in ways that are findable, accessible, interoperable and reusable (FAIR <a
-          href="https://www.force11.org/" target="_blank">www.force11.org</a>).</span></li>
-        <li>
-          <span>Provide a platform for <a href="/home">visualizing data</a>, and mechanisms for visualization methods to be shared.</span>
+        <li class="inline-display mid-first-li mid-first-container"><i class="material-icons card-icon">smart_display</i></li>
+        <li class="inline-display mid-first-li mid-first-container">
+          <p class="mid-first-p">New to MetaMine? <span class="mid-first-span">View Our step-by-step tutorials!</span></p>
         </li>
-        <li><span>Provide <router-link to="/mtools">module tools</router-link> that improve the quantification of nanofiller dispersion and morphology as well as the ability to reconstruct those morphologies for subsequent modeling and analysis.</span>
-        </li>
-        <li><span>Improve the ability to design nanocomposites through <router-link to="/simtools">simulation and design tools</router-link>.</span></li>
+        <li class="inline-display mid-first-container" @click="links('/nm#/mm/tutorials')" style="cursor:pointer"><i class="material-icons card-icon">arrow_right_alt</i></li>
       </ul>
-      <v-flex d-flex xs12>
-        <v-layout row wrap>
-          <v-flex d-flex class="login-info">
-            <v-card-text>
-              <strong>Login or register</strong> for an account to enable advanced analysis and upload features.  Registering for an account is easy
-              using <a href="https://accounts.oit.duke.edu/onelink/register" target="_blank">Duke's OneLink feature</a>.
-              InCommon support is coming soon.
-              <a href="https://www.incommon.org/federation/incommon-federation-participants/" target="_blank">InCommon federation</a> allows
-              many university users to login with the same credentials they use for their own university.
-            </v-card-text>
-          </v-flex>
-        </v-layout>
-      </v-flex>
-      <p style="padding-left:15%;padding-right:15%;text-align:left"><span>NanoMine is built on both a <a
-        href="https://github.com/Duke-MatSci/nanomine-schema/tree/master/xml" target="_blank">schema</a>* and an ontology to provide a robustness to the FAIR principles. NanoMine also allows for the registration of materials resources, bridging the gap between existing resources and the end users and making those existing resources available for research to material community.</span>
+    </div>
+    <div class="mid-second white-color">
+      <p style="font-size:1.3rem;">
+        <strong>Login or register</strong> for an account to enable advanced analysis and upload features.  Registering for an account is easy
+        using <a href="https://accounts.oit.duke.edu/onelink/register" target="_blank" class="white-color">Duke's OneLink feature</a>.
+        InCommon support is coming soon.
+        <a href="https://www.incommon.org/federation/incommon-federation-participants/" target="_blank" class="white-color">InCommon federation</a> allows
+        many university users to login with the same credentials they use for their own university.
       </p>
-
+      <p style="font-size:1.3rem;"><span>MetaMine is built on both a <a
+        href="https://github.com/Duke-MatSci/nanomine-schema/tree/master/xml" target="_blank" class="white-color">schema</a>* and an ontology to provide a robustness to the FAIR principles. MetaMine also allows for the registration of materials resources, bridging the gap between existing resources and the end users and making those existing resources available for research to material community.</span>
+      </p>
+    </div>
+    <v-container fluid>
       <v-flex d-flex xs12>
         <v-layout row wrap justify-center>
           <v-img src="/nmstatic/img/sponsors3.png" max-width="1024"  aspect-ratio="4.6" contain></v-img>
@@ -84,22 +105,23 @@
 
 <script>
 import {Auth} from '@/modules/Auth.js'
-
+import { AppMixin } from './utils'
 export default {
   name: 'NanoMine',
+  mixins: [AppMixin],
   data () {
     return {
       msg: 'A Nanocomposites Data Resource'
     }
   },
   mounted: function () {
-    console.log('cookies: ' + document.cookie)
+    // console.log('cookies: ' + document.cookie)
     let auth = new Auth()
-    console.log('token: ' + JSON.stringify(auth.tokenValues))
+    // console.log('token: ' + JSON.stringify(auth.tokenValues))
   },
   created(){
     let auth = new Auth();
-    return this.$router.push('/home_v2');
+    // return this.$router.push('/home_v2');
   }
 }
 </script>
@@ -111,21 +133,80 @@ export default {
   }
 
   ul {
-    text-align: left;
-    padding-left: 20%;
-    padding-right: 15%;
-    margin-top: 20px;
-    margin-bottom: 10px;
+    text-align: center;
+    padding-left: 0;
+    padding-right: 0;
+    margin-top: 4rem;
+    margin-bottom: 2rem;
+    -webkit-align-items: center;
+    -ms-flex-align: center;
+    align-items: center;
+    display: -webkit-flex;
+    display: flex;
+    margin: 2rem auto;
+    justify-content: center;
   }
 
   .mainheading { /* class of large text in jumbotron*/
-    font-size: 40px;
-    color: white;
+    font-size: 3rem;
   }
 
-  .subheading {
-    color: white;
+  .centralize-heading {
+    position: relative;
+    top: 32%;
+    transform: translate(-50%,-50%);
+    left: 50%;
+    text-align: center;
+    font-size: 1.5rem
   }
+
+  .white-color {
+    color: #ffffff !important;
+  }
+
+  .card-container {
+    margin: 1.5rem 0;
+    padding: .5rem;
+  }
+
+  .card-heading {
+    font-size: 2rem;
+    font-weight: 400;
+  }
+
+  .card-icon {
+    font-size: 7rem;
+  }
+
+  .card-icon-container {
+    margin-bottom: .9rem;
+    margin-top: 1rem;
+  }
+
+  .card-float {
+    text-align: center;
+    padding: .1rem 1rem;
+  }
+
+  .inline-display {
+    display: inline-flex !important;
+  }
+
+  .card {
+    background: #fff;
+    border-radius: 2px;
+    display: inline-block;
+    height: 300px;
+    margin: 1rem;
+    position: relative;
+    width: 300px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+    transition: all 0.3s cubic-bezier(.25,.8,.25,1);
+    cursor: pointer;
+  }
+
+  
+  
 
   .visualize-button {
     color: #000000;

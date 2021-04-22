@@ -1,126 +1,128 @@
 <template>
-  <div class="nuexampleunitcell">
-    <h1>{{ msg }}</h1>
-    <v-container fluid grid-list-md>
-      <v-layout row wrap>
-        <v-flex d-flex xs12>
-          <v-layout row wrap>
-            <v-flex d-flex xs12>
-              <div class="title font-weight-thin text-xs-left">
-              Data from Northwestern University composed randome sample (100) of 80K simulated results for static analysis.
-              </div>
-            </v-flex>
-            <v-flex d-flex xs12>
-              <div class="body-2 font-weight-thin text-xs-left">
-                Click image to select the next geometry configuration and results from the subset of simulated results.
-              </div>
-            </v-flex>
-            <v-flex d-flex xs12>
-              <div class="body-2 font-weight-thin text-xs-left">
-              Default material is void and filled material
-                is Stratasys Tango Black (Poisson's Ratio 0.33, Young's Modulus 2e6 Pa).
-              </div>
-            </v-flex>
-            <v-flex d-flex xs12 style="align-self: start;">
-              <v-flex d-flex xs2>
-                <v-btn class="text-xs-left" color="primary" flat @click="handleReset()">Reset</v-btn>
+  <div class="main">
+    <div class="nuexampleunitcell">
+      <v-container fluid grid-list-md class="adjust-padding">
+        <h1 class="header-nm">{{ msg }}</h1>
+        <v-layout row wrap>
+          <v-flex d-flex xs12>
+            <v-layout row wrap>
+              <v-flex d-flex xs12>
+                <div class="title font-weight-thin text-xs-left">
+                Data from Northwestern University composed randome sample (100) of 80K simulated results for static analysis.
+                </div>
               </v-flex>
-              <v-text-field v-if="1 === 1" xs5 @keyup.enter="onGeometryEntered"
-                v-model="geometry"
-                label="Custom geometry string"
-                required
-              ></v-text-field>
-              <v-flex v-else d-flex xs5></v-flex>
-              <v-flex d-flex xs5></v-flex>
-            </v-flex>
-            <v-flex d-flex xs12 sm12 md3 lg3 xl3 justify-left style="min-width:310px;">
-              <canvas id="unit-cell" width="300" height="300"></canvas>
-            </v-flex>
-            <v-data-iterator
-              :items="geometryitems"
-              :rows-per-page-items="rowsPerPageItems"
-              :pagination.sync="pagination"
-              content-tag="v-layout"
-              hide-actions
-              row
-              wrap
-            >
-              <template v-slot:header>
-                <v-toolbar
-                  class="mb-2"
-                  color="cyan darken-5"
-                  dark
-                  flat
-                >
-                  <v-toolbar-title>Geometry Details</v-toolbar-title>
-                </v-toolbar>
-              </template>
-              <template v-slot:item="props">
-                <v-flex
-                  xs12
-                  sm8
-                  md6
-                  lg4
-                >
-                  <v-card>
-                    <v-card-title color="cyan darken-5" class="subheading font-weight-bold">{{props.item.name}}</v-card-title>
-
-                    <v-divider></v-divider>
-
-                    <v-list dense>
-                      <v-list-tile>
-                        <v-list-tile-content class="align-end">{{props.item.value}}</v-list-tile-content>
-                      </v-list-tile>
-                    </v-list>
-                  </v-card>
+              <v-flex d-flex xs12>
+                <div class="body-2 font-weight-thin text-xs-left">
+                  Click image to select the next geometry configuration and results from the subset of simulated results.
+                </div>
+              </v-flex>
+              <v-flex d-flex xs12>
+                <div class="body-2 font-weight-thin text-xs-left">
+                Default material is void and filled material
+                  is Stratasys Tango Black (Poisson's Ratio 0.33, Young's Modulus 2e6 Pa).
+                </div>
+              </v-flex>
+              <v-flex d-flex xs12 style="align-self: start;">
+                <v-flex d-flex xs2>
+                  <v-btn class="text-xs-left" color="primary" flat @click="handleReset()">Reset</v-btn>
                 </v-flex>
-              </template>
-            </v-data-iterator>
-          </v-layout>
-        </v-flex>
-      </v-layout>
-      <v-data-iterator
-        :items="bgitems"
-        :rows-per-page-items="rowsPerPageItems"
-        :pagination.sync="pagination"
-        content-tag="v-layout"
-        hide-actions
-        row
-        wrap
-      >
-        <template v-slot:header>
-          <v-toolbar
-            class="mb-2"
-            color="cyan darken-5"
-            dark
-            flat
-          >
-            <v-toolbar-title>Bandgap Values</v-toolbar-title>
-          </v-toolbar>
-        </template>
-        <template v-slot:item="props">
-          <v-flex
-            xs12
-            sm6
-            md4
-            lg3
-          >
-            <v-card>
-              <v-card-title class="subheading font-weight-bold">{{ props.item.name }}</v-card-title>
+                <v-text-field v-if="1 === 1" xs5 @keyup.enter="onGeometryEntered"
+                  v-model="geometry"
+                  label="Custom geometry string"
+                  required
+                ></v-text-field>
+                <v-flex v-else d-flex xs5></v-flex>
+                <v-flex d-flex xs5></v-flex>
+              </v-flex>
+              <v-flex d-flex xs12 sm12 md3 lg3 xl3 justify-left style="min-width:310px;">
+                <canvas id="unit-cell" width="300" height="300"></canvas>
+              </v-flex>
+              <v-data-iterator
+                :items="geometryitems"
+                :rows-per-page-items="rowsPerPageItems"
+                :pagination.sync="pagination"
+                content-tag="v-layout"
+                hide-actions
+                row
+                wrap
+              >
+                <template v-slot:header>
+                  <v-toolbar
+                    class="mb-2"
+                    color="cyan darken-5"
+                    dark
+                    flat
+                  >
+                    <v-toolbar-title>Geometry Details</v-toolbar-title>
+                  </v-toolbar>
+                </template>
+                <template v-slot:item="props">
+                  <v-flex
+                    xs12
+                    sm8
+                    md6
+                    lg4
+                  >
+                    <v-card>
+                      <v-card-title color="cyan darken-5" class="subheading font-weight-bold">{{props.item.name}}</v-card-title>
 
-              <v-divider></v-divider>
+                      <v-divider></v-divider>
 
-              <v-list dense v-for="bgpair in bgPairs" :key="bgpair.id">
-                <v-list-tile>
-                  <v-list-tile-content v-if="props.item.name === 'SH'" class="align-end">{{getBgValue(bgpair.sh)}}</v-list-tile-content>
-                  <v-list-tile-content v-if="props.item.name === 'PSV'" class="align-end">{{getBgValue(bgpair.psv)}}</v-list-tile-content>
-                </v-list-tile>
-              </v-list>
-            </v-card>
+                      <v-list dense>
+                        <v-list-tile>
+                          <v-list-tile-content class="align-end">{{props.item.value}}</v-list-tile-content>
+                        </v-list-tile>
+                      </v-list>
+                    </v-card>
+                  </v-flex>
+                </template>
+              </v-data-iterator>
+            </v-layout>
           </v-flex>
-        </template>
-      </v-data-iterator>
-    </v-container>
+        </v-layout>
+        <v-data-iterator
+          :items="bgitems"
+          :rows-per-page-items="rowsPerPageItems"
+          :pagination.sync="pagination"
+          content-tag="v-layout"
+          hide-actions
+          row
+          wrap
+        >
+          <template v-slot:header>
+            <v-toolbar
+              class="mb-2"
+              color="cyan darken-5"
+              dark
+              flat
+            >
+              <v-toolbar-title>Bandgap Values</v-toolbar-title>
+            </v-toolbar>
+          </template>
+          <template v-slot:item="props">
+            <v-flex
+              xs12
+              sm6
+              md4
+              lg3
+            >
+              <v-card>
+                <v-card-title class="subheading font-weight-bold">{{ props.item.name }}</v-card-title>
+
+                <v-divider></v-divider>
+
+                <v-list dense v-for="bgpair in bgPairs" :key="bgpair.id">
+                  <v-list-tile>
+                    <v-list-tile-content v-if="props.item.name === 'SH'" class="align-end">{{getBgValue(bgpair.sh)}}</v-list-tile-content>
+                    <v-list-tile-content v-if="props.item.name === 'PSV'" class="align-end">{{getBgValue(bgpair.psv)}}</v-list-tile-content>
+                  </v-list-tile>
+                </v-list>
+              </v-card>
+            </v-flex>
+          </template>
+        </v-data-iterator>
+      </v-container>
+    </div>
   </div>
 </template>
 
@@ -266,6 +268,9 @@ export default {
       // vm.effPrStr = vm.pixelUnit.getPrString()
       // vm.geometryitems[2].value = vm.effPrStr
     }
+  },
+  created(){
+    this.$store.commit('setAppHeaderInfo', {icon: 'fa-bullseye', name: 'Geometry Explorer'})
   }
 }
 </script>
@@ -302,10 +307,7 @@ export default {
     max-width: 300px;
     max-height: 300px;
   }
-
-  h1 {
-    margin-top: 10px;
-    background-color: black;
-    color: white;
+  .adjust-padding {
+    padding: 3rem !important;
   }
 </style>

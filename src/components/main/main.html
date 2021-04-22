@@ -14,7 +14,7 @@
                     <div class="nav nav_menu u--inline">
                         <ul>
                             <li><a href="/nm#/">NanoMine</a></li>
-                            <li><a href="#">MetaMine</a></li>
+                            <li><a href="/nm#/mm">MetaMine</a></li>
                         </ul>
                     </div>
                     <div class="u--inline">
@@ -41,7 +41,7 @@
             </div>
             <div class="section_banner__nav">
                 <nav class="nav_menu">
-                    <ul>
+                    <ul class="nav_ul">
                         <li class="u_margin-right-small">
                             <div class="nav_menu--container">
                                 <a class="u--default-size nav_menu--handler" href="#">About</a>
@@ -77,6 +77,7 @@
                                     <span class="nav_menu--siblings-lists" @click="links('/nm#/simmtools')"><a href="/nm#/tools">Module Tools</a></span>
                                     <span class="nav_menu--siblings-lists" @click="links('/nm#/simmtools')"><a href="/nm#/simmtools">Simmulation Tools</a></span>
                                     <span class="nav_menu--siblings-lists" @click="links('/nm#/ChemProps')"><a href="/nm#/ChemProps">ChemProps</a></span>
+                                    <!--<span class="nav_menu--siblings-lists" @click="links('/nm#/pixelunit')"><a href="/nm#/pixelunit">Geometry Explorer</a></span>-->
                                 </div>
                             </div>
                         </li>
@@ -91,8 +92,8 @@
         </div>
         <div class="section_visualize">
             <div class="visualize--links">
-                <div class="visualize--link-icons visualize--link-left"><i class="material-icons">keyboard_arrow_left</i></div>
-                <div class="visualize--link-icons visualize--link-right"><i class="material-icons">keyboard_arrow_right</i></div>
+                <div class="visualize--link-icons visualize--link-left" @click.prevent="pushChart('prev')"><i class="material-icons">keyboard_arrow_left</i></div>
+                <div class="visualize--link-icons visualize--link-right" @click.prevent="pushChart('next')"><i class="material-icons">keyboard_arrow_right</i></div>
             </div>
             <div class="wrapper">
                 <div class="visualize_header">
@@ -141,7 +142,6 @@
                 </div>
             </div>
         </div>
-        <a-footer></a-footer>
         <v-dialog v-model="logoutDialog" max-width="290">
             <v-card>
                 <v-card-title class="headline blue lighten-2" primary-title>Log out</v-card-title>

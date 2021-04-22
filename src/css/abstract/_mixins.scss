@@ -32,3 +32,18 @@
         @media only screen and (min-width: 112.5em) { @content };    //1800
     }
 }
+
+
+@supports (-webkit-hyphens:none){
+  .safari_only {
+    bottom: 1.5rem !important;
+  }
+} 
+
+/* @media screen and (min-color-index:0) and(-webkit-min-device-pixel-ratio:0){ 
+    @media screen {
+        _:-webkit-full-screen, .safari_only {
+            bottom: 1.5rem !important;
+        }
+    }
+} */

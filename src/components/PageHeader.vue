@@ -3,27 +3,44 @@
     <analytics/>
     <v-toolbar app dense>
       <v-toolbar-side-icon @click="toggleLeftMenu()" class="hidden-md-and-up"></v-toolbar-side-icon>
-      <v-btn flat to="/" @click="setSite('mm')">
-        <v-toolbar-title><i class="material-icons nm-home-icon">home</i>MaterialsMine</v-toolbar-title>
+      <v-btn flat to="/" @click="setSite('nano')">
+        <v-toolbar-title><i class="material-icons nm-home-icon">home</i></v-toolbar-title>
       </v-btn>
-      <v-btn v-if="site === 'meta'" flat to="/meta">MetaMine</v-btn>
-      <v-btn v-if="site === 'nano'" flat to="/nano">NanoMine</v-btn>
+      <v-btn flat to="/mm" @click="setSite('meta')">
+        <v-toolbar-title>MetaMine</v-toolbar-title>
+      </v-btn>
       <v-spacer></v-spacer>
       <v-toolbar-items class="hidden-sm-and-down">
-        <v-btn flat @click="$router.go(-1)">Go Back</v-btn>
+        <!--<v-btn flat to="/teams">Team</v-btn>-->
+        <v-btn flat @click="links('/home')">Visualize</v-btn>
+        <v-btn flat @click="links(null, true)">Gallery</v-btn>
+        <!-- Begin Test -->
+      <v-menu offset-y open-on-hover transition="slide-x-transition" bottom right>
+        <template v-slot:activator="{ on, attrs }">
+          <v-btn v-bind="attrs" v-on="on" flat>Tools</v-btn>
+        </template>
+        <v-list dense>
+          <!--<v-list-item v-for="(item, index) in listMenu" :key="index" router :to="item.link">-->
+          <v-list-item v-for="(item, index) in listMenu" :key="index" @click="links(item.link)">
+            <v-list-item-action>
+                <v-list-item-title class="list_menu">{{ item.title }}</v-list-item-title>
+            </v-list-item-action>
+          </v-list-item>
+        </v-list>
+      </v-menu>
+      <!-- End of Test -->
         <!--<v-btn flat to="/db">Database</v-btn>
         <v-btn flat to="/mtools">Module Tools</v-btn>
         <v-btn flat to="/simtools">Simulation Tools</v-btn>
         <v-btn flat @click="openGallery">Gallery</v-btn>
         <v-btn fab flat href="/home"><i class="material-icons nm-search-icon" v-if="searchEnabled()">search</i>
         </v-btn>-->
-        <v-btn v-if="isLoggedIn()" flat to="/contactus">Contact Us</v-btn>
+        <!--<v-btn v-if="isLoggedIn()" flat to="/mypage">Portal</v-btn>-->
+        <v-btn flat to="/mm/tutorials">Learn</v-btn>
+        <v-btn flat to="/mm/contact">Contact</v-btn>
         <!--<v-btn v-if="isLoggedIn()" flat to="/mypage">My Page</v-btn>-->
-        <!--<v-btn v-else flat to="/mypage">My Page</v-btn>-->
         <v-btn v-if="loginStatus" flat v-on:click="$store.commit('setLoginLogout')">
-          <i class="material-icons nm-user-icon" v-bind:class="{'nm-admin-icon': (isAdmin && !isRunAs), 'nm-runas-icon': isRunAs}">
-            perm_identity
-          </i>
+          <i class="material-icons nm-user-icon" v-bind:class="{'nm-admin-icon': (isAdmin && !isRunAs), 'nm-runas-icon': isRunAs}">perm_identity</i>
           <span v-if="!isTestUser()">
             &nbsp;Logout&nbsp;
           </span>
@@ -109,148 +126,20 @@
 <script>
 
 import {} from 'vuex'
-import {Auth} from '@/modules/Auth.js'
+import { AppMixin } from './utils'
+// import {Auth} from '@/modules/Auth.js'
 
 export default {
   name: 'PageHeader',
-  beforeMount: function () {
-    let vm = this
-    vm.auth = new Auth()
-    vm.$store.subscribe(vm.handleLoginDialogChange)
-    console.log('query = ' + JSON.stringify(vm.$route.query))
-    let qlogout = vm.$route.query.logout
-    if (qlogout && qlogout.match(/(true).*/)) {
-      setTimeout(function () {
-        vm.logoutRouted = true
-        // vm.logoutDialog = true
-        vm.$store.commit('setLoginLogout')
-        console.log('set logoutDialog to true')
-      }, 50)
-    } else {
-      console.log('logout not requested')
-    }
-    let qlogin = vm.$route.query.login
-    if (qlogin && qlogin.match(/(true).*/)) {
-      setTimeout(function () {
-        vm.loginRouted = true
-        vm.loginDialog = true
-        vm.$store.commit('setLoginLogout')
-        console.log('set loginDialog to true')
-      }, 50)
-    } else {
-      console.log('login not requested')
-    }
-  },
-  created: function () {
-    let vm = this
-    setInterval(function () {
-      if (vm.auth) {
-        vm.loggedInStatus = vm.isLoggedIn()
-      }
-    }, 1000)
-  },
-  methods: {
-    setSite (siteId) {
-      let vm = this
-      if (siteId === 'mm') {
-        vm.resetLeftMenu()
-      }
-      vm.site = siteId
-    },
-    log: function (msg) {
-      console.log(msg)
-    },
-    logout: function () {
-      let vm = this
-      vm.auth.logout()
-      vm.logoutUrl = '/nmr/doLogout'
-      vm.$refs.logoutLink.click()
-      vm.logoutDialog = false
-    },
-    getLoginLink: function () {
-      let vm = this
-      let rv = '/secure'
-      if (vm.auth.isTestUser() === true) {
-        rv = '/nmr/nmdevlogin'
-      }
-      return rv
-    },
-    cancelLogout: function () {
-      let vm = this
-      vm.logoutDialog = false
-      if (vm.logoutRouted) {
-        vm.logoutRouted = false
-        vm.$router.push('/')
-      }
-    },
-    searchEnabled: function () {
-      return true
-    },
-    toggleLeftMenu: function () {
-      this.$store.commit('toggleLeftMenu')
-    },
-    resetLeftMenu: function () {
-      this.$store.commit('resetLeftMenu')
-    },
-    toggleAdminAvailable: function () {
-      this.$store.commit('toggleAdminActive')
-    },
-    handleLoginDialogChange: function (mutation, state) {
-      let vm = this
-      console.log('handleLoginDialogChange: ' + mutation.type)
-      if (mutation.type === 'setLoginLogout') {
-        if (state.loginLogout && !vm.isLoggedIn()) {
-          vm.loginDialog = true
-        } else {
-          vm.loginDialog = false
-        }
-        if (state.loginLogout && vm.isLoggedIn()) {
-          vm.logoutDialog = true
-        } else {
-          vm.logoutDialog = false
-        }
-      } else if (mutation.type === 'resetLoginLogout') {
-        vm.loginDialog = false
-        vm.logoutDialog = false
-      }
-    },
-    isLoggedIn: function () {
-      return this.auth.isLoggedIn()
-    },
-    isTestUser: function () {
-      return this.auth.isTestUser()
-    },
-    openGallery: function () {
-      window.location = `${window.location.origin}/wi/about?view=view&uri=http://semanticscience.org/resource/Chart`
-    }
-  },
-  computed: {
-    loginStatus: function () { // reactive isLoggedIn to keep status updated in page header
-      console.log('Updating login status')
-      return this.loggedInStatus
-    },
-    userId: function () {
-      return this.auth.getUserId()
-    },
-    userName: function () {
-      return this.auth.getGivenName()
-    },
-    isAdmin: function () {
-      return this.auth.isAdmin()
-    },
-    isRunAs: function () {
-      return this.$store.getters.runAsUser != null
-    } },
+  mixins: [AppMixin],
   data () {
     return {
-      msg: 'PageHeader',
-      site: 'mm', // mm - main site, nano - NanoMine, meta - MetaMine
-      auth: null,
-      loggedInStatus: false,
-      loginDialog: false,
-      logoutDialog: false,
-      logoutRouted: false,
-      logoutUrl: null
+      listMenu: [
+        {title: "MCR Tools", link:"/nm#/mm/mtools"},
+        {title: "ChemProps", link:"/nm#/mm/ChemProps"},
+        {title: "Geometry Explorer", link:"/nm#/mm/pixelunit"},
+        {title: "Geometry Sample Explorer", link:"/nm#/mm/pixelunit50"}
+      ]
     }
   }
 }

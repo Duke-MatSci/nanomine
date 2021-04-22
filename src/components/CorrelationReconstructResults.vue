@@ -12,78 +12,70 @@
 -->
 
 <template>
-  <div>
-    <a-header :info="info"></a-header>
-    <div class="main">
-      <div class="CorrelationReconstructResults">
-        <v-alert
-          v-model="resultsError"
-          type="error"
-          dismissible
-        >
-          {{resultsErrorMsg}}
-        </v-alert>
-        <v-container>
-          <h1>{{msg}}</h1>
-          <v-layout>
-            <v-flex xs4>
-              <h4>Uploaded Image</h4>
-              <img :src="getInputImage()"/>
-              {{inputImage}}
-              <p></p>
-            </v-flex>
-            <v-flex xs4>
-              <h4>Reconstructed Image</h4>
-              <img :src="getOutputImage()"/>
-              {{outputImage}}
-              <p></p>
-            </v-flex>
-            <v-flex xs4>
-              <h4>Correlation Comparison</h4>
-              <img :src="getCorrelationComparison()"/>
-              {{correlation}}
-              <p></p>
-            </v-flex>
-          </v-layout>
-          <v-layout>
-            <v-flex xs12>
-              <h4>Download Results</h4>
-              <a :href="getZipFile()">{{zipFileName}}</a>
-            </v-flex>
-          </v-layout>
-          <h4>References</h4>
-          <v-flex xs12>
-            <p>Rintoul, M.D. and Torquato, S., 1997. Reconstruction of the structure of dispersions. <i>Journal of Colloid and Interface Science</i>, 186(2), pp.467-476.</p>
-            <p>Yeong,C. and Torquato,S., 1998. Reconstructing random media Physical Review E, vol. 57, no. 1, p. 495</p>
+  <div class="main">
+    <div class="CorrelationReconstructResults">
+      <v-alert
+        v-model="resultsError"
+        type="error"
+        dismissible
+      >
+        {{resultsErrorMsg}}
+      </v-alert>
+      <v-container>
+        <h1 class="header-nm">{{msg}}</h1>
+        <v-layout>
+          <v-flex xs4>
+            <h4>Uploaded Image</h4>
+            <img :src="getInputImage()"/>
+            {{inputImage}}
+            <p></p>
           </v-flex>
-        </v-container>
-      </div>
+          <v-flex xs4>
+            <h4>Reconstructed Image</h4>
+            <img :src="getOutputImage()"/>
+            {{outputImage}}
+            <p></p>
+          </v-flex>
+          <v-flex xs4>
+            <h4>Correlation Comparison</h4>
+            <img :src="getCorrelationComparison()"/>
+            {{correlation}}
+            <p></p>
+          </v-flex>
+        </v-layout>
+        <v-layout>
+          <v-flex xs12>
+            <h4>Download Results</h4>
+            <a :href="getZipFile()">{{zipFileName}}</a>
+          </v-flex>
+        </v-layout>
+         <h4 v-if="referenceOpen" @click="refOpen">References <i class="material-icons icon-adjust">keyboard_arrow_up</i></h4>
+        <h4 v-else @click="refOpen">References <i class="material-icons icon-adjust">keyboard_arrow_down</i></h4>
+        <v-flex xs12 v-if="referenceOpen">
+          <p>Rintoul, M.D. and Torquato, S., 1997. Reconstruction of the structure of dispersions. <i>Journal of Colloid and Interface Science</i>, 186(2), pp.467-476.</p>
+          <p>Yeong,C. and Torquato,S., 1998. Reconstructing random media Physical Review E, vol. 57, no. 1, p. 495</p>
+        </v-flex>
+      </v-container>
     </div>
-    <a-footer></a-footer>
   </div>
 </template>
 
 <script>
 import Axios from 'axios'
 import {} from 'vuex'
-import * as Util from './utils'
 export default {
   name: 'CorrelationReconstructResults',
   data: () => {
     return ({
-      info: {icon: 'fa-bullseye', name: 'Microstructure Reconstruction'},
       msg: 'Correlation Function',
       resultsError: false,
       resultsErrorMsg: '',
       inputFileName: '',
       ReconstructedFileName: '',
       CorrelationComparison: '',
-      zipFileName: ''
+      zipFileName: '',
+      referenceOpen: false
     })
-  },
-  components: {
-    aHeader: Util.Header,
-    aFooter: Util.Footer,
   },
   mounted: function () {
     this.getJobOutputParams()
@@ -131,7 +123,13 @@ export default {
           vm.resultsError = true
           vm.resetLoading()
         })
+    },
+    refOpen () {
+      return this.referenceOpen = !this.referenceOpen;
     }
+  },
+  created(){
+    this.$store.commit('setAppHeaderInfo', {icon: 'workspaces', name: 'Microstructure Reconstruction'})
   }
 }
 </script>
@@ -144,11 +142,6 @@ export default {
 
   h4 {
     text-transform: uppercase;
-  }
-  h1 {
-    margin-top: 10px;
-    padding-bottom: .1rem;
-    border-bottom: .2rem solid black;
   }
 
 </style>

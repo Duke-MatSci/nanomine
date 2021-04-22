@@ -15,6 +15,6 @@ export default {
     }
   },
   created() {
-    console.log("hello world", this.filter)
+    console.log("headerpass: ", this.$store.appHeaderInfo)
   }
 }

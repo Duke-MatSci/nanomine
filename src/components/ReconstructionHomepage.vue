@@ -13,8 +13,8 @@
 
 <template>
   <div>
-    <a-header :info="info"></a-header>
       <div class="main">
+      <h1 v-if="this.$store.state.versionNew" class="header-mm">Microstructure Reconstruction</h1>
         <div class="reconstruction_homepage">
           <!--<h1>{{ msg }}</h1>-->
           <v-container class="text-xs-left">
@@ -64,19 +64,11 @@
 </template>
 
 <script>
-import * as Util from './utils'
 export default {
   name: 'ReconstructionHomepage',
-  data () {
-    return {
-      info: {icon: 'fa-bullseye', name: 'Microstructure Reconstruction'},
-      // msg: 'Microstructure Reconstruction'
-    }
-  },
-  components: {
-    aFooter: Util.Footer,
-    aHeader: Util.Header
-  },
+  created(){
+    this.$store.commit('setAppHeaderInfo', {icon: 'workspaces', name: 'Microstructure Reconstruction'})
+  }
 }
 </script>
 
@@ -87,11 +79,6 @@ export default {
   }
   h4 {
     text-transform: uppercase;
-  }
-  h1 {
-    margin-top: 10px;
-    padding-bottom: .1rem;
-    border-bottom: .2rem solid black;
   }
   .reconstruction_homepage {
     padding-bottom: 40px;

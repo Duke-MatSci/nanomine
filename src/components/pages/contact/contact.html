@@ -1,6 +1,12 @@
 <template title="Materialsmine V2.0 - Teams Page">
     <div>
-        <a-header :info="info"></a-header>
+        <v-alert v-model="errorState"
+            :value="true"
+            type="error"
+            dismissible
+            >
+            {{errorMsg}}
+        </v-alert>
         <div class="u_divider"></div>
         <div class="section_teams">
             <div class="wrapper">
@@ -77,6 +83,5 @@
                 </div>
             </div>
         </div>
-        <a-footer></a-footer>
     </div>
 </template>

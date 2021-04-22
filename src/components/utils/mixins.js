@@ -49,9 +49,10 @@ export default {
     }, 1000)
   },
   methods: {
-    links(args,options) {
-      if(options){
-        return window.location = `${window.location.origin}/wi/about?view=view&uri=http://semanticscience.org/resource/Chart`
+    links(args, options) {
+      if (options) {
+        window.location = `${window.location.origin}/wi/about?view=view&uri=http://semanticscience.org/resource/Chart`;
+        return;
       }
       return window.open(args, '_self');
     },
@@ -102,7 +103,6 @@ export default {
     },
     handleLoginDialogChange: function (mutation, state) {
       let vm = this
-      console.log('handleLoginDialogChange: ' + mutation.type)
       if (mutation.type === 'setLoginLogout') {
         if (state.loginLogout && !vm.isLoggedIn()) {
           vm.loginDialog = true
@@ -124,10 +124,7 @@ export default {
     },
     isTestUser: function () {
       return this.auth.isTestUser()
-    },
-    // openGallery: function () {
-    //   window.location = `${window.location.origin}/wi/about?view=view&uri=http://semanticscience.org/resource/Chart`
-    // }
+    }
   },
   computed: {
     loginStatus: function () { // reactive isLoggedIn to keep status updated in page header

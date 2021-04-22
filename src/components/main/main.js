@@ -10,16 +10,15 @@ export default {
   mixins: [AppMixin],
   data: () => {
     return {
-      exploreChart: []
+      exploreChart: [],
+      pushedCharts: [],
+      screen: 0
     }
   },
   components: {
     aFooter: Util.Footer,
   },
   methods: {
-    // showBox () {
-    //   console.log(this.filter)
-    // },
     nav(args) {
       return window.location = `/nm#/${args}`
     },
@@ -48,9 +47,44 @@ export default {
       } catch(err){
         throw err;
       }
+    },
+    pushChart(args){
+      let movedChart, vm = this;
+      if(window.matchMedia("(max-width: 40.5em)").matches){
+        vm.screen = 1;
+      } else if(window.matchMedia("(max-width: 56.25em)").matches) {
+        vm.screen = 2;
+      } else {
+        vm.screen = 3;
+      }
+      if(args == 'prev'){
+        if(!this.pushedCharts.length){
+          return;
+        } else {
+          movedChart = this.pushedCharts[this.pushedCharts.length-1];
+          console.log(movedChart);
+          this.exploreChart.unshift(movedChart);
+          this.pushedCharts.pop();
+        }
+      } else {
+        console.log(this.screen);
+        if(!this.exploreChart.length){
+          return;
+        } else if(this.exploreChart.length <= this.screen){
+          return;
+        } else {
+          console.log('before exploreChart: ', this.exploreChart)
+          movedChart = this.exploreChart[0];
+          console.log(movedChart);
+          this.pushedCharts.push(movedChart);
+          this.exploreChart.shift();
+          console.log('exploreChart: ', this.exploreChart);
+        }
+      }
     }
   },
   created() {
     this.restCallFn();
+    this.$store.commit('setAppHeaderInfo', undefined)
   }
 }

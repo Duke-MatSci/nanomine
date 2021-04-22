@@ -1,16 +1,12 @@
 <template>
-  <div>
-    <a-header :info="info"></a-header>
-    <div class="main">
-      <v-flex class="mypage">
-        <h1><i class="material-icons">ballot</i> Reports</h1>
-        <h1><i class="material-icons">laptop</i> Administrative Tools</h1>
-        <h1><i class="material-icons">dashboard</i> Featured Tools + Resources</h1>
-        <v-container grid-list-xl>
-        </v-container>
-      </v-flex>
-    </div>
-    <a-footer></a-footer>
+  <div class="main">
+    <v-flex class="mypage">
+      <h1><i class="material-icons">ballot</i> Reports</h1>
+      <h1><i class="material-icons">laptop</i> Administrative Tools</h1>
+      <h1><i class="material-icons">dashboard</i> Featured Tools + Resources</h1>
+      <v-container grid-list-xl>
+      </v-container>
+    </v-flex>
   </div>
 </template>
 
@@ -21,12 +17,10 @@ import {} from 'vuex'
 import Axios from 'axios'
 import * as xmljs from 'xml-js'
 import * as _ from 'lodash'
-import * as Util from './utils'
 export default {
   name: 'MyPage',
   data () {
     return {
-      info: {icon: 'fa-file', name: 'My Portal'},
       formInView: 'block',
       msg: 'My Page',
       showAdmin: false,
@@ -121,10 +115,6 @@ export default {
       sampleTree: {},
       sampleTreeModel: null
     }
-  },
-  components: {
-    aHeader: Util.Header,
-    aFooter: Util.Footer
   },
   beforeMount: function () {
     let vm = this
@@ -954,6 +944,9 @@ export default {
     resetLoading: function () {
       this.$store.commit('notLoading')
     }
+  },
+  created(){
+    this.$store.commit('setAppHeaderInfo', {icon: 'house', name: 'My Portal'})
   }
 }
 </script>

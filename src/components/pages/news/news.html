@@ -1,74 +1,70 @@
 <template title="Materialsmine V2.0 - Teams Page">
-    <div>
-        <a-header :info="info"></a-header>
-        <div class="section_teams">
-            <div class="wrapper">
-                <div class="research">
-                    <div class="team_header">
-                        <h1 title="Research" class="visualize_header-h1 teams_header">Data centric nanocomposites design via mixed-variable Bayesian optimization</h1>
-                    </div>
-                    <div class="teams_text u-clear">
-                        <div class="news_image"> 
-                            <img src="/nmstatic/img/data-centric.png" alt="news article">
-                        </div>
-                        With an unprecedented combination of mechanical and electrical properties, polymer nanocomposites have the potential to be widely used across multiple industries. Tailoring nanocomposites to meet application specific requirements remains a challenging task, owing to the vast, mixed-variable design space that includes composition (i.e. choice of polymer, nanoparticle, and surface modification) and microstructures (i.e. dispersion and geometric arrangement of particles) of the nanocomposite material.
-                        <a href="https://doi.org/10.1039/D0ME00079E" target="_blank" class="btn-text">More...</a>
-                    </div>
+    <div class="section_teams">
+        <div class="wrapper">
+            <div class="research">
+                <div class="team_header">
+                    <h1 title="Research" class="visualize_header-h1 teams_header">Data centric nanocomposites design via mixed-variable Bayesian optimization</h1>
                 </div>
-                <div class="research">
-                    <div class="team_header">
-                        <h1 title="Research" class="visualize_header-h1 teams_header">Polymer Nanocomposite Data: Curation, Frameworks, Access, and Potential for Discovery and Design</h1>
-                    </div>
-                    <div class="teams_text u-clear">
-                        <div class="news_image"> 
-                            <img src="/nmstatic/img/acs_pub.jpg" alt="news article">
-                        </div>
-                        With the advent of the materials genome initiative (MGI) in the United States and a similar focus on materials data around the world, a number of materials data resources and associated vocabularies, tools, and repositories have been developed. While the majority of systems focus on slices of computational data with an emphasis on metallic alloys, NanoMine is an open source platform with the goal of curating and storing widely varying experimental data on polymer nanocomposites (polymers doped with nanoparticles) and providing access to characterization and analysis tools with the long-term objective of promoting facile nanocomposite design.
-                        <a href="https://dx.doi.org/10.1021/acsmacrolett.0c00264" target="_blank" class="btn-text">More...</a>
-                    </div>
-                </div>
-                <div class="u_divider"></div>
-                <div class="team_header news_header">
-                    <h1 title="Research" class="visualize_header-h1">News</h1>
-                </div>
-                <div class="news-container u-clear" @click="link('https://www.youtube.com/watch?v=BFfNXzwoKaU')">
+                <div class="teams_text u-clear">
                     <div class="news_image"> 
-                        <!--<img src="/nmstatic/img/brinson.jpg" alt="Cate Brinson">-->
-                        <i class="fa fa-youtube" style="font-size:10rem"></i>
+                        <img src="/nmstatic/img/data-centric.png" alt="news article">
                     </div>
-                    <div class="news_content">
-                        <div class="team_header">
-                            <h2 title="Cate Brinson: In the Kitchen with NanoMine" class="news_title">Cate Brinson: In the Kitchen with NanoMine</h2>
-                        </div>
-                        <div class="news_text">
-                            If discovering and designing next-gen materials is like cooking, Duke engineer Cate Brinson is writing the materials cookbook.
-                        </div>
+                    With an unprecedented combination of mechanical and electrical properties, polymer nanocomposites have the potential to be widely used across multiple industries. Tailoring nanocomposites to meet application specific requirements remains a challenging task, owing to the vast, mixed-variable design space that includes composition (i.e. choice of polymer, nanoparticle, and surface modification) and microstructures (i.e. dispersion and geometric arrangement of particles) of the nanocomposite material.
+                    <a href="https://doi.org/10.1039/D0ME00079E" target="_blank" class="btn-text">More...</a>
+                </div>
+            </div>
+            <div class="research">
+                <div class="team_header">
+                    <h1 title="Research" class="visualize_header-h1 teams_header">Polymer Nanocomposite Data: Curation, Frameworks, Access, and Potential for Discovery and Design</h1>
+                </div>
+                <div class="teams_text u-clear">
+                    <div class="news_image"> 
+                        <img src="/nmstatic/img/acs_pub.jpg" alt="news article">
                     </div>
-                    <div class="news_info">
-                        <div class="news_info-left">By <span>Duke Engineering</span></div>
-                        <div class="news_info-right">December 21, 2020</div>
+                    With the advent of the materials genome initiative (MGI) in the United States and a similar focus on materials data around the world, a number of materials data resources and associated vocabularies, tools, and repositories have been developed. While the majority of systems focus on slices of computational data with an emphasis on metallic alloys, NanoMine is an open source platform with the goal of curating and storing widely varying experimental data on polymer nanocomposites (polymers doped with nanoparticles) and providing access to characterization and analysis tools with the long-term objective of promoting facile nanocomposite design.
+                    <a href="https://dx.doi.org/10.1021/acsmacrolett.0c00264" target="_blank" class="btn-text">More...</a>
+                </div>
+            </div>
+            <div class="u_divider"></div>
+            <div class="team_header news_header">
+                <h1 title="Research" class="visualize_header-h1">News</h1>
+            </div>
+            <div class="news-container u-clear" @click="link('https://www.youtube.com/watch?v=BFfNXzwoKaU')">
+                <div class="news_image"> 
+                    <!--<img src="/nmstatic/img/brinson.jpg" alt="Cate Brinson">-->
+                    <i class="fa fa-youtube" style="font-size:10rem"></i>
+                </div>
+                <div class="news_content">
+                    <div class="team_header">
+                        <h2 title="Cate Brinson: In the Kitchen with NanoMine" class="news_title">Cate Brinson: In the Kitchen with NanoMine</h2>
+                    </div>
+                    <div class="news_text">
+                        If discovering and designing next-gen materials is like cooking, Duke engineer Cate Brinson is writing the materials cookbook.
                     </div>
                 </div>
-                <div class="news-container u-clear" @click="link('https://www.youtube.com/watch?v=zy5lZxklja4')">
-                    <div class="news_image"> 
-                        <!--<img src="/nmstatic/img/brinson.jpg" alt="Cate Brinson">-->
-                        <i class="fa fa-youtube" style="font-size:10rem"></i>
+                <div class="news_info">
+                    <div class="news_info-left">By <span>Duke Engineering</span></div>
+                    <div class="news_info-right">December 21, 2020</div>
+                </div>
+            </div>
+            <div class="news-container u-clear" @click="link('https://www.youtube.com/watch?v=zy5lZxklja4')">
+                <div class="news_image"> 
+                    <!--<img src="/nmstatic/img/brinson.jpg" alt="Cate Brinson">-->
+                    <i class="fa fa-youtube" style="font-size:10rem"></i>
+                </div>
+                <div class="news_content">
+                    <div class="team_header">
+                        <h2 title="Cate Brinson: In the Kitchen with NanoMine" class="news_title">ISWC Talk: Jamie McCusker on "NanoMine: A Knowledge Graph for Nanocomposite Materials Science"</h2>
                     </div>
-                    <div class="news_content">
-                        <div class="team_header">
-                            <h2 title="Cate Brinson: In the Kitchen with NanoMine" class="news_title">ISWC Talk: Jamie McCusker on "NanoMine: A Knowledge Graph for Nanocomposite Materials Science"</h2>
-                        </div>
-                        <div class="news_text">
-                            ISWC Talk: Jamie McCusker on "NanoMine: A Knowledge Graph for Nanocomposite Materials Science" (05 Nov 2020)
-                        </div>
+                    <div class="news_text">
+                        ISWC Talk: Jamie McCusker on "NanoMine: A Knowledge Graph for Nanocomposite Materials Science" (05 Nov 2020)
                     </div>
-                    <div class="news_info">
-                        <div class="news_info-left">By <span>Tetherless World</span></div>
-                        <div class="news_info-right">October 27, 2020</div>
-                    </div>
+                </div>
+                <div class="news_info">
+                    <div class="news_info-left">By <span>Tetherless World</span></div>
+                    <div class="news_info-right">October 27, 2020</div>
                 </div>
             </div>
         </div>
-        <a-footer></a-footer>
     </div>
 </template>

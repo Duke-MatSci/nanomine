@@ -7,7 +7,7 @@
     >
       {{errorMsg}}
     </v-alert>
-    <h1>{{ msg }}</h1>
+    <h1 class="header-mm">{{ msg }}</h1>
     <v-container fluid grid-list-md>
       <v-layout row wrap>
         <v-flex class="d-flex" xs12>
@@ -174,17 +174,8 @@ export default {
     width: 50px;
     height: auto;
   }
-  h1 {
-    margin-top: 5px;
-    margin-bottom: 5px;
-  }
   h4 {
     text-transform: uppercase;
-  }
-  h1 {
-    margin-top: 10px;
-    background-color: black;
-    color: white;
   }
 
 </style>

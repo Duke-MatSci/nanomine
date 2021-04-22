@@ -15,7 +15,7 @@
                     <div class="nav nav_menu u--inline">
                         <ul>
                             <li><a href="/nm#/">NanoMine</a></li>
-                            <li><a href="#">MetaMine</a></li>
+                            <li><a href="/nm#/mm">MetaMine</a></li>
                         </ul>
                     </div>
                     <div class="u--inline">
@@ -37,12 +37,12 @@
         <div class="section_banner section_banner__misc">
             <div class="section_banner__text">
                 <div class="section_banner__text-content">
-                    <i :class="`fa ${info.icon}`"></i> <span class="u_adjust-banner-text">{{ info.name }}</span>
+                    <i class="material-icons">{{info.icon}}</i><span class="u_adjust-banner-text">{{ info.name }}</span>
                 </div>
             </div>
             <div class="section_banner__nav">
                 <nav class="nav_menu">
-                    <ul>
+                    <ul class="nav_ul">
                         <li class="u_margin-right-small">
                             <div class="nav_menu--container">
                                 <a class="u--default-size nav_menu--handler" href="#">About</a>
@@ -78,6 +78,7 @@
                                     <span class="nav_menu--siblings-lists" @click="links('/nm#/tools')"><a href="/nm#/tools">Module Tools</a></span>
                                     <span class="nav_menu--siblings-lists" @click="links('/nm#/simmtools')"><a href="/nm#/simmtools">Simulation Tools</a></span>
                                     <span class="nav_menu--siblings-lists" @click="links('/nm#/ChemProps')"><a href="/nm#/ChemProps">ChemProps</a></span>
+                                    <!--<span class="nav_menu--siblings-lists" @click="links('/nm#/pixelunit')"><a href="/nm#/pixelunit">Geometry Explorer</a></span>-->
                                 </div>
                             </div>
                         </li>

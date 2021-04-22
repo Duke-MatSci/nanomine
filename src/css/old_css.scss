@@ -1,0 +1,100 @@
+@import './abstract/_mixins.scss';
+#app {
+    font-family: 'Avenir', Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    color: #2c3e50;
+    margin-top: 48px;
+    background-color: white;
+}
+.app-router {
+    // margin-bottom: 75px;
+    margin-top: -10px;
+}
+h1 {
+    margin-top: 25px;
+    margin-bottom: 15px;
+}
+
+h4 {
+    margin-top: 25px;
+}
+
+img {
+    margin-top: 30px;
+}
+.main {
+    background-color: #ffffff;
+}
+
+.icon-adjust {
+    font-size: 1.5rem !important;
+    vertical-align: text-bottom;
+    cursor: pointer;
+}
+
+.header-nm {
+    margin-top: 10px;
+    padding-bottom: .1rem;
+    border-bottom: .2rem solid black;
+}
+
+.header-mm {
+    padding: 3rem 0;
+    background-color: #08233c;
+    color: white;
+    text-align: center;
+}
+
+.ul_adjust {
+    @include respond(tab-port) {
+        display: inline-block !important;
+    }
+}
+
+.mid {
+    &-first {
+        background-color: #08233c;
+        padding: 2.5rem 1rem;
+        margin: 1.5rem 0;
+        margin-bottom: 0;
+
+        &-span {
+            display: block;
+        }
+
+        &-p {
+            margin-top: 0.5rem;
+            font-size: 2.5rem;
+        }
+
+        &-li {
+            margin-right: 5rem;
+        }
+
+        &-container {
+            height: 8rem;
+        }
+    }
+
+    &-second {
+        background-color: rgba(0,0,0,.6);
+        padding: 6rem 15rem;
+        margin: 0 0 1.5rem 0;
+    
+        @include respond(tab-port) {
+            padding: 6rem 3rem;
+        }
+    }
+}
+
+.list_menu {
+    display: block; 
+    padding: .5rem 1.5rem; 
+    cursor: pointer;
+
+    &:hover {
+        background-color: rgba(0,0,0,.6);
+        color: #ffffff;
+    }
+}

@@ -72,11 +72,11 @@ export default new Router({
     return { x: 0, y: 0 }
   },
   routes: [
-    // {
-    //   path: '/',
-    //   name: 'NanoMine',
-    //   component: NanoMine
-    // },
+    {
+      path: '/mm',
+      name: 'NanoMine',
+      component: NanoMine
+    },
     {
       path: '/',
       name: 'LandingPage',
@@ -123,7 +123,7 @@ export default new Router({
       component: Textview
     },
     {
-      path: '/contactus',
+      path: '/contact',
       name: 'Contactus',
       component: Contactus
     },
@@ -137,38 +137,43 @@ export default new Router({
       name: 'MetaMineTools',
       component: MetaMineTools
     },
+    // {
+    //   path: '/meta/modelviewer',
+    //   name: 'ModelViewer',
+    //   component: ModelViewer
+    // },
+    // {
+    //   path: '/mm/db',
+    //   name: 'Database',
+    //   component: Database
+    // },
     {
-      path: '/meta/modelviewer',
-      name: 'ModelViewer',
-      component: ModelViewer
-    },
-    {
-      path: '/db',
-      name: 'Database',
-      component: Database
-    },
-    {
-      path: '/contact',
+      path: '/mm/contact',
       name: 'Contact',
       component: Contact
     },
-    {
-      path: '/simtools',
-      name: 'SimTools',
-      component: SimTools
-    },
+    // {
+    //   path: '/simtools',
+    //   name: 'SimTools',
+    //   component: SimTools
+    // },
     {
       path: '/mypage',
       name: 'MyPage',
       component: MyPage
     },
     {
-      path: '/mtools',
+      path: '/mm/mtools',
       name: 'ModuleTools',
       component: ModuleTools
     },
     {
       path: '/XMLCONV',
+      name: 'XMLCONV',
+      component: XMLCONV
+    },
+    {
+      path: '/mm/XMLCONV',
       name: 'XMLCONV',
       component: XMLCONV
     },
@@ -189,22 +194,37 @@ export default new Router({
       component: McrHomepage
     },
     {
+      path: '/mm/mcr_homepage',
+      name: 'McrHomepage',
+      component: McrHomepage
+    },
+    {
       path: '/binarization_homepage',
       name: 'BinarizeHomepage',
       component: BinarizeHomepage
     },
     {
-      path: '/nanomine/tutorials',
+      path: '/mm/binarization_homepage',
+      name: 'BinarizeHomepage',
+      component: BinarizeHomepage
+    },
+    {
+      path: '/mm/tutorials',
       name: 'NanoTutorials',
       component: NanoTutorials
     },
     {
-      path: '/metamine/pixelunit50',
+      path: '/mm/pixelunit50',
       name: 'NuExampleUnitCell',
       component: NuExampleUnitCell
     },
     {
       path: '/Otsu',
+      name: 'Otsu',
+      component: Otsu
+    },
+    {
+      path: 'mm/Otsu',
       name: 'Otsu',
       component: Otsu
     },
@@ -219,7 +239,17 @@ export default new Router({
       component: CharacterizeHomepage
     },
     {
+      path: '/mm/characterization_homepage',
+      name: 'CharacterizeHomepage',
+      component: CharacterizeHomepage
+    },
+    {
       path: '/reconstruction_homepage',
+      name: 'ReconstructionHomepage',
+      component: ReconstructionHomepage
+    },
+    {
+      path: '/mm/reconstruction_homepage',
       name: 'ReconstructionHomepage',
       component: ReconstructionHomepage
     },
@@ -229,12 +259,22 @@ export default new Router({
       component: IntelligentCharacterize
     },
     {
+      path: '/mm/IntelligentCharacterize',
+      name: 'IntelligentCharacterize',
+      component: IntelligentCharacterize
+    },
+    {
       path: '/Niblack',
       name: 'Niblack',
       component: Niblack
     },
     {
-      path: '/meta/pixelunit',
+      path: '/pixelunit',
+      name: 'PixelUnit',
+      component: PixelUnit
+    },
+    {
+      path: '/mm/pixelunit',
       name: 'PixelUnit',
       component: PixelUnit
     },
@@ -322,7 +362,17 @@ export default new Router({
       component: Dynamfit
     },
     {
+      path: '/mm/Dynamfit',
+      name: 'Dynamfit',
+      component: Dynamfit
+    },
+    {
       path: '/DynamfitExample',
+      name: 'DynamfitExample',
+      component: DynamfitExample
+    },
+    {
+      path: '/mm/DynamfitExample',
       name: 'DynamfitExample',
       component: DynamfitExample
     },
@@ -332,7 +382,17 @@ export default new Router({
       component: DynamfitExampleInput
     },
     {
+      path: '/mm/DynamfitExampleInput',
+      name: 'DynamfitExampleInput',
+      component: DynamfitExampleInput
+    },
+    {
       path: '/DynamfitResult',
+      name: 'DynamfitResult',
+      component: DynamfitResult
+    },
+    {
+      path: '/mm/DynamfitResult',
       name: 'DynamfitResult',
       component: DynamfitResult
     },
@@ -347,6 +407,11 @@ export default new Router({
       component: SmilesTest
     },
     {
+      path: '/mm/ChemProps',
+      name: 'ChemProps',
+      component: ChemProps
+    },
+    {
       path: '/ChemProps',
       name: 'ChemProps',
       component: ChemProps
@@ -358,6 +423,11 @@ export default new Router({
     },
     {
       path: '/ChemPropsAPIToken',
+      name: 'ChemPropsAPIToken',
+      component: ChemPropsAPIToken
+    },
+    {
+      path: '/mm/ChemPropsAPIToken',
       name: 'ChemPropsAPIToken',
       component: ChemPropsAPIToken
     }
