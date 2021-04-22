@@ -48,7 +48,6 @@ import ChemProps from '@/components/ChemProps'
 import XmlUploader from '@/components/XmlUploader'
 import SmilesTest from '@/components/nanomine/SmilesTest'
 import ChemPropsAPIToken from '@/components/ChemPropsAPIToken'
-import CurationPlot from '@/components/CurationPlot'
 
 // For Nanomine Gallery of Interactive Chart (Req 04/01/2020)
 import GalleryApp from '@/components/GalleryApp'
@@ -361,11 +360,6 @@ export default new Router({
       path: '/ChemPropsAPIToken',
       name: 'ChemPropsAPIToken',
       component: ChemPropsAPIToken
-    },
-    {
-      path: '/CurationPlot',
-      name: 'CurationPlot',
-      component: CurationPlot
     }
   ]
 })

@@ -78,7 +78,6 @@
                                     <span class="nav_menu--siblings-lists" @click="links('/nm#/tools')"><a href="/nm#/tools">Module Tools</a></span>
                                     <span class="nav_menu--siblings-lists" @click="links('/nm#/simmtools')"><a href="/nm#/simmtools">Simulation Tools</a></span>
                                     <span class="nav_menu--siblings-lists" @click="links('/nm#/ChemProps')"><a href="/nm#/ChemProps">ChemProps</a></span>
-                                    <span class="nav_menu--siblings-lists" @click="links('/nm#/CurationPlot')"><a href="/nm#/CurationPlot">Easy csv Plotter</a></span>
                                 </div>
                             </div>
                         </li>
