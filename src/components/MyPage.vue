@@ -1,120 +1,53 @@
 <template>
   <div class="main">
     <v-flex class="mypage">
-      <h1><i class="material-icons">ballot</i> Reports</h1>
-      <h1><i class="material-icons">laptop</i> Administrative Tools</h1>
-      <h1><i class="material-icons">dashboard</i> Featured Tools + Resources</h1>
-      <v-container grid-list-xl>
+      <v-container>
+        <h1 class="header-nm relative"><i class="material-icons">ballot</i> Reports <i class="material-icons icon">keyboard_arrow_down</i></h1>
+        <app-report> </app-report>
+        <h1 class="header-nm relative"><i class="material-icons">laptop</i> Administrative Tools <i class="material-icons icon">keyboard_arrow_down</i></h1>
+        <app-tool> </app-tool>
+        <h1 class="header-nm relative"><i class="material-icons">dashboard</i> Datasets <i class="material-icons icon">keyboard_arrow_down</i></h1>
+        <app-dataset> </app-dataset>
       </v-container>
     </v-flex>
+    <dialogue-box>
+      <v-layout row>
+          <v-flex xs12 sm6 offset-sm3 >
+              <v-card>
+                  <v-toolbar color="cyan" dark>
+                      <v-toolbar-title>Dataset Information</v-toolbar-title>
+
+                      <v-spacer></v-spacer>
+
+                      <v-btn icon @click="closeDisplay"> <v-icon>close</v-icon> </v-btn>
+                  </v-toolbar>
+              </v-card>
+          </v-flex>
+      </v-layout>
+    </dialogue-box>
   </div>
 </template>
 
 <script>
+import AdminDataset from './pages/admin_dataset/admin_dataset.vue'
+import AdminTools from './pages/admin_tools/admin_tools.vue'
+import Reports from './pages/reports/reports.vue'
 import {Auth} from '@/modules/Auth.js'
 import * as base64js from 'base64-js'
 import {} from 'vuex'
 import Axios from 'axios'
 import * as xmljs from 'xml-js'
 import * as _ from 'lodash'
+import datas from './utils/admin_data'
+import dialogueBox from './utils/dialogue.vue'
 export default {
-  name: 'MyPage',
-  data () {
-    return {
-      formInView: 'block',
-      msg: 'My Page',
-      showAdmin: false,
-      myPageError: false,
-      myPageErrorMsg: '',
-      fileError: false,
-      fileErrorMsg: '',
-      // Schema mgt
-      showSchemaMgt: false,
-      schemaFileText: '',
-      schemaFileName: '',
-      schemaError: false,
-      schemaErrorMsg: '',
-      schemaSuccess: false,
-      schemaSuccessMsg: '',
-      // schemas
-      firstSchemaTitle: 'first',
-      selectedSchemaId: '',
-      selectedSchemaTitle: '',
-      schemas: [],
-      // Users
-      showBecomeUser: false,
-      userall: true,
-      userpagination: {
-        sortBy: 'userid'
-      },
-      userindeterminate: true,
-      userselected: [],
-      userheaders: [
-        {text: 'User ID', align: 'right', sortable: true, value: 'userid'},
-        {text: 'Full Name', align: 'right', sortable: false, value: 'displayName'},
-        {text: 'Email Address', align: 'right', sortable: false, value: 'email'}
-      ],
-      users: [
-        {value: false, selected: false, userid: 'A101', displayName: 'John Doe', email: 'john.doe@example.com'},
-        {value: false, selected: false, userid: 'A102', displayName: 'Jane Doe', email: 'jane.doe@example.com'},
-        {value: false, selected: false, userid: 'A103', displayName: 'Manny Doe', email: 'manny.doe@example.com'}
-      ],
-      // Datasets
-      showMineOnly: false,
-      datasetSearch: '',
-      datasetHeaders: [
-        {text: 'ID', align: 'left', value: 'seq'},
-        {text: 'DOI', align: 'left', value: 'doi'},
-        {text: 'Title', align: 'left', value: 'title'},
-        {text: 'Comment', align: 'left', value: 'datasetComment'}
-      ],
-      datasetList: [],
-      datasetInfoDialogActive: false,
-      datasetDialogInfo: {}, // re-structured information from dataset
-      datasetHideSelector: false,
-      datasetSelected: null,
-      datasetTransformed: {},
-      // Filesets
-      filesetsSearch: '',
-      headerFilesetName: '',
-      filesetsHeaders: [
-        {text: 'Fileset Name', align: 'left', value: 'datasetSelected.filesets'}
-      ],
-      filesetsList: [],
-      filesetsHideSelector: false,
-      filesetsPagination: {
-        sortBy: 'filesets'
-      },
-      filesetSelected: null,
-      // Samples
-      filesSearch: '',
-      filesHeaders: [
-        {text: '', align: 'left', value: 'null'},
-        {text: '', align: 'left', value: 'null'},
-        {text: 'File Name', align: 'left', value: 'metadata.filename'},
-        {text: 'Type', align: 'left', value: 'metadata.contentType'},
-        {text: 'ID', align: 'left', value: 'id'}
-        // {text: 'Published', align: 'left', value: 'ispublished'},
-        // {text: 'Public', align: 'left', value: 'isPublic'},
-        // {text: 'Edit State', align: 'left', value: 'entityState'},
-        // {text: 'Curate State', align: 'left', value: 'curateState'}
-      ],
-      filesList: [],
-      filesHideSelector: true,
-      // sampleFileAll: true,
-      filespagination: {
-        sortBy: 'metadata.filename'
-      },
-      headerFileName: null,
-      fileSelected: null,
-      fileObj: '',
-      fileImageDataUri: '',
-      filesDialogActive: false,
-      filesDownloadIndeterminate: false,
-      filesDownloadSelected: [],
-      sampleTree: {},
-      sampleTreeModel: null
-    }
+  name: "MyPage",
+  data: () => ({...datas}),
+  components: {
+    appReport: Reports,
+    appTool: AdminTools,
+    appDataset: AdminDataset,
+    dialogueBox
   },
   beforeMount: function () {
     let vm = this
@@ -163,6 +96,9 @@ export default {
   },
   computed: {
     // schemas
+    display: () => {
+      return this.$store.getters.isDialogBox;
+    }, 
     schemaTitles () {
       let titles = []
       let vm = this
@@ -945,109 +881,9 @@ export default {
       this.$store.commit('notLoading')
     }
   },
-  created(){
+  created () {
     this.$store.commit('setAppHeaderInfo', {icon: 'house', name: 'My Portal'})
-  }
+  },
 }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-  img {
-    width: 50px;
-    height: auto;
-  }
-
-  h4 {
-    text-transform: uppercase;
-  }
-
-  h5 {
-    color: white;
-    background-color: black;
-    font-size: 16px;
-    margin-top: -1px;
-  }
-
-  h1 {
-    margin-top: 10px;
-    padding-bottom: .1rem;
-    border-bottom: .2rem solid black;
-  }
-
-  p {
-    margin-bottom: 2px;
-  }
-
-  .warn-red {
-    background-color: red;
-    color: white;
-    margin-bottom: 0px;
-  }
-
-  .sect-divider {
-    height: 5px;
-    background-color: #2ff2ff;
-    padding-top: 2px;
-    padding-bottom: 2px;
-    width: 100%;
-  }
-
-  .admin-header {
-    background-color: #03A9F4;
-    color: #ffffff;
-    font-size: 22px;
-    font-weight: bold;
-  }
-
-  .select-schema-header {
-    background-color: #03A9F4;
-    height: 30px;
-    color: #ffffff;
-    font-size: 22px;
-    font-weight: bold;
-  }
-
-  .dataset-header {
-    background-color: #03A9F4;
-    color: #ffffff;
-    font-size: 22px;
-    font-weight: bold;
-  }
-
-  .filesets-header {
-    background-color: #03A9F4;
-    color: #ffffff;
-    font-size: 22px;
-    font-weight: bold;
-  }
-
-  .files-header {
-    background-color: #03A9F4;
-    color: #ffffff;
-    font-size: 22px;
-    font-weight: bold;
-  }
-
-  .dataset-info-header {
-    background-color: #03A9F4;
-    color: #ffffff;
-    font-size: 22px;
-    font-weight: bold;
-    width: 100%;
-    padding: 10px;
-    margin-right: 0px;
-  }
-
-  .dataset-info-footer {
-    background-color: #03A9F4;
-    color: #000000;
-    font-size: 22px;
-    font-weight: bold;
-  }
-
-  .mypage {
-    padding: 2rem 4rem;
-  }
-
-</style>
