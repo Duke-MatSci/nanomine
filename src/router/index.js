@@ -458,10 +458,10 @@ export default new Router({
       name: 'ChemPropsAPIToken',
       component: ChemPropsAPIToken
     },
-    {
-      path: '/CurationPlot',
-      name: 'CurationPlot',
-      component: CurationPlot
-    }
+    // {
+    //   path: '/CurationPlot',
+    //   name: 'CurationPlot',
+    //   component: CurationPlot
+    // }
   ]
 })
