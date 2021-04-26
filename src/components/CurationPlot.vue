@@ -62,7 +62,6 @@ import {} from 'vuex'
 import { max } from "d3";
 import LineChart from "./nanomine/LineChart";
 import {Auth} from '@/modules/Auth.js'
-import * as Util from './utils';
 export default {
   name: "CurationPlot",
   data() {
@@ -92,8 +91,6 @@ export default {
     };
   },
   components: {
-    aHeader: Util.Header,
-    aFooter: Util.Footer,
     "nm-linechart": LineChart
   },
   methods: {
