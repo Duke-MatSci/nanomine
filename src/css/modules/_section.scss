@@ -3,7 +3,7 @@
         position: relative;
         // background-image: linear-gradient(0deg,rgba(8,35,60,.1),rgba(14,95,118,.1)),url(/nmstatic/img/random_network.png);
         background-image: linear-gradient(0deg,rgba(8,35,60,.2) 25%,rgba(14,95,118,.9)),url(/nmstatic/img/random_network.png);
-        height: 42rem;
+        height: 30rem;
         width: 100%;
         background-size: cover;
         z-index: 10;
@@ -24,7 +24,7 @@
 
         &__text-content {
             position: absolute;
-            top: 50%;
+            top: 55%;
             left: 50%;
             transform:translate(-50%, -50%);
             text-align: center;

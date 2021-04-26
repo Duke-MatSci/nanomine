@@ -150,6 +150,7 @@ Auth.prototype = {
     if (token && token.length > 0) {
       rv = jwt.decode(token) // client cannot and does not need to verify signature
     }
+    console.log(rv)
     return rv
   },
   handleErr: function (err, failureFunction) {
