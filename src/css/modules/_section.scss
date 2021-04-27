@@ -9,11 +9,11 @@
         z-index: 10;
 
         @include respond(tab-land){
-            height: 34rem;
+            height: 24rem;
         }
 
         @include respond(tab-port) {
-            height: 24rem;
+            height: 19rem;
             background-image: linear-gradient(0deg,rgba(8,35,60,.2) 25%,rgba(14,95,118,.9)),url(/nmstatic/img/random_network-medium.png);
         }
 
@@ -55,6 +55,7 @@
             @include respond(tab-port) {
                 width: 75%;
                 font-size: 1.8rem;
+                top: 50%;
             }
 
             @include respond(phone) {

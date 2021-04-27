@@ -12,7 +12,29 @@ export default {
     return {
       exploreChart: [],
       pushedCharts: [],
-      screen: 0
+      screen: 0,
+      gifChart: [
+        {
+          img: "/nmstatic/img/test/characterization-radial.gif",
+          title: "Characterization Radial Chart"
+        },
+        {
+          img: "/nmstatic/img/test/crossfiltering.gif",
+          title: "Cross Filtering Chart"
+        },
+        {
+          img: "/nmstatic/img/test/matrix-filler-combo.gif",
+          title: "Matrix Filler Combo Chart"
+        },
+        {
+          img: "/nmstatic/img/test/meta-analysis.gif",
+          title: "Meta Analysis Chart"
+        },
+        {
+          img: "/nmstatic/img/test/tensile-chart.gif",
+          title: "Tensile Chart"
+        },
+      ]
     }
   },
   components: {
@@ -62,23 +84,19 @@ export default {
           return;
         } else {
           movedChart = this.pushedCharts[this.pushedCharts.length-1];
-          console.log(movedChart);
-          this.exploreChart.unshift(movedChart);
+          // this.exploreChart.unshift(movedChart);
+          this.gifChart.unshift(movedChart);
           this.pushedCharts.pop();
         }
       } else {
-        console.log(this.screen);
-        if(!this.exploreChart.length){
+        if(!this.gifChart.length){
           return;
-        } else if(this.exploreChart.length <= this.screen){
+        } else if(this.gifChart.length <= this.screen){
           return;
         } else {
-          console.log('before exploreChart: ', this.exploreChart)
-          movedChart = this.exploreChart[0];
-          console.log(movedChart);
+          movedChart = this.gifChart[0];
           this.pushedCharts.push(movedChart);
-          this.exploreChart.shift();
-          console.log('exploreChart: ', this.exploreChart);
+          this.gifChart.shift();
         }
       }
     }

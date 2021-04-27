@@ -11,7 +11,7 @@
                         <div class="footer_list">
                             <ul>
                                 <li><a href="/nm">Nanomine</a></li>
-                                <li><a href="#">Metamine</a></li>
+                                <li><a href="/nm#/mm">Metamine</a></li>
                             </ul>
                         </div>
                         <div class="footer_list">
