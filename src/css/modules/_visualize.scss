@@ -92,8 +92,8 @@
             background-color: $primary-white;
 
             @include respond(laptop) {
-                width: 19rem;
-                height: 21rem;
+                width: 20.5rem;
+                height: 20rem;
             }
             
             @include respond(tab-port) {

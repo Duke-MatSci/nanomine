@@ -5,6 +5,7 @@ Vue.use(Vuex)
 
 const store = new Vuex.Store({
   state: {
+    dialogBox: true,
     leftMenuActive: false,
     adminAvailable: false,
     isWaiting: false,
@@ -111,7 +112,10 @@ const store = new Vuex.Store({
     },
     setAppHeaderInfo: function (state, info) {
       state.appHeaderInfo = info
-    }
+    },
+    toggleDialogBox: state => {
+      state.dialogBox = !state.dialogBox
+    },
   },
   getters: {
     baseServicesUrl: (state) => {
@@ -249,6 +253,9 @@ const store = new Vuex.Store({
     },
     isEditorActive: function (state) {
       return state.editorActive
+    },
+    isDialogBox: state => {
+      return state.dialogBox
     }
   }
 })

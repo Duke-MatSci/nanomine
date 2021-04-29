@@ -9,6 +9,7 @@ import DynamfitExampleInput from '@/components/DynamfitExampleInput'
 import DynamfitResult from '@/components/DynamfitResult'
 import ModuleTools from '@/components/ModuleTools'
 import MyPage from '@/components/MyPage'
+import MyOldPage from '@/components/old_mypage'
 import MaterialsMine from '@/components/MaterialsMine'
 import MetaMine from '@/components/metamine/MetaMine'
 import MetaMineTools from '@/components/metamine/MetaMineTools'
@@ -164,6 +165,11 @@ export default new Router({
       component: MyPage
     },
     {
+      path: '/oldmypage',
+      name: 'MyOldPage',
+      component: MyOldPage
+    },
+    {
       path: '/mm/mtools',
       name: 'ModuleTools',
       component: ModuleTools
@@ -225,7 +231,7 @@ export default new Router({
       component: Otsu
     },
     {
-      path: 'mm/Otsu',
+      path: '/mm/Otsu',
       name: 'Otsu',
       component: Otsu
     },
@@ -270,6 +276,11 @@ export default new Router({
       component: Niblack
     },
     {
+      path: '/mm/Niblack',
+      name: 'Niblack',
+      component: Niblack
+    },
+    {
       path: '/pixelunit',
       name: 'PixelUnit',
       component: PixelUnit
@@ -285,12 +296,27 @@ export default new Router({
       component: CorrelationCharacterize
     },
     {
+      path: '/mm/CorrelationCharacterize',
+      name: 'CorrelationCharacterize',
+      component: CorrelationCharacterize
+    },
+    {
       path: '/SDFCharacterize',
       name: 'SDFCharacterize',
       component: SDFCharacterize
     },
     {
+      path: '/mm/SDFCharacterize',
+      name: 'SDFCharacterize',
+      component: SDFCharacterize
+    },
+    {
       path: '/DescriptorCharacterize',
+      name: 'DescriptorCharacterize',
+      component: DescriptorCharacterize
+    },
+    {
+      path: '/mm/DescriptorCharacterize',
       name: 'DescriptorCharacterize',
       component: DescriptorCharacterize
     },

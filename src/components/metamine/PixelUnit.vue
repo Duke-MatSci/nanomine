@@ -1,7 +1,7 @@
 <template>
   <div class="main">
+    <h1 v-if="this.$store.state.versionNew" class="header-mm">{{ msg }}</h1>
     <div class="pixelunit">
-      <h1 v-if="this.$store.state.versionNew" class="header-mm">{{ msg }}</h1>
       <v-container fluid grid-list-md class="adjust-padding">
         <h1 v-if="!this.$store.state.versionNew" class="header-nm">{{ msg }}</h1>
         <v-layout row wrap>

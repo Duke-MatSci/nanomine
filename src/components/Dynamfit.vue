@@ -16,7 +16,10 @@
         <p class="text-xs-left">This program fits a viscoelastic mastercurve from DMA experiments with a Prony Series. The Prony Series coefficients can be used as baseline properties for the matrix in a FEA simulation of nanocomposites.
         </p>
         <br>
-        <p class="text-xs-left">If this tool is new to you, please click <v-btn class="text-xs-left" small color="primary" to="/DynamfitExample">Example of Dynamfit</v-btn>
+        <p class="text-xs-left" v-if="this.$store.state.versionNew">If this tool is new to you, please click <v-btn class="text-xs-left" small color="primary" to="/mm/DynamfitExample">Example of Dynamfit</v-btn>
+        to get familiar with this tool.
+        </p>
+        <p class="text-xs-left" v-if="!this.$store.state.versionNew">If this tool is new to you, please click <v-btn class="text-xs-left" small color="primary" to="/DynamfitExample">Example of Dynamfit</v-btn>
         to get familiar with this tool.
         </p>
         <br>

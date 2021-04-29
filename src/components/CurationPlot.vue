@@ -1,9 +1,9 @@
 <template>
   <div>
-    <a-header :info="info"></a-header>
     <div class="main">
       <div class="curationplot">
         <v-container fluid grid-list-md>
+          <h1 v-if="!this.$store.state.versionNew" class="header-nm">{{ title }}</h1>
           <v-layout row wrap>
             <v-flex d-flex xs4 sm4 md4>
               <v-card
@@ -54,7 +54,6 @@
         </v-container>
       </div>
     </div>
-    <a-footer></a-footer>
   </div>
 </template>
 
@@ -63,7 +62,6 @@ import {} from 'vuex'
 import { max } from "d3";
 import LineChart from "./nanomine/LineChart";
 import {Auth} from '@/modules/Auth.js'
-import * as Util from './utils';
 export default {
   name: "CurationPlot",
   data() {
@@ -76,7 +74,6 @@ export default {
     // let width = 460 - margin.left - margin.right;
     // let height = 400 - margin.top - margin.bottom;
     return {
-      info: {icon: 'fa-bullseye', name: 'Curation Plot'},
       title: 'Curation Plot',
       dialog: false,
       boxColor: '#e3e3e3',
@@ -94,8 +91,6 @@ export default {
     };
   },
   components: {
-    aHeader: Util.Header,
-    aFooter: Util.Footer,
     "nm-linechart": LineChart
   },
   methods: {
@@ -199,6 +194,9 @@ export default {
         ylabel: this.ylabel,
       };
     }
+  },
+  created(){
+    this.$store.commit('setAppHeaderInfo', {icon: 'workspaces', name: 'Curation Plot'})
   }
 };
 </script>

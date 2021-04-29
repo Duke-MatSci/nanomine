@@ -98,3 +98,13 @@ img {
         color: #ffffff;
     }
 }
+
+.relative {
+    position: relative;
+}
+
+.icon {
+    position: absolute !important;
+    right: 1rem;
+    bottom: 9px;
+}
