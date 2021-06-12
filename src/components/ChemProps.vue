@@ -13,7 +13,7 @@
         </v-alert>
         <h3 class="text-xs-left">Description</h3>
         <br>
-        <p class="text-xs-left">ChemProps is a growing polymer name and filler name standardization database. Polymer names and filler names can have many alias, impeding the queries to collect all relevant data by a chemical name as the keyword. Chemprops is a useful resource to address this problem. It standardizes the chemical names that belong to the same database such that queries can retrieve all data that is related to a certain chemical name regardless of how they were originally reported. You can find more details in our paper <href a="https://jcheminf.biomedcentral.com/articles/10.1186/s13321-021-00502-6">"ChemProps: A RESTful API enabled database for composite polymer name standardization"</href>.
+        <p class="text-xs-left">ChemProps is a growing polymer name and filler name standardization database. Polymer names and filler names can have many alias, impeding the queries to collect all relevant data by a chemical name as the keyword. Chemprops is a useful resource to address this problem. It standardizes the chemical names that belong to the same database such that queries can retrieve all data that is related to a certain chemical name regardless of how they were originally reported. You can find more details in our paper <a href="https://jcheminf.biomedcentral.com/articles/10.1186/s13321-021-00502-6" target="_blank">"ChemProps: A RESTful API enabled database for composite polymer name standardization"</a>.
         </p>
         <p class="text-xs-left">This webapp is designed for one-time search. For batch jobs, please use the ChemProps API. A token is required to use the API. You must be logged in to request the ChemProps API token.
         </p>
