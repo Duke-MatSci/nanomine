@@ -13,12 +13,12 @@
         </v-alert>
         <h3 class="text-xs-left">Description</h3>
         <br>
-        <p class="text-xs-left">ChemProps is a growing polymer name and filler name standardization database. Polymer names and filler names can have many alias, impeding the queries to collect all relevant data by a chemical name as the keyword. Chemprops is a useful resource to address this problem. It standardizes the chemical names that belong to the same database such that queries can retrieve all data that is related to a certain chemical name regardless of how they were originally reported.
+        <p class="text-xs-left">ChemProps is a growing polymer name and filler name standardization database. Polymer names and filler names can have many alias, impeding the queries to collect all relevant data by a chemical name as the keyword. Chemprops is a useful resource to address this problem. It standardizes the chemical names that belong to the same database such that queries can retrieve all data that is related to a certain chemical name regardless of how they were originally reported. You can find more details in our paper <href a="https://jcheminf.biomedcentral.com/articles/10.1186/s13321-021-00502-6">"ChemProps: A RESTful API enabled database for composite polymer name standardization"</href>.
         </p>
         <p class="text-xs-left">This webapp is designed for one-time search. For batch jobs, please use the ChemProps API. A token is required to use the API. You must be logged in to request the ChemProps API token.
         </p>
         <v-btn v-if="!this.$store.state.versionNew" to="/ChemPropsAPIToken" color="primary">Request API Token</v-btn>
-        <v-btn else to="/mm/ChemPropsAPIToken" color="primary">Request API Token</v-btn>
+        <v-btn v-else to="/mm/ChemPropsAPIToken" color="primary">Request API Token</v-btn>
         <br>
         <h3 class="text-xs-left">Instructions</h3>
         <p class="text-xs-left"><b>1. Select the collection.</b></p>
@@ -70,6 +70,7 @@
           <br>
           <h4 v-if="referenceOpen" @click="refOpen" class="text-xs-left">References <i class="material-icons icon-adjust">keyboard_arrow_up</i></h4>
           <h4 v-else @click="refOpen" class="text-xs-left">References <i class="material-icons icon-adjust">keyboard_arrow_down</i></h4>
+          <p v-if="referenceOpen" class="text-xs-left">Hu, Bingyin, Anqi Lin, and L. Catherine Brinson. "ChemProps: A RESTful API enabled database for composite polymer name standardization." Journal of cheminformatics 13.1 (2021): 1-13.</p>
           <p v-if="referenceOpen" class="text-xs-left">Probst, Daniel, and Jean-Louis Reymond. "Smilesdrawer: parsing and drawing SMILES-encoded molecular structures using client-side javascript." Journal of chemical information and modeling 58.1 (2018): 1-7.</p>
         <!--</div>-->
       </v-container>
