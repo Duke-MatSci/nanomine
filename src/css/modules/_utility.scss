@@ -21,6 +21,15 @@
 }
 
 .u {
+    &--bg {
+        background-color: $primary !important;
+        color: $primary-white !important
+    }
+
+    &--alt-bg {
+        background-color: $tertiary !important;
+        color: $primary !important
+    }
     &-clear {
         @include clearfix;
     }
@@ -83,12 +92,20 @@
                 margin-bottom: 0.4rem;
             }
         }
+
+        &-small {
+            margin-bottom: 1rem !important;
+        }
     }
 
     &_toggle-display-off {
         @include respond(phone){
             display: none;
         }
+    }
+
+    &_pointer {
+        cursor: pointer;
     }
 
 }

@@ -1,5 +1,140 @@
 <template title="Materialsmine V2.0 - Dataset">
     <div>
-        <h1 class="header-nm relative"><i class="material-icons">dashboard</i> Datasets <i class="material-icons icon">keyboard_arrow_down</i></h1>
+        <h1 class="header-nm relative u_pointer" v-if="tabSelected" @click="tabSelected = !tabSelected"><i class="material-icons">dashboard</i> Datasets <i class="material-icons icon">keyboard_arrow_up</i></h1>
+        <h1 class="header-nm relative u_pointer" v-else @click="tabSelected = !tabSelected"><i class="material-icons">dashboard</i> Datasets <i class="material-icons icon">keyboard_arrow_down</i></h1>
+
+        <v-container grid-list-xl>
+            <v-layout row wrap>
+                <v-card style="width:100%;" class="u_margin-bottom-small">
+                    <v-card-title class="u--bg">
+                        <span class="text-xs-left">
+                            <v-btn fab small class="u--alt-bg" @click="toggleDatasetHide">
+                                <v-icon light v-if="!datasetHideSelector">expand_more</v-icon>
+                                <v-icon light v-else>expand_less</v-icon>
+                            </v-btn>
+                            <v-btn v-if="datasetsHeaderInfoIcon" fab small color="primary" class="white--text" @click="datasetInfoDialog()">
+                                <v-icon>info</v-icon>
+                            </v-btn>
+                            {{datasetsHeaderTitle}}
+                        </span>
+                        <v-spacer></v-spacer>
+                        <span class="text-xs-right" style="width:50%;" v-show="datasetSelected !== null">{{headerDOI}}</span>
+                    </v-card-title>
+                    <v-card-title v-show="!datasetHideSelector">
+                      <v-checkbox v-if="isLoggedIn()" v-model="showMineOnly" primary hide-details label="Show mine only"></v-checkbox>
+                      <v-spacer></v-spacer>
+                      <v-text-field v-model="datasetSearch" append-icon="search" label="Filter datasets" single-line hide-details></v-text-field>
+                    </v-card-title>
+                    <v-data-table v-show="!datasetHideSelector" :headers="datasetHeaders" :items="datasetsFiltered" :search="datasetSearch">
+                      <v-divider></v-divider>
+                      <template slot="items" slot-scope="props" height="300">
+                        <td class="text-xs-left" v-on:click="datasetClick(props.item)">{{props.item.seq}}</td>
+                        <td class="text-xs-left" v-on:click="datasetClick(props.item)">{{props.item.doi}}</td>
+                        <td class="text-xs-left" v-on:click="datasetClick(props.item)">{{props.item.title}}</td>
+                        <td class="text-xs-left" v-on:click="datasetClick(props.item)">{{props.item.datasetComment}}</td>
+                      </template>
+                      <v-alert slot="no-results" :value="true" color="error" icon="warning">
+                        Your search for "{{ datasetSearch }}" found no results.
+                      </v-alert>
+                    </v-data-table>
+                </v-card>
+
+                <!-- IF Fileset Selected -->
+                <v-card style="width:100%;" v-show="datasetSelected !== null" class="u_margin-bottom-small">
+                    <v-card-title class="filesets-header u--bg">
+                        <span style="width:50%;" class="text-xs-left">
+                            <v-btn fab small class="u--alt-bg" @click="toggleFilesetsHide">
+                                <v-icon light v-if="!filesetsHideSelector">expand_more</v-icon>
+                                <v-icon light v-else>expand_less</v-icon>
+                            </v-btn>
+                            {{filesetsHeaderTitle}}
+                        </span>
+                        <span class="text-xs-right" style="width:50%;" v-show="filesetSelected !== null">
+                            {{headerFilesetName}}
+                        </span>
+                    </v-card-title>
+                    <v-card-title v-show="!filesetsHideSelector">
+                        <v-spacer></v-spacer>
+                        <v-text-field v-model="filesetsSearch" append-icon="search" label="Filter filesets" single-line hide-details></v-text-field>
+                    </v-card-title>
+                    <v-data-table v-show="!filesetsHideSelector" :headers="filesetsHeaders" :items="filesetsList" :search="filesetsSearch">
+                        <v-divider></v-divider>
+                        <template slot="items" slot-scope="props" height="300">
+                            <td class="text-xs-left" v-on:click="filesetClick(props.item)">{{props.item.fileset}}</td>
+                        </template>
+                        <v-alert slot="no-results" :value="true" color="error" icon="warning">Your search for "{{ filesetsSearch }}" found no results.</v-alert>
+                    </v-data-table>
+                </v-card>
+
+                <!-- IF File Selected from FileSet Selection -->
+                <v-card style="width:100%;" v-show="filesetSelected !== null">
+                    <v-card-title class="files-header u--bg">
+                        <span style="width:40%;" class="text-xs-left">
+                            <v-btn fab small class="u--alt-bg" @click="toggleFilesHide">
+                            <v-icon light v-if="!filesHideSelector">expand_more</v-icon>
+                            <v-icon light v-else>expand_less</v-icon>
+                            </v-btn>
+                            {{filesHeaderTitle}}
+                        </span>
+                        <span class="text-xs-right" style="width:60%;" v-show="fileSelected !== null">
+                            {{headerFileName}}
+                        </span>
+                    </v-card-title>
+                    <v-card-title v-show="!filesHideSelector">
+                        <v-spacer></v-spacer>
+                        <v-text-field v-model="filesSearch" append-icon="search" label="Filter list of files" single-line hide-details></v-text-field>
+                    </v-card-title>
+                    <v-data-table v-show="!filesHideSelector" :headers="filesHeaders" :items="filesList" :search="filesSearch" v-model="filesDownloadSelected" select-all item-key="id" :pagination.sync="filespagination">
+                        <template slot="headers" slot-scope="props">
+                            <tr>
+                            <th style="text-align:left;" v-for="header in props.headers" :key="header.text" :class="['column sortable', filespagination.descending ? 'desc' : 'asc', header.value === filespagination.sortBy ? 'active' : '']" @click="filesChangeSort(header.value)">
+                                <v-icon small>arrow_upward</v-icon>
+                                {{ header.text }}
+                            </th>
+                            </tr>
+                        </template>
+                        <v-divider></v-divider>
+                        <template slot="items" slot-scope="props" height="300">
+                            <td class="text-xs-left"><a :href="getDownloadName(props.item)"><v-icon small>cloud_download</v-icon></a></td>
+                            <td class="text-xs-left" v-if="isFileViewable(props.item)" v-on:click="fileClick(props.item)"><v-icon small>visibility</v-icon></td>
+                            <td class="text-xs-left" v-else><span>&nbsp;</span><!--v-icon small>visibility_off</v-icon--></td>
+                            <td class="text-xs-left">{{getFileFilename(props.item)}}</td>
+                            <td class="text-xs-left">{{getFileDisplayType(props.item)}}</td>
+                            <td class="text-xs-left">{{props.item.id}}</td>
+                        </template>
+                        <v-alert slot="no-results" :value="true" color="error" icon="warning">
+                            Your search for "{{ filesSearch }}" found no results.
+                        </v-alert>
+                    </v-data-table>
+                </v-card>
+
+                <!-- Alert Box -->
+                <v-alert v-model="fileError" type="error" dismissible>{{fileErrorMsg}}</v-alert>
+
+                <!--XML Viewer Card-->
+                <v-card style="width:100%;" v-show="(fileSelected !== null && fileSelected.type === 'xmldata')">
+                    <v-container v-bind:style="{'display': formInView}" fluid justify-start fill-height>
+                        <v-layout row wrap align-start fill-height>
+                        <v-flex fill-height xs12 align-start justify-start>
+                            <div>
+                                <tree-view ref="tree" style="text-align: left;" :data="fileObj" :options="sampleTreeviewOptions()"></tree-view>
+                            </div>
+                        </v-flex>
+                        </v-layout>
+                    </v-container>
+                </v-card>
+
+                <!-- Image Viewer Card-->
+                <v-card style="width:100%;" v-show="(fileSelected !== null && fileSelected.type === 'blob')">
+                    <v-container v-bind:style="{'display': formInView}" fluid justify-start fill-height>
+                        <v-layout row wrap align-start fill-height>
+                            <v-flex fill-height xs12 align-start justify-start>
+                                <v-img v-if="fileImageDataUri !== null" ref="fileImageDisplay" :src="fileImageDataUri"></v-img>
+                            </v-flex>
+                        </v-layout>
+                    </v-container>
+                </v-card>
+            </v-layout>
+        </v-container>
     </div>
 </template>

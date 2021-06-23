@@ -66,7 +66,7 @@
                                 <a class="u--default-size nav_menu--handler" href="#">Upload</a>
                                 <div class="nav_menu--siblings">
                                     <span class="nav_menu--siblings-lists" @click="links('/nm#/XMLCONV')"><a href="/nm#/XMLCONV">Xml Based Upload</a></span>
-                                    <span class="nav_menu--siblings-lists" @click="links('#')"><a href="#">Direct Dataset Upload Form</a></span>
+                                    <span class="nav_menu--siblings-lists" @click="opnLinks()"><a @click="opnLinks()">Direct Dataset Upload Form</a></span>
                                 </div>
                             </div>
                         </li>
@@ -98,8 +98,9 @@
             </div>
             <div class="wrapper">
                 <div class="visualize_header">
-                    <h1 title="Visualization Headline" class="visualize_header-h1">Visualize Your Data</h1>
+                    <h1 title="Visualization Headline" class="visualize_header-h1">Visualize and Interact with Your Data</h1>
                 </div>
+                <!-- Old chart accordion -->
                 <!-- <div class="visualize_accordion" title="Visualization Container">
                     <div class="visualize_chart" :class="`charts-${index + 1}`" v-for="(result, index) in exploreChart" :key="index">
                         <div class="visualize_chart-content" :class="`charts_content-${index + 1}`" @click.prevent="linkChart(result.backup.uri)">
@@ -110,7 +111,7 @@
                 </div> -->
                 <div class="visualize_accordion" title="Visualization Container">
                     <div class="visualize_chart" :class="`charts-${index + 1}`" v-for="(chart, index) in gifChart" :key="index">
-                        <div class="visualize_chart-content" :class="`charts_content-${index + 1}`" @click.prevent="nav('gallery')">
+                        <div class="visualize_chart-content" :class="`charts_content-${index + 1}`" @click.prevent="openChart(chart.url)">
                             <img :src="chart.img" :alt="chart.title">
                             <span>{{chart.title}}</span>
                         </div>
@@ -121,7 +122,8 @@
                     <a href="/nm#/gallery" class="btn-text">Explore the chart gallery</a>
                 </div>
                 <div class="visualize_text">
-                    <p>Our charts platform leverages SPARQL and Vega-Lite to create custom, interactive charts from data in the MaterialsMine knowledge graph using an in-browser editor. Visit our Charts Gallery to see some examples, and contact us to get your data integrated into the knowledge graph</p>
+                    <!--<p>Our charts platform leverages SPARQL and Vega-Lite to create custom, interactive charts from data in the MaterialsMine knowledge graph using an in-browser editor. Visit our Charts Gallery to see some examples, and contact us to get your data integrated into the knowledge graph</p>-->
+                    <p>Our chart builder leverages <strong>SPARQL</strong> and <strong>Vega-Lite</strong> for rich, interactive charts of data from the MaterialsMine knowledge graph. Visit our Charts Gallery to view examples, and contact us to get your data integrated.</p>
                 </div>
             </div>
         </div>

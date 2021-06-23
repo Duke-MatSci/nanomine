@@ -25,7 +25,7 @@ import * as Util from './components/utils'
 const mmPages = [
   '/mm', '/mm/db', '/mm/tutorials', '/mm/binarization_homepage', '/mm/mcr_homepage', '/mm/XMLCONV', '/mm/contact', '/mm/mtools', '/mm/Otsu', '/mm/pixelunit50', '/mm/characterization_homepage',
   '/mm/Dynamfit', '/mm/DynamfitExample', '/mm/DynamfitExampleInput', '/mm/DynamfitResult', '/mm/pixelunit', '/mm/ChemProps', '/mm/ChemPropsAPIToken', '/mm/reconstruction_homepage', '/mm/IntelligentCharacterize',
-  '/mm/CorrelationCharacterize', '/mm/DescriptorCharacterize', '/mm/SDFCharacterize', '/mm/Niblack'
+  '/mm/CorrelationCharacterize', '/mm/DescriptorCharacterize', '/mm/SDFCharacterize', '/mm/Niblack', '/mm/teams'
 ];
 export default {
   name: 'App',

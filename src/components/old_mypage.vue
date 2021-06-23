@@ -559,7 +559,7 @@ import * as xmljs from 'xml-js'
 import * as _ from 'lodash'
 
 export default {
-  name: 'MyPage',
+  name: 'MyOldPage',
   data () {
     return {
       formInView: 'block',
