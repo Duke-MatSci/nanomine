@@ -24,7 +24,7 @@
           <span class="font-weight-black">Step 1:</span> Create a new dataset for the control sample and its related files,
             <span class="font-weight-black">then when uploading each additional sample be
             sure to select the same dataset</span> that was used for the control sample of the sample group.<br/>
-          <span class="font-weight-black">Step 2:</span> Click <a href="/nmstatic/xmlconv/master_template.zip" download>here</a> to download the
+          <span class="font-weight-black">Step 2:</span> Click <a href="https://github.com/Duke-MatSci/nanomine-schema/blob/master/xls-input-forms/master_template.xlsx?raw=true" download>here</a> to download the
           blank MS Excel template (137 kB).
           (Click <a href="/nmstatic/xmlconv/example.zip" download>here</a> to see an example, 263 kB)<br>
           <span class="font-weight-black">Step 3:</span> Fill in the parameters for all applicable cells in the Excel template file. Prepare the supplementary

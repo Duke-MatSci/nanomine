@@ -287,7 +287,7 @@ def specialIssueRest(sheet, dsInfo):
         if match(sheet.row_values(row)[0], 'Publication Year'):
             publicationYear = str(sheet.row_values(row)[1])
             if len(publicationYear.strip()) > 0:
-                dsInfo['publicationYear'] = publicationYear.strip()
+                dsInfo['publicationYear'] = publicationYear[:publicationYear.find('.')].strip()
         # volume
         if match(sheet.row_values(row)[0], 'Volume'):
             volume = str(sheet.row_values(row)[1])
