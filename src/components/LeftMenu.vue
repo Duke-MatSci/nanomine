@@ -4,15 +4,23 @@
       <v-list dense>
        <v-list-tile>&nbsp;
         </v-list-tile>
-        <v-list-tile  href="/home" v-on:click="clicked()">
-          <v-list-tile-title>Visualize</v-list-tile-title>
-          <v-icon>search</v-icon>
+        <v-list-tile  href="/nm#/mm/teams" v-on:click="clicked()">
+          <v-list-tile-title>About Us</v-list-tile-title>
+          <v-icon>people</v-icon>
         </v-list-tile>
         <v-list-tile  href="/home" v-on:click="clicked()">
-          <v-list-tile-title>Gallery</v-list-tile-title>
+          <v-list-tile-title>Browse Data</v-list-tile-title>
           <v-icon>search</v-icon>
         </v-list-tile>
-        <v-list-tile to="/mm/mtools" v-on:click="clicked()">
+        <v-list-tile  href="/wi/gallery" v-on:click="clicked()">
+          <v-list-tile-title>Explore Gallery</v-list-tile-title>
+          <v-icon>account_tree</v-icon>
+        </v-list-tile>
+        <v-list-tile  href="/wi/about?view=new&uri=http:%2F%2Fwww.w3.org%2Fns%2Fdcat%23Dataset" v-on:click="clicked()">
+          <v-list-tile-title>Curate Data</v-list-tile-title>
+          <v-icon>file_upload</v-icon>
+        </v-list-tile>
+        <v-list-tile to="/mm/pixelunit" v-on:click="clicked()">
           <v-list-tile-title>Module Tools</v-list-tile-title>
           <v-icon>insert_chart</v-icon>
         </v-list-tile>

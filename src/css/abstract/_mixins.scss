@@ -13,6 +13,14 @@
     transform: translate(-50%, -50%);
 }
 
+@mixin chartDisplayAdjust($i, $num) {
+    @if $i > $num {
+        visibility: hidden;
+        display: none;
+        opacity: 0;
+    }
+}
+
 
 
 @mixin respond($breakpoint) {
@@ -27,6 +35,9 @@
     }
     @if $breakpoint == laptop {
         @media only screen and (max-width: 90em) { @content };    //1440px
+    }
+    @if $breakpoint == big-desktop-chart-adjust {
+        @media only screen and (min-width: 112.5em) and (min-resolution: 250dpi) { @content };    //1800
     }
     @if $breakpoint == big-desktop {
         @media only screen and (min-width: 112.5em) { @content };    //1800

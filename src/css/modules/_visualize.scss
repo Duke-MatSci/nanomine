@@ -17,6 +17,12 @@
                 visibility: visible;
                 top: 10.5rem;
                 cursor: pointer;
+                @include respond(tab-port) {
+                    top: 12.5rem;
+                }
+                @include respond(phone) {
+                    top: 14.5rem;
+                }
                 & > i {
                     font-size: 6rem;
                     font-weight: 500;
@@ -31,7 +37,11 @@
             left: -0.5rem;
         }
         &-right {
-            right: 0rem;
+            right: 0;
+
+            @include respond(phone) {
+                right: -0.5rem;
+            }
         }
     }
 
@@ -93,17 +103,16 @@
 
             @include respond(laptop) {
                 width: 20.5rem;
-                height: 20rem;
+                height: 17.5rem;
             }
             
             @include respond(tab-port) {
                 width: 23rem;
-                height: 24rem;
             }
 
             @include respond(phone) {
-                width: 18rem;
-                height: 20rem;
+                width: 21rem;
+                height: 17.2rem;
             }
 
             & > img {
@@ -179,36 +188,24 @@
         -webkit-backface-visibility: hidden;
         backface-visibility: hidden;
 
+        /* @include respond(big-desktop-chart-adjust){
+            @include chartDisplayAdjust($i, 4);
+        } */
+
         @include respond(laptop) {
-            @if $i > 4 {
-                visibility: hidden;
-                display: none;
-                opacity: 0;
-            }
+            @include chartDisplayAdjust($i, 4);
         }
 
         @include respond(tab-land) {
-            @if $i > 3 {
-                visibility: hidden;
-                display: none;
-                opacity: 0;
-            }
+            @include chartDisplayAdjust($i, 3);
         }
 
         @include respond(tab-port) {
-            @if $i > 2 {
-                visibility: hidden;
-                display: none;
-                opacity: 0;
-            }
+            @include chartDisplayAdjust($i, 2);
         }
 
         @include respond(phone) {
-            @if $i > 1 {
-                visibility: hidden;
-                display: none;
-                opacity: 0;
-            }
+            @include chartDisplayAdjust($i, 1);
         }
     }
     .charts_content-#{$i}{
@@ -244,6 +241,17 @@
         } @else if $i == 5 {
             left: -100px;
         }
+
+        /* @include respond(big-desktop-chart-adjust){
+            @if $i == 1 or $i == 4 {
+                // transition: top .5s ease-out;
+                position: relative;
+                top: 30px;
+            } @else if $i == 2 or $i == 3 {
+                margin-top: 0px;
+                top: 0;
+            }
+        } */
 
         @include respond(laptop) {
             @if $i == 1 or $i == 4 {
@@ -283,11 +291,9 @@
 
         &:hover {
             position: relative;
-            top: -4rem;
-            animation-name: moveInBottom;
-            animation-duration: 1s;
-            animation-timing-function: ease-out;
-            animation-iteration-count: 1;
+            transform: scale(1.15);
+            z-index: 100 !important;
+            box-shadow: rgba($primary, 0.16) 0px 1px 4px, $primary-light 0px 0px 0px 3px;
         }
     }
 }

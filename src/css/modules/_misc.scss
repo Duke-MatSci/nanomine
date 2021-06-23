@@ -171,6 +171,12 @@
                     font-size: 1.4rem;
                 }
             }
+            &_adjust {
+                @include respond(phone){
+                    transform: rotate(-11deg) translateY(63px) !important;
+                    bottom: 10px !important;
+                }
+            }
         }
     }
 }
@@ -250,10 +256,20 @@
         box-shadow: 0 1px 3px rgba($primary-black, .12), 0 1px 2px rgba($primary-black, .24);
         margin-right: 3.2rem;
         padding: .5rem;
+        @include respond(phone){
+            margin-right: 1.2rem !important;
+        }
 
         & > img {
             height: 15rem; 
             width: auto;
+        }
+
+        & > i {
+            font-size: 10rem !important;
+            @include respond(phone){
+                font-size: 4rem !important;
+            }
         }
     }
 
@@ -263,16 +279,25 @@
         word-spacing: .2rem;
         line-height: 1.7;
         text-align: justify;
+        @include respond(phone){
+            font-size: 1rem !important;
+        }
     }
 
     &_title{
         font-weight: 500;
         font-size: 2rem;
         color: $primary;
+        @include respond(phone){
+            font-size: 1.2rem !important;
+        }
     }
 
     &_info {
         margin-top: 1rem;
+        @include respond(phone){
+            font-size: .7rem !important;
+        }
         &-left {
             color: $primary;
             padding: .2rem;
@@ -309,7 +334,7 @@
                     margin-right: 5rem;
                     margin-bottom: 5rem;
     
-                    @include respond(phone){
+                    @include respond(tab-port){
                         display: block;
                         margin-right: 0;
                     }

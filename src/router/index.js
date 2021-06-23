@@ -86,6 +86,7 @@ export default new Router({
     },
     {
       path: '/teams',
+      alias: '/mm/teams',
       name: 'TeamsPage',
       component: TeamsPage
     },
@@ -176,11 +177,7 @@ export default new Router({
     },
     {
       path: '/XMLCONV',
-      name: 'XMLCONV',
-      component: XMLCONV
-    },
-    {
-      path: '/mm/XMLCONV',
+      alias: '/mm/XMLCONV',
       name: 'XMLCONV',
       component: XMLCONV
     },
@@ -197,21 +194,13 @@ export default new Router({
     // },
     {
       path: '/mcr_homepage',
-      name: 'McrHomepage',
-      component: McrHomepage
-    },
-    {
-      path: '/mm/mcr_homepage',
+      alias: '/mm/mcr_homepage',
       name: 'McrHomepage',
       component: McrHomepage
     },
     {
       path: '/binarization_homepage',
-      name: 'BinarizeHomepage',
-      component: BinarizeHomepage
-    },
-    {
-      path: '/mm/binarization_homepage',
+      alias: '/mm/binarization_homepage',
       name: 'BinarizeHomepage',
       component: BinarizeHomepage
     },
@@ -227,11 +216,7 @@ export default new Router({
     },
     {
       path: '/Otsu',
-      name: 'Otsu',
-      component: Otsu
-    },
-    {
-      path: '/mm/Otsu',
+      alias: '/mm/Otsu',
       name: 'Otsu',
       component: Otsu
     },
@@ -242,81 +227,49 @@ export default new Router({
     },
     {
       path: '/characterization_homepage',
-      name: 'CharacterizeHomepage',
-      component: CharacterizeHomepage
-    },
-    {
-      path: '/mm/characterization_homepage',
+      alias: '/mm/characterization_homepage',
       name: 'CharacterizeHomepage',
       component: CharacterizeHomepage
     },
     {
       path: '/reconstruction_homepage',
-      name: 'ReconstructionHomepage',
-      component: ReconstructionHomepage
-    },
-    {
-      path: '/mm/reconstruction_homepage',
+      alias: '/mm/reconstruction_homepage',
       name: 'ReconstructionHomepage',
       component: ReconstructionHomepage
     },
     {
       path: '/IntelligentCharacterize',
-      name: 'IntelligentCharacterize',
-      component: IntelligentCharacterize
-    },
-    {
-      path: '/mm/IntelligentCharacterize',
+      alias: '/mm/IntelligentCharacterize',
       name: 'IntelligentCharacterize',
       component: IntelligentCharacterize
     },
     {
       path: '/Niblack',
-      name: 'Niblack',
-      component: Niblack
-    },
-    {
-      path: '/mm/Niblack',
+      alias: '/mm/Niblack',
       name: 'Niblack',
       component: Niblack
     },
     {
       path: '/pixelunit',
-      name: 'PixelUnit',
-      component: PixelUnit
-    },
-    {
-      path: '/mm/pixelunit',
+      alias: '/mm/pixelunit',
       name: 'PixelUnit',
       component: PixelUnit
     },
     {
       path: '/CorrelationCharacterize',
-      name: 'CorrelationCharacterize',
-      component: CorrelationCharacterize
-    },
-    {
-      path: '/mm/CorrelationCharacterize',
+      alias: '/mm/CorrelationCharacterize',
       name: 'CorrelationCharacterize',
       component: CorrelationCharacterize
     },
     {
       path: '/SDFCharacterize',
-      name: 'SDFCharacterize',
-      component: SDFCharacterize
-    },
-    {
-      path: '/mm/SDFCharacterize',
+      alias: '/mm/SDFCharacterize',
       name: 'SDFCharacterize',
       component: SDFCharacterize
     },
     {
       path: '/DescriptorCharacterize',
-      name: 'DescriptorCharacterize',
-      component: DescriptorCharacterize
-    },
-    {
-      path: '/mm/DescriptorCharacterize',
+      alias: '/mm/DescriptorCharacterize',
       name: 'DescriptorCharacterize',
       component: DescriptorCharacterize
     },
@@ -385,41 +338,25 @@ export default new Router({
     },
     {
       path: '/Dynamfit',
-      name: 'Dynamfit',
-      component: Dynamfit
-    },
-    {
-      path: '/mm/Dynamfit',
+      alias: '/mm/Dynamfit',
       name: 'Dynamfit',
       component: Dynamfit
     },
     {
       path: '/DynamfitExample',
-      name: 'DynamfitExample',
-      component: DynamfitExample
-    },
-    {
-      path: '/mm/DynamfitExample',
+      alias: '/mm/DynamfitExample',
       name: 'DynamfitExample',
       component: DynamfitExample
     },
     {
       path: '/DynamfitExampleInput',
-      name: 'DynamfitExampleInput',
-      component: DynamfitExampleInput
-    },
-    {
-      path: '/mm/DynamfitExampleInput',
+      alias: '/mm/DynamfitExampleInput',
       name: 'DynamfitExampleInput',
       component: DynamfitExampleInput
     },
     {
       path: '/DynamfitResult',
-      name: 'DynamfitResult',
-      component: DynamfitResult
-    },
-    {
-      path: '/mm/DynamfitResult',
+      alias: '/mm/DynamfitResult',
       name: 'DynamfitResult',
       component: DynamfitResult
     },
@@ -434,12 +371,8 @@ export default new Router({
       component: SmilesTest
     },
     {
-      path: '/mm/ChemProps',
-      name: 'ChemProps',
-      component: ChemProps
-    },
-    {
       path: '/ChemProps',
+      alias: '/mm/ChemProps',
       name: 'ChemProps',
       component: ChemProps
     },
@@ -450,11 +383,7 @@ export default new Router({
     },
     {
       path: '/ChemPropsAPIToken',
-      name: 'ChemPropsAPIToken',
-      component: ChemPropsAPIToken
-    },
-    {
-      path: '/mm/ChemPropsAPIToken',
+      alias: '/mm/ChemPropsAPIToken',
       name: 'ChemPropsAPIToken',
       component: ChemPropsAPIToken
     },
