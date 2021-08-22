@@ -17,7 +17,7 @@ import traceback
 import ssl
 import mime
 import requests
-
+from spectraHeaderParserForXML import spectraHeaderParserForXML
 
 
 def uploadFilesAndAdjustXMLImageRefs(jobDir, schemaId, xmlId, runCtx):
@@ -313,6 +313,7 @@ def conversion(jobDir, code_srcDir, xsdDir, templateName, user, datasetId):
         messages.append('exception: '  + str(traceback.format_exc()))
     if len(messages) > 0:
         return ('failure', messages)
+    
     # check #6: call the mf-vf conversion agent and add in the calculated mf/vf
     try:
         xmlName = jobDir + "/xml/" + ID + ".xml"
@@ -327,7 +328,18 @@ def conversion(jobDir, code_srcDir, xsdDir, templateName, user, datasetId):
         messages.append('exception: '  + str(traceback.format_exc()))
     if len(messages) > 0:
         return ('failure', messages)
-    # check #7: upload and check if the uploading is successful
+    # check #7: call the spectra data header parser
+    try:
+        xmlName = jobDir + "/xml/" + ID + ".xml"
+        shpxml = spectraHeaderParserForXML(xsdDir)
+        shpxml.runOnXML(xmlName, createCopy=False)
+    except:
+        messages.append('exception occurred during spectra header parser, please check header rows in your appended data files')
+        messages.append('exception: '  + str(traceback.format_exc()))
+    if len(messages) > 0:
+        return ('failure', messages)
+
+    # check #8: upload and check if the uploading is successful
     try:
 
         blobs = uploadFilesAndAdjustXMLImageRefs(jobDir, runCtx['schemaId'], ID, runCtx)
