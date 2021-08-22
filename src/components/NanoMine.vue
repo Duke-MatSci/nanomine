@@ -5,7 +5,7 @@
         <v-layout align-center>
           <div class="centralize-heading white-color">
             <h3 class="mainheading">MetaMine</h3>
-            <span>Material Informatics for Polymer MetaMaterial</span>
+            <span>Material Informatics for MetaMaterials</span>
           </div>
         </v-layout>
       </v-container>
@@ -14,30 +14,31 @@
       <h3 style="text-align:center; margin-top:1.8rem"><span>MetaMine is an open source, data resource for members of the metamaterial community with four key goals:</span></h3>
       <div class="card-container">
         <ul class="ul_adjust">
-          <li class="card card-float inline-display" @click="links('/nm#/mm/XMLCONV')">
+          <li class="card card-float inline-display" @click="opnLinks()">
             <div class="card-inside">
-              <div class="card-icon-container"><i class="material-icons card-icon">people_alt</i></div>
+              <div class="card-icon-container"><i class="material-icons card-icon card-icon-adjust">people_alt</i></div>
               <h2 class="card-heading">Curation</h2>
               <p>Provide a curation platform for sharing of data across the community in ways that are findable, accessible, interoperable and reusable (FAIR ww.force11.org)</p>
             </div>
           </li>
           <li class="card card-float inline-display" @click="links('/home')">
             <div class="card-inside">
-              <div class="card-icon-container"><i class="material-icons card-icon">tune</i></div>
+              <div class="card-icon-container"><i class="material-icons card-icon card-icon-adjust">tune</i></div>
               <h2 class="card-heading">Visualizing Data</h2>
               <p>Provide a platform for visualizing data, and mechanisms for visualization methods to be shared</p>
             </div>
           </li>
-          <li class="card card-float inline-display" @click="links('nm#/mm/mtools')">
+          <li class="card card-float inline-display" @click="links('/nm#/mm/pixelunit')">
             <div class="card-inside">
-              <div class="card-icon-container"><i class="material-icons card-icon">grain</i></div>
+              <div class="card-icon-container"><i class="material-icons card-icon card-icon-adjust">grain</i></div>
               <h2 class="card-heading">Module Tools</h2>
-              <p>Provide module tools that improve the quantification of nano filler dispersion and morphology as well as the ability to reconstruct those morphologies for subsequent modeling and analysis.</p>
+              <p>Provide module tools for analysis and characterization of mechanical metamaterials.</p>
             </div>
           </li>
-          <li class="card card-float inline-display" @click="links('http://reccr.chem.rpi.edu/polymerizer/index.html', false)">
+          <!--<li class="card card-float inline-display" @click="links('http://reccr.chem.rpi.edu/polymerizer/index.html', false)">-->
+          <li class="card card-float inline-display">
             <div class="card-inside">
-              <div class="card-icon-container"><i class="material-icons card-icon">widgets</i></div>
+              <div class="card-icon-container"><i class="material-icons card-icon card-icon-adjust">widgets</i></div>
               <h2 class="card-heading">Simulation Tools</h2>
               <p>Improve the ability to design metamaterial through simulation and design tools.</p>
             </div>
@@ -172,15 +173,6 @@ export default {
   .card-heading {
     font-size: 2rem;
     font-weight: 400;
-  }
-
-  .card-icon {
-    font-size: 7rem;
-  }
-
-  .card-icon-container {
-    margin-bottom: .9rem;
-    margin-top: 1rem;
   }
 
   .card-float {

@@ -49,6 +49,13 @@ export default {
     }, 1000)
   },
   methods: {
+    opnLinks(){
+      console.log("clicked and running")
+      if(this.isLoggedIn()){
+        return window.location = `${window.location.origin}/wi/about?view=new&uri=http:%2F%2Fwww.w3.org%2Fns%2Fdcat%23Dataset`;
+      }
+      return this.getLoginLink();
+    },
     links(args, options) {
       if (options) {
         window.location = `${window.location.origin}/wi/about?view=view&uri=http://semanticscience.org/resource/Chart`;

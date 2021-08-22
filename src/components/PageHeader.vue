@@ -12,14 +12,50 @@
       <v-spacer></v-spacer>
       <v-toolbar-items class="hidden-sm-and-down">
         <!--<v-btn flat to="/teams">Team</v-btn>-->
-        <v-btn flat @click="links('/home')">Visualize</v-btn>
-        <v-btn flat @click="links(null, true)">Gallery</v-btn>
-        <!-- Begin Test -->
+        <!--<v-btn flat @click="links('/home')">Visualize</v-btn>
+        <v-btn flat @click="links(null, true)">Gallery</v-btn>-->
+        <!-- Begin Test New Menu Options-->
+      <v-menu offset-y open-on-hover transition="slide-x-transition" bottom right>
+        <template v-slot:activator="{ on, attrs }">
+          <v-btn v-bind="attrs" v-on="on" flat>About</v-btn>
+        </template>
+        <v-list dense class="menu-vlist">
+          <!--<v-list-item v-for="(item, index) in listMenu" :key="index" router :to="item.link">-->
+          <v-list-item @click="links('/nm#/mm/teams')">
+            <v-list-item-action>
+                <v-list-item-title class="list_menu">About Us</v-list-item-title>
+            </v-list-item-action>
+          </v-list-item>
+          <v-list-item @click="links('/nm#/mm/tutorials')">
+            <v-list-item-action>
+                <v-list-item-title class="list_menu">Learn</v-list-item-title>
+            </v-list-item-action>
+          </v-list-item>
+        </v-list>
+      </v-menu>
+      <v-menu offset-y open-on-hover transition="slide-x-transition" bottom right>
+        <template v-slot:activator="{ on, attrs }">
+          <v-btn v-bind="attrs" v-on="on" flat>Visualize</v-btn>
+        </template>
+        <v-list dense class="menu-vlist">
+          <!--<v-list-item v-for="(item, index) in listMenu" :key="index" router :to="item.link">-->
+          <v-list-item @click="links('/home')">
+            <v-list-item-action>
+                <v-list-item-title class="list_menu">Browse Data</v-list-item-title>
+            </v-list-item-action>
+          </v-list-item>
+          <v-list-item @click="links(null, true)">
+            <v-list-item-action>
+                <v-list-item-title class="list_menu">Explore Gallery</v-list-item-title>
+            </v-list-item-action>
+          </v-list-item>
+        </v-list>
+      </v-menu>
       <v-menu offset-y open-on-hover transition="slide-x-transition" bottom right>
         <template v-slot:activator="{ on, attrs }">
           <v-btn v-bind="attrs" v-on="on" flat>Tools</v-btn>
         </template>
-        <v-list dense>
+        <v-list dense class="menu-vlist">
           <!--<v-list-item v-for="(item, index) in listMenu" :key="index" router :to="item.link">-->
           <v-list-item v-for="(item, index) in listMenu" :key="index" @click="links(item.link)">
             <v-list-item-action>
@@ -36,7 +72,7 @@
         <v-btn fab flat href="/home"><i class="material-icons nm-search-icon" v-if="searchEnabled()">search</i>
         </v-btn>-->
         <!--<v-btn v-if="isLoggedIn()" flat to="/mypage">Portal</v-btn>-->
-        <v-btn flat to="/mm/tutorials">Learn</v-btn>
+        <!--<v-btn flat to="/mm/tutorials">Learn</v-btn>-->
         <v-btn flat to="/mm/contact">Contact</v-btn>
         <!--<v-btn v-if="isLoggedIn()" flat to="/mypage">My Page</v-btn>-->
         <v-btn v-if="loginStatus" flat v-on:click="$store.commit('setLoginLogout')">
@@ -135,10 +171,10 @@ export default {
   data () {
     return {
       listMenu: [
-        {title: "MCR Tools", link:"/nm#/mm/mtools"},
-        {title: "ChemProps", link:"/nm#/mm/ChemProps"},
+        // {title: "MCR Tools", link:"/nm#/mm/mtools"},
+        // {title: "ChemProps", link:"/nm#/mm/ChemProps"},
         {title: "Geometry Explorer", link:"/nm#/mm/pixelunit"},
-        {title: "Geometry Sample Explorer", link:"/nm#/mm/pixelunit50"}
+        // {title: "Geometry Sample Explorer", link:"/nm#/mm/pixelunit50"}
       ]
     }
   }
@@ -193,5 +229,9 @@ export default {
 
   .bg-nm-info {
     background-color: #8CB2CA;
+  }
+  
+  .menu-vlist {
+    width: 15rem !important;
   }
 </style>

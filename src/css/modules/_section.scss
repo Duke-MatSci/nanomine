@@ -34,6 +34,10 @@
             font-size: 3rem;
             color: $primary-white;
 
+            @include respond(phone) {
+                top: 65% !important;
+            }
+
             & > span {
                 font-weight: 300;
             }

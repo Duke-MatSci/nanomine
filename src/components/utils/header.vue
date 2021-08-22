@@ -67,7 +67,7 @@
                                 <a class="u--default-size nav_menu--handler" href="#">Upload</a>
                                 <div class="nav_menu--siblings">
                                     <span class="nav_menu--siblings-lists" @click="links('/nm#/XMLCONV')"><a href="/nm#/XMLCONV">Xml-Based Upload</a></span>
-                                    <span class="nav_menu--siblings-lists" @click="links('#')"><a href="#">Direct Dataset Entry Form</a></span>
+                                    <span class="nav_menu--siblings-lists" @click="opnLinks()"><a @click="opnLinks()">Direct Dataset Entry Form</a></span>
                                 </div>
                             </div>
                         </li>

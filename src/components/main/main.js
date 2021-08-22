@@ -16,23 +16,28 @@ export default {
       gifChart: [
         {
           img: "/nmstatic/img/test/characterization-radial.gif",
-          title: "Characterization Radial Chart"
+          title: "Tooltips",
+          url: "https://materialsmine.org/wi/viz/16fb67daba5c4c39"
         },
         {
           img: "/nmstatic/img/test/crossfiltering.gif",
-          title: "Cross Filtering Chart"
+          title: "Crossfiltering",
+          url: "https://materialsmine.org/wi/viz/a66e1f86fe47ef6d"
         },
         {
           img: "/nmstatic/img/test/matrix-filler-combo.gif",
-          title: "Matrix Filler Combo Chart"
+          title: "Dynamic Selection",
+          url: "https://materialsmine.org/wi/viz/598daf9fd610e982"
         },
         {
           img: "/nmstatic/img/test/meta-analysis.gif",
-          title: "Meta Analysis Chart"
+          title: "Pan & Zoom",
+          url: "https://materialsmine.org/wi/viz/6675f5b909cf5059"
         },
         {
           img: "/nmstatic/img/test/tensile-chart.gif",
-          title: "Tensile Chart"
+          title: "Conditional Highlighting",
+          url: "https://materialsmine.org/wi/viz/fca5e763f0284284"
         },
       ]
     }
@@ -44,32 +49,39 @@ export default {
     nav(args) {
       return window.location = `/nm#/${args}`
     },
-    async restCallFn(){
-      try {
-        let result = await fetch(`${URL}/retrievecharts`, {
-          method: "GET",
-          headers: {
-            Accept: '*/*',
-            'Content-Type': 'application/json',
-            // Authorization: 'Bearer' + cookies
-          }
-        })
-        if(result.status == 201) {
-          result = await result.json()
-          result = result.charts.map((el) => {
-            el.backup = JSON.parse(el.backup)
-            return el
-          })
-          result.map((e,i) => {
-            if(i <= 4){
-              this.exploreChart.push(e);
-            }
-          })
-        }
-      } catch(err){
-        throw err;
-      }
+    openChart(arg) {
+      // Prod
+      return window.open(arg, '_blank')
+      // QA
+      // return window.location = "https://qa.materialsmine.org/wi/about?view=view&uri=http://semanticscience.org/resource/Chart"
     },
+    
+    // async restCallFn(){
+    //   try {
+    //     let result = await fetch(`${URL}/retrievecharts`, {
+    //       method: "GET",
+    //       headers: {
+    //         Accept: '*/*',
+    //         'Content-Type': 'application/json',
+    //         // Authorization: 'Bearer' + cookies
+    //       }
+    //     })
+    //     if(result.status == 201) {
+    //       result = await result.json()
+    //       result = result.charts.map((el) => {
+    //         el.backup = JSON.parse(el.backup)
+    //         return el
+    //       })
+    //       result.map((e,i) => {
+    //         if(i <= 4){
+    //           this.exploreChart.push(e);
+    //         }
+    //       })
+    //     }
+    //   } catch(err){
+    //     throw err;
+    //   }
+    // },
     pushChart(args){
       let movedChart, vm = this;
       if(window.matchMedia("(max-width: 40.5em)").matches){
@@ -102,7 +114,7 @@ export default {
     }
   },
   created() {
-    this.restCallFn();
+    // this.restCallFn();
     this.$store.commit('setAppHeaderInfo', undefined)
   }
 }
