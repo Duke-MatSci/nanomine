@@ -331,7 +331,7 @@ def conversion(jobDir, code_srcDir, xsdDir, templateName, user, datasetId):
     # check #7: call the spectra data header parser
     try:
         xmlName = jobDir + "/xml/" + ID + ".xml"
-        config = './nanomineParserConfig.json'
+        config = '{}/nanomineParserConfig.json'.format(code_srcDir)
         shpxml = spectraHeaderParserForXML(xsdDir, config)
         shpxml.runOnXML(xmlName, createCopy=False)
     except:
