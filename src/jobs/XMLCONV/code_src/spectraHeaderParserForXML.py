@@ -11,13 +11,16 @@ import logging
 # config logging
 
 class spectraHeaderParserForXML(object):
-    def __init__(self, xsdDir):
+    def __init__(self, xsdDir, config=None):
         '''
         :param xsdDir: path to the xsd schema file 
         :type xsdDir: str
         '''
         # load the parser
-        self.parser = spectraHeaderParser()
+        if config is None:
+            self.parser = spectraHeaderParser()
+        else:
+            self.parser = spectraHeaderParser(config)
         # load the xsdTraverse object for element sorting
         self.xsdt = xsdTraverse(xsdDir)
         # # (TODO) read spectra data parent element tags from xsd directly

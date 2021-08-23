@@ -6,9 +6,9 @@ import re
 
 class spectraHeaderParser(object):
     # init function
-    def __init__(self):
+    def __init__(self, config='./data_preparation/nanomineParserConfig.json'):
         # initialize subclasses
-        self.__loadSC__()
+        self.__loadSC__(config)
         pass
 
     # header separator function
@@ -139,7 +139,7 @@ class spectraHeaderParser(object):
         return self.xpathSubclassPairs[noBracketXpath]
 
     # preload subclasses
-    def __loadSC__(self, config='./data_preparation/nanomineParserConfig.json'):
+    def __loadSC__(self, config):
         '''
         Load standard/non-standard name pairs and load subclasses with those pairs
         '''
