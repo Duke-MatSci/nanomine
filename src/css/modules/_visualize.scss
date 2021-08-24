@@ -87,6 +87,24 @@
             margin-bottom: 1rem;
         }
     }
+
+    &_image {
+        &container {
+            margin-top: 2.5rem;
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: space-evenly;
+        }
+        &modifier {
+            margin-bottom: 2rem;
+        }
+        &error {
+            color: $error;
+            text-align: center;
+        }
+    }
+
     &_chart {
         display: none;
         visibility: hidden;

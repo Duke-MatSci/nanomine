@@ -3,6 +3,10 @@ const https = require('https')
 const jwt = require('jsonwebtoken');
 const axios = require('axios');
 const bycrypt = require('bcryptjs');
+const mongoose = require('mongoose');
+const mimetypes = require('mime-types');
+const s2a = require('stream-to-array')
+const ObjectId = require('mongodb').ObjectId
 const { validationResult } = require('express-validator/check');
 const User = require('../modules/mongo/schema/users');
 const Apiaccess = require('../modules/mongo/schema/accessApi');
@@ -187,4 +191,153 @@ const postToChemprops = async(req, res, receivedToken) => {
         }
     }
     apiResponse(res, 200, {data: 'Cannot verify user and or chemical name'})
+}
+
+const getImageFromMongo = (arg, logger) => {
+    return new Promise(function(resolve, reject) {
+        const options = {},  imageId = new URL(arg).searchParams.get('id')
+        if(imageId){
+            let dlStream = null
+            const bucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, options)
+            try {
+                dlStream = bucket.openDownloadStream(ObjectId.createFromHexString(imageId), {})
+                // dlStream.on('file', function (fileRec) {
+                //     const imageFileBuffer = fileRec.filename
+                //     const mt = mimetypes.lookup(imageFileBuffer)
+                //     const imageFile = imageFileBuffer.split('/').slice(-1)[0];
+                //     resolve({mt,imageFile})
+                // })
+                // dlStream.on('error', function (err) {
+                //     logger.debug('[getImageFromMongo Function]:: '+ err)
+                //     reject(null)
+                // })
+                s2a(dlStream, function (err, a) {
+                    if (err) {
+                      logger.error('[getImageFromMongo Function]:: '+ err)
+                      reject(err)
+                    } else {
+                      let buffers = a.map(a => Buffer.isBuffer(a) ? a : Buffer.from(a))
+                      resolve(Buffer.concat(buffers).toString('base64'))
+                    }
+                })
+            } catch (err) {
+                logger.error('[getImageFromMongo]:: '+ err)
+                reject(null)
+            }
+        }
+    })
+}
+
+// const getImageFromMongo = (arg, logger) => {
+//     logger.debug('[getImageFromMongo]:: Inside this function!!')
+//     const options = {}, imageId = new URL(arg).searchParams.get('id')
+//     if(imageId){
+//         let dlStream = null
+//         const bucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, options)
+//         try {
+//             dlStream = bucket.openDownloadStream(ObjectId.createFromHexString(imageId), {})
+//             // s2a(dlStream, function (err, a) {
+//             //     if (err) {
+//             //       let msg = func + ' - stream to array (id) returned error: ' + err
+//             //       logger.error(msg)
+//             //       reject(err)
+//             //     } else {
+//             //       let buffers = a.map(a => Buffer.isBuffer(a) ? a : Buffer.from(a))
+//             //       resolve(Buffer.concat(buffers))
+//             //     }
+//             // })
+//             dlStream.on('file', function (fileRec) {
+//                 const imageFileBuffer = fileRec.filename
+//                 const mt = mimetypes.lookup(imageFileBuffer)
+//                 const imageFile = imageFileBuffer.split('/').slice(-1)[0];
+//                 logger.info('[getImageFromMongo]:: image file processed successfully')
+//                 return ({mt,imageFile})
+//             })
+//             dlStream.on('error', function (err) {
+//                 logger.debug('[getImageFromMongo]:: '+ err)
+//                 return {}
+//             })
+//         } catch (err) {
+//             logger.debug('[getImageFromMongo]:: '+ err)
+//             return {}
+//         }
+//     } else {
+//         logger.debug('[getImageFromMongo]:: No Image ID passed or found')
+//         return {}
+//     }
+// }
+
+const processImageArray = async (arg,logger,res) => {
+    const retrievedImages = await arg.map(async (el) => {
+        const processImage = await getImageFromMongo(el.image, logger)
+        logger.info('Checker: ' + el.sample)
+        logger.info('Checker2: ' + processImage)
+        el.image = processImage
+        return el
+    })
+    Promise.all(retrievedImages).then(function(retrievedImage) {
+        logger.info('[processImageArray]:: All promises fulfilled')
+        return apiResponse(res, 200, {data: retrievedImage});
+    })
+}
+
+const filterSparqlResult = async(arg) => {
+    let retrievedImage = await arg.bindings.map((imgResult) => {
+        const imageObject = {}
+        Object.entries(imgResult)
+            .forEach(([field, value]) => imageObject[field] = value.value)
+        return imageObject
+    })
+    return retrievedImage;
+}
+
+const imageSparqlResult = async (res, arg, logger) => {
+    const retrievedImage = await filterSparqlResult(arg, logger)
+    return processImageArray(retrievedImage, logger, res)
+}
+
+exports.galleryParser = async(req,res) => {
+    const logger = req.logger;
+    const queryType = {}
+    queryType.defaultQuery = `
+        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+        PREFIX sio: <http://semanticscience.org/resource/>
+        PREFIX mm: <http://materialsmine.org/ns/>
+        PREFIX prov: <http://www.w3.org/ns/prov#>
+        SELECT * WHERE {
+            ?sample a mm:PolymerNanocomposite ;
+                    sio:isRepresentedBy ?image ;
+                    rdfs:label ?sample_label .
+            ?image a sio:Image .
+        }
+        LIMIT 10
+        `.trim()
+
+    queryType.imageQuery = `
+        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+        PREFIX sio: <http://semanticscience.org/resource/>
+        PREFIX prov: <http://www.w3.org/ns/prov#>
+        SELECT DISTINCT ?image WHERE {
+            ?image a sio:Image ;
+                prov:wasGeneratedBy [ a prov:Activity ; prov:used ?sample ] .
+            ?sample sio:hasComponentPart [ a [ rdfs:label "${req.body.query}" ] ]
+        }
+        LIMIT 10
+        `.trim()
+        
+    const SPARQL_ENDPOINT = req.env.nmLocalRestBase + '/sparql'
+    const request = {
+        method: 'post',
+        url: SPARQL_ENDPOINT,
+        data: `query=${encodeURIComponent(queryType[req.body.type])}`,
+        headers: {
+          'Accept': 'application/sparql-results+json',
+          'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+        },
+        withCredentials: true
+    }
+    const response = await axios(request)
+    if(response){ return imageSparqlResult(res, response.data.results, logger)   }
+    else { return apiResponse(res, 400, {mssg: "An error occurred"}) }
 }

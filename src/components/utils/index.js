@@ -5,5 +5,5 @@ import AppMixin from './mixins'
 export {
     Header,
     Footer,
-    AppMixin
+    AppMixin,
 }

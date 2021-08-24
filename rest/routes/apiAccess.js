@@ -37,4 +37,7 @@ router.post('/create', middleware.verifyToken, [
 ], 
 apiAccessController.createAccess)
 
+/** Image Gallery Parser */
+router.post('/image_gallery_parser', apiAccessController.galleryParser)
+
 module.exports = router;

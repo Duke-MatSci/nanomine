@@ -108,4 +108,26 @@
         cursor: pointer;
     }
 
+    &_centralize {
+        &_text {
+            text-align: center;
+        }
+        &_other {
+            margin: 0 auto;
+        }
+    }
+
+    &_searchimage {
+        &_form-group {
+            margin-bottom: 0 !important;
+            width: 55% !important;
+            @include respond(phone){
+                width: 80%;
+            }
+        }
+        &_input {
+            padding: .2rem !important;
+        }
+    }
+
 }
