@@ -62,6 +62,7 @@ import News from '@/components/pages/news/news.vue'
 import Tools from '@/components/pages/tools/tools.vue'
 import SimmTools from '@/components/pages/simm/simm.vue'
 import Upload from '@/components/pages/upload/upload.vue'
+import ImageSearch from '@/components/pages/imagesearch/imagesearch.vue'
 import Textview from '@/components/pages/textview/textview.vue'
 import Contactus from '@/components/pages/contact/contact.vue'
 
@@ -119,6 +120,11 @@ export default new Router({
       path: '/upload',
       name: 'Upload',
       component: Upload
+    },
+    {
+      path: '/imagegallery',
+      name: 'ImageSearch',
+      component: ImageSearch
     },
     {
       path: '/single',

@@ -1,0 +1,36 @@
+<template title="Materialsmine V2.0 - Teams Page">
+    <div class="section_teams">
+        <div class="wrapper">
+            <div class="research">
+                <div class="team_header">
+                    <h1 title="Research" class="visualize_header-h1 u_centralize_text">Image Gallery</h1>
+                </div>
+                <div class="teams_text">
+                    <form class="form u_margin-top-med" @submit.prevent="submitImageSearch">
+                        <div class="form__group u_searchimage_form-group u_centralize_other">
+                            <!-- <input type="text" class="form__input" placeholder="Project Name" name="name" id="name" onChange={val => this.setState({ name:val.target.value })}  required /> -->
+                            <input v-model.trim="query" type="text" class="form__input u_searchimage_input" placeholder='Search Images (e.g. "Silicon dioxide")' name="name" id="name" required />
+                            <label htmlFor="name" class="form__label u_searchimage_input">Search Images</label>
+                        </div>
+                        <div class="form__group u_centralize_text">
+                            <button type="submit" class="btn btn--primary u_centralize_others">Search Images</button>
+                        </div>
+                    </form>
+                    <div v-if="returnResponseError.responseError" class="visualize_imageerror u_margin-top-med">{{ returnResponseError.errorMessage }}</div>
+                    <div v-if="loading" class="u_margin-top-med">
+                        <app-loader :loading="loading" text="Loading Images" />
+                    </div>
+                    <div v-else class="visualize_imagecontainer" title="Curated Image Gallery">
+                        <div v-for="(el, index) in contentDisplay" :key="index">
+                            <div class="visualize_chart-content visualize_imagemodifier">
+                                <img :src="el.image" :alt="el.sample_label">
+                                <span>{{reduceDescription(el.sample_label)}}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <pagination v-if="returnFetchedImages.length >= basePage" :cpage="returnCurrentContentPage" :tpages="totalPages" :query="query" :length ="returnFetchedImages.length"/>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>

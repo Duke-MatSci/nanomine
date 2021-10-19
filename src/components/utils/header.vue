@@ -58,7 +58,8 @@
                                 <a class="u--default-size nav_menu--handler" href="#">Visualize</a>
                                 <div class="nav_menu--siblings">
                                     <span class="nav_menu--siblings-lists" @click="links('/home')"><a href="/home">Browse Data</a></span>
-                                    <span class="nav_menu--siblings-lists" @click="links(true,true)"><a href="/nm#/gallery">Explore Gallery</a></span>
+                                    <span class="nav_menu--siblings-lists" @click="links(true,true)"><a href="/nm#/gallery">Chart Gallery</a></span>
+                                    <span class="nav_menu--siblings-lists" @click="links('/nm#/imagegallery')"><a href="/nm#/imagegallery">Image Gallery</a></span>
                                 </div>
                             </div>
                         </li>

@@ -80,6 +80,7 @@
             border-top-right-radius: .5rem;
             display: none;
             visibility: hidden;
+            z-index: 10;
 
             @include respond(laptop){
                 top: 2rem;

@@ -108,4 +108,41 @@
         cursor: pointer;
     }
 
+    &_centralize {
+        &_text {
+            text-align: center;
+        }
+        &_other {
+            margin: 0 auto;
+        }
+    }
+
+    &_searchimage {
+        &_form-group {
+            margin-bottom: 0 !important;
+            width: 55% !important;
+            @include respond(phone){
+                width: 80%;
+            }
+        }
+        &_input {
+            padding: .2rem !important;
+        }
+    }
+
+    &_myprofile {
+        position: relative;
+        margin: .4rem;
+
+        &--container{
+            position: absolute;
+            left: 50%;
+            right: 50%;
+            transform: translate(-50%, -50%);
+        }
+        &--image {
+            height: 12rem;
+        }
+    }
+
 }

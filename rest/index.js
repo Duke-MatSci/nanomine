@@ -2525,7 +2525,9 @@ app.get('/blob', function (req, res) { // MDCS only supports get by id (since th
       }
       dlStream.on('file', function (fileRec) {
         let fn = fileRec.filename
+        logger.debug(fn)
         let mt = mimetypes.lookup(fn)
+        logger.debug(mt)
         res.set('Content-Type', mt)
         let fnc = fn.split('/')
         res.attachment(fnc.slice(-1)[0])

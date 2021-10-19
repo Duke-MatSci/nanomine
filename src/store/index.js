@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import imageSearch from './modules/imagesearch'
 
 Vue.use(Vuex)
 
@@ -257,6 +258,10 @@ const store = new Vuex.Store({
     isDialogBox: state => {
       return state.dialogBox
     }
+  },
+  modules: {
+    imageSearch
   }
 })
-export default store
+
+export default store;

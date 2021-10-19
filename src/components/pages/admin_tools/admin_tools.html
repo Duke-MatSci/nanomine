@@ -1,5 +1,6 @@
 <template title="Materialsmine V2.0 - Admin Tools">
     <div>
-        <h1 class="header-nm relative"><i class="material-icons">laptop</i> Administrative Tools <i class="material-icons icon">keyboard_arrow_down</i></h1>
+        <h1 class="header-nm relative u_pointer" v-if="tabSelected" @click="tabSelected = !tabSelected"><i class="material-icons">laptop</i> Administrative Tools <i class="material-icons icon">keyboard_arrow_up</i></h1>
+        <h1 class="header-nm relative u_pointer" v-else @click="tabSelected = !tabSelected"><i class="material-icons">laptop</i> Administrative Tools <i class="material-icons icon">keyboard_arrow_down</i></h1>
     </div>
 </template>
