@@ -1,71 +1,102 @@
 import Loader  from '../../utils/loading'
+import pagination  from '../../utils/pagination'
 export default {
   name: 'Upload',
   data: () => ({
     title: 'Image Gallery',
     loading: true,
     error: 'mmms',
-    gifChart: [
-      {
-        img: "/nmstatic/img/test/characterization-radial.gif",
-        title: "Tooltips",
-        url: "https://materialsmine.org/wi/viz/16fb67daba5c4c39"
-      },
-      {
-        img: "/nmstatic/img/test/crossfiltering.gif",
-        title: "Crossfiltering",
-        url: "https://materialsmine.org/wi/viz/a66e1f86fe47ef6d"
-      },
-      {
-        img: "/nmstatic/img/test/matrix-filler-combo.gif",
-        title: "Dynamic Selection",
-        url: "https://materialsmine.org/wi/viz/598daf9fd610e982"
-      },
-      {
-        img: "/nmstatic/img/test/meta-analysis.gif",
-        title: "Pan & Zoom",
-        url: "https://materialsmine.org/wi/viz/6675f5b909cf5059"
-      },
-      {
-        img: "/nmstatic/img/test/tensile-chart.gif",
-        title: "Conditional Highlighting",
-        url: "https://materialsmine.org/wi/viz/fca5e763f0284284"
-      },
-    ],
+    query: null,
+    contentDisplay: [],
+    limit: 0,
+    totalPages: 1,
+    basePage: 10,
+    perPage: 10,
   }),
   components: {
-    appLoader: Loader
+    appLoader: Loader,
+    pagination
   },
   methods: {
-    showBox () {
-      console.log(this.filter)
-    },
     reduceDescription(args) {
-      let arr, arrSplice, res
+      let arr, arrSplice
       arr = args.split(" ")
       arr.splice(15)
       arrSplice = arr.reduce((a,b) => `${a} ${b}`, "")
       return `${arrSplice}...`
     },
-    mmm(arg){
-      console.log(arg)
+    async showResults(){
+      this.perPage = this.returnCurrentContentPage * this.basePage
+      console.log('running show result',this.perPage)
+      const newArr = [];
+      await this.returnFetchedImages.map((e,i) => {
+        if(i+1 <= this.perPage && i+1 > this.perPage - this.basePage){
+          newArr.push(e)
+        }
+      })
+      console.log(newArr)
+      return this.contentDisplay = newArr;
+    },
+    async submitImageSearch(){
+      this.loading = true;
+      this.limit = 0;
+      const vm = this;
+      const actionPayload = {
+        limit: this.limit,
+        query: this.query,
+      }
+      try {
+        await vm.$store.commit('imageSearch/toggleCurrentContentPage', 1)
+        await vm.$store.dispatch('imageSearch/loadImages', actionPayload)
+      } catch(error){
+        vm.error = error || 'Something failed'
+      }
+      this.loading = false;
     }
   },
   computed: {
     returnFetchedImages(){
-      this.mmm(this.$store.getters['imageSearch/returnFetchedImages'])
       return this.$store.getters['imageSearch/returnFetchedImages']
     },
     returnResponseError(){
       return this.$store.getters['imageSearch/returnResponseError']
+    },
+    returnCurrentContentPage(){
+      return this.$store.getters['imageSearch/returnCurrentContentPage']
+    }
+  },
+  watch: {
+    returnFetchedImages(newValue, oldValue){
+      if(newValue.length > oldValue.length){
+        this.limit = this.limit += 1
+      }
+      if(newValue && newValue != oldValue){
+        const length = newValue.length;
+        let tpages = Math.round(length/this.basePage)
+        if(length <= this.basePage){
+          this.totalPages = 1;
+        } else if(length%this.basePage == 0){
+          this.totalPages = tpages;
+        } else if(length%this.basePage <= 4) {
+          this.totalPages = tpages + 1;
+        } else {
+          this.totalPages = tpages;
+        }
+      }
+      this.showResults()
+    },
+    returnCurrentContentPage(newValues, oldValues){
+      if(newValues != oldValues){
+        this.showResults()
+      }
     }
   },
   async mounted(){
     this.loading = true;
     const vm = this;
     const actionPayload = {
-      // limit: this.limit,
-      query: null
+      limit: this.limit,
+      query: this.query,
     }
     try {
       await vm.$store.dispatch('imageSearch/loadImages', actionPayload)

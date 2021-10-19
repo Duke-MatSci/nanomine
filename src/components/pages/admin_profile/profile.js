@@ -1,5 +1,5 @@
 export default {
-  name: 'AdminTools',
+  name: 'Profile',
   data: () => ({
     tabSelected: false,
   })

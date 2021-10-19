@@ -1,0 +1,69 @@
+<template title="Materialsmine V2.0 - Admin My Profile">
+    <div>
+        <h1 class="header-nm relative u_pointer" v-if="tabSelected" @click="tabSelected = !tabSelected"><i class="material-icons">manage_accounts</i> My Profile <i class="material-icons icon">keyboard_arrow_up</i></h1>
+        <h1 class="header-nm relative u_pointer" v-else @click="tabSelected = !tabSelected"><i class="material-icons">manage_accounts</i> My Profile <i class="material-icons icon">keyboard_arrow_down</i></h1>
+        <div class="section_teams" v-if="tabSelected">
+            <div class="wrapper">
+                <form class="form">
+                    <div class="grid grid_col-space-left grid_gap-small">
+                        <div>
+                            <div class="form__group">
+                                <!-- <input type="text" class="form__input" placeholder="Project Name" name="name" id="name" onChange={val => this.setState({ name:val.target.value })}  required /> -->
+                                <input type="text" class="form__input" placeholder="Full Name (Required)" name="fname" id="fname" required />
+                                <label htmlFor="fname" class="form__label">First Name</label>
+                            </div>
+                            <div class="form__group">
+                                <!-- <input type="text" class="form__input" placeholder="Project Name" name="name" id="name" onChange={val => this.setState({ name:val.target.value })}  required /> -->
+                                <input type="text" class="form__input" placeholder="Full Name (Required)" name="lname" id="lname" required />
+                                <label htmlFor="lname" class="form__label">Last Name</label>
+                            </div>
+                            <div class="form__group">
+                                <!-- <input type="text" class="form__input" placeholder="Project Name" name="name" id="name" onChange={val => this.setState({ name:val.target.value })}  required /> -->
+                                <input type="text" class="form__input" placeholder="Job Title" name="title" id="title" required />
+                                <label htmlFor="title" class="form__label">Job Title</label>
+                            </div>
+                        </div>
+                        <div class="u_myprofile">
+                            <div class="u_myprofile--container">
+                                <!-- <img class="u_myprofile--image" src="" title="Cate Brinson" /> -->
+                                <div class="form__group">
+                                    <!-- <input type="text" class="form__input" placeholder="Project Name" name="name" id="name" onChange={val => this.setState({ name:val.target.value })}  required /> -->
+                                    <input type="file" placeholder="Profile Image" name="profileimage" id="profileimage" />
+                                    <label htmlFor="profileimage" class="form__label">Upload Profile Image</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form__group">
+                        <!-- <input type="text" class="form__input" placeholder="Project Name" name="name" id="name" onChange={val => this.setState({ name:val.target.value })}  required /> -->
+                        <input type="email" class="form__input" placeholder="Email Address (Required)" name="email" id="email" required disabled/>
+                        <label htmlFor="email" class="form__label">Email Address</label>
+                    </div>
+                    <div class="form__group">
+                        <!-- <input type="text" class="form__input" placeholder="Project Name" name="name" id="name" onChange={val => this.setState({ name:val.target.value })}  required /> -->
+                        <textarea rows="4" class="form__input" placeholder="Short Bio (200 Char Max)" name="bio" id="bio" required></textarea>
+                        <label htmlFor="bio" class="form__label">Short Bio (200 Char Max)</label>
+                    </div>
+                    <div class="form__group">
+                        <!-- <input type="text" class="form__input" placeholder="Project Name" name="name" id="name" onChange={val => this.setState({ name:val.target.value })}  required /> -->
+                        <input type="text" class="form__input" placeholder="Web Address" name="web" id="web" />
+                        <label htmlFor="web" class="form__label">Web Address</label>
+                    </div>
+                    <div class="form__group">
+                        <!-- <input type="text" class="form__input" placeholder="Project Name" name="name" id="name" onChange={val => this.setState({ name:val.target.value })}  required /> -->
+                        <input type="text" class="form__input" placeholder="linkedIn" name="linkedin" id="linkedin" />
+                        <label htmlFor="linkedin" class="form__label">linkedIn</label>
+                    </div>
+                    <div class="form__group">
+                        <!-- <input type="text" class="form__input" placeholder="Project Name" name="name" id="name" onChange={val => this.setState({ name:val.target.value })}  required /> -->
+                        <input type="text" class="form__input" placeholder="Twitter Link" name="twitter" id="twitter" />
+                        <label htmlFor="twitter" class="form__label">Twitter Link</label>
+                    </div>
+                    <div class="form__group">
+                        <button class="btn btn--primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</template>

@@ -40,4 +40,7 @@ apiAccessController.createAccess)
 /** Image Gallery Parser */
 router.post('/image_gallery_parser', apiAccessController.galleryParser)
 
+/** Image Gallery API Parser For WHYIS */
+router.post('/imageapiparser', apiAccessController.microstructureImageApi)
+
 module.exports = router;

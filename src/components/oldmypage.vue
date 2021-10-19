@@ -1,7 +1,7 @@
 <template>
   <div class="main">
     <v-flex class="mypage">
-      <h1><i class="material-icons">ballot</i> Reports</h1>
+      <h1><i class="material-icons">account_circle</i> Reports</h1>
       <h1><i class="material-icons">laptop</i> Administrative Tools</h1>
       <h1><i class="material-icons">dashboard</i> Featured Tools + Resources</h1>
       <v-container grid-list-xl>

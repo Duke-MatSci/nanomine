@@ -5,7 +5,8 @@ const state = {
     filteredImage: [],
     responseError: false,
     errorMessage: null,
-    queryType: 'default'
+    queryType: 'default',
+    currentContentPage: 1
 }
 
 const getters =  {
@@ -16,6 +17,9 @@ const getters =  {
     returnResponseError(state){
         const { errorMessage, responseError } = state
         return {responseError, errorMessage}
+    },
+    returnCurrentContentPage(state){
+        return state.currentContentPage
     }
 }
 
@@ -26,11 +30,14 @@ const mutations = {
     },
     addFetchedImages(state, payload){
         state.fetchedImage = [...state.fetchedImage, ...payload]
-        console.log(state.fetchedImage[0])
         console.log(state.fetchedImage)
     },
     resetFetchedImage(state){
         state.fetchedImage = []
+    },
+    toggleCurrentContentPage(state,payload){
+        state.currentContentPage = payload
+        console.log('toggle current page running', state.currentContentPage)
     }
 }
 
@@ -44,10 +51,14 @@ const actions = {
             },
             body: JSON.stringify({
                 type: !payload.query ? 'defaultQuery':'imageQuery',
-                query: payload.query
+                query: payload.query,
+                limit: payload.limit
             })
         });
         const responseData = await response.json();
+        if(payload.query) {
+            context.commit('resetFetchedImage');
+        }
         if(response.status == 200){
             const processedData = responseData.data.map(el => {
                 const imageURI = processImage(el.image)
@@ -59,7 +70,7 @@ const actions = {
             const logError = {status: true, message: responseData.mssg}
             context.commit('setResponseError', logError)
         }
-    }
+    },
 }
 
 const processImage = (arg) => {

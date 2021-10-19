@@ -2,7 +2,7 @@
   <div class="main">
     <v-flex class="mypage">
       <v-container>
-        <app-report> </app-report>
+        <app-profile> </app-profile>
         <app-tool> </app-tool>
         <app-dataset> </app-dataset>
       </v-container>
@@ -28,14 +28,14 @@
 <script>
 import AdminDataset from './pages/admin_dataset/admin_dataset.vue'
 import AdminTools from './pages/admin_tools/admin_tools.vue'
-import Reports from './pages/reports/reports.vue'
+import Profile from './pages/admin_profile/profile.vue'
 import datas from './utils/admin_data'
 import dialogueBox from './utils/dialogue.vue'
 export default {
   name: "MyPage",
   data: () => ({...datas}),
   components: {
-    appReport: Reports,
+    appProfile: Profile,
     appTool: AdminTools,
     appDataset: AdminDataset,
     dialogueBox

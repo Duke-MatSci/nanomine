@@ -2,8 +2,7 @@
     <div>
         <h1 class="header-nm relative u_pointer" v-if="tabSelected" @click="tabSelected = !tabSelected"><i class="material-icons">dashboard</i> Datasets <i class="material-icons icon">keyboard_arrow_up</i></h1>
         <h1 class="header-nm relative u_pointer" v-else @click="tabSelected = !tabSelected"><i class="material-icons">dashboard</i> Datasets <i class="material-icons icon">keyboard_arrow_down</i></h1>
-
-        <v-container grid-list-xl>
+        <v-container grid-list-xl v-if="tabSelected">
             <v-layout row wrap>
                 <v-card style="width:100%;" class="u_margin-bottom-small">
                     <v-card-title class="u--bg">
