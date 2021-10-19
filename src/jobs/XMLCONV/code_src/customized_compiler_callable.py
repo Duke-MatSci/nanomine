@@ -156,6 +156,8 @@ def axisInfo(datadict):
 # a helper method to find a blurry match regardless of # signs between two
 # strings, testant is the standard expression
 def match(testee, testant):
+    if type(testee) != str or type(testant) != str:
+        return False
     if (testant.lower() == testee.lower()):
         return True
     elif (testant.lower() == testee.lower().split("#")[0].strip()):
