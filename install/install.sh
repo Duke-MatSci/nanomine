@@ -45,7 +45,7 @@ fi
 echo installing whyis ...
 #export WHYIS_FORK='bluedevil-oit'
 export WHYIS_FORK='tolulomo'
-export WHYIS_BRANCH='install'
+export WHYIS_BRANCH='master'
 ## bash < <(curl -skL https://raw.githubusercontent.com/tetherless-world/whyis/master/install.sh)
 curl -skL --output whyis-install.tmp https://raw.githubusercontent.com/${WHYIS_FORK}/whyis/${WHYIS_BRANCH}/install.sh
 if [[ $? -ne 0 ]]; then
