@@ -17,27 +17,27 @@ export default {
         {
           img: "/nmstatic/img/test/characterization-radial.gif",
           title: "Tooltips",
-          url: "https://materialsmine.org/wi/viz/16fb67daba5c4c39"
+          url: "https://materialsmine.org/wi/viz/1eeea9b71ebb10b7"
         },
         {
           img: "/nmstatic/img/test/crossfiltering.gif",
           title: "Crossfiltering",
-          url: "https://materialsmine.org/wi/viz/a66e1f86fe47ef6d"
+          url: "https://materialsmine.org/wi/viz/1dfd29527da82466"
         },
         {
           img: "/nmstatic/img/test/matrix-filler-combo.gif",
           title: "Dynamic Selection",
-          url: "https://materialsmine.org/wi/viz/598daf9fd610e982"
+          url: "https://materialsmine.org/wi/viz/24b40b6d992fa2f8"
         },
         {
           img: "/nmstatic/img/test/meta-analysis.gif",
           title: "Pan & Zoom",
-          url: "https://materialsmine.org/wi/viz/6675f5b909cf5059"
+          url: "https://materialsmine.org/wi/viz/2a774b46a67ff7a6"
         },
         {
           img: "/nmstatic/img/test/tensile-chart.gif",
           title: "Conditional Highlighting",
-          url: "https://materialsmine.org/wi/viz/fca5e763f0284284"
+          url: "https://materialsmine.org/wi/viz/6203fc0eade146e8"
         },
       ]
     }
