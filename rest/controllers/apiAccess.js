@@ -161,11 +161,11 @@ const postToChemprops = async(req, res, receivedToken) => {
                 userExists: decoded.userExists,
             }, req.env.nmAuthSecret);
             const polfil = req.query.polfil ? req.query.polfil : 'pol';
-            const ChemicalName = req.query.chemicalname;
+            const ChemicalName = req.query.chemicalname || req.query.ChemicalName;
             const nmId = req.params.nmId ? req.params.nmId : 'restNmId';
-            const Abbreviation = req.query.abbreviation;
-            const TradeName = req.query.tradename;
-            const SMILES = req.query.smiles;
+            const Abbreviation = req.query.abbreviation || req.query.Abbreviation;
+            const TradeName = req.query.tradename || req.query.TradeName;
+            const SMILES = req.query.smiles || req.query.SMILES;
             let httpsAgent = {
                 host: 'localhost',
                 port: '443',
