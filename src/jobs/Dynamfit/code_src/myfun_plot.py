@@ -33,7 +33,7 @@ def plotEandEE(jobDir, experimental_file, data_file, eleNum):
 	# 		ExptEpp.append(float(expt[2]))
 	# print(ExptFreq)
 	# read XPR file
-	logfreq = np.arange(min(ExptFreq),max(ExptFreq)+0.1,0.1)
+	logfreq = np.arange(min(np.log10(ExptFreq)),max(np.log10(ExptFreq))+0.1,0.1)
 	mm = np.loadtxt(os.path.join(jobDir, data_file))
 	NumOfDebyeTerms = eleNum + 1 # (Actual No. of Terms + 1) for eps_inf
 	TemPR = np.zeros((NumOfDebyeTerms,2))
