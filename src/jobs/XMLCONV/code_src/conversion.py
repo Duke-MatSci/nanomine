@@ -255,7 +255,7 @@ def conversion(jobDir, code_srcDir, xsdDir, templateName, user, datasetId):
                   dens_val = etree.SubElement(density, 'value')
                   dens_val.text = result['density']
                   dens_uni = etree.SubElement(density, 'unit')
-                  dens_uni.text = 'g/cm3'
+                  dens_uni.text = 'g/cm^3'
             ## testing - raise ValueError('Upload of input successful. returned id: ' + uploadId) ## for testing
             elif r.status_code == 404:
               logging.error('Matrix not found: ' + json.dumps(chemprops_data))
@@ -295,7 +295,7 @@ def conversion(jobDir, code_srcDir, xsdDir, templateName, user, datasetId):
                   dens_val = etree.SubElement(density, 'value')
                   dens_val.text = str(result['density'])
                   dens_uni = etree.SubElement(density, 'unit')
-                  dens_uni.text = 'g/cm3'
+                  dens_uni.text = 'g/cm^3'
             ## testing - raise ValueError('Upload of input successful. returned id: ' + uploadId) ## for testing
             elif r.status_code == 404:
               logging.error('Filler not found: ' + json.dumps(chemprops_data))
