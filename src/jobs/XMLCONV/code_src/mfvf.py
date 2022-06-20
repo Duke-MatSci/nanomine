@@ -81,15 +81,20 @@ class mfvfConvert:
                 chemical = filCon.findtext('.//ChemicalName')
                 if chemical is None or chemical == '':
                     raise LookupError('[Filler Error] Filler requires a non-empty chemical name.')
-                # density (required to be in the form of g/cm^3)
-                    # check whether value exists (TODO)
-                    # check whether unit is g/cm^3 (TODO)
-                    # need more layers here
+                # density
                 density = filCon.findtext('./Density/value') # one filler component should have only one density
                 if density is None:
                     density = self.getDensity(chemical)
                 else:
-                    density = float(density)
+                    unit = filCon.findtext('./Density/unit')
+                    if unit is None:
+                        raise LookupError('[Filler Error] Filler density unit is missing.')
+                    elif unit == 'g/cm^3':
+                        density = float(density)
+                    elif unit == 'kg/m^3':
+                        density = float(density)/1e3
+                    else:
+                        raise ValueError('[Filler Error] Filler density unit is unrecognized.')
                 # filler component composition (TODO allow mf FCC under vf FC and vf FCC under mf FC)
                 cc_ele = filCon.find('.//FillerComponentComposition/' + filMV)
                 if cc_ele is None:
@@ -132,7 +137,7 @@ class mfvfConvert:
                                             'absMass': absMassSum,
                                             filMV: filComp}
         # end of the loop thru the fillers
-        # (TODO) allow filMV to have both mass and volume (requires solving er yuan yi ci equations)
+        # (TODO) allow filMV to have both mass and volume (requires solving linear equations)
         if len(set(self.filMVs)) > 1:
             raise AssertionError('[Filler Error] The filler compositions are not consistent. Some use mass while others use volume.')
         self.filMV = self.freq(self.filMVs)[0] # get the most frequently occurred fraction type (TODO need to move to the top, we are now assuming the self.filVM (mass or volume) of the composite has a total value of 1, if one of the filVM is not consistent, we cannot use the same method to compute cc)
@@ -166,15 +171,20 @@ class mfvfConvert:
                 pass
             else:
                 raise AssertionError('[Matrix Error] The number of density provided does not match with the number of MatrixComponentComposition or Constituent.')
-            # density (required to be in the form of g/cm^3)
-                # check whether value exists (TODO)
-                # check whether unit is g/cm^3 (TODO)
-                # need more layers here
+            # density
             density = ele.findtext('.//Density/value')
             if density is None:
                 density = self.getDensity(chemical)
             else:
-                density = float(density)
+                unit = ele.findtext('.//Density/unit')
+                if unit is None:
+                    raise LookupError('[Matrix Error] Matrix density unit is missing.')
+                elif unit == 'g/cm^3':
+                    density = float(density)
+                elif unit == 'kg/m^3':
+                    density = float(density)/1e3
+                else:
+                    raise ValueError('[Matrix Error] Matrix density unit is unrecognized.')
             # matrix component composition
             cc_ele = ele.find('.//MatrixComponentComposition/Fraction')
             if cc_ele is None or self.matConsNum == 1:
@@ -342,16 +352,3 @@ class mfvfConvert:
         else:
             pdone = len(sone) - sone.find('.') - sone_zero
         return pdone
-
-## Test
-if __name__ == '__main__':
-    mvc = mfvfConvert('L159_S2_Lu_2006.xml-5b71eb00e74a1d7c81bec6c7-5b72e790e74a1d68f48b2daa.xml')
-    # mvc = mfvfConvert('L290_S20_Si_2006.xml')
-    # mvc = mfvfConvert('corner7.xml')
-    # mvc = mfvfConvert('L324_S1_Zhu_2017.xml')
-    mvc.run()
-    # import glob
-    # xmls = glob.glob("L129*.xml")
-    # for xml in xmls:
-    #     mvc = mfvfConvert(xml)
-    #     mvc.run()
