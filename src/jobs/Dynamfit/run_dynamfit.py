@@ -119,6 +119,8 @@ logging.info("calculation begin")
 if len(messages) == 0:
   try:
     logging.info("before a.out")
+    # a.out uses upper case .X_T filename
+    os.system(f"cd {jobDir}; cp ./{templateName}.X_T ./{templateName.upper()}.X_T")
     os.system("cd %s; ./a.out %s %s %s %s %s" %(jobDir, templateName, weight, std, nEle, dt))
     logging.info("after a.out")
     plotEandEE(jobDir, templateName+'.X_T', templateName+'.XPR', int(nEle))

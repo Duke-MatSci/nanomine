@@ -9,26 +9,31 @@ import os
 
 def plotEandEE(jobDir, experimental_file, data_file, eleNum):
 	inc = 0.1
-	logfreq = np.arange(-4, 6.1, 0.1)
+	# logfreq = np.arange(-4, 6.1, 0.1)
 	TS1 = 0.75;           # beta relaxation, s_beta, Tau shift. For tau <= 1, Shift multiplier along x direction. 1 is no shift
 	DS1 = 10;             # beta relaxation, M_beta, DeltaEpsilonShiftFor tau <= 1, Shift multiplier along y direction. 1 is no shift
 	TS2 = 0.02;           # Alpha relaxation, s_alpha, For tau > 1, Shift multiplier along x direction. 1 is no shift
 	DS2 = 10;             # Alpha relaxation, M_alpha, For tau > 1, Shift multiplier along y direction. 1 is no shift
 	CES = -0.28+0.6;      # ConstEpsilonShift
 	# read input file
-	ExptFreq = []
-	ExptEp = []
-	ExptEpp = []
-	with open(os.path.join(jobDir, experimental_file), 'r') as f:
-		rows = f.read().split("\n")
-		for row in rows:
-			expt = row.split()
-			print(expt)
-			ExptFreq.append(np.log10(float(expt[0])))
-			ExptEp.append(float(expt[1]))
-			ExptEpp.append(float(expt[2]))
-	print(ExptFreq)
+	# ExptFreq = []
+	# ExptEp = []
+	# ExptEpp = []
+	ExptData = np.loadtxt(os.path.join(jobDir, experimental_file))
+	ExptFreq = np.log10(ExptData[:,0])
+	ExptEp = ExptData[:,1]
+	ExptEpp = ExptData[:,2]
+	# with open(os.path.join(jobDir, experimental_file), 'r') as f:
+	# 	rows = f.read().split("\n")
+	# 	for row in rows:
+	# 		expt = row.split()
+	# 		print(expt)
+	# 		ExptFreq.append(np.log10(float(expt[0])))
+	# 		ExptEp.append(float(expt[1]))
+	# 		ExptEpp.append(float(expt[2]))
+	# print(ExptFreq)
 	# read XPR file
+	logfreq = np.arange(min(ExptFreq),max(ExptFreq)+0.1,0.1)
 	mm = np.loadtxt(os.path.join(jobDir, data_file))
 	NumOfDebyeTerms = eleNum + 1 # (Actual No. of Terms + 1) for eps_inf
 	TemPR = np.zeros((NumOfDebyeTerms,2))

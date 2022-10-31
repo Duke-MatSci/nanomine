@@ -194,7 +194,7 @@ def sortSequence(myList, myClassName, myXSDtree):
              'Additive':'ProcessingParameterAdditive',# temp;prevTemp
              'Solvent':'SolventType',# temp;prevTemp
              'Mixing':'ProcessingParameterMixing',# temp;prevTemp
-             'Extrusion':'ExtrusionType',# temp;prevTemp not necessary
+             'Extrusion':'UsedType',# temp;prevTemp
              'SingleScrewExtrusion':'SingleScrewExtrusionExtruderType',# Extrusion;prevExtrsHeader
              'TwinScrewExtrusion':'TwinScrewExtrusionExtruderType',# Extrusion;prevExtrsHeader
              'ExtrusionHeatingZone':'HeatingZoneType',# ExtrsHZ;'ExtrusionHeatingZone'
@@ -257,7 +257,8 @@ def sortSequence(myList, myClassName, myXSDtree):
              'Imagefile':'ImageFileType', # temp;prevTemp
              'Dimension':'ImageSizeType', # Dimension;'Dimension'
              'Sample experimental info':'SampleType', # temp;prevTemp
-             'PolymerNanocomposite':'Root' # DATA;'PolymerNanocomposite'
+             'PolymerNanocomposite':'Root', # DATA;'PolymerNanocomposite'
+             'Annealing':'GeneralConditionsType'# temp;prevTemp
              } # {myClassName:xsdComplexTypeName}
     myTypeName = CTmap[myClassName] #example: MatrixType
     myTypeTree = myXSDtree.findall(".//*[@name='" + myTypeName + "']")
@@ -1037,18 +1038,14 @@ def sheetProcTypeHelper(sheet, row, temp_list, stop_sign, myXSDtree, jobDir):
                'Drying/Evaporation': 'Drying-Evaporation',
                'Centrifugation': 'Centrifugation', 'Molding': 'Molding',
                'Deposition and Coating': 'DepositionAndCoating',
-               'Self-Assembly': 'Self-Assembly', 'Other': 'Other'}
+               'Self-Assembly': 'Self-Assembly', 'Other': 'Other',
+               'Annealing': 'Annealing'}
     temp = [] # always save temp if not empty when we find a match in headers
     irow = row + 1 # the row we are looking at
     prevTemp = '' # save the previous cleanTemp
     MoldingInfo = [] # a list for Molding/MoldingInfo
-    # a dict for identifying single and twin screw extrusion
-    extrsHeaders = {'Extrusion - Single screw extrusion': 'SingleScrewExtrusion',
-                    'Extrusion - Twin screw extrusion': 'TwinScrewExtrusion'}
-    prevExtrsHeader = ''
     Extrusion = [] # a list for Extrusion/SingleScrewExtrusion and Extrusion/TwinScrewExtrusion
-    ExtrsHZ = [] # a list for Extrusion/.../HeatingZone
-    ExtrsOP = [] # a list for Extrusion/.../Output
+    prevExtrsHeader = ''
     # start scanning
     # as long as we are not 1) out of bound 2) find a stop_sign
     while (irow < sheet.nrows and
@@ -1066,21 +1063,7 @@ def sheetProcTypeHelper(sheet, row, temp_list, stop_sign, myXSDtree, jobDir):
                 # initialize
                 MoldingInfo = []
             # special case Extrusion, need to save the list from bottom up
-            # (HeatingZone and Output => Extrusion => dict with
-            # SingleScrewExtrusion or TwinScrewExtrusion as key) into temp
             if prevTemp == 'Extrusion':
-                if len(ExtrsHZ) > 0:
-                    # sort ExtrsHZ
-                    ExtrsHZ = sortSequence(ExtrsHZ, 'ExtrusionHeatingZone', myXSDtree)
-                    Extrusion.append({'HeatingZone': ExtrsHZ})
-                    # initialize
-                    ExtrsHZ = []
-                if len(ExtrsOP) > 0:
-                    # sort ExtrsOP
-                    ExtrsOP = sortSequence(ExtrsOP, 'ExtrusionOutput', myXSDtree)
-                    Extrusion.append({'Output': ExtrsOP})
-                    # initialize
-                    ExtrsOP = []
                 if len(Extrusion) > 0:
                     # sort Extrusion
                     Extrusion = sortSequence(Extrusion, prevExtrsHeader, myXSDtree)
@@ -1095,615 +1078,108 @@ def sheetProcTypeHelper(sheet, row, temp_list, stop_sign, myXSDtree, jobDir):
                 temp_list.append({'ChooseParameter': {headers[prevTemp]: temp}})
                 temp = []
             prevTemp = cleanTemp # update prevTemp
-    # Aging (skipped)
     # Other
         # Description
         if match(sheet.cell_value(irow, 0), 'Other - description'):
             # temp = insert('Description', sheet.cell_value(irow, 1), temp)
             temp = str(sheet.cell_value(irow, 1)).strip() # DANGEROUS! type(temp) changes here
-    # Additive
-        # Description
-        if match(sheet.cell_value(irow, 0), 'Additive - description'):
-            temp = insert('Description', sheet.cell_value(irow, 1), temp)
-        # Additive
-        if match(sheet.cell_value(irow, 0), 'Additive - additive'):
-            temp = insert('Additive', sheet.cell_value(irow, 1), temp)
-        # Amount
-        if match(sheet.cell_value(irow, 0), 'Additive - amount'):
-            amount = collections.OrderedDict()
-            if type(sheet.row_values(irow)[1]) == float or len(sheet.row_values(irow)[1]) > 0:
-                amount = addKVU('Amount', '', sheet.row_values(irow)[1],
-                                sheet.row_values(irow)[2], '', '', '', '', amount, jobDir, myXSDtree)
-            else:
-                amount = addKVU('Amount', sheet.row_values(irow)[1], '',
-                                sheet.row_values(irow)[2], '', '', '', '', amount, jobDir, myXSDtree)
-            if len(amount) > 0:
-                temp.append(amount)
-
-    # Cooling
-        # Description
-        if match(sheet.cell_value(irow, 0), 'Cooling - description'):
-            temp = insert('Description', sheet.cell_value(irow, 1), temp)
-        # Temperature
-        if match(sheet.cell_value(irow, 0), 'Cooling - temperature'):
-            temperature = collections.OrderedDict()
-            # if type(sheet.row_values(irow)[1]) == float or len(sheet.row_values(irow)[1]) > 0:
-            temperature = addKVU('Temperature', '', sheet.row_values(irow)[1],
-                                 sheet.row_values(irow)[2], '', '', '', '', temperature, jobDir, myXSDtree)
-            # else:
-            #     temperature = addKVU('Temperature', sheet.row_values(irow)[1], '',
-            #                          sheet.row_values(irow)[2], '', '', '', '', temperature)
-            if len(temperature) > 0:
-                temp.append(temperature)
-        # Time
-        if match(sheet.cell_value(irow, 0), 'Cooling - time'):
-            time = collections.OrderedDict()
-            # if type(sheet.row_values(irow)[1]) == float or len(sheet.row_values(irow)[1]) > 0:
-            time = addKVU('Time', '', sheet.row_values(irow)[1],
-                          sheet.row_values(irow)[2], '', '', '', '', time, jobDir, myXSDtree)
-            # else:
-            #     time = addKVU('Time', sheet.row_values(irow)[1], '',
-            #                   sheet.row_values(irow)[2], '', '', '', '', time)
-            if len(time) > 0:
-                temp.append(time)
-        # Pressure
-        if match(sheet.cell_value(irow, 0), 'Cooling - pressure'):
-            pressure = collections.OrderedDict()
-            # if type(sheet.row_values(irow)[1]) == float or len(sheet.row_values(irow)[1]) > 0:
-            pressure = addKVU('Pressure', '', sheet.row_values(irow)[1],
-                              sheet.row_values(irow)[2], '', '', '', '', pressure, jobDir, myXSDtree)
-            # else:
-            #     pressure = addKVU('Pressure', sheet.row_values(irow)[1], '',
-            #                       sheet.row_values(irow)[2], '', '', '', '', pressure)
-            if len(pressure) > 0:
-                temp.append(pressure)
-        # AmbientCondition
-        if match(sheet.cell_value(irow, 0), 'Cooling - ambient condition'):
-            temp = insert('AmbientCondition', sheet.cell_value(irow, 1), temp)
-
     # Solvent
         # SolventName
-        if match(sheet.cell_value(irow, 0), 'Solvent - solvent amount'):
+        if match(sheet.cell_value(irow, 0), 'Solvent - solvent name'):
             temp = insert('SolventName', sheet.cell_value(irow, 1), temp)
-            amount = collections.OrderedDict()
-            amount = addKVU('SolventAmount', '', sheet.row_values(irow)[2],
-                            sheet.row_values(irow)[3], '', '', '', '', amount, jobDir, myXSDtree)
-            if len(amount) > 0:
-                temp.append(amount)
 
     # Mixing
-        # Description
-        if match(sheet.cell_value(irow, 0), 'Mixing - description'):
-            temp = insert('Description', sheet.cell_value(irow, 1), temp)
-        # Mixer
-        if match(sheet.cell_value(irow, 0), 'Mixing - mixer'):
-            temp = insert('Mixer', sheet.cell_value(irow, 1), temp)
         # MixingMethod
         if match(sheet.cell_value(irow, 0), 'Mixing - method'):
             temp = insert('MixingMethod', sheet.cell_value(irow, 1), temp)
-        # ChemicalUsed
-        if match(sheet.cell_value(irow, 0), 'Mixing - chemical used'):
-            myRow = sheet.row_values(irow)
-            che = collections.OrderedDict()
-            che = addKVU('ChemicalUsed', myRow[1], myRow[2], myRow[3], '', '', '', '', che, jobDir, myXSDtree)
-            if len(che) > 0:
-                temp.append(che)
-        # RPM
-        if match(sheet.cell_value(irow, 0), 'Mixing - RPM'):
-            rpm = collections.OrderedDict()
-            if type(sheet.row_values(irow)[1]) == float or len(sheet.row_values(irow)[1]) > 0:
-                rpm = addKVU('RPM', '', sheet.row_values(irow)[1],
-                             sheet.row_values(irow)[2], '', '', '', '', rpm, jobDir, myXSDtree)
-            else:
-                rpm = addKVU('RPM', sheet.row_values(irow)[1], '',
-                             sheet.row_values(irow)[2], '', '', '', '', rpm, jobDir, myXSDtree)
-            if len(rpm) > 0:
-                temp.append(rpm)
-        # Time
-        if match(sheet.cell_value(irow, 0), 'Mixing - time'):
-            time = collections.OrderedDict()
-            # if type(sheet.row_values(irow)[1]) == float or len(sheet.row_values(irow)[1]) > 0:
-            time = addKVU('Time', '', sheet.row_values(irow)[1],
-                          sheet.row_values(irow)[2], '', '', '', '', time, jobDir, myXSDtree)
-            # else:
-            #     time = addKVU('Time', sheet.row_values(irow)[1], '',
-            #                   sheet.row_values(irow)[2], '', '', '', '', time)
-            if len(time) > 0:
-                temp.append(time)
-        # Temperature
-        if match(sheet.cell_value(irow, 0), 'Mixing - temperature'):
-            temperature = collections.OrderedDict()
-            # if type(sheet.row_values(irow)[1]) == float or len(sheet.row_values(irow)[1]) > 0:
-            temperature = addKVU('Temperature', '', sheet.row_values(irow)[1],
-                                 sheet.row_values(irow)[2], '', '', '', '', temperature, jobDir, myXSDtree)
-            # else:
-            #     temperature = addKVU('Temperature', sheet.row_values(irow)[1], '',
-            #                          sheet.row_values(irow)[2], '', '', '', '', temperature)
-            if len(temperature) > 0:
-                temp.append(temperature)
 
     # Extrusion
-        # first detect the correct header, single or twin
-        if matchList(sheet.cell_value(irow, 0), extrsHeaders.keys()):
-            # only if all the Extrusion lists are empty we update the prevExtrsHeader
-            if len(Extrusion) == 0 and len(ExtrsHZ) == 0 and len(ExtrsOP) == 0:
-                prevExtrsHeader = extrsHeaders[sheet.cell_value(irow, 0)]
-        # Single(Twin)ScrewExtrusion/Extruder
-        if match(sheet.cell_value(irow, 0), 'Extruder'):
+        # Used or not
+        if match(sheet.cell_value(irow, 0), 'Extrusion - type'):
+            if sheet.cell_value(irow, 1) == 'single-screw extrusion':
+                prevExtrsHeader = 'SingleScrewExtrusion'
+            elif sheet.cell_value(irow, 1) == 'twin-screw extrusion':
+                prevExtrsHeader = 'TwinScrewExtrusion'
             Extrusion = insert('Extruder', sheet.cell_value(irow, 1), Extrusion)
-        # Single(Twin)ScrewExtrusion/ResidenceTime
-        if match(sheet.cell_value(irow, 0), 'Residence time'):
-            time = collections.OrderedDict()
-            # if type(sheet.row_values(irow)[1]) == float or len(sheet.row_values(irow)[1]) > 0:
-            time = addKVU('ResidenceTime', '', sheet.row_values(irow)[1],
-                          sheet.row_values(irow)[2], '', '', '', '', time, jobDir, myXSDtree)
-            # else:
-            #     time = addKVU('ResidenceTime', sheet.row_values(irow)[1], '',
-            #                   sheet.row_values(irow)[2], '', '', '', '', time)
-            if len(time) > 0:
-                Extrusion.append(time)
-        # Single(Twin)ScrewExtrusion/ExtrusionTemperature
-        if match(sheet.cell_value(irow, 0), 'Extrusion temperature'):
+        # Extrusion temperature
+        if match(sheet.cell_value(irow, 0), 'Extrusion - temperature'):
             temperature = collections.OrderedDict()
-            # if type(sheet.row_values(irow)[1]) == float or len(sheet.row_values(irow)[1]) > 0:
             temperature = addKVU('ExtrusionTemperature', '', sheet.row_values(irow)[1],
                                  sheet.row_values(irow)[2], '', '', '', '', temperature, jobDir, myXSDtree)
-            # else:
-            #     temperature = addKVU('ExtrusionTemperature', sheet.row_values(irow)[1], '',
-            #                          sheet.row_values(irow)[2], '', '', '', '', temperature)
             if len(temperature) > 0:
                 Extrusion.append(temperature)
-        # Single(Twin)ScrewExtrusion/ScrewDiameter
-        if match(sheet.cell_value(irow, 0), 'Screw diameter'):
-            diameter = collections.OrderedDict()
-            if type(sheet.row_values(irow)[1]) == float or len(sheet.row_values(irow)[1]) > 0:
-                diameter = addKVU('ScrewDiameter', '', sheet.row_values(irow)[1],
-                                  sheet.row_values(irow)[2], '', '', '', '', diameter, jobDir, myXSDtree)
-            else:
-                diameter = addKVU('ScrewDiameter', sheet.row_values(irow)[1], '',
-                                  sheet.row_values(irow)[2], '', '', '', '', diameter, jobDir, myXSDtree)
-            if len(diameter) > 0:
-                Extrusion.append(diameter)
-        # Single(Twin)ScrewExtrusion/D_L_ratio
-        if match(sheet.cell_value(irow, 0), 'D/L ratio'):
-            Extrusion = insert('D_L_ratio', sheet.cell_value(irow, 1), Extrusion)
-        # Single(Twin)ScrewExtrusion/FlightWidth
-        if match(sheet.cell_value(irow, 0), 'Flight width'):
-            width = collections.OrderedDict()
-            if type(sheet.row_values(irow)[1]) == float or len(sheet.row_values(irow)[1]) > 0:
-                width = addKVU('FlightWidth', '', sheet.row_values(irow)[1],
-                               sheet.row_values(irow)[2], '', '', '', '', width, jobDir, myXSDtree)
-            else:
-                width = addKVU('FlightWidth', sheet.row_values(irow)[1], '',
-                                sheet.row_values(irow)[2], '', '', '', '', width, jobDir, myXSDtree)
-            if len(width) > 0:
-                Extrusion.append(width)
-        # Single(Twin)ScrewExtrusion/HeatingZone
-            # heatingZoneNumber
-        if match(sheet.cell_value(irow, 0), 'Heating zone - number'):
-            if type(sheet.cell_value(irow, 1)) == float:
-                if int(sheet.cell_value(irow, 1)) == sheet.cell_value(irow, 1):
-                    ExtrsHZ = insert('heatingZoneNumber', int(sheet.cell_value(irow, 1)), ExtrsHZ)
-                else:
-                    ExtrsHZ = insert('heatingZoneNumber', sheet.cell_value(irow, 1), ExtrsHZ)
-            else: # if user enters non-number value, save it and raise error
-                ExtrsHZ = insert('heatingZoneNumber', sheet.cell_value(irow, 1), ExtrsHZ)
-            # lengthOfHeatingZone
-        if match(sheet.cell_value(irow, 0), 'Heating zone - length'):
-            length = collections.OrderedDict()
-            if type(sheet.row_values(irow)[1]) == float or len(sheet.row_values(irow)[1]) > 0:
-                length = addKVU('lengthOfHeatingZone', '', sheet.row_values(irow)[1],
-                                sheet.row_values(irow)[2], '', '', '', '', length, jobDir, myXSDtree)
-            else:
-                length = addKVU('lengthOfHeatingZone', sheet.row_values(irow)[1], '',
-                                sheet.row_values(irow)[2], '', '', '', '', length, jobDir, myXSDtree)
-            if len(length) > 0:
-                ExtrsHZ.append(length)
-            # barrelTemperature
-        if match(sheet.cell_value(irow, 0), 'Heating zone - barrel temperature'):
-            temperature = collections.OrderedDict()
-            # if type(sheet.row_values(irow)[1]) == float or len(sheet.row_values(irow)[1]) > 0:
-            temperature = addKVU('barrelTemperature', '', sheet.row_values(irow)[1],
-                                 sheet.row_values(irow)[2], '', '', '', '', temperature, jobDir, myXSDtree)
-            # else:
-            #     temperature = addKVU('barrelTemperature', sheet.row_values(irow)[1], '',
-            #                          sheet.row_values(irow)[2], '', '', '', '', temperature)
-            if len(temperature) > 0:
-                ExtrsHZ.append(temperature)
-        # Single(Twin)ScrewExtrusion/DieDiameter
-        if match(sheet.cell_value(irow, 0), 'Die diameter'):
-            diameter = collections.OrderedDict()
-            if type(sheet.row_values(irow)[1]) == float or len(sheet.row_values(irow)[1]) > 0:
-                diameter = addKVU('DieDiameter', '', sheet.row_values(irow)[1],
-                                  sheet.row_values(irow)[2], '', '', '', '', diameter, jobDir, myXSDtree)
-            else:
-                diameter = addKVU('DieDiameter', sheet.row_values(irow)[1], '',
-                                  sheet.row_values(irow)[2], '', '', '', '', diameter, jobDir, myXSDtree)
-            if len(diameter) > 0:
-                Extrusion.append(diameter)
-        # Single(Twin)ScrewExtrusion/Output
-            # MeltTemperature
-        if match(sheet.cell_value(irow, 0), 'Output - Melt temperature'):
-            melt = collections.OrderedDict()
-            # if type(sheet.row_values(irow)[1]) == float or len(sheet.row_values(irow)[1]) > 0:
-            melt = addKVU('MeltTemperature', '', sheet.row_values(irow)[1],
-                          sheet.row_values(irow)[2], '', '', '', '', melt, jobDir, myXSDtree)
-            # else:
-            #     melt = addKVU('MeltTemperature', sheet.row_values(irow)[1], '',
-            #                   sheet.row_values(irow)[2], '', '', '', '', melt)
-            if len(melt) > 0:
-                ExtrsOP.append(melt)
-            # PressureAtDie
-        if match(sheet.cell_value(irow, 0), 'Output - Pressure at die'):
-            pressure = collections.OrderedDict()
-            # if type(sheet.row_values(irow)[1]) == float or len(sheet.row_values(irow)[1]) > 0:
-            pressure = addKVU('PressureAtDie', '', sheet.row_values(irow)[1],
-                              sheet.row_values(irow)[2], '', '', '', '', pressure, jobDir, myXSDtree)
-            # else:
-            #     pressure = addKVU('PressureAtDie', sheet.row_values(irow)[1], '',
-            #                       sheet.row_values(irow)[2], '', '', '', '', pressure)
-            if len(pressure) > 0:
-                ExtrsOP.append(pressure)
-            # Torque
-        if match(sheet.cell_value(irow, 0), 'Output - Torque'):
-            torque = collections.OrderedDict()
-            if type(sheet.row_values(irow)[1]) == float or len(sheet.row_values(irow)[1]) > 0:
-                torque = addKVU('Torque', '', sheet.row_values(irow)[1],
-                                sheet.row_values(irow)[2], '', '', '', '', torque, jobDir, myXSDtree)
-            else:
-                torque = addKVU('Torque', sheet.row_values(irow)[1], '',
-                                sheet.row_values(irow)[2], '', '', '', '', torque, jobDir, myXSDtree)
-            if len(torque) > 0:
-                ExtrsOP.append(torque)
-            # Amperage
-        if match(sheet.cell_value(irow, 0), 'Output - Amperage'):
-            amperage = collections.OrderedDict()
-            if type(sheet.row_values(irow)[1]) == float or len(sheet.row_values(irow)[1]) > 0:
-                amperage = addKVU('Amperage', '', sheet.row_values(irow)[1],
-                                  sheet.row_values(irow)[2], '', '', '', '', amperage, jobDir, myXSDtree)
-            else:
-                amperage = addKVU('Amperage', sheet.row_values(irow)[1], '',
-                                  sheet.row_values(irow)[2], '', '', '', '', amperage, jobDir, myXSDtree)
-            if len(amperage) > 0:
-                ExtrsOP.append(amperage)
-            # Voltage
-        if match(sheet.cell_value(irow, 0), 'Output - Voltage'):
-            voltage = collections.OrderedDict()
-            if type(sheet.row_values(irow)[1]) == float or len(sheet.row_values(irow)[1]) > 0:
-                voltage = addKVU('Voltage', '', sheet.row_values(irow)[1],
-                                 sheet.row_values(irow)[2], '', '', '', '', voltage, jobDir, myXSDtree)
-            else:
-                voltage = addKVU('Voltage', sheet.row_values(irow)[1], '',
-                                 sheet.row_values(irow)[2], '', '', '', '', voltage, jobDir, myXSDtree)
-            if len(voltage) > 0:
-                ExtrsOP.append(voltage)
-            # Power
-        if match(sheet.cell_value(irow, 0), 'Output - Power'):
-            power = collections.OrderedDict()
-            if type(sheet.row_values(irow)[1]) == float or len(sheet.row_values(irow)[1]) > 0:
-                power = addKVU('Power', '', sheet.row_values(irow)[1],
-                               sheet.row_values(irow)[2], '', '', '', '', power, jobDir, myXSDtree)
-            else:
-                power = addKVU('Power', sheet.row_values(irow)[1], '',
-                               sheet.row_values(irow)[2], '', '', '', '', power, jobDir, myXSDtree)
-            if len(power) > 0:
-                ExtrsOP.append(power)
-            # ThroughPut
-        if match(sheet.cell_value(irow, 0), 'Output - Throughput'):
-            throughput = collections.OrderedDict()
-            if type(sheet.row_values(irow)[1]) == float or len(sheet.row_values(irow)[1]) > 0:
-                throughput = addKVU('ThroughPut', '', sheet.row_values(irow)[1],
-                                     sheet.row_values(irow)[2], '', '', '', '', throughput, jobDir, myXSDtree)
-            else:
-                throughput = addKVU('ThroughPut', sheet.row_values(irow)[1], '',
-                                     sheet.row_values(irow)[2], '', '', '', '', throughput, jobDir, myXSDtree)
-            if len(throughput) > 0:
-                ExtrsOP.append(throughput)
-            # ResidenceTime
-        if match(sheet.cell_value(irow, 0), 'Output - Residence time'):
-            residence = collections.OrderedDict()
-            # if type(sheet.row_values(irow)[1]) == float or len(sheet.row_values(irow)[1]) > 0:
-            residence = addKVU('ResidenceTime', '', sheet.row_values(irow)[1],
-                               sheet.row_values(irow)[2], '', '', '', '', residence, jobDir, myXSDtree)
-            # else:
-            #     residence = addKVU('ResidenceTime', sheet.row_values(irow)[1], '',
-            #                        sheet.row_values(irow)[2], '', '', '', '', residence)
-            if len(residence) > 0:
-                ExtrsOP.append(residence)
-        # SingleScrewExtrusion/InnerBarrelDiameter
-        if match(sheet.cell_value(irow, 0), 'Inner barrel diameter'):
-            diameter = collections.OrderedDict()
-            if type(sheet.row_values(irow)[1]) == float or len(sheet.row_values(irow)[1]) > 0:
-                diameter = addKVU('InnerBarrelDiameter', '', sheet.row_values(irow)[1],
-                                  sheet.row_values(irow)[2], '', '', '', '', diameter, jobDir, myXSDtree)
-            else:
-                diameter = addKVU('InnerBarrelDiameter', sheet.row_values(irow)[1], '',
-                                  sheet.row_values(irow)[2], '', '', '', '', diameter, jobDir, myXSDtree)
-            if len(diameter) > 0:
-                Extrusion.append(diameter)
-        # SingleScrewExtrusion/ScrewLength
-        if match(sheet.cell_value(irow, 0), 'Screw length'):
-            length = collections.OrderedDict()
-            if type(sheet.row_values(irow)[1]) == float or len(sheet.row_values(irow)[1]) > 0:
-                length = addKVU('ScrewLength', '', sheet.row_values(irow)[1],
-                                sheet.row_values(irow)[2], '', '', '', '', length, jobDir, myXSDtree)
-            else:
-                length = addKVU('ScrewLength', sheet.row_values(irow)[1], '',
-                                sheet.row_values(irow)[2], '', '', '', '', length, jobDir, myXSDtree)
-            if len(length) > 0:
-                Extrusion.append(length)
-        # SingleScrewExtrusion/RadialFlightClearance
-        if match(sheet.cell_value(irow, 0), 'Radial flight clearance'):
-            clearance = collections.OrderedDict()
-            if type(sheet.row_values(irow)[1]) == float or len(sheet.row_values(irow)[1]) > 0:
-                clearance = addKVU('RadialFlightClearance', '', sheet.row_values(irow)[1],
-                                   sheet.row_values(irow)[2], '', '', '', '', clearance, jobDir, myXSDtree)
-            else:
-                clearance = addKVU('RadialFlightClearance', sheet.row_values(irow)[1], '',
-                                sheet.row_values(irow)[2], '', '', '', '', clearance, jobDir, myXSDtree)
-            if len(clearance) > 0:
-                Extrusion.append(clearance)
-        # SingleScrewExtrusion/ChannelDepth
-        if match(sheet.cell_value(irow, 0), 'Channel depth'):
-            depth = collections.OrderedDict()
-            if type(sheet.row_values(irow)[1]) == float or len(sheet.row_values(irow)[1]) > 0:
-                depth = addKVU('ChannelDepth', '', sheet.row_values(irow)[1],
-                               sheet.row_values(irow)[2], '', '', '', '', depth, jobDir, myXSDtree)
-            else:
-                depth = addKVU('ChannelDepth', sheet.row_values(irow)[1], '',
-                               sheet.row_values(irow)[2], '', '', '', '', depth, jobDir, myXSDtree)
-            if len(depth) > 0:
-                Extrusion.append(depth)
-        # SingleScrewExtrusion/ScrewLead
-        if match(sheet.cell_value(irow, 0), 'Screw lead'):
-            lead = collections.OrderedDict()
-            if type(sheet.row_values(irow)[1]) == float or len(sheet.row_values(irow)[1]) > 0:
-                lead = addKVU('ScrewLead', '', sheet.row_values(irow)[1],
-                              sheet.row_values(irow)[2], '', '', '', '', lead, jobDir, myXSDtree)
-            else:
-                lead = addKVU('ScrewLead', sheet.row_values(irow)[1], '',
-                              sheet.row_values(irow)[2], '', '', '', '', lead, jobDir, myXSDtree)
-            if len(lead) > 0:
-                Extrusion.append(lead)
-        # SingleScrewExtrusion/NumberOfChannelsPerScrew
-        if match(sheet.cell_value(irow, 0), 'Number of channels per screw'):
-            if type(sheet.cell_value(irow, 1)) == float:
-                if int(sheet.cell_value(irow, 1)) == sheet.cell_value(irow, 1):
-                    Extrusion = insert('NumberOfChannelsPerScrew', int(sheet.cell_value(irow, 1)), Extrusion)
-                else:
-                    Extrusion = insert('NumberOfChannelsPerScrew', sheet.cell_value(irow, 1), Extrusion)
-            else: # if user enters non-number value, save it and raise error
-                Extrusion = insert('NumberOfChannelsPerScrew', sheet.cell_value(irow, 1), Extrusion)
-        # SingleScrewExtrusion/ScrewChannelWidth
-        if match(sheet.cell_value(irow, 0), 'Screw channel width'):
-            width = collections.OrderedDict()
-            if type(sheet.row_values(irow)[1]) == float or len(sheet.row_values(irow)[1]) > 0:
-                width = addKVU('ScrewChannelWidth', '', sheet.row_values(irow)[1],
-                               sheet.row_values(irow)[2], '', '', '', '', width, jobDir, myXSDtree)
-            else:
-                width = addKVU('ScrewChannelWidth', sheet.row_values(irow)[1], '',
-                               sheet.row_values(irow)[2], '', '', '', '', width, jobDir, myXSDtree)
-            if len(width) > 0:
-                Extrusion.append(width)
-        # Single(Twin)ScrewExtrusion/RotationSpeed
-        if match(sheet.cell_value(irow, 0), 'Rotation speed'):
-            speed = collections.OrderedDict()
-            if type(sheet.row_values(irow)[1]) == float or len(sheet.row_values(irow)[1]) > 0:
-                speed = addKVU('RotationSpeed', '', sheet.row_values(irow)[1],
-                               sheet.row_values(irow)[2], '', '', '', '', speed, jobDir, myXSDtree)
-            else:
-                speed = addKVU('RotationSpeed', sheet.row_values(irow)[1], '',
-                               sheet.row_values(irow)[2], '', '', '', '', speed, jobDir, myXSDtree)
-            if len(speed) > 0:
-                Extrusion.append(speed)
-        # SingleScrewExtrusion/BarrelTemperature (maybe redundant)
-        if match(sheet.cell_value(irow, 0), 'Barrel Temperature'):
-            temperature = collections.OrderedDict()
-            # if type(sheet.row_values(irow)[1]) == float or len(sheet.row_values(irow)[1]) > 0:
-            temperature = addKVU('BarrelTemperature', '', sheet.row_values(irow)[1],
-                                 sheet.row_values(irow)[2], '', '', '', '', temperature, jobDir, myXSDtree)
-            # else:
-            #     temperature = addKVU('BarrelTemperature', sheet.row_values(irow)[1], '',
-            #                          sheet.row_values(irow)[2], '', '', '', '', temperature)
-            if len(temperature) > 0:
-                Extrusion.append(temperature)
-        # TwinScrewExtrusion/RotationMode
-        if match(sheet.cell_value(irow, 0), 'Rotation mode'):
-            Extrusion = insert('RotationMode', sheet.cell_value(irow, 1), Extrusion)
-        # TwinScrewExtrusion/ScrewChannelDiameter
-        if match(sheet.cell_value(irow, 0), 'Screw channel diameter'):
-            diameter = collections.OrderedDict()
-            if type(sheet.row_values(irow)[1]) == float or len(sheet.row_values(irow)[1]) > 0:
-                diameter = addKVU('ScrewChannelDiameter', '', sheet.row_values(irow)[1],
-                                  sheet.row_values(irow)[2], '', '', '', '', diameter, jobDir, myXSDtree)
-            else:
-                diameter = addKVU('ScrewChannelDiameter', sheet.row_values(irow)[1], '',
-                                  sheet.row_values(irow)[2], '', '', '', '', diameter, jobDir, myXSDtree)
-            if len(diameter) > 0:
-                Extrusion.append(diameter)
-        # TwinScrewExtrusion/FlightClearance
-        if match(sheet.cell_value(irow, 0), 'Flight clearance'):
-            clearance = collections.OrderedDict()
-            if type(sheet.row_values(irow)[1]) == float or len(sheet.row_values(irow)[1]) > 0:
-                clearance = addKVU('FlightClearance', '', sheet.row_values(irow)[1],
-                                   sheet.row_values(irow)[2], '', '', '', '', clearance, jobDir, myXSDtree)
-            else:
-                clearance = addKVU('FlightClearance', sheet.row_values(irow)[1], '',
-                                   sheet.row_values(irow)[2], '', '', '', '', clearance, jobDir, myXSDtree)
-            if len(clearance) > 0:
-                Extrusion.append(clearance)
 
-    # Heating
+    # Heating (Use Heating - purpose to update prevTemp)
+        # Purpose (Molding/Drying-Evaporation/Curing/Annealing, if not available then Heating)
+        if match(sheet.cell_value(irow, 0), 'Heating - purpose'):
+            purpose = sheet.cell_value(irow, 1)
+            if purpose == 'molding':
+                prevTemp = 'Molding'
+            elif purpose == 'drying/evaporation':
+                prevTemp = 'Drying/Evaporation'
+            elif purpose == 'curing':
+                prevTemp = 'Curing'
+            elif purpose == 'annealing':
+                prevTemp = 'Annealing'
         # Description
-        if match(sheet.cell_value(irow, 0), 'Heating - description'):
+        if prevTemp != 'Molding' and match(sheet.cell_value(irow, 0), 'Heating - description'):
             temp = insert('Description', sheet.cell_value(irow, 1), temp)
         # Temperature
-        if match(sheet.cell_value(irow, 0), 'Heating - temperature'):
+        if prevTemp != 'Molding' and match(sheet.cell_value(irow, 0), 'Heating - temperature'):
             temperature = collections.OrderedDict()
-            # if type(sheet.row_values(irow)[1]) == float or len(sheet.row_values(irow)[1]) > 0:
             temperature = addKVU('Temperature', '', sheet.row_values(irow)[1],
                                  sheet.row_values(irow)[2], '', '', '', '', temperature, jobDir, myXSDtree)
-            # else:
-            #     temperature = addKVU('Temperature', sheet.row_values(irow)[1], '',
-            #                          sheet.row_values(irow)[2], '', '', '', '', temperature)
             if len(temperature) > 0:
                 temp.append(temperature)
         # Time
-        if match(sheet.cell_value(irow, 0), 'Heating - time'):
+        if prevTemp != 'Molding' and match(sheet.cell_value(irow, 0), 'Heating - time'):
             time = collections.OrderedDict()
-            # if type(sheet.row_values(irow)[1]) == float or len(sheet.row_values(irow)[1]) > 0:
             time = addKVU('Time', '', sheet.row_values(irow)[1],
                           sheet.row_values(irow)[2], '', '', '', '', time, jobDir, myXSDtree)
-            # else:
-            #     time = addKVU('Time', sheet.row_values(irow)[1], '',
-            #                   sheet.row_values(irow)[2], '', '', '', '', time)
             if len(time) > 0:
                 temp.append(time)
         # Pressure
-        if match(sheet.cell_value(irow, 0), 'Heating - pressure'):
+        if prevTemp != 'Molding' and match(sheet.cell_value(irow, 0), 'Heating - pressure'):
             pressure = collections.OrderedDict()
-            # if type(sheet.row_values(irow)[1]) == float or len(sheet.row_values(irow)[1]) > 0:
             pressure = addKVU('Pressure', '', sheet.row_values(irow)[1],
                               sheet.row_values(irow)[2], '', '', '', '', pressure, jobDir, myXSDtree)
-            # else:
-            #     pressure = addKVU('Pressure', sheet.row_values(irow)[1], '',
-            #                       sheet.row_values(irow)[2], '', '', '', '', pressure)
             if len(pressure) > 0:
                 temp.append(pressure)
         # AmbientCondition
-        if match(sheet.cell_value(irow, 0), 'Heating - ambient condition'):
+        if prevTemp != 'Molding' and match(sheet.cell_value(irow, 0), 'Heating - ambient condition'):
             temp = insert('AmbientCondition', sheet.cell_value(irow, 1), temp)
 
-    # Drying/Evaporation
-        # Description
-        if match(sheet.cell_value(irow, 0), 'Drying/Evaporation - description'):
-            temp = insert('Description', sheet.cell_value(irow, 1), temp)
-        # Temperature
-        if match(sheet.cell_value(irow, 0), 'Drying/Evaporation - temperature'):
-            temperature = collections.OrderedDict()
-            # if type(sheet.row_values(irow)[1]) == float or len(sheet.row_values(irow)[1]) > 0:
-            temperature = addKVU('Temperature', '', sheet.row_values(irow)[1],
-                                 sheet.row_values(irow)[2], '', '', '', '', temperature, jobDir, myXSDtree)
-            # else:
-            #     temperature = addKVU('Temperature', sheet.row_values(irow)[1], '',
-            #                          sheet.row_values(irow)[2], '', '', '', '', temperature)
-            if len(temperature) > 0:
-                temp.append(temperature)
-        # Time
-        if match(sheet.cell_value(irow, 0), 'Drying/Evaporation - time'):
-            time = collections.OrderedDict()
-            # if type(sheet.row_values(irow)[1]) == float or len(sheet.row_values(irow)[1]) > 0:
-            time = addKVU('Time', '', sheet.row_values(irow)[1],
-                          sheet.row_values(irow)[2], '', '', '', '', time, jobDir, myXSDtree)
-            # else:
-            #     time = addKVU('Time', sheet.row_values(irow)[1], '',
-            #                   sheet.row_values(irow)[2], '', '', '', '', time)
-            if len(time) > 0:
-                temp.append(time)
-        # Pressure
-        if match(sheet.cell_value(irow, 0), 'Drying/Evaporation - pressure'):
-            pressure = collections.OrderedDict()
-            # if type(sheet.row_values(irow)[1]) == float or len(sheet.row_values(irow)[1]) > 0:
-            pressure = addKVU('Pressure', '', sheet.row_values(irow)[1],
-                              sheet.row_values(irow)[2], '', '', '', '', pressure, jobDir, myXSDtree)
-            # else:
-            #     pressure = addKVU('Pressure', sheet.row_values(irow)[1], '',
-            #                       sheet.row_values(irow)[2], '', '', '', '', pressure)
-            if len(pressure) > 0:
-                temp.append(pressure)
-        # AmbientCondition
-        if match(sheet.cell_value(irow, 0), 'Drying/Evaporation - ambient condition'):
-            temp = insert('AmbientCondition', sheet.cell_value(irow, 1), temp)
-
-    # Centrifugation
-        # Used or not
-        if match(sheet.cell_value(irow, 0), 'Centrifugation'):
-            temp = sheet.cell_value(irow, 1)
-
-    # Molding
+    # Molding (Note that Molding is now a part of Heating, need to check prevTemp)
         # MoldingMode
-        if match(sheet.cell_value(irow, 0), 'Molding - mode'):
+        if prevTemp == 'Molding' and match(sheet.cell_value(irow, 0), 'Heating - molding mode'):
             temp = insert('MoldingMode', sheet.cell_value(irow, 1), temp)
         # MoldingInfo/Description
-        if match(sheet.cell_value(irow, 0), 'Molding - description'):
+        if prevTemp == 'Molding' and match(sheet.cell_value(irow, 0), 'Heating - description'):
             MoldingInfo = insert('Description', sheet.cell_value(irow, 1), MoldingInfo)
         # MoldingInfo/Temperature
-        if match(sheet.cell_value(irow, 0), 'Molding - temperature'):
+        if prevTemp == 'Molding' and match(sheet.cell_value(irow, 0), 'Heating - temperature'):
             temperature = collections.OrderedDict()
-            # if type(sheet.row_values(irow)[1]) == float or len(sheet.row_values(irow)[1]) > 0:
             temperature = addKVU('Temperature', '', sheet.row_values(irow)[1],
                                  sheet.row_values(irow)[2], '', '', '', '', temperature, jobDir, myXSDtree)
-            # else:
-            #     temperature = addKVU('Temperature', sheet.row_values(irow)[1], '',
-            #                          sheet.row_values(irow)[2], '', '', '', '', temperature)
             if len(temperature) > 0:
                 MoldingInfo.append(temperature)
         # MoldingInfo/Time
-        if match(sheet.cell_value(irow, 0), 'Molding - time'):
+        if prevTemp == 'Molding' and match(sheet.cell_value(irow, 0), 'Heating - time'):
             time = collections.OrderedDict()
-            # if type(sheet.row_values(irow)[1]) == float or len(sheet.row_values(irow)[1]) > 0:
             time = addKVU('Time', '', sheet.row_values(irow)[1],
                           sheet.row_values(irow)[2], '', '', '', '', time, jobDir, myXSDtree)
-            # else:
-            #     time = addKVU('Time', sheet.row_values(irow)[1], '',
-            #                   sheet.row_values(irow)[2], '', '', '', '', time)
             if len(time) > 0:
                 MoldingInfo.append(time)
         # MoldingInfo/Pressure
-        if match(sheet.cell_value(irow, 0), 'Molding - pressure'):
+        if prevTemp == 'Molding' and match(sheet.cell_value(irow, 0), 'Heating - pressure'):
             pressure = collections.OrderedDict()
-            # if type(sheet.row_values(irow)[1]) == float or len(sheet.row_values(irow)[1]) > 0:
             pressure = addKVU('Pressure', '', sheet.row_values(irow)[1],
                               sheet.row_values(irow)[2], '', '', '', '', pressure, jobDir, myXSDtree)
-            # else:
-            #     pressure = addKVU('Pressure', sheet.row_values(irow)[1], '',
-            #                       sheet.row_values(irow)[2], '', '', '', '', pressure)
             if len(pressure) > 0:
                 MoldingInfo.append(pressure)
         # AmbientCondition
-        if match(sheet.cell_value(irow, 0), 'Molding - ambient condition'):
+        if prevTemp == 'Molding' and match(sheet.cell_value(irow, 0), 'Heating - ambient condition'):
             MoldingInfo = insert('AmbientCondition', sheet.cell_value(irow, 1), MoldingInfo)
-
-    # Curing
-        # Description
-        if match(sheet.cell_value(irow, 0), 'Curing - description'):
-            temp = insert('Description', sheet.cell_value(irow, 1), temp)
-        # Temperature
-        if match(sheet.cell_value(irow, 0), 'Curing - temperature'):
-            temperature = collections.OrderedDict()
-            # if type(sheet.row_values(irow)[1]) == float or len(sheet.row_values(irow)[1]) > 0:
-            temperature = addKVU('Temperature', '', sheet.row_values(irow)[1],
-                                 sheet.row_values(irow)[2], '', '', '', '', temperature, jobDir, myXSDtree)
-            # else:
-            #     temperature = addKVU('Temperature', sheet.row_values(irow)[1], '',
-            #                          sheet.row_values(irow)[2], '', '', '', '', temperature)
-            if len(temperature) > 0:
-                temp.append(temperature)
-        # Time
-        if match(sheet.cell_value(irow, 0), 'Curing - time'):
-            time = collections.OrderedDict()
-            # if type(sheet.row_values(irow)[1]) == float or len(sheet.row_values(irow)[1]) > 0:
-            time = addKVU('Time', '', sheet.row_values(irow)[1],
-                          sheet.row_values(irow)[2], '', '', '', '', time, jobDir, myXSDtree)
-            # else:
-            #     time = addKVU('Time', sheet.row_values(irow)[1], '',
-            #                   sheet.row_values(irow)[2], '', '', '', '', time)
-            if len(time) > 0:
-                temp.append(time)
-        # Pressure
-        if match(sheet.cell_value(irow, 0), 'Curing - pressure'):
-            pressure = collections.OrderedDict()
-            # if type(sheet.row_values(irow)[1]) == float or len(sheet.row_values(irow)[1]) > 0:
-            pressure = addKVU('Pressure', '', sheet.row_values(irow)[1],
-                              sheet.row_values(irow)[2], '', '', '', '', pressure, jobDir, myXSDtree)
-            # else:
-            #     pressure = addKVU('Pressure', sheet.row_values(irow)[1], '',
-            #                       sheet.row_values(irow)[2], '', '', '', '', pressure)
-            if len(pressure) > 0:
-                temp.append(pressure)
-        # AmbientCondition
-        if match(sheet.cell_value(irow, 0), 'Curing - ambient condition'):
-            temp = insert('AmbientCondition', sheet.cell_value(irow, 1), temp)
 
         # move to the next row
         irow += 1
@@ -1716,35 +1192,20 @@ def sheetProcTypeHelper(sheet, row, temp_list, stop_sign, myXSDtree, jobDir):
         # then save MoldingInfo as a dict in temp
         temp.append({'MoldingInfo': MoldingInfo})
     # special case Extrusion, need to save the list from bottom up
-    # (HeatingZone and Output => Extrusion => dict with
-    # SingleScrewExtrusion or TwinScrewExtrusion as key) into temp
     if prevTemp == 'Extrusion':
-        if len(ExtrsHZ) > 0:
-            # sort ExtrsHZ
-            ExtrsHZ = sortSequence(ExtrsHZ, 'ExtrusionHeatingZone', myXSDtree)
-            Extrusion.append({'HeatingZone': ExtrsHZ})
-            # initialize
-            ExtrsHZ = []
-        if len(ExtrsOP) > 0:
-            # sort ExtrsOP
-            ExtrsOP = sortSequence(ExtrsOP, 'ExtrusionOutput', myXSDtree)
-            Extrusion.append({'Output': ExtrsOP})
-            # initialize
-            ExtrsOP = []
         if len(Extrusion) > 0:
             # sort Extrusion
             Extrusion = sortSequence(Extrusion, prevExtrsHeader, myXSDtree)
             temp.append({prevExtrsHeader: Extrusion})
+        # initialize
+        Extrusion = []
+        prevExtrsHeader = ''
     # save temp
     if len(temp) > 0: # update temp if it's not empty
         # sort temp
         temp = sortSequence(temp, prevTemp, myXSDtree)
         temp_list.append({'ChooseParameter': {headers[prevTemp]: temp}})
         temp = []
-##    prevTemp = cleanTemp # update prevTemp
-
-##     if (prevTemp and len(temp) > 0):
-##        temp_list.append({'ChooseParameter': {headers[prevTemp]: temp}})
     return temp_list
 
 def sheetProcType(sheet, DATA, myXSDtree, jobDir):
